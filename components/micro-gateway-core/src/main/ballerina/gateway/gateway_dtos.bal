@@ -53,6 +53,27 @@ public type APIKeyValidationRequestDto {
     string httpVerb;
 };
 
+public type AuthenticationContext {
+    boolean authenticated;
+    string username;
+    string applicationTier;
+    string tier;
+    string apiTier;
+    boolean isContentAwareTierPresent;
+    string apiKey;
+    string keyType;
+    string callerToken;
+    string applicationId;
+    string applicationName;
+    string consumerKey;
+    string subscriber;
+    string[] throttlingDataList;
+    int spikeArrestLimit;
+    string subscriberTenantDomain;
+    string spikeArrestUnit;
+    boolean stopOnQuotaReach;
+};
+
 public type KeyManagerConf {
    string serverUrl;
    Credentials credentials;

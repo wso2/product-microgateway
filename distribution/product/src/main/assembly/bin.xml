@@ -37,7 +37,7 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
-                <include>org.wso2.am:micro-gateway-core:jar</include>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
             </includes>
         </dependencySet>
 

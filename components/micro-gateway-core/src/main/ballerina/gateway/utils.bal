@@ -1,3 +1,19 @@
+// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
@@ -285,4 +301,20 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
 public function getApiName(http:FilterContext context) returns (string) {
     string serviceName = context.serviceName;
     return serviceName.split("_")[0];
+}
+
+public function getConfigValue(string instanceId, string property, string defaultValue) returns string {
+    return config:getAsString(instanceId + "." + property, default = defaultValue);
+}
+
+public function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
+    return config:getAsInt(instanceId + "." + property, default = defaultValue);
+}
+
+public function getConfigBooleanValue(string instanceId, string property, boolean defaultValue) returns boolean {
+    return config:getAsBoolean(instanceId + "." + property, default = defaultValue);
+}
+
+public function getConfigFloatValue(string instanceId, string property, float defaultValue) returns float {
+    return config:getAsFloat(instanceId + "." + property, default = defaultValue);
 }
