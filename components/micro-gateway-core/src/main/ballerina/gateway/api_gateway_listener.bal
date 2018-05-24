@@ -26,7 +26,7 @@ import ballerina/io;
 
 @Description {value:"Representation of an API gateway listener"}
 @Field {value:"config: EndpointConfiguration instance"}
-@Field {value:"secureListener: Secure HTTP Listener instance"}
+@Field {value:"httpListener: HTTP Listener instance"}
 public type APIGatewayListener object {
     public {
         EndpointConfiguration config;
@@ -202,6 +202,7 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     }
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost");
     intitateKeyManagerConfigurations();
+    initGatewayCaches();
     initiateThrottleConfigs();
 }
 
@@ -231,8 +232,7 @@ function initiateAuthProviders(EndpointConfiguration config) {
         scheme: AUTHN_SCHEME_BASIC,
         authStoreProvider: AUTH_PROVIDER_CONFIG
     };
-    http:AuthProvider[] authProivders = [jwtAuthProvider, basicAuthProvider];
-    config.authProviders = authProivders;
+    config.authProviders = [jwtAuthProvider, basicAuthProvider];
 }
 
 function intitateKeyManagerConfigurations() {
@@ -245,17 +245,6 @@ function intitateKeyManagerConfigurations() {
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }
 
-function getConfigValue(string instanceId, string property, string defaultValue) returns string {
-    return config:getAsString(instanceId + "." + property, default = defaultValue);
-}
-
-function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
-    return config:getAsInt(instanceId + "." + property, default = defaultValue);
-}
-
-function getConfigBooleanValue(string instanceId, string property, boolean defaultValue) returns boolean {
-    return config:getAsBoolean(instanceId + "." + property, default = defaultValue);
-}
 
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
 @Param {value:"ep: The endpoint to which the service should be registered to"}

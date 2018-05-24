@@ -17,8 +17,17 @@
 import ballerina/cache;
 
 
-cache:Cache gatewayKeyValidationCache = new;
-cache:Cache invalidTokenCache = new;
+cache:Cache gatewayKeyValidationCache;
+cache:Cache invalidTokenCache;
+
+public function initGatewayCaches() {
+    gatewayKeyValidationCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+            900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+    invalidTokenCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
+        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+}
 
 public type APIGatewayCache object {
 
