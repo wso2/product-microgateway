@@ -102,7 +102,7 @@ function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
     } else {
         http:Filter[] newFilters = createAuthFiltersForSecureListener(config);
         // add existing filters next. WSO2 retaled ballerina services by default does not contain additional filters.
-        // But custom filters cab be plugeed in while initiating the listener as an endpoint.
+        // But custom filters can be plugeed in while initiating the listener as an endpoint.
         // for ex:
         //    endpoint gateway:APIGatewayListener listener {
         //    filters:[customFilter]
@@ -150,7 +150,9 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     SubscriptionFilter subscriptionFilter = new;
 
     // use the ballerina in built scope(authz) filter
-    cache:Cache authzCache = new(expiryTimeMillis = 300000);
+    cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+    900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+    evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
     auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
     auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
     http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
