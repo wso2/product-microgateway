@@ -234,7 +234,7 @@ public function OAuthAuthProvider::doKeyValidation (APIKeyValidationRequestDto a
         xml responsepayload;
         match keyValidationResponse.getXmlPayload() {
             error err => {
-                log:printError("Error occurred while getting key validation service response ",err=err);
+                log:printError("Error occurred while getting key validation service xml response payload ",err=err);
                 return {};
             }
             xml responseXml => {
