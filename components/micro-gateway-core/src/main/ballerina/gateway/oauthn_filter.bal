@@ -19,6 +19,7 @@ import ballerina/log;
 import ballerina/auth;
 import ballerina/config;
 import ballerina/runtime;
+import ballerina/system;
 import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
@@ -39,6 +40,8 @@ public type OAuthnFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
+        //Setting UUID
+        context.attributes[MESSAGE_ID] = system:uuid();
         // get auth config for this resource
         boolean authenticated;
         APIKeyValidationRequestDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
