@@ -168,7 +168,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     RequestStreamDTO requestStreamDto;
     string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
-    requestStreamDto.messageID = "messageID";
+    requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDto.apiKey = getContext(context) + ":" + apiVersion;
     requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     requestStreamDto.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context) + ":" +

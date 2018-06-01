@@ -70,6 +70,8 @@
 @final public string UNAUTHENTICATED_TIER = "Unauthenticated";
 @Description { value: "Anonymous user name" }
 @final public string END_USER_ANONYMOUS = "anonymous";
+@Description { value: "message id" }
+@final public string MESSAGE_ID = "MESSAGE_ID";
 
 // config constants
 @Description { value: "Key manager related configs"}
