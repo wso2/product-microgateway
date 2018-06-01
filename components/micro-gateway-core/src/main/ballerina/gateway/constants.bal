@@ -72,6 +72,14 @@
 @final public string END_USER_ANONYMOUS = "anonymous";
 @Description { value: "message id" }
 @final public string MESSAGE_ID = "MESSAGE_ID";
+@Description { value: "Default jwt header name" }
+@final public string JWT_HEADER_NAME = "X-JWT-Assertion";
+@Description { value: "Production key type value" }
+@final public string PRODUCTION_KEY_TYPE = "PRODUCTION";
+@Description { value: "Authentication level any" }
+@final public string ANY_AUTHENTICATION_LEVEL = "Any";
+
+
 
 // config constants
 @Description { value: "Key manager related configs"}
@@ -100,8 +108,8 @@
 @Description { value: "Listener endpoint key store password"}
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 
-@Description { value: "JWT related configs"}
-@final public string JWT_INSTANCE_ID = "jwtConfig";
+@Description { value: "JWT Token related configs"}
+@final public string JWT_INSTANCE_ID = "jwtTokenConfig";
 @Description { value: "JWT issuer"}
 @final public string ISSUER = "issuer";
 @Description { value: "JWT audience"}
@@ -121,6 +129,13 @@
 @final public string TOKEN_CACHE_CAPACITY = "tokenCache.capacity";
 @Description { value: "Token cache eviction factor"}
 @final public string TOKEN_CACHE_EVICTION_FACTOR = "tokenCache.evictionFactor";
+
+@Description { value: "JWT  related configs"}
+@final public string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
+@Description { value: "JWT enabled in gateway"}
+@final public string JWT_ENABLED = "enabled";
+@Description { value: "JWT  header name"}
+@final public string JWT_HEADER = "header";
 
 // end of config constants
 

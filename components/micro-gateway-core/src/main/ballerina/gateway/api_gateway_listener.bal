@@ -116,7 +116,7 @@ function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
     }
 }
 
-@Description {value:"Create an array of auth and authz filters"}
+@Description {value:"Create an array of gateway filters"}
 @Param {value:"config: EndpointConfiguration instance"}
 @Return {value:"Array of Filters comprising of authn and authz Filters"}
 function createAuthFiltersForSecureListener (EndpointConfiguration config) returns (http:Filter[]) {
@@ -135,7 +135,6 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
             }
         }
         () => {
-            // if no auth providers are specified, add basic authn handler with config based auth provider
             log:printDebug("No Authenticator found");
         }
 

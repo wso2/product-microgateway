@@ -141,6 +141,8 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                                 match <APIKeyValidationDto>keyValidationInfoJson {
                                     APIKeyValidationDto dto => {
                                         apiKeyValidationDto = dto;
+                                        // specifically setting the key type since type is a keyword in ballerina.
+                                        apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
                                     }
                                     error err => {
                                         log:printError("Error while converting key validation response json to type APIKeyValidationDto"

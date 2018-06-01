@@ -46,7 +46,7 @@
                 <version>${download.plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>download-ballerina</id>
+                        <id>download-ballerina-platform</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>wget</goal>
@@ -54,6 +54,19 @@
                         <configuration>
                             <!--<url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>-->
                             <url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-ballerina-runtime</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <!--<url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
+                            <url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
                         </configuration>

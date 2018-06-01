@@ -27,21 +27,35 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/ballerina/ballerina-platform-${ballerina.platform.version}</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime</outputDirectory>
         </fileSet>
     </fileSets>
 
     <files>
-    <!--start of claim management feature-->
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/bre/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/security</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/ballerinaTruststore.p12</source>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/security</outputDirectory>
         </file>
     </files>
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/bre/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/lib</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>

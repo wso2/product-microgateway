@@ -169,7 +169,7 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     apiKeyValidationRequest.context = httpServiceConfig.basePath;
     apiKeyValidationRequest.apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
-    apiKeyValidationRequest.requiredAuthenticationLevel = "Any";
+    apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
