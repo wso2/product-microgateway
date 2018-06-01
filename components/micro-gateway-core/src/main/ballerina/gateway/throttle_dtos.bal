@@ -54,3 +54,19 @@ public type EligibilityStreamDTO {
     boolean isEligible;
     string throttleKey;
 };
+
+public type ThrottleAnalyticsEventDTO {
+    string clientType;
+    string accessToken;
+    string userId;
+    string tenantDomain;
+    string api;
+    string api_version;
+    string context;
+    string apiPublisher;
+    int throttledTime;
+    string applicationName;
+    string applicationId;
+    string subscriber;
+    string throttledOutReason;
+};
