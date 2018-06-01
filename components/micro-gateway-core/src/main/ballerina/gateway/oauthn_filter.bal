@@ -79,6 +79,8 @@ public type OAuthnFilter object {
                                         } else {
                                             authenticationContext.username = END_USER_ANONYMOUS;
                                         }
+                                        authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
+                                        authenticationContext.keyType = apiKeyValidationDto.keyType;
                                         authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
                                         authenticationContext.applicationId = apiKeyValidationDto.applicationId;
                                         authenticationContext.applicationName = apiKeyValidationDto.applicationName;
@@ -92,6 +94,13 @@ public type OAuthnFilter object {
                                         authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.stopOnQuotaReach;
                                         authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
                                         .contentAware;
+                                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
+                                        if(getConfigBooleanValue(JWT_CONFIG_INSTANCE_ID, JWT_ENABLED, false) &&
+                                            authenticationContext.callerToken != "") {
+                                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
+                                                JWT_HEADER_NAME);
+                                            request.setHeader(jwtheaderName, authenticationContext.callerToken);
+                                        }
                                         context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                                         runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
                                         authContext.scheme = AUTH_SCHEME_OAUTH2;
@@ -125,6 +134,7 @@ public type OAuthnFilter object {
             authenticationContext.apiKey = clientIp ;
             authenticationContext.username = END_USER_ANONYMOUS;
             authenticationContext.applicationId = clientIp;
+            authenticationContext.keyType = PRODUCTION_KEY_TYPE;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             return createFilterResult(true, 200 , "Successfully authenticated");
         }

@@ -37,7 +37,7 @@ public type APIKeyValidationDto {
     string subscriberTenantDomain ;
     string throttlingDataList ;
     string tier ;
-    //string type ;
+    string keyType ;
     string userType ;
     string validationStatus;
     string validityPeriod;
@@ -72,6 +72,7 @@ public type AuthenticationContext {
     string subscriberTenantDomain;
     string spikeArrestUnit;
     boolean stopOnQuotaReach;
+    string apiPublisher;
 };
 
 public type KeyManagerConf {
