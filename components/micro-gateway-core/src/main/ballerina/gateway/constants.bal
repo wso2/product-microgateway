@@ -76,6 +76,9 @@
 @final public string JWT_HEADER_NAME = "X-JWT-Assertion";
 @Description { value: "Production key type value" }
 @final public string PRODUCTION_KEY_TYPE = "PRODUCTION";
+@Description { value: "Authentication level any" }
+@final public string ANY_AUTHENTICATION_LEVEL = "Any";
+
 
 
 // config constants
