@@ -18,6 +18,7 @@ import ballerina/http;
 import ballerina/log;
 import ballerina/cache;
 import ballerina/config;
+import ballerina/time;
 
 @Description { value: "Representation of the Throttle filter" }
 @Field { value: "filterRequest: request filter method which attempts to throttle the request" }
@@ -51,16 +52,17 @@ public type ThrottleFilter object {
         string apiContext = getContext(context);
         string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
-        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)){
+        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+            AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
+            AUTHENTICATION_CONTEXT];
             if (isRquestBlocked(request, context)){
                 // request Blocked
-                requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+                requestFilterResult = { canProceed: false, statusCode: 429, message: REQUEST_BLOCKED };
+                publishThrottleAnalyticsEvent(request, context, keyvalidationResult, REQUEST_BLOCKED);
             } else {
                 requestFilterResult = { canProceed: true };
                 // Request not blocked go to check throttling
                 apiLevelThrottleKey = apiContext + ":" + apiVersion;
-                AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
-                AUTHENTICATION_CONTEXT];
                 if (keyvalidationResult.apiTier != "" && keyvalidationResult.apiTier != UNLIMITED_TIER){
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
@@ -86,12 +88,16 @@ public type ThrottleFilter object {
                                 // Application Level Throttled
                                 requestFilterResult = { canProceed: false, statusCode: 429, message:
                                 "You have exceeded your quota" };
+                                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
+                                    THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
                             }
                         } else {
                             // Subscription Level Throttled
-                            if (keyvalidationResult.stopOnQuotaReach){
+                            if (keyvalidationResult.stopOnQuotaReach) {
                                 requestFilterResult = { canProceed: false, statusCode: 429, message:
                                 "You have exceeded your quota" };
+                                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
+                                    THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
                             } else {
                                 // set properties in order to publish into analytics for billing
                             }
@@ -99,10 +105,14 @@ public type ThrottleFilter object {
                     } else {
                         //Resource level Throttled
                         requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+                        publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
+                            THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
                     }
                 } else {
                     //API level Throttled
                     requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+                    publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
+                        THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
                 }
             }
         } else {
@@ -255,4 +265,36 @@ function shiftLeft(int a, int b) returns (int) {
 
 function getMessageSize() returns (int) {
     return 0;
+}
+
+function publishThrottleAnalyticsEvent(http:Request req, http:FilterContext context, AuthenticationContext authConext,
+    string reason) {
+    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(req, context, authConext, reason);
+    io:println(eventDto);
+}
+
+function populateThrottleAnalyticdDTO(http:Request req, http:FilterContext context, AuthenticationContext authConext,
+    string reason) returns (ThrottleAnalyticsEventDTO) {
+    ThrottleAnalyticsEventDTO eventDto;
+    string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+    time:Time time = time:currentTime();
+    int currentTimeMills = time.time;
+
+    json metaInfo = {};
+    metaInfo.keyType = authConext.keyType;
+    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
+    eventDto.clientType = metaInfo.toString();
+    eventDto.accessToken = "-";
+    eventDto.userId = authConext.username;
+    eventDto.tenantDomain = getTenantDomain(context);
+    eventDto.api = getApiName(context);
+    eventDto.api_version = apiVersion;
+    eventDto.context = getContext(context);
+    eventDto.apiPublisher = authConext.apiPublisher;
+    eventDto.throttledTime = currentTimeMills;
+    eventDto.applicationName = authConext.applicationName;
+    eventDto.applicationId = authConext.applicationId;
+    eventDto.subscriber = authConext.subscriber;
+    eventDto.throttledOutReason = reason;
+    return eventDto;
 }
