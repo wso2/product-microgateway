@@ -270,7 +270,7 @@ function getMessageSize() returns (int) {
 function publishThrottleAnalyticsEvent(http:Request req, http:FilterContext context, AuthenticationContext authConext,
     string reason) {
     ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(req, context, authConext, reason);
-    io:println(eventDto);
+    //todo: publish eventDto to a stream
 }
 
 function populateThrottleAnalyticdDTO(http:Request req, http:FilterContext context, AuthenticationContext authConext,
