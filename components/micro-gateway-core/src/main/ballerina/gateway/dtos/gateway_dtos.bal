@@ -43,7 +43,7 @@ public type APIKeyValidationDto {
     string validityPeriod;
 };
 
-public type APIKeyValidationRequestDto {
+public type APIRequestMetaDataDto {
     string context;
     string apiVersion;
     string accessToken;

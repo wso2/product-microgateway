@@ -142,8 +142,8 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     http:Filter[] authFilters = [];
     http:AuthnHandlerChain authnHandlerChain = new(registry);
     //http:AuthnFilter authnFilter = new(authnHandlerChain);
-    OAuthnHandler oauthnHandler = new;
-    OAuthnFilter authnFilter = new(oauthnHandler, authnHandlerChain);
+    OAuthnAuthenticator oauthAuthenticator = new;
+    AuthnFilter authnFilter = new(oauthAuthenticator, authnHandlerChain);
 
     ThrottleFilter throttleFilter = new();
     SubscriptionFilter subscriptionFilter = new;
@@ -220,7 +220,7 @@ function initiateAuthProviders(EndpointConfiguration config) {
     http:AuthProvider jwtAuthProvider = {
         id: AUTH_SCHEME_JWT,
         scheme: AUTH_SCHEME_JWT,
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://192.168.42.1:9443/oauth2/token"),
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         trustStore: {

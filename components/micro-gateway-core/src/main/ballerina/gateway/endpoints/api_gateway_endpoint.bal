@@ -26,3 +26,16 @@ endpoint http:Client keyValidationEndpoint {
     url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443")
 };
 
+endpoint http:Listener tokenListenerEndpoint {
+    port:getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096),
+    host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost"),
+    secureSocket:{
+        keyStore: {
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
+                "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+        }
+    }
+};
+

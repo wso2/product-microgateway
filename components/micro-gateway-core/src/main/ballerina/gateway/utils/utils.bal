@@ -160,8 +160,8 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 
 @Description { value: "Retrieve the key validation request dto from filter context" }
 @Return { value: "api key validation request dto" }
-public function getKeyValidationRequestObject(http:FilterContext context) returns APIKeyValidationRequestDto {
-    APIKeyValidationRequestDto apiKeyValidationRequest = {};
+public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
+    APIRequestMetaDataDto apiKeyValidationRequest = {};
     http:HttpServiceConfig httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
         (context.serviceType));
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation

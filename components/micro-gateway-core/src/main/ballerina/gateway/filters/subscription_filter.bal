@@ -38,9 +38,10 @@ public type SubscriptionFilter object {
                         json decodedPayload => {
                             json subscribedAPIList = decodedPayload.subscribedAPIs;
                             int numOfSubscriptions = lengthof subscribedAPIList;
-                            int count =0;
-                            while(count < numOfSubscriptions) {
-                                if(subscribedAPIList[count].context.toString() == currentAPIContext ) {
+                            int count = 0;
+                            //todo check whether can use for each
+                            while (count < numOfSubscriptions) {
+                                if (subscribedAPIList[count].context.toString() == currentAPIContext) {
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = subscribedAPIList[count].subscriptionTier.toString();
                                     authenticationContext.apiKey = jwtToken;
@@ -53,19 +54,19 @@ public type SubscriptionFilter object {
                                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
                                     authenticationContext.apiTier = decodedPayload.apiTier.toString();
                                     authenticationContext.subscriberTenantDomain = decodedPayload
-                                                                                    .subscriberTenantDomain.toString();
-                                    authenticationContext.isContentAwareTierPresent = check <boolean> decodedPayload
+                                    .subscriberTenantDomain.toString();
+                                    authenticationContext.isContentAwareTierPresent = check <boolean>decodedPayload
                                     .isContentAware;
                                     json policiesList = decodedPayload.subscriptionPolicies;
                                     int numOfPolicies = lengthof policiesList;
-                                    int i =0;
+                                    int i = 0;
                                     foreach (key in policiesList.getKeys()){
-                                        if(authenticationContext.tier == key) {
-                                            authenticationContext.spikeArrestLimit = check < int > policiesList[i].
+                                        if (authenticationContext.tier == key) {
+                                            authenticationContext.spikeArrestLimit = check <int>policiesList[i].
                                             spikeArrestLimit;
                                             authenticationContext.spikeArrestUnit = policiesList[i].spikeArrestUnit.
                                             toString();
-                                            authenticationContext.stopOnQuotaReach = check < boolean > policiesList[i][i].
+                                            authenticationContext.stopOnQuotaReach = check <boolean>policiesList[i][i].
                                             stopOnQuotaReach;
                                         }
                                     }
