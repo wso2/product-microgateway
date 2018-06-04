@@ -186,33 +186,27 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         string encodedBasicAuthHeader = check base64Header.base64Encode();
 
         http:Request keyValidationRequest = new;
-
         http:Response keyValidationResponse = new;
-        //todo use proper xml type
-        string xmlString = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-            xmlns:xsd=\"http://org.apache.axis2/xsd\">
-            <soapenv:Header/>
-            <soapenv:Body>
-            <xsd:validateKey>
-            <!--Optional:-->
-            <xsd:context>" + apiRequestMetaDataDto.context + "</xsd:context>
-            <!--Optional:-->
-            <xsd:version>" + apiRequestMetaDataDto.apiVersion + "</xsd:version>
-            <!--Optional:-->
-            <xsd:accessToken>" + apiRequestMetaDataDto.accessToken + "</xsd:accessToken>
-            <!--Optional:-->
-            <xsd:requiredAuthenticationLevel>" + apiRequestMetaDataDto.requiredAuthenticationLevel + "</xsd:requiredAuthenticationLevel>
-            <!--Optional:-->
-            <xsd:clientDomain>" + apiRequestMetaDataDto.clientDomain + "</xsd:clientDomain>
-            <!--Optional:-->
-            <xsd:matchingResource>" + apiRequestMetaDataDto.matchingResource + "</xsd:matchingResource>
-            <!--Optional:-->
-            <xsd:httpVerb>" + apiRequestMetaDataDto.httpVerb + "</xsd:httpVerb>
-            </xsd:validateKey>
-            </soapenv:Body>
-            </soapenv:Envelope>";
+        xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
+        xmlns "http://org.apache.axis2/xsd" as xsd;
+        xml contextXml = xml `<xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>`;
+        xml versionXml = xml `<xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>`;
+        xml tokenXml = xml `<xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>`;
+        xml authLevelXml = xml `<xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto
+        .requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>`;
+        xml clientDomainXml = xml `<xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>`;
+        xml resourceXml = xml `<xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>`;
+        xml httpVerbXml = xml `<xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>`;
+        xml soapBody = xml`<soapenv:Body></soapenv:Body>`;
+        xml validateXml = xml`<xsd:validateKey></xsd:validateKey>`;
+        xml requestValuesxml = contextXml + versionXml + tokenXml + authLevelXml + clientDomainXml + resourceXml +
+            httpVerbXml;
+        validateXml.setChildren(requestValuesxml);
+        soapBody.setChildren(validateXml);
+        xml soapEnvelope = xml `<soapenv:Envelope></soapenv:Envelope>`;
+        soapEnvelope.setChildren(soapBody);
 
-        keyValidationRequest.setTextPayload(xmlString,contentType="text/xml");
+        keyValidationRequest.setXmlPayload(soapEnvelope);
         keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, "text/xml");
         keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
                 encodedBasicAuthHeader);

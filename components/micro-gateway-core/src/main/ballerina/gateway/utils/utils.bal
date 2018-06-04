@@ -167,7 +167,7 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
     apiKeyValidationRequest.context = httpServiceConfig.basePath;
-    apiKeyValidationRequest.apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
+    apiKeyValidationRequest.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
@@ -202,21 +202,21 @@ function createAuthnResult(boolean authenticated) returns (http:FilterResult) {
     return requestFilterResult;
 }
 
-public function getVersionFromServiceAnnotation(reflect:annotationData[] annData) returns VersionConfiguration {
+public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annData) returns APIConfiguration {
     if (lengthof annData == 0) {
         return {};
     }
-    reflect:annotationData|() versionAnn;
+    reflect:annotationData|() apiAnn;
     foreach ann in annData {
-        if (ann.name == VERSION_ANN_NAME && ann.pkgName == GATEWAY_ANN_PACKAGE) {
-            versionAnn = ann;
+        if (ann.name == API_ANN_NAME && ann.pkgName == GATEWAY_ANN_PACKAGE) {
+            apiAnn = ann;
             break;
         }
     }
-    match versionAnn {
+    match apiAnn {
         reflect:annotationData annData1 => {
-            VersionConfiguration versionConfig = check <VersionConfiguration>annData1.value;
-            return versionConfig;
+            APIConfiguration apiConfig = check <APIConfiguration>annData1.value;
+            return apiConfig;
         }
         () => {
             return {};

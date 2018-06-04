@@ -18,18 +18,19 @@
 
 package org.ballerina.gateway.models;
 
-public class VersionModel {
+public class APIModel {
 
-    private static VersionModel instance;
+    private static APIModel instance;
     private String apiVersion;
+    private String name;
 
-    private VersionModel() {
+    private APIModel() {
     }
 
-    public static VersionModel getInstance() {
-        synchronized (VersionModel.class) {
+    public static APIModel getInstance() {
+        synchronized (APIModel.class) {
             if (instance == null) {
-                instance = new VersionModel();
+                instance = new APIModel();
             }
         }
         return instance;
@@ -41,5 +42,13 @@ public class VersionModel {
 
     public void setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
