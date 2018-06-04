@@ -88,6 +88,9 @@
 @final public string THROTTLE_CONF_INSTANCE_ID = "Throttling";
 @Description { value: "Key manager server URL parameter"}
 @final public string KM_SERVER_URL = "serverUrl";
+@Description { value: "Key manager oauth2 endpoint contexs"}
+@final public string KM_TOKEN_CONTEXT = "/oauth2";
+
 @Description { value: "Block condition state"}
 @final public string BLOCKING_CONDITION_STATE = "state";
 @Description { value: "Block condition key"}
@@ -107,6 +110,8 @@
 @final public string LISTENER_CONF_KEY_STORE_PATH = "keyStore.path";
 @Description { value: "Listener endpoint key store password"}
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
+@Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints"}
+@final public string TOKEN_LISTENER_PORT = "tokenListenerPort";
 
 @Description { value: "JWT Token related configs"}
 @final public string JWT_INSTANCE_ID = "jwtTokenConfig";

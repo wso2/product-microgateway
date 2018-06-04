@@ -19,7 +19,7 @@ function initGoldPolicy() {
         from eligibilityStream
         throttler:timeBatch(60000)
         where isEligible == true
-        select throttleKey, count(messageID) >= 5 as isThrottled, expiryTimeStamp
+        select throttleKey, count(messageID) >= 5 as isThrottled, 13234 as expiryTimeStamp
         group by throttleKey
         => (GlobalThrottleStreamDTO[] counts) {
             resultStream.publish(counts);

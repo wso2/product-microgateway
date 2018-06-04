@@ -28,14 +28,14 @@ import ballerina/io;
 @Description {value:"Representation of OAuth2 Auth handler for HTTP traffic"}
 @Field {value:"oAuthAuthenticator: OAuthAuthProvider instance"}
 @Field {value:"name: Authentication handler name"}
-public type OAuthnHandler object {
+public type OAuthnAuthenticator object {
     public {
         string name= "oauth2";
         OAuthAuthProvider oAuthAuthenticator = new;
     }
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req, APIKeyValidationRequestDto apiKeyValidationRequestDto)
+    public function handle (http:Request req, APIRequestMetaDataDto apiRequestMetaDataDto)
     returns (APIKeyValidationDto| error);
 
 };
@@ -43,7 +43,7 @@ public type OAuthnHandler object {
 @Description {value:"Intercepts a HTTP request for authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if authentication is a success, else false"}
-public function OAuthnHandler::canHandle (http:Request req) returns (boolean) {
+public function OAuthnAuthenticator::canHandle (http:Request req) returns (boolean) {
     string authHeader;
     try {
         authHeader = req.getHeader(AUTH_HEADER);
@@ -64,14 +64,14 @@ public function OAuthnHandler::canHandle (http:Request req) returns (boolean) {
 @Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-public function OAuthnHandler::handle (http:Request req, APIKeyValidationRequestDto apiKeyValidationRequestDto)
+public function OAuthnAuthenticator::handle (http:Request req, APIRequestMetaDataDto apiRequestMetaDataDto)
                                    returns (APIKeyValidationDto| error) {
     APIKeyValidationDto apiKeyValidationDto;
     try {
-        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
+        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiRequestMetaDataDto);
     } catch (error err) {
         log:printError("Error while getting key validation info for access token" +
-                apiKeyValidationRequestDto.accessToken, err = err);
+                apiRequestMetaDataDto.accessToken, err = err);
         return err;
     }
     return apiKeyValidationDto;
@@ -79,7 +79,7 @@ public function OAuthnHandler::handle (http:Request req, APIKeyValidationRequest
 
 
 
-function  getAccessTokenCacheKey(APIKeyValidationRequestDto dto) returns string {
+function  getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {
     return dto.accessToken + ":" + dto.context + "/" + dto.apiVersion + dto.matchingResource + ":" + dto.httpVerb;
 }
 
@@ -93,19 +93,19 @@ public type OAuthAuthProvider object {
     }
 
 
-    public function authenticate (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (APIKeyValidationDto);
+    public function authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns (APIKeyValidationDto);
 
-    public function doKeyValidation(APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json);
+    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (json);
 
 };
 
 
 @Description {value:"Authenticate with a oauth2 token"}
-@Param {value:"apiKeyValidationRequestDto: Object containig data to call the key validation service"}
+@Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
 @Return {value:"boolean: true if authentication is a success, else false"}
-public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns
+public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
                                                                                                               (APIKeyValidationDto) {
-    string cacheKey = getAccessTokenCacheKey(apiKeyValidationRequestDto);
+    string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
     boolean authorized;
     APIKeyValidationDto apiKeyValidationDto;
     match self.gatewayTokenCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
@@ -114,26 +114,25 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
             self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, true);
             apiKeyValidationDtoFromcache.authorized= "false";
-            log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache. But token is
-            expired");
+            log:printDebug("Access token found in cache. But token is expired");
             return apiKeyValidationDtoFromcache;
         }
         authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
         apiKeyValidationDto = apiKeyValidationDtoFromcache;
-        log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache.");
+        log:printDebug("Access token " + apiRequestMetaDataDto.accessToken + " found in cache.");
         }
         () => {
             match self.gatewayTokenCache.retrieveFromInvalidTokenCache(cacheKey) {
                 boolean cacheAuthorizedValue => {
                     APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:API_AUTH_INVALID_CREDENTIALS };
-                    log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in invalid
+                    log:printDebug("Access token found in invalid
                     token cache.");
                     return apiKeyValidationInfoDTO;
                 }
                 () => {
-                    log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " not found in cache.
+                    log:printDebug("Access token not found in cache.
                     Hence calling the key vaidation service.");
-                    json keyValidationInfoJson = self.doKeyValidation(apiKeyValidationRequestDto);
+                    json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
                     match <string>keyValidationInfoJson.authorized {
                         string authorizeValue => {
                             boolean auth = <boolean>authorizeValue;
@@ -179,7 +178,7 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
 }
 
 
-public function OAuthAuthProvider::doKeyValidation (APIKeyValidationRequestDto apiKeyValidationRequestDto)
+public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto)
                                        returns (json) {
     try {
         string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
@@ -189,25 +188,26 @@ public function OAuthAuthProvider::doKeyValidation (APIKeyValidationRequestDto a
         http:Request keyValidationRequest = new;
 
         http:Response keyValidationResponse = new;
+        //todo use proper xml type
         string xmlString = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
             xmlns:xsd=\"http://org.apache.axis2/xsd\">
             <soapenv:Header/>
             <soapenv:Body>
             <xsd:validateKey>
             <!--Optional:-->
-            <xsd:context>" + apiKeyValidationRequestDto.context + "</xsd:context>
+            <xsd:context>" + apiRequestMetaDataDto.context + "</xsd:context>
             <!--Optional:-->
-            <xsd:version>" + apiKeyValidationRequestDto.apiVersion + "</xsd:version>
+            <xsd:version>" + apiRequestMetaDataDto.apiVersion + "</xsd:version>
             <!--Optional:-->
-            <xsd:accessToken>" + apiKeyValidationRequestDto.accessToken + "</xsd:accessToken>
+            <xsd:accessToken>" + apiRequestMetaDataDto.accessToken + "</xsd:accessToken>
             <!--Optional:-->
-            <xsd:requiredAuthenticationLevel>" + apiKeyValidationRequestDto.requiredAuthenticationLevel + "</xsd:requiredAuthenticationLevel>
+            <xsd:requiredAuthenticationLevel>" + apiRequestMetaDataDto.requiredAuthenticationLevel + "</xsd:requiredAuthenticationLevel>
             <!--Optional:-->
-            <xsd:clientDomain>" + apiKeyValidationRequestDto.clientDomain + "</xsd:clientDomain>
+            <xsd:clientDomain>" + apiRequestMetaDataDto.clientDomain + "</xsd:clientDomain>
             <!--Optional:-->
-            <xsd:matchingResource>" + apiKeyValidationRequestDto.matchingResource + "</xsd:matchingResource>
+            <xsd:matchingResource>" + apiRequestMetaDataDto.matchingResource + "</xsd:matchingResource>
             <!--Optional:-->
-            <xsd:httpVerb>" + apiKeyValidationRequestDto.httpVerb + "</xsd:httpVerb>
+            <xsd:httpVerb>" + apiRequestMetaDataDto.httpVerb + "</xsd:httpVerb>
             </xsd:validateKey>
             </soapenv:Body>
             </soapenv:Envelope>";
@@ -228,6 +228,7 @@ public function OAuthAuthProvider::doKeyValidation (APIKeyValidationRequestDto a
         match result1 {
             error err => {
                 log:printError("Error occurred while reading key validation response",err =err);
+                return {};
             }
             http:Response prod => {
                 keyValidationResponse = prod;
