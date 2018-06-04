@@ -35,7 +35,7 @@
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
 @Description {value:"Version annotation name in service level"}
-@final public string VERSION_ANN_NAME = "Version";
+@final public string API_ANN_NAME = "API";
 @Description {value:"gateway annotation package"}
 @final public string GATEWAY_ANN_PACKAGE = "wso2.gateway";
 
@@ -78,6 +78,10 @@
 @final public string PRODUCTION_KEY_TYPE = "PRODUCTION";
 @Description { value: "Authentication level any" }
 @final public string ANY_AUTHENTICATION_LEVEL = "Any";
+@Description { value: "API Name attribute" }
+@final public string API_NAME = "apiName";
+@Description { value: "API Version attribute" }
+@final public string API_VERSION = "apiVersion";
 
 
 

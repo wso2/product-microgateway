@@ -50,7 +50,7 @@ public type ThrottleFilter object {
         boolean apiLevelThrottledTriggered = false;
         boolean stopOnQuotaReach = true;
         string apiContext = getContext(context);
-        string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+        string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
         if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
@@ -77,7 +77,7 @@ public type ThrottleFilter object {
                     if (!resourceLevelThrottled){
                         if (!isSubscriptionLevelThrottled(context, keyvalidationResult)){
                             if (!isApplicationLevelThrottled(keyvalidationResult)){
-                                if (!isHardlimitThrottled(getContext(context), getVersionFromServiceAnnotation
+                                if (!isHardlimitThrottled(getContext(context), getAPIDetailsFromServiceAnnotation
                                     (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
                                     // Send Throttle Event
                                     RequestStreamDTO throttleEvent = generateThrottleEvent(request, context,
@@ -155,7 +155,7 @@ function isHardlimitThrottled(string context, string apiVersion) returns (boolea
 function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns (
             boolean) {
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
-        (context) + ":" + getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
+        (context) + ":" + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
     ;
     if (isThrottled(subscriptionLevelThrottleKey)){
         return true;
@@ -176,7 +176,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
              returns (
                      RequestStreamDTO) {
     RequestStreamDTO requestStreamDto;
-    string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
+    string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
     requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDto.apiKey = getContext(context) + ":" + apiVersion;
@@ -186,7 +186,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.appTier = keyValidationDto.applicationTier;
     requestStreamDto.apiTier = keyValidationDto.apiTier;
     requestStreamDto.subscriptionTier = keyValidationDto.tier;
-    requestStreamDto.resourceKey = getContext(context) + "/" + getVersionFromServiceAnnotation(reflect:
+    requestStreamDto.resourceKey = getContext(context) + "/" + getAPIDetailsFromServiceAnnotation(reflect:
             getServiceAnnotations(context.serviceType)).apiVersion;
     TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName));
@@ -276,7 +276,7 @@ function publishThrottleAnalyticsEvent(http:Request req, http:FilterContext cont
 function populateThrottleAnalyticdDTO(http:Request req, http:FilterContext context, AuthenticationContext authConext,
     string reason) returns (ThrottleAnalyticsEventDTO) {
     ThrottleAnalyticsEventDTO eventDto;
-    string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+    string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 

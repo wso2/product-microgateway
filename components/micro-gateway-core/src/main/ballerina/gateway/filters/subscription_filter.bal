@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/internal;
+import ballerina/log;
 import ballerina/io;
 
 // Subscription filter to validate the subscriptions which is available in the  jwt token
@@ -37,43 +38,28 @@ public type SubscriptionFilter object {
                     match getDecodedJWTPayload(jwtPayload) {
                         json decodedPayload => {
                             json subscribedAPIList = decodedPayload.subscribedAPIs;
-                            int numOfSubscriptions = lengthof subscribedAPIList;
-                            int count = 0;
-                            //todo check whether can use for each
-                            while (count < numOfSubscriptions) {
-                                if (subscribedAPIList[count].context.toString() == currentAPIContext) {
+                            APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:
+                                getServiceAnnotations(filterContext.serviceType));
+                            foreach subscription in subscribedAPIList {
+                                if (subscription.name.toString() == apiConfig.name &&
+                                    subscription["version"].toString() == apiConfig.apiVersion) {
                                     authenticationContext.authenticated = true;
-                                    authenticationContext.tier = subscribedAPIList[count].subscriptionTier.toString();
+                                    authenticationContext.tier = subscription.subscriptionTier.toString();
                                     authenticationContext.apiKey = jwtToken;
                                     authenticationContext.username = decodedPayload.endUser.toString();
-                                    authenticationContext.callerToken = decodedPayload.endUserToken.toString();
+                                    authenticationContext.callerToken = jwtToken    ;
                                     authenticationContext.applicationId = decodedPayload.application.id.toString();
                                     authenticationContext.applicationName = decodedPayload.application.name.toString();
                                     authenticationContext.applicationTier = decodedPayload.application.tier.toString();
-                                    authenticationContext.subscriber = subscribedAPIList[count].subscriber.toString();
+                                    authenticationContext.subscriber = subscription.subscriber.toString();
                                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
                                     authenticationContext.apiTier = decodedPayload.apiTier.toString();
+                                    authenticationContext.apiPublisher = decodedPayload.publisher.toString();
                                     authenticationContext.subscriberTenantDomain = decodedPayload
                                     .subscriberTenantDomain.toString();
-                                    authenticationContext.isContentAwareTierPresent = check <boolean>decodedPayload
-                                    .isContentAware;
-                                    json policiesList = decodedPayload.subscriptionPolicies;
-                                    int numOfPolicies = lengthof policiesList;
-                                    int i = 0;
-                                    foreach (key in policiesList.getKeys()){
-                                        if (authenticationContext.tier == key) {
-                                            authenticationContext.spikeArrestLimit = check <int>policiesList[i].
-                                            spikeArrestLimit;
-                                            authenticationContext.spikeArrestUnit = policiesList[i].spikeArrestUnit.
-                                            toString();
-                                            authenticationContext.stopOnQuotaReach = check <boolean>policiesList[i][i].
-                                            stopOnQuotaReach;
-                                        }
-                                    }
                                     filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                                     return createFilterResult(true, 200, "Successfully validated subscriptions");
                                 }
-                                count++;
                             }
                             return createFilterResult(false, 403, "Subscription validation failed");
                         }

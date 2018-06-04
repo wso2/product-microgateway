@@ -27,7 +27,7 @@ import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.ballerina.gateway.models.TierModel;
-import org.ballerina.gateway.models.VersionModel;
+import org.ballerina.gateway.models.APIModel;
 
 import java.util.List;
 
@@ -43,6 +43,7 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
 
     public static final String POLICY = "policy";
     public static final String VERSION = "apiVersion";
+    public static final String NAME = "name";
     private DiagnosticLog dlog;
 
     @Override
@@ -88,7 +89,9 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
                 switch (keyValue.getKey().toString()) {
                 //Match annotation key and assign the value to model class
                 case VERSION:
-                    VersionModel.getInstance().setApiVersion(annotationValue);
+                    APIModel.getInstance().setApiVersion(annotationValue);
+                case NAME:
+                    APIModel.getInstance().setName(annotationValue);
                 default:
                     break;
                 }
