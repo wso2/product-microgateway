@@ -1,0 +1,16 @@
+NAME
+    micro-gw help setup - set up the environment
+
+SYNOPSIS
+     micro-gw setup [-e] [args...]
+
+DESCRIPTION
+
+OPTIONS
+
+     --offline
+
+DEFAULT BEHAVIOR
+
+EXAMPLES
+
