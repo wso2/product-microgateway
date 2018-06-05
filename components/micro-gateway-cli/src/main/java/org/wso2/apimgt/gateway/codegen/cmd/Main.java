@@ -24,7 +24,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
-import org.ballerinalang.packerina.BuilderUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.ballerinalang.packerina.init.models.SrcFile;
 import org.slf4j.Logger;
@@ -33,8 +32,8 @@ import org.wso2.apimgt.gateway.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.codegen.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.codegen.service.APIService;
 import org.wso2.apimgt.gateway.codegen.service.APIServiceImpl;
 import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
@@ -44,7 +43,6 @@ import org.wso2.apimgt.gateway.codegen.token.TokenManagementImpl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,10 +64,7 @@ public class Main {
         try {
             String tempRoot = "/home/harsha/Downloads/myroot";
             GatewayCmdUtils.createTempDir(tempRoot);
-            GatewayCmdUtils.createTempPathTxt(tempRoot, tempRoot);
             String root = GatewayCmdUtils.getProjectRoot(tempRoot);
-            GatewayCmdUtils.createMainProjectStructure(root);
-            GatewayCmdUtils.createMainConfig(root);
             String configPath = GatewayCmdUtils.getMainConfigPath(root) + File.separator +
                                                                             GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
             Config config = ConfigYAMLParser.parse(configPath, Config.class);
@@ -230,7 +225,7 @@ public class Main {
             if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
                 if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                     if (username.trim().isEmpty()) {
-                        username = promptForTextInput("Username can't be empty; enter secret: ");
+                        username = promptForTextInput("Username can't be empty; enter username: ");
                         if (username.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                         }
@@ -239,9 +234,9 @@ public class Main {
             }
 
             if (StringUtils.isEmpty(password)) {
-                if ((password = promptForPassowordInput("Enter Password: ")).trim().isEmpty()) {
+                if ((password = promptForPasswordInput("Enter Password: ")).trim().isEmpty()) {
                     if (StringUtils.isEmpty(password)) {
-                        password = promptForPassowordInput("Password can't be empty; enter password: ");
+                        password = promptForPasswordInput("Password can't be empty; enter password: ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
                         }
@@ -304,7 +299,7 @@ public class Main {
             return System.console().readLine();
         }
 
-        private String promptForPassowordInput(String msg) {
+        private String promptForPasswordInput(String msg) {
             outStream.println(msg);
             return new String(System.console().readPassword());
         }
@@ -336,31 +331,50 @@ public class Main {
                 outStream.println(commandUsageInfo);
                 return;
             }
-
-            if (argList != null && argList.size() > 1) {
-                throw GatewayCmdUtils.createUsageException("too many arguments");
-            }
-
-            String root = "/home/harsha/Downloads/myroot";
-            String path = GatewayCmdUtils.getLabelDirectoryPath(root, "accounts");
-            // Get source root path.
-            Path sourceRootPath = Paths.get(path);
-            label = "accounts";
-            try {
-                String orrignalDir = System.getProperty("user.dir");
-                System.setProperty("user.dir", path);
-                InitHandler.initialize(Paths.get(path), null, new ArrayList<SrcFile>(), null);
-                BuilderUtils.compileAndWrite(sourceRootPath, "src",  "accounts.balx", false, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Runtime.getRuntime().exit(1);
-            }
-            Runtime.getRuntime().exit(0);
         }
 
         @Override
         public String getName() {
             return GatewayCliCommands.BUILD;
+        }
+
+        @Override
+        public void setParentCmdParser(JCommander parentCmdParser) {
+            this.parentCmdParser = parentCmdParser;
+        }
+    }
+
+    /**
+     * This class represents the "run" command and it holds arguments and flags specified by the user.
+     */
+    @Parameters(commandNames = "run", commandDescription = "micro gateway run information")
+    private static class RunCmd implements GatewayLauncherCmd {
+
+        @Parameter(names = "--java.debug", hidden = true)
+        private String javaDebugPort;
+
+        @Parameter(names = {"-l", "--label"}, hidden = true)
+        private String label;
+
+        @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
+        private boolean helpFlag;
+
+        @Parameter(arity = 1)
+        private List<String> argList;
+
+        private JCommander parentCmdParser;
+
+        public void execute() {
+            if (helpFlag) {
+                String commandUsageInfo = GatewayLauncherCmd.getCommandUsageInfo("run");
+                outStream.println(commandUsageInfo);
+                return;
+            }
+        }
+
+        @Override
+        public String getName() {
+            return GatewayCliCommands.RUN;
         }
 
         @Override
@@ -386,7 +400,6 @@ public class Main {
                 printUsageInfo(GatewayCliCommands.HELP);
                 return;
             }
-
             printUsageInfo(GatewayCliCommands.DEFAULT);
         }
 
