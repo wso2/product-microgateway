@@ -28,6 +28,7 @@ public class GatewayCliConstants {
     public static String MAIN_CONFIG_FILE_NAME = "config.yaml";
     public static String PROJECT_CONFIG_FILE_NAME = "gateway-config.yaml";
     public static String TEMP_DIR_NAME = "temp";
-    public static String PROJECT_ROOT_HOLDER_FILE_NAME = "path.txt";
+    public static String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
     public static String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.yaml";
+    public static String CLI_HOME = "CLI_HOME";
 }

@@ -29,12 +29,6 @@
 # NOTE: Borrowed generously from Apache Tomcat startup scripts.
 # -----------------------------------------------------------------------------
 
-# if BALLERINA_HOME is not set we're not happy
-if [ -z "$BALLERINA_HOME" ]; then
-  echo "You must set the BALLERINA_HOME variable before running cli tool."
-  exit 1
-fi
-
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
 os400=false
@@ -59,8 +53,11 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-# set BALLERINA_HOME
-CLI_HOME=`cd "$PRGDIR/.." ; pwd`
+# set CLI_HOME as an environment variable
+export CLI_HOME=`cd "$PRGDIR/.." ; pwd`
+
+# set BALLERINA_HOME as ballerina platform home path
+BALLERINA_HOME=$CLI_HOME/lib/platform
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
