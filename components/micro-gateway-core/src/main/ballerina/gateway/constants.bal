@@ -94,6 +94,9 @@
 @final public string KM_SERVER_URL = "serverUrl";
 @Description { value: "Key manager oauth2 endpoint contexs"}
 @final public string KM_TOKEN_CONTEXT = "/oauth2";
+@Description { value: "time stamp skew for auth caches"}
+@final public string TIMESTAMP_SKEW = "timestampSkew";
+
 
 @Description { value: "Block condition state"}
 @final public string BLOCKING_CONDITION_STATE = "state";

@@ -1,0 +1,5 @@
+function initThrottlePolicies() {
+{{#policyInitNames}}
+    future {{.}}Ftr = start {{.}}();
+{{/policyInitNames}}
+}
