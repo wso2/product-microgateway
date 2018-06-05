@@ -1,0 +1,33 @@
+NAME
+    micro-gw help setup - set up the environment
+
+SYNOPSIS
+     micro-gw setup [-u|--username] [-p|--password] [-l|--label]
+         [-o|--overwrite] [--path] [args...]
+
+DESCRIPTION
+     Setup command executes ...
+
+OPTIONS
+
+     --offline
+         In a package build, the dependencies are always checked from
+         the remote repository (Ballerina Central) to check for latest
+         artifacts. If --offline is given, this remote check is not
+         done and the local artifacts will be used instead.
+
+      --username
+
+      --password
+
+      --label
+
+      --overwrite
+
+      --path
+
+DEFAULT BEHAVIOR
+
+
+EXAMPLES
+

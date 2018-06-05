@@ -1,0 +1,17 @@
+NAME
+    micro-gw help setup - set up the environment
+
+SYNOPSIS
+     micro-gw setup [--offline] [args...]
+
+DESCRIPTION
+     Run command executes the given program or package.
+
+OPTIONS
+
+     --offline
+
+DEFAULT BEHAVIOR
+
+EXAMPLES
+

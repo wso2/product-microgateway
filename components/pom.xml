@@ -29,5 +29,6 @@
 
     <modules>
         <module>micro-gateway-core</module>
+        <module>micro-gateway-cli</module>
     </modules>
 </project>
