@@ -17,6 +17,10 @@
  */
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
+
+import java.io.File;
+
 public class TokenConfig {
 
     private String publisherEndpoint;
@@ -25,23 +29,32 @@ public class TokenConfig {
     private String username;
     private String clientId;
     private String clientSecret;
-    private String trustoreLocation;
-    private String trustorePassword;
+    private String trustStoreLocation;
+    private String trustStorePassword;
 
-    public String getTrustoreLocation() {
-        return trustoreLocation;
+    public String getTrustStoreLocation() {
+        return trustStoreLocation;
     }
 
-    public void setTrustoreLocation(String trustoreLocation) {
-        this.trustoreLocation = trustoreLocation;
+    public void setTrustStoreLocation(String trustStoreLocation) {
+        File file = new File(trustStoreLocation);
+        if (!file.isAbsolute()) {
+            trustStoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation;
+            file = new File(trustStoreLocation);
+            if (!file.exists()) {
+                System.err.println("Error while loading trust store location: " + trustStoreLocation);
+                Runtime.getRuntime().exit(1);
+            }
+        }
+        this.trustStoreLocation = trustStoreLocation;
     }
 
-    public String getTrustorePassword() {
-        return trustorePassword;
+    public String getTrustStorePassword() {
+        return trustStorePassword;
     }
 
-    public void setTrustorePassword(String trustorePassword) {
-        this.trustorePassword = trustorePassword;
+    public void setTrustStorePassword(String trustorePassword) {
+        this.trustStorePassword = trustorePassword;
     }
 
     public String getPublisherEndpoint() {

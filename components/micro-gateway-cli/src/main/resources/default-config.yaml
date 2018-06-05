@@ -1,11 +1,11 @@
 clientConfig:
   httpRequestTimeout: 1000000
 tokenConfig:
-  clientId: GDZO9Uk8v4nZZvPRZMdjrXHU38ga
-  clientSecret: 4bk3IvVg6niTEv25yqHS3bfYqbca
-  publisherEndpoint: https://localhost:9443/api/am/publisher/v1.0
-  registrationEndpoint: https://localhost:9443/client-registration/v0.11/register
+  clientId: ''
+  clientSecret: ''
+  publisherEndpoint: https://localhost:9443/api/am/publisher/v0.12
+  registrationEndpoint: https://localhost:9443/client-registration/v0.12/register
   tokenEndpoint: https://localhost:8243/token
-  trustoreLocation: /home/harsha/Downloads/ballerina/ballerina-platform-0.970.0/bre/security/ballerinaTruststore.p12
-  trustorePassword: ballerina
+  trustStoreLocation: lib/platform/bre/security/ballerinaTruststore.p12
+  trustStorePassword: ballerina
   username: ''

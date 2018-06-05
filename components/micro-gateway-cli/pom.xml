@@ -26,7 +26,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>microgw-cli</artifactId>
+    <artifactId>org.wso2.micro.gateway.cli</artifactId>
     <packaging>jar</packaging>
     <name>Micro Gateway Code Generator</name>
 

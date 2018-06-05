@@ -117,18 +117,15 @@ public class GatewayCmdUtils {
         }
     }
 
-    public static void createTempDir(String path) {
-        String tempDirPath = path + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
+    public static void storeProjectRootLocation(String projectRoot) throws IOException {
+        String tempDirPath = getTempFolderLocation();
         File tempDir = new File(tempDirPath);
         if (!tempDir.exists() && !tempDir.isDirectory()) {
             tempDir.mkdir();
         }
-    }
 
-    public static void createTempPathTxt(String path, String projectRoot) throws IOException {
-        String tempDirPath = path + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
-        String tempPathFileLocation = tempDirPath + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
-        File pathFile = new File(tempPathFileLocation);
+        String projectRootHolderFileLocation = getProjectRootHolderFileLocation();
+        File pathFile = new File(projectRootHolderFileLocation);
         if (!pathFile.exists()) {
             pathFile.createNewFile();
         }
@@ -142,13 +139,33 @@ public class GatewayCmdUtils {
         }
     }
 
-    public static String getProjectRoot(String path) throws IOException {
-        String tempDirPath = path + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
-        String tempPathFileLocation = tempDirPath + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
-        return readFileAsString(tempPathFileLocation, false);
+    public static String getStoredProjectRootLocation() throws IOException {
+        String projectRootHolderFileLocation = getProjectRootHolderFileLocation();
+        if (new File(projectRootHolderFileLocation).exists()) {
+            return readFileAsString(projectRootHolderFileLocation, false);
+        } else {
+            return null;
+        }
     }
 
+    public static String getCLIHome() {
+        return System.getenv(GatewayCliConstants.CLI_HOME);
+    }
+    
+    private static String getProjectRootHolderFileLocation() {
+        return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
+    }
+
+    private static String getTempFolderLocation() {
+        return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
+    }
+    
     public static void createMainProjectStructure(String root) {
+        File rootDir = new File(root);
+        if (!rootDir.exists() && !rootDir.isDirectory()) {
+            rootDir.mkdir();
+        }
+        
         String mainResourceDirPath = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
         File mainResourceDir = new File(mainResourceDirPath);
         if (!mainResourceDir.exists() && !mainResourceDir.isDirectory()) {
