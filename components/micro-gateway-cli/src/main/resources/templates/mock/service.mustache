@@ -32,7 +32,10 @@ endpoint http:Client {{qualifiedServiceName}}_EP {
     }
 }
 
-@gateway:Version { apiVersion: "{{api.version}}" }
+@gateway:API {
+    name:"{{api.name}}",
+    apiVersion: "{{api.version}}"
+}
 service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecureListener {
 {{#paths}}{{#value}}{{#operations}}{{#value}}
     @swagger:ResourceInfo {
@@ -61,8 +64,8 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     {{operationId}} (endpoint outboundEp, http:Request req) {
-
-    var clientResponse = {{qualifiedServiceName}}_EP->forward("/", req);
+    string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
+    var clientResponse = {{qualifiedServiceName}}_EP->forward(urlPostfix, req);
 
         match clientResponse {
 
