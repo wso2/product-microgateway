@@ -33,6 +33,14 @@
             <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/templates</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/templates</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/conf</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
@@ -43,6 +51,10 @@
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/security</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/bin/micro-gw.sh</source>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/bin</outputDirectory>
         </file>
     </files>
 
@@ -59,6 +71,13 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/lib</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.am.microgw:microgw-cli:jar</include>
             </includes>
         </dependencySet>
 
