@@ -29,8 +29,6 @@
 # NOTE: Borrowed generously from Apache Tomcat startup scripts.
 # -----------------------------------------------------------------------------
 
-# if BALLERINA_HOME is not set we're not happy
-
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
 os400=false

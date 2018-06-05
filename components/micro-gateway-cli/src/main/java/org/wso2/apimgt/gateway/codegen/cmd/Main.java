@@ -62,26 +62,48 @@ public class Main {
 
     public static void main(String... args) {
         try {
-            String tempRoot = "/home/harsha/Downloads/myroot";
-            GatewayCmdUtils.createTempDir(tempRoot);
-            String root = GatewayCmdUtils.getProjectRoot(tempRoot);
-            String configPath = GatewayCmdUtils.getMainConfigPath(root) + File.separator +
-                                                                            GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
-            Config config = ConfigYAMLParser.parse(configPath, Config.class);
-            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStore", config.getTokenConfig().getTrustoreLocation());
-            System.setProperty("javax.net.ssl.trustStorePassword", config.getTokenConfig().getTrustorePassword());
-            GatewayCmdUtils.setConfig(config);
             Optional<GatewayLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
             Runtime.getRuntime().exit(1);
+        }
+    }
+
+    private static void init(String overrideProjectRootPath, String label) {
+        try {
+            String projectRoot;
+            if (StringUtils.isBlank(overrideProjectRootPath)) {
+                String storedProjectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
+                if (StringUtils.isBlank(storedProjectRoot)) {
+                    outStream.println("Stored workspace path not available. "
+                            + "You need to specify --path <path to generate resources>");
+                    Runtime.getRuntime().exit(1);
+                }
+                projectRoot = storedProjectRoot;
+            } else {
+                projectRoot = overrideProjectRootPath;
+                GatewayCmdUtils.storeProjectRootLocation(projectRoot);
+                GatewayCmdUtils.createMainProjectStructure(projectRoot);
+                GatewayCmdUtils.createMainConfig(projectRoot);
+            }
+
+            //user can define different label time to time. So need to create irrespective path provided or not.
+            GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
+
+            String configPath = GatewayCmdUtils.getMainConfigPath(projectRoot) + File.separator +
+                    GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+            Config config = ConfigYAMLParser.parse(configPath, Config.class);
+            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+            System.setProperty("javax.net.ssl.trustStore", config.getTokenConfig().getTrustStoreLocation());
+            System.setProperty("javax.net.ssl.trustStorePassword", config.getTokenConfig().getTrustStorePassword());
+            GatewayCmdUtils.setConfig(config);
         } catch (ConfigParserException e) {
-            outStream.println("Error while parsing the config");
+            outStream.println(
+                    "Error while parsing the config" + (e.getCause() != null ? ": " + e.getCause().getMessage() : ""));
             Runtime.getRuntime().exit(1);
         } catch (IOException e) {
-            outStream.println("Error while processing files");
+            outStream.println("Error while processing files:" + e.getMessage());
             Runtime.getRuntime().exit(1);
         }
     }
@@ -219,13 +241,18 @@ public class Main {
             password = "admin";
             /* ******************* */
             
+            //initialize CLI with the provided path. First time the cli runs it is a must to provide this. Once it is
+            // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
+            // path is taken from above file.
+            init(path, label);
+
             Config config = GatewayCmdUtils.getConfig();
             String configuredUser = config.getTokenConfig().getUsername();
 
             if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
                 if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                     if (username.trim().isEmpty()) {
-                        username = promptForTextInput("Username can't be empty; enter username: ");
+                        username = promptForTextInput("Username can't be empty; enter secret: ");
                         if (username.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                         }
@@ -243,28 +270,24 @@ public class Main {
                     }
                 }
             }
-            String root = path;
+
+            String projectRoot = null;
             try {
-                root = GatewayCmdUtils.getProjectRoot(path);
-                GatewayCmdUtils.createTempDir(path);
-                GatewayCmdUtils.createTempPathTxt(path, path);
-                GatewayCmdUtils.createMainProjectStructure(root);
-                GatewayCmdUtils.createLabelProjectStructure(root, label); 
+                projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
             } catch (IOException e) {
-                outStream.println("Error while creating project structure");
-                e.printStackTrace();
+                outStream.println("Error while retrieving stored project location");
                 Runtime.getRuntime().exit(1);
             }
 
             TokenManagement manager = new TokenManagementImpl();
             String clientId = config.getTokenConfig().getClientId();
             if (StringUtils.isEmpty(clientId)) {
-                manager.generateClientIdAndSecret(config, root);
+                manager.generateClientIdAndSecret(config, projectRoot);
                 clientId = config.getTokenConfig().getClientId();
             }
 
             String clientSecret = config.getTokenConfig().getClientSecret();
-            manager.generateClientIdAndSecret(config, root);
+            manager.generateClientIdAndSecret(config, projectRoot);
             String accessToken = manager.generateAccessToken(username, password.toCharArray(),
                                                                                     clientId, clientSecret.toCharArray());
 
@@ -274,10 +297,10 @@ public class Main {
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
                 codeGenerator.generate(GatewayCmdUtils
-                                .getLabelSrcDirectoryPath(root, label),
+                                .getLabelSrcDirectoryPath(projectRoot, label),
                         apis, true);
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
-                        .getLabelDirectoryPath(root, label)), null, new ArrayList<SrcFile>(), null);
+                        .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
             } catch (IOException | BallerinaServiceGenException e) {
                 outStream.println("Error while generating ballerina source");
                 e.printStackTrace();

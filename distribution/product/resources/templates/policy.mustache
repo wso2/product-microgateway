@@ -1,0 +1,32 @@
+import ballerina/io;
+import ballerina/runtime;
+import ballerina/http;
+import ballerina/log;
+
+function {{funcName}}() {
+    stream<GlobalThrottleStreamDTO> resultStream;
+    stream<EligibilityStreamDTO> eligibilityStream;
+    forever {
+        from requestStream
+        select messageID, (subscriptionTier == "{{name}}") as isEligible, {{policyKey}} as throttleKey
+        => (EligibilityStreamDTO[] counts) {
+            eligibilityStream.publish(counts);
+        }
+
+        from eligibilityStream
+        throttler:timeBatch({{unitTime}}, 0)
+        where isEligible == true
+        select throttleKey, count(messageID) >= {{count}} as isThrottled, expiryTimeStamp
+        group by throttleKey
+        => (GlobalThrottleStreamDTO[] counts) {
+            resultStream.publish(counts);
+        }
+
+        from resultStream
+        throttler:emitOnStateChange(throttleKey, isThrottled)
+        select throttleKey, isThrottled, expiryTimeStamp
+        => (GlobalThrottleStreamDTO[] counts) {
+            globalThrottleStream.publish(counts);
+        }
+    }
+}

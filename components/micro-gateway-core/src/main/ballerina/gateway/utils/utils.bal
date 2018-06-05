@@ -233,8 +233,7 @@ public function getTenantFromBasePath(string basePath) returns string {
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
     int validityPeriod = check <int>apiKeyValidationDto.validityPeriod;
     int issuedTime = check <int>apiKeyValidationDto.issuedTime;
-    int timestampSkew = 5000;
-    // TODO : make this configurable;
+    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (validityPeriod != intMaxValue &&
