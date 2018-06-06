@@ -25,6 +25,7 @@ public type TierConfiguration {
 public annotation <resource> RateLimit TierConfiguration;
 
 @Description {value:"Configuration used for api version annotation"}
+@Field {value:"name: Name of the API"}
 @Field {value:"apiVersion: version specified for the API"}
 public type APIConfiguration {
     string apiVersion;
@@ -32,7 +33,7 @@ public type APIConfiguration {
 
 };
 
-@Description {value:"API version annotation"}
+@Description {value:"API relted details annotation"}
 public annotation <service> API APIConfiguration;
 
 

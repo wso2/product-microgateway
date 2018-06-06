@@ -41,6 +41,10 @@
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/filters</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>

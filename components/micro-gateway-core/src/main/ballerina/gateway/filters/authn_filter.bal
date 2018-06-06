@@ -42,6 +42,7 @@ public type AuthnFilter object {
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
         //Setting UUID
         context.attributes[MESSAGE_ID] = system:uuid();
+        context.attributes[FILTER_FAILED] = false;
         // get auth config for this resource
         boolean authenticated;
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
@@ -105,18 +106,25 @@ public type AuthnFilter object {
                                     authContext.scheme = AUTH_SCHEME_OAUTH2;
                                     authContext.authToken = token;
                                 } else {
-                                    return createFilterResult(false, 401, "Authentication failed");
+                                    int status = check <int> apiKeyValidationDto.validationStatus;
+                                    setErrorMessageToFilterContext(context, status);
+                                    return createFilterResult(true, 200, "Authentication filter has failed. But
+                                    continuing in order to  provide error details");
                                 }
                             }
                             error err => {
-                                log:printError(err.message);
-                                return createFilterResult(false, 500, "Error while authenticating the token");
+                                log:printError(err.message, err = err);
+                                setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+                                return createFilterResult(true, 200, "Authentication filter has failed. But
+                                    continuing in order to  provide error details");
                             }
                         }
                     }
                     error err => {
-                        log:printError(err.message);
-                        return createFilterResult(false, 401, err.message);
+                        log:printError(err.message, err = err);
+                        setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+                        return createFilterResult(true, 200, "Authentication filter has failed. But
+                                    continuing in order to  provide error details");
                     }
                 }
             }

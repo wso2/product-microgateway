@@ -158,11 +158,28 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     http:AuthzFilter authzFilter = new(authzHandler);
     // wraps the ballerina authz filter in new gateway filter
     OAuthzFilter authzFilterWrapper = new(authzFilter);
-
-    authFilters[0] = <http:Filter> authnFilter;
-    authFilters[1] = <http:Filter> authzFilterWrapper;
-    authFilters[2] = <http:Filter> subscriptionFilter;
-    authFilters[3] = <http:Filter> throttleFilter;
+    map defaultMap = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true};
+    map filterConfig = getConfigMapValue(FILTERS);
+    if(lengthof filterConfig == 0) {
+        filterConfig = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true};
+    }
+    int i=0;
+    if(check <boolean> filterConfig[AUTHN_FILTER]) {
+        authFilters[i] = < http:Filter> authnFilter;
+        i++;
+    }
+    if(check <boolean> filterConfig[AUTHN_FILTER]) {
+        authFilters[i] = < http:Filter> authzFilterWrapper;
+        i++;
+    }
+    if(check <boolean> filterConfig[SUBSCRIPTION_FILTER]) {
+        authFilters[i] = < http:Filter> subscriptionFilter;
+        i++;
+    }
+    if(check <boolean> filterConfig[THROTTLE_FILTER]) {
+        authFilters[i] = < http:Filter> throttleFilter;
+        i++;
+    }
 
     return authFilters;
 }
