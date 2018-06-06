@@ -47,7 +47,6 @@ public function OAuthnAuthenticator::canHandle (http:Request req) returns (boole
     string authHeader;
     try {
         authHeader = req.getHeader(AUTH_HEADER);
-        io:println("auth header" + authHeader);
     } catch (error e) {
         log:printDebug("Error in retrieving header " + AUTH_HEADER + ": " + e.message);
         return false;
@@ -124,7 +123,8 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
         () => {
             match self.gatewayTokenCache.retrieveFromInvalidTokenCache(cacheKey) {
                 boolean cacheAuthorizedValue => {
-                    APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:API_AUTH_INVALID_CREDENTIALS };
+                    APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:
+                    API_AUTH_INVALID_CREDENTIALS_STRING };
                     log:printDebug("Access token found in invalid
                     token cache.");
                     return apiKeyValidationInfoDTO;

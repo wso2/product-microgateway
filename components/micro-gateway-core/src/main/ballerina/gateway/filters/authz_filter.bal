@@ -43,10 +43,20 @@ public type OAuthzFilter object {
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
+        match <boolean> context.attributes[FILTER_FAILED] {
+            boolean failed => {
+                if (failed) {
+                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
+                }
+            } error err => {
+            //Nothing to handle
+        }
+        }
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         // scope validation is done in authn filter for oauth2, hence we only need to
         //validate scopes if auth scheme is jwt.
         if (authScheme == AUTH_SCHEME_JWT){
+            // todo: send proper error message
             return self.authzFilter.filterRequest(request, context);
         }
         return createFilterResult(true, 200, "Successfully authorized");

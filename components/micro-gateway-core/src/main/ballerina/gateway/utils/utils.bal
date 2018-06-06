@@ -167,12 +167,15 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
     apiKeyValidationRequest.context = httpServiceConfig.basePath;
-    apiKeyValidationRequest.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
-        (context.serviceType)).apiVersion;
+    APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
+        (context.serviceType));
+    apiKeyValidationRequest.apiVersion = apiConfig.apiVersion;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
+    context.attributes[API_NAME] = apiConfig.name;
+    context.attributes[API_CONTEXT] = httpServiceConfig.basePath;
     // TODO get correct verb
     return apiKeyValidationRequest;
 
@@ -183,7 +186,7 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
 @Param {value:"statusCode: status code for the filter request"}
 @Param {value:"message: response message from the filter"}
 @Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
-function createFilterResult (boolean canProceed, int statusCode, string message) returns (http:FilterResult) {
+public function createFilterResult (boolean canProceed, int statusCode, string message) returns (http:FilterResult) {
     http:FilterResult requestFilterResult = {};
     requestFilterResult = {canProceed:canProceed, statusCode:statusCode, message:message};
     return requestFilterResult;
@@ -241,7 +244,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
             // over and would produce a negative value)
             (currentTime - timestampSkew) > validityPeriod) {
         if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
-            apiKeyValidationDto.validationStatus = API_AUTH_INVALID_CREDENTIALS;
+            apiKeyValidationDto.validationStatus = API_AUTH_INVALID_CREDENTIALS_STRING;
             return true;
         }
     }
@@ -316,4 +319,28 @@ public function getConfigBooleanValue(string instanceId, string property, boolea
 
 public function getConfigFloatValue(string instanceId, string property, float defaultValue) returns float {
     return config:getAsFloat(instanceId + "." + property, default = defaultValue);
+}
+
+public function getConfigMapValue(string property) returns map {
+    return config:getAsMap(property);
+}
+
+public function setErrorMessageToFilterContext(http:FilterContext context, int errorCode) {
+    int status;
+    if (errorCode == API_AUTH_GENERAL_ERROR) {
+        status = INTERNAL_SERVER_ERROR;
+    } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE ||
+        errorCode == API_AUTH_FORBIDDEN ||
+        errorCode == INVALID_SCOPE) {
+        status = FORBIDDEN;
+    } else {
+        status = UNAUTHORIZED;
+
+    }
+    context.attributes[HTTP_STATUS_CODE] = status;
+    context.attributes[FILTER_FAILED] = true;
+    context.attributes[ERROR_CODE] = errorCode;
+    string errorMessage = getAuthenticationFailureMessage(errorCode);
+    context.attributes[ERROR_MESSAGE] = errorMessage;
+    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
 }

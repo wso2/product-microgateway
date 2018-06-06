@@ -34,8 +34,10 @@
 @final public string RESOURCE_ANN_NAME = "ResourceConfig";
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
-@Description {value:"Version annotation name in service level"}
+@Description {value:"API annotation name in service level"}
 @final public string API_ANN_NAME = "API";
+@Description {value:"skip filters annotation name in service level"}
+@final public string SKIP_FILTERS_ANN_NAME = "SkipFilters";
 @Description {value:"gateway annotation package"}
 @final public string GATEWAY_ANN_PACKAGE = "wso2.gateway";
 
@@ -47,7 +49,6 @@
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description {value:"Form url encoded"}
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-@final public string API_AUTH_INVALID_CREDENTIALS = "900901";
 @Description {value:"X-Forward-For Header "}
 @final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 @Description {value:"KeyValidation Response"}
@@ -79,9 +80,27 @@
 @Description { value: "Authentication level any" }
 @final public string ANY_AUTHENTICATION_LEVEL = "Any";
 @Description { value: "API Name attribute" }
-@final public string API_NAME = "apiName";
-@Description { value: "API Version attribute" }
 @final public string API_VERSION = "apiVersion";
+
+@Description { value: "Filter has return false" }
+@final public string FILTER_FAILED = "filter_failed";
+@Description { value: "error code attribute" }
+@final public string ERROR_CODE = "error_code";
+@Description { value: "error message attribute" }
+@final public string ERROR_MESSAGE = "error_message";
+@Description { value: "error description attribute" }
+@final public string ERROR_DESCRIPTION = "error_description";
+@final public string HTTP_STATUS_CODE = "status_code";
+
+@Description { value: "API name attribute" }
+@final public string API_NAME = "api_name";
+@Description { value: "API context attribute" }
+@final public string API_CONTEXT = "api_context";
+
+@final public string AUTHN_FILTER = "AUTHN_FILTER";
+@final public string AUTHZ_FILTER = "AUTHZ_FILTER";
+@final public string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
+@final public string THROTTLE_FILTER = "THROTTLE_FILTER";
 
 
 
@@ -119,6 +138,8 @@
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 @Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints"}
 @final public string TOKEN_LISTENER_PORT = "tokenListenerPort";
+@Description { value: "Set of filters to be enabled"}
+@final public string FILTERS = "filters";
 
 @Description { value: "JWT Token related configs"}
 @final public string JWT_INSTANCE_ID = "jwtTokenConfig";
@@ -161,3 +182,11 @@
 @final string THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
 @final string THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
 @final string THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
+
+
+// http codes
+@final int INTERNAL_SERVER_ERROR = 500;
+@final int FORBIDDEN = 403;
+@final int UNAUTHORIZED = 401;
+
+// end of http codes

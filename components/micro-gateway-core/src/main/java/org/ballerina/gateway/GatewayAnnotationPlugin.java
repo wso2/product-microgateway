@@ -18,6 +18,8 @@
 
 package org.ballerina.gateway;
 
+import org.ballerina.gateway.models.APIModel;
+import org.ballerina.gateway.models.TierModel;
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
@@ -25,9 +27,9 @@ import org.ballerinalang.model.tree.ResourceNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangArrayLiteral;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
-import org.ballerina.gateway.models.TierModel;
-import org.ballerina.gateway.models.APIModel;
 
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
                 //Match annotation key and assign the value to model class
                     case POLICY:
                         TierModel.getInstance().setTier(annotationValue);
-                        break;
+                        continue;
                     default:
                         break;
                 }
@@ -88,10 +90,14 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
                 String annotationValue = keyValue.getValue().toString();
                 switch (keyValue.getKey().toString()) {
                 //Match annotation key and assign the value to model class
-                case VERSION:
+                case VERSION: {
                     APIModel.getInstance().setApiVersion(annotationValue);
-                case NAME:
+                    continue;
+                }
+                case NAME: {
                     APIModel.getInstance().setName(annotationValue);
+                    continue;
+                }
                 default:
                     break;
                 }
