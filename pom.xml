@@ -156,7 +156,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
-                <artifactId>microgw-cli</artifactId>
+                <artifactId>org.wso2.micro.gateway.cli</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
