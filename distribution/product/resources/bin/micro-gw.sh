@@ -64,7 +64,7 @@ export BALLERINA_HOME=$BALLERINA_HOME
 export PATH=$BALLERINA_HOME/bin:$PATH
 
 #reading the micro gateway source root location
-file="$CLI_HOME/temp/path.txt"
+file="$CLI_HOME/temp/workspace.txt"
 
 while IFS= read line
 do
