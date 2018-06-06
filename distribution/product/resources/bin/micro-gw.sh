@@ -53,11 +53,23 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-# set CLI_HOME as an environment variable
+# set BALLERINA_HOME
 export CLI_HOME=`cd "$PRGDIR/.." ; pwd`
+BALLERINA_HOME="$CLI_HOME/lib/platform"
 
-# set BALLERINA_HOME as ballerina platform home path
-BALLERINA_HOME=$CLI_HOME/lib/platform
+echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
+echo CLI_HOME environment variable is set to $CLI_HOME
+
+export BALLERINA_HOME=$BALLERINA_HOME
+export PATH=$BALLERINA_HOME/bin:$PATH
+
+#reading the micro gateway source root location
+file="$CLI_HOME/temp/workspace.txt"
+
+while IFS= read line
+do
+	MICRO_GW_PROJECT_DIR=$line
+done <"$file"
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
@@ -121,8 +133,32 @@ do
           CMD="--java.debug"
     elif [ "$CMD" = "--java.debug" ] && [ -z "$PORT" ]; then
           PORT=$c
+    elif [ "$c" = "run" ] || [ "$c" = "build" ]; then
+          CMD_COMMAND=$c
+    elif [ "$c" = "--label" ] || [ "$c" = "-l" ]; then
+          CMD_LABEL=$c
+    elif ([ "$CMD_LABEL" = "--label" ] || [ "$CMD_LABEL" = "-l" ]) && [ -z "$CMD_LABEL_VAL" ]; then
+          CMD_LABEL_VAL=$c
     fi
+    echo $c
 done
+
+#execute build command
+if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
+    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL"
+    pushd $MICRO_GW_LABEL_PROJECT_DIR> /dev/null
+        echo $PWD
+        ballerina build src/ -o $CMD_LABEL_VAL.balx
+        exit 1
+    popd > /dev/null
+elif [ "$CMD_COMMAND" = "run" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
+    MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL/target"
+    pushd $MICRO_GW_LABEL_PROJECT_TARGET_DIR> /dev/null
+        echo $PWD
+        ballerina run $CMD_LABEL_VAL.balx
+        exit 1
+    popd > /dev/null
+fi
 
 if [ "$CMD" = "--java.debug" ]; then
   if [ "$PORT" = "" ]; then
@@ -170,8 +206,6 @@ fi
 
 #echo JAVA_HOME environment variable is set to $JAVA_HOME
 #echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
-
-#   cd "CLI_HOME"
 
 $JAVACMD \
 	-Xms256m -Xmx1024m \
