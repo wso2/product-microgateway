@@ -66,10 +66,9 @@ export PATH=$BALLERINA_HOME/bin:$PATH
 #reading the micro gateway source root location
 file="$CLI_HOME/temp/workspace.txt"
 
-while IFS= read line
-do
-	MICRO_GW_PROJECT_DIR=$line
-done <"$file"
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    	MICRO_GW_PROJECT_DIR="$line"
+done < "$file"
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
