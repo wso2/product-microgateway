@@ -54,7 +54,7 @@ done
 PRGDIR=`dirname "$PRG"`
 
 # set BALLERINA_HOME
-CLI_HOME=`cd "$PRGDIR/.." ; pwd`
+export CLI_HOME=`cd "$PRGDIR/.." ; pwd`
 BALLERINA_HOME="$CLI_HOME/lib/platform"
 
 echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
