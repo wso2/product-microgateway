@@ -21,6 +21,7 @@ public class DockerCopyFiles {
     private String source;
     private String target;
     private String isBallerinaConf;
+    private boolean enable = false;
 
     public String getIsBallerinaConf() {
         return isBallerinaConf;
@@ -44,5 +45,13 @@ public class DockerCopyFiles {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

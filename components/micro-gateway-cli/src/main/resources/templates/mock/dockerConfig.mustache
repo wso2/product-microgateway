@@ -1,0 +1,16 @@
+{{#if containerConfig.docker.dockerConfig.enable}}
+@docker:Config {
+    name:"{{qualifiedServiceName}}"{{#if containerConfig.docker.dockerConfig.registry}},
+    registry:"{{containerConfig.docker.dockerConfig.registry}}"{{/if}}{{#if containerConfig.docker.dockerConfig.tag}},
+    tag:"{{containerConfig.docker.dockerConfig.tag}}"{{/if}}{{#if containerConfig.docker.dockerConfig.buildImage}},
+    buildImage:"{{containerConfig.docker.dockerConfig.buildImage}}"{{/if}}{{#if containerConfig.docker.dockerConfig.dockerHost}},
+    dockerHost:"{{containerConfig.docker.dockerConfig.dockerHost}}"{{/if}}{{#if containerConfig.docker.dockerConfig.dockerCertPath}},
+    dockerCertPath:"{{containerConfig.docker.dockerConfig.dockerCertPath}}"{{/if}}{{#if containerConfig.docker.dockerConfig.baseImage}},
+    baseImage:"{{containerConfig.docker.dockerConfig.baseImage}}"{{/if}}{{#if containerConfig.docker.dockerConfig.enableDebug}},
+    enableDebug:"{{containerConfig.docker.dockerConfig.enableDebug}}"{{/if}}{{#if containerConfig.docker.dockerConfig.debugPort}},
+    debugPort:"{{containerConfig.docker.dockerConfig.debugPort}}"{{/if}}{{#if containerConfig.docker.dockerConfig.push}},
+    push:"{{containerConfig.docker.dockerConfig.push}}"{{/if}}{{#if containerConfig.docker.dockerConfig.username}},
+    username:"{{containerConfig.docker.dockerConfig.username}}"{{/if}}{{#if containerConfig.docker.dockerConfig.password}},
+    password:"{{containerConfig.docker.dockerConfig.password}}"{{/if}}
+}
+{{/if}}

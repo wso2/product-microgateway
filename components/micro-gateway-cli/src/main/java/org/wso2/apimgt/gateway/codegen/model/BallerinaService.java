@@ -22,6 +22,8 @@ import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.codegen.service.bean.EndpointConfig;
 import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
@@ -39,6 +41,7 @@ import java.util.Set;
 public class BallerinaService implements BallerinaSwaggerObject<BallerinaService, Swagger> {
     private String name;
     private ExtendedAPI api;
+    private ContainerConfig containerConfig;
     private EndpointConfig endpointConfig;
     private String srcPackage;
     private String modelPackage;
@@ -63,6 +66,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.info = swagger.getInfo();
         this.externalDocs = swagger.getExternalDocs();
         this.tags = swagger.getTags();
+        this.containerConfig = GatewayCmdUtils.getContainerConfig();
         setPaths(swagger);
         return this;
     }
@@ -193,5 +197,13 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
     public void setQualifiedServiceName(String qualifiedServiceName) {
         this.qualifiedServiceName = qualifiedServiceName;
+    }
+
+    public ContainerConfig getContainerConfig() {
+        return containerConfig;
+    }
+
+    public void setContainerConfig(ContainerConfig containerConfig) {
+        this.containerConfig = containerConfig;
     }
 }

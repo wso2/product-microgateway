@@ -22,6 +22,7 @@ public class KubernetesSecret {
     private String mountPath;
     private String readOnly;
     private String data;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -53,5 +54,13 @@ public class KubernetesSecret {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

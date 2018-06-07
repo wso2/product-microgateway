@@ -23,6 +23,7 @@ public class KubernetesPersistentVolumeClaim {
     private String readOnly;
     private String accessMode;
     private String volumeClaimSize;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -62,5 +63,13 @@ public class KubernetesPersistentVolumeClaim {
 
     public void setVolumeClaimSize(String volumeClaimSize) {
         this.volumeClaimSize = volumeClaimSize;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

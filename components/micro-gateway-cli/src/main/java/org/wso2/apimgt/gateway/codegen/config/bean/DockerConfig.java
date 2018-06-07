@@ -30,6 +30,7 @@ public class DockerConfig {
     private String push;
     private String username;
     private String password;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -125,5 +126,13 @@ public class DockerConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

@@ -34,6 +34,7 @@ public class KubernetesJob {
     private String username;
     private String password;
     private String baseImage;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -161,5 +162,13 @@ public class KubernetesJob {
 
     public void setBaseImage(String baseImage) {
         this.baseImage = baseImage;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

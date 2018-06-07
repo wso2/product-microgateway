@@ -18,22 +18,22 @@
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
 public class Docker {
-    private DockerConfig config;
-    private DockerCopyFiles copyFiles;
+    private DockerConfig dockerConfig;
+    private DockerCopyFiles dockerCopyFiles;
 
-    public DockerConfig getConfig() {
-        return config;
+    public DockerCopyFiles getDockerCopyFiles() {
+        return dockerCopyFiles;
     }
 
-    public void setConfig(DockerConfig config) {
-        this.config = config;
+    public void setDockerCopyFiles(DockerCopyFiles dockerCopyFiles) {
+        this.dockerCopyFiles = dockerCopyFiles;
     }
 
-    public DockerCopyFiles getCopyFiles() {
-        return copyFiles;
+    public DockerConfig getDockerConfig() {
+        return dockerConfig;
     }
 
-    public void setCopyFiles(DockerCopyFiles copyFiles) {
-        this.copyFiles = copyFiles;
+    public void setDockerConfig(DockerConfig dockerConfig) {
+        this.dockerConfig = dockerConfig;
     }
 }

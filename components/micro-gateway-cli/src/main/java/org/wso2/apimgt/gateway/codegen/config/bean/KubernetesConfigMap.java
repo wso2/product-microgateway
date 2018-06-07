@@ -23,4 +23,53 @@ public class KubernetesConfigMap {
     private String readOnly;
     private String ballerinaConf;
     private String data;
+    private boolean enable = false;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMountPath() {
+        return mountPath;
+    }
+
+    public void setMountPath(String mountPath) {
+        this.mountPath = mountPath;
+    }
+
+    public String getReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(String readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public String getBallerinaConf() {
+        return ballerinaConf;
+    }
+
+    public void setBallerinaConf(String ballerinaConf) {
+        this.ballerinaConf = ballerinaConf;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 }

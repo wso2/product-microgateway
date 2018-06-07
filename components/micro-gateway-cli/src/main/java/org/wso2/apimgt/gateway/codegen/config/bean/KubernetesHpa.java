@@ -23,6 +23,7 @@ public class KubernetesHpa {
     private String minReplicas;
     private String maxReplicas;
     private String cpuPrecentage;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -62,5 +63,13 @@ public class KubernetesHpa {
 
     public void setCpuPrecentage(String cpuPrecentage) {
         this.cpuPrecentage = cpuPrecentage;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

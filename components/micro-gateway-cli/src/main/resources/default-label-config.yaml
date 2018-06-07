@@ -1,94 +1,103 @@
 docker:
   dockerConfig:
-    name:
-    registry:
-    tag:
-    buildImage:
-    dockerHost:
-    dockerCertPath:
-    baseImage:
-    enableDebug:
-    debugPort:
-    push:
-    username:
-    password:
+    enable: false
+    #name: ''
+    #registry: ''
+    #tag: ''
+    #buildImage: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #baseImage: ''
+    #enableDebug: ''
+    #debugPort: ''
+    #push: ''
+    #username: ''
+    #password: ''
   dockerCopyFiles:
-    source:
-    target:
-    isBallerinaConf:
-
+    enable: false
+    #source: ''
+    #target: ''
+    #isBallerinaConf: ''
 kubernetes:
   kubernetesDeployment:
-    name:
-    labels:
-    replicas:
-    enableLiveness:
-    initialDelaySeconds:
-    periodSeconds:
-    livenessPort:
-    imagePullPolicy:
-    image:
-    env:
-    buildImage:
-    copyFiles:
-    dockerHost:
-    dockerCertPath:
-    push:
-    username:
-    password:
-    baseImage:
-    singleYAML:
+    enable: false
+    #name: ''
+    #labels: ''
+    #replicas: ''
+    #enableLiveness: ''
+    #initialDelaySeconds: ''
+    #periodSeconds: ''
+    #livenessPort: ''
+    #imagePullPolicy: ''
+    #image: ''
+    #env: ''
+    #buildImage: ''
+    #copyFiles: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #push: ''
+    #username: ''
+    #password: ''
+    #baseImage: ''
+    #singleYAML: ''
   kubernetesService:
-    name:
-    labels:
-    serviceType:
-    port:
+    enable: false
+    #name: ''
+    #labels: ''
+    #serviceType: ''
+    #port: ''
   kubernetesIngress:
-    name:
-    labels:
-    hostname:
-    annotations:
-    path:
-    targetPath:
-    ingressClass:
-    enableTLS:
+    enable: false
+    #name: ''
+    #labels: ''
+    #hostname: ''
+    #annotations: ''
+    #path: ''
+    #targetPath: ''
+    #ingressClass: ''
+    #enableTLS: ''
   kubernetesHpa:
-    name:
-    labels:
-    minReplicas:
-    maxReplicas:
-    cpuPrecentage:
+    enable: false
+    #name: ''
+    #labels: ''
+    #minReplicas: ''
+    #maxReplicas: ''
+    #cpuPrecentage: ''
   kubernetesSecret:
-    name:
-    mountPath:
-    readOnly:
-    data:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #data: ''
   kubernetesConfigMap:
-    name:
-    mountPath:
-    readOnly:
-    ballerinaConf:
-    data:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #ballerinaConf: ''
+    #data: ''
   kubernetesPersistentVolumeClaim:
-    name:
-    mountPath:
-    readOnly:
-    accessMode:
-    volumeClaimSize:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #accessMode: ''
+    #volumeClaimSize: ''
   kubernetesJob:
-    name:
-    labels:
-    restartPolicy:
-    backoffLimit:
-    activeDeadlineSeconds:
-    schedule:
-    imagePullPolicy:
-    image:
-    env:
-    buildImage:
-    dockerHost:
-    dockerCertPath:
-    push:
-    username:
-    password:
-    baseImage:
+    enable: false
+    #name: ''
+    #labels: ''
+    #restartPolicy: ''
+    #backoffLimit: ''
+    #activeDeadlineSeconds: ''
+    #schedule: ''
+    #imagePullPolicy: ''
+    #image: ''
+    #env: ''
+    #buildImage: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #push: ''
+    #username: ''
+    #password: ''
+    #baseImage: ''

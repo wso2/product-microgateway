@@ -4,9 +4,15 @@ import ballerina/swagger;
 import wso2/gateway;
 
 endpoint http:Client {{qualifiedServiceName}}_EP {
-    url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"
+    url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
+    enabled: false
+    {{else}},
+    cache: { isShared: true }
+    {{/equals}}
 };
 
+{{>docker}}
+{{>kubernetes}}
 
 @swagger:ServiceInfo { {{#info}}
     title: "{{title}}"{{#description}},

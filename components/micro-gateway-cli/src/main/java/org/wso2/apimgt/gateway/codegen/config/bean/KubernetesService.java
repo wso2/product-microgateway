@@ -22,6 +22,7 @@ public class KubernetesService {
     private String labels;
     private String serviceType;
     private String port;
+    private boolean enable = false;
 
     public String getName() {
         return name;
@@ -53,5 +54,13 @@ public class KubernetesService {
 
     public void setPort(String port) {
         this.port = port;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

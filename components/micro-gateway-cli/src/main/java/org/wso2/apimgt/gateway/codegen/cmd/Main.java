@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
+import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.codegen.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
@@ -88,6 +89,7 @@ public class Main {
                 GatewayCmdUtils.createMainProjectStructure(projectRoot);
                 GatewayCmdUtils.createMainConfig(projectRoot);
                 GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
+                GatewayCmdUtils.createLabelConfig(projectRoot, label);
             }
 
             //user can define different label time to time. So need to create irrespective path provided or not.
@@ -96,15 +98,20 @@ public class Main {
             String configPath = GatewayCmdUtils.getMainConfigPath(projectRoot) + File.separator +
                     GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
             Config config = ConfigYAMLParser.parse(configPath, Config.class);
+            String labelConfigPath = GatewayCmdUtils.getLabelConfDirectoryPath(projectRoot, label) + File.separator +
+                    GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+            ContainerConfig containerConfig = ConfigYAMLParser.parse(labelConfigPath, ContainerConfig.class);
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
             System.setProperty("javax.net.ssl.trustStore", config.getTokenConfig().getTrustStoreLocation());
             System.setProperty("javax.net.ssl.trustStorePassword", config.getTokenConfig().getTrustStorePassword());
             GatewayCmdUtils.setConfig(config);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
         } catch (ConfigParserException e) {
             outStream.println(
                     "Error while parsing the config" + (e.getCause() != null ? ": " + e.getCause().getMessage() : ""));
             Runtime.getRuntime().exit(1);
         } catch (IOException e) {
+            e.printStackTrace();
             outStream.println("Error while processing files:" + e.getMessage());
             Runtime.getRuntime().exit(1);
         }
