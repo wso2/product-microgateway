@@ -23,8 +23,10 @@ map blockConditions;
 map throttleDataMap;
 public stream<RequestStreamDTO> requestStream;
 public stream<GlobalThrottleStreamDTO> globalThrottleStream;
+public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
 boolean blockConditionExist;
+
 public function isBlockConditionExist(string key) returns (boolean) {
     return blockConditions.hasKey(key);
 }
@@ -66,7 +68,7 @@ public function publishNonThrottleEvent(RequestStreamDTO request) {
 }
 function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
-    requestStream.subscribe(startToPublish);
+    isStreamsInitialized = true;
 }
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
     io:println("Event GlobalThrottleStream: ", throttleEvent);

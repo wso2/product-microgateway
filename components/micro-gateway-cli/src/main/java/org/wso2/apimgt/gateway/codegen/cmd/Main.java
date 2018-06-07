@@ -29,6 +29,7 @@ import org.ballerinalang.packerina.init.models.SrcFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
@@ -37,6 +38,8 @@ import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.codegen.service.APIService;
 import org.wso2.apimgt.gateway.codegen.service.APIServiceImpl;
 import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagement;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagementImpl;
 import org.wso2.apimgt.gateway.codegen.utils.ZipUtils;
@@ -294,12 +297,17 @@ public class Main {
 
             APIService service = new APIServiceImpl();
             List<ExtendedAPI> apis = service.getAPIs(label, accessToken);
+            List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
+            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
+            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
                 codeGenerator.generate(GatewayCmdUtils
                                 .getLabelSrcDirectoryPath(projectRoot, label),
                         apis, true);
+                policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
+                        + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
                         .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
             } catch (IOException | BallerinaServiceGenException e) {

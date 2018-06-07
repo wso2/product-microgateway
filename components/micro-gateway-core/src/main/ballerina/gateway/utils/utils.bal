@@ -266,6 +266,8 @@ public function getClientIp(http:Request request) returns (string) {
     }
     if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
         header = request.getHeader(X_FORWARD_FOR_HEADER);
+    } else {
+        return "";
     }
     //TODO need to get the IP from REMOTE_ADDR
     clientIp = header;

@@ -209,7 +209,9 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 
     json properties = {};
     string remoteAddr = getClientIp(req);
-    properties.ip = ipToLong(remoteAddr);
+    if(remoteAddr != "") {
+        properties.ip = ipToLong(remoteAddr);
+    }
     if (getGatewayConfInstance().getThrottleConf().enabledHeaderConditions){
         string[] headerNames = req.getHeaderNames();
         foreach headerName in headerNames {
@@ -237,7 +239,6 @@ function ipToLong(string ipAddress) returns (int) {
     string[] ipAddressInArray = ipAddress.split("\\.");
     int i = 3;
     while (i >= 0 && (3-i) < lengthof ipAddressInArray) {
-        io:println(ipAddressInArray[3 - i]);
         match <int>ipAddressInArray[3 - i] {
             int ip => {
                 result = result + shiftLeft(ip, i * 8);
@@ -253,8 +254,6 @@ function ipToLong(string ipAddress) returns (int) {
                 i = i - 1;
             }
         }
-
-
     }
     return result;
 }
