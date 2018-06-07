@@ -31,7 +31,7 @@ public class ZipUtils {
     /**
      * A method to zip a folder with given path.
      * 
-     * todo: Note: this zip file does not preserve execute permissions of files. Need to fix with a better library. 
+     * Note: this zip method does not preserve permissions of files. eg: "execute" permissions.
      * 
      * @param sourceDirPath src path to zip
      * @param zipFilePath created zip file path

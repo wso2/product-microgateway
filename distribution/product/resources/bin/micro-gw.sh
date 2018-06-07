@@ -145,10 +145,14 @@ done
 #execute build command
 if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
     MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL"
-    pushd $MICRO_GW_LABEL_PROJECT_DIR> /dev/null
+    pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
         echo $PWD
+        # clean the content of target folder
+        if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
+            rm -r $MICRO_GW_LABEL_PROJECT_DIR/target
+        fi
+        # build the ballerina source code for the label
         ballerina build src/ -o $CMD_LABEL_VAL.balx
-        exit 1
     popd > /dev/null
 elif [ "$CMD_COMMAND" = "run" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
     MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL/target"
