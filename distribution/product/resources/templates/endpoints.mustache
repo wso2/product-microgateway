@@ -1,7 +1,13 @@
 import wso2/gateway;
 
+ExtensionFilter extensionFilter;
+
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
+    port:9095,
+    filters:[extensionFilter]
 };
 
 endpoint gateway:APIGatewayListener apiListener {
+    port:9090,
+    filters:[extensionFilter]
 };

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 public class GatewayCmdUtils {
@@ -152,6 +153,18 @@ public class GatewayCmdUtils {
     public static String getCLIHome() {
         return System.getenv(GatewayCliConstants.CLI_HOME);
     }
+
+    public static String getResourceFolderLocation() {
+        return System.getenv(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
+    }
+
+    public static String getFiltersFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
+    }
+
+    public static String getConfigFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
+    }
     
     private static String getProjectRootHolderFileLocation() {
         return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
@@ -218,6 +231,10 @@ public class GatewayCmdUtils {
         copyTargetDistBalx(projectRoot, labelName);
         ZipUtils.zip(distPath, getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator + File.separator
                 + GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getConfigFolderLocation() + File.separator
+                        + GatewayCliConstants.GW_DIST_CONF_FILE,
+                GatewayCmdUtils.getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator
+                        + GatewayCliConstants.PROJECT_CONF_FILE);
     }
 
     /**
@@ -396,6 +413,10 @@ public class GatewayCmdUtils {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         copyFolder(sourceFolder, destinationFolder);
+    }
+
+    public static void copyFilesToSources(String sourcePath, String destinationPath) throws IOException {
+        Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
     }
     
     /**

@@ -302,11 +302,9 @@ public class Main {
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
-                codeGenerator.generate(GatewayCmdUtils
-                                .getLabelSrcDirectoryPath(projectRoot, label),
-                        apis, true);
                 policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
                         + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
+                codeGenerator.generate(projectRoot, label, apis, true);
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
                         .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
             } catch (IOException | BallerinaServiceGenException e) {

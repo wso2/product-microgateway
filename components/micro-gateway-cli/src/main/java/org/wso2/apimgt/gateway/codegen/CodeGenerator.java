@@ -27,6 +27,8 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCliConstants;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.codegen.model.BallerinaService;
 import org.wso2.apimgt.gateway.codegen.model.GenSrcFile;
@@ -34,6 +36,7 @@ import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.codegen.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,11 +59,13 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String labelPath, List<ExtendedAPI> apis, boolean overwrite)
+    public void generate(String projectRoot, String labelName, List<ExtendedAPI> apis, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
+        String labelPath = GatewayCmdUtils
+                .getLabelSrcDirectoryPath(projectRoot, labelName);
         List<GenSrcFile> genFiles = new ArrayList<>();
         for (ExtendedAPI api : apis) {
             parser = new SwaggerParser();
@@ -71,6 +76,11 @@ public class CodeGenerator {
         }
         genFiles.add(generateCommonEndpoints());
         writeGeneratedSources(genFiles, Paths.get(labelPath), overwrite);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
+                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
+                labelPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+
+
     }
 
     private Template compileTemplate(String defaultTemplateDir, String templateName) throws IOException {
