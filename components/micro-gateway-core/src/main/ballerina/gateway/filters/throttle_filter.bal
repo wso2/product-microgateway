@@ -43,8 +43,6 @@ public type ThrottleFilter object {
         boolean resourceLevelThrottled;
         boolean apiLevelThrottled;
         string resourceLevelThrottleKey;
-        //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
-        string apiLevelThrottleKey;
 
         //Throttle Tiers
         string applicationLevelTier;
@@ -64,86 +62,36 @@ public type ThrottleFilter object {
         if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
-            if (isRquestBlocked(request, context)){
-                // request Blocked
-                requestFilterResult = { canProceed: false, statusCode: 429, message: REQUEST_BLOCKED };
-                publishThrottleAnalyticsEvent(request, context, keyvalidationResult, REQUEST_BLOCKED);
-            } else {
-                requestFilterResult = { canProceed: true };
-                // Request not blocked go to check throttling
-                apiLevelThrottleKey = apiContext + ":" + apiVersion;
-                if (keyvalidationResult.apiTier != "" && keyvalidationResult.apiTier != UNLIMITED_TIER){
-                    resourceLevelThrottleKey = apiLevelThrottleKey;
-                    apiLevelThrottledTriggered = true;
-                }
-                if (resourceLevelTier == UNLIMITED_TIER && !apiLevelThrottledTriggered){
-
-                } else {
-                    // todo: need to handle resource Level throttling with condition groups
-                }
-                //boolean resourceLevelThrottled = isResourceLevelThrottled(keyvalidationResult);
-                if (!apiLevelThrottled){
-                    if (!resourceLevelThrottled){
-                        if (!isSubscriptionLevelThrottled(context, keyvalidationResult)){
-                            if (!isApplicationLevelThrottled(keyvalidationResult)){
-                                if (!isHardlimitThrottled(getContext(context), getAPIDetailsFromServiceAnnotation
-                                    (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
-                                    // Send Throttle Event
-                                    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context,
-                                        keyvalidationResult);
-                                    publishNonThrottleEvent(throttleEvent);
-                                }
-                            } else {
-                                // Application Level Throttled
-                                requestFilterResult = { canProceed: false, statusCode: 429, message:
-                                "You have exceeded your quota" };
-                                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                                    THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
-                            }
-                        } else {
-                            // Subscription Level Throttled
-                            if (keyvalidationResult.stopOnQuotaReach) {
-                                requestFilterResult = { canProceed: false, statusCode: 429, message:
-                                "You have exceeded your quota" };
-                                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                                    THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
-                            } else {
-                                // set properties in order to publish into analytics for billing
-                            }
-                        }
-                    } else {
-                        //Resource level Throttled
-                        requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
-                        publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                            THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
-                    }
-                } else {
-                    //API level Throttled
-                    requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+            requestFilterResult = {canProceed:true};
+            if (isSubscriptionLevelThrottled(context, keyvalidationResult)){
+                if (keyvalidationResult.stopOnQuotaReach) {
+                    requestFilterResult = {canProceed:false, statusCode:429, message:
+                    "You have exceeded your quota"};
                     publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                        THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                        THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+                    return requestFilterResult;
+                } else {
+                    // set properties in order to publish into analytics for billing
                 }
             }
+            if (isApplicationLevelThrottled(keyvalidationResult)){
+                requestFilterResult = {canProceed:false, statusCode:429, message:
+                "You have exceeded your quota"};
+                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
+                    THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+                return requestFilterResult;
+            }
+
+            //Publish throttle event to internal policies
+            RequestStreamDTO throttleEvent = generateThrottleEvent(request, context,
+                keyvalidationResult);
+            publishNonThrottleEvent(throttleEvent);
         } else {
-            requestFilterResult = { canProceed: false, statusCode: 500, message: "Internal Error Occurred" };
+            requestFilterResult = {canProceed:false, statusCode:500, message:"Internal Error Occurred"};
         }
         return requestFilterResult;
     }
 };
-function isRquestBlocked(http:Request request, http:FilterContext context) returns (boolean) {
-    AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
-    string apiLevelBlockingKey = getContext(context);
-    string apiTenantDomain = getTenantDomain(context);
-    string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request);
-    string appLevelBlockingKey = keyvalidationResult.subscriber + ":" + keyvalidationResult.applicationName;
-    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiLevelBlockingKey) || isBlockConditionExist(
-                                                                                         ipLevelBlockingKey) ||
-            isBlockConditionExist(appLevelBlockingKey))|| isBlockConditionExist(keyvalidationResult.username)){
-        return true;
-    } else {
-        return false;
-    }
-}
 
 function isApiLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     if (keyValidationDto.apiTier != "" && keyValidationDto.apiTier != UNLIMITED_TIER){
