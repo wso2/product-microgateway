@@ -2,14 +2,15 @@ import ballerina/io;
 import ballerina/runtime;
 import ballerina/http;
 import ballerina/log;
+import wso2/gateway;
 
 function {{funcName}}() {
-    stream<GlobalThrottleStreamDTO> resultStream;
-    stream<EligibilityStreamDTO> eligibilityStream;
+    stream<gateway:GlobalThrottleStreamDTO> resultStream;
+    stream<gateway:EligibilityStreamDTO> eligibilityStream;
     forever {
-        from requestStream
-        select messageID, (subscriptionTier == "{{name}}") as isEligible, {{policyKey}} as throttleKey
-        => (EligibilityStreamDTO[] counts) {
+        from gateway:requestStream
+        select messageID, ({{tierType}} == "{{name}}") as isEligible, {{policyKey}} as throttleKey
+        => (gateway:EligibilityStreamDTO[] counts) {
             eligibilityStream.publish(counts);
         }
 
@@ -18,15 +19,15 @@ function {{funcName}}() {
         where isEligible == true
         select throttleKey, count(messageID) >= {{count}} as isThrottled, expiryTimeStamp
         group by throttleKey
-        => (GlobalThrottleStreamDTO[] counts) {
+        => (gateway:GlobalThrottleStreamDTO[] counts) {
             resultStream.publish(counts);
         }
 
         from resultStream
         throttler:emitOnStateChange(throttleKey, isThrottled)
         select throttleKey, isThrottled, expiryTimeStamp
-        => (GlobalThrottleStreamDTO[] counts) {
-            globalThrottleStream.publish(counts);
+        => (gateway:GlobalThrottleStreamDTO[] counts) {
+            gateway:globalThrottleStream.publish(counts);
         }
     }
 }

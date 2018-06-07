@@ -23,28 +23,9 @@ map blockConditions;
 map throttleDataMap;
 public stream<RequestStreamDTO> requestStream;
 public stream<GlobalThrottleStreamDTO> globalThrottleStream;
+public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
 boolean blockConditionExist;
-public function isBlockConditionExist(string key) returns (boolean) {
-    return blockConditions.hasKey(key);
-}
-public function isAnyBlockConditionExist() returns (boolean) {
-    return blockConditionExist;
-}
-public function putBlockCondition(map m) {
-    string condition = <string>m[BLOCKING_CONDITION_KEY];
-    string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
-    string conditionState = <string>m[BLOCKING_CONDITION_STATE];
-    if (conditionState == TRUE){
-        blockConditionExist = true;
-        blockConditions[conditionValue] = conditionValue;
-    } else {
-        _ = blockConditions.remove(conditionValue);
-        if (lengthof blockConditions.keys() == 0){
-            blockConditionExist = false;
-        }
-    }
-}
 
 public function isThrottled(string key) returns (boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
@@ -66,53 +47,12 @@ public function publishNonThrottleEvent(RequestStreamDTO request) {
 }
 function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
-    requestStream.subscribe(startToPublish);
+    isStreamsInitialized = true;
 }
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
-    io:println("Event GlobalThrottleStream: ", throttleEvent);
+    log:printDebug("Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey + ",isThrottled:"
+        + throttleEvent.isThrottled + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp);
     if (throttleEvent.isThrottled){
         throttleDataMap[throttleEvent.throttleKey] = throttleEvent.expiryTimeStamp;
     }
-}
-public function initializeBlockConditions() {
-    string base64Header = "admin:admin";
-    string encodedBasicAuthHeader = check base64Header.base64Encode();
-    http:Request clientRequest = new;
-    clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
-            encodedBasicAuthHeader);
-    var response = conditionRetrievalEndpoint->get("/throttle/data/v1/block", request = clientRequest);
-    match response {
-        http:Response httpResponse => {
-            if (httpResponse.statusCode == http:OK_200){
-                json payload = check httpResponse.getJsonPayload();
-                log:printDebug("Payload Retrieved From Block Condition Rest API :" + payload.toString());
-                foreach blockingValue in payload {
-                    match blockingValue {
-                        json value => {
-                            foreach condition in value {
-                                blockConditions[condition.toString()] = condition.toString();
-                            }
-                        }
-                    }
-                }
-                blockConditionExist = (lengthof blockConditions.keys() > 0);
-            } else if (httpResponse.statusCode == http:UNAUTHORIZED_401){
-                error err = { message: "Couldn't Retrieve Block Condition due to invalid credentials" };
-                log:printError("Couldn't Retrieve Block Conditions", err = err);
-            } else {
-                error err = { message: httpResponse.reasonPhrase };
-                log:printError("Couldn't Retrieve Block Conditions", err = err);
-
-            }
-        }
-        error err => {
-            log:printError("Couldn't Retrieve Block Conditions", err = err);
-        }
-    }
-}
-public function putThrottleData(string key, int expiryTimeStamp) {
-    throttleDataMap[key] = expiryTimeStamp;
-}
-public function removeThrottleData(string key){
-    _ = throttleDataMap.remove(key);
 }

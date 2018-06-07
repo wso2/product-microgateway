@@ -29,6 +29,7 @@ import org.ballerinalang.packerina.init.models.SrcFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
@@ -38,9 +39,10 @@ import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.codegen.service.APIService;
 import org.wso2.apimgt.gateway.codegen.service.APIServiceImpl;
 import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagement;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagementImpl;
-import org.wso2.apimgt.gateway.codegen.utils.ZipUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -306,12 +308,15 @@ public class Main {
 
             APIService service = new APIServiceImpl();
             List<ExtendedAPI> apis = service.getAPIs(label, accessToken);
+            List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
+            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
+            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
-                codeGenerator.generate(GatewayCmdUtils
-                                .getLabelSrcDirectoryPath(projectRoot, label),
-                        apis, true);
+                policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
+                        + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
+                codeGenerator.generate(projectRoot, label, apis, true);
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
                         .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
             } catch (IOException | BallerinaServiceGenException e) {
@@ -370,18 +375,10 @@ public class Main {
 
             try {
                 String projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
-                String distPath = GatewayCmdUtils.createTargetGatewayDistStructure(projectRoot, label);
-                GatewayCmdUtils
-                        .copyFolder(GatewayCmdUtils.getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB
-                                        + File.separator + GatewayCliConstants.CLI_RUNTIME,
-                                distPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
-                GatewayCmdUtils.copyTargetDistBinScripts(projectRoot, label);
-                GatewayCmdUtils.copyTargetDistBalx(projectRoot, label);
-                ZipUtils.zip(distPath, GatewayCmdUtils.getLabelTargetDirectoryPath(projectRoot, label) + File.separator
-                        + File.separator + GatewayCliConstants.GW_DIST_PREFIX + label
-                        + GatewayCliConstants.EXTENSION_ZIP);
+                GatewayCmdUtils.createLabelGWDistribution(projectRoot, label);
             } catch (IOException e) {
-                outStream.println("Error while creating micro gateway distribution for " + label);
+                outStream.println(
+                        "Error while creating micro gateway distribution for " + label + ". Reason: " + e.getMessage());
                 Runtime.getRuntime().exit(1);
             }
             Runtime.getRuntime().exit(0);

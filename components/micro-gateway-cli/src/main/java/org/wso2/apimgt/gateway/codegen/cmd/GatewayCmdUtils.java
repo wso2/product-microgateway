@@ -23,6 +23,7 @@ import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.codegen.utils.ZipUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 public class GatewayCmdUtils {
@@ -153,7 +155,19 @@ public class GatewayCmdUtils {
     public static String getCLIHome() {
         return System.getenv(GatewayCliConstants.CLI_HOME);
     }
-    
+
+    public static String getResourceFolderLocation() {
+        return System.getenv(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
+    }
+
+    public static String getFiltersFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
+    }
+
+    public static String getConfigFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
+    }
+
     private static String getProjectRootHolderFileLocation() {
         return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
     }
@@ -194,6 +208,9 @@ public class GatewayCmdUtils {
         String labelSrcDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
         createFolderIfNotExist(labelSrcDirPath);
 
+        String labelPolicySrcDirPath = labelSrcDirPath + File.separator + GatewayCliConstants.POLICY_DIR;
+        createFolderIfNotExist(labelPolicySrcDirPath);
+
         String labelTargetDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
         createFolderIfNotExist(labelTargetDirPath);
 
@@ -202,40 +219,83 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Creates the distribution structure for the label
+     * Create a micro gateway distribution for the provided label
      *
      * @param projectRoot project root location
      * @param labelName name of the label
-     * @return created distribution home path
+     * @throws IOException erro while creating micro gateway distribution
      */
-    public static String createTargetGatewayDistStructure(String projectRoot, String labelName) {
-        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
-        createFolderIfNotExist(labelTargetPath);
+    public static void createLabelGWDistribution(String projectRoot, String labelName) throws IOException {
+        createTargetGatewayDistStructure(projectRoot, labelName);
 
-        String distPath = labelTargetPath + File. separator + GatewayCliConstants.GW_DIST_PREFIX + labelName;
-        createFolderIfNotExist(distPath);
-
-        String distBinPath = distPath + File. separator + GatewayCliConstants.GW_DIST_BIN;
-        createFolderIfNotExist(distBinPath);
-
-        String distConfPath = distPath + File. separator + GatewayCliConstants.GW_DIST_CONF;
-        createFolderIfNotExist(distConfPath);
-
-        String distExec = distPath + File. separator + GatewayCliConstants.GW_DIST_EXEC;
-        createFolderIfNotExist(distExec);
-
-        return distPath;
+        String distPath = getTargetDistPath(projectRoot, labelName);
+        String gwDistPath = getTargetGatewayDistPath(projectRoot, labelName);
+        copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
+                + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
+        copyTargetDistBinScripts(projectRoot, labelName);
+        copyTargetDistBalx(projectRoot, labelName);
+        ZipUtils.zip(distPath, getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator + File.separator
+                + GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getConfigFolderLocation() + File.separator
+                        + GatewayCliConstants.GW_DIST_CONF_FILE,
+                GatewayCmdUtils.getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator
+                        + GatewayCliConstants.PROJECT_CONF_FILE);
     }
 
     /**
-     * Get the gateway distribution path for a given label
+     * Creates the distribution structure for the label
+     * 
+     * @param projectRoot project root location
+     * @param labelName name of the label
+     */
+    private static void createTargetGatewayDistStructure(String projectRoot, String labelName) {
+        //path : {label}/target
+        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+        createFolderIfNotExist(labelTargetPath);
+        
+        //path : {label}/target/distribution
+        String distPath = getTargetDistPath(projectRoot, labelName);
+        createFolderIfNotExist(distPath);
+
+        //path : {label}/target/distribution/micro-gw-{label}
+        String distMicroGWPath = getTargetGatewayDistPath(projectRoot, labelName);
+        createFolderIfNotExist(distMicroGWPath);
+
+        //path : {label}/target/distribution/micro-gw-{label}/bin
+        String distBinPath = distMicroGWPath + File. separator + GatewayCliConstants.GW_DIST_BIN;
+        createFolderIfNotExist(distBinPath);
+
+        //path : {label}/target/distribution/micro-gw-{label}/conf
+        String distConfPath = distMicroGWPath + File. separator + GatewayCliConstants.GW_DIST_CONF;
+        createFolderIfNotExist(distConfPath);
+
+        //path : {label}/target/distribution/micro-gw-{label}/exec
+        String distExec = distMicroGWPath + File. separator + GatewayCliConstants.GW_DIST_EXEC;
+        createFolderIfNotExist(distExec);
+    }
+
+    /**
+     * Get the distribution path for a given label
      *
+     * @param projectRoot project root location
+     * @param labelName name of the label
+     * @return distribution path for a given label
+     */
+    private static String getTargetDistPath(String projectRoot, String labelName) {
+        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+        return labelTargetPath + File. separator + GatewayCliConstants.GW_TARGET_DIST;
+    }
+
+
+    /**
+     * Get the gateway distribution path for a given label
+     * 
      * @param projectRoot project root location
      * @param labelName name of the label
      * @return gateway distribution path for a given label
      */
-    public static String getTargetGatewayDistPath(String projectRoot, String labelName) {
-        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+    private static String getTargetGatewayDistPath(String projectRoot, String labelName) {
+        String labelTargetPath = getTargetDistPath(projectRoot, labelName);
         return labelTargetPath + File. separator + GatewayCliConstants.GW_DIST_PREFIX + labelName;
     }
 
@@ -246,7 +306,7 @@ public class GatewayCmdUtils {
      * @param labelName name of the label
      * @throws IOException error while coping scripts
      */
-    public static void copyTargetDistBinScripts(String projectRoot, String labelName) throws IOException {
+    private static void copyTargetDistBinScripts(String projectRoot, String labelName) throws IOException {
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
         linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, labelName);
         String shTargetPath = getTargetGatewayDistPath(projectRoot, labelName);
@@ -263,10 +323,9 @@ public class GatewayCmdUtils {
      *
      * @param projectRoot project root location
      * @param labelName name of the label
-     * @return true if successfully copied
      * @throws IOException error while coping balx files
      */
-    public static boolean copyTargetDistBalx(String projectRoot, String labelName) throws IOException {
+    private static void copyTargetDistBalx(String projectRoot, String labelName) throws IOException {
         String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
         String gatewayDistExecPath =
                 getTargetGatewayDistPath(projectRoot, labelName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
@@ -276,10 +335,8 @@ public class GatewayCmdUtils {
                 labelTargetPath + File.separator + labelName + GatewayCliConstants.EXTENSION_BALX);
         if (balxSourceFile.exists()) {
             FileUtils.copyFile(balxSourceFile, gatewayDistExecPathFile);
-            return true;
         } else {
             System.err.println(labelName + ".balx could not be found in " + labelTargetPath);
-            return false;
         }
     }
 
@@ -343,7 +400,7 @@ public class GatewayCmdUtils {
      * @param labelName name of the label
      * @return path to the /target of a given label project in the project root path
      */
-    public static String getLabelTargetDirectoryPath(String root, String labelName) {
+    private static String getLabelTargetDirectoryPath(String root, String labelName) {
         return getLabelDirectoryPath(root, labelName) + File.separator
                 + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
     }
@@ -378,6 +435,10 @@ public class GatewayCmdUtils {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         copyFolder(sourceFolder, destinationFolder);
+    }
+
+    public static void copyFilesToSources(String sourcePath, String destinationPath) throws IOException {
+        Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**

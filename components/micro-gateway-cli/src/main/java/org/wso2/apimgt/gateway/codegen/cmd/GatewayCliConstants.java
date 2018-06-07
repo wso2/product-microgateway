@@ -36,17 +36,26 @@ public class GatewayCliConstants {
     public static String CLI_HOME = "CLI_HOME";
     public static String CLI_LIB = "lib";
     public static String CLI_RUNTIME = "runtime";
+    public static String POLICY_DIR = "policies";
 
     public static String EXTENSION_BALX = ".balx";
     public static String EXTENSION_ZIP = ".zip";
 
+    public static String GW_TARGET_DIST = "distribution";
+
     public static String GW_DIST_PREFIX = "micro-gw-";
     public static String GW_DIST_BIN = "bin";
     public static String GW_DIST_CONF = "conf";
+    public static String GW_DIST_RESOURCES = "resources";
+    public static String GW_DIST_FILTERS = "filters";
     public static String GW_DIST_RUNTIME = "runtime";
     public static String GW_DIST_EXEC = "exec";
     public static String GW_DIST_SH = "micro-gw.sh";
     public static String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator + GW_DIST_SH;
+    public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
+    public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
+    public static final String PROJECT_CONF_FILE = "ballerina.conf";
+
 
     public static String LABEL_PLACEHOLDER = "${label}";
 }

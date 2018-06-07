@@ -44,4 +44,4 @@ GWHOME=`cd "$PRGDIR/.." ; pwd`
 export BALLERINA_HOME=$GWHOME'/runtime'
 
 # run the balx created for ${label} APIs
-$BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx
+bash $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx

@@ -35,6 +35,7 @@ public class ThrottlePolicy {
     private String modelPackage;
     private String funcName;
     private long count;
+    private String tierType;
 
     public String getPolicyType() {
         return policyType;
@@ -100,6 +101,14 @@ public class ThrottlePolicy {
         this.policyKey = policyKey;
     }
 
+    public String getTierType() {
+        return tierType;
+    }
+
+    public void setTierType(String tierType) {
+        this.tierType = tierType;
+    }
+
     public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
         this.name = applicationPolicy.getPolicyName();
@@ -109,6 +118,7 @@ public class ThrottlePolicy {
         this.funcName = GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
                 + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.APPLICATION_KEY;
+        this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
         return this;
     }
 
@@ -121,6 +131,7 @@ public class ThrottlePolicy {
         this.funcName = GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
                 + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
+        this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
         return this;
     }
 
