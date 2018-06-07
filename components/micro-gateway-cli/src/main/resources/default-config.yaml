@@ -4,6 +4,7 @@ tokenConfig:
   clientId: ''
   clientSecret: ''
   publisherEndpoint: https://localhost:9443/api/am/publisher/v0.13
+  adminEndpoint: https://localhost:9443/api/am/admin/v0.13
   registrationEndpoint: https://localhost:9443/client-registration/v0.13/register
   tokenEndpoint: https://localhost:8243/token
   trustStoreLocation: lib/platform/bre/security/ballerinaTruststore.p12

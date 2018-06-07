@@ -24,6 +24,7 @@ import java.io.File;
 public class TokenConfig {
 
     private String publisherEndpoint;
+    private String adminEndpoint;
     private String registrationEndpoint;
     private String tokenEndpoint;
     private String username;
@@ -103,5 +104,13 @@ public class TokenConfig {
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
+    }
+
+    public String getAdminEndpoint() {
+        return adminEndpoint;
+    }
+
+    public void setAdminEndpoint(String adminEndpoint) {
+        this.adminEndpoint = adminEndpoint;
     }
 }
