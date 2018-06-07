@@ -88,7 +88,6 @@ public function APIGatewayListener::init (EndpointConfiguration config) {
     initiateAuthProviders(config);
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
-    initializeBlockConditions();
 }
 
 @Description {value:"Add authn and authz filters"}
