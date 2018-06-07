@@ -33,7 +33,7 @@ public class APIServiceImpl implements APIService {
         //calling token endpoint
         try {
             String urlStr =
-                    "https://localhost:9443/api/am/publisher/v0.12/apis?query=label:" + labelName + "&expand=true";
+                    "https://localhost:9443/api/am/publisher/v0.13/apis?query=label:" + labelName + "&expand=true";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -72,7 +72,7 @@ public class APIServiceImpl implements APIService {
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
         try {
-            String urlStr = "https://localhost:9443/api/am/admin/v0.12/throttling/policies/application";
+            String urlStr = "https://localhost:9443/api/am/admin/v0.13/throttling/policies/application";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -113,7 +113,7 @@ public class APIServiceImpl implements APIService {
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
         try {
-            String urlStr = "https://localhost:9443/api/am/admin/v0.12/throttling/policies/subscription";
+            String urlStr = "https://localhost:9443/api/am/admin/v0.13/throttling/policies/subscription";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
