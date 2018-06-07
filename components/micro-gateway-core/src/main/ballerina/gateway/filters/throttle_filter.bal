@@ -30,6 +30,15 @@ public type ThrottleFilter object {
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
+        match <boolean> context.attributes[FILTER_FAILED]{
+            boolean failed => {
+                if(failed) {
+                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
+                }
+            } error err => {
+            //Nothing to handle
+            }
+        }
         http:FilterResult requestFilterResult;
         boolean resourceLevelThrottled;
         boolean apiLevelThrottled;

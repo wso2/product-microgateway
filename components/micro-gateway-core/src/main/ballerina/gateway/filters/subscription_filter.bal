@@ -28,6 +28,16 @@ public type SubscriptionFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Request request, http:FilterContext filterContext) returns http:FilterResult {
+        match <boolean> filterContext.attributes[FILTER_FAILED] {
+            boolean failed => {
+                if (failed) {
+                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
+                }
+            }
+            error err => {
+                //Nothing to handle
+            }
+        }
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         if(authScheme == AUTH_SCHEME_JWT ){
             string jwtToken = runtime:getInvocationContext().authContext.authToken;
@@ -61,19 +71,24 @@ public type SubscriptionFilter object {
                                     return createFilterResult(true, 200, "Successfully validated subscriptions");
                                 }
                             }
-                            return createFilterResult(false, 403, "Subscription validation failed");
+                            setErrorMessageToFilterContext(filterContext, API_AUTH_FORBIDDEN);
+                            return createFilterResult(true, 200, "Subscription filter has failed. But
+                                    continuing in order to  provide error details");
                         }
                         error err => {
                             log:printError("Error while decoding jwt token with payload : " +
                                     jwtPayload, err = err);
-                            return createFilterResult(false, 500, "Error while decoding jwt token with payload : " +
-                                    jwtPayload);
+                            setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
+                            return createFilterResult(true, 200, "Subscription filter has failed. But
+                                    continuing in order to  provide error details");
                         }
                     }
                 }
                 error err => {
-                    log:printError(err.message);
-                    return createFilterResult(false, 403, err.message);
+                    log:printError(err.message, err = err);
+                    setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
+                    return createFilterResult(true, 200, "Subscription filter has failed. But
+                                    continuing in order to  provide error details");
                 }
             }
         }

@@ -17,6 +17,8 @@
  */
 package org.wso2.apimgt.gateway.codegen.cmd;
 
+import java.io.File;
+
 public class GatewayCliConstants {
     public static String BALLERINA_HOME = "BALLERINA_HOME";
     public static String MAIN_DIRECTORY_NAME = "micro-gw-resources";
@@ -33,4 +35,19 @@ public class GatewayCliConstants {
     public static String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.yaml";
     public static String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.yaml";
     public static String CLI_HOME = "CLI_HOME";
+    public static String CLI_LIB = "lib";
+    public static String CLI_RUNTIME = "runtime";
+
+    public static String EXTENSION_BALX = ".balx";
+    public static String EXTENSION_ZIP = ".zip";
+
+    public static String GW_DIST_PREFIX = "micro-gw-";
+    public static String GW_DIST_BIN = "bin";
+    public static String GW_DIST_CONF = "conf";
+    public static String GW_DIST_RUNTIME = "runtime";
+    public static String GW_DIST_EXEC = "exec";
+    public static String GW_DIST_SH = "micro-gw.sh";
+    public static String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator + GW_DIST_SH;
+
+    public static String LABEL_PLACEHOLDER = "${label}";
 }
