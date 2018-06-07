@@ -32,7 +32,7 @@ public type ExtensionFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
-        match filterContext.attributes[FILTER_FAILED] {
+        match <boolean> context.attributes[gateway:FILTER_FAILED] {
             boolean failed => {
                 if (failed) {
                     //todo we need to send proper error message once the ballerina respond support comes to the filter
