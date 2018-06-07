@@ -42,7 +42,6 @@ import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePo
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagement;
 import org.wso2.apimgt.gateway.codegen.token.TokenManagementImpl;
-import org.wso2.apimgt.gateway.codegen.utils.ZipUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -366,18 +365,10 @@ public class Main {
 
             try {
                 String projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
-                String distPath = GatewayCmdUtils.createTargetGatewayDistStructure(projectRoot, label);
-                GatewayCmdUtils
-                        .copyFolder(GatewayCmdUtils.getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB
-                                        + File.separator + GatewayCliConstants.CLI_RUNTIME,
-                                distPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
-                GatewayCmdUtils.copyTargetDistBinScripts(projectRoot, label);
-                GatewayCmdUtils.copyTargetDistBalx(projectRoot, label);
-                ZipUtils.zip(distPath, GatewayCmdUtils.getLabelTargetDirectoryPath(projectRoot, label) + File.separator
-                        + File.separator + GatewayCliConstants.GW_DIST_PREFIX + label
-                        + GatewayCliConstants.EXTENSION_ZIP);
+                GatewayCmdUtils.createLabelGWDistribution(projectRoot, label);
             } catch (IOException e) {
-                outStream.println("Error while creating micro gateway distribution for " + label);
+                outStream.println(
+                        "Error while creating micro gateway distribution for " + label + ". Reason: " + e.getMessage());
                 Runtime.getRuntime().exit(1);
             }
             Runtime.getRuntime().exit(0);
