@@ -2,6 +2,8 @@ package org.wso2.apimgt.gateway.codegen.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.service.bean.APIListDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.Endpoint;
 import org.wso2.apimgt.gateway.codegen.service.bean.EndpointConfig;
@@ -32,8 +34,10 @@ public class APIServiceImpl implements APIService {
         APIListDTO apiListDTO = null;
         //calling token endpoint
         try {
-            String urlStr =
-                    "https://localhost:9443/api/am/publisher/v0.13/apis?query=label:" + labelName + "&expand=true";
+            Config config = GatewayCmdUtils.getConfig();
+            String publisherEp = config.getTokenConfig().getPublisherEndpoint();
+            publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
+            String urlStr = publisherEp + "apis?query=label:" + labelName + "&expand=true";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -71,8 +75,11 @@ public class APIServiceImpl implements APIService {
         ApplicationThrottlePolicyListDTO appsList;
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
+        Config config = GatewayCmdUtils.getConfig();
+        String adminEp = config.getTokenConfig().getAdminEndpoint();
+        adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
-            String urlStr = "https://localhost:9443/api/am/admin/v0.13/throttling/policies/application";
+            String urlStr = adminEp + "throttling/policies/application";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -112,8 +119,11 @@ public class APIServiceImpl implements APIService {
         SubscriptionThrottlePolicyListDTO subsList;
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
+        Config config = GatewayCmdUtils.getConfig();
+        String adminEp = config.getTokenConfig().getAdminEndpoint();
+        adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
-            String urlStr = "https://localhost:9443/api/am/admin/v0.13/throttling/policies/subscription";
+            String urlStr = adminEp + "throttling/policies/subscription";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
