@@ -4,7 +4,8 @@ import ballerina/swagger;
 import wso2/gateway;
 
 endpoint http:Client {{qualifiedServiceName}}_EP {
-    url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}}
+    url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
+    cache: { enabled: false }
     {{else}},
     cache: { isShared: true }
     {{/equals}}
