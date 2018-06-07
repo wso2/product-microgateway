@@ -1,0 +1,103 @@
+docker:
+  dockerConfig:
+    enable: false
+    #name: ''
+    #registry: ''
+    #tag: ''
+    #buildImage: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #baseImage: ''
+    #enableDebug: ''
+    #debugPort: ''
+    #push: ''
+    #username: ''
+    #password: ''
+  dockerCopyFiles:
+    enable: false
+    #source: ''
+    #target: ''
+    #isBallerinaConf: ''
+kubernetes:
+  kubernetesDeployment:
+    enable: false
+    #name: ''
+    #labels: ''
+    #replicas: ''
+    #enableLiveness: ''
+    #initialDelaySeconds: ''
+    #periodSeconds: ''
+    #livenessPort: ''
+    #imagePullPolicy: ''
+    #image: ''
+    #env: ''
+    #buildImage: ''
+    #copyFiles: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #push: ''
+    #username: ''
+    #password: ''
+    #baseImage: ''
+    #singleYAML: ''
+  kubernetesService:
+    enable: false
+    #name: ''
+    #labels: ''
+    #serviceType: ''
+    #port: ''
+  kubernetesIngress:
+    enable: false
+    #name: ''
+    #labels: ''
+    #hostname: ''
+    #annotations: ''
+    #path: ''
+    #targetPath: ''
+    #ingressClass: ''
+    #enableTLS: ''
+  kubernetesHpa:
+    enable: false
+    #name: ''
+    #labels: ''
+    #minReplicas: ''
+    #maxReplicas: ''
+    #cpuPrecentage: ''
+  kubernetesSecret:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #data: ''
+  kubernetesConfigMap:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #ballerinaConf: ''
+    #data: ''
+  kubernetesPersistentVolumeClaim:
+    enable: false
+    #name: ''
+    #mountPath: ''
+    #readOnly: ''
+    #accessMode: ''
+    #volumeClaimSize: ''
+  kubernetesJob:
+    enable: false
+    #name: ''
+    #labels: ''
+    #restartPolicy: ''
+    #backoffLimit: ''
+    #activeDeadlineSeconds: ''
+    #schedule: ''
+    #imagePullPolicy: ''
+    #image: ''
+    #env: ''
+    #buildImage: ''
+    #dockerHost: ''
+    #dockerCertPath: ''
+    #push: ''
+    #username: ''
+    #password: ''
+    #baseImage: ''

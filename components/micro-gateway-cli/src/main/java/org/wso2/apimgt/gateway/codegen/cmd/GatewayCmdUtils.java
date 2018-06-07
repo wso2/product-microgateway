@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
+import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.codegen.utils.ZipUtils;
 
@@ -39,6 +40,7 @@ import java.nio.file.StandardCopyOption;
 public class GatewayCmdUtils {
 
     private static Config config;
+    private static ContainerConfig containerConfig;
 
     public static Config getConfig() {
         return config;
@@ -165,7 +167,7 @@ public class GatewayCmdUtils {
     public static String getConfigFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
     }
-    
+
     private static String getProjectRootHolderFileLocation() {
         return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
     }
@@ -176,7 +178,7 @@ public class GatewayCmdUtils {
 
     /**
      * Create the main structure of the project for all the labels
-     * 
+     *
      * @param root Root location to create the structure
      */
     public static void createMainProjectStructure(String root) {
@@ -185,7 +187,7 @@ public class GatewayCmdUtils {
         String mainResourceDirPath = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
         createFolderIfNotExist(mainResourceDirPath);
 
-        String mainConfigDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.MAIN_CONF_DIRECTORY_NAME;
+        String mainConfigDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
         createFolderIfNotExist(mainConfigDirPath);
 
         String mainProjectDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
@@ -194,7 +196,7 @@ public class GatewayCmdUtils {
 
     /**
      * Create a project structure for a particular label.
-     * 
+     *
      * @param root project root location
      * @param labelName name of the label
      */
@@ -202,7 +204,7 @@ public class GatewayCmdUtils {
         String mainResourceDir = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
         String mainProjectDir = mainResourceDir + File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
         File labelDir = createFolderIfNotExist(mainProjectDir + File.separator + labelName);
-        
+
         String labelSrcDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
         createFolderIfNotExist(labelSrcDirPath);
 
@@ -211,11 +213,14 @@ public class GatewayCmdUtils {
 
         String labelTargetDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
         createFolderIfNotExist(labelTargetDirPath);
+
+        String labelConfDirPath = labelDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        createFolderIfNotExist(labelConfDirPath);
     }
 
     /**
-     * Create a micro gateway distribution for the provided label 
-     * 
+     * Create a micro gateway distribution for the provided label
+     *
      * @param projectRoot project root location
      * @param labelName name of the label
      * @throws IOException erro while creating micro gateway distribution
@@ -280,8 +285,8 @@ public class GatewayCmdUtils {
         String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
         return labelTargetPath + File. separator + GatewayCliConstants.GW_TARGET_DIST;
     }
-    
-    
+
+
     /**
      * Get the gateway distribution path for a given label
      * 
@@ -296,10 +301,10 @@ public class GatewayCmdUtils {
 
     /**
      * Copies shell scripts to the distribution location
-     * 
+     *
      * @param projectRoot project root location
      * @param labelName name of the label
-     * @throws IOException error while coping scripts 
+     * @throws IOException error while coping scripts
      */
     private static void copyTargetDistBinScripts(String projectRoot, String labelName) throws IOException {
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
@@ -315,7 +320,7 @@ public class GatewayCmdUtils {
 
     /**
      * Copies balx binaries to the distribution location
-     * 
+     *
      * @param projectRoot project root location
      * @param labelName name of the label
      * @throws IOException error while coping balx files
@@ -337,18 +342,23 @@ public class GatewayCmdUtils {
 
     /**
      * Returns path to the conf folder in the project root
-     * 
+     *
      * @param root project root location
      * @return path to the conf folder in the project root
      */
     public static String getMainConfigPath(String root) {
         return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME +
-                                                File.separator + GatewayCliConstants.MAIN_CONF_DIRECTORY_NAME;
+                                                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+    }
+
+    public static String getLabelConfigPath(String root, String label) {
+        return getLabelDirectoryPath(root, label) +
+                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
     /**
      * Returns path to the given label project in the project root path
-     * 
+     *
      * @param root project root location
      * @param labelName name of the label
      * @return path to the given label project in the project root path
@@ -360,8 +370,20 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the label config directory of a particular label
+     *
+     * @param root project root location
+     * @param labelName name of the label
+     * @return path to the given label project conf directory in the project root path
+     */
+    public static String getLabelConfDirectoryPath(String root, String labelName) {
+        return getLabelDirectoryPath(root, labelName) +
+                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+    }
+
+    /**
      * Returns path to the /src of a given label project in the project root path
-     * 
+     *
      * @param root project root location
      * @param labelName name of the label
      * @return path to the /src of a given label project in the project root path
@@ -385,7 +407,7 @@ public class GatewayCmdUtils {
 
     /**
      * Creates main config file resides in PROJECT_ROOT/conf
-     * 
+     *
      * @param root project root location
      * @throws IOException error while creating the main config file
      */
@@ -418,10 +440,10 @@ public class GatewayCmdUtils {
     public static void copyFilesToSources(String sourcePath, String destinationPath) throws IOException {
         Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
     }
-    
+
     /**
      * This function recursively copy all the sub folder and files from sourceFolder to destinationFolder
-     * 
+     *
      * @param sourceFolder source location
      * @param destinationFolder destination location
      * @throws IOException error while copying folder to destination
@@ -437,7 +459,7 @@ public class GatewayCmdUtils {
 
             //Get all files from source directory
             String files[] = sourceFolder.list();
-            
+
             if (files != null) {
                 //Iterate over all files and copy them to destinationFolder one by one
                 for (String file : files) {
@@ -456,7 +478,7 @@ public class GatewayCmdUtils {
 
     /**
      * Creates a new folder if not exists
-     * 
+     *
      * @param path folder path
      * @return File object for the created folder
      */
@@ -466,5 +488,32 @@ public class GatewayCmdUtils {
             folder.mkdir();
         }
         return folder;
+    }
+
+    public static void createLabelConfig(String root, String label) throws IOException {
+        String mainConfig = getLabelConfigPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+        File file = new File(mainConfig);
+        if (!file.exists()) {
+            file.createNewFile();
+            FileWriter writer = null;
+            //Write Content
+            String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
+            try {
+                writer = new FileWriter(file);
+                writer.write(defaultConfig);
+            } finally {
+                if (writer != null) {
+                    writer.close();
+                }
+            }
+        }
+    }
+
+    public static ContainerConfig getContainerConfig() {
+        return containerConfig;
+    }
+
+    public static void setContainerConfig(ContainerConfig containerConfig) {
+        GatewayCmdUtils.containerConfig = containerConfig;
     }
 }

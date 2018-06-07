@@ -1,0 +1,13 @@
+{{#if containerConfig.kubernetes.kubernetesHpa.enable}}
+@kubernetes:Ingress {
+    {{#if containerConfig.kubernetes.kubernetesHpa.name}}
+    name:"{{containerConfig.kubernetes.kubernetesHpa.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.labels}},
+    labels:"{{containerConfig.kubernetes.kubernetesHpa.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.hostname}},
+    hostname:"{{containerConfig.kubernetes.kubernetesHpa.hostname}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.annotations}},
+    annotations:"{{containerConfig.kubernetes.kubernetesHpa.annotations}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.path}},
+    path:"{{containerConfig.kubernetes.kubernetesHpa.path}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.targetPath}},
+    targetPath:"{{containerConfig.kubernetes.kubernetesHpa.targetPath}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.ingressClass}},
+    ingressClass:"{{containerConfig.kubernetes.kubernetesHpa.ingressClass}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesHpa.enableTLS}},
+    enableTLS:"{{containerConfig.kubernetes.kubernetesHpa.enableTLS}}"{{/if}}
+}
+{{/if}}
