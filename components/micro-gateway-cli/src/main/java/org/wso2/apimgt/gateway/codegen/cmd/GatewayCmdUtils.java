@@ -192,6 +192,9 @@ public class GatewayCmdUtils {
         String labelSrcDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
         createFolderIfNotExist(labelSrcDirPath);
 
+        String labelPolicySrcDirPath = labelSrcDirPath + File.separator + GatewayCliConstants.POLICY_DIR;
+        createFolderIfNotExist(labelPolicySrcDirPath);
+
         String labelTargetDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
         createFolderIfNotExist(labelTargetDirPath);
     }

@@ -26,7 +26,6 @@ import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
-import org.apache.commons.io.FileUtils;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.codegen.model.GenSrcFile;
 import org.wso2.apimgt.gateway.codegen.model.ThrottlePolicy;
@@ -40,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class ThrottlePolicyGenerator {
     private String srcPackage;
     private String modelPackage;
 
-   /* *//**
+    /**
      * Generate ballerina and stream source for a given app and subs policies
      *
      * @param outPath              Destination file path to save generated source files. If not provided
@@ -60,11 +60,9 @@ public class ThrottlePolicyGenerator {
      * @param subscriptionPolicies list of subs policies
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
-     *//*
+     */
     public void generate(String outPath, List<ApplicationThrottlePolicyDTO> applicationPolicies,
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException, BallerinaServiceGenException {
-        Path srcPath = CodegenUtils.getSourcePath(srcPackage, outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = generateApplicationPolicies(applicationPolicies);
 
         List<GenSrcFile> genSubsFiles = generateSubscriptionPolicies(subscriptionPolicies);
@@ -72,9 +70,9 @@ public class ThrottlePolicyGenerator {
 
         GenSrcFile initGenFile = generateInitBal(applicationPolicies, subscriptionPolicies);
         genFiles.add(initGenFile);
-        writeGeneratedSources(genFiles, srcPath, implPath);
+        writeGeneratedSources(genFiles, Paths.get(outPath), true);
     }
-*/
+
     /**
      * Generate application policies source
      *
@@ -191,27 +189,17 @@ public class ThrottlePolicyGenerator {
         return handlebars.compile(templateName);
     }
 
-    private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath) throws IOException {
-        // Remove old generated files - if any - before regenerate
-        // if srcPackage was not provided and source was written to main package nothing will be deleted.
-        if (srcPackage != null && !srcPackage.isEmpty() && Files.exists(srcPath)) {
-            FileUtils.deleteDirectory(srcPath.toFile());
-        }
-
-        Files.createDirectories(srcPath);
+    private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, boolean overwrite) throws IOException {
+        Path filePath;
         for (GenSrcFile file : sources) {
-            Path filePath;
-
-            // We only overwrite files of overwritable type.
-            // So non overwritable files will be written to disk only once.
-            if (!file.getType().isOverwritable()) {
-                filePath = implPath.resolve(file.getFileName());
-                if (Files.notExists(filePath)) {
+            filePath = srcPath.resolve(file.getFileName());
+            if (Files.notExists(filePath)) {
+                CodegenUtils.writeFile(filePath, file.getContent());
+            } else {
+                if (overwrite) {
+                    Files.delete(filePath);
                     CodegenUtils.writeFile(filePath, file.getContent());
                 }
-            } else {
-                filePath = srcPath.resolve(file.getFileName());
-                CodegenUtils.writeFile(filePath, file.getContent());
             }
         }
     }

@@ -35,6 +35,7 @@ public class GatewayCliConstants {
     public static String CLI_HOME = "CLI_HOME";
     public static String CLI_LIB = "lib";
     public static String CLI_RUNTIME = "runtime";
+    public static String POLICY_DIR = "policies";
 
     public static String EXTENSION_BALX = ".balx";
     public static String EXTENSION_ZIP = ".zip";
