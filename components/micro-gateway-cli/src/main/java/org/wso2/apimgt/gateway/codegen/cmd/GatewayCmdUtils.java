@@ -172,7 +172,7 @@ public class GatewayCmdUtils {
             mainResourceDir.mkdir();
         }
 
-        String mainConfigDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.MAIN_CONF_DIRECTORY_NAME;
+        String mainConfigDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
         File mainConfigDir = new File(mainConfigDirPath);
         if (!mainConfigDir.exists() && !mainConfigDir.isDirectory()) {
             mainConfigDir.mkdir();
@@ -210,7 +210,12 @@ public class GatewayCmdUtils {
 
     public static String getMainConfigPath(String root) {
         return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME +
-                                                File.separator + GatewayCliConstants.MAIN_CONF_DIRECTORY_NAME;
+                                                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+    }
+
+    public static String getLabelConfigPath(String root, String label) {
+        return getLabelDirectoryPath(root, label) +
+                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
     public static String getLabelSrcDirectoryPath(String root, String labelName) {
@@ -233,6 +238,25 @@ public class GatewayCmdUtils {
             FileWriter writer = null;
             //Write Content
             String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_MAIN_CONFIG_FILE_NAME, true);
+            try {
+                writer = new FileWriter(file);
+                writer.write(defaultConfig);
+            } finally {
+                if (writer != null) {
+                    writer.close();
+                }
+            }
+        }
+    }
+
+    public static void createLabelConfig(String root, String label) throws IOException {
+        String mainConfig = getLabelDirectoryPath(root, label) + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        File file = new File(mainConfig);
+        if (!file.exists()) {
+            file.createNewFile();
+            FileWriter writer = null;
+            //Write Content
+            String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
             try {
                 writer = new FileWriter(file);
                 writer.write(defaultConfig);

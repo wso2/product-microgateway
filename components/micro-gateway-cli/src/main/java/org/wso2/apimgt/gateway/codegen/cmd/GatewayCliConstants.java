@@ -20,15 +20,17 @@ package org.wso2.apimgt.gateway.codegen.cmd;
 public class GatewayCliConstants {
     public static String BALLERINA_HOME = "BALLERINA_HOME";
     public static String MAIN_DIRECTORY_NAME = "micro-gw-resources";
-    public static String MAIN_CONF_DIRECTORY_NAME = "conf";
+    public static String CONF_DIRECTORY_NAME = "conf";
     public static String PROJECTS_DIRECTORY_NAME = "projects";
     public static String PROJECTS_CONFIG_DIRECTORY_NAME = "gateway-config";
     public static String PROJECTS_SRC_DIRECTORY_NAME = "src";
     public static String PROJECTS_TARGET_DIRECTORY_NAME = "target";
     public static String MAIN_CONFIG_FILE_NAME = "config.yaml";
+    public static String LABEL_CONFIG_FILE_NAME = "label-config.yaml";
     public static String PROJECT_CONFIG_FILE_NAME = "gateway-config.yaml";
     public static String TEMP_DIR_NAME = "temp";
     public static String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
     public static String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.yaml";
+    public static String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.yaml";
     public static String CLI_HOME = "CLI_HOME";
 }

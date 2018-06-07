@@ -86,6 +86,7 @@ public class Main {
                 GatewayCmdUtils.storeProjectRootLocation(projectRoot);
                 GatewayCmdUtils.createMainProjectStructure(projectRoot);
                 GatewayCmdUtils.createMainConfig(projectRoot);
+                GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
             }
 
             //user can define different label time to time. So need to create irrespective path provided or not.
@@ -125,6 +126,10 @@ public class Main {
             BuildCmd buildCmd = new BuildCmd();
             cmdParser.addCommand(GatewayCliCommands.BUILD, buildCmd);
             buildCmd.setParentCmdParser(cmdParser);
+
+            RunCmd runCmd = new RunCmd();
+            cmdParser.addCommand(GatewayCliCommands.RUN, runCmd);
+            runCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName("micro-gw");
             cmdParser.parse(args);
