@@ -3,6 +3,8 @@ package org.wso2.apimgt.gateway.codegen.token;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCliConstants;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
@@ -10,6 +12,7 @@ import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -80,7 +83,7 @@ public class TokenManagementImpl implements TokenManagement {
             urlConn.setRequestProperty("Content-Type", "application/json");
             String clientEncoded = DatatypeConverter.printBase64Binary(("admin" + ':' + "admin")
                     .getBytes(StandardCharsets.UTF_8));
-            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
             urlConn.getOutputStream().write((application.toString()).getBytes("UTF-8"));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
@@ -92,7 +95,8 @@ public class TokenManagementImpl implements TokenManagement {
                 String clientSecret = clientSecretNode.asText();
                 config.getToken().setClientSecret(clientSecret);
                 config.getToken().setClientId(clientId);
-                String configPath = root + "/micro-gw-resources/conf/config.yaml";
+                String configPath = GatewayCmdUtils.getMainConfigPath(root) + File.separator +
+                                                                            GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
                 TOMLConfigParser.write(configPath, config);
             } else { //If DCR call fails
                 throw new RuntimeException("DCR call failed. Status code: " + responseCode);

@@ -82,6 +82,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
+                <include>com.moandjiezana.toml:toml4j:jar</include>
             </includes>
         </dependencySet>
 

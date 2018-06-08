@@ -16,16 +16,9 @@
 
 package org.wso2.apimgt.gateway.codegen.test;
 
-import org.wso2.apimgt.gateway.codegen.CodeGenerator;
-import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants.GenType;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.wso2.apimgt.gateway.codegen.CodeGenerator;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
