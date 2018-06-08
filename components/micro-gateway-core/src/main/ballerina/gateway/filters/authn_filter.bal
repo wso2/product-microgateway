@@ -52,13 +52,14 @@ public type AuthnFilter object {
         boolean isAuthorized;
         if (isSecured) {
             string authHeader;
-            if(request.hasHeader(AUTH_HEADER)) {
-                authHeader = request.getHeader(AUTH_HEADER);
+            string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceType));
+            if (request.hasHeader(authHeaderName)) {
+                authHeader = request.getHeader(authHeaderName);
             } else {
                 log:printError("No authorization header was provided");
                 return createFilterResult(false, 401, "No authorization header was provided");
             }
-            string providerId = getAuthenticationProviderType(request.getHeader(AUTH_HEADER));
+            string providerId = getAuthenticationProviderType(request.getHeader(authHeaderName));
             // if auth providers are there, use those to authenticate
             if(providerId != AUTH_SCHEME_OAUTH2) {
                 string[] providerIds = [providerId];

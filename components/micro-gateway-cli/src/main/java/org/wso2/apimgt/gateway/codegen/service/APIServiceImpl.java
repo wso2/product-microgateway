@@ -52,7 +52,7 @@ public class APIServiceImpl implements APIService {
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
                 for (ExtendedAPI api : apiListDTO.getList()) {
                     String endpointConfig = api.getEndpointConfig();
-                    api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig)); 
+                    api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
                 }
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);

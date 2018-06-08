@@ -140,6 +140,8 @@
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 @Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints"}
 @final public string TOKEN_LISTENER_PORT = "tokenListenerPort";
+@Description { value: "The authoization header config name"}
+@final public string AUTH_HEADER_NAME = "authorizationHeader";
 @Description { value: "Set of filters to be enabled"}
 @final public string FILTERS = "filters";
 
