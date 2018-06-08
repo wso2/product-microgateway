@@ -104,7 +104,7 @@ public class Main {
                     GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
             ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreLocation());
+            System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
             System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
             GatewayCmdUtils.setConfig(config);
             GatewayCmdUtils.setContainerConfig(containerConfig);

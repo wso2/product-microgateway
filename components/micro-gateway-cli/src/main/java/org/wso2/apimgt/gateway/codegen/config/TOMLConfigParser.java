@@ -31,13 +31,13 @@ import java.nio.file.Paths;
 public class TOMLConfigParser {
 
     /**
-     * Parses the given YAML configuration file and de-serialize the content into given bean type.
+     * Parses the given TOML configuration file and de-serialize the content into given bean type.
      *
      * @param configFilePath path to toml file
      * @param type           class of the bean to be used when de-serializing
      * @param <T>            type of the bean class to be used when de-serializing
      * @return returns the populated bean instance
-     * @throws ConfigParserException if cannot read or parse the content of the specified YAML file
+     * @throws ConfigParserException if cannot read or parse the content of the specified TOML file
      */
     public static <T> T parse(String configFilePath, Class<T> type) throws ConfigParserException {
         Path configurationFile = Paths.get(configFilePath);
@@ -57,6 +57,13 @@ public class TOMLConfigParser {
         return loadedBean;
     }
 
+    /**
+     * Write the given bean type to a file.
+     *
+     * @param configFilePath path to toml file
+     * @param content            type of the bean class to be used when de-serializing
+     * @throws ConfigParserException if cannot write the content to file or specified file does not exist
+     */
     public static void write(String configFilePath, Object content) throws ConfigParserException {
         Path configurationFile = Paths.get(configFilePath);
         if (!Files.exists(configurationFile)) {
