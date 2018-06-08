@@ -105,6 +105,9 @@ public class APIDetailedDTO extends APIInfoDTO {
 
   private APICorsConfigurationDTO corsConfiguration = null;
 
+
+  private String authorizationHeader = null;
+
   /**
    * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
    **/
@@ -441,6 +444,16 @@ public class APIDetailedDTO extends APIInfoDTO {
   }
   public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
     this.corsConfiguration = corsConfiguration;
+  }
+
+  /**
+   ** The authorization header of the API
+   **/
+  @ApiModelProperty(value = "The authorization header to be set")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() { return authorizationHeader; }
+  public void setAuthorizationHeader(String authorizationHeader) {
+      this.authorizationHeader = authorizationHeader;
   }
 
 

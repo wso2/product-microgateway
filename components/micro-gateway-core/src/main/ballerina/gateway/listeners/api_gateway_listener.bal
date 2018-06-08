@@ -228,7 +228,6 @@ function initiateThrottleConfigs() {
     config.enabledHeaderConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledHeaderConditions", false);
     config.enabledJWTClaimConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledJWTClaimConditions", false);
     config.enabledQueryParamConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledQueryParamConditions", false);
-    config.enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledGlobalTMEventPublishing", false);
     getGatewayConfInstance().setThrottleConf(config);
 }
 
