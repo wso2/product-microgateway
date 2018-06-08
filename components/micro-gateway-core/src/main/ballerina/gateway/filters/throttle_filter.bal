@@ -69,9 +69,11 @@ public type ThrottleFilter object {
                     "You have exceeded your quota"};
                     publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
                         THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+                    context.attributes[IS_THROTTLE_OUT] = false;
                     return requestFilterResult;
                 } else {
                     // set properties in order to publish into analytics for billing
+                    context.attributes[IS_THROTTLE_OUT] = true;
                 }
             }
             if (isApplicationLevelThrottled(keyvalidationResult)){

@@ -73,6 +73,8 @@
 @final public string END_USER_ANONYMOUS = "anonymous";
 @Description { value: "message id" }
 @final public string MESSAGE_ID = "MESSAGE_ID";
+@Description { value: "Is requested throttld out" }
+@final public string IS_THROTTLE_OUT = "IS_THROTTLE_OUT";
 @Description { value: "Default jwt header name" }
 @final public string JWT_HEADER_NAME = "X-JWT-Assertion";
 @Description { value: "Production key type value" }
