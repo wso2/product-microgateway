@@ -35,12 +35,18 @@ endpoint http:Client {{qualifiedServiceName}}_EP {
     authConfig:{
         authProviders:["oauth2"],
         authentication:{enabled:true}
-    }
+    },
+    cors: {
+            allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
+            allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
+            allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}]
+        }
 }
 
 @gateway:API {
     name:"{{api.name}}",
-    apiVersion: "{{api.version}}"
+    apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
+    authorizationHeader : "{{api.authorizationHeader}}" {{/if}}
 }
 service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecureListener {
 {{#paths}}{{#value}}{{#operations}}{{#value}}
