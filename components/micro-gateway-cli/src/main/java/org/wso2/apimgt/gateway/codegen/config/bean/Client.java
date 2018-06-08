@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
-public class ClientConfig {
+public class Client {
     private int httpRequestTimeout;
 
     public int getHttpRequestTimeout() {

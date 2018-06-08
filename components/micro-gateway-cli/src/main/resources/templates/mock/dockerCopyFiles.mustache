@@ -1,8 +1,0 @@
-{{#if containerConfig.docker.dockerCopyFiles.enable}}
-@docker:Config {
-    {{#if containerConfig.docker.dockerConfig.source}}
-    source:"{{containerConfig.docker.dockerConfig.source}}"{{/if}}{{#if containerConfig.docker.dockerConfig.target}},
-    target:"{{containerConfig.docker.dockerConfig.target}}"{{/if}}{{#if containerConfig.docker.dockerConfig.isBallerinaConf}},
-    isBallerinaConf:"{{containerConfig.docker.dockerConfig.isBallerinaConf}}"{{/if}}
-}
-{{/if}}

@@ -21,7 +21,7 @@ import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 
 import java.io.File;
 
-public class TokenConfig {
+public class Token {
 
     private String publisherEndpoint;
     private String adminEndpoint;

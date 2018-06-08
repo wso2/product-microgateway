@@ -205,6 +205,11 @@
                 <artifactId>ballerina-packerina</artifactId>
                 <version>${ballerina.platform.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.moandjiezana.toml</groupId>
+                <artifactId>toml4j</artifactId>
+                <version>${toml.parser.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -289,6 +294,7 @@
         <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
         <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
         <testng.version>6.9.4</testng.version>
+        <toml.parser.version>0.7.2</toml.parser.version>
     </properties>
 
 </project>

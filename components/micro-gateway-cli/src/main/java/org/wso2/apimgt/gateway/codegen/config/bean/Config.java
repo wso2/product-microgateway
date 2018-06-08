@@ -18,22 +18,22 @@
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
 public class Config {
-    private ClientConfig clientConfig;
-    private TokenConfig tokenConfig;
+    private Client client;
+    private Token token;
 
-    public TokenConfig getTokenConfig() {
-        return tokenConfig;
+    public Token getToken() {
+        return token;
     }
 
-    public void setTokenConfig(TokenConfig tokenConfig) {
-        this.tokenConfig = tokenConfig;
+    public void setToken(Token token) {
+        this.token = token;
     }
 
-    public ClientConfig getClientConfig() {
-        return clientConfig;
+    public Client getClient() {
+        return client;
     }
 
-    public void setClientConfig(ClientConfig clientConfig) {
-        this.clientConfig = clientConfig;
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

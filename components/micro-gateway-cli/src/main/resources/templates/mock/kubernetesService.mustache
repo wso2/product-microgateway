@@ -1,9 +1,0 @@
-{{#if containerConfig.kubernetes.kubernetesService.enable}}
-@kubernetes:Service {
-    {{#if containerConfig.kubernetes.kubernetesService.name}}
-    name:"{{containerConfig.kubernetes.kubernetesService.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesService.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.serviceType}},
-    serviceType:"{{containerConfig.kubernetes.kubernetesService.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.port}},
-    port:"{{containerConfig.kubernetes.kubernetesService.port}}"{{/if}}
-}
-{{/if}}

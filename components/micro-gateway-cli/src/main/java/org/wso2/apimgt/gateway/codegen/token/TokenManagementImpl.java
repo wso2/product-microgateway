@@ -1,14 +1,9 @@
 package org.wso2.apimgt.gateway.codegen.token;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
+import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 
@@ -77,7 +72,7 @@ public class TokenManagementImpl implements TokenManagement {
             System.out.println(application.toString());
 
             // Calling DCR endpoint
-            String dcrEndpoint = config.getTokenConfig().getRegistrationEndpoint();
+            String dcrEndpoint = config.getToken().getRegistrationEndpoint();
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -95,10 +90,10 @@ public class TokenManagementImpl implements TokenManagement {
                 JsonNode clientSecretNode = rootNode.path("clientSecret");
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
-                config.getTokenConfig().setClientSecret(clientSecret);
-                config.getTokenConfig().setClientId(clientId);
+                config.getToken().setClientSecret(clientSecret);
+                config.getToken().setClientId(clientId);
                 String configPath = root + "/micro-gw-resources/conf/config.yaml";
-                ConfigYAMLParser.write(configPath, config, Config.class);
+                TOMLConfigParser.write(configPath, config);
             } else { //If DCR call fails
                 throw new RuntimeException("DCR call failed. Status code: " + responseCode);
             }
