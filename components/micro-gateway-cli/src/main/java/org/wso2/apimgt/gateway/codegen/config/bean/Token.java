@@ -21,7 +21,7 @@ import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 
 import java.io.File;
 
-public class TokenConfig {
+public class Token {
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -37,16 +37,22 @@ public class TokenConfig {
         return trustStoreLocation;
     }
 
-    public void setTrustStoreLocation(String trustStoreLocation) {
-        File file = new File(trustStoreLocation);
+    public String getTrustStoreAbsoluteLocation() {
+        String absoluteTrustoreLocation = trustStoreLocation;
+        File file = new File(absoluteTrustoreLocation);
         if (!file.isAbsolute()) {
-            trustStoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation;
-            file = new File(trustStoreLocation);
+            absoluteTrustoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
+            file = new File(absoluteTrustoreLocation);
             if (!file.exists()) {
-                System.err.println("Error while loading trust store location: " + trustStoreLocation);
+                System.err.println("Error while loading trust store location: " + absoluteTrustoreLocation);
                 Runtime.getRuntime().exit(1);
             }
         }
+        return absoluteTrustoreLocation;
+    }
+
+
+    public void setTrustStoreLocation(String trustStoreLocation) {
         this.trustStoreLocation = trustStoreLocation;
     }
 

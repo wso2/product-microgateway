@@ -1,7 +1,7 @@
-docker:
-  dockerConfig:
-    enable: false
-    #name: ''
+[docker]
+  [docker.dockerConfig]
+    enable = false
+    #name = ""
     #registry: ''
     #tag: ''
     #buildImage: ''
@@ -13,14 +13,14 @@ docker:
     #push: ''
     #username: ''
     #password: ''
-  dockerCopyFiles:
-    enable: false
+  [docker.dockerCopyFiles]
+    enable = false
     #source: ''
     #target: ''
     #isBallerinaConf: ''
-kubernetes:
-  kubernetesDeployment:
-    enable: false
+[kubernetes]
+  [kubernetes.kubernetesDeployment]
+    enable = "false"
     #name: ''
     #labels: ''
     #replicas: ''
@@ -40,14 +40,14 @@ kubernetes:
     #password: ''
     #baseImage: ''
     #singleYAML: ''
-  kubernetesService:
-    enable: false
+  [kubernetes.kubernetesService]
+    enable = "false"
     #name: ''
     #labels: ''
     #serviceType: ''
     #port: ''
-  kubernetesIngress:
-    enable: false
+  [kubernetes.kubernetesIngress]
+    enable = false
     #name: ''
     #labels: ''
     #hostname: ''
@@ -56,35 +56,35 @@ kubernetes:
     #targetPath: ''
     #ingressClass: ''
     #enableTLS: ''
-  kubernetesHpa:
-    enable: false
+  [kubernetes.kubernetesHpa]
+    enable = false
     #name: ''
     #labels: ''
     #minReplicas: ''
     #maxReplicas: ''
     #cpuPrecentage: ''
-  kubernetesSecret:
-    enable: false
+  [kubernetes.kubernetesSecret]
+    enable = false
     #name: ''
     #mountPath: ''
     #readOnly: ''
     #data: ''
-  kubernetesConfigMap:
-    enable: false
+  [kubernetes.kubernetesConfigMap]
+    enable = false
     #name: ''
     #mountPath: ''
     #readOnly: ''
     #ballerinaConf: ''
     #data: ''
-  kubernetesPersistentVolumeClaim:
-    enable: false
+  [kubernetes.kubernetesPersistentVolumeClaim]
+    enable = false
     #name: ''
     #mountPath: ''
     #readOnly: ''
     #accessMode: ''
     #volumeClaimSize: ''
-  kubernetesJob:
-    enable: false
+  [kubernetes.kubernetesJob]
+    enable = false
     #name: ''
     #labels: ''
     #restartPolicy: ''

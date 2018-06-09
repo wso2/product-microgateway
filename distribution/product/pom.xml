@@ -41,6 +41,10 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.cli</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

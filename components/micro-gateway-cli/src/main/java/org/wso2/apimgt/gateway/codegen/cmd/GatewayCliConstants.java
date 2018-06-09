@@ -27,12 +27,12 @@ public class GatewayCliConstants {
     public static String PROJECTS_CONFIG_DIRECTORY_NAME = "gateway-config";
     public static String PROJECTS_SRC_DIRECTORY_NAME = "src";
     public static String PROJECTS_TARGET_DIRECTORY_NAME = "target";
-    public static String MAIN_CONFIG_FILE_NAME = "config.yaml";
-    public static String LABEL_CONFIG_FILE_NAME = "label-config.yaml";
+    public static String MAIN_CONFIG_FILE_NAME = "config.toml";
+    public static String LABEL_CONFIG_FILE_NAME = "label-config.toml";
     public static String TEMP_DIR_NAME = "temp";
     public static String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
-    public static String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.yaml";
-    public static String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.yaml";
+    public static String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.toml";
+    public static String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
     public static String CLI_HOME = "CLI_HOME";
     public static String CLI_LIB = "lib";
     public static String CLI_RUNTIME = "runtime";
