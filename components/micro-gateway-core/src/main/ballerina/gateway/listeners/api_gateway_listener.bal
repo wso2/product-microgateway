@@ -217,7 +217,8 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     if(!config.isSecured) {
         config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
     }
-    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost");
+    // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
+    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     intitateKeyManagerConfigurations();
     initGatewayCaches();
     initiateThrottleConfigs();
