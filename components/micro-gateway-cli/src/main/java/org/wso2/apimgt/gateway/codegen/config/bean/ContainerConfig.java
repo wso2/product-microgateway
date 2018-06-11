@@ -36,4 +36,26 @@ public class ContainerConfig {
     public void setKubernetes(Kubernetes kubernetes) {
         this.kubernetes = kubernetes;
     }
+
+    public boolean getHasDocker() {
+        return docker!=null && (
+                (docker.getDockerConfig()!=null && docker.getDockerConfig().isEnable()) ||
+                (docker.getDockerCopyFiles()!=null && docker.getDockerCopyFiles().isEnable())
+        );
+    }
+
+    public boolean getHasKubernetes() {
+        return kubernetes != null && (
+                (kubernetes.getKubernetesConfigMap() != null && kubernetes.getKubernetesConfigMap().isEnable()) ||
+                        (kubernetes.getKubernetesDeployment() != null && kubernetes.getKubernetesDeployment()
+                                .isEnable()) ||
+                        (kubernetes.getKubernetesHpa() != null && kubernetes.getKubernetesHpa().isEnable()) ||
+                        (kubernetes.getKubernetesIngress() != null && kubernetes.getKubernetesIngress().isEnable()) ||
+                        (kubernetes.getKubernetesJob() != null && kubernetes.getKubernetesJob().isEnable()) ||
+                        (kubernetes.getKubernetesPersistentVolumeClaim() != null && kubernetes
+                                .getKubernetesPersistentVolumeClaim().isEnable()) ||
+                        (kubernetes.getKubernetesSecret() != null && kubernetes.getKubernetesSecret().isEnable()) ||
+                        (kubernetes.getKubernetesService() != null && kubernetes.getKubernetesService().isEnable())
+        );
+    }
 }

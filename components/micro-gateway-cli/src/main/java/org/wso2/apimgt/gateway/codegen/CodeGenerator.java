@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.codegen.model.BallerinaService;
 import org.wso2.apimgt.gateway.codegen.model.GenSrcFile;
+import org.wso2.apimgt.gateway.codegen.model.ListenerEndpoint;
 import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.codegen.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants;
@@ -154,7 +155,8 @@ public class CodeGenerator {
     private GenSrcFile generateCommonEndpoints() throws IOException {
         GenSrcFile sourceFile = null;
         String srcFile = GeneratorConstants.ENDPOINTS + GeneratorConstants.BALLERINA_EXTENSION;
-        String endpointContent = getContent(null, GeneratorConstants.DEFAULT_SERVICE_DIR,
+        ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
+        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_SERVICE_DIR,
                 GeneratorConstants.ENDPOINT_TEMPLATE_NAME);
         sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, endpointContent);
         return sourceFile;
