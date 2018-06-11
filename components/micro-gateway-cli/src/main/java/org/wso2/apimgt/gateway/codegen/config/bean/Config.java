@@ -17,9 +17,12 @@
  */
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
+import org.wso2.apimgt.gateway.codegen.service.bean.APICorsConfigurationDTO;
+
 public class Config {
     private Client client;
     private Token token;
+    private APICorsConfigurationDTO corsConfiguration;
 
     public Token getToken() {
         return token;
@@ -35,5 +38,13 @@ public class Config {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public APICorsConfigurationDTO getCorsConfiguration() {
+        return corsConfiguration;
+    }
+
+    public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
     }
 }

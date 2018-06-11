@@ -74,7 +74,9 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
         path:"{{../../key}}",
         authConfig:{
             authProviders:["oauth2"],
-            authentication:{enabled:true}
+            authentication:{enabled:true} {{#if scope}},
+            scopes: ["{{scope}}"] {{/if}}
+
         }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}

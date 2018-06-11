@@ -10,3 +10,10 @@ clientId = ""
 clientSecret = ""
 trustStoreLocation = "lib/platform/bre/security/ballerinaTruststore.p12"
 trustStorePassword = "ballerina"
+
+[corsConfiguration]
+corsConfigurationEnabled=true
+accessControlAllowOrigins=["*"]
+accessControlAllowMethods=["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
+accessControlAllowHeaders=["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction"]
+accessControlAllowCredentials=false
