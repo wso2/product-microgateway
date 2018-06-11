@@ -140,7 +140,7 @@ public class CodeGenerator {
         GenSrcFile sourceFile = null;
         String concatTitle = context.getQualifiedServiceName();
         String srcFile = concatTitle + ".bal";
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_SERVICE_DIR,
+        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.SERVICE_TEMPLATE_NAME);
         sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent);
         return sourceFile;
@@ -156,7 +156,7 @@ public class CodeGenerator {
         GenSrcFile sourceFile = null;
         String srcFile = GeneratorConstants.ENDPOINTS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
-        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_SERVICE_DIR,
+        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.ENDPOINT_TEMPLATE_NAME);
         sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, endpointContent);
         return sourceFile;

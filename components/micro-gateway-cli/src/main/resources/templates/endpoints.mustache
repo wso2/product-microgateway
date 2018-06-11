@@ -1,0 +1,16 @@
+import wso2/gateway;
+{{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
+
+ExtensionFilter extensionFilter;
+
+{{>kubernetesService}}
+endpoint gateway:APIGatewaySecureListener apiSecureListener {
+    port:9095,
+    filters:[extensionFilter]
+};
+
+{{>kubernetesService}}
+endpoint gateway:APIGatewayListener apiListener {
+    port:9090,
+    filters:[extensionFilter]
+};

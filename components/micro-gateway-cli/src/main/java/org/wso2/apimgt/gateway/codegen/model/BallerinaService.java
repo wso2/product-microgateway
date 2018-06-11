@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Wrapper for {@link Swagger}.
@@ -160,6 +161,9 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         key = key.replaceAll("/", "_");
         key = key.replaceAll("\\{", "_");
         key = key.replaceAll("}", "_");
+        if (key.contains("*")) {
+            key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
+        }
         return key;
     }
 

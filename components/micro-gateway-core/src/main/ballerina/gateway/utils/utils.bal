@@ -346,3 +346,13 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     context.attributes[ERROR_MESSAGE] = errorMessage;
     context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
 }
+
+public function getAuthorizationHeader(reflect:annotationData[] annData) returns string {
+    APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(annData);
+    string authHeader = apiConfig.authorizationHeader;
+    if (authHeader == "") {
+        authHeader = getConfigValue(LISTENER_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+    }
+    return authHeader;
+
+}

@@ -35,7 +35,7 @@ public class APIServiceImpl implements APIService {
         //calling token endpoint
         try {
             Config config = GatewayCmdUtils.getConfig();
-            String publisherEp = config.getTokenConfig().getPublisherEndpoint();
+            String publisherEp = config.getToken().getPublisherEndpoint();
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + "apis?query=label:" + labelName + "&expand=true";
             url = new URL(urlStr);
@@ -52,7 +52,7 @@ public class APIServiceImpl implements APIService {
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
                 for (ExtendedAPI api : apiListDTO.getList()) {
                     String endpointConfig = api.getEndpointConfig();
-                    api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig)); 
+                    api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
                 }
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
@@ -76,7 +76,7 @@ public class APIServiceImpl implements APIService {
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
         Config config = GatewayCmdUtils.getConfig();
-        String adminEp = config.getTokenConfig().getAdminEndpoint();
+        String adminEp = config.getToken().getAdminEndpoint();
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
             String urlStr = adminEp + "throttling/policies/application";
@@ -120,7 +120,7 @@ public class APIServiceImpl implements APIService {
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
         Config config = GatewayCmdUtils.getConfig();
-        String adminEp = config.getTokenConfig().getAdminEndpoint();
+        String adminEp = config.getToken().getAdminEndpoint();
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
             String urlStr = adminEp + "throttling/policies/subscription";

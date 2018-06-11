@@ -1,20 +1,18 @@
 package org.wso2.apimgt.gateway.codegen.token;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.lang3.StringUtils;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCliConstants;
 import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
+import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -77,7 +75,7 @@ public class TokenManagementImpl implements TokenManagement {
             System.out.println(application.toString());
 
             // Calling DCR endpoint
-            String dcrEndpoint = config.getTokenConfig().getRegistrationEndpoint();
+            String dcrEndpoint = config.getToken().getRegistrationEndpoint();
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -85,7 +83,7 @@ public class TokenManagementImpl implements TokenManagement {
             urlConn.setRequestProperty("Content-Type", "application/json");
             String clientEncoded = DatatypeConverter.printBase64Binary(("admin" + ':' + "admin")
                     .getBytes(StandardCharsets.UTF_8));
-            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
             urlConn.getOutputStream().write((application.toString()).getBytes("UTF-8"));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
@@ -95,10 +93,11 @@ public class TokenManagementImpl implements TokenManagement {
                 JsonNode clientSecretNode = rootNode.path("clientSecret");
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
-                config.getTokenConfig().setClientSecret(clientSecret);
-                config.getTokenConfig().setClientId(clientId);
-                String configPath = root + "/micro-gw-resources/conf/config.yaml";
-                ConfigYAMLParser.write(configPath, config, Config.class);
+                config.getToken().setClientSecret(clientSecret);
+                config.getToken().setClientId(clientId);
+                String configPath = GatewayCmdUtils.getMainConfigPath(root) + File.separator +
+                                                                            GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+                TOMLConfigParser.write(configPath, config);
             } else { //If DCR call fails
                 throw new RuntimeException("DCR call failed. Status code: " + responseCode);
             }

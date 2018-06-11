@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.codegen.ThrottlePolicyGenerator;
-import org.wso2.apimgt.gateway.codegen.config.ConfigYAMLParser;
+import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.BallerinaServiceGenException;
@@ -100,13 +100,13 @@ public class Main {
 
             String configPath = GatewayCmdUtils.getMainConfigPath(projectRoot) + File.separator +
                     GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
-            Config config = ConfigYAMLParser.parse(configPath, Config.class);
+            Config config = TOMLConfigParser.parse(configPath, Config.class);
             String labelConfigPath = GatewayCmdUtils.getLabelConfDirectoryPath(projectRoot, label) + File.separator +
                     GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
-            ContainerConfig containerConfig = ConfigYAMLParser.parse(labelConfigPath, ContainerConfig.class);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStore", config.getTokenConfig().getTrustStoreLocation());
-            System.setProperty("javax.net.ssl.trustStorePassword", config.getTokenConfig().getTrustStorePassword());
+            System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
+            System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
             GatewayCmdUtils.setConfig(config);
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
@@ -267,7 +267,7 @@ public class Main {
             init(path, label);
 
             Config config = GatewayCmdUtils.getConfig();
-            String configuredUser = config.getTokenConfig().getUsername();
+            String configuredUser = config.getToken().getUsername();
 
             if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
                 if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
@@ -300,13 +300,13 @@ public class Main {
             }
 
             TokenManagement manager = new TokenManagementImpl();
-            String clientId = config.getTokenConfig().getClientId();
+            String clientId = config.getToken().getClientId();
             if (StringUtils.isEmpty(clientId)) {
                 manager.generateClientIdAndSecret(config, projectRoot);
-                clientId = config.getTokenConfig().getClientId();
+                clientId = config.getToken().getClientId();
             }
 
-            String clientSecret = config.getTokenConfig().getClientSecret();
+            String clientSecret = config.getToken().getClientSecret();
             manager.generateClientIdAndSecret(config, projectRoot);
             String accessToken = manager.generateAccessToken(username, password.toCharArray(),
                                                                                     clientId, clientSecret.toCharArray());

@@ -26,26 +26,6 @@ import java.util.List;
  */
 public class GeneratorConstants {
 
-    /**
-     * Enum to select the code generation mode.
-     * Ballerina service, mock and client generation is available
-     */
-    public enum GenType {
-        MOCK("mock"),
-        CLIENT("client");
-
-        private String name;
-
-        GenType(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-    }
-
     public static final String SERVICE_TEMPLATE_NAME = "service";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String ENDPOINT_TEMPLATE_NAME = "endpoints";
@@ -53,15 +33,10 @@ public class GeneratorConstants {
     public static final String BALLERINA_EXTENSION = ".bal";
     public static final String THROTTLE_POLICY_INIT_TEMPLATE_NAME = "policy_init";
 
-    public static final String SCHEMA_FILE_NAME = "schema.bal";
-    public static final String COMMON_MODELS_FILE_NAME = "common.bal";
-
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
     public static final String DEFAULT_TEMPLATE_DIR = File.separator + "templates";
-    public static final String DEFAULT_SERVICE_DIR = DEFAULT_TEMPLATE_DIR + File.separator + "mock";
 
-    public static final String GEN_SRC_DIR = "gen";
     public static final String DEFAULT_SERVICE_PKG = "service";
     public static final String APPLICATION_POLICY_TYPE = "application";
     public static final String SUBSCRIPTION_POLICY_TYPE = "subscription";
