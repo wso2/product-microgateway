@@ -17,6 +17,12 @@
  */
 package org.wso2.apimgt.gateway.codegen.config.bean;
 
+import org.wso2.apimgt.gateway.codegen.CodeGenerationContext;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCliConstants;
+import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
+
+import java.util.UUID;
+
 public class KubernetesDeployment {
 
     private String name;
@@ -41,7 +47,13 @@ public class KubernetesDeployment {
     private boolean enable = false;
 
     public String getName() {
-        return name;
+        if (name == null) {
+            CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
+            return codeGenerationContext.getLabel() + GatewayCliConstants.K8S_DEPLOYMENT + UUID.randomUUID()
+                    .toString();
+        } else {
+            return name;
+        }
     }
 
     public void setName(String name) {

@@ -96,7 +96,7 @@ public class ServerInstance implements Server {
     }
 
     public void startMicroGwServer(String balFile) throws MicroGWTestException {
-        String[] args = {balFile};
+        String[] args = {balFile, "-e", "b7a.log.level=DEBUG"};
         setArguments(args);
 
         startServer();
@@ -173,7 +173,7 @@ public class ServerInstance implements Server {
      * @throws MicroGWTestException if service stop fails
      */
     @Override
-    public void stopServer() throws MicroGWTestException {
+    public void stopServer(boolean deleteExtractedDir) throws MicroGWTestException {
         log.info("Stopping server..");
         if (process != null) {
             String pid;
@@ -204,8 +204,9 @@ public class ServerInstance implements Server {
             //wait until port to close
             Utils.waitForPortToClosed(httpServerPort, 30000);
             log.info("Server Stopped Successfully");
-
-            deleteWorkDir();
+            if(deleteExtractedDir) {
+                deleteWorkDir();
+            }
         }
     }
 
@@ -217,7 +218,7 @@ public class ServerInstance implements Server {
     @Override
     public void restartServer() throws MicroGWTestException {
         log.info("Restarting Server...");
-        stopServer();
+        stopServer(true);
         startServer();
         log.info("Server Restarted Successfully");
     }

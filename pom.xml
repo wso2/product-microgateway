@@ -41,7 +41,8 @@
 
     <modules>
         <module>components</module>
-        <module>distribution/product</module>
+        <module>distribution</module>
+        <module>tests</module>
     </modules>
 
     <repositories>

@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.codegen.cmd;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
+import org.wso2.apimgt.gateway.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
 import org.wso2.apimgt.gateway.codegen.exception.CliLauncherException;
@@ -41,6 +42,7 @@ public class GatewayCmdUtils {
 
     private static Config config;
     private static ContainerConfig containerConfig;
+    private static CodeGenerationContext codeGenerationContext;
 
     public static Config getConfig() {
         return config;
@@ -48,6 +50,14 @@ public class GatewayCmdUtils {
 
     public static void setConfig(Config configFromFile) {
         config = configFromFile;
+    }
+
+    public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
+        GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
+    }
+
+    public static CodeGenerationContext getCodeGenerationContext() {
+        return codeGenerationContext;
     }
 
     public static String readFileAsString(String path, boolean inResource) throws IOException {

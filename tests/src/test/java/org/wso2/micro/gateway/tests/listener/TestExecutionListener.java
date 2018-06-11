@@ -69,7 +69,7 @@ public class TestExecutionListener implements IExecutionListener {
     public void onExecutionFinish() {
         if (newServer != null && newServer.isRunning()) {
             try {
-                newServer.stopServer();
+                newServer.stopServer(true);
             } catch (Exception e) {
                 log.error("Server failed to stop. " + e.getMessage(), e);
                 throw new RuntimeException("Server failed to stop. " + e.getMessage(), e);

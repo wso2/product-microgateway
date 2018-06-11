@@ -55,6 +55,8 @@ public class GatewayCliConstants {
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
     public static final String PROJECT_CONF_FILE = "ballerina.conf";
 
+    public static final String K8S_DEPLOYMENT = "-deployment-";
+    public static final String K8S_SERVICE = "-service-";
 
     public static String LABEL_PLACEHOLDER = "${label}";
 }

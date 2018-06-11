@@ -29,6 +29,7 @@ import org.ballerinalang.packerina.init.models.SrcFile;
 import org.ballerinalang.toml.antlr4.TomlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
@@ -107,6 +108,10 @@ public class Main {
             System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
             GatewayCmdUtils.setConfig(config);
             GatewayCmdUtils.setContainerConfig(containerConfig);
+
+            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
+            codeGenerationContext.setLabel(label);
+            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
             outStream.println(
                     "Error while parsing the config" + (e.getCause() != null ? ": " + e.getCause().getMessage() : ""));
