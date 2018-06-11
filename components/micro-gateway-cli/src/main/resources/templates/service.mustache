@@ -1,6 +1,9 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/swagger;
+{{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
+{{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
+
 import wso2/gateway;
 
 endpoint http:Client {{qualifiedServiceName}}_EP {
