@@ -33,4 +33,5 @@ public class TestConstant {
     public static final String HTTP_METHOD_HEAD = "HEAD";
 
     public static final int GATEWAY_LISTENER_PORT = 9090;
+    public static final int KM_LISTENER_PORT = 9443;
 }
