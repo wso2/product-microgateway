@@ -13,7 +13,6 @@ import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePo
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyListDTO;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
 
 public class APIServiceImpl implements APIService {
     
@@ -53,6 +53,11 @@ public class APIServiceImpl implements APIService {
                 for (ExtendedAPI api : apiListDTO.getList()) {
                     String endpointConfig = api.getEndpointConfig();
                     api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
+                    // set default values from config if per api cors ins not enabled
+                    if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
+                            .getCorsConfigurationEnabled()) {
+                        api.setCorsConfiguration(config.getCorsConfiguration());
+                    }
                 }
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
