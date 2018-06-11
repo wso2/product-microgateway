@@ -26,6 +26,7 @@ import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.ballerinalang.packerina.init.models.SrcFile;
+import org.ballerinalang.toml.antlr4.TomlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.codegen.CodeGenerator;
@@ -97,11 +98,9 @@ public class Main {
             //user can define different label time to time. So need to create irrespective path provided or not.
             GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
 
-            String configPath = GatewayCmdUtils.getMainConfigPath(projectRoot) + File.separator +
-                    GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+            String configPath = GatewayCmdUtils.getMainConfigLocation(projectRoot);
             Config config = TOMLConfigParser.parse(configPath, Config.class);
-            String labelConfigPath = GatewayCmdUtils.getLabelConfDirectoryPath(projectRoot, label) + File.separator +
-                    GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+            String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(projectRoot, label);
             ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
             System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
@@ -244,26 +243,43 @@ public class Main {
         @Parameter(names = {"-l", "--label"}, hidden = true)
         private String label;
 
-        @Parameter(names = {"-o", "--overwrite"}, hidden = true)
-        private boolean overwrite;
+        @Parameter(names = {"-r", "--reset"}, hidden = true)
+        private boolean reset;
 
         @Parameter(names = {"--path"}, hidden = true)
         private String path;
 
         public void execute() {
-            /* temporary hardcoded */
-            username = "admin";
-            password = "admin";
-            /* ******************* */
-            
             //initialize CLI with the provided path. First time the cli runs it is a must to provide this. Once it is
             // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
             // path is taken from above file.
             init(path, label);
 
             Config config = GatewayCmdUtils.getConfig();
-            String configuredUser = config.getToken().getUsername();
+            String projectRoot = StringUtils.EMPTY;
+            try {
+                projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
+            } catch (IOException e) {
+                e.printStackTrace();
+                outStream.println("Stored workspace path not available. "
+                                    + "You need to specify --path <path to generate resources>");
+                Runtime.getRuntime().exit(1);
+            }
 
+            if (reset) {
+                config.getToken().setClientId(StringUtils.EMPTY);
+                config.getToken().setClientSecret(StringUtils.EMPTY);
+                config.getToken().setUsername(StringUtils.EMPTY);
+                try {
+                    TOMLConfigParser.write(GatewayCmdUtils.getMainConfigDirPath(projectRoot), config);
+                } catch (ConfigParserException e) {
+                    e.printStackTrace();
+                    outStream.println("Error occurred while writing to the config file");
+                    Runtime.getRuntime().exit(1);
+                }
+            }
+
+            String configuredUser = config.getToken().getUsername();
             if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
                 if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                     if (username.trim().isEmpty()) {
@@ -286,25 +302,13 @@ public class Main {
                 }
             }
 
-            String projectRoot = null;
-            try {
-                projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
-            } catch (IOException e) {
-                outStream.println("Error while retrieving stored project location");
-                Runtime.getRuntime().exit(1);
-            }
-
             TokenManagement manager = new TokenManagementImpl();
             String clientId = config.getToken().getClientId();
             if (StringUtils.isEmpty(clientId)) {
-                manager.generateClientIdAndSecret(config, projectRoot);
-                clientId = config.getToken().getClientId();
+                manager.generateClientIdAndSecret(config, projectRoot, password.toCharArray());
             }
 
-            String clientSecret = config.getToken().getClientSecret();
-            manager.generateClientIdAndSecret(config, projectRoot);
-            String accessToken = manager.generateAccessToken(username, password.toCharArray(),
-                                                                                    clientId, clientSecret.toCharArray());
+            String accessToken = manager.generateAccessToken(username, password.toCharArray());
 
             APIService service = new APIServiceImpl();
             List<ExtendedAPI> apis = service.getAPIs(label, accessToken);

@@ -1,12 +1,18 @@
 NAME
-    Gateway Cli - Tool which used to generate the ballerina services from APIs
+    Gateway Cli - Tool which use to generate ballerina services from APIs
 
 SYNOPSIS
     micro-gw [?|-h|--help]
 
 DESCRIPTION
-     This a cli tool which allow users to generate ballerina service definition
-     from APIs
+     This is a cli tool which allow users to generate ballerina service definition
+     from APIs created in the WSO2 API Manager. API Manager provide the capability
+     to group APIs by labels. This tool generates ballerina sources automatically
+     for APIs which belongs to a given label. Then user can generate balx source
+     for all APIs belongs to a specific label. When generating the balx source, tool
+     will generate light weight runtime for the generate balx which package with
+     ballerina runtime. This will allow user to get the zip archive of generated
+     label to run in any environment
 
 OPTIONS
 
@@ -17,8 +23,8 @@ OPTIONS
 
 MICRO GATEWAY COMMANDS
      Available commands are:
-         setup        Setup the micro gateway environment
-         build        Generate executables
+         setup        Setup the micro gateway environment with labels
+         build        Generate balx sources and archives
          run          Run generated services
 
 EXAMPLES

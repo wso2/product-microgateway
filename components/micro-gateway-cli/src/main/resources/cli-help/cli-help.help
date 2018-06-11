@@ -20,9 +20,9 @@ DESCRIPTION
          micro-gw [COMMAND] [options]
 
      COMMAND is one of the available commands listed below:
-         setup        Generate ballerina source files for APIs belongs to given label
-         build        Generate executables
-         run          Run generated services
+         setup        Generate ballerina source files for APIs belongs to the given label
+         build        Generate executables and the archive
+         run          Run generate balx
 
 OPTIONS
      Gateway Cli help takes no command line options
@@ -32,4 +32,4 @@ EXAMPLES
      $ ballerina help
 
      Learn how to use the gateway cli setup command
-     $ ballerina help run
+     $ ballerina help setup

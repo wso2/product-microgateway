@@ -30,7 +30,6 @@ import java.util.Set;
  * Wraps the {@link PathItem} from swagger models to provide an iterable object model
  * for operations.
  *
- * @since 0.967.0
  */
 public class BallerinaPath implements BallerinaSwaggerObject<BallerinaPath, Path> {
     private Set<Map.Entry<String, BallerinaOperation>> operations;

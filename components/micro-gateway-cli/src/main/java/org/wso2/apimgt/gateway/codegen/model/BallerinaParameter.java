@@ -23,7 +23,6 @@ import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
 /**
  * Wraps the {@link Parameter} from swagger models for easier templating.
  *
- * @since 0.967.0
  */
 public class BallerinaParameter implements BallerinaSwaggerObject<BallerinaParameter, Parameter> {
     private String name;

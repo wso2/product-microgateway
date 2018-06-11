@@ -346,15 +346,44 @@ public class GatewayCmdUtils {
      * @param root project root location
      * @return path to the conf folder in the project root
      */
-    public static String getMainConfigPath(String root) {
+    public static String getMainConfigDirPath(String root) {
         return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME +
                                                 File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
-    public static String getLabelConfigPath(String root, String label) {
+    /**
+     * Returns location of the main configuration file of given project root
+     *
+     * @param root project root location
+     * @return path configuration file
+     */
+    public static String getMainConfigLocation(String root) {
+        return getMainConfigDirPath(root) + File.separator
+                + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+    }
+
+    /**
+     * Returns path to the label conf folder in the project root
+     *
+     * @param root project root location
+     * @return path to the label conf folder in the project root
+     */
+    public static String getLabelConfigDirPath(String root, String label) {
         return getLabelDirectoryPath(root, label) +
                 File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
+
+    /**
+     * Returns location of the main configuration file of given project root
+     *
+     * @param root project root location
+     * @return path label configuration file
+     */
+    public static String getLabelConfigLocation(String root, String labelName) {
+        return getLabelConfigDirPath(root, labelName) + File.separator
+                + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+    }
+
 
     /**
      * Returns path to the given label project in the project root path
@@ -369,17 +398,6 @@ public class GatewayCmdUtils {
                 + File.separator + labelName;
     }
 
-    /**
-     * Returns path to the label config directory of a particular label
-     *
-     * @param root project root location
-     * @param labelName name of the label
-     * @return path to the given label project conf directory in the project root path
-     */
-    public static String getLabelConfDirectoryPath(String root, String labelName) {
-        return getLabelDirectoryPath(root, labelName) +
-                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
-    }
 
     /**
      * Returns path to the /src of a given label project in the project root path
@@ -412,7 +430,7 @@ public class GatewayCmdUtils {
      * @throws IOException error while creating the main config file
      */
     public static void createMainConfig(String root) throws IOException {
-        String mainConfig = getMainConfigPath(root) + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        String mainConfig = getMainConfigLocation(root);
         File file = new File(mainConfig);
         if (!file.exists()) {
             file.createNewFile();
@@ -491,7 +509,7 @@ public class GatewayCmdUtils {
     }
 
     public static void createLabelConfig(String root, String label) throws IOException {
-        String mainConfig = getLabelConfigPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+        String mainConfig = getLabelConfigDirPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
         File file = new File(mainConfig);
         if (!file.exists()) {
             file.createNewFile();

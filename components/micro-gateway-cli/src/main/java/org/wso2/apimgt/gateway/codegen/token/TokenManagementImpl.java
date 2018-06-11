@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.wso2.apimgt.gateway.codegen.token;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,12 +40,15 @@ import java.nio.charset.StandardCharsets;
 public class TokenManagementImpl implements TokenManagement {
 
     @Override
-    public String generateAccessToken(String username, char[] password, String clientId, char[] clientSecret) {
+    public String generateAccessToken(String username, char[] password) {
         URL url;
         HttpsURLConnection urlConn = null;
         //calling token endpoint
         try {
-            url = new URL("https://localhost:8243/token");
+            Config config = GatewayCmdUtils.getConfig();
+            String clientId = config.getToken().getClientId();
+            String clientSecret = GatewayCmdUtils.decrypt(config.getToken().getClientSecret(), new String(password));
+            url = new URL(config.getToken().getTokenEndpoint());
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
@@ -61,7 +81,7 @@ public class TokenManagementImpl implements TokenManagement {
     }
 
     @Override
-    public String generateClientIdAndSecret(Config config, String root) {
+    public String generateClientIdAndSecret(Config config, String root, char[] password) {
         URL url;
         HttpURLConnection urlConn = null;
         try {
@@ -93,18 +113,16 @@ public class TokenManagementImpl implements TokenManagement {
                 JsonNode clientSecretNode = rootNode.path("clientSecret");
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
-                config.getToken().setClientSecret(clientSecret);
+                String encryptedSecret = GatewayCmdUtils.decrypt(clientSecret, new String(password));
+                config.getToken().setClientSecret(encryptedSecret);
                 config.getToken().setClientId(clientId);
-                String configPath = GatewayCmdUtils.getMainConfigPath(root) + File.separator +
-                                                                            GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+                String configPath = GatewayCmdUtils.getMainConfigLocation(root);
                 TOMLConfigParser.write(configPath, config);
+                GatewayCmdUtils.setConfig(config);
             } else { //If DCR call fails
                 throw new RuntimeException("DCR call failed. Status code: " + responseCode);
             }
-        } catch (IOException e) {
-            String errorMsg = "Can not create OAuth application  : ";
-            throw new RuntimeException(errorMsg, e);
-        } catch (ConfigParserException e) {
+        } catch (IOException | ConfigParserException e) {
             String errorMsg = "Can not create OAuth application  : ";
             throw new RuntimeException(errorMsg, e);
         } finally {

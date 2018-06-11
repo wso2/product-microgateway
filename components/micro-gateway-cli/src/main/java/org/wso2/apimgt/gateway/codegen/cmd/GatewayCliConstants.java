@@ -24,7 +24,6 @@ public class GatewayCliConstants {
     public static String MAIN_DIRECTORY_NAME = "micro-gw-resources";
     public static String CONF_DIRECTORY_NAME = "conf";
     public static String PROJECTS_DIRECTORY_NAME = "projects";
-    public static String PROJECTS_CONFIG_DIRECTORY_NAME = "gateway-config";
     public static String PROJECTS_SRC_DIRECTORY_NAME = "src";
     public static String PROJECTS_TARGET_DIRECTORY_NAME = "target";
     public static String MAIN_CONFIG_FILE_NAME = "config.toml";

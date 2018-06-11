@@ -30,7 +30,6 @@ import java.util.Map;
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
  *
- * @since 0.967.0
  */
 public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOperation, Operation> {
     private List<String> tags;
