@@ -26,12 +26,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
  *
  */
 public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOperation, Operation> {
+
+    public static final String X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String X_SCOPE = "x-scope";
     private List<String> tags;
     private String summary;
     private String description;
@@ -40,6 +44,7 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
     private String operationId;
     private List<BallerinaParameter> parameters;
     private List<String> methods;
+    private String scope;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -61,10 +66,10 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         this.methods = null;
         Map<String, Object> extension =  operation.getVendorExtensions();
-        Object resourceTier = extension.get("x-throttling-tier");
-        if (resourceTier != null) {
-            this.resourceTier = resourceTier.toString();
-        }
+        Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
+        resourceTier.ifPresent(value -> this.resourceTier = value.toString());
+        Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
+        scopes.ifPresent(value -> this.scope = value.toString());
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
@@ -139,5 +144,13 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
 
     public void setResourceTier(String resourceTier) {
         this.resourceTier = resourceTier;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }
