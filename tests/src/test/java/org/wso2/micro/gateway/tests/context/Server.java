@@ -33,7 +33,7 @@ public interface Server {
     /**
      * Stops the server started by startServer method.
      *
-     * @throws MicroGWTestException if service stop fails
+     * @throws MicroGWTestException if rest stop fails
      */
     public void stopServer(boolean deleteExtractedDir) throws MicroGWTestException;
 

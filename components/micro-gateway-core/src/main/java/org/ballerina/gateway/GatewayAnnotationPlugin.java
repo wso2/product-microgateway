@@ -77,7 +77,7 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
         }
     }
 
-    // Extract annotations attached  to service<> objects
+    // Extract annotations attached  to rest<> objects
     @Override
     public void process(ServiceNode serviceNode, List<AnnotationAttachmentNode> annotations) {
 

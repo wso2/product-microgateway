@@ -40,7 +40,7 @@ public class TestExecutionListener implements IExecutionListener {
 
     /**
      * This method will execute before all the test classes are executed and this will start a server
-     * with sample service files deployed.
+     * with sample rest files deployed.
      *
      */
     @Override
@@ -106,7 +106,7 @@ public class TestExecutionListener implements IExecutionListener {
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isDirectory()) {
-                    log.info("Searching service ballerina files in " + file.getPath());
+                    log.info("Searching rest ballerina files in " + file.getPath());
                     listFiles(file.getAbsolutePath(), list);
                 } else {
                     if (file.getPath().endsWith(Constants.SERVICE_FILE_EXTENSION)) {
