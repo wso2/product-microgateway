@@ -60,6 +60,14 @@ public class GatewayCmdUtils {
         return codeGenerationContext;
     }
 
+    /**
+     * Read file as string
+     *
+     * @param path to the file
+     * @param inResource whether file is in resources directory of jar or not
+     * @return file content
+     * @throws IOException if file read went wrong
+     */
     public static String readFileAsString(String path, boolean inResource) throws IOException {
         InputStream is = null;
         if (inResource) {
@@ -100,6 +108,12 @@ public class GatewayCmdUtils {
         return sb.toString();
     }
 
+    /**
+     * Create usage exception
+     *
+     * @param errorMsg error message
+     * @return created usage exception
+     */
     public static CliLauncherException createUsageException(String errorMsg) {
         CliLauncherException launcherException = new CliLauncherException();
         launcherException.addMessage("micro-gw: " + errorMsg);
@@ -107,6 +121,12 @@ public class GatewayCmdUtils {
         return launcherException;
     }
 
+    /**
+     * Convert first letter to lower case
+     *
+     * @param s string
+     * @return first letter lower case string
+     */
     public static String makeFirstLetterLowerCase(String s) {
         if (s == null) {
             return null;
@@ -116,6 +136,12 @@ public class GatewayCmdUtils {
         return new String(c);
     }
 
+    /**
+     * Encrypt given value with provided secret
+     * @param value value to encrypt
+     * @param secret encryption key
+     * @return encrypted value
+     */
     public static String encrypt(String value, String secret) {
         try {
             AESCipherTool cipherTool = new AESCipherTool(secret);
@@ -125,6 +151,12 @@ public class GatewayCmdUtils {
         }
     }
 
+    /**
+     * Decrypt given value with provided secret
+     * @param value value to decrypt
+     * @param secret decryption key
+     * @return decrypted value
+     */
     public static String decrypt(String value, String secret) {
         try {
             AESCipherTool cipherTool = new AESCipherTool(secret);
@@ -134,7 +166,13 @@ public class GatewayCmdUtils {
         }
     }
 
-    public static void storeProjectRootLocation(String projectRoot) throws IOException {
+    /**
+     * Store workspace location
+     *
+     * @param workspacePath project workspace location
+     * @throws IOException if file write went wrong
+     */
+    public static void storeWorkspaceLocation(String workspacePath) throws IOException {
         String tempDirPath = getTempFolderLocation();
         createFolderIfNotExist(tempDirPath);
 
@@ -147,41 +185,75 @@ public class GatewayCmdUtils {
         //Write Content
         try {
             writer = new FileWriter(pathFile);
-            writer.write(projectRoot);
+            writer.write(workspacePath);
         } finally {
             writer.close();
         }
     }
 
-    public static String getStoredProjectRootLocation() throws IOException {
-        String projectRootHolderFileLocation = getProjectRootHolderFileLocation();
-        if (new File(projectRootHolderFileLocation).exists()) {
-            return readFileAsString(projectRootHolderFileLocation, false);
+    /**
+     * Retrieve stored workspace location
+     * @return workspace location
+     * @throws IOException if file read went wrong
+     */
+    public static String getStoredWorkspaceLocation() throws IOException {
+        String workspaceLocation = getProjectRootHolderFileLocation();
+        if (new File(workspaceLocation).exists()) {
+            return readFileAsString(workspaceLocation, false);
         } else {
             return null;
         }
     }
 
+    /**
+     * Get cli home location
+     *
+     * @return cli home location
+     */
     public static String getCLIHome() {
         return System.getenv(GatewayCliConstants.CLI_HOME);
     }
 
+    /**
+     * Get resources file directory path
+     *
+     * @return resources file directory path
+     */
     public static String getResourceFolderLocation() {
         return System.getenv(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
     }
 
+    /**
+     * Get filters folder location
+     *
+     * @return filters folder location
+     */
     public static String getFiltersFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
     }
 
+    /**
+     * Get config folder location
+     *
+     * @return config folder location
+     */
     public static String getConfigFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
     }
 
+    /**
+     * Get workspace root holder file path
+     *
+     * @return workspace root holder file path
+     */
     private static String getProjectRootHolderFileLocation() {
         return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
     }
 
+    /**
+     * Get temp folder location
+     * @return temp folder location
+     */
     private static String getTempFolderLocation() {
         return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
     }
@@ -465,6 +537,13 @@ public class GatewayCmdUtils {
         copyFolder(sourceFolder, destinationFolder);
     }
 
+    /**
+     * Copy files to resources directory
+     *
+     * @param sourcePath source directory path
+     * @param destinationPath destionation directory path
+     * @throws IOException if file copy went wrong
+     */
     public static void copyFilesToSources(String sourcePath, String destinationPath) throws IOException {
         Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
     }
@@ -518,6 +597,12 @@ public class GatewayCmdUtils {
         return folder;
     }
 
+    /**
+     * Create initial label configuration
+     * @param root workspace location
+     * @param label label name
+     * @throws IOException if file create went wrong
+     */
     public static void createLabelConfig(String root, String label) throws IOException {
         String mainConfig = getLabelConfigDirPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
         File file = new File(mainConfig);

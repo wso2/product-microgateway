@@ -43,8 +43,6 @@ import java.util.List;
  * This class generates Ballerina Services/Clients for a provided OAS definition.
  */
 public class CodeGenerator {
-    private String srcPackage;
-    private String modelPackage;
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -65,8 +63,7 @@ public class CodeGenerator {
         for (ExtendedAPI api : apis) {
             parser = new SwaggerParser();
             swagger = parser.parse(api.getApiDefinition());
-            definitionContext = new BallerinaService().buildContext(swagger, api).srcPackage(srcPackage)
-                    .modelPackage(srcPackage);
+            definitionContext = new BallerinaService().buildContext(swagger, api);
             genFiles.add(generateService(definitionContext));
         }
         genFiles.add(generateCommonEndpoints());
@@ -88,10 +85,10 @@ public class CodeGenerator {
     private GenSrcFile generateService(BallerinaService context) throws IOException {
         GenSrcFile sourceFile = null;
         String concatTitle = context.getQualifiedServiceName();
-        String srcFile = concatTitle + ".bal";
+        String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.SERVICE_TEMPLATE_NAME);
-        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent);
+        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
         return sourceFile;
     }
 
@@ -107,7 +104,7 @@ public class CodeGenerator {
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
         String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.ENDPOINT_TEMPLATE_NAME);
-        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, endpointContent);
+        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
         return sourceFile;
     }
 
@@ -127,21 +124,5 @@ public class CodeGenerator {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
         return template.apply(context);
-    }
-
-    public String getSrcPackage() {
-        return srcPackage;
-    }
-
-    public void setSrcPackage(String srcPackage) {
-        this.srcPackage = srcPackage;
-    }
-
-    public String getModelPackage() {
-        return modelPackage;
-    }
-
-    public void setModelPackage(String modelPackage) {
-        this.modelPackage = modelPackage;
     }
 }

@@ -25,6 +25,13 @@ import java.nio.charset.StandardCharsets;
 
 public class TokenManagementUtil {
 
+    /**
+     * Get input string as string
+     *
+     * @param input input stream
+     * @return inout stream content as string
+     * @throws IOException if read went wrong
+     */
     public static String getResponseString(InputStream input) throws IOException {
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             String file = "";

@@ -37,7 +37,9 @@ import java.nio.charset.StandardCharsets;
 
 public class OAuthServiceImpl implements OAuthService {
 
-    @Override
+    /**
+     * @see OAuthService#generateAccessToken(String, char[])
+     */
     public String generateAccessToken(String username, char[] password) {
         URL url;
         HttpsURLConnection urlConn = null;
@@ -82,8 +84,10 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    @Override
-    public String generateClientIdAndSecret(String root, char[] password) {
+    /**
+     * @see OAuthService#generateAccessToken(String, char[])
+     */
+    public void generateClientIdAndSecret(char[] password) {
         URL url;
         HttpURLConnection urlConn = null;
         try {
@@ -118,7 +122,7 @@ public class OAuthServiceImpl implements OAuthService {
                 String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
                 config.getToken().setClientSecret(encryptedSecret);
                 config.getToken().setClientId(clientId);
-                String configPath = GatewayCmdUtils.getMainConfigLocation(root);
+                String configPath = GatewayCmdUtils.getMainConfigLocation(GatewayCmdUtils.getStoredWorkspaceLocation());
                 TOMLConfigParser.write(configPath, config);
                 GatewayCmdUtils.setConfig(config);
             } else { //If DCR call fails
@@ -132,6 +136,5 @@ public class OAuthServiceImpl implements OAuthService {
                 urlConn.disconnect();
             }
         }
-        return null;
     }
 }
