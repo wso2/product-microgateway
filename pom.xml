@@ -282,6 +282,11 @@
                 <artifactId>toml4j</artifactId>
                 <version>${toml.parser.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>lib-creator</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -338,7 +343,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>0.973.0</ballerina.platform.version>
+        <ballerina.platform.version>0.974.0</ballerina.platform.version>
         <assembly.plugin.version>2.5.2</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
         <shade.plugin.version>2.4.3</shade.plugin.version>
