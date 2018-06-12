@@ -73,8 +73,8 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         authConfig:{
-            authProviders:["oauth2"],
-            authentication:{enabled:true} {{#if scope}},
+            authProviders:["oauth2"] {{#unless isSecured}},
+            authentication:{enabled:false} {{/unless}} {{#if scope}},
             scopes: ["{{scope}}"] {{/if}}
 
         }

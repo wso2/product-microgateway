@@ -25,7 +25,7 @@ import ballerina/reflect;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
-    boolean isSecured;
+    boolean isSecured = true;
     match resourceLevelAuthAnn.authentication {
         http:Authentication authn => {
             isSecured = authn.enabled;
@@ -278,8 +278,8 @@ public function getClientIp(http:Request request) returns (string) {
     return clientIp;
 }
 
-public function extractAccessToken (http:Request req) returns (string|error) {
-    string authHeader = req.getHeader(AUTH_HEADER);
+public function extractAccessToken (http:Request req, string authHeaderName) returns (string|error) {
+    string authHeader = req.getHeader(authHeaderName);
     string[] authHeaderComponents = authHeader.split(" ");
     if(lengthof authHeaderComponents != 2){
         return handleError("Incorrect bearer authentication header format");
@@ -351,7 +351,7 @@ public function getAuthorizationHeader(reflect:annotationData[] annData) returns
     APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(annData);
     string authHeader = apiConfig.authorizationHeader;
     if (authHeader == "") {
-        authHeader = getConfigValue(LISTENER_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
     }
     return authHeader;
 

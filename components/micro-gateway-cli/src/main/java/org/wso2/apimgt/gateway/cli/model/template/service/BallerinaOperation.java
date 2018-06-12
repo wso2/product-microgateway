@@ -36,6 +36,8 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
 
     public static final String X_THROTTLING_TIER = "x-throttling-tier";
     public static final String X_SCOPE = "x-scope";
+    public static final String X_AUTH_TYPE = "x-auth-type";
+    public static final String AUTH_TYPE_NONE = "None";
     private List<String> tags;
     private String summary;
     private String description;
@@ -45,6 +47,7 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
     private List<BallerinaParameter> parameters;
     private List<String> methods;
     private String scope;
+    private boolean isSecured = true;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -70,6 +73,12 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         resourceTier.ifPresent(value -> this.resourceTier = value.toString());
         Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
         scopes.ifPresent(value -> this.scope = value.toString());
+        Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
+        authType.ifPresent(value -> {
+            if (AUTH_TYPE_NONE.equals(value)) {
+                this.isSecured = false;
+            }
+        });
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
@@ -152,5 +161,13 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public boolean isSecured() {
+        return isSecured;
+    }
+
+    public void setSecured(boolean secured) {
+        isSecured = secured;
     }
 }

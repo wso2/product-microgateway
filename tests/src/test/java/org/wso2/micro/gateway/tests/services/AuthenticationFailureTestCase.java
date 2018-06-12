@@ -63,8 +63,7 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
                 .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
-        Assert.assertTrue(response.getData().contains("No authorization header was provided"),
-                "Message " + "content mismatched");
+        Assert.assertTrue(response.getData().contains("Missing Credentials"), "Message content mismatched");
     }
 
     @Test(description = "Test with invalid token")
