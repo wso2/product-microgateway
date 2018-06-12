@@ -139,14 +139,12 @@ do
     elif ([ "$CMD_LABEL" = "--label" ] || [ "$CMD_LABEL" = "-l" ]) && [ -z "$CMD_LABEL_VAL" ]; then
           CMD_LABEL_VAL=$c
     fi
-    echo $c
 done
 
 #execute build command
 if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
     MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL"
     pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
-        echo $PWD
         # clean the content of target folder
         if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
             rm -r $MICRO_GW_LABEL_PROJECT_DIR/target
@@ -157,7 +155,6 @@ if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PR
 elif [ "$CMD_COMMAND" = "run" ] && [ "$CMD_LABEL_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
     MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_LABEL_VAL/target"
     pushd $MICRO_GW_LABEL_PROJECT_TARGET_DIR> /dev/null
-        echo $PWD
         ballerina run $CMD_LABEL_VAL.balx
         exit 1
     popd > /dev/null
@@ -207,9 +204,6 @@ fi
 
 # ----- Execute The Requested Command -----------------------------------------
 
-#echo JAVA_HOME environment variable is set to $JAVA_HOME
-#echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
-
 $JAVACMD \
 	-Xms256m -Xmx1024m \
 	-XX:+HeapDumpOnOutOfMemoryError \
@@ -221,4 +215,4 @@ $JAVACMD \
 	-Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" \
 	-Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" \
 	-Dfile.encoding=UTF8 \
-	org.wso2.apimgt.gateway.codegen.cmd.Main "$@"
+	org.wso2.apimgt.gateway.cli.cmd.Main "$@"

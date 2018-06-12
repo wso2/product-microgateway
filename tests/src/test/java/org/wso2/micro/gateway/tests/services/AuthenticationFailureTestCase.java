@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Testing the pizza_shack api service for authentication error messages
+ * Testing the pizza_shack api rest for authentication error messages
  */
 public class AuthenticationFailureTestCase extends IntegrationTestCase {
     private ServerInstance microGWServer;

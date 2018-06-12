@@ -173,7 +173,7 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
             authProviderIds = providers;
         }
         () => {
-            // no auth providers found in resource level, try in service level
+            // no auth providers found in resource level, try in rest level
             match serviceLevelAuthAnn.authProviders {
                 string[] providers => {
                     authProviderIds = providers;

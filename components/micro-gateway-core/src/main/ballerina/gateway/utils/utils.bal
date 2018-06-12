@@ -31,7 +31,7 @@ public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn,
             isSecured = authn.enabled;
         }
         () => {
-            // if not found at resource level, check in the service level
+            // if not found at resource level, check in the rest level
             match serviceLevelAuthAnn.authentication {
                 http:Authentication authn => {
                     isSecured = authn.enabled;

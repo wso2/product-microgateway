@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.tests.context;
 
 public class Constants {
-    //Name of the system property define the location of the service distribution
+    //Name of the system property define the location of the rest distribution
     public static final String SYSTEM_PROP_SERVER_ZIP = "server.zip";
     //Name of the system property define the current dir of maven execution
     public static final String SYSTEM_PROP_BASE_DIR = "basedir";
@@ -27,7 +27,7 @@ public class Constants {
     public static final String BALLERINA_PLATFORM_DIR = "/lib/platform/";
     //Name of the script file which start the server
     public static final String BALLERINA_SERVER_SCRIPT_NAME = "ballerina";
-    //File extension the the ballerina service file
+    //File extension the the ballerina rest file
     public static final String SERVICE_FILE_EXTENSION = ".bal";
     //Default HTTP port of the server
     public static final int DEFAULT_HTTP_PORT = 9070;
