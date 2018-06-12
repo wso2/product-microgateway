@@ -213,7 +213,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         keyValidationRequest.setHeader("SOAPAction", "urn:validateKey");
         time:Time time = time:currentTime();
         int startTimeMills = time.time;
-        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request= keyValidationRequest);
+        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
         time = time:currentTime();
         int endTimeMills = time.time;
         log:printDebug("Total time taken for key validation service call : " + (endTimeMills- startTimeMills) +

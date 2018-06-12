@@ -19,7 +19,7 @@ import ballerina/http;
 import ballerina/io;
 
 endpoint http:Listener keyManagerListener {
-    port:9443
+    port:9943
 };
 
 @http:ServiceConfig {
