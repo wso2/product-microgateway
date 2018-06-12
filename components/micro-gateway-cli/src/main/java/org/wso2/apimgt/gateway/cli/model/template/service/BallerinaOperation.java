@@ -20,7 +20,7 @@ import io.swagger.models.ExternalDocs;
 import io.swagger.models.Operation;
 import io.swagger.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.rest.bean.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;

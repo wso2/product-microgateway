@@ -215,4 +215,4 @@ $JAVACMD \
 	-Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" \
 	-Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" \
 	-Dfile.encoding=UTF8 \
-	org.wso2.apimgt.gateway.codegen.cmd.Main "$@"
+	org.wso2.apimgt.gateway.cli.cmd.Main "$@"

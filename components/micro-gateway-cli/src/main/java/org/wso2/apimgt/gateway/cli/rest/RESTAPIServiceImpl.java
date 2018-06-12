@@ -111,7 +111,6 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
-                System.out.println(responseStr);
                 //convert json string to object
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);
                 List<ApplicationThrottlePolicyDTO> policyDTOS = appsList.getList();
@@ -239,9 +238,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
             JsonNode sandboxEndpoints = rootNode.withArray("sandbox_endpoints");
             if (sandboxEndpoints != null) {
-                Iterator<JsonNode> sandboxEndointIterator = sandboxEndpoints.iterator();
-                while (sandboxEndointIterator.hasNext()) {
-                    JsonNode node = sandboxEndointIterator.next();
+                Iterator<JsonNode> sandboxEndpointIterator = sandboxEndpoints.iterator();
+                while (sandboxEndpointIterator.hasNext()) {
+                    JsonNode node = sandboxEndpointIterator.next();
                     Endpoint endpoint = new Endpoint();
                     endpoint.setEndpointUrl(node.get("url").asText());
                     endpointConf.addSandEndpoint(endpoint);

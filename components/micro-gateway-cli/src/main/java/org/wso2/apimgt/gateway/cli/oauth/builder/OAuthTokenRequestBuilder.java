@@ -65,7 +65,7 @@ public class OAuthTokenRequestBuilder {
     }
 
     public OAuthTokenRequestBuilder setPassword(char[] password) {
-        this.request += "&password=" + password;
+        this.request += "&password=" + new String(password);
         this.oAuthTokenRequest.setPassword(password);
         return this;
     }
@@ -77,7 +77,7 @@ public class OAuthTokenRequestBuilder {
     }
 
     public OAuthTokenRequestBuilder setGrantType(String grantType) {
-        this.request = "grant_type=" + request;
+        this.request = "grant_type=" + grantType;
         oAuthTokenRequest.setGrantType(grantType);
         return this;
     }

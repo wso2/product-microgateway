@@ -84,7 +84,7 @@ public class Main {
                 String storedProjectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
                 if (StringUtils.isBlank(storedProjectRoot)) {
                     outStream.println("Stored workspace path not available. "
-                                       + "You need to specify --path <path to generate resources>");
+                            + "You need to specify --path <path to generate resources>");
                     Runtime.getRuntime().exit(1);
                 }
                 projectRoot = storedProjectRoot;
@@ -126,6 +126,7 @@ public class Main {
 
     /**
      * Get the invoke CMD from the specified arguments
+     *
      * @param args list of arguments
      * @return invoked CMD
      */
@@ -279,7 +280,7 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
                 outStream.println("Stored workspace path not available. "
-                                    + "You need to specify --path <path to generate resources>");
+                        + "You need to specify --path <path to generate resources>");
                 Runtime.getRuntime().exit(1);
             }
 
@@ -300,11 +301,15 @@ public class Main {
             if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
                 if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                     if (username.trim().isEmpty()) {
-                        username = promptForTextInput("Username can't be empty; enter secret: ");
+                        username = promptForTextInput("Username can't be empty; enter username: ");
                         if (username.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
+                        } else {
+                            config.getToken().setUsername(username);
                         }
                     }
+                } else {
+                    config.getToken().setUsername(username);
                 }
             }
 
@@ -314,11 +319,13 @@ public class Main {
                         password = promptForPasswordInput("Password can't be empty; enter password: ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
-                        } else {
-                            config.getToken().setUsername(username);
                         }
                     }
                 }
+            }
+
+            if(StringUtils.isEmpty(username)) {
+                username = config.getToken().getUsername();
             }
 
             OAuthService manager = new OAuthServiceImpl();

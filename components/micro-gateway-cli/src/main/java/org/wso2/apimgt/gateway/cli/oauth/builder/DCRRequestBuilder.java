@@ -27,7 +27,7 @@ public class DCRRequestBuilder {
     ObjectMapper mapper;
     ObjectNode request;
 
-    public void DCRRequest() {
+    public DCRRequestBuilder() {
         this.dcrRequest = new DCRRequest();
         this.mapper = new ObjectMapper();
         this.request = mapper.createObjectNode();
