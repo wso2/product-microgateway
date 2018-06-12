@@ -33,7 +33,7 @@ import org.wso2.apimgt.gateway.codegen.model.ThrottlePolicyInitializer;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants;
+import org.wso2.apimgt.gateway.codegen.constants.GeneratorConstants;
 
 import java.io.IOException;
 import java.io.PrintWriter;

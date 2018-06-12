@@ -15,21 +15,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package org.wso2.apimgt.gateway.codegen.service;
 
-package org.wso2.apimgt.gateway.codegen.model;
+import org.wso2.apimgt.gateway.codegen.service.bean.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
 
-import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.codegen.config.bean.ContainerConfig;
+import java.util.List;
 
-public class ListenerEndpoint {
-    private ContainerConfig containerConfig;
+public interface APIService {
+    List<ExtendedAPI> getAPIs(String labelId, String accessToken);
 
-    public ListenerEndpoint buildContext() {
-        this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        return this;
-    }
+    List<ApplicationThrottlePolicyDTO> getApplicationPolicies(String token);
 
-    public ContainerConfig getContainerConfig() {
-        return containerConfig;
-    }
+    List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String token);
 }

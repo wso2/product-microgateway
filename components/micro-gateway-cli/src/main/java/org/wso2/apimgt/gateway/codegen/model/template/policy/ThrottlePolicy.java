@@ -20,7 +20,7 @@ package org.wso2.apimgt.gateway.codegen.model;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.RequestCountLimitDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants;
+import org.wso2.apimgt.gateway.codegen.constants.GeneratorConstants;
 
 import java.util.concurrent.TimeUnit;
 

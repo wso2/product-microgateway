@@ -1,4 +1,4 @@
-package org.wso2.apimgt.gateway.codegen.model;/*
+/*
  * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
@@ -15,10 +15,11 @@ package org.wso2.apimgt.gateway.codegen.model;/*
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.apimgt.gateway.codegen.model;
 
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.codegen.service.bean.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.codegen.utils.GeneratorConstants;
+import org.wso2.apimgt.gateway.codegen.constants.GeneratorConstants;
 
 import java.util.ArrayList;
 import java.util.List;

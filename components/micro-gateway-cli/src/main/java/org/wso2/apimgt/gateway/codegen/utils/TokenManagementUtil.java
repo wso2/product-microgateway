@@ -15,11 +15,24 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.wso2.apimgt.gateway.codegen.token;
+package org.wso2.apimgt.gateway.codegen.utils;
 
-public interface TokenManagement {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-    String generateAccessToken(String username, char[] password);
+public class TokenManagementUtil {
 
-    String generateClientIdAndSecret(String root, char[] password);
+    public static String getResponseString(InputStream input) throws IOException {
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+            String file = "";
+            String str;
+            while ((str = buffer.readLine()) != null) {
+                file += str;
+            }
+            return file;
+        }
+    }
 }

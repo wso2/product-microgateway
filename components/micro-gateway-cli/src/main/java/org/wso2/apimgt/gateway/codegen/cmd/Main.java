@@ -248,7 +248,7 @@ public class Main {
         @Parameter(names = {"-l", "--label"}, hidden = true)
         private String label;
 
-        @Parameter(names = {"-r", "--reset"}, hidden = true)
+        @Parameter(names = {"--reset"}, hidden = true)
         private boolean reset;
 
         @Parameter(names = {"--path"}, hidden = true)
@@ -302,6 +302,8 @@ public class Main {
                         password = promptForPasswordInput("Password can't be empty; enter password: ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
+                        } else {
+                            config.getToken().setUsername(username);
                         }
                     }
                 }
@@ -309,8 +311,9 @@ public class Main {
 
             TokenManagement manager = new TokenManagementImpl();
             String clientId = config.getToken().getClientId();
+
             if (StringUtils.isEmpty(clientId)) {
-                manager.generateClientIdAndSecret(config, projectRoot, password.toCharArray());
+                manager.generateClientIdAndSecret(projectRoot, password.toCharArray());
             }
 
             String accessToken = manager.generateAccessToken(username, password.toCharArray());

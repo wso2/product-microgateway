@@ -19,20 +19,15 @@ package org.wso2.apimgt.gateway.codegen.token;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.wso2.apimgt.gateway.codegen.cmd.GatewayCliConstants;
 import org.wso2.apimgt.gateway.codegen.cmd.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.codegen.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.codegen.config.bean.Config;
 import org.wso2.apimgt.gateway.codegen.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.codegen.utils.TokenManagementUtil;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.bind.DatatypeConverter;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -43,29 +38,32 @@ public class TokenManagementImpl implements TokenManagement {
     public String generateAccessToken(String username, char[] password) {
         URL url;
         HttpsURLConnection urlConn = null;
-        //calling token endpoint
         try {
             Config config = GatewayCmdUtils.getConfig();
             String clientId = config.getToken().getClientId();
             String clientSecret = GatewayCmdUtils.decrypt(config.getToken().getClientSecret(), new String(password));
             url = new URL(config.getToken().getTokenEndpoint());
             urlConn = (HttpsURLConnection) url.openConnection();
-            urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("POST");
-            urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConn.setRequestMethod(TokenManagementConstants.POST);
+            urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
+                    TokenManagementConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
             String clientEncoded = DatatypeConverter.printBase64Binary(
-                    (clientId + ':' + new String(clientSecret)).getBytes(StandardCharsets.UTF_8));
-            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
-            String postParams = "grant_type=password&username=" + username + "&password=" + new String(password);
-            postParams += "&scope=" + TokenManagementConstants.REQUESTED_TOKEN_SCOPE;
-            urlConn.getOutputStream().write((postParams).getBytes("UTF-8"));
-            System.out.println(postParams);
+                    (clientId + ':' + clientSecret).getBytes(StandardCharsets.UTF_8));
+            urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
+                                        TokenManagementConstants.BASIC + " " + clientEncoded);
+            urlConn.setDoOutput(true);
+            String postBody = new OAuthTokenRequestBuilder().setClientKey(clientId)
+                                .setClientSecret(clientSecret.toCharArray())
+                                .setGrantType(TokenManagementConstants.PASSWORD).setPassword(password)
+                                .setScopes(new String[] {TokenManagementConstants.REQUESTED_TOKEN_SCOPE})
+                                .setUsername(username).requestBody();
+            urlConn.getOutputStream().write((postBody).getBytes(TokenManagementConstants.UTF_8));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = getResponseString(urlConn.getInputStream());
+                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 JsonNode rootNode = mapper.readTree(responseStr);
-                String accessToken = rootNode.path("access_token").asText();
+                String accessToken = rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
                 return accessToken;
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
@@ -81,39 +79,39 @@ public class TokenManagementImpl implements TokenManagement {
     }
 
     @Override
-    public String generateClientIdAndSecret(Config config, String root, char[] password) {
+    public String generateClientIdAndSecret(String root, char[] password) {
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode application = mapper.createObjectNode();
-            application.put(TokenManagementConstants.CALLBACK_URL, TokenManagementConstants.APPLICATION_CALLBACK_URL);
-            application.put(TokenManagementConstants.CLIENT_NAME, TokenManagementConstants.APPLICATION_NAME);
-            application.put(TokenManagementConstants.TOKEN_SCOPE, TokenManagementConstants.REQUESTED_TOKEN_SCOPE);
-            application.put(TokenManagementConstants.OWNER, "admin");
-            application.put(TokenManagementConstants.GRANT_TYPE, TokenManagementConstants.PASSWORD_GRANT_TYPE);
-            System.out.println(application.toString());
-
-            // Calling DCR endpoint
+            Config config = GatewayCmdUtils.getConfig();
+            String username = config.getToken().getUsername();
+            String requestBody = new DCRRequestBuilder().setCallbackUrl(TokenManagementConstants.APPLICATION_CALLBACK_URL)
+                                    .setClientName(TokenManagementConstants.APPLICATION_NAME)
+                                    .setOwner(username).setSaasApp(true)
+                                    .setGrantTypes(new String[] {TokenManagementConstants.PASSWORD_GRANT_TYPE})
+                                    .setTokenScope(TokenManagementConstants.TOKEN_SCOPE_PRODUCTION).requestBody();
             String dcrEndpoint = config.getToken().getRegistrationEndpoint();
+            ObjectMapper mapper = new ObjectMapper();
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setRequestMethod(TokenManagementConstants.POST);
+            urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
+                                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
             urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("POST");
-            urlConn.setRequestProperty("Content-Type", "application/json");
-            String clientEncoded = DatatypeConverter.printBase64Binary(("admin" + ':' + "admin")
+            String clientEncoded = DatatypeConverter.printBase64Binary((username + ':' + new String(password))
                     .getBytes(StandardCharsets.UTF_8));
-            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
-            urlConn.getOutputStream().write((application.toString()).getBytes("UTF-8"));
+            urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
+                                        TokenManagementConstants.BASIC + " " + clientEncoded);
+            urlConn.getOutputStream().write(requestBody.getBytes(TokenManagementConstants.UTF_8));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
-                String responseStr = getResponseString(urlConn.getInputStream());
+                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 JsonNode rootNode = mapper.readTree(responseStr);
-                JsonNode clientIdNode = rootNode.path("clientId");
-                JsonNode clientSecretNode = rootNode.path("clientSecret");
+                JsonNode clientIdNode = rootNode.path(TokenManagementConstants.CLIENT_ID);
+                JsonNode clientSecretNode = rootNode.path(TokenManagementConstants.CLIENT_SECRET);
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
-                String encryptedSecret = GatewayCmdUtils.decrypt(clientSecret, new String(password));
+                String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
                 config.getToken().setClientSecret(encryptedSecret);
                 config.getToken().setClientId(clientId);
                 String configPath = GatewayCmdUtils.getMainConfigLocation(root);
@@ -131,16 +129,5 @@ public class TokenManagementImpl implements TokenManagement {
             }
         }
         return null;
-    }
-
-    private static String getResponseString(InputStream input) throws IOException {
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-            String file = "";
-            String str;
-            while ((str = buffer.readLine()) != null) {
-                file += str;
-            }
-            return file;
-        }
     }
 }

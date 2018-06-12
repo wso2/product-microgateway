@@ -15,11 +15,21 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.wso2.apimgt.gateway.codegen.token;
 
-public interface TokenManagement {
+package org.wso2.apimgt.gateway.codegen.model;
 
-    String generateAccessToken(String username, char[] password);
+import org.wso2.apimgt.gateway.codegen.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.codegen.model.config.ContainerConfig;
 
-    String generateClientIdAndSecret(String root, char[] password);
+public class ListenerEndpoint {
+    private ContainerConfig containerConfig;
+
+    public ListenerEndpoint buildContext() {
+        this.containerConfig = GatewayCmdUtils.getContainerConfig();
+        return this;
+    }
+
+    public ContainerConfig getContainerConfig() {
+        return containerConfig;
+    }
 }
