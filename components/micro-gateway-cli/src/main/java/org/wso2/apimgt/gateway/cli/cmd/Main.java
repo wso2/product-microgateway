@@ -81,7 +81,7 @@ public class Main {
         try {
             String projectRoot;
             if (StringUtils.isBlank(overrideProjectRootPath)) {
-                String storedProjectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
+                String storedProjectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
                 if (StringUtils.isBlank(storedProjectRoot)) {
                     outStream.println("Stored workspace path not available. "
                             + "You need to specify --path <path to generate resources>");
@@ -90,7 +90,7 @@ public class Main {
                 projectRoot = storedProjectRoot;
             } else {
                 projectRoot = overrideProjectRootPath;
-                GatewayCmdUtils.storeProjectRootLocation(projectRoot);
+                GatewayCmdUtils.storeWorkspaceLocation(projectRoot);
                 GatewayCmdUtils.createMainProjectStructure(projectRoot);
                 GatewayCmdUtils.createMainConfig(projectRoot);
                 GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
@@ -276,7 +276,7 @@ public class Main {
             Config config = GatewayCmdUtils.getConfig();
             String projectRoot = StringUtils.EMPTY;
             try {
-                projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
+                projectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
             } catch (IOException e) {
                 e.printStackTrace();
                 outStream.println("Stored workspace path not available. "
@@ -332,7 +332,7 @@ public class Main {
             String clientId = config.getToken().getClientId();
 
             if (StringUtils.isEmpty(clientId)) {
-                manager.generateClientIdAndSecret(projectRoot, password.toCharArray());
+                manager.generateClientIdAndSecret(password.toCharArray());
             }
 
             String accessToken = manager.generateAccessToken(username, password.toCharArray());
@@ -411,7 +411,7 @@ public class Main {
             }
 
             try {
-                String projectRoot = GatewayCmdUtils.getStoredProjectRootLocation();
+                String projectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
                 GatewayCmdUtils.createLabelGWDistribution(projectRoot, label);
             } catch (IOException e) {
                 outStream.println(

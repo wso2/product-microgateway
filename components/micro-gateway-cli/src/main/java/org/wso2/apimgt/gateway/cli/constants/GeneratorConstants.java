@@ -43,5 +43,7 @@ public class GeneratorConstants {
     public static final String APPLICATION_TIER_TYPE = "appTier";
     public static final String SUBSCRIPTION_TIER_TYPE = "subscriptionTier";
     public static final String INIT_FUNC_SUFFIX = "Policy";
+    public static final String THROTTLE_POLICY_INITIALIZER = "throttle_policy_initializer";
+    public static final String UTF_8 = "UTF-8";
 
 }
