@@ -45,6 +45,18 @@
             <directory>${basedir}/resources/filters</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/lib
+            </directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/lib
+            </directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/lib</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
