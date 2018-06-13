@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
@@ -57,8 +58,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("GET");
-            urlConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -105,8 +106,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("GET");
-            urlConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -115,7 +116,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);
                 List<ApplicationThrottlePolicyDTO> policyDTOS = appsList.getList();
                 for (ApplicationThrottlePolicyDTO policyDTO : policyDTOS ) {
-                    if(!"Unlimited".equalsIgnoreCase(policyDTO.getPolicyName())){
+                    if(!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())){
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
@@ -150,8 +151,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("GET");
-            urlConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER
+                                                + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -160,7 +162,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 subsList = mapper.readValue(responseStr, SubscriptionThrottlePolicyListDTO.class);
                 List<SubscriptionThrottlePolicyDTO> policyDTOS = subsList.getList();
                 for (SubscriptionThrottlePolicyDTO policyDTO : policyDTOS ) {
-                    if(!"Unlimited".equalsIgnoreCase(policyDTO.getPolicyName())){
+                    if(!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())){
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
@@ -183,66 +185,67 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         JsonNode rootNode = null;
         EndpointConfig endpointConf = new EndpointConfig();
         rootNode = mapper.readTree(endpointConfig);
-        String endpointType = rootNode.path("endpoint_type").asText();
+        String endpointType = rootNode.path(RESTServiceConstants.ENDPOINT_TYPE).asText();
         endpointConf.setEndpointType(endpointType);
 
-        if ("http".equalsIgnoreCase(endpointType) || "failover".equalsIgnoreCase(endpointType)) {
-            JsonNode prodEndpointNode = rootNode.get("production_endpoints");
+        if (RESTServiceConstants.HTTP.equalsIgnoreCase(endpointType) || RESTServiceConstants.FAILOVER.
+                                                    equalsIgnoreCase(endpointType)) {
+            JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
             if (prodEndpointNode != null) {
                 Endpoint prod = new Endpoint();
-                prod.setEndpointUrl(prodEndpointNode.get("url").asText());
+                prod.setEndpointUrl(prodEndpointNode.get(RESTServiceConstants.URL).asText());
                 endpointConf.addProdEndpoint(prod);
             }
 
-            JsonNode sandEndpointNode = rootNode.get("sandbox_endpoints");
+            JsonNode sandEndpointNode = rootNode.get(RESTServiceConstants.SANDBOX_ENDPOINTS);
             if (sandEndpointNode != null) {
                 Endpoint sandbox = new Endpoint();
-                sandbox.setEndpointUrl(sandEndpointNode.get("url").asText());
+                sandbox.setEndpointUrl(sandEndpointNode.get(RESTServiceConstants.URL).asText());
                 endpointConf.addSandEndpoint(sandbox);
             }
 
-            if ("failover".equalsIgnoreCase(endpointType)) {
-                JsonNode prodFailoverEndpointNode = rootNode.withArray("production_failovers");
+            if (RESTServiceConstants.FAILOVER.equalsIgnoreCase(endpointType)) {
+                JsonNode prodFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.PRODUCTION_FAILOVERS);
                 if (prodFailoverEndpointNode != null) {
                     Iterator<JsonNode> prodFailoverEndointIterator = prodFailoverEndpointNode.iterator();
                     while (prodFailoverEndointIterator.hasNext()) {
                         JsonNode node = prodFailoverEndointIterator.next();
                         Endpoint endpoint = new Endpoint();
-                        endpoint.setEndpointUrl(node.get("url").asText());
+                        endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                         endpointConf.addProdFailoverEndpoint(endpoint);
                     }
                 }
 
-                JsonNode sandFailoverEndpointNode = rootNode.withArray("sandbox_failovers");
+                JsonNode sandFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.SANDBOX_FAILOVERS);
                 if (sandFailoverEndpointNode != null) {
                     Iterator<JsonNode> sandboxFailoverEndointIterator = sandFailoverEndpointNode.iterator();
                     while (sandboxFailoverEndointIterator.hasNext()) {
                         JsonNode node = sandboxFailoverEndointIterator.next();
                         Endpoint endpoint = new Endpoint();
-                        endpoint.setEndpointUrl(node.get("url").asText());
+                        endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                         endpointConf.addSandFailoverEndpoint(endpoint);
                     }
                 }
             }
-        } else if ("load_balance".equalsIgnoreCase(endpointType)) {
-            JsonNode prodEndoints = rootNode.withArray("production_endpoints");
-            if (prodEndoints != null) {
-                Iterator<JsonNode> prodEndointIterator = prodEndoints.iterator();
+        } else if (RESTServiceConstants.LOAD_BALANCE.equalsIgnoreCase(endpointType)) {
+            JsonNode prodEndpoints = rootNode.withArray(RESTServiceConstants.PRODUCTION_ENDPOINTS);
+            if (prodEndpoints != null) {
+                Iterator<JsonNode> prodEndointIterator = prodEndpoints.iterator();
                 while (prodEndointIterator.hasNext()) {
                     JsonNode node = prodEndointIterator.next();
                     Endpoint endpoint = new Endpoint();
-                    endpoint.setEndpointUrl(node.get("url").asText());
+                    endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                     endpointConf.addProdEndpoint(endpoint);
                 }
             }
 
-            JsonNode sandboxEndpoints = rootNode.withArray("sandbox_endpoints");
+            JsonNode sandboxEndpoints = rootNode.withArray(RESTServiceConstants.SANDBOX_ENDPOINTS);
             if (sandboxEndpoints != null) {
                 Iterator<JsonNode> sandboxEndpointIterator = sandboxEndpoints.iterator();
                 while (sandboxEndpointIterator.hasNext()) {
                     JsonNode node = sandboxEndpointIterator.next();
                     Endpoint endpoint = new Endpoint();
-                    endpoint.setEndpointUrl(node.get("url").asText());
+                    endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                     endpointConf.addSandEndpoint(endpoint);
                 }
             }
