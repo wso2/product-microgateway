@@ -201,3 +201,5 @@
 @final int UNAUTHORIZED = 401;
 
 // end of http codes
+
+@final string PATH_SEPERATOR = "/";

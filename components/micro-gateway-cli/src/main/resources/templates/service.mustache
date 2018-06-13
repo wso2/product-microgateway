@@ -34,7 +34,7 @@ endpoint http:Client {{qualifiedServiceName}}_EP {
 }
 
 @http:ServiceConfig {
-    basePath: "{{api.context}}/{{api.version}}",{{!-- {{only one base path is allowed for all endpoints}} --}}
+    basePath: "{{api.context}}{{#unless api.isDefaultVersion}}/{{api.version}}{{/unless}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
         authProviders:["oauth2"],
         authentication:{enabled:true}
@@ -81,7 +81,11 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     {{operationId}} (endpoint outboundEp, http:Request req) {
+    {{#if api.isDefaultVersion}}
+    string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
+    {{else}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
+    {{/if}}
     var clientResponse = {{qualifiedServiceName}}_EP->forward(urlPostfix, req);
 
         match clientResponse {
