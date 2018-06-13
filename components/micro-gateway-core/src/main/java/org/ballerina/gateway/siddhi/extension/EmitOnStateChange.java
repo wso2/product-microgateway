@@ -43,13 +43,15 @@ import java.util.Map;
 
 /**
  * This is a custom extension, written for a certain throttler.
- * Upon arrival of a request, looking at the key in the request, this throttler first decides whether to throttle the request or not.
+ * Upon arrival of a request, looking at the key in the request, this throttler first decides whether to throttle
+ * the request or not.
  * If that decision is different to what it was for the previous request (with the same key),
  * then this processor emits this request as an event; hence the name emitOnStateChange.
  * <p/>
  * If this request is the first request from a certain key, then that requested will be emitted out.
  * <p/>
- * This is useful when the throttler needs to alert only when the throttling decision is changed, in contrast to alerting about every decision taken.
+ * This is useful when the throttler needs to alert only when the throttling decision is changed, in contrast to
+ * alerting about every decision taken.
  * <p/>
  * Usage:
  * throttler:emitOnStateChange(key, isThrottled)
