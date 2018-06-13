@@ -69,7 +69,7 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/security</outputDirectory>
         </file>
         <file>
-            <source>${basedir}/resources/bin/micro-gw.sh</source>
+            <source>${basedir}/resources/bin/micro-gw</source>
             <outputDirectory>wso2am-micro-gw-${pom.version}/bin</outputDirectory>
         </file>
     </files>
