@@ -316,12 +316,15 @@ public class GatewayCmdUtils {
                 + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
         copyTargetDistBinScripts(projectRoot, labelName);
         copyTargetDistBalx(projectRoot, labelName);
+
+        //copy micro-gw.conf file to the distribution
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getConfigFolderLocation() + File.separator
+                + GatewayCliConstants.GW_DIST_CONF_FILE, gwDistPath + File.separator
+                + GatewayCliConstants.GW_DIST_CONF + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE);
+
+        //creating an archive of the distribution
         ZipUtils.zip(distPath, getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator + File.separator
                 + GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getConfigFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_CONF_FILE,
-                GatewayCmdUtils.getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator
-                        + GatewayCliConstants.PROJECT_CONF_FILE);
     }
 
     /**

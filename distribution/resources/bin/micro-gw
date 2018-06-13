@@ -53,18 +53,22 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# if MICROGW_TOOLKIT_HOME environment variable not set then set it relative to the micro-gw binary location
+if [[ -z "${MICROGW_TOOLKIT_HOME}" ]]; then
+  export MICROGW_TOOLKIT_HOME=`cd "$PRGDIR/.." ; pwd`
+fi
+
 # set BALLERINA_HOME
-export CLI_HOME=`cd "$PRGDIR/.." ; pwd`
-BALLERINA_HOME="$CLI_HOME/lib/platform"
+BALLERINA_HOME="$MICROGW_TOOLKIT_HOME/lib/platform"
 
 echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
-echo CLI_HOME environment variable is set to $CLI_HOME
+echo MICROGW_TOOLKIT_HOME environment variable is set to $MICROGW_TOOLKIT_HOME
 
 export BALLERINA_HOME=$BALLERINA_HOME
 export PATH=$BALLERINA_HOME/bin:$PATH
 
 #reading the micro gateway source root location
-file="$CLI_HOME/temp/workspace.txt"
+file="$MICROGW_TOOLKIT_HOME/temp/workspace.txt"
 
 while IFS='' read -r line || [[ -n "$line" ]]; do
     	MICRO_GW_PROJECT_DIR="$line"
@@ -74,7 +78,7 @@ done < "$file"
 if $cygwin; then
   [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
-  [ -n "$CLI_HOME" ] && CLI_HOME=`cygpath --unix "$CLI_HOME"`
+  [ -n "$MICROGW_TOOLKIT_HOME" ] && MICROGW_TOOLKIT_HOME=`cygpath --unix "$MICROGW_TOOLKIT_HOME"`
 fi
 
 # For OS400
@@ -96,8 +100,8 @@ if $mingw ; then
     BALLERINA_HOME="`(cd "$BALLERINA_HOME"; pwd)`"
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  [ -n "$CLI_HOME" ] &&
-    CLI_HOME="`(cd "$CLI_HOME"; pwd)`"
+  [ -n "$MICROGW_TOOLKIT_HOME" ] &&
+    MICROGW_TOOLKIT_HOME="`(cd "$MICROGW_TOOLKIT_HOME"; pwd)`"
 fi
 
 if [ -z "$JAVACMD" ] ; then
@@ -189,7 +193,7 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
-for j in "$CLI_HOME"/target/*.jar
+for j in "$MICROGW_TOOLKIT_HOME"/target/*.jar
 do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
@@ -207,7 +211,7 @@ fi
 $JAVACMD \
 	-Xms256m -Xmx1024m \
 	-XX:+HeapDumpOnOutOfMemoryError \
-	-XX:HeapDumpPath="$CLI_HOME/heap-dump.hprof" \
+	-XX:HeapDumpPath="$MICROGW_TOOLKIT_HOME/heap-dump.hprof" \
 	$JAVA_OPTS \
 	-classpath "$CLI_CLASSPATH" \
 	-Djava.security.egd=file:/dev/./urandom \
