@@ -26,6 +26,7 @@ import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.util.AbstractMap;
@@ -33,7 +34,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Wrapper for {@link Swagger}.
@@ -74,9 +74,10 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
     @Override
     public BallerinaService buildContext(Swagger definition, ExtendedAPI api) throws BallerinaServiceGenException {
-        this.name = trim(api.getName());
+        this.name = CodegenUtils.trim(api.getName());
         this.api = api;
-        this.qualifiedServiceName = trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
+        this.qualifiedServiceName =
+                CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         return buildContext(definition);
     }
@@ -106,7 +107,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
             balPath.getOperations().forEach(operation -> {
                 if (operation.getValue().getOperationId() == null) {
                     String pathName = path.getKey().substring(1); // need to drop '/' prefix from the key, ex:'/path'
-                    String operationId = operation.getKey() + trim(StringUtils.capitalize(pathName));
+                    String operationId = operation.getKey() + CodegenUtils.trim(StringUtils.capitalize(pathName));
                     operation.getValue().setOperationId(operationId);
                 }
             });
@@ -152,20 +153,6 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         return paths;
     }
 
-
-    private String trim(String key) {
-        if (key == null) {
-            return null;
-        }
-        key = key.replaceAll(" ", "_");
-        key = key.replaceAll("/", "_");
-        key = key.replaceAll("\\{", "_");
-        key = key.replaceAll("}", "_");
-        if (key.contains("*")) {
-            key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
-        }
-        return key;
-    }
 
     private String replaceAllNonAlphaNumeric(String value) {
         return value.replaceAll("[^a-zA-Z0-9]+","_");
