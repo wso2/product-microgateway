@@ -63,8 +63,11 @@ public type ThrottleFilter object {
             AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
             requestFilterResult = {canProceed:true};
-            if (isSubscriptionLevelThrottled(context, keyvalidationResult)){
-                if (keyvalidationResult.stopOnQuotaReach) {
+            boolean isThrottled;
+            boolean stopOnQuata;
+            (isThrottled, stopOnQuata) = isSubscriptionLevelThrottled(context, keyvalidationResult);
+            if (isThrottled){
+                if (stopOnQuata) {
                     requestFilterResult = {canProceed:false, statusCode:429, message:
                     "You have exceeded your quota"};
                     publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
@@ -112,24 +115,19 @@ function isHardlimitThrottled(string context, string apiVersion) returns (boolea
 
 
 function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns (
-            boolean) {
+            boolean, boolean) {
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
         (context) + ":" + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
     ;
-    if (isThrottled(subscriptionLevelThrottleKey)){
-        return true;
-    } else {
-        return false;
-    }
+    return isThrottled(subscriptionLevelThrottleKey);
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
-    if (isThrottled(applicationLevelThrottleKey)){
-        return true;
-    } else {
-        return false;
-    }
+    boolean throttled;
+    boolean stopOnQuata;
+    (throttled, stopOnQuata) = isThrottled(applicationLevelThrottleKey);
+    return throttled;
 }
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
              returns (

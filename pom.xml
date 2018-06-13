@@ -293,6 +293,11 @@
                 <artifactId>lib-creator</artifactId>
                 <version>${ballerina.platform.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.cli</artifactId>
+                <version>${wso2.apim.cli.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -348,6 +353,7 @@
 
     <properties>
         <ballerina.platform.version>0.974.0</ballerina.platform.version>
+        <wso2.apim.cli.version>2.5.0-SNAPSHOT</wso2.apim.cli.version>
         <assembly.plugin.version>2.5.2</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
         <shade.plugin.version>2.4.3</shade.plugin.version>

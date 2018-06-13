@@ -36,7 +36,7 @@ import java.util.List;
 public class TestExecutionListener implements IExecutionListener {
     private static final Logger log = LoggerFactory.getLogger(TestExecutionListener.class);
 
-    private static Server newServer;
+    private static ServerInstance newServer;
 
     /**
      * This method will execute before all the test classes are executed and this will start a server
@@ -52,7 +52,7 @@ public class TestExecutionListener implements IExecutionListener {
             newServer = ServerInstance.initMicroGwServer();
             String configPath = new File("src" + File.separator + "test" + File.separator + "resources"
                     + File.separator + "confs" + File.separator + "startup.conf").getAbsolutePath();
-            ((ServerInstance) newServer).startMicroGwServerWithConfigPath(relativePath, configPath);
+            newServer.startMicroGwServerWithConfigPath(relativePath, configPath);
 
         } catch (MicroGWTestException e) {
             log.error("Server failed to start. " + e.getMessage(), e);
