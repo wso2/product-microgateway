@@ -39,6 +39,12 @@
         <tag>HEAD</tag>
     </scm>
 
+    <parent>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>5</version>
+    </parent>
+
     <modules>
         <module>components</module>
         <module>distribution</module>
