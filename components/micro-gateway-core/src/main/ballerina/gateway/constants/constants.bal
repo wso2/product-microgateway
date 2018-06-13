@@ -24,6 +24,8 @@
 @final public string AUTH_PROVIDER_CONFIG = "config";
 @Description {value:"Authentication header name"}
 @final public string AUTH_HEADER = "Authorization";
+@Description {value:"Temp Authentication header name"}
+@final public string TEMP_AUTH_HEADER = "WSO2-Authorization";
 @Description {value:"Basic authentication scheme"}
 @final public string AUTH_SCHEME_BASIC = "Basic";
 @Description {value:"Bearer authentication scheme"}
@@ -140,10 +142,15 @@
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 @Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints"}
 @final public string TOKEN_LISTENER_PORT = "tokenListenerPort";
-@Description { value: "The authoization header config name"}
-@final public string AUTH_HEADER_NAME = "authorizationHeader";
 @Description { value: "Set of filters to be enabled"}
 @final public string FILTERS = "filters";
+
+@Description { value: "Authentication related configs"}
+@final public string AUTH_CONF_INSTANCE_ID = "authConfig";
+@Description { value: "The authoization header config name"}
+@final public string AUTH_HEADER_NAME = "authorizationHeader";
+@Description { value: "Config name to remove auth header from out going message"}
+@final public string REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE = "removeAuthHeaderFromOutMessage";
 
 @Description { value: "JWT Token related configs"}
 @final public string JWT_INSTANCE_ID = "jwtTokenConfig";
@@ -194,3 +201,5 @@
 @final int UNAUTHORIZED = 401;
 
 // end of http codes
+
+@final string PATH_SEPERATOR = "/";

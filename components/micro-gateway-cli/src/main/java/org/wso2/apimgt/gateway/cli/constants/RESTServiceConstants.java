@@ -32,4 +32,6 @@ public class RESTServiceConstants {
     public static final String AUTHORIZATION = "Authorization";
     public static final String BEARER = "Bearer";
     public static final String GET = "GET";
+    public static final String APIS_GET_URI =
+            "apis?query=label:" + GatewayCliConstants.LABEL_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
 }

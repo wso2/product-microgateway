@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
@@ -34,6 +35,7 @@ import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +56,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             Config config = GatewayCmdUtils.getConfig();
             String publisherEp = config.getToken().getPublisherEndpoint();
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
-            String urlStr = publisherEp + "apis?query=label:" + labelName + "&expand=true";
+            String urlStr =
+                    publisherEp + RESTServiceConstants.APIS_GET_URI.replace(GatewayCliConstants.LABEL_PLACEHOLDER,
+                            URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoOutput(true);

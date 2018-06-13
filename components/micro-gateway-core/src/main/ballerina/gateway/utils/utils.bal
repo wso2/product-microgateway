@@ -25,7 +25,7 @@ import ballerina/reflect;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
-    boolean isSecured;
+    boolean isSecured = true;
     match resourceLevelAuthAnn.authentication {
         http:Authentication authn => {
             isSecured = authn.enabled;
@@ -166,16 +166,25 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
         (context.serviceType));
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
-    apiKeyValidationRequest.context = httpServiceConfig.basePath;
+    string apiContext = httpServiceConfig.basePath;
     APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType));
-    apiKeyValidationRequest.apiVersion = apiConfig.apiVersion;
+    string apiVersion = apiConfig.apiVersion;
+    apiKeyValidationRequest.apiVersion = apiVersion;
+    if(!apiContext.contains(apiVersion)){
+        if(apiContext.hasSuffix(PATH_SEPERATOR)) {
+            apiContext = apiContext + apiVersion;
+        } else {
+            apiContext = apiContext + PATH_SEPERATOR + apiVersion;
+        }
+    }
+    apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
     context.attributes[API_NAME] = apiConfig.name;
-    context.attributes[API_CONTEXT] = httpServiceConfig.basePath;
+    context.attributes[API_CONTEXT] = apiContext;
     // TODO get correct verb
     return apiKeyValidationRequest;
 
@@ -278,8 +287,8 @@ public function getClientIp(http:Request request) returns (string) {
     return clientIp;
 }
 
-public function extractAccessToken (http:Request req) returns (string|error) {
-    string authHeader = req.getHeader(AUTH_HEADER);
+public function extractAccessToken (http:Request req, string authHeaderName) returns (string|error) {
+    string authHeader = req.getHeader(authHeaderName);
     string[] authHeaderComponents = authHeader.split(" ");
     if(lengthof authHeaderComponents != 2){
         return handleError("Incorrect bearer authentication header format");
@@ -351,7 +360,7 @@ public function getAuthorizationHeader(reflect:annotationData[] annData) returns
     APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(annData);
     string authHeader = apiConfig.authorizationHeader;
     if (authHeader == "") {
-        authHeader = getConfigValue(LISTENER_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
     }
     return authHeader;
 
