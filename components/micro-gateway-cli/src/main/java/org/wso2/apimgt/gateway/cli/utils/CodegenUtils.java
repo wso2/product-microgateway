@@ -45,7 +45,7 @@ public class CodegenUtils {
     public static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter(filePath.toString(), "UTF-8");
+            writer = new PrintWriter(filePath.toString(),  GeneratorConstants.UTF_8);
             writer.print(content);
         } finally {
             if (writer != null) {
@@ -54,6 +54,14 @@ public class CodegenUtils {
         }
     }
 
+    /**
+     * Compile given template
+     *
+     * @param defaultTemplateDir template directory
+     * @param templateName template name
+     * @return Generated template
+     * @throws IOException if file read went wrong
+     */
     public static Template compileTemplate(String defaultTemplateDir, String templateName) throws IOException {
         String templatesDirPath = System.getProperty(GeneratorConstants.TEMPLATES_DIR_PATH_KEY, defaultTemplateDir);
         ClassPathTemplateLoader cpTemplateLoader = new ClassPathTemplateLoader((templatesDirPath));
@@ -86,6 +94,14 @@ public class CodegenUtils {
         return handlebars.compile(templateName);
     }
 
+    /**
+     * Write generated templates
+     *
+     * @param sources list of source files
+     * @param srcPath source location
+     * @param overwrite whether existing files overwrite or not
+     * @throws IOException if file write went wrong
+     */
     public static void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, boolean overwrite) throws IOException {
         Path filePath;
         for (GenSrcFile file : sources) {

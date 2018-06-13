@@ -40,10 +40,7 @@ import java.util.List;
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
  */
-
 public class ThrottlePolicyGenerator {
-    private String srcPackage;
-    private String modelPackage;
 
     /**
      * Generate ballerina and stream source for a given app and subs policies
@@ -79,8 +76,7 @@ public class ThrottlePolicyGenerator {
         ThrottlePolicy policyContext;
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         for (ApplicationThrottlePolicyDTO applicationPolicy : applicationPolicies) {
-            policyContext = new ThrottlePolicy().buildContext(applicationPolicy).srcPackage(srcPackage)
-                    .modelPackage(srcPackage);
+            policyContext = new ThrottlePolicy().buildContext(applicationPolicy);
             sourceFiles.add(generatePolicy(policyContext));
         }
         return sourceFiles;
@@ -98,8 +94,7 @@ public class ThrottlePolicyGenerator {
         ThrottlePolicy policyContext;
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         for (SubscriptionThrottlePolicyDTO subscriptionPolicy : subscriptionPolicies) {
-            policyContext = new ThrottlePolicy().buildContext(subscriptionPolicy).srcPackage(srcPackage)
-                    .modelPackage(srcPackage);
+            policyContext = new ThrottlePolicy().buildContext(subscriptionPolicy);
             sourceFiles.add(generatePolicy(policyContext));
         }
         return sourceFiles;
@@ -115,9 +110,9 @@ public class ThrottlePolicyGenerator {
      * @throws BallerinaServiceGenException when code generator fails
      */
     public GenSrcFile generateInitBal(List<ApplicationThrottlePolicyDTO> applicationPolicies,
-            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException, BallerinaServiceGenException {
+            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException {
         ThrottlePolicyInitializer context = new ThrottlePolicyInitializer().buildAppContext(applicationPolicies)
-                .buildSubsContext(subscriptionPolicies).srcPackage(srcPackage).modelPackage(srcPackage);
+                .buildSubsContext(subscriptionPolicies);
         return generateInitBalFile(context);
     }
 
@@ -142,7 +137,7 @@ public class ThrottlePolicyGenerator {
             Context context = Context.newBuilder(object)
                     .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                     .build();
-            writer = new PrintWriter(outPath, "UTF-8");
+            writer = new PrintWriter(outPath, GeneratorConstants.UTF_8);
             writer.println(template.apply(context));
         } finally {
             if (writer != null) {
@@ -159,31 +154,22 @@ public class ThrottlePolicyGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generatePolicy(ThrottlePolicy context) throws IOException {
-        if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage = GeneratorConstants.DEFAULT_SERVICE_PKG;
-        }
-
         String concatTitle = context.getPolicyType() + "_" + context.getName();
         String srcFile = concatTitle + ".bal";
 
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_TEMPLATE_NAME);
-        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent);
-
+        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
         return sourceFiles;
     }
 
     private GenSrcFile generateInitBalFile(ThrottlePolicyInitializer context) throws IOException {
-        if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage = GeneratorConstants.DEFAULT_SERVICE_PKG;
-        }
-
-        String concatTitle = "throttle_policy_initializer";
-        String srcFile = concatTitle + ".bal";
+        String concatTitle = GeneratorConstants.THROTTLE_POLICY_INITIALIZER;
+        String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
 
         String mainContent = getPolicyInitContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_INIT_TEMPLATE_NAME);
-        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent);
+        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
 
         return sourceFiles;
     }
@@ -212,21 +198,5 @@ public class ThrottlePolicyGenerator {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
         return template.apply(context);
-    }
-
-    public String getSrcPackage() {
-        return srcPackage;
-    }
-
-    public void setSrcPackage(String srcPackage) {
-        this.srcPackage = srcPackage;
-    }
-
-    public String getModelPackage() {
-        return modelPackage;
-    }
-
-    public void setModelPackage(String modelPackage) {
-        this.modelPackage = modelPackage;
     }
 }
