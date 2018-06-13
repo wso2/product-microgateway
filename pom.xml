@@ -383,7 +383,7 @@
         <org.snakeyaml.version>1.16.0.wso2v1</org.snakeyaml.version>
         <apache.mina.core>2.0.16</apache.mina.core>
         <awaitility.version>3.0.0</awaitility.version>
-        <project.scm.id>my-scm-server</project.scm.id>
+        <project.scm.id>scm-server</project.scm.id>
     </properties>
 
 </project>
