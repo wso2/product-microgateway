@@ -57,7 +57,7 @@ public type AuthnFilter object {
                 authHeader = request.getHeader(authHeaderName);
             } else {
                 log:printError("No authorization header was provided");
-                setErrorMessageToFilterContext(context, 900902);
+                setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                 return createFilterResult(true, 200, "Authentication filter has failed. But
                                     continuing in order to  provide error details");
             }
@@ -145,7 +145,7 @@ public type AuthnFilter object {
                     }
                     error err => {
                         log:printError(err.message, err = err);
-                        setErrorMessageToFilterContext(context, 900902);
+                        setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                         return createFilterResult(true, 200, "Authentication filter has failed. But
                                     continuing in order to  provide error details");
                     }

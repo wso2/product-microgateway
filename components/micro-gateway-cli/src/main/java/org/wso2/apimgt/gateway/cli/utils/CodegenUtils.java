@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Utilities used by ballerina code generator.
@@ -98,5 +99,19 @@ public class CodegenUtils {
                 }
             }
         }
+    }
+
+    public static String trim(String key) {
+        if (key == null) {
+            return null;
+        }
+        key = key.replaceAll(" ", "_");
+        key = key.replaceAll("/", "_");
+        key = key.replaceAll("\\{", "_");
+        key = key.replaceAll("}", "_");
+        if (key.contains("*")) {
+            key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
+        }
+        return key;
     }
 }

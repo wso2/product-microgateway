@@ -67,7 +67,15 @@ public class CodeGenerator {
             swagger = parser.parse(api.getApiDefinition());
             definitionContext = new BallerinaService().buildContext(swagger, api).srcPackage(srcPackage)
                     .modelPackage(srcPackage);
+            // we need to generate the bal service for default versioned apis as well
+            if(definitionContext.getApi().getIsDefaultVersion()) {
+                definitionContext.getApi().setIsDefaultVersion(false);
+                genFiles.add(generateService(definitionContext));
+                definitionContext.getApi().setIsDefaultVersion(true);
+                definitionContext.setQualifiedServiceName(CodegenUtils.trim(api.getName()));
+            }
             genFiles.add(generateService(definitionContext));
+
         }
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(labelPath), overwrite);

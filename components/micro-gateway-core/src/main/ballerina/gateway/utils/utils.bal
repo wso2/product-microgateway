@@ -166,16 +166,25 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
         (context.serviceType));
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
-    apiKeyValidationRequest.context = httpServiceConfig.basePath;
+    string apiContext = httpServiceConfig.basePath;
     APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType));
-    apiKeyValidationRequest.apiVersion = apiConfig.apiVersion;
+    string apiVersion = apiConfig.apiVersion;
+    apiKeyValidationRequest.apiVersion = apiVersion;
+    if(!apiContext.contains(apiVersion)){
+        if(apiContext.hasSuffix(PATH_SEPERATOR)) {
+            apiContext = apiContext + apiVersion;
+        } else {
+            apiContext = apiContext + PATH_SEPERATOR + apiVersion;
+        }
+    }
+    apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
     context.attributes[API_NAME] = apiConfig.name;
-    context.attributes[API_CONTEXT] = httpServiceConfig.basePath;
+    context.attributes[API_CONTEXT] = apiContext;
     // TODO get correct verb
     return apiKeyValidationRequest;
 
