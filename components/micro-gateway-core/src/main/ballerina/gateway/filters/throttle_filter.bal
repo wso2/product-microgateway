@@ -66,7 +66,7 @@ public type ThrottleFilter object {
             boolean isThrottled;
             boolean stopOnQuata;
             (isThrottled, stopOnQuata) = isSubscriptionLevelThrottled(context, keyvalidationResult);
-            if (isThrottled){
+            if (isThrottled) {
                 if (stopOnQuata) {
                     requestFilterResult = {canProceed:false, statusCode:429, message:
                     "You have exceeded your quota"};

@@ -1,4 +1,3 @@
-package org.wso2.micro.gateway.tests.services;
 /*
  * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,7 @@ package org.wso2.micro.gateway.tests.services;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.micro.gateway.tests.services;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.slf4j.Logger;

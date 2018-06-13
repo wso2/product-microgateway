@@ -88,8 +88,7 @@ public class MockAPIPublisher {
         apiJsonObj.put("context", api.getContext());
         apiJsonObj.put("provider", api.getProvider());
 
-        //        private String[] tiers;
-        //        private String swagger;
+        //todo: set tiers and swagger
         api.setSwagger(apiJsonObj.toString());
         return api;
     }
