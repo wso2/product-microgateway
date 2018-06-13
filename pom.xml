@@ -42,7 +42,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>5</version>
+        <version>1</version>
     </parent>
 
     <modules>
@@ -299,15 +299,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.bsc.maven</groupId>
-                <artifactId>maven-processor-plugin</artifactId>
-                <version>${processor.plugin.version}</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${shade.plugin.version}</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

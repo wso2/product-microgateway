@@ -18,6 +18,9 @@
 
 package org.ballerina.gateway.models;
 
+/**
+ * API Model class
+ */
 public class APIModel {
 
     private static APIModel instance;

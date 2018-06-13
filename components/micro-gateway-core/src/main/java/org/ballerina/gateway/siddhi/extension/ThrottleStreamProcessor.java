@@ -54,6 +54,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Throttle stream processor class
+ */
 @Extension(name = "timeBatch", namespace = "throttler", description =
         "A batch (tumbling) time window that holds events that arrive during window.time periods, "
                 + "and gets updated for each window.time.", parameters = {
