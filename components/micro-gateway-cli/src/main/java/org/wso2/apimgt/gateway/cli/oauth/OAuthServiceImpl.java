@@ -42,13 +42,13 @@ public class OAuthServiceImpl implements OAuthService {
      */
     public String generateAccessToken(String username, char[] password) {
         URL url;
-        HttpsURLConnection urlConn = null;
+        HttpURLConnection urlConn = null;
         try {
             Config config = GatewayCmdUtils.getConfig();
             String clientId = config.getToken().getClientId();
             String clientSecret = GatewayCmdUtils.decrypt(config.getToken().getClientSecret(), new String(password));
             url = new URL(config.getToken().getTokenEndpoint());
-            urlConn = (HttpsURLConnection) url.openConnection();
+            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);

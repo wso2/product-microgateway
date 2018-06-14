@@ -27,19 +27,21 @@ public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
 boolean blockConditionExist;
 
-public function isThrottled(string key) returns (boolean) {
+public function isThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled){
         int currentTime = time:currentTime().time;
-        int timeStamp = check <int>throttleDataMap[key];
+        GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
+        int timeStamp = dto.expiryTimeStamp;
+        boolean stopOnQuata = dto.stopOnQuata;
         if (timeStamp >= currentTime) {
-            return isThrottled;
+            return (isThrottled, stopOnQuata);
         } else {
             boolean status = throttleDataMap.remove(key);
-            return false;
+            return (false, stopOnQuata);
         }
     }
-    return isThrottled;
+    return (isThrottled, false);
 }
 
 public function publishNonThrottleEvent(RequestStreamDTO request) {
@@ -53,6 +55,6 @@ public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
     log:printDebug("Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey + ",isThrottled:"
         + throttleEvent.isThrottled + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp);
     if (throttleEvent.isThrottled){
-        throttleDataMap[throttleEvent.throttleKey] = throttleEvent.expiryTimeStamp;
+        throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
     }
 }

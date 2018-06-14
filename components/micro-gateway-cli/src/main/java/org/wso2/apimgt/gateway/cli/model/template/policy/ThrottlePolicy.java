@@ -36,6 +36,7 @@ public class ThrottlePolicy {
     private String funcName;
     private long count;
     private String tierType;
+    private boolean stopOnQuotaReach;
 
     public String getPolicyType() {
         return policyType;
@@ -109,6 +110,14 @@ public class ThrottlePolicy {
         this.tierType = tierType;
     }
 
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
     public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
         this.name = applicationPolicy.getPolicyName();
@@ -119,6 +128,7 @@ public class ThrottlePolicy {
                 + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.APPLICATION_KEY;
         this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
+        this.stopOnQuotaReach = true;
         return this;
     }
 
@@ -132,6 +142,7 @@ public class ThrottlePolicy {
                 + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
         this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
+        this.stopOnQuotaReach = applicationPolicy.getStopOnQuotaReach();
         return this;
     }
 

@@ -34,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     public List<ExtendedAPI> getAPIs(String labelName, String accessToken) {
 
         URL url;
-        HttpsURLConnection urlConn = null;
+        HttpURLConnection urlConn = null;
         APIListDTO apiListDTO = null;
         //calling token endpoint
         try {
@@ -60,7 +61,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     publisherEp + RESTServiceConstants.APIS_GET_URI.replace(GatewayCliConstants.LABEL_PLACEHOLDER,
                             URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
             url = new URL(urlStr);
-            urlConn = (HttpsURLConnection) url.openConnection();
+            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
@@ -98,7 +99,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      */
     public List<ApplicationThrottlePolicyDTO> getApplicationPolicies(String accessToken) {
         URL url;
-        HttpsURLConnection urlConn = null;
+        HttpURLConnection urlConn = null;
         ApplicationThrottlePolicyListDTO appsList;
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
@@ -108,7 +109,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             String urlStr = adminEp + "throttling/policies/application";
             url = new URL(urlStr);
-            urlConn = (HttpsURLConnection) url.openConnection();
+            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
@@ -143,7 +144,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      */
     public List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken) {
         URL url;
-        HttpsURLConnection urlConn = null;
+        HttpURLConnection urlConn = null;
         SubscriptionThrottlePolicyListDTO subsList;
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
@@ -153,7 +154,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             String urlStr = adminEp + "throttling/policies/subscription";
             url = new URL(urlStr);
-            urlConn = (HttpsURLConnection) url.openConnection();
+            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER

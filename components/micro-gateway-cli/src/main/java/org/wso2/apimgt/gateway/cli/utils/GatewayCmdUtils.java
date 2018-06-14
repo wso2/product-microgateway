@@ -211,7 +211,7 @@ public class GatewayCmdUtils {
      * @return cli home location
      */
     public static String getCLIHome() {
-        return System.getenv(GatewayCliConstants.CLI_HOME);
+        return System.getProperty(GatewayCliConstants.CLI_HOME);
     }
 
     /**
@@ -220,7 +220,7 @@ public class GatewayCmdUtils {
      * @return resources file directory path
      */
     public static String getResourceFolderLocation() {
-        return System.getenv(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
+        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
     }
 
     /**

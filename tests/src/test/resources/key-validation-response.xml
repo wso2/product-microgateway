@@ -1,0 +1,39 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Body>
+        <ns:validateKeyResponse xmlns:ns="http://org.apache.axis2/xsd">
+            <ns:return xmlns:ax2129="http://keymgt.apimgt.carbon.wso2.org/xsd"
+                       xmlns:ax2131="http://api.apimgt.carbon.wso2.org/xsd"
+                       xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd"
+                       xmlns:ax2135="http://model.api.apimgt.carbon.wso2.org/xsd"
+                       xmlns:ax2136="http://dto.api.apimgt.carbon.wso2.org/xsd"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ax2133:APIKeyValidationInfoDTO">
+                <ax2133:apiName>PizzaShackAPI</ax2133:apiName>
+                <ax2133:apiPublisher>admin</ax2133:apiPublisher>
+                <ax2133:apiTier xsi:nil="true" />
+                <ax2133:applicationId>11</ax2133:applicationId>
+                <ax2133:applicationName>app1</ax2133:applicationName>
+                <ax2133:applicationTier>Unlimited</ax2133:applicationTier>
+                <ax2133:authorized>true</ax2133:authorized>
+                <ax2133:authorizedDomains xsi:nil="true" />
+                <ax2133:consumerKey>fxzmNBTonG00FViQELefepgKF2Qa</ax2133:consumerKey>
+                <ax2133:contentAware>false</ax2133:contentAware>
+                <ax2133:endUserName>admin@carbon.super</ax2133:endUserName>
+                <ax2133:endUserToken xsi:nil="true" />
+                <ax2133:issuedTime>1528825112163</ax2133:issuedTime>
+                <ax2133:scopes>default</ax2133:scopes>
+                <ax2133:scopes>am_application_scope</ax2133:scopes>
+                <ax2133:spikeArrestLimit>0</ax2133:spikeArrestLimit>
+                <ax2133:spikeArrestUnit xsi:nil="true" />
+                <ax2133:stopOnQuotaReach>true</ax2133:stopOnQuotaReach>
+                <ax2133:subscriber>admin</ax2133:subscriber>
+                <ax2133:subscriberTenantDomain>carbon.super</ax2133:subscriberTenantDomain>
+                <ax2133:throttlingDataList>api_level_throttling_key</ax2133:throttlingDataList>
+                <ax2133:tier>Unlimited</ax2133:tier>
+                <ax2133:type>PRODUCTION</ax2133:type>
+                <ax2133:userType>APPLICATION</ax2133:userType>
+                <ax2133:validationStatus>0</ax2133:validationStatus>
+                <ax2133:validityPeriod>9223372036854775807</ax2133:validityPeriod>
+            </ns:return>
+        </ns:validateKeyResponse>
+    </soapenv:Body>
+</soapenv:Envelope>

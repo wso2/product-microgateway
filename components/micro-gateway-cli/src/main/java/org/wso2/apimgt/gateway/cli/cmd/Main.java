@@ -249,7 +249,7 @@ public class Main {
         @Parameter(names = {"-u", "--user"}, hidden = true)
         private String username;
 
-        @Parameter(names = {"-p", "--password"}, hidden = true, password = true)
+        @Parameter(names = {"-p", "--password"}, hidden = true)
         private String password;
 
         @Parameter(names = {"-l", "--label"}, hidden = true)
