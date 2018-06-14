@@ -33,7 +33,7 @@ public class GatewayCliConstants {
     public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
     public static final String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.toml";
     public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
-    public static final String CLI_HOME = "MICROGW_TOOLKIT_HOME";
+    public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
     public static final String CLI_RUNTIME = "runtime";
     public static final String POLICY_DIR = "policies";
