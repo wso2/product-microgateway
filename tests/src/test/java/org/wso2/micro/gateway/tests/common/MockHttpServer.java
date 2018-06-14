@@ -17,16 +17,20 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
+import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -117,7 +121,7 @@ public class MockHttpServer extends Thread {
                     String label = null;
                     for (String para : paras) {
                         String[] searchQuery = para.split(":");
-                        if("label".equalsIgnoreCase(searchQuery[0])){
+                        if ("label".equalsIgnoreCase(searchQuery[0])) {
                             label = searchQuery[1];
                         }
                     }
@@ -167,8 +171,13 @@ public class MockHttpServer extends Thread {
             });
             httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/application", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
-                    byte[] response = IOUtils.toString(new FileInputStream(
-                            getClass().getClassLoader().getResource("application-policies.json").getPath())).getBytes();
+                    String defaultPolicies = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("application-policies.json").getPath()));
+                    JSONObject policies = new JSONObject(defaultPolicies);
+                    for (ApplicationPolicy policy : MockAPIPublisher.getInstance().getApplicationPolicies()) {
+                        policies.getJSONArray("list").put(new JSONObject(new Gson().toJson(policy)));
+                    }
+                    byte[] response = policies.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
@@ -176,9 +185,13 @@ public class MockHttpServer extends Thread {
             });
             httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/subscription", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
-                    byte[] response = IOUtils.toString(new FileInputStream(
-                            getClass().getClassLoader().getResource("subscription-policies.json").getPath()))
-                            .getBytes();
+                    String defaultPolicies = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("subscription-policies.json").getPath()));
+                    JSONObject policies = new JSONObject(defaultPolicies);
+                    for (SubscriptionPolicy policy : MockAPIPublisher.getInstance().getSubscriptionPolicies()) {
+                        policies.getJSONArray("list").put(new JSONObject(new Gson().toJson(policy)));
+                    }
+                    byte[] response = policies.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();

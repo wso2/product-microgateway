@@ -24,10 +24,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.model.API;
+import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ import java.util.Map;
 public class APIInvokeTestCase extends BaseTestCase {
     private static final Logger log = LoggerFactory.getLogger(APIInvokeTestCase.class);
     private String label = "apimTestLabel";
-    private String token;
+    private String token, jwtToken;
 
     @BeforeClass
     public void start() throws Exception {
@@ -51,6 +52,12 @@ public class APIInvokeTestCase extends BaseTestCase {
         //Register API with label
         pub.addApi(label, api);
 
+        //Define application info
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("jwtApp");
+        application.setTier("Unlimited");
+        application.setId((int) (Math.random() * 1000));
+
         //create key validation and subscription info for the API
         KeyValidationInfo info = new KeyValidationInfo();
         info.setApiName(api.getName());
@@ -59,7 +66,7 @@ public class APIInvokeTestCase extends BaseTestCase {
 
         //Register a token with key validation info
         token = pub.getAndRegisterAccessToken(info);
-
+        jwtToken = getJWT(api, application, "Unlimited");
         //generate apis with CLI and start the micro gateway server
         super.init(label);
     }
@@ -72,7 +79,16 @@ public class APIInvokeTestCase extends BaseTestCase {
                 .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
 
+    @Test(description = "Test API invocation with a JWT token")
+    public void testApiInvokeWithJWT() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
     @AfterClass

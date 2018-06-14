@@ -5,7 +5,6 @@ import wso2/gateway;
 future ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
-    runtime:sleep(100);
     while (true) {
         if(gateway:isStreamsInitialized == true) {
             log:printDebug("Throttle streams initialized.");
