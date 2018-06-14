@@ -40,7 +40,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.net.ssl.HttpsURLConnection;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
 

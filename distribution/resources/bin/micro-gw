@@ -219,4 +219,5 @@ $JAVACMD \
 	-Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" \
 	-Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" \
 	-Dfile.encoding=UTF8 \
+	-Dcli.home=$MICROGW_TOOLKIT_HOME \
 	org.wso2.apimgt.gateway.cli.cmd.Main "$@"
