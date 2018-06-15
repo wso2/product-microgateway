@@ -146,6 +146,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     ThrottleFilter throttleFilter = new();
     SubscriptionFilter subscriptionFilter = new;
+    AnalyticsRequestFilter analyticsFilter = new();
 
     // use the ballerina in built scope(authz) filter
     cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
@@ -157,10 +158,11 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     http:AuthzFilter authzFilter = new(authzHandler);
     // wraps the ballerina authz filter in new gateway filter
     OAuthzFilter authzFilterWrapper = new(authzFilter);
-    map defaultMap = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true};
+    map defaultMap = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true,
+                    ANALYTICS_FILTER: true};
     map filterConfig = getConfigMapValue(FILTERS);
     if(lengthof filterConfig == 0) {
-        filterConfig = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true};
+        filterConfig = defaultMap;
     }
     int i=0;
     if(check <boolean> filterConfig[AUTHN_FILTER]) {
@@ -177,6 +179,10 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     }
     if(check <boolean> filterConfig[THROTTLE_FILTER]) {
         authFilters[i] = < http:Filter> throttleFilter;
+        i++;
+    }
+    if(check <boolean> filterConfig[ANALYTICS_FILTER]) {
+        authFilters[i] = < http:Filter> analyticsFilter;
         i++;
     }
 

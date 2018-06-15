@@ -22,6 +22,7 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
+import ballerina/internal;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
@@ -365,3 +366,42 @@ public function getAuthorizationHeader(reflect:annotationData[] annData) returns
     return authHeader;
 
 }
+
+public function getCurrentTime() returns int {
+    time:Time currentTime = time:currentTime();
+    int  time = currentTime.time;
+    return time;
+
+}
+
+public function rotateFile(string fileName) returns string|error  {
+    int rotatingTimeStamp = getCurrentTime();
+    string zipName = fileName + "." + rotatingTimeStamp + ".zip";
+    internal:Path zipLocation = new(zipName);
+    internal:Path fileToZip = new(fileName);
+    match internal:compress(fileToZip, zipLocation) {
+        error compressError => {
+            log:printError("Error occurred while compressing the file: ", err = compressError);
+            return compressError;
+        }
+        () => {
+            log:printInfo("File compressed successfully");
+            match fileToZip.delete() {
+                () => {
+                    log:printInfo("Existed file deleted successfully");
+                }
+                error err => {
+                    log:printError("Error occurred while deleting file: " + fileName, err = err);
+                }
+            }
+            return zipName;
+        }
+    }
+}
+
+function initStreamPublisher() {
+    log:printInfo("Subscribing writing method to event stream");
+    eventStream.subscribe(writeEventToFile);
+}
+
+future streamftr = start initStreamPublisher();
