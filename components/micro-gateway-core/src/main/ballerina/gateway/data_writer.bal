@@ -109,7 +109,7 @@ function writeEventToFile(EventDTO eventDTO) {
     if (initializingTime == 0 ) {
         initializingTime = getCurrentTime();
     }
-    if ( currentTime - initializingTime > 60*1000) {
+    if ( currentTime - initializingTime > 60*1000*10) {
         var result = rotateFile("api-usage-data.dat");
         initializingTime = getCurrentTime();
         match result {

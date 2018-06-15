@@ -33,9 +33,6 @@ function searchFilesToUpload() returns error? {
     }
 }
 
-
-
-
 function informError(error e) {
     log:printInfo("File were not present to upload yet:" + e.message);
 }
@@ -43,7 +40,7 @@ function informError(error e) {
 function timerTask() {
     (function() returns error?) onTriggerFunction = searchFilesToUpload;
     function(error) onErrorFunction = informError;
-    timer = new task:Timer(onTriggerFunction, onErrorFunction, 60000, delay = 1000);
+    timer = new task:Timer(onTriggerFunction, onErrorFunction, 300000, delay = 5000);
     timer.start();
 }
 

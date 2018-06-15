@@ -399,8 +399,6 @@ public function rotateFile(string fileName) returns string|error  {
     }
 }
 
-
-
 function initStreamPublisher() {
     log:printInfo("Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
