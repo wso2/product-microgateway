@@ -105,6 +105,7 @@
 @final public string AUTHZ_FILTER = "AUTHZ_FILTER";
 @final public string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
 @final public string THROTTLE_FILTER = "THROTTLE_FILTER";
+@final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
 
 
 
