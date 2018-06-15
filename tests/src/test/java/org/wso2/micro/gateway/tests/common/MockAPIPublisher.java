@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.tests.common.model.API;
+import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
+import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,6 +43,8 @@ public class MockAPIPublisher {
     private Map<String, List<API>> apis;
     private Map<String, KeyValidationInfo> tokenInfo;
     private static MockAPIPublisher instance;
+    private static List<SubscriptionPolicy> subscriptionPolicies;
+    private static List<ApplicationPolicy> applicationPolicies;
 
     public static MockAPIPublisher getInstance() {
         if (instance == null) {
@@ -52,6 +56,8 @@ public class MockAPIPublisher {
     public MockAPIPublisher() {
         apis = new HashMap<>();
         tokenInfo = new HashMap<>();
+        subscriptionPolicies = new ArrayList<>();
+        applicationPolicies = new ArrayList<>();
     }
 
     public void addApi(String label, API api) {
@@ -127,10 +133,34 @@ public class MockAPIPublisher {
         try {
             String xmlResponse = IOUtils.toString(new FileInputStream(
                     getClass().getClassLoader().getResource("key-validation-response.xml").getPath()));
+            xmlResponse = xmlResponse.replace("$APINAME", info.getApiName());
             return xmlResponse;
         } catch (IOException e) {
             log.error("Error occurred when generating response", e);
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public void clear() {
+        tokenInfo.clear();
+        apis.clear();
+        subscriptionPolicies.clear();
+        applicationPolicies.clear();
+    }
+
+    public void addSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicies.add(subscriptionPolicy);
+    }
+
+    public static List<SubscriptionPolicy> getSubscriptionPolicies() {
+        return subscriptionPolicies;
+    }
+
+    public void addApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        applicationPolicies.add(applicationPolicy);
+    }
+
+    public static List<ApplicationPolicy> getApplicationPolicies() {
+        return applicationPolicies;
     }
 }

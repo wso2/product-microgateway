@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.tests.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.micro.gateway.tests.context.Constants;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -41,15 +42,17 @@ public class CLIExecutor {
     public void generate(String label) throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
-        Path path = Files.createTempDirectory("userProject", new FileAttribute[0]);
+        String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
+        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
         log.info("CLI Project Home: " + path.toString());
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
-        File asd = new File(path.toString() + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.GW_DIST_CONF);
-        asd.mkdirs();
+        File gwConfDir = new File(
+                path.toString() + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
+                        + GatewayCliConstants.GW_DIST_CONF);
+        gwConfDir.mkdirs();
         Files.copy(new File(
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).toPath(), new File(
