@@ -381,7 +381,7 @@ public function rotateFile(string fileName) returns string|error  {
     internal:Path fileToZip = new(fileName);
     match internal:compress(fileToZip, zipLocation) {
         error compressError => {
-            log:printError("Error occurred while compressing the file: " + compressError.message);
+            log:printError("Error occurred while compressing the file: ", err = compressError);
             return compressError;
         }
         () => {

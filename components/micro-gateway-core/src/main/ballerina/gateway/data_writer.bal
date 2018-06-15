@@ -56,6 +56,8 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
         requestStream.applicationOwner = authContext.subscriber;
         requestStream.tier = authContext.tier;
         requestStream.continuedOnThrottleOut = !authContext.stopOnQuotaReach;
+        requestStream.apiPublisher = authContext.apiPublisher;
+        requestStream.keyType = authContext.keyType;
     }
     requestStream.userAgent = request.userAgent;
     requestStream.clientIp = getClientIp(request);
@@ -67,14 +69,11 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
 
     //todo: hostname verify
     requestStream.hostName = "localhost";   //todo:get the host properl
-    //todo:check if apiPublisher comes in keyValidation context
-    requestStream.apiPublisher = "admin@carbon.super";   //todo:get publisher properly
     requestStream.method = request.method;
     //todo:verify resourcepath and resourceTemplate
     requestStream.resourceTemplate = "resourcePath";
     requestStream.resourcePath = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
-    requestStream.keyType = "PRODUCTION";
     //todo:random uuid taken from throttle filter
     requestStream.correlationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
     requestStream.requestCount = 1;
@@ -106,10 +105,10 @@ function getEventData(EventDTO dto) returns string {
 function writeEventToFile(EventDTO eventDTO) {
     //todo:batch events to reduce IO cost
     int currentTime = getCurrentTime();
-    if (initializingTime == 0 ) {
+    if (initializingTime == 0) {
         initializingTime = getCurrentTime();
     }
-    if ( currentTime - initializingTime > 60*1000*10) {
+    if (currentTime - initializingTime > 60*1000*10) {
         var result = rotateFile("api-usage-data.dat");
         initializingTime = getCurrentTime();
         match result {
@@ -117,7 +116,7 @@ function writeEventToFile(EventDTO eventDTO) {
                 log:printInfo("File rotated successfully.");
             }
             error err => {
-                log:printError("Error occurred while rotating the file: " + err.message);
+                log:printError("Error occurred while rotating the file: ", err = err);
             }
         }
     }
@@ -136,10 +135,10 @@ function writeEventToFile(EventDTO eventDTO) {
     } finally {
         match charChannel.close() {
             error sourceCloseError => {
-                log:printError("Error occured while closing the channel: " + sourceCloseError.message);
+                log:printError("Error occured while closing the channel: ", err = sourceCloseError);
             }
             () => {
-                log:printInfo("Source channel closed successfully.");
+                log:printDebug("Source channel closed successfully.");
             }
         }
     }
