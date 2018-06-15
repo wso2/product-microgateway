@@ -9,7 +9,6 @@ endpoint http:Client clientEP {
 };
 
 function multipartSender(string file) returns http:Response {
-    io:println("starting uploading");
     mime:Entity filePart = new;
     filePart.setContentDisposition(getContentDispositionForFormData("file"));
     filePart.setFileAsEntityBody(file);
@@ -26,13 +25,14 @@ function multipartSender(string file) returns http:Response {
     match returnResponse {
         error err => {
             http:Response response = new;
-            response.setPayload("Error occurred while sending multipart request!");
+            string errorMessage = "Error occurred while sending multipart request: SC " + 500;
+            response.setPayload(errorMessage);
             response.statusCode = 500;
+            log:printError(errorMessage);
             return response;
         }
         http:Response returnResult => {
-            io:println("successfully uploaded");
-            io:println(returnResult);
+            log:printInfo("successfully uploaded the file: " + file);
             return returnResult;
         }
     }

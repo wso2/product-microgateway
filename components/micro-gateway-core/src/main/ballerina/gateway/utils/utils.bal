@@ -381,17 +381,17 @@ public function rotateFile(string fileName) returns string|error  {
     internal:Path fileToZip = new(fileName);
     match internal:compress(fileToZip, zipLocation) {
         error compressError => {
-            io:println("Error occurred while compressing the file: " + compressError.message);
+            log:printError("Error occurred while compressing the file: " + compressError.message);
             return compressError;
         }
         () => {
-            io:println("File compressed successfully");
+            log:printInfo("File compressed successfully");
             match fileToZip.delete() {
                 () => {
-                    log:printInfo("File deleted successfully");
+                    log:printInfo("Existed file deleted successfully");
                 }
                 error err => {
-                    log:printError("Error occurred while deleting directory: " + fileName, err = err);
+                    log:printError("Error occurred while deleting file: " + fileName, err = err);
                 }
             }
             return zipName;
@@ -402,9 +402,8 @@ public function rotateFile(string fileName) returns string|error  {
 
 
 function initStreamPublisher() {
-    io:println("subscribing events");
+    log:printInfo("Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
-    //filesToUpload.subscribe(multipartSender);
 }
 
 future streamftr = start initStreamPublisher();

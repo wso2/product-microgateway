@@ -108,27 +108,25 @@ function writeEventToFile(EventDTO eventDTO) {
     int currentTime = getCurrentTime();
     if (initializingTime == 0 ) {
         initializingTime = getCurrentTime();
-        io:println("initialTime: " + initializingTime);
     }
     if ( currentTime - initializingTime > 60*1000) {
         var result = rotateFile("api-usage-data.dat");
         initializingTime = getCurrentTime();
         match result {
             string name => {
-                io:println("File rotated successfully.");
+                log:printInfo("File rotated successfully.");
             }
             error err => {
-                io:println("Error occurred while rotating the file.");
+                log:printError("Error occurred while rotating the file: " + err.message);
             }
         }
     }
     io:ByteChannel channel = io:openFile("api-usage-data.dat", io:APPEND);
     io:CharacterChannel  charChannel = new(channel,  "UTF-8");
     try {
-        io:println("writing to events to a file");
         match charChannel.write(getEventData(eventDTO),0) {
             int numberOfCharsWritten => {
-                io:println(" No of characters written : " + numberOfCharsWritten);
+                log:printInfo("Event is getting written");
             }
             error err => {
                 throw err;
@@ -138,11 +136,10 @@ function writeEventToFile(EventDTO eventDTO) {
     } finally {
         match charChannel.close() {
             error sourceCloseError => {
-                io:println("Error occured while closing the channel: " +
-                        sourceCloseError.message);
+                log:printError("Error occured while closing the channel: " + sourceCloseError.message);
             }
             () => {
-                io:println("Source channel closed successfully.");
+                log:printInfo("Source channel closed successfully.");
             }
         }
     }
