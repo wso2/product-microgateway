@@ -31,6 +31,7 @@ public class GatewayCliConstants {
     public static final String LABEL_CONFIG_FILE_NAME = "label-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
+    public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
     public static final String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.toml";
     public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
     public static final String CLI_HOME = "cli.home";
@@ -56,4 +57,6 @@ public class GatewayCliConstants {
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String CHARSET_UTF8 = "UTF-8";
+
+    public static final int EXIT_CODE_NOT_MODIFIED = 34;
 }

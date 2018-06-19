@@ -13,23 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.rest.policy;
+package org.wso2.apimgt.gateway.cli.constants;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.wso2.apimgt.gateway.cli.hashing.Hash;
+/**
+ * Constants used for hashing
+ */
+public class HashingConstants {
 
-public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO {
-
-    private ThrottleLimitDTO defaultLimit = null;
-
-    @Hash
-    @JsonProperty("defaultLimit")
-    public ThrottleLimitDTO getDefaultLimit() {
-        return defaultLimit;
-    }
-
-    public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
-        this.defaultLimit = defaultLimit;
-    }
-
+    public static final String HASH_SEPARATOR = "::";
+    public static final String HASH_ALGORITHM = "MD5";
+    public static final int BASE_16 = 16;
 }
