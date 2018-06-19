@@ -250,7 +250,7 @@ public class GatewayCmdUtils {
      * Get temp folder location
      * @return temp folder location
      */
-    public static String getTempFolderLocation() {
+    private static String getTempFolderLocation() {
         return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
     }
 

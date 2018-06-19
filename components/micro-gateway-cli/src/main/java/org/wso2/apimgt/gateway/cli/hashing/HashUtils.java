@@ -37,6 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+/**
+ * Utility class used for hashing functionality
+ * 
+ */
 public class HashUtils {
 
     /**

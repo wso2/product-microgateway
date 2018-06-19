@@ -17,12 +17,12 @@
  */
 package org.wso2.apimgt.gateway.cli.exception;
 
+/**
+ * Hashing Exception class
+ * 
+ */
 public class HashingException extends Exception {
     public HashingException(String message, Throwable e) {
         super(message, e);
-    }
-
-    public HashingException(String message) {
-        super(message);
     }
 }

@@ -18,10 +18,6 @@ package org.wso2.apimgt.gateway.cli.model.rest.ext;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 public class ExtendedAPI extends APIDetailedDTO {
     private EndpointConfig endpointConfigRepresentation = null;
 
