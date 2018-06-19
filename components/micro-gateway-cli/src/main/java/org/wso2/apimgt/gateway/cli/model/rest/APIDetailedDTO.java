@@ -155,6 +155,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * The transport to be set. Accepted values are HTTP, WS
      **/
+    @Hash
     @JsonProperty("type")
     public TypeEnum getType() {
         return type;
@@ -195,6 +196,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * The subscription tiers selected for the particular APIDetailedDTO
      **/
+    @Hash
     @JsonProperty("tiers")
     public List<String> getTiers() {
         return tiers;
@@ -263,7 +265,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.visibleTenants = visibleTenants;
     }
 
-
+    @Hash
     @JsonProperty("endpointConfig")
     public String getEndpointConfig() {
         return endpointConfig;
@@ -273,7 +275,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.endpointConfig = endpointConfig;
     }
 
-
+    @Hash
     @JsonProperty("endpointSecurity")
     public APIEndpointSecurityDTO getEndpointSecurity() {
         return endpointSecurity;
@@ -410,6 +412,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * * The authorization header of the API
      **/
+    @Hash
     @JsonProperty("authorizationHeader")
     public String getAuthorizationHeader() {
         return authorizationHeader;

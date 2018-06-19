@@ -16,11 +16,13 @@
 package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO {
 
     private ThrottleLimitDTO defaultLimit = null;
 
+    @Hash
     @JsonProperty("defaultLimit")
     public ThrottleLimitDTO getDefaultLimit() {
         return defaultLimit;

@@ -350,14 +350,19 @@ public class Main {
                 policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
                         + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
                 codeGenerator.generate(projectRoot, label, apis, true);
-                try {
-                    boolean changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
-                    System.out.println("Changes -- "+ changesDetected);
-                } catch (HashingException e) {
-                    outStream.println("Error while checking for changes of resources. Skipping no-change detection..");
-                }
+                //Initializing the ballerina label project and creating .bal folder. 
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
                         .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
+                try {
+                    boolean changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
+                    if (!changesDetected) {
+                        outStream.println("No changes from upstream.");
+                        Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
+                    }
+                } catch (HashingException e) {
+                    outStream.println("Error while checking for changes of resources. Skipping no-change detection..");
+                    Runtime.getRuntime().exit(1);
+                }
             } catch (IOException | BallerinaServiceGenException e) {
                 outStream.println("Error while generating ballerina source");
                 e.printStackTrace();

@@ -16,6 +16,7 @@
 package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 public class APIInfoDTO {
 
@@ -44,6 +45,7 @@ public class APIInfoDTO {
     /**
      * Name of the APIDetailedDTO
      **/
+    @Hash
     @JsonProperty("name")
     public String getName() {
         return name;
@@ -68,6 +70,7 @@ public class APIInfoDTO {
     /**
      * A string that represents the context of the user's request
      **/
+    @Hash
     @JsonProperty("context")
     public String getContext() {
         return context;
@@ -80,6 +83,7 @@ public class APIInfoDTO {
     /**
      * The version of the APIDetailedDTO
      **/
+    @Hash
     @JsonProperty("version")
     public String getVersion() {
         return version;

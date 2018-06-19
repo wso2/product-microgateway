@@ -57,4 +57,6 @@ public class GatewayCliConstants {
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String CHARSET_UTF8 = "UTF-8";
+
+    public static final int EXIT_CODE_NOT_MODIFIED = 34;
 }

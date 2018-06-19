@@ -17,6 +17,7 @@ package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
+import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import javax.validation.constraints.NotNull;
 
@@ -47,6 +48,7 @@ public class ThrottlePolicyDTO {
     /**
      * Name of policy
      **/
+    @Hash
     @JsonProperty("policyName")
     public String getPolicyName() {
         return policyName;

@@ -355,6 +355,12 @@ public class GatewayCmdUtils {
         createFolderIfNotExist(distExec);
     }
 
+    /**
+     * Load the stored resource hash content from the CLI temp folder
+     * 
+     * @return stored resource hash content from the CLI temp folder
+     * @throws IOException error while loading stored resource hash content
+     */
     public static String loadStoredResourceHashes() throws IOException {
         String resourceHashFileLocation = getResourceHashHolderFileLocation();
         String content = null;
@@ -364,6 +370,12 @@ public class GatewayCmdUtils {
         return content;
     }
 
+    /**
+     * Saves the resource hash content to the CLI temp folder
+     * 
+     * @param content resource hash content
+     * @throws IOException error while saving resource hash content
+     */
     public static void storeResourceHashesFileContent(String content) throws IOException {
         String tempDirPath = getTempFolderLocation();
         createFolderIfNotExist(tempDirPath);

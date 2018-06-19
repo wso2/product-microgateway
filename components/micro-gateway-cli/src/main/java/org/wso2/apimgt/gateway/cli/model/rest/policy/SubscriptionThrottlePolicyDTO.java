@@ -16,6 +16,7 @@
 package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
 
+    @Hash
     @JsonProperty("defaultLimit")
     public ThrottleLimitDTO getDefaultLimit() {
         return defaultLimit;
@@ -82,6 +84,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
      * This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's
      * requests will be dropped. If unchecked, the requests will be allowed to pass through.\n
      **/
+    @Hash
     @JsonProperty("stopOnQuotaReach")
     public Boolean getStopOnQuotaReach() {
         return stopOnQuotaReach;

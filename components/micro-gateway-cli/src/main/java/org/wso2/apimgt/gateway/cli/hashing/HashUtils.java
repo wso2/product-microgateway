@@ -20,17 +20,13 @@ package org.wso2.apimgt.gateway.cli.hashing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.HashingConstants;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,14 +39,25 @@ import java.util.TreeSet;
 
 public class HashUtils {
 
+    /**
+     * Generate hashes for the specified apis, subscription and application policies, then compare with the previously
+     *  generated hashes and detect if there are changes with them.
+     * 
+     * @param apis APIs list
+     * @param subscriptionPolicies Subscription Policies list
+     * @param appPolicies Application policies list
+     * @return true if there are changes detected vs the previous check
+     * @throws HashingException error while change detection
+     */
     public static boolean detectChanges(List<ExtendedAPI> apis,
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies,
             List<ApplicationThrottlePolicyDTO> appPolicies) throws HashingException {
+        
         boolean hasChanges = true;
         Map<String, String> allHashesMap = new HashMap<>();
         Map<String, String> apiHashesMap = getMapOfHashesForAPIs(apis);
         Map<String, String> appPolicyHashesMap = getMapOfHashesForAppPolicies(appPolicies);
-        Map<String, String> subsPolicyHashesMap = getMapOfHashesForSubpolicies(subscriptionPolicies);
+        Map<String, String> subsPolicyHashesMap = getMapOfHashesForSubPolicies(subscriptionPolicies);
 
         allHashesMap.putAll(apiHashesMap);
         allHashesMap.putAll(appPolicyHashesMap);
@@ -69,6 +76,12 @@ public class HashUtils {
         return hasChanges;
     }
 
+    /**
+     * Loads the stored resource hashes
+     * 
+     * @return a map with id to hash mapping loaded from the CLI temp
+     * @throws IOException error while loading the stored hashes
+     */
     private static Map<String, String> loadStoredResourceHashes() throws IOException {
         String content = GatewayCmdUtils.loadStoredResourceHashes();
         Map<String, String> hashes = new HashMap<>();
@@ -79,50 +92,81 @@ public class HashUtils {
         return hashes;
     }
 
+    /**
+     * Store the calculated hashes of API/policy resources in CLI temp folder
+     * 
+     * @param hashesMap map of id against hashes to be stored
+     * @throws IOException error while storing hash values
+     */
     private static void storeResourceHashes(Map<String, String> hashesMap) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         String stringifiedHashes = mapper.writeValueAsString(hashesMap);
         GatewayCmdUtils.storeResourceHashesFileContent(stringifiedHashes);
     }
 
+    /**
+     * Calculate the hashes of the given list of APIs and return as a map with id -> hash mapping 
+     * 
+     * @param apis List of APIs
+     * @return map with id -> hash mapping
+     * @throws HashingException error while calculating hashes of the APIs
+     */
     private static Map<String, String> getMapOfHashesForAPIs(List<ExtendedAPI> apis) throws HashingException {
         Map<String, String> hashes = new HashMap<>();
         if (apis != null) {
             for (ExtendedAPI api : apis) {
                 String hash = getAnnotatedHash(api);
-                System.out.println(api.getName() + " -- " + hash);
                 hashes.put(api.getId(), hash);
             }
         }
         return hashes;
     }
 
+    /**
+     * Calculate the hashes of the given list of application throttle policies and return as a map with id -> hash mapping 
+     *
+     * @param policies List of application throttle policies
+     * @return map with id -> hash mapping
+     * @throws HashingException error while calculating hashes of the application throttle policies
+     */
     private static Map<String, String> getMapOfHashesForAppPolicies(List<ApplicationThrottlePolicyDTO> policies)
             throws HashingException {
         Map<String, String> hashes = new HashMap<>();
         if (policies != null) {
             for (ApplicationThrottlePolicyDTO throttlePolicy : policies) {
                 String hash = getAnnotatedHash(throttlePolicy);
-                System.out.println(throttlePolicy.getDisplayName() + " -- " + hash);
                 hashes.put(throttlePolicy.getPolicyId(), hash);
             }
         }
         return hashes;
     }
 
-    private static Map<String, String> getMapOfHashesForSubpolicies(List<SubscriptionThrottlePolicyDTO> policies)
+    /**
+     * Calculate the hashes of the given list of subscription throttle policies and return as a map with id -> hash mapping 
+     *
+     * @param policies List of subscription throttle policies
+     * @return map with id -> hash mapping
+     * @throws HashingException error while calculating hashes of the subscription throttle policies
+     */
+    private static Map<String, String> getMapOfHashesForSubPolicies(List<SubscriptionThrottlePolicyDTO> policies)
             throws HashingException {
         Map<String, String> hashes = new HashMap<>();
         if (policies != null) {
             for (SubscriptionThrottlePolicyDTO throttlePolicy : policies) {
                 String hash = getAnnotatedHash(throttlePolicy);
-                System.out.println(throttlePolicy.getDisplayName() + " -- " + hash);
                 hashes.put(throttlePolicy.getPolicyId(), hash);
             }
         }
         return hashes;
     }
-    
+
+    /**
+     * Calculates the hash of the object using the Hash annotations added to the getter methods of the object.
+     * 
+     * @param obj object whose hash needs to be calculated. 
+     * @return calculated hash value
+     * @throws HashingException error while calculating hash
+     */
     private static String getAnnotatedHash(Object obj) throws HashingException {
         ObjectMapper mapper = new ObjectMapper();
         TreeSet<String> sortedSet = new TreeSet<>();
@@ -131,6 +175,12 @@ public class HashUtils {
                 try {
                     Object value = method.invoke(obj);
                     String stringifiedField = mapper.writeValueAsString(value);
+                    
+                    //The method name needs to be added here. The reason is, the array of methods returned from 
+                    // getClass().getMethods() is not always in a particular order. If the order changes, this would 
+                    // result in change of the hash even through the object didn't change. To fix this, a TreeSet is 
+                    // used which will insert entries sorted in natural ordering. The method name appended in the front
+                    // to always have a fixed string at the beginning.
                     sortedSet.add(method.getName() + HashingConstants.HASH_SEPARATOR + stringifiedField);
                 } catch (JsonProcessingException | IllegalAccessException | InvocationTargetException e) {
                     throw new HashingException("Error while generating hash for " + obj, e);
