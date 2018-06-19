@@ -21,10 +21,13 @@ import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -631,5 +634,27 @@ public class GatewayCmdUtils {
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
         GatewayCmdUtils.containerConfig = containerConfig;
+    }
+
+    public static void saveConfig(Config config) {
+        String configPath;
+        try {
+            configPath = GatewayCmdUtils.getMainConfigLocation(GatewayCmdUtils.getStoredWorkspaceLocation());
+            TOMLConfigParser.write(configPath, config);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ConfigParserException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static APICorsConfigurationDTO getDefaultCorsConfig() {
+        APICorsConfigurationDTO corsConfigurationDTO = new APICorsConfigurationDTO();
+        corsConfigurationDTO.setAccessControlAllowCredentials(true);
+        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.accessControlAllowOrigins);
+        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.accessControlAllowMethods);
+        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.accessControlAllowHeaders);
+        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.accessControlAllowCredentials);
+        return corsConfigurationDTO;
     }
 }

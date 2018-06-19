@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
@@ -30,7 +31,6 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyLi
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import java.io.IOException;
@@ -42,6 +42,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
+    private String publisherEp;
+    private String adminEp;
+
+    public RESTAPIServiceImpl(String publisherEp, String adminEp) {
+        this.publisherEp = publisherEp;
+        this.adminEp = adminEp;
+    }
 
     /**
      * @see RESTAPIService#getAPIs(String, String)
@@ -53,17 +60,16 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         APIListDTO apiListDTO = null;
         //calling token endpoint
         try {
-            Config config = GatewayCmdUtils.getConfig();
-            String publisherEp = config.getToken().getPublisherEndpoint();
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
-            String urlStr =
-                    publisherEp + RESTServiceConstants.APIS_GET_URI.replace(GatewayCliConstants.LABEL_PLACEHOLDER,
+            String urlStr = publisherEp + RESTServiceConstants.APIS_GET_URI
+                    .replace(GatewayCliConstants.LABEL_PLACEHOLDER,
                             URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
             url = new URL(urlStr);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -73,10 +79,17 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 for (ExtendedAPI api : apiListDTO.getList()) {
                     String endpointConfig = api.getEndpointConfig();
                     api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
-                    // set default values from config if per api cors ins not enabled
-                    if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
-                            .getCorsConfigurationEnabled()) {
-                        api.setCorsConfiguration(config.getCorsConfiguration());
+                    // set default values from config if per api cors is not enabled
+                    Config config = GatewayCmdUtils.getConfig();
+                    if (config == null) {
+                        if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
+                            api.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+                        }
+                    } else {
+                        if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
+                                .getCorsConfigurationEnabled()) {
+                            api.setCorsConfiguration(config.getCorsConfiguration());
+                        }
                     }
                 }
             } else {
@@ -102,8 +115,6 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         ApplicationThrottlePolicyListDTO appsList;
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
-        Config config = GatewayCmdUtils.getConfig();
-        String adminEp = config.getToken().getAdminEndpoint();
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
             String urlStr = adminEp + "throttling/policies/application";
@@ -111,7 +122,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER + " " + accessToken);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -119,8 +131,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 //convert json string to object
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);
                 List<ApplicationThrottlePolicyDTO> policyDTOS = appsList.getList();
-                for (ApplicationThrottlePolicyDTO policyDTO : policyDTOS ) {
-                    if(!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())){
+                for (ApplicationThrottlePolicyDTO policyDTO : policyDTOS) {
+                    if (!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())) {
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
@@ -147,8 +159,6 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         SubscriptionThrottlePolicyListDTO subsList;
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
-        Config config = GatewayCmdUtils.getConfig();
-        String adminEp = config.getToken().getAdminEndpoint();
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
             String urlStr = adminEp + "throttling/policies/subscription";
@@ -156,8 +166,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION, RESTServiceConstants.BEARER
-                                                + " " + accessToken);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -165,8 +175,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 //convert json string to object
                 subsList = mapper.readValue(responseStr, SubscriptionThrottlePolicyListDTO.class);
                 List<SubscriptionThrottlePolicyDTO> policyDTOS = subsList.getList();
-                for (SubscriptionThrottlePolicyDTO policyDTO : policyDTOS ) {
-                    if(!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())){
+                for (SubscriptionThrottlePolicyDTO policyDTO : policyDTOS) {
+                    if (!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(policyDTO.getPolicyName())) {
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
@@ -193,7 +203,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         endpointConf.setEndpointType(endpointType);
 
         if (RESTServiceConstants.HTTP.equalsIgnoreCase(endpointType) || RESTServiceConstants.FAILOVER.
-                                                    equalsIgnoreCase(endpointType)) {
+                equalsIgnoreCase(endpointType)) {
             JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
             if (prodEndpointNode != null) {
                 Endpoint prod = new Endpoint();

@@ -1,15 +1,15 @@
 [client]
 httpRequestTimeout = 1000000
 [token]
-publisherEndpoint = "https://localhost:9443/api/am/publisher/v0.13"
-adminEndpoint = "https://localhost:9443/api/am/admin/v0.13"
-registrationEndpoint = "https://localhost:9443/client-registration/v0.13/register"
-tokenEndpoint = "https://localhost:8243/token"
+publisherEndpoint = ""
+adminEndpoint = ""
+registrationEndpoint = ""
+tokenEndpoint = ""
 username = ""
 clientId = ""
 clientSecret = ""
-trustStoreLocation = "lib/platform/bre/security/ballerinaTruststore.p12"
-trustStorePassword = "ballerina"
+trustStoreLocation = ""
+trustStorePassword = ""
 
 [corsConfiguration]
 corsConfigurationEnabled=true
