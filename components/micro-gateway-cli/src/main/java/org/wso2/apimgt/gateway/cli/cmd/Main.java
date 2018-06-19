@@ -98,7 +98,6 @@ public class Main {
                 projectRoot = overrideProjectRootPath;
                 GatewayCmdUtils.storeWorkspaceLocation(projectRoot);
                 GatewayCmdUtils.createMainProjectStructure(projectRoot);
-                //
                 GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
                 GatewayCmdUtils.createLabelConfig(projectRoot, label);
             }
@@ -294,7 +293,7 @@ public class Main {
             // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
             // path is taken from above file.
             if (StringUtils.isEmpty(label)) {
-                outStream.println("Label can't be empty. " + "You need to specify -l <label name>");
+                outStream.println("Label can't be empty. You need to specify -l <label name>");
                 return;
             }
 
