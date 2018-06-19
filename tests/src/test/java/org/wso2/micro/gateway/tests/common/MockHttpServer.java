@@ -23,7 +23,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,7 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
-            httpServer.createContext("/token", new HttpHandler() {
+            httpServer.createContext("/oauth2/token", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
                     JSONObject payload = new JSONObject();
                     payload.put("access_token", UUID.randomUUID());

@@ -24,19 +24,22 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
-import org.ballerinalang.packerina.init.models.SrcFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.model.config.Client;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
+import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Token;
+import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -49,6 +52,10 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +99,6 @@ public class Main {
                 projectRoot = overrideProjectRootPath;
                 GatewayCmdUtils.storeWorkspaceLocation(projectRoot);
                 GatewayCmdUtils.createMainProjectStructure(projectRoot);
-                GatewayCmdUtils.createMainConfig(projectRoot);
                 GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
                 GatewayCmdUtils.createLabelConfig(projectRoot, label);
             }
@@ -101,13 +107,19 @@ public class Main {
             GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
 
             String configPath = GatewayCmdUtils.getMainConfigLocation(projectRoot);
-            Config config = TOMLConfigParser.parse(configPath, Config.class);
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+                System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
+                System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                GatewayCmdUtils.createMainConfig(projectRoot);
+            }
+
             String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(projectRoot, label);
             ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
-            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
-            System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
-            GatewayCmdUtils.setConfig(config);
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
@@ -246,28 +258,43 @@ public class Main {
         @Parameter(names = "--java.debug", hidden = true)
         private String javaDebugPort;
 
-        @Parameter(names = {"-u", "--user"}, hidden = true)
+        @Parameter(names = { "-u", "--user" }, hidden = true)
         private String username;
 
-        @Parameter(names = {"-p", "--password"}, hidden = true)
+        @Parameter(names = { "-p", "--password" }, hidden = true)
         private String password;
 
-        @Parameter(names = {"-l", "--label"}, hidden = true)
+        @Parameter(names = { "-l", "--label" }, hidden = true)
         private String label;
 
-        @Parameter(names = {"--reset"}, hidden = true)
+        @Parameter(names = { "--reset" }, hidden = true)
         private boolean reset;
 
-        @Parameter(names = {"--path"}, hidden = true)
+        @Parameter(names = { "--path" }, hidden = true)
         private String path;
+
+        @Parameter(names = { "--base-url" }, hidden = true)
+        private String baseUrl;
+
+        @Parameter(names = { "-t", "--trustStore" }, hidden = true)
+        private String trustStoreLocation;
+
+        @Parameter(names = { "-s", "--trustStorePass" }, hidden = true)
+        private String trustStorePassword;
+
+        private String publisherEndpoint;
+        private String adminEndpoint;
+        private String registrationEndpoint;
+        private String tokenEndpoint;
+        private String clientID;
+        private String clientSecret;
 
         public void execute() {
             //initialize CLI with the provided path. First time the cli runs it is a must to provide this. Once it is
             // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
             // path is taken from above file.
             if (StringUtils.isEmpty(label)) {
-                outStream.println("Label can't be empty. "
-                        + "You need to specify -l <label name>");
+                outStream.println("Label can't be empty. You need to specify -l <label name>");
                 return;
             }
 
@@ -297,26 +324,42 @@ public class Main {
                 }
             }
 
-            String configuredUser = config.getToken().getUsername();
-            if (StringUtils.isEmpty(configuredUser) && StringUtils.isEmpty(username)) {
-                if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
-                    if (username.trim().isEmpty()) {
-                        username = promptForTextInput("Username can't be empty; enter username: ");
-                        if (username.trim().isEmpty()) {
+            boolean isOverwriteRequired = false;
+
+            //Setup username
+            //If config is there
+            if (config != null) {
+                //get previous user
+                String configuredUser = config.getToken().getUsername();
+                // check username is also provided
+                if (!StringUtils.isEmpty(username)) {
+                    // if provided user is different user it and mark as config is need to changed
+                    if (!username.equalsIgnoreCase(configuredUser)) {
+                        username = configuredUser;
+                        isOverwriteRequired = true;
+                    }
+                    // if username is not provided, get the previous user
+                } else {
+                    username = configuredUser;
+                }
+            } else {
+                isOverwriteRequired = true;
+                // If there is no config file, prompt user to enter
+                if (StringUtils.isEmpty(username)) {
+                    if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
+                        if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
-                        } else {
-                            config.getToken().setUsername(username);
                         }
                     }
-                } else {
-                    config.getToken().setUsername(username);
                 }
             }
 
+            //Setup password
             if (StringUtils.isEmpty(password)) {
-                if ((password = promptForPasswordInput("Enter Password: ")).trim().isEmpty()) {
+                if ((password = promptForPasswordInput("Enter Password for " + username + ": ")).trim().isEmpty()) {
                     if (StringUtils.isEmpty(password)) {
-                        password = promptForPasswordInput("Password can't be empty; enter password: ");
+                        password = promptForPasswordInput(
+                                "Password can't be empty; enter password for " + username + ": ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
                         }
@@ -324,20 +367,133 @@ public class Main {
                 }
             }
 
-            if(StringUtils.isEmpty(username)) {
-                username = config.getToken().getUsername();
+            //Setup urls
+            //If config is there
+            if (config != null) {
+                //get previous publisher endpoint
+                String existingPublisherEndpoint = config.getToken().getPublisherEndpoint();
+                // check baseUrl is also provided
+                if (!StringUtils.isEmpty(baseUrl)) {
+                    // if provided baseUrl is different, use it and mark as config is need to changed
+                    String newPublisherEndpoint;
+                    try {
+                        newPublisherEndpoint = new URL(new URL(baseUrl), RESTServiceConstants.PUB_RESOURCE_PATH)
+                                .toString();
+                    } catch (MalformedURLException e) {
+                        outStream.println("Existing publisher endpoint is malformed. Please reset and setup again.");
+                        throw new RuntimeException(
+                                "Existing publisher endpoint is malformed. Please reset and setup again.");
+                    }
+                    if (!newPublisherEndpoint.toString().equalsIgnoreCase(existingPublisherEndpoint)) {
+                        // If baseUrl is different derive urls again
+                        populateHosts(baseUrl);
+                        isOverwriteRequired = true;
+                    }
+                } else {
+                    //If same url is provided, use the existing config
+                    publisherEndpoint = config.getToken().getPublisherEndpoint();
+                    adminEndpoint = config.getToken().getAdminEndpoint();
+                    registrationEndpoint = config.getToken().getRegistrationEndpoint();
+                    tokenEndpoint = config.getToken().getTokenEndpoint();
+                }
+            } else {
+                // If there is no config file, prompt user to enter baseUrl
+                if (StringUtils.isEmpty(baseUrl)) {
+                    if ((baseUrl = promptForTextInput(
+                            "Enter APIM base URL [" + RESTServiceConstants.DEFAULT_HOST + "]: ")).trim().isEmpty()) {
+                        baseUrl = RESTServiceConstants.DEFAULT_HOST;
+                    }
+                }
+                // derive urls with given url
+                populateHosts(baseUrl);
+            }
+
+            //configure trust store
+            //If config is there
+            if (config != null) {
+                //get previous trust store
+                String configuredTrustStore = config.getToken().getTrustStoreLocation();
+                // check trust store is also provided
+                if (!StringUtils.isEmpty(trustStoreLocation)) {
+                    // if provided trust store is different use it and mark as config is need to changed
+                    if (!trustStoreLocation.equalsIgnoreCase(configuredTrustStore)) {
+                        isOverwriteRequired = true;
+                    }
+                    // if trust store is not provided, get the previous trust store
+                } else {
+                    trustStoreLocation = configuredTrustStore;
+                }
+            } else {
+                // If there is no config file, prompt user to enter
+                if (StringUtils.isEmpty(trustStoreLocation)) {
+                    if ((trustStoreLocation = promptForTextInput(
+                            "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]"))
+                            .trim().isEmpty()) {
+                        trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
+                    }
+                }
+            }
+
+            //configure trust store password
+            //If config is there
+            if (config != null) {
+                //get previous trust store password
+                String configuredTrustStorePass = config.getToken().getTrustStorePassword();
+                // check trust store password is also provided
+                if (!StringUtils.isEmpty(trustStorePassword)) {
+                    // if provided trust store password is different use it and mark as config is need to changed
+                    if (!trustStorePassword.equalsIgnoreCase(configuredTrustStorePass)) {
+                        isOverwriteRequired = true;
+                    }
+                    // if trust store password is not provided, get the previous trust store password
+                } else {
+                    trustStorePassword = configuredTrustStorePass;
+                }
+            } else {
+                // If there is no config file, prompt user to enter
+                if (StringUtils.isEmpty(trustStorePassword)) {
+                    if ((trustStorePassword = promptForTextInput("Enter Trust store password: [ use default? ]")).trim()
+                            .isEmpty()) {
+                        trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+                    }
+                }
+            }
+
+            File trustStoreFile = new File(trustStoreLocation);
+            if (!trustStoreFile.isAbsolute()) {
+                trustStoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation;
+            }
+            trustStoreFile = new File(trustStoreLocation);
+            if (!trustStoreFile.exists()) {
+                System.err.println("Error while loading trust store location: " + trustStoreLocation);
+                Runtime.getRuntime().exit(1);
+            }
+
+            //set the trustStore again
+            if (isOverwriteRequired) {
+                System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+                System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
+                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
             }
 
             OAuthService manager = new OAuthServiceImpl();
-            String clientId = config.getToken().getClientId();
-
-            if (StringUtils.isEmpty(clientId)) {
-                manager.generateClientIdAndSecret(password.toCharArray());
+            if (config != null) {
+                clientID = config.getToken().getClientId();
+                String encryptedSecret = config.getToken().getClientSecret();
+                clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, new String(password));
             }
 
-            String accessToken = manager.generateAccessToken(username, password.toCharArray());
+            if (clientID == null) {
+                String[] clientInfo = manager
+                        .generateClientIdAndSecret(registrationEndpoint, username, password.toCharArray());
+                clientID = clientInfo[0];
+                clientSecret = clientInfo[1];
+            }
 
-            RESTAPIService service = new RESTAPIServiceImpl();
+            String accessToken = manager
+                    .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret);
+
+            RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint);
             List<ExtendedAPI> apis = service.getAPIs(label, accessToken);
             List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
@@ -348,12 +504,36 @@ public class Main {
                 policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
                         + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
                 codeGenerator.generate(projectRoot, label, apis, true);
-                InitHandler.initialize(Paths.get(GatewayCmdUtils
-                        .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getLabelDirectoryPath(projectRoot, label)), null,
+                        new ArrayList<>(), null);
             } catch (IOException | BallerinaServiceGenException e) {
                 outStream.println("Error while generating ballerina source");
                 e.printStackTrace();
                 Runtime.getRuntime().exit(1);
+            }
+
+            //if all the operations are success, write new config to file
+            if (isOverwriteRequired) {
+                Config newConfig = new Config();
+                Client client = new Client();
+                client.setHttpRequestTimeout(1000000);
+                newConfig.setClient(client);
+                
+                String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
+                Token token = new TokenBuilder()
+                        .setPublisherEndpoint(publisherEndpoint)
+                        .setAdminEndpoint(adminEndpoint)
+                        .setRegistrationEndpoint(registrationEndpoint)
+                        .setTokenEndpoint(tokenEndpoint)
+                        .setUsername(username)
+                        .setClientId(clientID)
+                        .setClientSecret(encryptedSecret)
+                        .setTrustStoreLocation(trustStoreLocation)
+                        .setTrustStorePassword(trustStorePassword)
+                        .build();
+                newConfig.setToken(token);
+                newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+                GatewayCmdUtils.saveConfig(newConfig);
             }
         }
 
@@ -375,6 +555,18 @@ public class Main {
             outStream.println(msg);
             return new String(System.console().readPassword());
         }
+
+        private void populateHosts(String host) {
+            try {
+                publisherEndpoint = new URL(new URL(host), RESTServiceConstants.PUB_RESOURCE_PATH).toString();
+                adminEndpoint = new URL(new URL(host), RESTServiceConstants.ADMIN_RESOURCE_PATH).toString();
+                registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
+                tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("Malformed URL is provided");
+            }
+        }
+
     }
 
     /**
@@ -386,10 +578,10 @@ public class Main {
         @Parameter(names = "--java.debug", hidden = true)
         private String javaDebugPort;
 
-        @Parameter(names = {"-l", "--label"}, hidden = true)
+        @Parameter(names = { "-l", "--label" }, hidden = true)
         private String label;
 
-        @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
+        @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
         private boolean helpFlag;
 
         @Parameter(arity = 1)
@@ -405,8 +597,7 @@ public class Main {
             }
 
             if (StringUtils.isEmpty(label)) {
-                outStream.println("Label can't be empty. "
-                        + "You need to specify -l <label name>");
+                outStream.println("Label can't be empty. " + "You need to specify -l <label name>");
                 return;
             }
 
@@ -441,10 +632,10 @@ public class Main {
         @Parameter(names = "--java.debug", hidden = true)
         private String javaDebugPort;
 
-        @Parameter(names = {"-l", "--label"}, hidden = true)
+        @Parameter(names = { "-l", "--label" }, hidden = true)
         private String label;
 
-        @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
+        @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
         private boolean helpFlag;
 
         @Parameter(arity = 1)
@@ -460,8 +651,7 @@ public class Main {
             }
 
             if (StringUtils.isEmpty(label)) {
-                outStream.println("Label can't be empty. "
-                        + "You need to specify -l <label name>");
+                outStream.println("Label can't be empty. " + "You need to specify -l <label name>");
                 return;
             }
         }
@@ -482,7 +672,7 @@ public class Main {
      */
     private static class DefaultCmd implements GatewayLauncherCmd {
 
-        @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
+        @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
         private boolean helpFlag;
 
         @Parameter(names = "--java.debug", hidden = true)

@@ -20,18 +20,24 @@ package org.wso2.apimgt.gateway.cli.oauth;
 public interface OAuthService {
 
     /**
-     * Generate access token
+     * Generate access token using password grant
      *
-     * @param username username of the user
-     * @param password password of the user
+     * @param tokenEndpoint token endpoint
+     * @param username      userid
+     * @param password      password
+     * @param clientId      client consumer key
+     * @param clientSecret  client consumer secret
      * @return access token
      */
-    String generateAccessToken(String username, char[] password);
+    String generateAccessToken(String tokenEndpoint, String username, char[] password, String clientId,
+            String clientSecret);
 
     /**
      * Generate OAuth application via DCR
      *
-     * @param password password of the user
+     * @param dcrEndpoint DCR endpoint
+     * @param username    user
+     * @param password    password password of the user
      */
-    void generateClientIdAndSecret(char[] password);
+    String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password);
 }
