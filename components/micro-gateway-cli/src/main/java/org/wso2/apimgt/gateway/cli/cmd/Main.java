@@ -31,6 +31,8 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.exception.HashingException;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -348,6 +350,12 @@ public class Main {
                 policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, label) + File.separator
                         + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
                 codeGenerator.generate(projectRoot, label, apis, true);
+                try {
+                    boolean changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
+                    System.out.println("Changes -- "+ changesDetected);
+                } catch (HashingException e) {
+                    outStream.println("Error while checking for changes of resources. Skipping no-change detection..");
+                }
                 InitHandler.initialize(Paths.get(GatewayCmdUtils
                         .getLabelDirectoryPath(projectRoot, label)), null, new ArrayList<SrcFile>(), null);
             } catch (IOException | BallerinaServiceGenException e) {

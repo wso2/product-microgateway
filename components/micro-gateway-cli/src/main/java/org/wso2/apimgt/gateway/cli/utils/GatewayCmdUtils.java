@@ -37,6 +37,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GatewayCmdUtils {
 
@@ -181,14 +183,8 @@ public class GatewayCmdUtils {
         if (!pathFile.exists()) {
             pathFile.createNewFile();
         }
-        FileWriter writer = null;
         //Write Content
-        try {
-            writer = new FileWriter(pathFile);
-            writer.write(workspacePath);
-        } finally {
-            writer.close();
-        }
+        writeContent(workspacePath, pathFile);
     }
 
     /**
@@ -254,7 +250,7 @@ public class GatewayCmdUtils {
      * Get temp folder location
      * @return temp folder location
      */
-    private static String getTempFolderLocation() {
+    public static String getTempFolderLocation() {
         return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
     }
 
@@ -357,6 +353,38 @@ public class GatewayCmdUtils {
         //path : {label}/target/distribution/micro-gw-{label}/exec
         String distExec = distMicroGWPath + File. separator + GatewayCliConstants.GW_DIST_EXEC;
         createFolderIfNotExist(distExec);
+    }
+
+    public static String loadStoredResourceHashes() throws IOException {
+        String resourceHashFileLocation = getResourceHashHolderFileLocation();
+        String content = null;
+        if (new File(resourceHashFileLocation).exists()) {
+            content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
+        }
+        return content;
+    }
+
+    public static void storeResourceHashesFileContent(String content) throws IOException {
+        String tempDirPath = getTempFolderLocation();
+        createFolderIfNotExist(tempDirPath);
+
+        String resourceHashesFileLocation = getResourceHashHolderFileLocation();
+        File pathFile = new File(resourceHashesFileLocation);
+        if (!pathFile.exists()) {
+            pathFile.createNewFile();
+        }
+        //Write Content
+        writeContent(content, pathFile);
+    }
+    
+    /**
+     * Get resource hash holder file path
+     *
+     * @return resource hash holder file path
+     */
+    private static String getResourceHashHolderFileLocation() {
+        return GatewayCmdUtils.getTempFolderLocation() + File.separator
+                + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
     }
 
     /**
@@ -601,6 +629,25 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Write content to a specified file
+     * 
+     * @param content content to be written
+     * @param file file object initialized with path
+     * @throws IOException error while writing content to file
+     */
+    private static void writeContent(String content, File file) throws IOException {
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write(content);
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
+    /**
      * Create initial label configuration
      * @param root workspace location
      * @param label label name
@@ -611,17 +658,9 @@ public class GatewayCmdUtils {
         File file = new File(mainConfig);
         if (!file.exists()) {
             file.createNewFile();
-            FileWriter writer = null;
             //Write Content
             String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
-            try {
-                writer = new FileWriter(file);
-                writer.write(defaultConfig);
-            } finally {
-                if (writer != null) {
-                    writer.close();
-                }
-            }
+            writeContent(defaultConfig, file);
         }
     }
 
