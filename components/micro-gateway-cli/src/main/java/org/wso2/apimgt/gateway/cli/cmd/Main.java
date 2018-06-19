@@ -39,6 +39,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
+import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -517,20 +518,20 @@ public class Main {
                 Client client = new Client();
                 client.setHttpRequestTimeout(1000000);
                 newConfig.setClient(client);
-
-                Token token = new Token();
-                token.setPublisherEndpoint(publisherEndpoint);
-                token.setAdminEndpoint(adminEndpoint);
-                token.setRegistrationEndpoint(registrationEndpoint);
-                token.setTokenEndpoint(tokenEndpoint);
-                token.setUsername(username);
-                token.setClientId(clientID);
+                
                 String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
-                token.setClientSecret(encryptedSecret);
-                token.setTrustStoreLocation(trustStoreLocation);
-                token.setTrustStorePassword(trustStorePassword);
+                Token token = new TokenBuilder()
+                        .setPublisherEndpoint(publisherEndpoint)
+                        .setAdminEndpoint(adminEndpoint)
+                        .setRegistrationEndpoint(registrationEndpoint)
+                        .setTokenEndpoint(tokenEndpoint)
+                        .setUsername(username)
+                        .setClientId(clientID)
+                        .setClientSecret(encryptedSecret)
+                        .setTrustStoreLocation(trustStoreLocation)
+                        .setTrustStorePassword(trustStorePassword)
+                        .build();
                 newConfig.setToken(token);
-
                 newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
                 GatewayCmdUtils.saveConfig(newConfig);
             }
