@@ -19,6 +19,8 @@ package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 
 public class GatewayCliConstants {
     public static final String BALLERINA_HOME = "BALLERINA_HOME";
@@ -59,4 +61,11 @@ public class GatewayCliConstants {
     public static final String CHARSET_UTF8 = "UTF-8";
 
     public static final int EXIT_CODE_NOT_MODIFIED = 34;
+
+    public static final List<String> accessControlAllowOrigins = Arrays.asList("*");
+    public static final List<String> accessControlAllowMethods = Arrays
+            .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS");
+    public static final List<String> accessControlAllowHeaders = Arrays
+            .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction");
+    public static final boolean accessControlAllowCredentials = false;
 }

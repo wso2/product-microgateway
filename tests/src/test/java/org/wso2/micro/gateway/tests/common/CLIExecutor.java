@@ -48,17 +48,10 @@ public class CLIExecutor {
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
-
-        File gwConfDir = new File(
-                path.toString() + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                        + GatewayCliConstants.GW_DIST_CONF);
-        gwConfDir.mkdirs();
-        Files.copy(new File(
-                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
-                        .getPath()).toPath(), new File(
-                path.toString() + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                        + GatewayCliConstants.CONF_DIRECTORY_NAME + File.separator + "config.toml").toPath());
-        main.main("setup", "--label", label, "--path", path.toString(), "--user", "admin", "--password", "admin");
+        String[] args = { "setup", "--label", label, "--path", path.toString(), "--user", "admin", "--password",
+                "admin", "--base-url", "http://localhost:9443", "--trustStore",
+                "lib/platform/bre/security/ballerinaTruststore.p12", "--trustStorePass", "ballerina" };
+        main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
