@@ -376,7 +376,7 @@ public function getCurrentTime() returns int {
 
 public function rotateFile(string fileName) returns string|error  {
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileName + "." + rotatingTimeStamp + ".zip";
+    string zipName = fileName + "." + rotatingTimeStamp + ZIP_EXTENSION;
     internal:Path zipLocation = new(zipName);
     internal:Path fileToZip = new(fileName);
     match internal:compress(fileToZip, zipLocation) {
@@ -402,6 +402,14 @@ public function rotateFile(string fileName) returns string|error  {
 function initStreamPublisher() {
     log:printInfo("Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
+    getAnalyticsConfig();
+}
+
+function getAnalyticsConfig() {
+    map vals = getConfigMapValue(ANALYTICS);
+    rotatingTime =  check <int> vals[ROTATING_TIME];
+    uploadingUrl = <string> vals[UPLOADING_EP];
+    log:printDebug("Analytics config values read");
 }
 
 future streamftr = start initStreamPublisher();
