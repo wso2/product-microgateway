@@ -42,7 +42,7 @@ public type APIGatewayCache object {
 
    public function removeFromInvalidTokenCache (string tokenCacheKey);
 
-   public function addToInvalidTokenCache (string tokenCacheKey, boolean authorize) ;
+   public function addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) ;
 };
 
 public function APIGatewayCache::authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns (APIKeyValidationDto|()) {
@@ -76,8 +76,8 @@ public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCache
     }
 }
 
-public function APIGatewayCache::addToInvalidTokenCache (string tokenCacheKey, boolean authorize) {
-    invalidTokenCache.put(tokenCacheKey, authorize);
+public function APIGatewayCache::addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
+    invalidTokenCache.put(tokenCacheKey, apiKeyValidationDto);
 }
 
 public function APIGatewayCache::removeFromInvalidTokenCache (string tokenCacheKey) {

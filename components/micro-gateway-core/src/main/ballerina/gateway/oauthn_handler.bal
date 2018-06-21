@@ -35,7 +35,7 @@ public type OAuthnAuthenticator object {
     }
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req, APIRequestMetaDataDto apiRequestMetaDataDto)
+    public function handle (http:Request req)
     returns (APIKeyValidationDto| error);
 
 };
@@ -63,14 +63,14 @@ public function OAuthnAuthenticator::canHandle (http:Request req) returns (boole
 @Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-public function OAuthnAuthenticator::handle (http:Request req, APIRequestMetaDataDto apiRequestMetaDataDto)
+public function OAuthnAuthenticator::handle (http:Request req)
                                    returns (APIKeyValidationDto| error) {
     APIKeyValidationDto apiKeyValidationDto;
     try {
-        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiRequestMetaDataDto);
+        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
+        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
     } catch (error err) {
-        log:printError("Error while getting key validation info for access token" +
-                apiRequestMetaDataDto.accessToken, err = err);
+        log:printError("Error while getting key validation info for access token", err = err);
         return err;
     }
     return apiKeyValidationDto;
@@ -111,7 +111,7 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
         APIKeyValidationDto apiKeyValidationDtoFromcache => {
         if(isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
-            self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, true);
+            self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDtoFromcache);
             apiKeyValidationDtoFromcache.authorized= "false";
             log:printDebug("Access token found in cache. But token is expired");
             return apiKeyValidationDtoFromcache;
@@ -125,13 +125,11 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
                 boolean cacheAuthorizedValue => {
                     APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:
                     API_AUTH_INVALID_CREDENTIALS_STRING };
-                    log:printDebug("Access token found in invalid
-                    token cache.");
+                    log:printDebug("Access token found in invalid token cache.");
                     return apiKeyValidationInfoDTO;
                 }
                 () => {
-                    log:printDebug("Access token not found in cache.
-                    Hence calling the key vaidation service.");
+                    log:printDebug("Access token not found in cache. Hence calling the key vaidation service.");
                     json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
                     match <string>keyValidationInfoJson.authorized {
                         string authorizeValue => {
@@ -152,10 +150,10 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
                                 authorized = auth;
                                 self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                             } else {
-                                self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, true);
-                                apiKeyValidationDto.authorized="false";
-                                apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson
-                                    .validationStatus;
+                                apiKeyValidationDto.authorized = "false";
+                                apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.
+                                validationStatus;
+                                self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDto);
                             }
                         }
                         error err => {
@@ -246,7 +244,6 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         log:printError("Error occurred while validating token",err =err);
         return {};
     }
-    return {};
 
 }
 

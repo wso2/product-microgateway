@@ -42,25 +42,46 @@ public type OAuthzFilter object {
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
-    public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
-        match <boolean> context.attributes[FILTER_FAILED] {
-            boolean failed => {
-                if (failed) {
-                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
-                }
-            } error err => {
-            //Nothing to handle
-        }
-        }
+    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+                                                                                                                boolean
+    {
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         // scope validation is done in authn filter for oauth2, hence we only need to
         //validate scopes if auth scheme is jwt.
         if (authScheme == AUTH_SCHEME_JWT){
-            // todo: send proper error message
-            return self.authzFilter.filterRequest(request, context);
+            return self.authzFilter.filterRequest(listener, request, context);
         }
-        return createFilterResult(true, 200, "Successfully authorized");
+        return true;
+    }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        // In authorization filter we have specifically set the error payload since we are using ballerina in built
+        // authzFilter
+        if (response.statusCode == FORBIDDEN) {
+            match context.attributes[ERROR_CODE]{
+                () => {
+                    setAuthorizationFailureMessage(response, context);
+                }
+                any code => {// no need to set error codes
+                }
+
+            }
+        }
+        return true;
     }
 };
+
+function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
+    string errorDescription = INVALID_SCOPE_MESSAGE;
+    string errorMesssage = INVALID_SCOPE_MESSAGE;
+    int errorCode = INVALID_SCOPE;
+    response.setContentType(APPLICATION_JSON);
+    json payload = { fault: {
+        code: errorCode,
+        message: errorMesssage,
+        description: errorDescription
+    } };
+    response.setJsonPayload(payload);
+}
 
 

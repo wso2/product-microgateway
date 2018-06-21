@@ -281,28 +281,75 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
 }
 
-// Extension filter used to send custom error messages and to customizations
 @Description {value:"Representation of the Subscription filter"}
 @Field {value:"filterRequest: request filter method which attempts to validate the subscriptions"}
 public type ExtensionFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
-    public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
+    public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) returns
+                                                                                                                 boolean {
+        return true;
+    }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         match <boolean> context.attributes[gateway:FILTER_FAILED] {
             boolean failed => {
                 if (failed) {
-                    //todo we need to send proper error message once the ballerina respond support comes to the filter
                     int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
-                    string errorMessage = <string>context.attributes[gateway:ERROR_DESCRIPTION];
-                    return gateway:createFilterResult(false, statusCode, errorMessage);
+                    if(statusCode == gateway:UNAUTHORIZED) {
+                        setAuthenticationErrorResponse(response, context );
+                    } else if (statusCode ==  gateway:FORBIDDEN) {
+                        setAuthorizationErrorResponse(response, context );
+                    } else if (statusCode ==  gateway:THROTTLED_OUT){
+                        setThrottleFailureResponse(response, context );
+                    } else {
+                        setGenericErrorResponse(response, context );
+                    }
+
+                    return true;
+                    //return gateway:createFilterResult(false, statusCode, errorMessage);
                 }
             } error err => {
             //Nothing to handle
+            return true;
         }
         }
-        http:FilterResult requestFilterResult = {canProceed:true, statusCode:200, message:"Filters succeeded"};
-        return requestFilterResult;
+
+        return true;
     }
 
 };
+
+@Description {value:"This method can be used to send custom error message in an authentication failute"}
+function setAuthenticationErrorResponse(http:Response response, http:FilterContext context) {
+    //Un comment the following code and set the proper error messages
+
+    //int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
+    //string errorDescription = <string>context.attributes[gateway:ERROR_DESCRIPTION];
+    //string errorMesssage = <string>context.attributes[gateway:ERROR_MESSAGE];
+    //int errorCode = check <int>context.attributes[gateway:ERROR_CODE];
+    //response.statusCode = statusCode;
+    //response.setContentType(gateway:APPLICATION_JSON);
+    //json payload = {fault : {
+    //    code : errorCode,
+    //    message : errorMesssage,
+    //    description : errorDescription
+    //}};
+    //response.setJsonPayload(payload);
+}
+
+@Description {value:"This method can be used to send custom error message in an authorization failute"}
+function setAuthorizationErrorResponse(http:Response response, http:FilterContext context) {
+
+}
+
+@Description {value:"This method can be used to send custom error message when message throttled out"}
+function setThrottleFailureResponse(http:Response response, http:FilterContext context) {
+
+}
+
+@Description {value:"This method can be used to send custom general error message "}
+function setGenericErrorResponse(http:Response response, http:FilterContext context) {
+
+}
 

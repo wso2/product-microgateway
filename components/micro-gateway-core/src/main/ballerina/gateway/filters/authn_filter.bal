@@ -39,15 +39,18 @@ public type AuthnFilter object {
     public new (oauthnHandler, authnHandlerChain) {}
 
     @Description {value:"filterRequest: Request filter function"}
-    public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
+    public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) returns
+                                                                                                                 boolean {
         //Setting UUID
         context.attributes[MESSAGE_ID] = system:uuid();
         context.attributes[FILTER_FAILED] = false;
+        runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR] = context.serviceType;
+        runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
         // get auth config for this resource
         boolean authenticated;
-        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
+        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
         var (isSecured, authProviders) = getResourceAuthConfig(context);
-        APIKeyValidationDto apiKeyValidationDto;
+        //APIKeyValidationDto apiKeyValidationInfoDto;
         AuthenticationContext authenticationContext;
         boolean isAuthorized;
         if (isSecured) {
@@ -58,8 +61,8 @@ public type AuthnFilter object {
             } else {
                 log:printError("No authorization header was provided");
                 setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                return createFilterResult(true, 200, "Authentication filter has failed. But
-                                    continuing in order to  provide error details");
+                sendErrorResponse(listener, request, context);
+                return false;
             }
             string providerId = getAuthenticationProviderType(authHeader);
             // if auth providers are there, use those to authenticate
@@ -84,12 +87,12 @@ public type AuthnFilter object {
             } else {
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
+                        runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
                         log:printDebug("Successfully extracted the oauth toke from header : " + authHeaderName);
-                        apiKeyValidationRequestDto.accessToken = token;
-                        match self.oauthnHandler.handle(request, apiKeyValidationRequestDto) {
+                        match self.oauthnHandler.handle(request) {
                             APIKeyValidationDto apiKeyValidationDto => {
                                 isAuthorized = <boolean>apiKeyValidationDto.authorized;
-                                log:printDebug("API Key validation service returned with value : " + isAuthorized);
+                                log:printDebug("Authentication handler returned with value : " + isAuthorized);
                                 if(isAuthorized) {
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = apiKeyValidationDto.tier;
@@ -128,34 +131,32 @@ public type AuthnFilter object {
                                     authContext.authToken = token;
                                 } else {
                                     int status = check <int> apiKeyValidationDto.validationStatus;
-                                    log:printDebug("API Key validation service returned with validation status : " +
+                                    log:printDebug("Authentication handler returned with validation status : " +
                                             status);
                                     setErrorMessageToFilterContext(context, status);
-                                    return createFilterResult(true, 200, "Authentication filter has failed. But
-                                    continuing in order to  provide error details");
+                                    sendErrorResponse(listener, request, context);
+                                    return false;
                                 }
                             }
                             error err => {
                                 log:printError(err.message, err = err);
                                 setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                                return createFilterResult(true, 200, "Authentication filter has failed. But
-                                    continuing in order to  provide error details");
+                                sendErrorResponse(listener, request, context);
+                                return false;
                             }
                         }
                     }
                     error err => {
                         log:printError(err.message, err = err);
                         setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                        return createFilterResult(true, 200, "Authentication filter has failed. But
-                                    continuing in order to  provide error details");
+                        sendErrorResponse(listener, request, context);
+                        return false;
                     }
                 }
             }
 
         } else {
             // not secured, no need to authenticate
-            log:printDebug("The resource : " + apiKeyValidationRequestDto.matchingResource + "is configured as
-            authentication none");
             string clientIp = getClientIp(request);
             authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
@@ -165,9 +166,13 @@ public type AuthnFilter object {
             authenticationContext.applicationId = clientIp;
             authenticationContext.keyType = PRODUCTION_KEY_TYPE;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-            return createFilterResult(true, 200 , "Successfully authenticated");
+            return true;
         }
-        return createAuthnResult(isAuthorized);
+        return isAuthorized;
+    }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        return true;
     }
 };
 

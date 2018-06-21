@@ -37,7 +37,7 @@ public type APIGatewayListener object {
         httpListener = new;
     }
 
-    public function init(EndpointConfiguration config);
+    public function init(EndpointConfiguration endpointConfig);
 
     @Description {value:"Gets called when the endpoint is being initialize during package init time"}
     @Return {value:"Error occured during initialization"}
@@ -83,11 +83,11 @@ public type EndpointConfiguration {
 };
 
 
-public function APIGatewayListener::init (EndpointConfiguration config) {
-    initiateGatewayConfigurations(config);
-    initiateAuthProviders(config);
-    addAuthFiltersForAPIGatewayListener(config);
-    self.httpListener.init(config);
+public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
+    initiateGatewayConfigurations(endpointConfig);
+    initiateAuthProviders(endpointConfig);
+    addAuthFiltersForAPIGatewayListener(endpointConfig);
+    self.httpListener.init(endpointConfig);
 }
 
 @Description {value:"Add authn and authz filters"}

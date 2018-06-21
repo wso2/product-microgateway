@@ -111,7 +111,7 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
                     .getAbsolutePath();
             startKMServer(kmServerFile);
             Map<String, String> headers = new HashMap<>();
-            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer asds-4324");
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer sample-token");
             HttpResponse response = HttpClientRequest
                     .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
             Assert.assertNotNull(response);
