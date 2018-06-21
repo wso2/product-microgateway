@@ -27,14 +27,14 @@ public type GatewayConf object {
         return gatewayConf;
     }
 
-    public function setKeyManagerConf(KeyManagerConf keyManagerConf) {
-        gatewayConf.keyManagerConf = keyManagerConf;
+    public function setKeyManagerConf(KeyManagerConf keyManagerConfig) {
+        gatewayConf.keyManagerConf = keyManagerConfig;
     }
     public function getKeyManagerConf() returns(KeyManagerConf) {
         return gatewayConf.keyManagerConf;
     }
-    public function setThrottleConf(ThrottleConf throttleConf) {
-        gatewayConf.throttleConf = throttleConf;
+    public function setThrottleConf(ThrottleConf throttleConfig) {
+        gatewayConf.throttleConf = throttleConfig;
     }
     public function getThrottleConf() returns(ThrottleConf) {
         return gatewayConf.throttleConf;

@@ -23,7 +23,8 @@ endpoint http:Client conditionRetrievalEndpoint {
     }
 };
 endpoint http:Client keyValidationEndpoint {
-    url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443")
+    url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+    cache: { enabled: false }
 };
 
 endpoint http:Listener tokenListenerEndpoint {

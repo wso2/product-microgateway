@@ -21,23 +21,17 @@ import ballerina/time;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
-        match <boolean> context.attributes[FILTER_FAILED] {
-            boolean failed => {
-                if (failed) {
-                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
-                }
-            } error err => {
-            //Nothing to handle
-            }
-        }
-        http:FilterResult requestFilterResult;
-        AnalyticsRequestStream requestStream = generateRequestEvent(request, context);
-        EventDTO eventDto = generateEventFromRequest(requestStream);
+    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+                                                                                                                boolean {
+        AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
+        EventDTO eventDto = generateEventFromRequest(requestEventStream);
         eventStream.publish(eventDto);
-        requestFilterResult = { canProceed: true, statusCode: 200, message: "Analytics filter processed." };
-        return requestFilterResult;
+        return true;
 
+    }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        return true;
     }
 
 };

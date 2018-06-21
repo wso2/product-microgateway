@@ -29,17 +29,9 @@ public type ThrottleFilter object {
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
-    public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
-        match <boolean> context.attributes[FILTER_FAILED]{
-            boolean failed => {
-                if(failed) {
-                    return createFilterResult(true, 200, "Skipping filter due to parent filter has returned false");
-                }
-            } error err => {
-            //Nothing to handle
-            }
-        }
-        http:FilterResult requestFilterResult;
+    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+                                                                                                                boolean {
+        boolean requestFilterResult;
         boolean resourceLevelThrottled;
         boolean apiLevelThrottled;
         string resourceLevelThrottleKey;
@@ -62,29 +54,32 @@ public type ThrottleFilter object {
         if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
-            requestFilterResult = {canProceed:true};
-            boolean isThrottled;
+            requestFilterResult = true;
             boolean stopOnQuata;
             (isThrottled, stopOnQuata) = isSubscriptionLevelThrottled(context, keyvalidationResult);
             if (isThrottled) {
                 if (stopOnQuata) {
-                    requestFilterResult = {canProceed:false, statusCode:429, message:
-                    "You have exceeded your quota"};
                     publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
                         THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
                     context.attributes[IS_THROTTLE_OUT] = false;
-                    return requestFilterResult;
+                    setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                        THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                    sendErrorResponse(listener, request, context);
+                    requestFilterResult = false;
+                    return false;
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[IS_THROTTLE_OUT] = true;
                 }
             }
             if (isApplicationLevelThrottled(keyvalidationResult)){
-                requestFilterResult = {canProceed:false, statusCode:429, message:
-                "You have exceeded your quota"};
+                setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
+                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                sendErrorResponse(listener, request, context);
                 publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
                     THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
-                return requestFilterResult;
+                requestFilterResult = false;
+                return false;
             }
 
             //Publish throttle event to internal policies
@@ -92,11 +87,27 @@ public type ThrottleFilter object {
                 keyvalidationResult);
             publishNonThrottleEvent(throttleEvent);
         } else {
-            requestFilterResult = {canProceed:false, statusCode:500, message:"Internal Error Occurred"};
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, APPLICATION_THROTTLE_OUT_ERROR_CODE,
+                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+            sendErrorResponse(listener, request, context);
+            requestFilterResult = false;
         }
         return requestFilterResult;
     }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        return true;
+    }
 };
+
+function setThrottleErrorMessageToContext(http:FilterContext context, int statusCode, int errorCode, string
+    errorMessage, string errorDescription) {
+    context.attributes[HTTP_STATUS_CODE] = statusCode;
+    context.attributes[FILTER_FAILED] = true;
+    context.attributes[ERROR_CODE] = errorCode;
+    context.attributes[ERROR_MESSAGE] = errorMessage;
+    context.attributes[ERROR_DESCRIPTION] = errorDescription;
+}
 
 function isApiLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     if (keyValidationDto.apiTier != "" && keyValidationDto.apiTier != UNLIMITED_TIER){
@@ -104,9 +115,6 @@ function isApiLevelThrottled(AuthenticationContext keyValidationDto) returns (bo
     return false;
 }
 
-function isResourceLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
-    return false;
-}
 
 function isHardlimitThrottled(string context, string apiVersion) returns (boolean) {
 
@@ -119,14 +127,14 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
         (context) + ":" + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
     ;
-    return isThrottled(subscriptionLevelThrottleKey);
+    return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     boolean throttled;
     boolean stopOnQuata;
-    (throttled, stopOnQuata) = isThrottled(applicationLevelThrottleKey);
+    (throttled, stopOnQuata) = isRequestThrottled(applicationLevelThrottleKey);
     return throttled;
 }
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)

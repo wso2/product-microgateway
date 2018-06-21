@@ -27,7 +27,7 @@ public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
 boolean blockConditionExist;
 
-public function isThrottled(string key) returns (boolean, boolean) {
+public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled){
         int currentTime = time:currentTime().time;

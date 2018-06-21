@@ -31,17 +31,17 @@
 @Description {value:"Bearer authentication scheme"}
 @final public string AUTH_SCHEME_BEARER = "Bearer";
 @Description {value:"Auth annotation package"}
-@final public string ANN_PACKAGE = "ballerina.http";
+@final public string ANN_PACKAGE = "ballerina/http";
 @Description {value:"Resource level annotation name"}
 @final public string RESOURCE_ANN_NAME = "ResourceConfig";
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
 @Description {value:"API annotation name in service level"}
-@final public string API_ANN_NAME = "API";
+@final public string API_ANN_NAME = "0.0.0"; //todo This value should be API,
 @Description {value:"skip filters annotation name in service level"}
 @final public string SKIP_FILTERS_ANN_NAME = "SkipFilters";
 @Description {value:"gateway annotation package"}
-@final public string GATEWAY_ANN_PACKAGE = "wso2.gateway";
+@final public string GATEWAY_ANN_PACKAGE = "wso2/gateway";
 
 @Description {value:"Basic prefix for authorization header with ending spce"}
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
@@ -106,6 +106,10 @@
 @final public string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
 @final public string THROTTLE_FILTER = "THROTTLE_FILTER";
 @final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
+
+@final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
+@final public string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
+@final public string ACCESS_TOKEN_ATTR = "ACCESS_TOKEN";
 
 
 
@@ -195,12 +199,17 @@
 @final string THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
 @final string THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
 
+@final string INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured";
+
 
 // http codes
-@final int INTERNAL_SERVER_ERROR = 500;
-@final int FORBIDDEN = 403;
-@final int UNAUTHORIZED = 401;
+@final public int INTERNAL_SERVER_ERROR = 500;
+@final public int FORBIDDEN = 403;
+@final public int UNAUTHORIZED = 401;
+@final public int THROTTLED_OUT = 429;
 
 // end of http codes
+
+@final public string APPLICATION_JSON = "application/json";
 
 @final string PATH_SEPERATOR = "/";

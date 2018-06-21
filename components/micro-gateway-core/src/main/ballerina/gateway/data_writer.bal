@@ -26,18 +26,20 @@ int initializingTime = 0;
 //streams associated with DTOs
 stream<EventDTO> eventStream;
 
-function getPayload(AnalyticsRequestStream requestStream) returns (string) {
-    return requestStream.consumerKey + OBJ + requestStream.context + OBJ + requestStream.apiVersion + OBJ +
-        requestStream.api + OBJ + requestStream.resourcePath + OBJ +requestStream.resourceTemplate + OBJ +
-        requestStream.method + OBJ + requestStream.apiVersion + OBJ + requestStream.requestCount + OBJ +
-        requestStream.requestTime + OBJ + requestStream.username + OBJ + requestStream.tenantDomain + OBJ +
-        requestStream.hostName + OBJ + requestStream.apiPublisher + OBJ + requestStream.applicationName + OBJ
-        + requestStream.applicationId + OBJ + requestStream.userAgent + OBJ + requestStream.tier +
-        OBJ + requestStream.continuedOnThrottleOut + OBJ + requestStream.clientIp + requestStream.applicationOwner;
+function getPayload(AnalyticsRequestStream requestStreamForPayload) returns (string) {
+    return requestStreamForPayload.consumerKey + OBJ + requestStreamForPayload.context + OBJ + requestStreamForPayload.apiVersion + OBJ +
+        requestStreamForPayload.api + OBJ + requestStreamForPayload.resourcePath + OBJ + requestStreamForPayload.resourceTemplate + OBJ +
+        requestStreamForPayload.method + OBJ + requestStreamForPayload.apiVersion + OBJ + requestStreamForPayload.requestCount + OBJ +
+        requestStreamForPayload.requestTime + OBJ + requestStreamForPayload.username + OBJ + requestStreamForPayload.tenantDomain + OBJ +
+        requestStreamForPayload.hostName + OBJ + requestStreamForPayload.apiPublisher + OBJ + requestStreamForPayload.applicationName + OBJ
+        + requestStreamForPayload.applicationId + OBJ + requestStreamForPayload.userAgent + OBJ + requestStreamForPayload
+        .tier +
+        OBJ + requestStreamForPayload.continuedOnThrottleOut + OBJ + requestStreamForPayload.clientIp + requestStreamForPayload
+        .applicationOwner;
 }
 
-function getMetaData(AnalyticsRequestStream requestStream) returns (string) {
-    return "{\"keyType\":\"" + requestStream.keyType + "\",\"correlationID\":\"" + requestStream.correlationID + "\"}";
+function getMetaData(AnalyticsRequestStream requestStreamForMetaData) returns (string) {
+    return "{\"keyType\":\"" + requestStreamForMetaData.keyType + "\",\"correlationID\":\"" + requestStreamForMetaData.correlationID + "\"}";
 }
 
 function getCorrelationData(AnalyticsRequestStream request) returns (string) {
@@ -46,52 +48,52 @@ function getCorrelationData(AnalyticsRequestStream request) returns (string) {
 
 function generateRequestEvent(http:Request request, http:FilterContext context) returns (AnalyticsRequestStream){
     //ready authentication context to get values
-    AnalyticsRequestStream requestStream;
+    AnalyticsRequestStream analyticsRequestStream;
     AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
     if ( authContext != null) {
-        requestStream.consumerKey = authContext.consumerKey;
-        requestStream.username = authContext.username;
-        requestStream.applicationId = authContext.applicationId;
-        requestStream.applicationName = authContext.applicationName;
-        requestStream.applicationOwner = authContext.subscriber;
-        requestStream.tier = authContext.tier;
-        requestStream.continuedOnThrottleOut = !authContext.stopOnQuotaReach;
-        requestStream.apiPublisher = authContext.apiPublisher;
-        requestStream.keyType = authContext.keyType;
+        analyticsRequestStream.consumerKey = authContext.consumerKey;
+        analyticsRequestStream.username = authContext.username;
+        analyticsRequestStream.applicationId = authContext.applicationId;
+        analyticsRequestStream.applicationName = authContext.applicationName;
+        analyticsRequestStream.applicationOwner = authContext.subscriber;
+        analyticsRequestStream.tier = authContext.tier;
+        analyticsRequestStream.continuedOnThrottleOut = !authContext.stopOnQuotaReach;
+        analyticsRequestStream.apiPublisher = authContext.apiPublisher;
+        analyticsRequestStream.keyType = authContext.keyType;
     }
-    requestStream.userAgent = request.userAgent;
-    requestStream.clientIp = getClientIp(request);
-    requestStream.context = getContext(context);
-    requestStream.tenantDomain = getTenantDomain(context);
-    requestStream.api = getApiName(context);
-    requestStream.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+    analyticsRequestStream.userAgent = request.userAgent;
+    analyticsRequestStream.clientIp = getClientIp(request);
+    analyticsRequestStream.context = getContext(context);
+    analyticsRequestStream.tenantDomain = getTenantDomain(context);
+    analyticsRequestStream.api = getApiName(context);
+    analyticsRequestStream.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
     apiVersion;
 
     //todo: hostname verify
-    requestStream.hostName = "localhost";   //todo:get the host properl
-    requestStream.method = request.method;
+    analyticsRequestStream.hostName = "localhost";   //todo:get the host properl
+    analyticsRequestStream.method = request.method;
     //todo:verify resourcepath and resourceTemplate
-    requestStream.resourceTemplate = "resourcePath";
-    requestStream.resourcePath = getResourceConfigAnnotation
+    analyticsRequestStream.resourceTemplate = "resourcePath";
+    analyticsRequestStream.resourcePath = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
     //todo:random uuid taken from throttle filter
-    requestStream.correlationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
-    requestStream.requestCount = 1;
+    analyticsRequestStream.correlationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
+    analyticsRequestStream.requestCount = 1;
     //todo:get request time from authentication filter
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
-    requestStream.requestTime = currentTimeMills;
-    return requestStream;
+    analyticsRequestStream.requestTime = currentTimeMills;
+    return analyticsRequestStream;
 
 }
 
-function generateEventFromRequest(AnalyticsRequestStream requestStream) returns EventDTO {
+function generateEventFromRequest(AnalyticsRequestStream requestStreamForEvent) returns EventDTO {
     EventDTO eventDTO;
     eventDTO.streamId = "org.wso2.apimgt.statistics.request:1.1.0";
     eventDTO.timeStamp = getCurrentTime();
-    eventDTO.metaData = getMetaData(requestStream);
-    eventDTO.correlationData = getCorrelationData(requestStream);
-    eventDTO.payloadData = getPayload(requestStream);
+    eventDTO.metaData = getMetaData(requestStreamForEvent);
+    eventDTO.correlationData = getCorrelationData(requestStreamForEvent);
+    eventDTO.payloadData = getPayload(requestStreamForEvent);
     return eventDTO;
 }
 

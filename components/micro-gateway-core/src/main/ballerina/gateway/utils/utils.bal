@@ -161,19 +161,19 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 
 @Description { value: "Retrieve the key validation request dto from filter context" }
 @Return { value: "api key validation request dto" }
-public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
+public function getKeyValidationRequestObject() returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    http:HttpServiceConfig httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
-        (context.serviceType));
+    typedesc serviceType = check <typedesc>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
+    http:HttpServiceConfig httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations(serviceType));
     http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
+    (reflect:getResourceAnnotations(serviceType, <string>runtime:
+            getInvocationContext().attributes[RESOURCE_NAME_ATTR]));
     string apiContext = httpServiceConfig.basePath;
-    APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
-        (context.serviceType));
+    APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
     string apiVersion = apiConfig.apiVersion;
     apiKeyValidationRequest.apiVersion = apiVersion;
-    if(!apiContext.contains(apiVersion)){
-        if(apiContext.hasSuffix(PATH_SEPERATOR)) {
+    if (!apiContext.contains(apiVersion)){
+        if (apiContext.hasSuffix(PATH_SEPERATOR)) {
             apiContext = apiContext + apiVersion;
         } else {
             apiContext = apiContext + PATH_SEPERATOR + apiVersion;
@@ -184,36 +184,11 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
-    context.attributes[API_NAME] = apiConfig.name;
-    context.attributes[API_CONTEXT] = apiContext;
-    // TODO get correct verb
+    apiKeyValidationRequest.accessToken = <string>runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR];
     return apiKeyValidationRequest;
 
 }
 
-@Description {value:"Creates an instance of FilterResult"}
-@Param {value:"canProceed: authorization status for the request"}
-@Param {value:"statusCode: status code for the filter request"}
-@Param {value:"message: response message from the filter"}
-@Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
-public function createFilterResult (boolean canProceed, int statusCode, string message) returns (http:FilterResult) {
-    http:FilterResult requestFilterResult = {};
-    requestFilterResult = {canProceed:canProceed, statusCode:statusCode, message:message};
-    return requestFilterResult;
-}
-
-@Description {value:"Creates an instance of FilterResult"}
-@Param {value:"authenticated: filter status for the request"}
-@Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
-function createAuthnResult(boolean authenticated) returns (http:FilterResult) {
-    http:FilterResult requestFilterResult = {};
-    if (authenticated) {
-        requestFilterResult = {canProceed: true, statusCode: 200, message: "Successfully authenticated"};
-    } else {
-        requestFilterResult = {canProceed: false, statusCode: 401, message: "Authentication failure"};
-    }
-    return requestFilterResult;
-}
 
 public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annData) returns APIConfiguration {
     if (lengthof annData == 0) {
@@ -355,6 +330,29 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     string errorMessage = getAuthenticationFailureMessage(errorCode);
     context.attributes[ERROR_MESSAGE] = errorMessage;
     context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
+}
+
+@Description {value:"Default error response sender with json error response"}
+public function sendErrorResponse(http:Listener listener, http:Request request, http:FilterContext context) {
+    endpoint http:Listener caller = listener;
+    int statusCode = check <int>context.attributes[HTTP_STATUS_CODE];
+    string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
+    string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
+    int errorCode = check <int>context.attributes[ERROR_CODE];
+    http:Response response;
+    response.statusCode = statusCode;
+    response.setContentType(APPLICATION_JSON);
+    json payload = {fault : {
+        code : errorCode,
+        message : errorMesssage,
+        description : errorDescription
+    }};
+    response.setJsonPayload(payload);
+    var value = caller->respond(response);
+    match value {
+        error err => log:printError("Error while sending the error response", err = err);
+        () => {}
+    }
 }
 
 public function getAuthorizationHeader(reflect:annotationData[] annData) returns string {
