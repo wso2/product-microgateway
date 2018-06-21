@@ -4,22 +4,22 @@ import ballerina/mime;
 
 stream<string> filesToUpload;
 
-endpoint http:Client clientEP {
-    url: "https://localhost:9443"
-};
 
 function multipartSender(string file) returns http:Response {
+    endpoint http:Client clientEP {
+        url: uploadingUrl
+    };
     mime:Entity filePart = new;
     filePart.setContentDisposition(getContentDispositionForFormData("file"));
     filePart.setFileAsEntityBody(file);
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
 
-    request.addHeader("Authorization", getBasicAuthHeaderValue("admin", "admin"));
-    request.addHeader("FileName", file);
-    request.addHeader("Accept", "application/json");
+    request.addHeader(AUTH_HEADER, getBasicAuthHeaderValue("admin", "admin"));
+    request.addHeader(FILE_NAME, file);
+    request.addHeader(ACCEPT, APPLICATION_JSON);
     request.setBodyParts(bodyParts);
-    var returnResponse = clientEP->post("/micro-gateway/v0.9/usage/upload-file",request);
+    var returnResponse = clientEP->post("", request);
 
     match returnResponse {
         error err => {

@@ -23,21 +23,22 @@ public string EVS = "--EVT--";
 public string OBJ = "--OBJ--";
 
 int initializingTime = 0;
+int rotatingTime = 0;
 //streams associated with DTOs
 stream<EventDTO> eventStream;
 
 function getPayload(AnalyticsRequestStream requestStream) returns (string) {
-    return requestStream.consumerKey + OBJ + requestStream.context + OBJ + requestStream.apiVersion + OBJ +
+    return requestStream.consumerKey + OBJ + requestStream.context + OBJ + requestStream.api + ":" + requestStream.apiVersion + OBJ +
         requestStream.api + OBJ + requestStream.resourcePath + OBJ +requestStream.resourceTemplate + OBJ +
         requestStream.method + OBJ + requestStream.apiVersion + OBJ + requestStream.requestCount + OBJ +
         requestStream.requestTime + OBJ + requestStream.username + OBJ + requestStream.tenantDomain + OBJ +
         requestStream.hostName + OBJ + requestStream.apiPublisher + OBJ + requestStream.applicationName + OBJ
         + requestStream.applicationId + OBJ + requestStream.userAgent + OBJ + requestStream.tier +
-        OBJ + requestStream.continuedOnThrottleOut + OBJ + requestStream.clientIp + requestStream.applicationOwner;
+        OBJ + requestStream.continuedOnThrottleOut + OBJ + requestStream.clientIp + OBJ + requestStream.applicationOwner;
 }
 
 function getMetaData(AnalyticsRequestStream requestStream) returns (string) {
-    return "{\"keyType\":\"" + requestStream.keyType + "\",\"correlationID\":\"" + requestStream.correlationID + "\"}";
+    return "{\\\"keyType\\\":\"" + requestStream.keyType + "\",\\\"correlationID\\\":\"" + requestStream.correlationID + "\"}";
 }
 
 function getCorrelationData(AnalyticsRequestStream request) returns (string) {
@@ -60,7 +61,8 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
         requestStream.keyType = authContext.keyType;
     }
     requestStream.userAgent = request.userAgent;
-    requestStream.clientIp = getClientIp(request);
+    //todo: check if clientIP is deriving properly
+    requestStream.clientIp = "127.0.0.1";//getClientIp(request);
     requestStream.context = getContext(context);
     requestStream.tenantDomain = getTenantDomain(context);
     requestStream.api = getApiName(context);
@@ -70,14 +72,12 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
     //todo: hostname verify
     requestStream.hostName = "localhost";   //todo:get the host properl
     requestStream.method = request.method;
-    //todo:verify resourcepath and resourceTemplate
-    requestStream.resourceTemplate = "resourcePath";
+    requestStream.resourceTemplate = getResourceConfigAnnotation
+    (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
     requestStream.resourcePath = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
-    //todo:random uuid taken from throttle filter
-    requestStream.correlationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
+    requestStream.correlationID = <string>context.attributes[MESSAGE_ID];
     requestStream.requestCount = 1;
-    //todo:get request time from authentication filter
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
     requestStream.requestTime = currentTimeMills;
@@ -97,7 +97,7 @@ function generateEventFromRequest(AnalyticsRequestStream requestStream) returns 
 
 function getEventData(EventDTO dto) returns string {
     string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp + EVS +
-        "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + dto.correlationData + EVS +
+        "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
         "payLoadData" + KVT + dto.payloadData + "\n";
     return output;
 }
@@ -108,8 +108,8 @@ function writeEventToFile(EventDTO eventDTO) {
     if (initializingTime == 0) {
         initializingTime = getCurrentTime();
     }
-    if (currentTime - initializingTime > 60*1000*10) {
-        var result = rotateFile("api-usage-data.dat");
+    if (currentTime - initializingTime > rotatingTime) {
+        var result = rotateFile(API_USAGE_FILE);
         initializingTime = getCurrentTime();
         match result {
             string name => {
@@ -120,7 +120,7 @@ function writeEventToFile(EventDTO eventDTO) {
             }
         }
     }
-    io:ByteChannel channel = io:openFile("api-usage-data.dat", io:APPEND);
+    io:ByteChannel channel = io:openFile(API_USAGE_FILE, io:APPEND);
     io:CharacterChannel  charChannel = new(channel,  "UTF-8");
     try {
         match charChannel.write(getEventData(eventDTO),0) {
