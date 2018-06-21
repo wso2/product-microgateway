@@ -30,6 +30,34 @@ OPTIONS
     --path
         Path to the project location
 
+    --base-url
+        APIM base url assuming all the portals are running in same node. By default base-url is https://localhost:9443/
+
+    -t
+    --trustStore
+        <Optional>
+        Path to the trustStore file
+        By default consider <CLI_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
+
+    -s
+    --trustStorePass
+        <Optional>
+        Password for the given trustStore
+        By default use default trustStore password
+
+    -n
+    --project
+        <Optional>
+        Project name
+        If not present consider label as project name
+
+    -c
+    --config
+        <Optional>
+        Path to the cli configuration file
+        Be default use the <CLI_HOME>/resources/conf/cli-config.toml
+
+
 DEFAULT BEHAVIOR
     Generate the ballerina sources from given label along with the policies configured in the deployment
 

@@ -111,9 +111,6 @@ public class Main {
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
-                System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-                System.setProperty("javax.net.ssl.trustStore", config.getToken().getTrustStoreAbsoluteLocation());
-                System.setProperty("javax.net.ssl.trustStorePassword", config.getToken().getTrustStorePassword());
                 GatewayCmdUtils.setConfig(config);
             } else {
                 outStream.println("Config: " + configPath + " Not found.");
@@ -284,7 +281,7 @@ public class Main {
         @Parameter(names = { "-s", "--trustStorePass" }, hidden = true)
         private String trustStorePassword;
 
-        @Parameter(names = { "-n", "--name" }, hidden = true)
+        @Parameter(names = { "-n", "--project" }, hidden = true)
         private String projectName;
 
         @Parameter(names = { "-c", "--config" }, hidden = true)
@@ -357,6 +354,7 @@ public class Main {
                     // if username is not provided, get the previous user
                 } else {
                     if (StringUtils.isEmpty(configuredUser)) {
+                        isOverwriteRequired = true;
                         if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                         }
@@ -408,9 +406,9 @@ public class Main {
                     }
                     if (!newPublisherEndpoint.toString().equalsIgnoreCase(existingPublisherEndpoint)) {
                         // If baseUrl is different derive urls again
-                        populateHosts(baseUrl);
                         isOverwriteRequired = true;
                     }
+                    populateHosts(baseUrl);
                 } else {
                     //If same url is provided, use the existing config
                     publisherEndpoint = config.getToken().getPublisherEndpoint();
@@ -419,6 +417,7 @@ public class Main {
                     tokenEndpoint = config.getToken().getTokenEndpoint();
                     if (StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
                             .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint)) {
+                        isOverwriteRequired = true;
                         if ((baseUrl = promptForTextInput(
                                 "Enter APIM base URL [" + RESTServiceConstants.DEFAULT_HOST + "]: ")).trim()
                                 .isEmpty()) {
@@ -430,6 +429,7 @@ public class Main {
             } else {
                 // If there is no config file, prompt user to enter baseUrl
                 if (StringUtils.isEmpty(baseUrl)) {
+                    isOverwriteRequired = true;
                     if ((baseUrl = promptForTextInput(
                             "Enter APIM base URL [" + RESTServiceConstants.DEFAULT_HOST + "]: ")).trim().isEmpty()) {
                         baseUrl = RESTServiceConstants.DEFAULT_HOST;
@@ -453,6 +453,7 @@ public class Main {
                     // if trust store is not provided, get the previous trust store
                 } else {
                     if (StringUtils.isEmpty(configuredTrustStore)) {
+                        isOverwriteRequired = true;
                         if ((trustStoreLocation = promptForTextInput(
                                 "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]"))
                                 .trim().isEmpty()) {
@@ -465,6 +466,7 @@ public class Main {
             } else {
                 // If there is no config file, prompt user to enter
                 if (StringUtils.isEmpty(trustStoreLocation)) {
+                    isOverwriteRequired = true;
                     if ((trustStoreLocation = promptForTextInput(
                             "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]"))
                             .trim().isEmpty()) {
@@ -477,7 +479,19 @@ public class Main {
             //If config is there
             if (config != null) {
                 //get previous trust store password
-                String configuredTrustStorePass = config.getToken().getTrustStorePassword();
+                String encryptedPass = config.getToken().getTrustStorePassword();
+                String configuredTrustStorePass;
+                if(StringUtils.isEmpty(encryptedPass)){
+                    configuredTrustStorePass = null;
+                } else {
+                    try {
+                        configuredTrustStorePass = GatewayCmdUtils.decrypt(encryptedPass, new String(password));
+                    } catch (CliLauncherException e) {
+                        //different password used to encrypt
+                        configuredTrustStorePass = null;
+                    }
+                }
+
                 // check trust store password is also provided
                 if (!StringUtils.isEmpty(trustStorePassword)) {
                     // if provided trust store password is different use it and mark as config is need to changed
@@ -487,6 +501,7 @@ public class Main {
                     // if trust store password is not provided, get the previous trust store password
                 } else {
                     if (StringUtils.isEmpty(configuredTrustStorePass)) {
+                        isOverwriteRequired = true;
                         if ((trustStorePassword = promptForTextInput("Enter Trust store password: [ use default? ]"))
                                 .trim().isEmpty()) {
                             trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
@@ -498,6 +513,7 @@ public class Main {
             } else {
                 // If there is no config file, prompt user to enter
                 if (StringUtils.isEmpty(trustStorePassword)) {
+                    isOverwriteRequired = true;
                     if ((trustStorePassword = promptForTextInput("Enter Trust store password: [ use default? ]")).trim()
                             .isEmpty()) {
                         trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
@@ -515,19 +531,22 @@ public class Main {
                 Runtime.getRuntime().exit(1);
             }
 
-            //set the trustStore again
-            if (isOverwriteRequired) {
-                System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-                System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
-                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-            }
+            //set the trustStore
+            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+            System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);//            }
 
             OAuthService manager = new OAuthServiceImpl();
             if (config != null) {
                 clientID = config.getToken().getClientId();
                 String encryptedSecret = config.getToken().getClientSecret();
                 if (!StringUtils.isEmpty(clientID.trim()) && !StringUtils.isEmpty(encryptedSecret.trim())) {
-                    clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, new String(password));
+                    try {
+                        clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, new String(password));
+                    } catch (CliLauncherException e) {
+                        //different password used to encrypt
+                        clientSecret = null;
+                    }
                 }
             }
 
@@ -548,6 +567,7 @@ public class Main {
 
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
+            boolean changesDetected = false;
             try {
                 policyGenerator.generate(
                         GatewayCmdUtils.getLabelSrcDirectoryPath(projectRoot, projectName) + File.separator
@@ -557,11 +577,7 @@ public class Main {
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getLabelDirectoryPath(projectRoot, projectName)), null,
                         new ArrayList<>(), null);
                 try {
-                    boolean changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
-                    if (!changesDetected) {
-                        outStream.println("No changes from upstream.");
-                        Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
-                    }
+                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
                 } catch (HashingException e) {
                     outStream.println("Error while checking for changes of resources. Skipping no-change detection..");
                     Runtime.getRuntime().exit(1);
@@ -580,6 +596,7 @@ public class Main {
                 newConfig.setClient(client);
                 
                 String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
+                String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, new String(password));
                 Token token = new TokenBuilder()
                         .setPublisherEndpoint(publisherEndpoint)
                         .setAdminEndpoint(adminEndpoint)
@@ -589,11 +606,17 @@ public class Main {
                         .setClientId(clientID)
                         .setClientSecret(encryptedSecret)
                         .setTrustStoreLocation(trustStoreLocation)
-                        .setTrustStorePassword(trustStorePassword)
+                        .setTrustStorePassword(encryptedTrustStorePass)
                         .build();
                 newConfig.setToken(token);
                 newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
                 GatewayCmdUtils.saveConfig(newConfig, configPath);
+
+                //There should not be any logic after this system exit
+                if (!changesDetected) {
+                    outStream.println("No changes from upstream.");
+                    Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
+                }
             }
         }
 
@@ -638,7 +661,7 @@ public class Main {
         @Parameter(names = "--java.debug", hidden = true)
         private String javaDebugPort;
 
-        @Parameter(names = { "-n", "--name" }, hidden = true)
+        @Parameter(names = { "-n", "--project" }, hidden = true)
         private String projectName;
 
         @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")

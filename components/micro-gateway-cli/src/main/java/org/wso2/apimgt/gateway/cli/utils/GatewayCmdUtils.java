@@ -169,7 +169,7 @@ public class GatewayCmdUtils {
             AESCipherTool cipherTool = new AESCipherTool(secret);
             return cipherTool.decrypt(value);
         } catch (AESCipherToolException e) {
-            throw createUsageException("failed to encrypt client secret");
+            throw createUsageException("failed to decrypt client secret");
         }
     }
 

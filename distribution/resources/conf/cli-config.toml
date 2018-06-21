@@ -10,7 +10,7 @@ username = "admin"
 clientId = ""
 clientSecret = ""
 trustStoreLocation = "lib/platform/bre/security/ballerinaTruststore.p12"
-trustStorePassword = "ballerina"
+trustStorePassword = "h1MIqBSj2lRMdZRVuwcTWEPbIgePRnPxySOS91Ku/gY="
 
 [corsConfiguration]
 corsConfigurationEnabled = false
