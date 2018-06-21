@@ -19,6 +19,8 @@ package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 
 public class GatewayCliConstants {
     public static final String BALLERINA_HOME = "BALLERINA_HOME";
@@ -33,6 +35,7 @@ public class GatewayCliConstants {
     public static final String LABEL_CONFIG_FILE_NAME = "label-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
+    public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
     public static final String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.toml";
     public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
     public static final String CLI_HOME = "cli.home";
@@ -58,4 +61,13 @@ public class GatewayCliConstants {
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String CHARSET_UTF8 = "UTF-8";
+
+    public static final int EXIT_CODE_NOT_MODIFIED = 34;
+
+    public static final List<String> accessControlAllowOrigins = Arrays.asList("*");
+    public static final List<String> accessControlAllowMethods = Arrays
+            .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS");
+    public static final List<String> accessControlAllowHeaders = Arrays
+            .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction");
+    public static final boolean accessControlAllowCredentials = false;
 }

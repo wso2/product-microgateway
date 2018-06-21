@@ -21,10 +21,13 @@ import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,6 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GatewayCmdUtils {
 
@@ -63,7 +68,7 @@ public class GatewayCmdUtils {
     /**
      * Read file as string
      *
-     * @param path       to the file
+     * @param path to the file
      * @param inResource whether file is in resources directory of jar or not
      * @return file content
      * @throws IOException if file read went wrong
@@ -183,14 +188,8 @@ public class GatewayCmdUtils {
         if (!pathFile.exists()) {
             pathFile.createNewFile();
         }
-        FileWriter writer = null;
         //Write Content
-        try {
-            writer = new FileWriter(pathFile);
-            writer.write(workspacePath);
-        } finally {
-            writer.close();
-        }
+        writeContent(workspacePath, pathFile);
     }
 
     /**
@@ -223,7 +222,8 @@ public class GatewayCmdUtils {
      * @return resources file directory path
      */
     public static String getResourceFolderLocation() {
-        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.GW_DIST_RESOURCES;
+        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator
+                + GatewayCliConstants.GW_DIST_RESOURCES;
     }
 
     /**
@@ -322,9 +322,10 @@ public class GatewayCmdUtils {
         copyTargetDistBalx(projectRoot, labelName);
 
         //copy micro-gw.conf file to the distribution
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getConfigFolderLocation() + File.separator
-                + GatewayCliConstants.GW_DIST_CONF_FILE, gwDistPath + File.separator
-                + GatewayCliConstants.GW_DIST_CONF + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE);
+        GatewayCmdUtils.copyFilesToSources(
+                GatewayCmdUtils.getConfigFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE,
+                gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
+                        + GatewayCliConstants.GW_DIST_CONF_FILE);
 
         //creating an archive of the distribution
         ZipUtils.zip(distPath, getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator + File.separator
@@ -371,6 +372,50 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Load the stored resource hash content from the CLI temp folder
+     *
+     * @return stored resource hash content from the CLI temp folder
+     * @throws IOException error while loading stored resource hash content
+     */
+    public static String loadStoredResourceHashes() throws IOException {
+        String resourceHashFileLocation = getResourceHashHolderFileLocation();
+        String content = null;
+        if (new File(resourceHashFileLocation).exists()) {
+            content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
+        }
+        return content;
+    }
+
+    /**
+     * Saves the resource hash content to the CLI temp folder
+     *
+     * @param content resource hash content
+     * @throws IOException error while saving resource hash content
+     */
+    public static void storeResourceHashesFileContent(String content) throws IOException {
+        String tempDirPath = getTempFolderLocation();
+        createFolderIfNotExist(tempDirPath);
+
+        String resourceHashesFileLocation = getResourceHashHolderFileLocation();
+        File pathFile = new File(resourceHashesFileLocation);
+        if (!pathFile.exists()) {
+            pathFile.createNewFile();
+        }
+        //Write Content
+        writeContent(content, pathFile);
+    }
+
+    /**
+     * Get resource hash holder file path
+     *
+     * @return resource hash holder file path
+     */
+    private static String getResourceHashHolderFileLocation() {
+        return GatewayCmdUtils.getTempFolderLocation() + File.separator
+                + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
+    }
+
+    /**
      * Get the distribution path for a given label
      *
      * @param projectRoot project root location
@@ -381,7 +426,6 @@ public class GatewayCmdUtils {
         String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
         return labelTargetPath + File.separator + GatewayCliConstants.GW_TARGET_DIST;
     }
-
 
     /**
      * Get the gateway distribution path for a given label
@@ -443,8 +487,8 @@ public class GatewayCmdUtils {
      * @return path to the conf folder in the project root
      */
     public static String getMainConfigDirPath(String root) {
-        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME +
-                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
+                + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
     /**
@@ -454,8 +498,7 @@ public class GatewayCmdUtils {
      * @return path configuration file
      */
     public static String getMainConfigLocation(String root) {
-        return getMainConfigDirPath(root) + File.separator
-                + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        return getMainConfigDirPath(root) + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
     }
 
     /**
@@ -465,8 +508,7 @@ public class GatewayCmdUtils {
      * @return path to the label conf folder in the project root
      */
     public static String getLabelConfigDirPath(String root, String label) {
-        return getLabelDirectoryPath(root, label) +
-                File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        return getLabelDirectoryPath(root, label) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
     /**
@@ -476,10 +518,8 @@ public class GatewayCmdUtils {
      * @return path label configuration file
      */
     public static String getLabelConfigLocation(String root, String labelName) {
-        return getLabelConfigDirPath(root, labelName) + File.separator
-                + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+        return getLabelConfigDirPath(root, labelName) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
     }
-
 
     /**
      * Returns path to the given label project in the project root path
@@ -489,11 +529,9 @@ public class GatewayCmdUtils {
      * @return path to the given label project in the project root path
      */
     public static String getLabelDirectoryPath(String root, String labelName) {
-        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME +
-                File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME
-                + File.separator + labelName;
+        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
+                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME + File.separator + labelName;
     }
-
 
     /**
      * Returns path to the /src of a given label project in the project root path
@@ -612,6 +650,25 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Write content to a specified file
+     *
+     * @param content content to be written
+     * @param file file object initialized with path
+     * @throws IOException error while writing content to file
+     */
+    private static void writeContent(String content, File file) throws IOException {
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write(content);
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
+    /**
      * Creates file if not exist
      *
      * @param path folder path
@@ -638,21 +695,14 @@ public class GatewayCmdUtils {
      * @throws IOException if file create went wrong
      */
     public static void createLabelConfig(String root, String label) throws IOException {
-        String mainConfig = getLabelConfigDirPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+        String mainConfig =
+                getLabelConfigDirPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
         File file = new File(mainConfig);
         if (!file.exists()) {
             file.createNewFile();
-            FileWriter writer = null;
             //Write Content
             String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
-            try {
-                writer = new FileWriter(file);
-                writer.write(defaultConfig);
-            } finally {
-                if (writer != null) {
-                    writer.close();
-                }
-            }
+            writeContent(defaultConfig, file);
         }
     }
 
@@ -662,5 +712,27 @@ public class GatewayCmdUtils {
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
         GatewayCmdUtils.containerConfig = containerConfig;
+    }
+
+    public static void saveConfig(Config config) {
+        String configPath;
+        try {
+            configPath = GatewayCmdUtils.getMainConfigLocation(GatewayCmdUtils.getStoredWorkspaceLocation());
+            TOMLConfigParser.write(configPath, config);
+        } catch (IOException e) {
+            System.err.println("Error occurred when getting main config.");
+        } catch (ConfigParserException e) {
+            System.err.println("Error occurred while parsing configuration, when persisting.");
+        }
+    }
+
+    public static APICorsConfigurationDTO getDefaultCorsConfig() {
+        APICorsConfigurationDTO corsConfigurationDTO = new APICorsConfigurationDTO();
+        corsConfigurationDTO.setAccessControlAllowCredentials(true);
+        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.accessControlAllowOrigins);
+        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.accessControlAllowMethods);
+        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.accessControlAllowHeaders);
+        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.accessControlAllowCredentials);
+        return corsConfigurationDTO;
     }
 }

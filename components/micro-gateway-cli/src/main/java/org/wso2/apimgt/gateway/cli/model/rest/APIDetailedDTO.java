@@ -18,6 +18,7 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,6 +88,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
      **/
+    @Hash
     @JsonProperty("apiDefinition")
     public String getApiDefinition() {
         return apiDefinition;
@@ -109,7 +111,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.wsdlUri = wsdlUri;
     }
 
-
+    @Hash
     @JsonProperty("responseCaching")
     public String getResponseCaching() {
         return responseCaching;
@@ -119,7 +121,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.responseCaching = responseCaching;
     }
 
-
+    @Hash
     @JsonProperty("cacheTimeout")
     public Integer getCacheTimeout() {
         return cacheTimeout;
@@ -139,7 +141,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.destinationStatsEnabled = destinationStatsEnabled;
     }
 
-
+    @Hash
     @JsonProperty("isDefaultVersion")
     public Boolean getIsDefaultVersion() {
         return isDefaultVersion;
@@ -153,6 +155,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * The transport to be set. Accepted values are HTTP, WS
      **/
+    @Hash
     @JsonProperty("type")
     public TypeEnum getType() {
         return type;
@@ -166,6 +169,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * Supported transports for the APIDetailedDTO (http and/or https).\n
      **/
+    @Hash
     @JsonProperty("transport")
     public List<String> getTransport() {
         return transport;
@@ -192,6 +196,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * The subscription tiers selected for the particular APIDetailedDTO
      **/
+    @Hash
     @JsonProperty("tiers")
     public List<String> getTiers() {
         return tiers;
@@ -260,7 +265,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.visibleTenants = visibleTenants;
     }
 
-
+    @Hash
     @JsonProperty("endpointConfig")
     public String getEndpointConfig() {
         return endpointConfig;
@@ -270,7 +275,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.endpointConfig = endpointConfig;
     }
 
-
+    @Hash
     @JsonProperty("endpointSecurity")
     public APIEndpointSecurityDTO getEndpointSecurity() {
         return endpointSecurity;
@@ -394,6 +399,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.businessInformation = businessInformation;
     }
 
+    @Hash
     @JsonProperty("corsConfiguration")
     public APICorsConfigurationDTO getCorsConfiguration() {
         return corsConfiguration;
@@ -406,6 +412,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     /**
      * * The authorization header of the API
      **/
+    @Hash
     @JsonProperty("authorizationHeader")
     public String getAuthorizationHeader() {
         return authorizationHeader;
