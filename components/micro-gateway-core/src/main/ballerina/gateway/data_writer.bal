@@ -23,23 +23,26 @@ public string EVS = "--EVT--";
 public string OBJ = "--OBJ--";
 
 int initializingTime = 0;
+int rotatingTime = 0;
 //streams associated with DTOs
 stream<EventDTO> eventStream;
 
 function getPayload(AnalyticsRequestStream requestStreamForPayload) returns (string) {
-    return requestStreamForPayload.consumerKey + OBJ + requestStreamForPayload.context + OBJ + requestStreamForPayload.apiVersion + OBJ +
+    return requestStreamForPayload.consumerKey + OBJ + requestStreamForPayload.context + OBJ + requestStreamForPayload.api + ":" + requestStreamForPayload
+        .apiVersion + OBJ +
         requestStreamForPayload.api + OBJ + requestStreamForPayload.resourcePath + OBJ + requestStreamForPayload.resourceTemplate + OBJ +
         requestStreamForPayload.method + OBJ + requestStreamForPayload.apiVersion + OBJ + requestStreamForPayload.requestCount + OBJ +
         requestStreamForPayload.requestTime + OBJ + requestStreamForPayload.username + OBJ + requestStreamForPayload.tenantDomain + OBJ +
         requestStreamForPayload.hostName + OBJ + requestStreamForPayload.apiPublisher + OBJ + requestStreamForPayload.applicationName + OBJ
         + requestStreamForPayload.applicationId + OBJ + requestStreamForPayload.userAgent + OBJ + requestStreamForPayload
         .tier +
-        OBJ + requestStreamForPayload.continuedOnThrottleOut + OBJ + requestStreamForPayload.clientIp + requestStreamForPayload
+        OBJ + requestStreamForPayload.continuedOnThrottleOut + OBJ + requestStreamForPayload.clientIp + OBJ + requestStreamForPayload
         .applicationOwner;
 }
 
 function getMetaData(AnalyticsRequestStream requestStreamForMetaData) returns (string) {
-    return "{\"keyType\":\"" + requestStreamForMetaData.keyType + "\",\"correlationID\":\"" + requestStreamForMetaData.correlationID + "\"}";
+    return "{\\\"keyType\\\":\"" + requestStreamForMetaData.keyType + "\",\\\"correlationID\\\":\"" + requestStreamForMetaData
+        .correlationID + "\"}";
 }
 
 function getCorrelationData(AnalyticsRequestStream request) returns (string) {
@@ -62,7 +65,8 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
         analyticsRequestStream.keyType = authContext.keyType;
     }
     analyticsRequestStream.userAgent = request.userAgent;
-    analyticsRequestStream.clientIp = getClientIp(request);
+    //todo: check if clientIP is deriving properly
+    analyticsRequestStream.clientIp = "127.0.0.1";//getClientIp(request);
     analyticsRequestStream.context = getContext(context);
     analyticsRequestStream.tenantDomain = getTenantDomain(context);
     analyticsRequestStream.api = getApiName(context);
@@ -72,14 +76,12 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
     //todo: hostname verify
     analyticsRequestStream.hostName = "localhost";   //todo:get the host properl
     analyticsRequestStream.method = request.method;
-    //todo:verify resourcepath and resourceTemplate
-    analyticsRequestStream.resourceTemplate = "resourcePath";
+    analyticsRequestStream.resourceTemplate = getResourceConfigAnnotation
+    (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
     analyticsRequestStream.resourcePath = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
-    //todo:random uuid taken from throttle filter
-    analyticsRequestStream.correlationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
+    analyticsRequestStream.correlationID = <string>context.attributes[MESSAGE_ID];
     analyticsRequestStream.requestCount = 1;
-    //todo:get request time from authentication filter
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
     analyticsRequestStream.requestTime = currentTimeMills;
@@ -99,7 +101,7 @@ function generateEventFromRequest(AnalyticsRequestStream requestStreamForEvent) 
 
 function getEventData(EventDTO dto) returns string {
     string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp + EVS +
-        "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + dto.correlationData + EVS +
+        "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
         "payLoadData" + KVT + dto.payloadData + "\n";
     return output;
 }
@@ -110,8 +112,8 @@ function writeEventToFile(EventDTO eventDTO) {
     if (initializingTime == 0) {
         initializingTime = getCurrentTime();
     }
-    if (currentTime - initializingTime > 60*1000*10) {
-        var result = rotateFile("api-usage-data.dat");
+    if (currentTime - initializingTime > rotatingTime) {
+        var result = rotateFile(API_USAGE_FILE);
         initializingTime = getCurrentTime();
         match result {
             string name => {
@@ -122,7 +124,7 @@ function writeEventToFile(EventDTO eventDTO) {
             }
         }
     }
-    io:ByteChannel channel = io:openFile("api-usage-data.dat", io:APPEND);
+    io:ByteChannel channel = io:openFile(API_USAGE_FILE, io:APPEND);
     io:CharacterChannel  charChannel = new(channel,  "UTF-8");
     try {
         match charChannel.write(getEventData(eventDTO),0) {

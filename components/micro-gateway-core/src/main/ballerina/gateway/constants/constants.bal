@@ -51,6 +51,9 @@
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description {value:"Form url encoded"}
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+@Description {value:"Application JSON type"}
+@final public string APPLICATION_JSON = "application/json";
+
 @Description {value:"X-Forward-For Header "}
 @final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 @Description {value:"KeyValidation Response"}
@@ -110,6 +113,28 @@
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 @final public string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
 @final public string ACCESS_TOKEN_ATTR = "ACCESS_TOKEN";
+
+//Analytics filter related constants
+@final public string ZIP_EXTENSION = ".zip";
+@Description { value: "Endpoint URL of the uploading web application" }
+@final public string UPLOADING_URL = "uploadingUrl";
+@Description { value: "Name of the file which the events are getting written into" }
+@final public string API_USAGE_FILE = "api-usage-data.dat";
+@Description { value: "Time span of the file uploading task" }
+@final public string TIME_INTERVAL = "timeInterval";
+@Description { value: "FileName header to be sent to uploading EP" }
+@final public string FILE_NAME = "FileName";
+@Description { value: "Accept header" }
+@final public string ACCEPT = "Accept";
+@Description { value: "Analytics conf heading" }
+@final public string ANALYTICS = "analytics";
+@Description { value: "Time inteval of the uploading task" }
+@final public string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
+@Description { value: "Rotating time of the file" }
+@final public string ROTATING_TIME = "rotatingPeriod";
+@Description { value: "Uploading endpoing of the microgateway" }
+@final public string UPLOADING_EP = "uploadingEndpoint";
+
 
 
 
@@ -210,6 +235,5 @@
 
 // end of http codes
 
-@final public string APPLICATION_JSON = "application/json";
 
 @final string PATH_SEPERATOR = "/";

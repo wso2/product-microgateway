@@ -6,6 +6,7 @@ import ballerina/runtime;
 import ballerina/log;
 
 task:Timer? timer;
+string uploadingUrl;
 
 future timerFtr = start timerTask();
 
@@ -15,7 +16,7 @@ function searchFilesToUpload() returns error? {
     internal:Path[] pathList = check ex.list();
     foreach pathEntry in pathList {
         string fileName = pathEntry.getName();
-        if ( fileName.contains("zip")) {
+        if (fileName.contains(ZIP_EXTENSION)) {
             http:Response response =  multipartSender(pathEntry.getName());
             if (response.statusCode == 201) {
                 var result = pathEntry.delete();
@@ -38,9 +39,11 @@ function informError(error e) {
 }
 
 function timerTask() {
+    map vals = getConfigMapValue(ANALYTICS);
+    int timeSpan =  check <int> vals[UPLOADING_TIME_SPAN];
     (function() returns error?) onTriggerFunction = searchFilesToUpload;
     function(error) onErrorFunction = informError;
-    timer = new task:Timer(onTriggerFunction, onErrorFunction, 300000, delay = 5000);
+    timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
     timer.start();
 }
 

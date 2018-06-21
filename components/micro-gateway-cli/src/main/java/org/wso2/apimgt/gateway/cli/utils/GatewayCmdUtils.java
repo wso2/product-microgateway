@@ -68,7 +68,7 @@ public class GatewayCmdUtils {
     /**
      * Read file as string
      *
-     * @param path       to the file
+     * @param path to the file
      * @param inResource whether file is in resources directory of jar or not
      * @return file content
      * @throws IOException if file read went wrong
@@ -359,6 +359,13 @@ public class GatewayCmdUtils {
         String distConfPath = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_CONF;
         createFolderIfNotExist(distConfPath);
 
+        //path : {label}/target/distribution/micro-gw-{label}/logs
+        String logsDirPath = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_LOGS_DIRECTORY_NAME;
+        createFolderIfNotExist(logsDirPath);
+
+        //path : {label}/target/distribution/micro-gw-{label}/logs/access_logs
+        createFileIfNotExist(logsDirPath, GatewayCliConstants.ACCESS_LOG_FILE);
+
         //path : {label}/target/distribution/micro-gw-{label}/exec
         String distExec = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         createFolderIfNotExist(distExec);
@@ -366,7 +373,7 @@ public class GatewayCmdUtils {
 
     /**
      * Load the stored resource hash content from the CLI temp folder
-     * 
+     *
      * @return stored resource hash content from the CLI temp folder
      * @throws IOException error while loading stored resource hash content
      */
@@ -381,7 +388,7 @@ public class GatewayCmdUtils {
 
     /**
      * Saves the resource hash content to the CLI temp folder
-     * 
+     *
      * @param content resource hash content
      * @throws IOException error while saving resource hash content
      */
@@ -397,7 +404,7 @@ public class GatewayCmdUtils {
         //Write Content
         writeContent(content, pathFile);
     }
-    
+
     /**
      * Get resource hash holder file path
      *
@@ -644,7 +651,7 @@ public class GatewayCmdUtils {
 
     /**
      * Write content to a specified file
-     * 
+     *
      * @param content content to be written
      * @param file file object initialized with path
      * @throws IOException error while writing content to file
@@ -657,6 +664,25 @@ public class GatewayCmdUtils {
         } finally {
             if (writer != null) {
                 writer.close();
+            }
+        }
+    }
+
+    /**
+     * Creates file if not exist
+     *
+     * @param path folder path
+     * @param fileName name of the file
+     */
+    private static void createFileIfNotExist(String path, String fileName) {
+        String filePath = path + File.separator + fileName;
+        File file = new File(filePath);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                //TODO remove stracktrace and append this to a log
+                e.printStackTrace();
             }
         }
     }
