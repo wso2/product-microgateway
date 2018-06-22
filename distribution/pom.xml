@@ -84,8 +84,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://preprod-product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>
-                            <!--<url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>-->
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>
                             <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>-->
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
@@ -98,8 +97,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://preprod-product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>
-                            <!--<url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>
                             <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
