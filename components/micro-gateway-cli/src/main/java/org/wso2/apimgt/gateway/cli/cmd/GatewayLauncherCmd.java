@@ -24,7 +24,6 @@ import java.io.IOException;
 
 /**
  * {@code GatewayLauncherCmd} represents a micro gateway cli launcher command.
- *
  */
 public interface GatewayLauncherCmd {
 
@@ -34,7 +33,7 @@ public interface GatewayLauncherCmd {
 
     void setParentCmdParser(JCommander parentCmdParser);
 
-    static String getCommandUsageInfo(String commandName) {
+    default String getCommandUsageInfo(String commandName) {
         if (commandName == null) {
             throw GatewayCmdUtils.createUsageException("Invalid command");
         }
@@ -45,5 +44,10 @@ public interface GatewayLauncherCmd {
         } catch (IOException e) {
             throw GatewayCmdUtils.createUsageException("Usage info not available for command: " + commandName);
         }
+    }
+
+    default void printUsageInfo(String commandName) {
+        String usageInfo = getCommandUsageInfo(commandName);
+        System.err.println(usageInfo);
     }
 }

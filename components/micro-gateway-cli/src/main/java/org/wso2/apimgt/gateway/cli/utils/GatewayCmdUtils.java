@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
+import org.wso2.apimgt.gateway.cli.cmd.GatewayLauncherCmd;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
