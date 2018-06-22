@@ -149,6 +149,12 @@
 @final public string ROTATING_TIME = "rotatingPeriod";
 @Description { value: "Uploading endpoing of the microgateway" }
 @final public string UPLOADING_EP = "uploadingEndpoint";
+@Description { value: "Starting time of the request" }
+@final public string REQUEST_TIME = "REQUEST_TIME";
+@Description { value: "Time spent on the throttling filter" }
+@final public string THROTTLE_LATENCY = "THROTTLE_LATENCY";
+@Description { value: "Time spent on the authentication filter" }
+@final public string SECURITY_LATENCY = "SECURITY_LATENCY";
 
 
 

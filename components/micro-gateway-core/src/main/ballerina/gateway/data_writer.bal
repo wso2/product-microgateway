@@ -119,13 +119,9 @@ function getEventData(EventDTO dto) returns string {
 
 function writeEventToFile(EventDTO eventDTO) {
     //todo:batch events to reduce IO cost
-    int currentTime = getCurrentTime();
-    if (initializingTime == 0) {
-        initializingTime = getCurrentTime();
-    }
-    if (currentTime - initializingTime > rotatingTime) {
+
+    if ( eventDTO.streamId == "rotatingEvent") {
         var result = rotateFile(API_USAGE_FILE);
-        initializingTime = getCurrentTime();
         match result {
             string name => {
                 log:printInfo("File rotated successfully.");
@@ -134,27 +130,45 @@ function writeEventToFile(EventDTO eventDTO) {
                 log:printError("Error occurred while rotating the file: ", err = err);
             }
         }
-    }
-    io:ByteChannel channel = io:openFile(API_USAGE_FILE, io:APPEND);
-    io:CharacterChannel  charChannel = new(channel,  "UTF-8");
-    try {
-        match charChannel.write(getEventData(eventDTO),0) {
-            int numberOfCharsWritten => {
-                log:printInfo("Event is getting written");
+    } else {
+        io:ByteChannel channel = io:openFile(API_USAGE_FILE, io:APPEND);
+        io:CharacterChannel  charChannel = new(channel,  "UTF-8");
+        try {
+            match charChannel.write(getEventData(eventDTO),0) {
+                int numberOfCharsWritten => {
+                    log:printInfo("Event is getting written");
+                }
+                error err => {
+                    throw err;
+                }
             }
-            error err => {
-                throw err;
-            }
-        }
 
-    } finally {
-        match charChannel.close() {
-            error sourceCloseError => {
-                log:printError("Error occured while closing the channel: ", err = sourceCloseError);
-            }
-            () => {
-                log:printDebug("Source channel closed successfully.");
+        } finally {
+            match charChannel.close() {
+                error sourceCloseError => {
+                    log:printError("Error occured while closing the channel: ", err = sourceCloseError);
+                }
+                () => {
+                    log:printDebug("Source channel closed successfully.");
+                }
             }
         }
     }
+    //int currentTime = getCurrentTime();
+    //if (initializingTime == 0) {
+    //    initializingTime = getCurrentTime();
+    //}
+    //if (currentTime - initializingTime > rotatingTime) {
+    //    var result = rotateFile(API_USAGE_FILE);
+    //    initializingTime = getCurrentTime();
+    //    match result {
+    //        string name => {
+    //            log:printInfo("File rotated successfully.");
+    //        }
+    //        error err => {
+    //            log:printError("Error occurred while rotating the file: ", err = err);
+    //        }
+    //    }
+    //}
+
 }

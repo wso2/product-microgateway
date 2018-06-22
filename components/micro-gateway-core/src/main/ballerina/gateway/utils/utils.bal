@@ -23,6 +23,7 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 import ballerina/internal;
+import ballerina/system;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
@@ -367,6 +368,8 @@ public function getCurrentTime() returns int {
 }
 
 public function rotateFile(string fileName) returns string|error  {
+    //string uuid = system:uuid();
+    //string zipName = fileName + "." + uuid + ZIP_EXTENSION;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp + ZIP_EXTENSION;
     internal:Path zipLocation = new(zipName);
@@ -407,6 +410,11 @@ function getAnalyticsConfig() {
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
     log:printDebug("Analytics config values read");
+}
+
+function setLatency(int starting, http:FilterContext context, string latencyType) {
+    int ending = getCurrentTime();
+    context.attributes[latencyType] = ending - starting;
 }
 
 future streamftr = start initStreamPublisher();

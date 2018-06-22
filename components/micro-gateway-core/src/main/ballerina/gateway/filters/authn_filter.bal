@@ -42,6 +42,8 @@ public type AuthnFilter object {
     public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                  boolean {
         //Setting UUID
+        int startingTime = getCurrentTime();
+        context.attributes[REQUEST_TIME] = startingTime;
         context.attributes[MESSAGE_ID] = system:uuid();
         context.attributes[FILTER_FAILED] = false;
         context.attributes[REMOTE_ADDRESS] = getClientIp(request, listener);

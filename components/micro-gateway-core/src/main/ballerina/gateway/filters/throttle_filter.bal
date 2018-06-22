@@ -109,6 +109,8 @@ public type ThrottleFilter object {
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
+        int endingTime = getCurrentTime();
+        setLatency(startingTime, context, THROTTLE_LATENCY);
         log:printDebug("Request is not throttled");
         return true;
     }

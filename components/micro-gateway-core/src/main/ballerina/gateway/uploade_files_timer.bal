@@ -5,7 +5,6 @@ import ballerina/math;
 import ballerina/runtime;
 import ballerina/log;
 
-task:Timer? timer;
 string uploadingUrl;
 
 future timerFtr = start timerTask();
@@ -39,6 +38,7 @@ function informError(error e) {
 }
 
 function timerTask() {
+    task:Timer? timer;
     map vals = getConfigMapValue(ANALYTICS);
     int timeSpan =  check <int> vals[UPLOADING_TIME_SPAN];
     (function() returns error?) onTriggerFunction = searchFilesToUpload;
