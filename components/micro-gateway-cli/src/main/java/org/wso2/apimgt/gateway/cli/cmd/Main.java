@@ -74,7 +74,7 @@ public class Main {
 
     private static PrintStream outStream = System.err;
 
-    private static final Logger cliLog = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... args) {
         try {
@@ -512,7 +512,7 @@ public class Main {
                 try {
                     boolean changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
                     if (!changesDetected) {
-                        outStream.println("No changes from upstream.");
+                        outStream.println("No changes from server.");
                         Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
                     }
                 } catch (HashingException e) {

@@ -227,6 +227,16 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Get resources file directory path
+     *
+     * @return resources file directory path
+     */
+    public static String getLoggingPropertiesFileLocation() {
+        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.CLI_CONF
+                + File.separator + GatewayCliConstants.LOGGING_PROPERTIES_FILENAME;
+    }
+
+    /**
      * Get filters folder location
      *
      * @return filters folder location

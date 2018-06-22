@@ -18,12 +18,11 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
-import java.net.URLEncoder;
+import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.List;
 
 public class GatewayCliConstants {
-    public static final String BALLERINA_HOME = "BALLERINA_HOME";
     public static final String MAIN_DIRECTORY_NAME = "micro-gw-resources";
     public static final String CONF_DIRECTORY_NAME = "conf";
     public static final String PROJECTS_DIRECTORY_NAME = "projects";
@@ -40,6 +39,7 @@ public class GatewayCliConstants {
     public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
+    public static final String CLI_CONF = "conf";
     public static final String CLI_RUNTIME = "runtime";
     public static final String POLICY_DIR = "policies";
     public static final String EXTENSION_BALX = ".balx";
@@ -61,6 +61,9 @@ public class GatewayCliConstants {
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String CHARSET_UTF8 = "UTF-8";
+
+    public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
+    public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
     public static final int EXIT_CODE_NOT_MODIFIED = 34;
 
