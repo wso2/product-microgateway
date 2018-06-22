@@ -25,6 +25,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.logging.LogManager;
 
+/**
+ * A class for feeding the logging configurations to CLILogManager. This class is set as the config provider through
+ * the system property `java.util.logging.config.class`.
+ * 
+ */
 public class CLILogConfigReader {
     private static final PrintStream stderr = System.err;
 

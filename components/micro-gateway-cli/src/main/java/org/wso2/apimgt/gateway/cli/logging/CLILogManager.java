@@ -27,6 +27,11 @@ import java.util.Properties;
 import java.util.logging.LogManager;
 import java.util.regex.Matcher;
 
+/**
+ * Java util logging manager for micro-gw CLI which overrides the readConfiguration method to replace placeholders
+ * having system or environment variables.
+ * 
+ */
 public class CLILogManager extends LogManager {
 
     @Override
