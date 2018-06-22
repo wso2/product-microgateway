@@ -1,0 +1,18 @@
+NAME
+    micro-gw help reset - resets all the previously specified configurations.
+
+SYNOPSIS
+     micro-gw reset
+
+DESCRIPTION
+    
+     Reset command is used clear all the previously specified configurations such as server-url, username when running 
+     the setup command (micro-gw setup) for the first time. 
+     
+     When running the setup command for the first time, those configuration are stored internally within microgateway 
+     toolkit and will be reused for subsequent setup commands. To rerun setup command with a new set of configuration,
+     the reset command needs to be run beforehand.
+
+EXAMPLES
+    Reset all the configuration to default.
+    $ micro-gw reset

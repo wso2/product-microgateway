@@ -24,9 +24,6 @@ OPTIONS
     --password
         Password of the user
 
-    --reset
-        With this option present, it will reset the current configured user and generated consumer key and secret
-
     --path
         Path to the project location
 
