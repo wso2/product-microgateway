@@ -14,9 +14,9 @@ DESCRIPTION
 
 OPTIONS
 
-     -l <label-name>
-     --label <label-name>
-        Name of the label that should run the generated services from binary(balx) source
+     --n <project-name>
+     --project <project-name>
+        Name of the project that should run the generated services from binary(balx) source
 
 DEFAULT BEHAVIOR
     Runs the services generated for given label

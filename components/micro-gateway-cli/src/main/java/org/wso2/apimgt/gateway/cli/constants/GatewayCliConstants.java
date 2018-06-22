@@ -31,7 +31,7 @@ public class GatewayCliConstants {
     public static final String PROJECTS_LOGS_DIRECTORY_NAME = "logs";
     public static final String ACCESS_LOG_FILE = "access_logs";
     public static final String PROJECTS_TARGET_DIRECTORY_NAME = "target";
-    public static final String MAIN_CONFIG_FILE_NAME = "config.toml";
+    public static final String MAIN_CONFIG_FILE_NAME = "cli-config.toml";
     public static final String LABEL_CONFIG_FILE_NAME = "label-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";

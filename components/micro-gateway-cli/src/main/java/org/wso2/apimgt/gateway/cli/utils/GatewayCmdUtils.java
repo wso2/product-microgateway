@@ -169,7 +169,7 @@ public class GatewayCmdUtils {
             AESCipherTool cipherTool = new AESCipherTool(secret);
             return cipherTool.decrypt(value);
         } catch (AESCipherToolException e) {
-            throw createUsageException("failed to encrypt client secret");
+            throw createUsageException("failed to decrypt client secret");
         }
     }
 
@@ -272,9 +272,6 @@ public class GatewayCmdUtils {
 
         String mainResourceDirPath = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
         createFolderIfNotExist(mainResourceDirPath);
-
-        String mainConfigDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
-        createFolderIfNotExist(mainConfigDirPath);
 
         String mainProjectDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
         createFolderIfNotExist(mainProjectDirPath);
@@ -494,11 +491,11 @@ public class GatewayCmdUtils {
     /**
      * Returns location of the main configuration file of given project root
      *
-     * @param root project root location
      * @return path configuration file
      */
-    public static String getMainConfigLocation(String root) {
-        return getMainConfigDirPath(root) + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+    public static String getMainConfigLocation() {
+        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_RESOURCES + File.separator
+                + GatewayCliConstants.GW_DIST_CONF + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
     }
 
     /**
@@ -555,25 +552,6 @@ public class GatewayCmdUtils {
     private static String getLabelTargetDirectoryPath(String root, String labelName) {
         return getLabelDirectoryPath(root, labelName) + File.separator
                 + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
-    }
-
-    /**
-     * Creates main config file resides in PROJECT_ROOT/conf
-     *
-     * @param root project root location
-     * @throws IOException error while creating the main config file
-     */
-    public static void createMainConfig(String root) throws IOException {
-        String mainConfig = getMainConfigLocation(root);
-        File file = new File(mainConfig);
-        if (!file.exists()) {
-            file.createNewFile();
-            //Write Content
-            String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_MAIN_CONFIG_FILE_NAME, true);
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(defaultConfig);
-            }
-        }
     }
 
     /**
@@ -714,13 +692,9 @@ public class GatewayCmdUtils {
         GatewayCmdUtils.containerConfig = containerConfig;
     }
 
-    public static void saveConfig(Config config) {
-        String configPath;
+    public static void saveConfig(Config config, String configPath) {
         try {
-            configPath = GatewayCmdUtils.getMainConfigLocation(GatewayCmdUtils.getStoredWorkspaceLocation());
             TOMLConfigParser.write(configPath, config);
-        } catch (IOException e) {
-            System.err.println("Error occurred when getting main config.");
         } catch (ConfigParserException e) {
             System.err.println("Error occurred while parsing configuration, when persisting.");
         }

@@ -1,0 +1,20 @@
+[client]
+httpRequestTimeout = 1000000
+
+[token]
+publisherEndpoint = "https://localhost:9443/api/am/publisher/v0.13"
+adminEndpoint = "https://localhost:9443/api/am/admin/v0.13"
+registrationEndpoint = "https://localhost:9443/client-registration/v0.13/register"
+tokenEndpoint = "https://localhost:9443/oauth2/token"
+username = "admin"
+clientId = ""
+clientSecret = ""
+trustStoreLocation = "lib/platform/bre/security/ballerinaTruststore.p12"
+trustStorePassword = "h1MIqBSj2lRMdZRVuwcTWEPbIgePRnPxySOS91Ku/gY="
+
+[corsConfiguration]
+corsConfigurationEnabled = false
+accessControlAllowCredentials = false
+accessControlAllowOrigins = ["*"]
+accessControlAllowHeaders = ["authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"]
+accessControlAllowMethods = ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"]
