@@ -19,7 +19,10 @@ package org.wso2.apimgt.gateway.cli.oauth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
@@ -31,6 +34,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class OAuthServiceImpl implements OAuthService {
+    private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);
 
     /**
      * @see OAuthService#generateAccessToken(String, String, char[], String, String)
@@ -63,11 +67,12 @@ public class OAuthServiceImpl implements OAuthService {
                 String accessToken = rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
                 return accessToken;
             } else {
-                throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
+                logger.error("Error occurred while getting token. Status code: {} ", responseCode);
+                throw new CLIRuntimeException();
             }
-        } catch (Exception e) {
-            String msg = "Error while creating the new token for token regeneration.";
-            throw new RuntimeException(msg, e);
+        } catch (IOException e) {
+            logger.error("Error occurred while communicate with token endpoint {}", tokenEndpoint);
+            throw new CLIRuntimeException();
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -110,11 +115,12 @@ public class OAuthServiceImpl implements OAuthService {
                 String[] clientInfo = { clientId, clientSecret };
                 return clientInfo;
             } else { //If DCR call fails
-                throw new RuntimeException("DCR call failed. Status code: " + responseCode);
+                logger.error("Error occurred while creating oAuth application. Status code: {} ", responseCode);
+                throw new CLIRuntimeException("Error occurred while creating oAuth application");
             }
         } catch (IOException e) {
-            String errorMsg = "Can not create OAuth application  : ";
-            throw new RuntimeException(errorMsg, e);
+            logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint);
+            throw new CLIRuntimeException("Error occurred while communicate with DCR endpoint");
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

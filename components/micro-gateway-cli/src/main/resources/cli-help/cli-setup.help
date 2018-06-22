@@ -30,17 +30,17 @@ OPTIONS
     --path
         Path to the project location
 
-    --base-url
+    --server-url
         APIM base url assuming all the portals are running in same node. By default base-url is https://localhost:9443/
 
     -t
-    --trustStore
+    --truststore
         <Optional>
         Path to the trustStore file
         By default consider <CLI_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
 
     -s
-    --trustStorePass
+    --truststore-pass
         <Optional>
         Password for the given trustStore
         By default use default trustStore password

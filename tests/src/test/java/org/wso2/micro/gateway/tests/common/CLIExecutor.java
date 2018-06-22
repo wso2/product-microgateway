@@ -48,9 +48,14 @@ public class CLIExecutor {
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
-        String[] args = { "setup", "--label", label, "--path", path.toString(), "--user", "admin", "--password",
-                "admin", "--base-url", "http://localhost:9443", "--trustStore",
-                "lib/platform/bre/security/ballerinaTruststore.p12", "--trustStorePass", "ballerina" };
+
+        String config = new File(
+                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
+                        .getPath()).getAbsolutePath();
+        String[] args = { "setup", "--label", label, "--path", path.toString(), "--username", "admin", "--password",
+                "admin", "--server-url", "http://localhost:9443", "--truststore",
+                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
+                config };
         main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
