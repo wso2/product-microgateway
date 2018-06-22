@@ -152,7 +152,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <server.zip>
-                            ${basedir}/../distribution/target/wso2am-micro-gw-${project.version}.zip
+                            ${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip
                         </server.zip>
                         <project.build.directory>${project.build.directory}</project.build.directory>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
