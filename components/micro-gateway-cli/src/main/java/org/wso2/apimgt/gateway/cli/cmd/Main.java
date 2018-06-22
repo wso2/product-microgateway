@@ -534,7 +534,7 @@ public class Main {
             //set the trustStore
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
             System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
-            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);//            }
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
             OAuthService manager = new OAuthServiceImpl();
             if (config != null) {
