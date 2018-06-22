@@ -42,6 +42,10 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${basedir}/resources/cli-conf</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}/resources/filters</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
         </fileSet>
@@ -56,6 +60,15 @@
                 ${project.build.directory}/lib
             </directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/lib</outputDirectory>
+        </fileSet>
+
+        <!--create an empty logs folder-->
+        <fileSet>
+            <directory>${basedir}/resources/logs</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/logs</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 

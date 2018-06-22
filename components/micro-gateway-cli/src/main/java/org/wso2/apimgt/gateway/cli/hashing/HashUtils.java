@@ -20,11 +20,15 @@ package org.wso2.apimgt.gateway.cli.hashing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.HashingConstants;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.IOException;
@@ -43,6 +47,8 @@ import java.util.TreeSet;
  */
 public class HashUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(HashUtils.class);
+
     /**
      * Generate hashes for the specified apis, subscription and application policies, then compare with the previously
      *  generated hashes and detect if there are changes with them.
@@ -59,9 +65,13 @@ public class HashUtils {
         
         boolean hasChanges = true;
         Map<String, String> allHashesMap = new HashMap<>();
-        Map<String, String> apiHashesMap = getMapOfHashesForAPIs(apis);
-        Map<String, String> appPolicyHashesMap = getMapOfHashesForAppPolicies(appPolicies);
-        Map<String, String> subsPolicyHashesMap = getMapOfHashesForSubPolicies(subscriptionPolicies);
+        Map<String, String> apiHashesMap = getMapOfHashes(apis);
+        Map<String, String> appPolicyHashesMap = getMapOfHashes(appPolicies);
+        Map<String, String> subsPolicyHashesMap = getMapOfHashes(subscriptionPolicies);
+
+        logger.debug("API calculated hashes {}", apiHashesMap);
+        logger.debug("App policy calculated hashes {}", appPolicyHashesMap);
+        logger.debug("Subscription policy calculated hashes {}", subsPolicyHashesMap);
 
         allHashesMap.putAll(apiHashesMap);
         allHashesMap.putAll(appPolicyHashesMap);
@@ -70,9 +80,12 @@ public class HashUtils {
         try {
             Map<String, String> storedHashes = loadStoredResourceHashes();
             if (equalMaps(storedHashes, allHashesMap)) {
+                logger.debug("No changes detected from calculating hashes.");
                 hasChanges = false;
             } else {
+                logger.debug("Storing calculated resource hashes.");
                 storeResourceHashes(allHashesMap);
+                logger.debug("Storing calculated resource hashes success.");
             }
         } catch (IOException e) {
             throw new HashingException("Error while resource change detection", e);
@@ -109,56 +122,24 @@ public class HashUtils {
     }
 
     /**
-     * Calculate the hashes of the given list of APIs and return as a map with id -> hash mapping 
+     * Calculate the hashes of the given list of APIs or Throttle policies and return as a map with id -> hash mapping 
      * 
-     * @param apis List of APIs
+     * @param objects List of APIs
      * @return map with id -> hash mapping
      * @throws HashingException error while calculating hashes of the APIs
      */
-    private static Map<String, String> getMapOfHashesForAPIs(List<ExtendedAPI> apis) throws HashingException {
+    private static Map<String, String> getMapOfHashes(List objects) throws HashingException {
         Map<String, String> hashes = new HashMap<>();
-        if (apis != null) {
-            for (ExtendedAPI api : apis) {
-                String hash = getAnnotatedHash(api);
-                hashes.put(api.getId(), hash);
-            }
-        }
-        return hashes;
-    }
-
-    /**
-     * Calculate the hashes of the given list of application throttle policies and return as a map with id -> hash mapping 
-     *
-     * @param policies List of application throttle policies
-     * @return map with id -> hash mapping
-     * @throws HashingException error while calculating hashes of the application throttle policies
-     */
-    private static Map<String, String> getMapOfHashesForAppPolicies(List<ApplicationThrottlePolicyDTO> policies)
-            throws HashingException {
-        Map<String, String> hashes = new HashMap<>();
-        if (policies != null) {
-            for (ApplicationThrottlePolicyDTO throttlePolicy : policies) {
-                String hash = getAnnotatedHash(throttlePolicy);
-                hashes.put(throttlePolicy.getPolicyId(), hash);
-            }
-        }
-        return hashes;
-    }
-
-    /**
-     * Calculate the hashes of the given list of subscription throttle policies and return as a map with id -> hash mapping 
-     *
-     * @param policies List of subscription throttle policies
-     * @return map with id -> hash mapping
-     * @throws HashingException error while calculating hashes of the subscription throttle policies
-     */
-    private static Map<String, String> getMapOfHashesForSubPolicies(List<SubscriptionThrottlePolicyDTO> policies)
-            throws HashingException {
-        Map<String, String> hashes = new HashMap<>();
-        if (policies != null) {
-            for (SubscriptionThrottlePolicyDTO throttlePolicy : policies) {
-                String hash = getAnnotatedHash(throttlePolicy);
-                hashes.put(throttlePolicy.getPolicyId(), hash);
+        if (objects != null) {
+            for (Object obj : objects) {
+                String hash = getAnnotatedHash(obj);
+                if (obj instanceof ExtendedAPI) {
+                    hashes.put(((ExtendedAPI)obj).getId(), hash);
+                } else if (obj instanceof ThrottlePolicyDTO) {
+                    hashes.put(((ThrottlePolicyDTO)obj).getPolicyId(), hash);
+                } else {
+                    logger.warn("Incompatible type for generating hash: " + obj + ", class: " + obj.getClass());
+                }
             }
         }
         return hashes;
