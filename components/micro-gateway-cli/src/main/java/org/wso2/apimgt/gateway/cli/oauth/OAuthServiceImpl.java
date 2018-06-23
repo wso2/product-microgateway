@@ -71,7 +71,7 @@ public class OAuthServiceImpl implements OAuthService {
                 throw new CLIRuntimeException();
             }
         } catch (IOException e) {
-            logger.error("Error occurred while communicate with token endpoint {}", tokenEndpoint);
+            logger.error("Error occurred while communicate with token endpoint {}", tokenEndpoint, e);
             throw new CLIRuntimeException();
         } finally {
             if (urlConn != null) {
@@ -119,7 +119,7 @@ public class OAuthServiceImpl implements OAuthService {
                 throw new CLIRuntimeException("Error occurred while creating oAuth application");
             }
         } catch (IOException e) {
-            logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint);
+            logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint, e);
             throw new CLIRuntimeException("Error occurred while communicate with DCR endpoint");
         } finally {
             if (urlConn != null) {

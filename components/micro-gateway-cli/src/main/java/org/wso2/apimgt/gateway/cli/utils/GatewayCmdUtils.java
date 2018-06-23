@@ -20,9 +20,12 @@ package org.wso2.apimgt.gateway.cli.utils;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cmd.GatewayLauncherCmd;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
@@ -46,6 +49,7 @@ import java.util.Map;
 
 public class GatewayCmdUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
@@ -276,40 +280,37 @@ public class GatewayCmdUtils {
     /**
      * Create the main structure of the project for all the labels
      *
-     * @param root Root location to create the structure
+     * @param workspace location to the workspace
      */
-    public static void createMainProjectStructure(String root) {
-        createFolderIfNotExist(root);
-
-        String mainResourceDirPath = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
-        createFolderIfNotExist(mainResourceDirPath);
-
-        String mainProjectDirPath = mainResourceDirPath + File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
-        createFolderIfNotExist(mainProjectDirPath);
+    public static void createWorkspaceStructure(String workspace) {
+        String mainResourceDirPath =
+                workspace + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
+                        + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
+        createFoldersIfNotExist(mainResourceDirPath);
     }
 
     /**
      * Create a project structure for a particular label.
      *
-     * @param root      project root location
-     * @param labelName name of the label
+     * @param workspace   project root location
+     * @param projectName name of the project
      */
-    public static void createLabelProjectStructure(String root, String labelName) {
-        String mainResourceDir = root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME;
-        String mainProjectDir = mainResourceDir + File.separator + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
-        File labelDir = createFolderIfNotExist(mainProjectDir + File.separator + labelName);
+    public static void createProjectStructure(String workspace, String projectName) {
+        String mainProjectDir = workspace + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
+                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
+        File projectDir = createFolderIfNotExist(mainProjectDir + File.separator + projectName);
 
-        String labelSrcDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
-        createFolderIfNotExist(labelSrcDirPath);
+        String srcDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
+        createFolderIfNotExist(srcDirPath);
 
-        String labelPolicySrcDirPath = labelSrcDirPath + File.separator + GatewayCliConstants.POLICY_DIR;
-        createFolderIfNotExist(labelPolicySrcDirPath);
+        String policyDirPath = srcDirPath + File.separator + GatewayCliConstants.POLICY_DIR;
+        createFolderIfNotExist(policyDirPath);
 
-        String labelTargetDirPath = labelDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
-        createFolderIfNotExist(labelTargetDirPath);
+        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
+        createFolderIfNotExist(targetDirPath);
 
-        String labelConfDirPath = labelDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
-        createFolderIfNotExist(labelConfDirPath);
+        String confDirPath = projectDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        createFolderIfNotExist(confDirPath);
     }
 
     /**
@@ -633,7 +634,33 @@ public class GatewayCmdUtils {
     private static File createFolderIfNotExist(String path) {
         File folder = new File(path);
         if (!folder.exists() && !folder.isDirectory()) {
-            folder.mkdir();
+            boolean created = folder.mkdir();
+            if (created) {
+                logger.debug("Dir: {} created. ", path);
+            } else {
+                logger.error("Failed to create dir: {} ", path);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
+        }
+        return folder;
+    }
+
+    /**
+     * Creates a new folders if not exists
+     *
+     * @param path folder path
+     * @return File object for the created folder
+     */
+    private static File createFoldersIfNotExist(String path) {
+        File folder = new File(path);
+        if (!folder.exists() && !folder.isDirectory()) {
+            boolean created = folder.mkdirs();
+            if (created) {
+                logger.debug("Dir: {} created. ", path);
+            } else {
+                logger.error("Failed to create dir: {} ", path);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
         }
         return folder;
     }

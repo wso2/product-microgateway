@@ -47,11 +47,10 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
     private void setup() throws Exception {
         microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
         kmServer = ServerInstance.initMicroGwServer(TestConstant.KM_LISTENER_PORT);
-        String relativePath = new File(
-                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "apis"
-                        + File.separator + "pizza_shack_api.bal").getAbsolutePath();
-        String configPath = new File("src" + File.separator + "test" + File.separator + "resources"
-                + File.separator + "confs" + File.separator + "base.conf").getAbsolutePath();
+        String relativePath = getClass().getClassLoader()
+                .getResource("apis" + File.separator + "pizza_shack_api.bal").getPath();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "base.conf").getPath();
         startServer(relativePath, configPath);
     }
 
@@ -69,8 +68,8 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
     @Test(description = "Test with invalid token")
     public void testWithInvalidToken() throws Exception {
         try {
-            String kmServerFile = new File(keyManagerServiceDir + File.separator + "unauthenticated.bal")
-                    .getAbsolutePath();
+            String kmServerFile = getClass().getClassLoader()
+                    .getResource("keyManager" + File.separator + "unauthenticated.bal").getPath();
             startKMServer(kmServerFile);
             Map<String, String> headers = new HashMap<>();
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer asds-34234");
@@ -87,8 +86,8 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
     @Test(description = "Test with invalid scopes")
     public void testWithInvalidScopes() throws Exception {
         try {
-            String kmServerFile = new File(keyManagerServiceDir + File.separator + "unauthorized.bal")
-                    .getAbsolutePath();
+            String kmServerFile = getClass().getClassLoader()
+                    .getResource("keyManager" + File.separator + "unauthorized.bal").getPath();
             startKMServer(kmServerFile);
             Map<String, String> headers = new HashMap<>();
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer asds-34234");
@@ -107,8 +106,8 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
     @Test(description = "Test with invalid subscription")
     public void testWithInvalidSubscription() throws Exception {
         try {
-            String kmServerFile = new File(keyManagerServiceDir + File.separator + "invalid_subscription.bal")
-                    .getAbsolutePath();
+            String kmServerFile = getClass().getClassLoader()
+                    .getResource("keyManager" + File.separator + "invalid_subscription.bal").getPath();
             startKMServer(kmServerFile);
             Map<String, String> headers = new HashMap<>();
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer sample-token");

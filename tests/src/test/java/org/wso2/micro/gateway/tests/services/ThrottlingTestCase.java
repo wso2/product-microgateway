@@ -39,6 +39,7 @@ import java.util.Map;
 public class ThrottlingTestCase extends BaseTestCase {
     private static final Logger log = LoggerFactory.getLogger(ThrottlingTestCase.class);
     private String label = "apimTestLabel";
+    private String project = "apimTestProject";
     private String token, jwtToken, jwtToken2;
 
     @BeforeClass
@@ -79,7 +80,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         jwtToken = getJWT(api, application, subscriptionPolicy.getPolicyName());
         jwtToken2 = getJWT(api, application2, "Unlimited");
         //generate apis with CLI and start the micro gateway server
-        super.init(label);
+        super.init(label, project);
     }
 
     @Test(description = "Test subscription throttling with a JWT token")

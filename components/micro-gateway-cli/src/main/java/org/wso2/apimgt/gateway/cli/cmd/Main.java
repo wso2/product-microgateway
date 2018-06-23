@@ -19,49 +19,14 @@ package org.wso2.apimgt.gateway.cli.cmd;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.Parameters;
-import org.apache.commons.lang3.StringUtils;
-import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
-import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
-import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
-import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
-import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
-import org.wso2.apimgt.gateway.cli.exception.HashingException;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
-import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
-import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
-import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,7 +36,7 @@ import java.util.Optional;
 public class Main {
     private static final String JC_UNKNOWN_OPTION_PREFIX = "Unknown option:";
     private static final String JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX = "Expected a value after parameter";
-    public static final String MICRO_GW = "micro-gw";
+    private static final String MICRO_GW = "micro-gw";
 
     private static PrintStream outStream = System.err;
 
@@ -137,20 +102,16 @@ public class Main {
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";
             throw GatewayCmdUtils.createUsageException(errorMsg);
-
         } catch (ParameterException e) {
             String msg = e.getMessage();
             if (msg == null) {
                 throw GatewayCmdUtils.createUsageException("Internal error occurred");
-
             } else if (msg.startsWith(JC_UNKNOWN_OPTION_PREFIX)) {
                 String flag = msg.substring(JC_UNKNOWN_OPTION_PREFIX.length());
                 throw GatewayCmdUtils.createUsageException("Unknown flag '" + flag.trim() + "'");
-
             } else if (msg.startsWith(JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX)) {
                 String flag = msg.substring(JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX.length());
                 throw GatewayCmdUtils.createUsageException("Flag '" + flag.trim() + "' needs an argument");
-
             } else {
                 // Make the first character of the error message lower case
                 throw GatewayCmdUtils.createUsageException(GatewayCmdUtils.makeFirstLetterLowerCase(msg));

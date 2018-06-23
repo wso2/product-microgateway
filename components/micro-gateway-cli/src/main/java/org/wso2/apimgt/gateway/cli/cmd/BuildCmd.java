@@ -26,7 +26,6 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.List;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -35,6 +34,7 @@ import java.util.List;
 public class BuildCmd implements GatewayLauncherCmd {
 
     private static PrintStream outStream = System.err;
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
@@ -43,11 +43,6 @@ public class BuildCmd implements GatewayLauncherCmd {
 
     @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
     private boolean helpFlag;
-
-    @Parameter(arity = 1)
-    private List<String> argList;
-
-    private JCommander parentCmdParser;
 
     public void execute() {
         if (helpFlag) {
@@ -80,6 +75,5 @@ public class BuildCmd implements GatewayLauncherCmd {
 
     @Override
     public void setParentCmdParser(JCommander parentCmdParser) {
-        this.parentCmdParser = parentCmdParser;
     }
 }

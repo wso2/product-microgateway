@@ -45,7 +45,7 @@ public class BaseTestCase {
     protected CLIExecutor cliExecutor;
     protected MockHttpServer mockHttpServer;
 
-    public void init(String label) throws Exception {
+    public void init(String label, String project) throws Exception {
         microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
         String cliHome = microGWServer.getServerHome();
 
@@ -53,9 +53,9 @@ public class BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label);
+        cliExecutor.generate(label, project);
 
-        String balPath = CLIExecutor.getInstance().getLabelBalx(label);
+        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
         String[] args = { "--config", configPath };

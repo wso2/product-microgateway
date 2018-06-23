@@ -22,6 +22,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
@@ -29,6 +31,7 @@ import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
@@ -63,7 +66,9 @@ import java.util.List;
  */
 @Parameters(commandNames = "setup", commandDescription = "setup information")
 public class SetupCmd implements GatewayLauncherCmd {
+    private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.err;
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
@@ -73,14 +78,8 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-p", "--password" }, hidden = true)
     private String password;
 
-    @Parameter(names = { "-l", "--label" }, hidden = true)
+    @Parameter(names = { "-l", "--label" }, hidden = true, required = true)
     private String label;
-
-    @Parameter(names = { "--reset" }, hidden = true)
-    private boolean reset;
-
-    @Parameter(names = { "--path" }, hidden = true)
-    private String workspace;
 
     @Parameter(names = { "--server-url" }, hidden = true)
     private String baseUrl;
@@ -91,7 +90,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-s", "--truststore-pass" }, hidden = true)
     private String trustStorePassword;
 
-    @Parameter(names = { "-n", "--project" }, hidden = true)
+    @Parameter(names = { "-n", "--project" }, hidden = true, required = true)
     private String projectName;
 
     @Parameter(names = { "-c", "--config" }, hidden = true)
@@ -101,17 +100,14 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String adminEndpoint;
     private String registrationEndpoint;
     private String tokenEndpoint;
-    private String clientID;
     private String clientSecret;
 
     public void execute() {
         //initialize CLI with the provided path. First time the cli runs it is a must to provide this. Once it is
         // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
         // path is taken from above file.
-        if (StringUtils.isEmpty(label)) {
-            outStream.println("Label can't be empty. You need to specify -l <label name>");
-            return;
-        }
+        String clientID;
+        String workspace = System.getProperty("user.dir");
 
         if (StringUtils.isEmpty(projectName)) {
             projectName = label;
@@ -192,7 +188,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             configuredTrustStorePass = null;
         } else {
             try {
-                configuredTrustStorePass = GatewayCmdUtils.decrypt(encryptedPass, new String(password));
+                configuredTrustStorePass = GatewayCmdUtils.decrypt(encryptedPass, password);
             } catch (CliLauncherException e) {
                 //different password used to encrypt
                 configuredTrustStorePass = null;
@@ -217,8 +213,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
-            System.err.println("Error while loading trust store location: " + trustStoreLocation);
-            Runtime.getRuntime().exit(1);
+            logger.error("Provided trust store location {} not exist.", trustStoreLocation);
+            throw new CLIRuntimeException("Provided trust store not exist.");
         }
 
         //set the trustStore
@@ -227,16 +223,14 @@ public class SetupCmd implements GatewayLauncherCmd {
         System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
         OAuthService manager = new OAuthServiceImpl();
-        if (config != null) {
-            clientID = config.getToken().getClientId();
-            String encryptedSecret = config.getToken().getClientSecret();
-            if (!StringUtils.isEmpty(clientID.trim()) && !StringUtils.isEmpty(encryptedSecret.trim())) {
-                try {
-                    clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, new String(password));
-                } catch (CliLauncherException e) {
-                    //different password used to encrypt
-                    clientSecret = null;
-                }
+        clientID = config.getToken().getClientId();
+        String encryptedSecret = config.getToken().getClientSecret();
+        if (!StringUtils.isEmpty(clientID.trim()) && !StringUtils.isEmpty(encryptedSecret.trim())) {
+            try {
+                clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, password);
+            } catch (CliLauncherException e) {
+                //different password used to encrypt
+                clientSecret = null;
             }
         }
 
@@ -257,7 +251,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
         CodeGenerator codeGenerator = new CodeGenerator();
-        boolean changesDetected = false;
+        boolean changesDetected;
         try {
             policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(workspace, projectName) + File.separator
                     + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
@@ -268,13 +262,13 @@ public class SetupCmd implements GatewayLauncherCmd {
             try {
                 changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
             } catch (HashingException e) {
-                outStream.println("Error while checking for changes of resources. Skipping no-change detection..");
-                Runtime.getRuntime().exit(1);
+                logger.error("Error while checking for changes of resources. Skipping no-change detection..");
+                throw new CLIRuntimeException(
+                        "Error while checking for changes of resources. Skipping no-change detection..");
             }
         } catch (IOException | BallerinaServiceGenException e) {
-            outStream.println("Error while generating ballerina source");
-            e.printStackTrace();
-            Runtime.getRuntime().exit(1);
+            logger.error("Error while generating ballerina source.");
+            throw new CLIRuntimeException("Error while generating ballerina source.");
         }
 
         //if all the operations are success, write new config to file
@@ -284,12 +278,19 @@ public class SetupCmd implements GatewayLauncherCmd {
             client.setHttpRequestTimeout(1000000);
             newConfig.setClient(client);
 
-            String encryptedSecret = GatewayCmdUtils.encrypt(clientSecret, new String(password));
-            String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, new String(password));
-            Token token = new TokenBuilder().setPublisherEndpoint(publisherEndpoint).setAdminEndpoint(adminEndpoint)
-                    .setRegistrationEndpoint(registrationEndpoint).setTokenEndpoint(tokenEndpoint).setUsername(username)
-                    .setClientId(clientID).setClientSecret(encryptedSecret).setTrustStoreLocation(trustStoreLocation)
-                    .setTrustStorePassword(encryptedTrustStorePass).build();
+            String encryptedCS = GatewayCmdUtils.encrypt(clientSecret, password);
+            String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, password);
+            Token token = new TokenBuilder()
+                    .setPublisherEndpoint(publisherEndpoint)
+                    .setAdminEndpoint(adminEndpoint)
+                    .setRegistrationEndpoint(registrationEndpoint)
+                    .setTokenEndpoint(tokenEndpoint)
+                    .setUsername(username)
+                    .setClientId(clientID)
+                    .setClientSecret(encryptedCS)
+                    .setTrustStoreLocation(trustStoreLocation)
+                    .setTrustStorePassword(encryptedTrustStorePass)
+                    .build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
             GatewayCmdUtils.saveConfig(newConfig, configPath);
@@ -304,7 +305,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.HELP;
+        return GatewayCliCommands.SETUP;
     }
 
     @Override
@@ -328,56 +329,40 @@ public class SetupCmd implements GatewayLauncherCmd {
             registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
             tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Malformed URL is provided");
+            logger.error("Malformed URL is provided {}", host);
+            throw new CLIRuntimeException("Error occurred while setting up url configurations.");
         }
     }
 
-    private static void init(String overrideProjectRootPath, String label, String configPath) {
+    private static void init(String workspace, String projectName, String configPath) {
         try {
-            String projectRoot;
-            if (StringUtils.isBlank(overrideProjectRootPath)) {
-                String storedProjectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
-                if (StringUtils.isBlank(storedProjectRoot)) {
-                    outStream.println("Stored workspace path not available. "
-                            + "You need to specify --path <path to generate resources>");
-                    Runtime.getRuntime().exit(1);
-                }
-                projectRoot = storedProjectRoot;
-            } else {
-                projectRoot = overrideProjectRootPath;
-                GatewayCmdUtils.storeWorkspaceLocation(projectRoot);
-                GatewayCmdUtils.createMainProjectStructure(projectRoot);
-                GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
-                GatewayCmdUtils.createLabelConfig(projectRoot, label);
-            }
-
-            //user can define different label time to time. So need to create irrespective path provided or not.
-            GatewayCmdUtils.createLabelProjectStructure(projectRoot, label);
+            GatewayCmdUtils.storeWorkspaceLocation(workspace);
+            GatewayCmdUtils.createWorkspaceStructure(workspace);
+            GatewayCmdUtils.createProjectStructure(workspace, projectName);
+            GatewayCmdUtils.createLabelConfig(workspace, projectName);
 
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
                 GatewayCmdUtils.setConfig(config);
             } else {
-                outStream.println("Config: " + configPath + " Not found.");
-                Runtime.getRuntime().exit(1);
+                logger.error("Config: {} Not found.", configPath);
+                throw new CLIRuntimeException("Error occurred while loading configurations.");
             }
 
-            String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(projectRoot, label);
+            String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(workspace, projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setLabel(label);
+            codeGenerationContext.setLabel(projectName);
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
-            outStream.println(
-                    "Error while parsing the config" + (e.getCause() != null ? ": " + e.getCause().getMessage() : ""));
-            Runtime.getRuntime().exit(1);
+            logger.error("Error while parsing the config {}", configPath, e);
+            throw new CLIRuntimeException("Error occurred while loading configurations.");
         } catch (IOException e) {
-            e.printStackTrace();
-            outStream.println("Error while processing files:" + e.getMessage());
-            Runtime.getRuntime().exit(1);
+            logger.error("Error while generating label configs", e);
+            throw new CLIRuntimeException("Error occurred while loading configurations.");
         }
     }
 }

@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 @Parameters(commandNames = "reset", commandDescription = "reset configurations")
 public class ResetCmd implements GatewayLauncherCmd {
     private static PrintStream outStream = System.err;
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
