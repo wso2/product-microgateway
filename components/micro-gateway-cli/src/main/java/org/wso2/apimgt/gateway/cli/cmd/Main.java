@@ -52,6 +52,11 @@ public class Main {
         } catch (CLIRuntimeException e) {
             outStream.println(e.getMessage());
             Runtime.getRuntime().exit(1);
+        } catch (Exception e) {
+            //Use generic exception to catch all the runtime exception
+            outStream.println("Internal error occurred when setup.");
+            logger.error("Internal error occurred when setup.", e);
+            Runtime.getRuntime().exit(1);
         }
     }
 

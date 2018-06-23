@@ -20,10 +20,8 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.PrintStream;
-//import java.util.List;
 
 /**
  * This class represents the "run" command and it holds arguments and flags specified by the user.
@@ -35,26 +33,17 @@ public class RunCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = { "-l", "--label" }, hidden = true)
-    private String label;
+    @Parameter(names = { "-n", "--project" }, hidden = true, required = true)
+    private String project;
 
     @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
     private boolean helpFlag;
-
-//    @Parameter(arity = 1)
-//    private List<String> argList;
-
-//    private JCommander parentCmdParser;
 
     public void execute() {
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("run");
             outStream.println(commandUsageInfo);
             return;
-        }
-
-        if (StringUtils.isEmpty(label)) {
-            outStream.println("Label can't be empty. You need to specify -l <label name>");
         }
     }
 
@@ -65,6 +54,6 @@ public class RunCmd implements GatewayLauncherCmd {
 
     @Override
     public void setParentCmdParser(JCommander parentCmdParser) {
-//        this.parentCmdParser = parentCmdParser;
+        //Nothing to implement
     }
 }

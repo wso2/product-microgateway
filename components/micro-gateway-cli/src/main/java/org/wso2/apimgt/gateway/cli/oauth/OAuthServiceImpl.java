@@ -64,8 +64,7 @@ public class OAuthServiceImpl implements OAuthService {
                 ObjectMapper mapper = new ObjectMapper();
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 JsonNode rootNode = mapper.readTree(responseStr);
-                String accessToken = rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
-                return accessToken;
+                return rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
             } else {
                 logger.error("Error occurred while getting token. Status code: {} ", responseCode);
                 throw new CLIRuntimeException();

@@ -26,8 +26,6 @@ import io.swagger.parser.SwaggerParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.exception.HashingException;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
@@ -96,13 +94,11 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateService(BallerinaService context) throws IOException {
-        GenSrcFile sourceFile = null;
         String concatTitle = context.getQualifiedServiceName();
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.SERVICE_TEMPLATE_NAME);
-        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
-        return sourceFile;
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     /**
@@ -112,13 +108,11 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateCommonEndpoints() throws IOException {
-        GenSrcFile sourceFile = null;
         String srcFile = GeneratorConstants.ENDPOINTS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
         String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.ENDPOINT_TEMPLATE_NAME);
-        sourceFile = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
-        return sourceFile;
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
 

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.context.Constants;
+import org.wso2.micro.gateway.tests.context.ServerLogReader;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -68,15 +69,9 @@ public class CLIExecutor {
         String[] args2 = new String[] { "src", "-o", project };
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
-        StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), (String msg) -> {
-            log.info("ballerina build: " + msg);
-        });
-        StreamGobbler streamGobblerE = new StreamGobbler(process.getErrorStream(), (String msg) -> {
-            log.error("ballerina build: " + msg);
-        });
 
-        Executors.newSingleThreadExecutor().submit(streamGobbler);
-        Executors.newSingleThreadExecutor().submit(streamGobblerE);
+        new ServerLogReader("errorStream", process.getErrorStream()).start();
+        new ServerLogReader("inputStream", process.getInputStream()).start();
         int exitCode = process.waitFor();
         if (exitCode != 0) {
             throw new RuntimeException("Error occurred when building.");

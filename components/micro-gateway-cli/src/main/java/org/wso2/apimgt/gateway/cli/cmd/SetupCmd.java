@@ -81,13 +81,13 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-l", "--label" }, hidden = true, required = true)
     private String label;
 
-    @Parameter(names = { "--server-url" }, hidden = true)
+    @Parameter(names = { "-s", "--server-url" }, hidden = true)
     private String baseUrl;
 
     @Parameter(names = { "-t", "--truststore" }, hidden = true)
     private String trustStoreLocation;
 
-    @Parameter(names = { "-s", "--truststore-pass" }, hidden = true)
+    @Parameter(names = { "-w", "--truststore-pass" }, hidden = true)
     private String trustStorePassword;
 
     @Parameter(names = { "-n", "--project" }, hidden = true, required = true)
@@ -108,10 +108,6 @@ public class SetupCmd implements GatewayLauncherCmd {
         // path is taken from above file.
         String clientID;
         String workspace = System.getProperty("user.dir");
-
-        if (StringUtils.isEmpty(projectName)) {
-            projectName = label;
-        }
 
         if (StringUtils.isEmpty(configPath)) {
             configPath = GatewayCmdUtils.getMainConfigLocation();
@@ -159,11 +155,9 @@ public class SetupCmd implements GatewayLauncherCmd {
                 if ((baseUrl = promptForTextInput("Enter APIM base URL [" + RESTServiceConstants.DEFAULT_HOST + "]: "))
                         .trim().isEmpty()) {
                     baseUrl = RESTServiceConstants.DEFAULT_HOST;
-                    populateHosts(baseUrl);
                 }
-            } else {
-                populateHosts(baseUrl);
             }
+            populateHosts(baseUrl);
         }
 
         //configure trust store

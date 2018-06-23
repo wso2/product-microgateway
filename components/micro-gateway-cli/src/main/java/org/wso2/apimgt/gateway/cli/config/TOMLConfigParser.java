@@ -46,7 +46,7 @@ public class TOMLConfigParser {
         }
 
         T loadedBean;
-        String content = null;
+        String content;
         try {
             content = new String(Files.readAllBytes(configurationFile), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -78,7 +78,7 @@ public class TOMLConfigParser {
         }
     }
 
-    static <T> T parseString(String configFileContent, Class<T> type) {
+    private static <T> T parseString(String configFileContent, Class<T> type) {
         return new Toml().read(configFileContent).to(type);
     }
 }

@@ -140,7 +140,7 @@ do
           CMD_COMMAND=$c
     elif [ "$c" = "--name" ] || [ "$c" = "-n" ]; then
           CMD_PRO_NAME=$c
-    elif ([ "$CMD_PRO_NAME" = "--name" ] || [ "$CMD_PRO_NAME" = "-n" ]) && [ -z "$CMD_PRO_NAME_VAL" ]; then
+    elif ([ "$CMD_PRO_NAME" = "--project" ] || [ "$CMD_PRO_NAME" = "-n" ]) && [ -z "$CMD_PRO_NAME_VAL" ]; then
           CMD_PRO_NAME_VAL=$c
     fi
 done
