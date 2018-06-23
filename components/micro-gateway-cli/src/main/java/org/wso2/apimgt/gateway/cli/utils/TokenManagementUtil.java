@@ -34,12 +34,12 @@ public class TokenManagementUtil {
      */
     public static String getResponseString(InputStream input) throws IOException {
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-            String file = "";
+            StringBuilder content = new StringBuilder();
             String str;
             while ((str = buffer.readLine()) != null) {
-                file += str;
+                content.append(str);
             }
-            return file;
+            return content.toString();
         }
     }
 }

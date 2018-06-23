@@ -49,17 +49,7 @@ public class OAuthTokenRequestBuilder {
     }
 
     public OAuthTokenRequestBuilder setScopes(String[] scopes) {
-        String scopesStr = "";
-        int scopesLength = scopes.length;
-        int i = 0;
-        for (String scope : scopes) {
-            i++;
-            scopesStr += scope;
-            if (scopesLength != i) {
-                scopesStr += " ";
-            }
-        }
-        this.request += "&scope=" + scopesStr;
+        this.request += "&scope=" + String.join(" ", scopes);
         this.oAuthTokenRequest.setScopes(scopes);
         return this;
     }

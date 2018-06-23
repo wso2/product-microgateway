@@ -29,6 +29,6 @@ public class CLIZipException extends RuntimeException {
      * @param e throwable
      */
     public CLIZipException(String message, Throwable e) {
-        super(message);
+        super(message, e);
     }
 }

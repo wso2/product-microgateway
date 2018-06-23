@@ -21,7 +21,9 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.IOException;
@@ -32,13 +34,13 @@ import java.io.PrintStream;
  */
 @Parameters(commandNames = "build", commandDescription = "micro gateway build information")
 public class BuildCmd implements GatewayLauncherCmd {
-
+    private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
     private static PrintStream outStream = System.err;
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = { "-n", "--project" }, hidden = true)
+    @Parameter(names = { "-n", "--project" }, hidden = true, required = true)
     private String projectName;
 
     @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
@@ -51,21 +53,13 @@ public class BuildCmd implements GatewayLauncherCmd {
             return;
         }
 
-        if (StringUtils.isEmpty(projectName)) {
-            outStream.println("Label can't be empty. You need to specify -n <project name>");
-            return;
-        }
-
         try {
             String projectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
             GatewayCmdUtils.createLabelGWDistribution(projectRoot, projectName);
         } catch (IOException e) {
-            outStream.println(
-                    "Error while creating micro gateway distribution for project " + projectName + ". Reason: " + e
-                            .getMessage());
-            Runtime.getRuntime().exit(1);
+            logger.error("Error while creating micro gateway distribution for project {}.", projectName, e);
+            throw new CLIRuntimeException("Error while creating micro gateway distribution for project");
         }
-        Runtime.getRuntime().exit(0);
     }
 
     @Override

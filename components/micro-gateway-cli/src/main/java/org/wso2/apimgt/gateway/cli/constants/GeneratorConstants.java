@@ -33,7 +33,6 @@ public class GeneratorConstants {
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
     public static final String DEFAULT_TEMPLATE_DIR = File.separator + "templates";
 
-    public static final String DEFAULT_SERVICE_PKG = "service";
     public static final String APPLICATION_POLICY_TYPE = "application";
     public static final String SUBSCRIPTION_POLICY_TYPE = "subscription";
     public static final String APPLICATION_INIT_FUNC_PREFIX = "initApplication";

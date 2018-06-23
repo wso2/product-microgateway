@@ -18,6 +18,7 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,6 @@ public class GatewayCliConstants {
     public static final String TEMP_DIR_NAME = "temp";
     public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
-    public static final String DEFAULT_MAIN_CONFIG_FILE_NAME = "default-config.toml";
     public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
@@ -56,7 +56,6 @@ public class GatewayCliConstants {
     public static final String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator + GW_DIST_SH;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
-    public static final String PROJECT_CONF_FILE = "ballerina.conf";
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
@@ -67,7 +66,7 @@ public class GatewayCliConstants {
 
     public static final int EXIT_CODE_NOT_MODIFIED = 34;
 
-    public static final List<String> accessControlAllowOrigins = Arrays.asList("*");
+    public static final List<String> accessControlAllowOrigins = Collections.singletonList("*");
     public static final List<String> accessControlAllowMethods = Arrays
             .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS");
     public static final List<String> accessControlAllowHeaders = Arrays

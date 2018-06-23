@@ -71,7 +71,7 @@ public class ThrottlePolicyGenerator {
      * @return list of {@code GenSrcFile}
      * @throws IOException when file operations fail
      */
-    public List<GenSrcFile> generateApplicationPolicies(List<ApplicationThrottlePolicyDTO> applicationPolicies)
+    private List<GenSrcFile> generateApplicationPolicies(List<ApplicationThrottlePolicyDTO> applicationPolicies)
             throws IOException {
         ThrottlePolicy policyContext;
         List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -89,7 +89,7 @@ public class ThrottlePolicyGenerator {
      * @return list of {@code GenSrcFile}
      * @throws IOException when file operations fail
      */
-    public List<GenSrcFile> generateSubscriptionPolicies(List<SubscriptionThrottlePolicyDTO> subscriptionPolicies)
+    private List<GenSrcFile> generateSubscriptionPolicies(List<SubscriptionThrottlePolicyDTO> subscriptionPolicies)
             throws IOException, BallerinaServiceGenException {
         ThrottlePolicy policyContext;
         List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -107,9 +107,9 @@ public class ThrottlePolicyGenerator {
      * @param subscriptionPolicies list of subscription policies
      * @return GenSrcFile
      * @throws IOException                  when file operations fail
-     * @throws BallerinaServiceGenException when code generator fails
+     * @throws IOException when code generator fails
      */
-    public GenSrcFile generateInitBal(List<ApplicationThrottlePolicyDTO> applicationPolicies,
+    private GenSrcFile generateInitBal(List<ApplicationThrottlePolicyDTO> applicationPolicies,
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException {
         ThrottlePolicyInitializer context = new ThrottlePolicyInitializer().buildAppContext(applicationPolicies)
                 .buildSubsContext(subscriptionPolicies);
@@ -159,8 +159,7 @@ public class ThrottlePolicyGenerator {
 
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_TEMPLATE_NAME);
-        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
-        return sourceFiles;
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     private GenSrcFile generateInitBalFile(ThrottlePolicyInitializer context) throws IOException {
@@ -169,9 +168,7 @@ public class ThrottlePolicyGenerator {
 
         String mainContent = getPolicyInitContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_INIT_TEMPLATE_NAME);
-        GenSrcFile sourceFiles = new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
-
-        return sourceFiles;
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     /**

@@ -22,15 +22,14 @@ import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.cmd.GatewayLauncherCmd;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
-import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
 import java.io.BufferedReader;
@@ -44,8 +43,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GatewayCmdUtils {
 
@@ -79,7 +76,7 @@ public class GatewayCmdUtils {
      * @throws IOException if file read went wrong
      */
     public static String readFileAsString(String path, boolean inResource) throws IOException {
-        InputStream is = null;
+        InputStream is;
         if (inResource) {
             is = ClassLoader.getSystemResourceAsStream(path);
         } else {
@@ -191,7 +188,13 @@ public class GatewayCmdUtils {
         String projectRootHolderFileLocation = getProjectRootHolderFileLocation();
         File pathFile = new File(projectRootHolderFileLocation);
         if (!pathFile.exists()) {
-            pathFile.createNewFile();
+            boolean created = pathFile.createNewFile();
+            if (created) {
+                logger.debug("File: {} created. ", projectRootHolderFileLocation);
+            } else {
+                logger.error("Failed to create file: {} ", projectRootHolderFileLocation);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
         }
         //Write Content
         writeContent(workspacePath, pathFile);
@@ -226,7 +229,7 @@ public class GatewayCmdUtils {
      *
      * @return resources file directory path
      */
-    public static String getResourceFolderLocation() {
+    private static String getResourceFolderLocation() {
         return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator
                 + GatewayCliConstants.GW_DIST_RESOURCES;
     }
@@ -255,7 +258,7 @@ public class GatewayCmdUtils {
      *
      * @return config folder location
      */
-    public static String getConfigFolderLocation() {
+    private static String getConfigFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
     }
 
@@ -408,7 +411,13 @@ public class GatewayCmdUtils {
         String resourceHashesFileLocation = getResourceHashHolderFileLocation();
         File pathFile = new File(resourceHashesFileLocation);
         if (!pathFile.exists()) {
-            pathFile.createNewFile();
+            boolean created = pathFile.createNewFile();
+            if (created) {
+                logger.debug("Hashed file: {} created. ", resourceHashesFileLocation);
+            } else {
+                logger.error("Failed to create hash file: {} ", resourceHashesFileLocation);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
         }
         //Write Content
         writeContent(content, pathFile);
@@ -463,7 +472,13 @@ public class GatewayCmdUtils {
                 + GatewayCliConstants.GW_DIST_SH);
         try (FileWriter writer = new FileWriter(pathFile)) {
             writer.write(linuxShContent);
-            pathFile.setExecutable(true);
+            boolean success = pathFile.setExecutable(true);
+            if (success) {
+                logger.debug("File: {} set to executable. ", pathFile.getAbsolutePath());
+            } else {
+                logger.error("Failed to set executable file: {} ", pathFile.getAbsolutePath());
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
         }
     }
 
@@ -490,17 +505,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the conf folder in the project root
-     *
-     * @param root project root location
-     * @return path to the conf folder in the project root
-     */
-    public static String getMainConfigDirPath(String root) {
-        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.CONF_DIRECTORY_NAME;
-    }
-
-    /**
      * Returns location of the main configuration file of given project root
      *
      * @return path configuration file
@@ -516,7 +520,7 @@ public class GatewayCmdUtils {
      * @param root project root location
      * @return path to the label conf folder in the project root
      */
-    public static String getLabelConfigDirPath(String root, String label) {
+    private static String getLabelConfigDirPath(String root, String label) {
         return getLabelDirectoryPath(root, label) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
@@ -573,7 +577,7 @@ public class GatewayCmdUtils {
      * @param destination destination location
      * @throws IOException error while copying folder to destination
      */
-    public static void copyFolder(String source, String destination) throws IOException {
+    private static void copyFolder(String source, String destination) throws IOException {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         copyFolder(sourceFolder, destinationFolder);
@@ -603,7 +607,13 @@ public class GatewayCmdUtils {
         if (sourceFolder.isDirectory()) {
             //Verify if destinationFolder is already present; If not then create it
             if (!destinationFolder.exists()) {
-                destinationFolder.mkdir();
+                boolean created = destinationFolder.mkdir();
+                if (created) {
+                    logger.debug("Dir: {} created. ", destinationFolder.getAbsolutePath());
+                } else {
+                    logger.error("Failed to create dir: {} ", destinationFolder.getAbsolutePath());
+                    throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                }
             }
 
             //Get all files from source directory
@@ -649,9 +659,8 @@ public class GatewayCmdUtils {
      * Creates a new folders if not exists
      *
      * @param path folder path
-     * @return File object for the created folder
      */
-    private static File createFoldersIfNotExist(String path) {
+    private static void createFoldersIfNotExist(String path) {
         File folder = new File(path);
         if (!folder.exists() && !folder.isDirectory()) {
             boolean created = folder.mkdirs();
@@ -662,7 +671,6 @@ public class GatewayCmdUtils {
                 throw new CLIRuntimeException("Error occurred while setting up workspace structure");
             }
         }
-        return folder;
     }
 
     /**
@@ -695,10 +703,16 @@ public class GatewayCmdUtils {
         File file = new File(filePath);
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                boolean created = file.createNewFile();
+                if (created) {
+                    logger.debug("File: {} created. ", path);
+                } else {
+                    logger.error("Failed to create file: {} ", path);
+                    throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                }
             } catch (IOException e) {
-                //TODO remove stracktrace and append this to a log
-                e.printStackTrace();
+                logger.error("Failed to create file: {} ", path, e);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
             }
         }
     }
@@ -706,16 +720,22 @@ public class GatewayCmdUtils {
     /**
      * Create initial label configuration
      *
-     * @param root  workspace location
+     * @param workspace  workspace location
      * @param label label name
      * @throws IOException if file create went wrong
      */
-    public static void createLabelConfig(String root, String label) throws IOException {
+    public static void createLabelConfig(String workspace, String label) throws IOException {
         String mainConfig =
-                getLabelConfigDirPath(root, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+                getLabelConfigDirPath(workspace, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
         File file = new File(mainConfig);
         if (!file.exists()) {
-            file.createNewFile();
+            boolean created = file.createNewFile();
+            if (created) {
+                logger.debug("Workspace dir: {} created. ", workspace);
+            } else {
+                logger.error("Failed to create workspace dir: {} ", workspace);
+                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+            }
             //Write Content
             String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
             writeContent(defaultConfig, file);

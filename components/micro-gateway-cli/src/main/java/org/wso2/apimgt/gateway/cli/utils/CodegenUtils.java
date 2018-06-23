@@ -42,7 +42,7 @@ public class CodegenUtils {
      * @param content content of the file
      * @throws IOException when a file operation fails
      */
-    public static void writeFile(Path filePath, String content) throws IOException {
+    private static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(),  GeneratorConstants.UTF_8);

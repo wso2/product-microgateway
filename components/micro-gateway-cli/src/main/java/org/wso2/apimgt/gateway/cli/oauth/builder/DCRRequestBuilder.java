@@ -24,13 +24,11 @@ import org.wso2.apimgt.gateway.cli.model.oauth.DCRRequest;
 
 public class DCRRequestBuilder {
     private DCRRequest dcrRequest;
-    ObjectMapper mapper;
-    ObjectNode request;
+    private ObjectNode request;
 
     public DCRRequestBuilder() {
         this.dcrRequest = new DCRRequest();
-        this.mapper = new ObjectMapper();
-        this.request = mapper.createObjectNode();
+        this.request = new ObjectMapper().createObjectNode();
     }
 
     public DCRRequest build() {
@@ -60,16 +58,7 @@ public class DCRRequestBuilder {
     }
 
     public DCRRequestBuilder setGrantTypes(String[] grantTypes) {
-        String grantTypesStr = "";
-        int grantTypesLength = grantTypes.length;
-        int i = 0;
-        for (String grant : grantTypes) {
-            i++;
-            grantTypesStr += grant;
-            if (grantTypesLength != i) {
-                grantTypesStr += " ";
-            }
-        }
+        String grantTypesStr = String.join(" ", grantTypes);
         this.dcrRequest.setGrantTypes(grantTypes);
         this.request.put(TokenManagementConstants.GRANT_TYPE, grantTypesStr);
         return this;

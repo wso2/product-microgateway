@@ -38,7 +38,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
@@ -57,7 +56,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
         URL url;
         HttpURLConnection urlConn = null;
-        APIListDTO apiListDTO = null;
+        APIListDTO apiListDTO;
         //calling token endpoint
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
@@ -196,7 +195,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
     private EndpointConfig getEndpointConfig(String endpointConfig) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = null;
+        JsonNode rootNode;
         EndpointConfig endpointConf = new EndpointConfig();
         rootNode = mapper.readTree(endpointConfig);
         String endpointType = rootNode.path(RESTServiceConstants.ENDPOINT_TYPE).asText();
@@ -221,9 +220,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             if (RESTServiceConstants.FAILOVER.equalsIgnoreCase(endpointType)) {
                 JsonNode prodFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.PRODUCTION_FAILOVERS);
                 if (prodFailoverEndpointNode != null) {
-                    Iterator<JsonNode> prodFailoverEndointIterator = prodFailoverEndpointNode.iterator();
-                    while (prodFailoverEndointIterator.hasNext()) {
-                        JsonNode node = prodFailoverEndointIterator.next();
+                    for (JsonNode node : prodFailoverEndpointNode) {
                         Endpoint endpoint = new Endpoint();
                         endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                         endpointConf.addProdFailoverEndpoint(endpoint);
@@ -232,9 +229,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
                 JsonNode sandFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.SANDBOX_FAILOVERS);
                 if (sandFailoverEndpointNode != null) {
-                    Iterator<JsonNode> sandboxFailoverEndointIterator = sandFailoverEndpointNode.iterator();
-                    while (sandboxFailoverEndointIterator.hasNext()) {
-                        JsonNode node = sandboxFailoverEndointIterator.next();
+                    for (JsonNode node : sandFailoverEndpointNode) {
                         Endpoint endpoint = new Endpoint();
                         endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                         endpointConf.addSandFailoverEndpoint(endpoint);
@@ -244,9 +239,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         } else if (RESTServiceConstants.LOAD_BALANCE.equalsIgnoreCase(endpointType)) {
             JsonNode prodEndpoints = rootNode.withArray(RESTServiceConstants.PRODUCTION_ENDPOINTS);
             if (prodEndpoints != null) {
-                Iterator<JsonNode> prodEndointIterator = prodEndpoints.iterator();
-                while (prodEndointIterator.hasNext()) {
-                    JsonNode node = prodEndointIterator.next();
+                for (JsonNode node : prodEndpoints) {
                     Endpoint endpoint = new Endpoint();
                     endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                     endpointConf.addProdEndpoint(endpoint);
@@ -255,9 +248,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
             JsonNode sandboxEndpoints = rootNode.withArray(RESTServiceConstants.SANDBOX_ENDPOINTS);
             if (sandboxEndpoints != null) {
-                Iterator<JsonNode> sandboxEndpointIterator = sandboxEndpoints.iterator();
-                while (sandboxEndpointIterator.hasNext()) {
-                    JsonNode node = sandboxEndpointIterator.next();
+                for (JsonNode node : sandboxEndpoints) {
                     Endpoint endpoint = new Endpoint();
                     endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
                     endpointConf.addSandEndpoint(endpoint);
