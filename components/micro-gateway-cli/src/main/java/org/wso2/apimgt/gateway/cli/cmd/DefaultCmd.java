@@ -28,6 +28,7 @@ public class DefaultCmd implements GatewayLauncherCmd {
     @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
     private boolean helpFlag;
 
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 

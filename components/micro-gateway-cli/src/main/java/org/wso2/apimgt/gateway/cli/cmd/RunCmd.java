@@ -23,7 +23,7 @@ import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.PrintStream;
-import java.util.List;
+//import java.util.List;
 
 /**
  * This class represents the "run" command and it holds arguments and flags specified by the user.
@@ -31,6 +31,7 @@ import java.util.List;
 @Parameters(commandNames = "run", commandDescription = "micro gateway run information")
 public class RunCmd implements GatewayLauncherCmd {
     private static PrintStream outStream = System.err;
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
@@ -40,10 +41,10 @@ public class RunCmd implements GatewayLauncherCmd {
     @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
     private boolean helpFlag;
 
-    @Parameter(arity = 1)
-    private List<String> argList;
+//    @Parameter(arity = 1)
+//    private List<String> argList;
 
-    private JCommander parentCmdParser;
+//    private JCommander parentCmdParser;
 
     public void execute() {
         if (helpFlag) {
@@ -54,7 +55,6 @@ public class RunCmd implements GatewayLauncherCmd {
 
         if (StringUtils.isEmpty(label)) {
             outStream.println("Label can't be empty. You need to specify -l <label name>");
-            return;
         }
     }
 
@@ -65,6 +65,6 @@ public class RunCmd implements GatewayLauncherCmd {
 
     @Override
     public void setParentCmdParser(JCommander parentCmdParser) {
-        this.parentCmdParser = parentCmdParser;
+//        this.parentCmdParser = parentCmdParser;
     }
 }

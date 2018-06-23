@@ -39,7 +39,7 @@ public class CLIExecutor {
     private String cliHome;
     private static CLIExecutor instance;
 
-    public void generate(String label) throws Exception {
+    public void generate(String label, String project) throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -52,7 +52,8 @@ public class CLIExecutor {
         String config = new File(
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).getAbsolutePath();
-        String[] args = { "setup", "--label", label, "--path", path.toString(), "--username", "admin", "--password",
+        System.setProperty("user.dir", path.toString());
+        String[] args = { "setup", "--label", label, "--project", project, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config };
@@ -61,16 +62,21 @@ public class CLIExecutor {
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
         homeDirectory = path + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME + File.separator + label;
+                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME + File.separator + project;
 
         String[] cmdArray = new String[] { "bash", balCommand, "build" };
-        String[] args2 = new String[] { "src", "-o", label };
+        String[] args2 = new String[] { "src", "-o", project };
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
         StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), (String msg) -> {
             log.info("ballerina build: " + msg);
         });
+        StreamGobbler streamGobblerE = new StreamGobbler(process.getErrorStream(), (String msg) -> {
+            log.error("ballerina build: " + msg);
+        });
+
         Executors.newSingleThreadExecutor().submit(streamGobbler);
+        Executors.newSingleThreadExecutor().submit(streamGobblerE);
         int exitCode = process.waitFor();
         if (exitCode != 0) {
             throw new RuntimeException("Error occurred when building.");
@@ -103,8 +109,8 @@ public class CLIExecutor {
         this.cliHome = cliHome;
     }
 
-    public String getLabelBalx(String label) {
-        return homeDirectory + File.separator + "target" + File.separator + label + ".balx";
+    public String getLabelBalx(String project) {
+        return homeDirectory + File.separator + "target" + File.separator + project + ".balx";
     }
 }
 

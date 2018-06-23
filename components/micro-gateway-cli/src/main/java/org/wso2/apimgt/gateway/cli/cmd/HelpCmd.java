@@ -34,6 +34,7 @@ public class HelpCmd implements GatewayLauncherCmd {
     @Parameter(description = "Command name")
     private List<String> helpCommands;
 
+    @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 

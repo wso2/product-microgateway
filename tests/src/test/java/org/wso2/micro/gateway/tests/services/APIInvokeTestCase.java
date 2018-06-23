@@ -37,6 +37,7 @@ import java.util.Map;
 public class APIInvokeTestCase extends BaseTestCase {
     private static final Logger log = LoggerFactory.getLogger(APIInvokeTestCase.class);
     private String label = "apimTestLabel";
+    private String project = "apimTestProject";
     private String token, jwtToken;
 
     @BeforeClass
@@ -68,7 +69,7 @@ public class APIInvokeTestCase extends BaseTestCase {
         token = pub.getAndRegisterAccessToken(info);
         jwtToken = getJWT(api, application, "Unlimited");
         //generate apis with CLI and start the micro gateway server
-        super.init(label);
+        super.init(label, project);
     }
 
     @Test(description = "Test API invocation with a oauth token")
