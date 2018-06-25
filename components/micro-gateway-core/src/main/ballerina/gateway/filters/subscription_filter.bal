@@ -58,6 +58,9 @@ public type SubscriptionFilter object {
                                     authenticationContext.apiPublisher = decodedPayload.publisher.toString();
                                     authenticationContext.subscriberTenantDomain = decodedPayload
                                     .subscriberTenantDomain.toString();
+                                    authenticationContext.keyType = decodedPayload.keytype.toString();
+                                    // setting keytype to invocationContext
+                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                                     filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                                     return true;
                                 }

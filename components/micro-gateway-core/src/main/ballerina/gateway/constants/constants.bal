@@ -111,6 +111,7 @@
 @final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
 
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
+@final public string KEY_TYPE_ATTR = "KEY_TYPE";
 @final public string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
 @final public string ACCESS_TOKEN_ATTR = "ACCESS_TOKEN";
 
