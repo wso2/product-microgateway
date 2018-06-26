@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
@@ -176,43 +176,12 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Store workspace location
+     * Returns current user dir
      *
-     * @param workspacePath project workspace location
-     * @throws IOException if file write went wrong
+     * @return current user dir
      */
-    public static void storeWorkspaceLocation(String workspacePath) throws IOException {
-        String tempDirPath = getTempFolderLocation();
-        createFolderIfNotExist(tempDirPath);
-
-        String projectRootHolderFileLocation = getProjectRootHolderFileLocation();
-        File pathFile = new File(projectRootHolderFileLocation);
-        if (!pathFile.exists()) {
-            boolean created = pathFile.createNewFile();
-            if (created) {
-                logger.debug("File: {} created. ", projectRootHolderFileLocation);
-            } else {
-                logger.error("Failed to create file: {} ", projectRootHolderFileLocation);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
-            }
-        }
-        //Write Content
-        writeContent(workspacePath, pathFile);
-    }
-
-    /**
-     * Retrieve stored workspace location
-     *
-     * @return workspace location
-     * @throws IOException if file read went wrong
-     */
-    public static String getStoredWorkspaceLocation() throws IOException {
-        String workspaceLocation = getProjectRootHolderFileLocation();
-        if (new File(workspaceLocation).exists()) {
-            return readFileAsString(workspaceLocation, false);
-        } else {
-            return null;
-        }
+    public static String getUserDir() {
+        return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
     }
 
     /**
@@ -416,7 +385,7 @@ public class GatewayCmdUtils {
                 logger.debug("Hashed file: {} created. ", resourceHashesFileLocation);
             } else {
                 logger.error("Failed to create hash file: {} ", resourceHashesFileLocation);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }
         //Write Content
@@ -477,7 +446,7 @@ public class GatewayCmdUtils {
                 logger.debug("File: {} set to executable. ", pathFile.getAbsolutePath());
             } else {
                 logger.error("Failed to set executable file: {} ", pathFile.getAbsolutePath());
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }
     }
@@ -612,7 +581,7 @@ public class GatewayCmdUtils {
                     logger.debug("Dir: {} created. ", destinationFolder.getAbsolutePath());
                 } else {
                     logger.error("Failed to create dir: {} ", destinationFolder.getAbsolutePath());
-                    throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                    throw new CLIInternalException("Error occurred while setting up workspace structure");
                 }
             }
 
@@ -649,7 +618,7 @@ public class GatewayCmdUtils {
                 logger.debug("Dir: {} created. ", path);
             } else {
                 logger.error("Failed to create dir: {} ", path);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }
         return folder;
@@ -668,7 +637,7 @@ public class GatewayCmdUtils {
                 logger.debug("Dir: {} created. ", path);
             } else {
                 logger.error("Failed to create dir: {} ", path);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }
     }
@@ -708,11 +677,11 @@ public class GatewayCmdUtils {
                     logger.debug("File: {} created. ", path);
                 } else {
                     logger.error("Failed to create file: {} ", path);
-                    throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                    throw new CLIInternalException("Error occurred while setting up workspace structure");
                 }
             } catch (IOException e) {
                 logger.error("Failed to create file: {} ", path, e);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }
     }
@@ -734,7 +703,7 @@ public class GatewayCmdUtils {
                 logger.debug("Workspace dir: {} created. ", workspace);
             } else {
                 logger.error("Failed to create workspace dir: {} ", workspace);
-                throw new CLIRuntimeException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
             //Write Content
             String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);

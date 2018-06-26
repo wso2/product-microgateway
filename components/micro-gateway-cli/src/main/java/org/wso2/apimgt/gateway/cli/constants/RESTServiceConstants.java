@@ -34,6 +34,9 @@ public class RESTServiceConstants {
     public static final String GET = "GET";
     public static final String APIS_GET_URI =
             "apis?query=label:" + GatewayCliConstants.LABEL_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
+    public static final String API_GET_BY_NAME_VERSION_URI =
+            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
+                    + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
     public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v0.13";
     public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v0.13";
     public static final String DCR_RESOURCE_PATH = "/client-registration/v0.13/register";
