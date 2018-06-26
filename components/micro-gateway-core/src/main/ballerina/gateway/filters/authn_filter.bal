@@ -50,6 +50,7 @@ public type AuthnFilter object {
         boolean authenticated;
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
         var (isSecured, authProviders) = getResourceAuthConfig(context);
+        context.attributes[IS_SECURED] = isSecured;
         //APIKeyValidationDto apiKeyValidationInfoDto;
         AuthenticationContext authenticationContext;
         boolean isAuthorized;

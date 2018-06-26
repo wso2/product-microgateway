@@ -43,7 +43,7 @@ public type ThrottleConf {
 public type GlobalThrottleStreamDTO {
     string throttleKey ;
     boolean isThrottled;
-    boolean stopOnQuata;
+    boolean stopOnQuota;
     int expiryTimeStamp;
 };
 

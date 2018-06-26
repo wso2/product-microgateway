@@ -80,6 +80,12 @@
 @final public string MESSAGE_ID = "MESSAGE_ID";
 @Description { value: "Is requested throttld out" }
 @final public string IS_THROTTLE_OUT = "IS_THROTTLE_OUT";
+@Description { value: "Is requested allowed after throttld out" }
+@final public string ALLOWED_ON_QUOTA_REACHED = "ALLOWED_ON_QUOTA_REACHED";
+@Description { value: "Is api secured" }
+@final public string IS_SECURED = "IS_SECURED";
+@Description { value: "Requested throttld out reason" }
+@final public string THROTTLE_OUT_REASON = "THROTTLE_REASON";
 @Description { value: "Default jwt header name" }
 @final public string JWT_HEADER_NAME = "X-JWT-Assertion";
 @Description { value: "Production key type value" }

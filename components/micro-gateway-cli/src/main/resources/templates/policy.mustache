@@ -17,7 +17,7 @@ function {{funcName}}() {
         from eligibilityStream
         throttler:timeBatch({{unitTime}}, 0)
         where isEligible == true
-        select throttleKey, count(messageID) >= {{count}} as isThrottled, {{stopOnQuotaReach}} as stopOnQuata, expiryTimeStamp
+        select throttleKey, count(messageID) >= {{count}} as isThrottled, {{stopOnQuotaReach}} as stopOnQuota, expiryTimeStamp
         group by throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             resultStream.publish(counts);
@@ -25,7 +25,7 @@ function {{funcName}}() {
 
         from resultStream
         throttler:emitOnStateChange(throttleKey, isThrottled)
-        select throttleKey, isThrottled, stopOnQuata, expiryTimeStamp
+        select throttleKey, isThrottled, stopOnQuota, expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             gateway:globalThrottleStream.publish(counts);
         }
