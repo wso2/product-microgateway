@@ -6,13 +6,22 @@ import ballerina/swagger;
 
 import wso2/gateway;
 
-endpoint http:Client {{qualifiedServiceName}}_EP {
+endpoint http:Client {{qualifiedServiceName}}_PROD_EP {
     url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }
     {{else}},
     cache: { isShared: true }
     {{/equals}}
 };
+
+endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
+    url: "{{endpointConfig.sandEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
+    cache: { enabled: false }
+    {{else}},
+        cache: { isShared: true }
+    {{/equals}}
+};
+
 
 {{>docker}}
 {{>kubernetes}}
@@ -86,8 +95,12 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
     {{else}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
-    var clientResponse = {{qualifiedServiceName}}_EP->forward(urlPostfix, req);
-
+        http:Response|error clientResponse;
+        if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+            clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
+        } else {
+            clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
+        }
         match clientResponse {
 
             http:Response res => {

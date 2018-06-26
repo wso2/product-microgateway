@@ -85,6 +85,7 @@ public class MockAPIPublisher {
 
         JSONObject endpoint = new JSONObject(endpointJson);
         endpoint.getJSONObject("production_endpoints").put("url", api.getEndpoint());
+        endpoint.getJSONObject("sandbox_endpoints").put("url", api.getEndpoint());
 
         JSONObject apiJsonObj = new JSONObject(apiJson);
         apiJsonObj.put("endpointConfig", endpoint.toString());
