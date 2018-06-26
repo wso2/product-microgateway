@@ -59,7 +59,10 @@ public class GatewayCliConstants {
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";
     public static final String LABEL_PLACEHOLDER = "${label}";
+    public static final String API_NAME_PLACEHOLDER = "${name}";
+    public static final String VERSION_PLACEHOLDER = "${version}";
     public static final String CHARSET_UTF8 = "UTF-8";
+    public static final String SYS_PROP_USER_DIR = "user.dir";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");

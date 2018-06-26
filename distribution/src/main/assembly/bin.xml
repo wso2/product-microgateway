@@ -27,45 +27,45 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/ballerina/ballerina-platform-${ballerina.platform.version}</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/platform</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/runtime</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/templates</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/templates</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/resources/templates</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/cli-conf</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/conf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/filters</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/resources/filters</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/lib
             </directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/runtime/lib</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/lib
             </directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/platform/lib</outputDirectory>
         </fileSet>
 
         <!--create an empty logs folder-->
         <fileSet>
             <directory>${basedir}/resources/logs</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/logs</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/logs</outputDirectory>
             <excludes>
                 <exclude>*/**</exclude>
             </excludes>
@@ -75,35 +75,35 @@
     <files>
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/platform/bre/security</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/runtime/bre/security</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/bin</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/bin</outputDirectory>
         </file>
     </files>
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/platform/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/runtime/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/lib</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/lib/platform/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>

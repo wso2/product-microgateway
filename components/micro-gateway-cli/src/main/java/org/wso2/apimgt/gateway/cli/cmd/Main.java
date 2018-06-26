@@ -22,6 +22,7 @@ import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.ParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
@@ -48,9 +49,15 @@ public class Main {
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
+            logger.error("Error occurred while executing command", e);
+            Runtime.getRuntime().exit(1);
+        } catch (CLIInternalException e) {
+            outStream.println(e.getMessage());
+            logger.error("Internal error occurred when setup.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
-            outStream.println(e.getMessage());
+            outStream.println(e.getTerminalMsg());
+            logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (Exception e) {
             //Use generic exception to catch all the runtime exception

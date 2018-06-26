@@ -20,29 +20,26 @@ package org.wso2.apimgt.gateway.cli.exception;
 /**
  * Exception class to throw when runtime exception happen and to exit the system
  */
-public class CLIRuntimeException extends RuntimeException {
+public class CLIInternalException extends RuntimeException {
     private final static int DEFAULT_EXIT_CODE = 1;
     private int exitCode;
-    private String terminalMsg;
 
-    public CLIRuntimeException(String message) {
-        this(message, message, DEFAULT_EXIT_CODE);
+    public CLIInternalException() {
+        super();
     }
 
-    public CLIRuntimeException(String message, int exitCode) {
-        this (message, message, exitCode);
+    public CLIInternalException(String message) {
+        this(message, DEFAULT_EXIT_CODE);
     }
 
-    public CLIRuntimeException(String terminalMsg, String internalMsg, int exitCode) {
-        super(internalMsg);
+    public CLIInternalException(String message, Throwable e) {
+        super(message, e);
+        this.exitCode = DEFAULT_EXIT_CODE;
+    }
+
+    public CLIInternalException(String message, int exitCode) {
+        super(message);
         this.exitCode = exitCode;
-        this.terminalMsg = terminalMsg;
-    }
-
-    public CLIRuntimeException(String terminalMsg, String internalMsg, int exitCode, Throwable e) {
-        super(internalMsg, e);
-        this.exitCode = exitCode;
-        this.terminalMsg = terminalMsg;
     }
 
     public int getExitCode() {
@@ -51,13 +48,5 @@ public class CLIRuntimeException extends RuntimeException {
 
     public void setExitCode(int exitCode) {
         this.exitCode = exitCode;
-    }
-
-    public String getTerminalMsg() {
-        return terminalMsg;
-    }
-
-    public void setTerminalMsg(String terminalMsg) {
-        this.terminalMsg = terminalMsg;
     }
 }

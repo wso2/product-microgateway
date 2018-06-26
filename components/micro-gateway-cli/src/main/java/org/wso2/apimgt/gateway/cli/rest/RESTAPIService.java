@@ -35,6 +35,16 @@ public interface RESTAPIService {
     List<ExtendedAPI> getAPIs(String labelName, String accessToken);
 
     /**
+     * Gets the API specified by name and version
+     * 
+     * @param apiName Name of the API
+     * @param version Version of the API
+     * @param accessToken access token
+     * @return the API specified by name and version by calling the Publisher REST API
+     */
+    ExtendedAPI getAPI(String apiName, String version, String accessToken);
+
+    /**
      * Get list of application
      *
      * @param accessToken access token
