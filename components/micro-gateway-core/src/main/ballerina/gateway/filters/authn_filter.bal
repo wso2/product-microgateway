@@ -126,6 +126,9 @@ public type AuthnFilter object {
                                     }
                                     checkAndRemoveAuthHeaders(request, authHeaderName);
                                     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+
+                                    // setting keytype to invocationContext
+                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                                     runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
                                     authContext.scheme = AUTH_SCHEME_OAUTH2;
                                     authContext.authToken = token;
@@ -165,6 +168,8 @@ public type AuthnFilter object {
             authenticationContext.username = END_USER_ANONYMOUS;
             authenticationContext.applicationId = clientIp;
             authenticationContext.keyType = PRODUCTION_KEY_TYPE;
+            // setting keytype to invocationContext
+            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             return true;
         }
