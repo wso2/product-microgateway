@@ -23,7 +23,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.IOException;
@@ -54,11 +54,11 @@ public class BuildCmd implements GatewayLauncherCmd {
         }
 
         try {
-            String projectRoot = GatewayCmdUtils.getStoredWorkspaceLocation();
+            String projectRoot = GatewayCmdUtils.getUserDir();
             GatewayCmdUtils.createLabelGWDistribution(projectRoot, projectName);
         } catch (IOException e) {
             logger.error("Error while creating micro gateway distribution for project {}.", projectName, e);
-            throw new CLIRuntimeException("Error while creating micro gateway distribution for project");
+            throw new CLIInternalException("Error while creating micro gateway distribution for project");
         }
     }
 

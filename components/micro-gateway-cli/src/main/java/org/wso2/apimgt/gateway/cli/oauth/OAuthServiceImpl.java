@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
@@ -67,11 +67,11 @@ public class OAuthServiceImpl implements OAuthService {
                 return rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
             } else {
                 logger.error("Error occurred while getting token. Status code: {} ", responseCode);
-                throw new CLIRuntimeException();
+                throw new CLIInternalException();
             }
         } catch (IOException e) {
             logger.error("Error occurred while communicate with token endpoint {}", tokenEndpoint, e);
-            throw new CLIRuntimeException();
+            throw new CLIInternalException();
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -115,11 +115,11 @@ public class OAuthServiceImpl implements OAuthService {
                 return clientInfo;
             } else { //If DCR call fails
                 logger.error("Error occurred while creating oAuth application. Status code: {} ", responseCode);
-                throw new CLIRuntimeException("Error occurred while creating oAuth application");
+                throw new CLIInternalException("Error occurred while creating oAuth application");
             }
         } catch (IOException e) {
             logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint, e);
-            throw new CLIRuntimeException("Error occurred while communicate with DCR endpoint");
+            throw new CLIInternalException("Error occurred while communicate with DCR endpoint");
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

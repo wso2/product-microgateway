@@ -19,8 +19,12 @@ package org.wso2.apimgt.gateway.cli.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
@@ -41,6 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
+    private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
+    
     private String publisherEp;
     private String adminEp;
 
@@ -53,7 +59,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      * @see RESTAPIService#getAPIs(String, String)
      */
     public List<ExtendedAPI> getAPIs(String labelName, String accessToken) {
-
+        logger.debug("Retrieving APIs with label {}", labelName);
         URL url;
         HttpURLConnection urlConn = null;
         APIListDTO apiListDTO;
@@ -63,6 +69,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             String urlStr = publisherEp + RESTServiceConstants.APIS_GET_URI
                     .replace(GatewayCliConstants.LABEL_PLACEHOLDER,
                             URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
+            logger.debug("GET APIs URL: {}", urlStr);
             url = new URL(urlStr);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -70,26 +77,15 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
                     RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
+            logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                logger.debug("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
                 for (ExtendedAPI api : apiListDTO.getList()) {
-                    String endpointConfig = api.getEndpointConfig();
-                    api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
-                    // set default values from config if per api cors is not enabled
-                    Config config = GatewayCmdUtils.getConfig();
-                    if (config == null) {
-                        if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
-                            api.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-                        }
-                    } else {
-                        if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
-                                .getCorsConfigurationEnabled()) {
-                            api.setCorsConfiguration(config.getCorsConfiguration());
-                        }
-                    }
+                    setAdditionalConfigs(api);
                 }
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
@@ -102,7 +98,89 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 urlConn.disconnect();
             }
         }
+        logger.debug("Retrieving APIs with label {} was successful.", labelName);
         return apiListDTO.getList();
+    }
+
+
+    /**
+     * @see RESTAPIService#getAPI(String, String, String)
+     */
+    public ExtendedAPI getAPI(String apiName, String version, String accessToken) {
+        logger.debug("Retrieving API with name {}, version {}", apiName, version);
+        URL url;
+        HttpURLConnection urlConn = null;
+        ExtendedAPI matchedAPI = null;
+        //calling token endpoint
+        try {
+            publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
+            String urlStr = publisherEp + RESTServiceConstants.API_GET_BY_NAME_VERSION_URI
+                    .replace(GatewayCliConstants.API_NAME_PLACEHOLDER,
+                            URLEncoder.encode(apiName, GatewayCliConstants.CHARSET_UTF8))
+                    .replace(GatewayCliConstants.VERSION_PLACEHOLDER,
+                            URLEncoder.encode(version, GatewayCliConstants.CHARSET_UTF8));
+            logger.debug("GET API URL: {}", urlStr);
+            url = new URL(urlStr);
+            
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
+            int responseCode = urlConn.getResponseCode();
+            logger.debug("Response code: {}", responseCode);
+            if (responseCode == 200) {
+                ObjectMapper mapper = new ObjectMapper();
+                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                logger.debug("Response body: {}", responseStr);
+                //convert json string to object
+                APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
+                if (apiList != null) {
+                    for (ExtendedAPI api: apiList.getList()) {
+                        if (apiName.equals(api.getName()) && version.equals(api.getVersion())) {
+                            matchedAPI = api;
+                            break;
+                        }
+                    }
+                    if (matchedAPI == null) {
+                        throw new CLIRuntimeException(
+                                "No Published APIs matched for name:" + apiName + ", version:" + version);
+                    }
+                    //set additional configs such as CORS configs from the toolkit configuration
+                    setAdditionalConfigs(matchedAPI);
+                } else {
+                    throw new CLIInternalException("No proper response received for get API request.");
+                }
+            } else {
+                throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
+            }
+        } catch (Exception e) {
+            String msg = "Error while getting the API with name:" + apiName + ", version: " + version;
+            throw new CLIInternalException(msg, e);
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
+        logger.debug("Retrieving API with name {}, version {} was successful.", apiName, version);
+        return matchedAPI;
+    }
+
+    private void setAdditionalConfigs(ExtendedAPI api) throws IOException {
+        String endpointConfig = api.getEndpointConfig();
+        api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
+        // set default values from config if per api cors is not enabled
+        Config config = GatewayCmdUtils.getConfig();
+        if (config == null) {
+            if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
+                api.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+            }
+        } else {
+            if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
+                    .getCorsConfigurationEnabled()) {
+                api.setCorsConfiguration(config.getCorsConfiguration());
+            }
+        }
     }
 
     /**

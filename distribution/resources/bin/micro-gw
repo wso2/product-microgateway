@@ -67,12 +67,7 @@ echo MICROGW_TOOLKIT_HOME environment variable is set to $MICROGW_TOOLKIT_HOME
 export BALLERINA_HOME=$BALLERINA_HOME
 export PATH=$BALLERINA_HOME/bin:$PATH
 
-#reading the micro gateway source root location
-file="$MICROGW_TOOLKIT_HOME/temp/workspace.txt"
-
-while IFS='' read -r line || [[ -n "$line" ]]; do
-    	MICRO_GW_PROJECT_DIR="$line"
-done < "$file"
+MICRO_GW_PROJECT_DIR=$(pwd)
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
@@ -140,7 +135,7 @@ do
           CMD_COMMAND=$c
     elif [ "$c" = "--name" ] || [ "$c" = "-n" ]; then
           CMD_PRO_NAME=$c
-    elif ([ "$CMD_PRO_NAME" = "--project" ] || [ "$CMD_PRO_NAME" = "-n" ]) && [ -z "$CMD_PRO_NAME_VAL" ]; then
+    elif ([ "$CMD_PRO_NAME" = "--name" ] || [ "$CMD_PRO_NAME" = "-n" ]) && [ -z "$CMD_PRO_NAME_VAL" ]; then
           CMD_PRO_NAME_VAL=$c
     fi
 done

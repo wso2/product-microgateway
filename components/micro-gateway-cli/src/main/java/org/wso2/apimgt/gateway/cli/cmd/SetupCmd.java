@@ -31,7 +31,7 @@ import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
@@ -78,7 +78,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-p", "--password" }, hidden = true)
     private String password;
 
-    @Parameter(names = { "-l", "--label" }, hidden = true, required = true)
+    @Parameter(names = { "-l", "--label" }, hidden = true)
     private String label;
 
     @Parameter(names = { "-s", "--server-url" }, hidden = true)
@@ -96,6 +96,12 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-c", "--config" }, hidden = true)
     private String configPath;
 
+    @Parameter(names = { "-a", "--api-name" }, hidden = true)
+    private String apiName;
+
+    @Parameter(names = { "-v", "--version" }, hidden = true)
+    private String version;
+
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -103,11 +109,10 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String clientSecret;
 
     public void execute() {
-        //initialize CLI with the provided path. First time the cli runs it is a must to provide this. Once it is
-        // provided, it is stored in <CLI_HOME>/temp/workspace.txt. In next runs, no need to provide the path and
-        // path is taken from above file.
         String clientID;
-        String workspace = System.getProperty("user.dir");
+        String workspace = GatewayCmdUtils.getUserDir();
+
+        validateAPIGetRequestParams(label, apiName, version);
 
         if (StringUtils.isEmpty(configPath)) {
             configPath = GatewayCmdUtils.getMainConfigLocation();
@@ -208,7 +213,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
             logger.error("Provided trust store location {} not exist.", trustStoreLocation);
-            throw new CLIRuntimeException("Provided trust store not exist.");
+            throw new CLIInternalException("Provided trust store not exist.");
         }
 
         //set the trustStore
@@ -238,8 +243,14 @@ public class SetupCmd implements GatewayLauncherCmd {
         String accessToken = manager
                 .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret);
 
+        List<ExtendedAPI> apis = new ArrayList<>();
         RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint);
-        List<ExtendedAPI> apis = service.getAPIs(label, accessToken);
+        if (label != null) {
+            apis = service.getAPIs(label, accessToken);
+        } else {
+            ExtendedAPI api = service.getAPI(apiName, version, accessToken);
+            apis.add(api);
+        }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
@@ -257,12 +268,12 @@ public class SetupCmd implements GatewayLauncherCmd {
                 changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
             } catch (HashingException e) {
                 logger.error("Error while checking for changes of resources. Skipping no-change detection..");
-                throw new CLIRuntimeException(
+                throw new CLIInternalException(
                         "Error while checking for changes of resources. Skipping no-change detection..");
             }
         } catch (IOException | BallerinaServiceGenException e) {
             logger.error("Error while generating ballerina source.");
-            throw new CLIRuntimeException("Error while generating ballerina source.");
+            throw new CLIInternalException("Error while generating ballerina source.");
         }
 
         //if all the operations are success, write new config to file
@@ -292,8 +303,31 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         //There should not be any logic after this system exit
         if (!changesDetected) {
-            outStream.println("No changes from server.");
+            outStream.println(
+                    "No changes received from the server. If you already have a built distribution, it can be reused.");
             Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
+        }
+    }
+
+    /**
+     * Validates label, API name and version parameters in for below conditions.
+     * 1. Either label should be provided or both API name and version should be provided.
+     * 2. Cannot provide all params; i.e. label, API name and version at the same time.
+     *
+     * @param label   Label name
+     * @param apiName API name
+     * @param version API version
+     */
+    private void validateAPIGetRequestParams(String label, String apiName, String version) {
+        if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
+                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) || 
+                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) || 
+                (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
+            throw GatewayCmdUtils.createUsageException(
+                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) " 
+                            + "should be provided." 
+                            + "\n\nEx:\tmicro-gw setup -l accounts -n accounts-project" 
+                            + "\n\tmicro-gw setup -a Pizzashack -v 1.0.0 -n pizzashack-project");
         }
     }
 
@@ -324,13 +358,12 @@ public class SetupCmd implements GatewayLauncherCmd {
             tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
         } catch (MalformedURLException e) {
             logger.error("Malformed URL is provided {}", host);
-            throw new CLIRuntimeException("Error occurred while setting up url configurations.");
+            throw new CLIInternalException("Error occurred while setting up url configurations.");
         }
     }
 
     private static void init(String workspace, String projectName, String configPath) {
         try {
-            GatewayCmdUtils.storeWorkspaceLocation(workspace);
             GatewayCmdUtils.createWorkspaceStructure(workspace);
             GatewayCmdUtils.createProjectStructure(workspace, projectName);
             GatewayCmdUtils.createLabelConfig(workspace, projectName);
@@ -341,7 +374,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                 GatewayCmdUtils.setConfig(config);
             } else {
                 logger.error("Config: {} Not found.", configPath);
-                throw new CLIRuntimeException("Error occurred while loading configurations.");
+                throw new CLIInternalException("Error occurred while loading configurations.");
             }
 
             String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(workspace, projectName);
@@ -353,10 +386,10 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
             logger.error("Error while parsing the config {}", configPath, e);
-            throw new CLIRuntimeException("Error occurred while loading configurations.");
+            throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
             logger.error("Error while generating label configs", e);
-            throw new CLIRuntimeException("Error occurred while loading configurations.");
+            throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }
 }
