@@ -24,6 +24,7 @@ public class KeyValidationInfo {
     private String apiName;
     private String apiPublisher;
     private boolean authorized;
+    private String keyType;
 
     public String getApiName() {
         return apiName;
@@ -47,5 +48,17 @@ public class KeyValidationInfo {
 
     public void setAuthorized(boolean authorized) {
         this.authorized = authorized;
+    }
+
+    public boolean isAuthorized() {
+        return authorized;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
     }
 }
