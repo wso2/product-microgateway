@@ -364,7 +364,6 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     private static void init(String workspace, String projectName, String configPath) {
         try {
-            GatewayCmdUtils.createWorkspaceStructure(workspace);
             GatewayCmdUtils.createProjectStructure(workspace, projectName);
             GatewayCmdUtils.createLabelConfig(workspace, projectName);
 

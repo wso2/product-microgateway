@@ -232,15 +232,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Get workspace root holder file path
-     *
-     * @return workspace root holder file path
-     */
-    private static String getProjectRootHolderFileLocation() {
-        return getTempFolderLocation() + File.separator + GatewayCliConstants.PROJECT_ROOT_HOLDER_FILE_NAME;
-    }
-
-    /**
      * Get temp folder location
      *
      * @return temp folder location
@@ -250,27 +241,13 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create the main structure of the project for all the labels
-     *
-     * @param workspace location to the workspace
-     */
-    public static void createWorkspaceStructure(String workspace) {
-        String mainResourceDirPath =
-                workspace + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                        + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
-        createFoldersIfNotExist(mainResourceDirPath);
-    }
-
-    /**
      * Create a project structure for a particular label.
      *
      * @param workspace   project root location
      * @param projectName name of the project
      */
     public static void createProjectStructure(String workspace, String projectName) {
-        String mainProjectDir = workspace + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME;
-        File projectDir = createFolderIfNotExist(mainProjectDir + File.separator + projectName);
+        File projectDir = createFolderIfNotExist(workspace + File.separator + projectName);
 
         String srcDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
         createFolderIfNotExist(srcDirPath);
@@ -511,8 +488,7 @@ public class GatewayCmdUtils {
      * @return path to the given label project in the project root path
      */
     public static String getLabelDirectoryPath(String root, String labelName) {
-        return root + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME + File.separator + labelName;
+        return root + File.separator + labelName;
     }
 
     /**

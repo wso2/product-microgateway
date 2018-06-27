@@ -62,8 +62,7 @@ public class CLIExecutor {
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + GatewayCliConstants.MAIN_DIRECTORY_NAME + File.separator
-                + GatewayCliConstants.PROJECTS_DIRECTORY_NAME + File.separator + project;
+        homeDirectory = path + File.separator + project;
 
         String[] cmdArray = new String[] { "bash", balCommand, "build" };
         String[] args2 = new String[] { "src", "-o", project };
