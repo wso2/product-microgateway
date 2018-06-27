@@ -18,32 +18,29 @@
 package org.wso2.micro.gateway.tests.services;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ThrottlingTestCase extends BaseTestCase {
-    private static final Logger log = LoggerFactory.getLogger(ThrottlingTestCase.class);
-    private String label = "apimTestLabel";
-    private String project = "apimTestProject";
-    private String token, jwtToken, jwtToken2;
+    private String jwtToken, jwtToken2;
 
     @BeforeClass
     public void start() throws Exception {
+        String label = "apimTestLabel";
+        String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -77,33 +74,25 @@ public class ThrottlingTestCase extends BaseTestCase {
         application2.setId((int) (Math.random() * 1000));
 
         //Register a token with key validation info
-        jwtToken = getJWT(api, application, subscriptionPolicy.getPolicyName());
-        jwtToken2 = getJWT(api, application2, "Unlimited");
+        jwtToken = getJWT(api, application, subscriptionPolicy.getPolicyName(), TestConstant.KEY_TYPE_PRODUCTION);
+        jwtToken2 = getJWT(api, application2, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION);
         //generate apis with CLI and start the micro gateway server
         super.init(label, project);
     }
 
     @Test(description = "Test subscription throttling with a JWT token")
     public void testSubscriptionThrottlingWithJWT() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        int retry = 15;
-        int responseCode = -1;
-        while (retry > 0)
-            for (int i = 0; i < 15; i++) {
-                org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                        .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
-                Assert.assertNotNull(response);
-                responseCode = response.getResponseCode();
-                retry--;
-            }
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
+        invokeAndAssert(jwtToken);
     }
 
     @Test(description = "Test application throttling with a JWT token")
     public void testApplicationThrottlingWithJWT() throws Exception {
+        invokeAndAssert(jwtToken2);
+    }
+
+    private void invokeAndAssert(String token) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken2);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         int retry = 15;
         int responseCode = -1;
         while (retry > 0)

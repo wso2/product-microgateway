@@ -32,66 +32,78 @@ public type ThrottleFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
         boolean requestFilterResult;
-        boolean resourceLevelThrottled;
-        boolean apiLevelThrottled;
-        string resourceLevelThrottleKey;
-
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;
-        TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
-                context.resourceName));
-        string resourceLevelTier = tier.policy;
-        string apiLevelTier;
         //Throttled decisions
         boolean isThrottled = false;
-        boolean isResourceLevelThrottled = false;
-        boolean apiLevelThrottledTriggered = false;
-        boolean stopOnQuotaReach = true;
         string apiContext = getContext(context);
         string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
-        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-            AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
+        boolean filterFailed =check <boolean>context.attributes[FILTER_FAILED];
+        boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+        AuthenticationContext keyvalidationResult;
+        if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+            keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
             requestFilterResult = true;
-            boolean stopOnQuata;
-            (isThrottled, stopOnQuata) = isSubscriptionLevelThrottled(context, keyvalidationResult);
+            boolean stopOnQuota;
+            (isThrottled, stopOnQuota) = isSubscriptionLevelThrottled(context, keyvalidationResult);
             if (isThrottled) {
-                if (stopOnQuata) {
-                    publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                        THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
-                    context.attributes[IS_THROTTLE_OUT] = false;
+                if (stopOnQuota) {
+                    context.attributes[IS_THROTTLE_OUT] = true;
+                    context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
+                    context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                     sendErrorResponse(listener, request, context);
-                    requestFilterResult = false;
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[IS_THROTTLE_OUT] = true;
+                    context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
                 }
             }
-            if (isApplicationLevelThrottled(keyvalidationResult)){
+            if (isApplicationLevelThrottled(keyvalidationResult)) {
+                context.attributes[IS_THROTTLE_OUT] = true;
+                context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
                     THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(listener, request, context);
-                publishThrottleAnalyticsEvent(request, context, keyvalidationResult,
-                    THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
-                requestFilterResult = false;
                 return false;
             }
-
-            //Publish throttle event to internal policies
-            RequestStreamDTO throttleEvent = generateThrottleEvent(request, context,
-                keyvalidationResult);
-            publishNonThrottleEvent(throttleEvent);
+        } else if (!isSecured) {
+            // setting keytype to invocationContext
+            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
+            if (isUnauthenticateLevelThrottled(context)) {
+                context.attributes[IS_THROTTLE_OUT] = true;
+                context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
+                setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                sendErrorResponse(listener, request, context);
+                return false;
+            }
+            // not secured, no need to authenticate
+            string clientIp = getClientIp(request);
+            keyvalidationResult.authenticated = true;
+            keyvalidationResult.tier = UNAUTHENTICATED_TIER;
+            keyvalidationResult.stopOnQuotaReach = true;
+            keyvalidationResult.apiKey = clientIp ;
+            keyvalidationResult.username = END_USER_ANONYMOUS;
+            keyvalidationResult.applicationId = clientIp;
+            keyvalidationResult.keyType = PRODUCTION_KEY_TYPE;
+            // setting keytype to invocationContext
+            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
         } else {
-            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, APPLICATION_THROTTLE_OUT_ERROR_CODE,
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                 INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
             sendErrorResponse(listener, request, context);
-            requestFilterResult = false;
+            return false;
         }
+
+        //Publish throttle event to internal policies
+        RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
+        publishNonThrottleEvent(throttleEvent);
         return requestFilterResult;
     }
 
@@ -109,34 +121,36 @@ function setThrottleErrorMessageToContext(http:FilterContext context, int status
     context.attributes[ERROR_DESCRIPTION] = errorDescription;
 }
 
-function isApiLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
-    if (keyValidationDto.apiTier != "" && keyValidationDto.apiTier != UNLIMITED_TIER){
-    }
-    return false;
-}
-
-
-function isHardlimitThrottled(string context, string apiVersion) returns (boolean) {
-
-    return false;
-}
-
-
 function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns (
             boolean, boolean) {
-    string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
-        (context) + ":" + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
-    ;
+    if(keyValidationDto.tier == UNLIMITED_TIER) {
+        return (false, false);
+    }
+    string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext(context) + ":"
+    + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
+    if(keyValidationDto.applicationTier == UNLIMITED_TIER) {
+        return false;
+    }
     string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     boolean throttled;
-    boolean stopOnQuata;
-    (throttled, stopOnQuata) = isRequestThrottled(applicationLevelThrottleKey);
+    boolean stopOnQuota;
+    (throttled, stopOnQuota) = isRequestThrottled(applicationLevelThrottleKey);
     return throttled;
 }
+
+function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean) {
+    string throttleKey = getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
+                                                         reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+    boolean throttled;
+    boolean stopOnQuota;
+    (throttled, stopOnQuota) = isRequestThrottled(throttleKey);
+    return throttled;
+}
+
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
              returns (
                      RequestStreamDTO) {
@@ -168,24 +182,6 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     if(remoteAddr != "") {
         properties.ip = ipToLong(remoteAddr);
     }
-    if (getGatewayConfInstance().getThrottleConf().enabledHeaderConditions){
-        string[] headerNames = req.getHeaderNames();
-        foreach headerName in headerNames {
-            string headerValue = untaint req.getHeader(headerName);
-            properties[headerName] = headerValue;
-        }
-    }
-    if (getGatewayConfInstance().getThrottleConf().enabledQueryParamConditions){
-        foreach k, v in req.getQueryParams() {
-            properties[k] = v;
-        }
-    }
-    if (getGatewayConfInstance().getThrottleConf().enabledJWTClaimConditions){
-        foreach k, v in runtime:getInvocationContext().userPrincipal.claims {
-            properties[k] = <string>v;
-        }
-    }
-
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
 }
@@ -225,40 +221,4 @@ function shiftLeft(int a, int b) returns (int) {
         i = i - 1;
     }
     return result;
-}
-
-function getMessageSize() returns (int) {
-    return 0;
-}
-
-function publishThrottleAnalyticsEvent(http:Request req, http:FilterContext context, AuthenticationContext authConext,
-    string reason) {
-    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(req, context, authConext, reason);
-    //todo: publish eventDto to a stream
-}
-
-function populateThrottleAnalyticdDTO(http:Request req, http:FilterContext context, AuthenticationContext authConext,
-    string reason) returns (ThrottleAnalyticsEventDTO) {
-    ThrottleAnalyticsEventDTO eventDto;
-    string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
-    time:Time time = time:currentTime();
-    int currentTimeMills = time.time;
-
-    json metaInfo = {};
-    metaInfo.keyType = authConext.keyType;
-    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
-    eventDto.clientType = metaInfo.toString();
-    eventDto.accessToken = "-";
-    eventDto.userId = authConext.username;
-    eventDto.tenantDomain = getTenantDomain(context);
-    eventDto.api = getApiName(context);
-    eventDto.api_version = apiVersion;
-    eventDto.context = getContext(context);
-    eventDto.apiPublisher = authConext.apiPublisher;
-    eventDto.throttledTime = currentTimeMills;
-    eventDto.applicationName = authConext.applicationName;
-    eventDto.applicationId = authConext.applicationId;
-    eventDto.subscriber = authConext.subscriber;
-    eventDto.throttledOutReason = reason;
-    return eventDto;
 }

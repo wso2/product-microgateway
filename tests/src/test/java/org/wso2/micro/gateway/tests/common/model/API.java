@@ -24,7 +24,8 @@ public class API {
     private String name;
     private String version;
     private String context;
-    private String endpoint;
+    private String prodEndpoint;
+    private String sandEndpoint;
     private String provider;
     private String[] tiers;
     private String swagger;
@@ -53,12 +54,20 @@ public class API {
         this.context = context;
     }
 
-    public String getEndpoint() {
-        return endpoint;
+    public String getProdEndpoint() {
+        return prodEndpoint;
     }
 
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
+    public void setProdEndpoint(String prodEndpoint) {
+        this.prodEndpoint = prodEndpoint;
+    }
+
+    public String getSandEndpoint() {
+        return sandEndpoint;
+    }
+
+    public void setSandEndpoint(String sandEndpoint) {
+        this.sandEndpoint = sandEndpoint;
     }
 
     public String getProvider() {
@@ -83,5 +92,10 @@ public class API {
 
     public void setSwagger(String swagger) {
         this.swagger = swagger;
+    }
+
+    public void setEndpoint(String endpoint) {
+        setProdEndpoint(endpoint);
+        setSandEndpoint(endpoint);
     }
 }

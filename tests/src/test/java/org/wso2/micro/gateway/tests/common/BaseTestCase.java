@@ -42,10 +42,11 @@ import java.util.UUID;
  */
 public class BaseTestCase {
     protected ServerInstance microGWServer;
-    protected CLIExecutor cliExecutor;
     protected MockHttpServer mockHttpServer;
 
-    public void init(String label, String project) throws Exception {
+    protected void init(String label, String project) throws Exception {
+        CLIExecutor cliExecutor;
+
         microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
         String cliHome = microGWServer.getServerHome();
 
@@ -68,13 +69,13 @@ public class BaseTestCase {
         MockAPIPublisher.getInstance().clear();
     }
 
-    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier) throws Exception {
+    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType) throws Exception {
         return getJWT(api.getName(), "/" + api.getContext() + "/" + api.getVersion(), api.getVersion(), tier,
-                applicationDTO.getName(), applicationDTO.getTier());
+                applicationDTO.getName(), applicationDTO.getTier(), keyType);
     }
 
-    protected String getJWT(String apiName, String context, String version, String subTier, String appName,
-            String appTier) throws Exception {
+    private String getJWT(String apiName, String context, String version, String subTier, String appName,
+            String appTier, String keyType) throws Exception {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(10);
         applicationDTO.setName(appName);
@@ -94,7 +95,7 @@ public class BaseTestCase {
         jwtTokenInfo.put("application", new JSONObject(applicationDTO));
         jwtTokenInfo.put("scope", "am_application_scope default");
         jwtTokenInfo.put("iss", "https://localhost:8244/token");
-        jwtTokenInfo.put("keytype", "PRODUCTION");
+        jwtTokenInfo.put("keytype", keyType);
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
         jwtTokenInfo.put("exp", System.currentTimeMillis() + 3600 * 1000);
         jwtTokenInfo.put("iat", System.currentTimeMillis());
@@ -130,8 +131,6 @@ public class BaseTestCase {
         //sign the assertion and return the signature
         byte[] signedAssertion = signature.sign();
         String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
-        String jwt = base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
-
-        return jwt;
+        return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
     }
 }

@@ -84,8 +84,8 @@ public class MockAPIPublisher {
                 .toString(new FileInputStream(getClass().getClassLoader().getResource("endpoint.json").getPath()));
 
         JSONObject endpoint = new JSONObject(endpointJson);
-        endpoint.getJSONObject("production_endpoints").put("url", api.getEndpoint());
-        endpoint.getJSONObject("sandbox_endpoints").put("url", api.getEndpoint());
+        endpoint.getJSONObject("production_endpoints").put("url", api.getProdEndpoint());
+        endpoint.getJSONObject("sandbox_endpoints").put("url", api.getSandEndpoint());
 
         JSONObject apiJsonObj = new JSONObject(apiJson);
         apiJsonObj.put("endpointConfig", endpoint.toString());
@@ -135,6 +135,7 @@ public class MockAPIPublisher {
             String xmlResponse = IOUtils.toString(new FileInputStream(
                     getClass().getClassLoader().getResource("key-validation-response.xml").getPath()));
             xmlResponse = xmlResponse.replace("$APINAME", info.getApiName());
+            xmlResponse = xmlResponse.replace("$KEY_TYPE", info.getKeyType());
             return xmlResponse;
         } catch (IOException e) {
             log.error("Error occurred when generating response", e);

@@ -57,6 +57,8 @@ public class MockHttpServer extends Thread {
     private String DCRRestAPIBasePath = "/client-registration/v0.13";
     private String PubRestAPIBasePath = "/api/am/publisher/v0.13";
     private String AdminRestAPIBasePath = "/api/am/admin/v0.13";
+    public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
+    public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
 
     public static void main(String[] args) {
         MockHttpServer mockHttpServer = new MockHttpServer(9443);
@@ -93,6 +95,22 @@ public class MockHttpServer extends Thread {
                 public void handle(HttpExchange exchange) throws IOException {
                     String payload = IOUtils.toString(exchange.getRequestBody());
                     byte[] response = payload.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/prod", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    byte[] response = PROD_ENDPOINT_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/sand", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    byte[] response = SAND_ENDPOINT_RESPONSE.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();

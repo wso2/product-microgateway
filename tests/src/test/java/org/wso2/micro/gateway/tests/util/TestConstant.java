@@ -17,8 +17,6 @@
 */
 package org.wso2.micro.gateway.tests.util;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Constants used in test cases.
  */
@@ -31,6 +29,9 @@ public class TestConstant {
     public static final String HTTP_METHOD_POST = "POST";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
+
+    public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
+    public static final String KEY_TYPE_SANDBOX = "SANDBOX";
 
     public static final int GATEWAY_LISTENER_PORT = 9090;
     public static final int KM_LISTENER_PORT = 9943;
