@@ -142,7 +142,7 @@ done
 
 #execute build command
 if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
-    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_PRO_NAME_VAL"
+    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
     pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
         # clean the content of target folder
         if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
@@ -152,7 +152,7 @@ if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW
         ballerina build src/ -o $CMD_PRO_NAME_VAL.balx
     popd > /dev/null
 elif [ "$CMD_COMMAND" = "run" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
-    MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/micro-gw-resources/projects/$CMD_PRO_NAME_VAL/target"
+    MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL/target"
     pushd $MICRO_GW_LABEL_PROJECT_TARGET_DIR> /dev/null
         ballerina run $CMD_PRO_NAME_VAL.balx
         exit 1
