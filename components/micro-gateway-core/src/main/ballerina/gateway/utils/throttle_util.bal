@@ -19,26 +19,24 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/log;
 
-map blockConditions;
 map throttleDataMap;
 public stream<RequestStreamDTO> requestStream;
 public stream<GlobalThrottleStreamDTO> globalThrottleStream;
 public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
-boolean blockConditionExist;
 
 public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
-    if (isThrottled){
+    if (isThrottled) {
         int currentTime = time:currentTime().time;
         GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
         int timeStamp = dto.expiryTimeStamp;
-        boolean stopOnQuata = dto.stopOnQuata;
+        boolean stopOnQuota = dto.stopOnQuota;
         if (timeStamp >= currentTime) {
-            return (isThrottled, stopOnQuata);
+            return (isThrottled, stopOnQuota);
         } else {
             boolean status = throttleDataMap.remove(key);
-            return (false, stopOnQuata);
+            return (false, stopOnQuota);
         }
     }
     return (isThrottled, false);
