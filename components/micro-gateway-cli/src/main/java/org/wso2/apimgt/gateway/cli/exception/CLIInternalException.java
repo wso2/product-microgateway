@@ -24,10 +24,6 @@ public class CLIInternalException extends RuntimeException {
     private final static int DEFAULT_EXIT_CODE = 1;
     private int exitCode;
 
-    public CLIInternalException() {
-        super();
-    }
-
     public CLIInternalException(String message) {
         this(message, DEFAULT_EXIT_CODE);
     }

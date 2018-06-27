@@ -301,6 +301,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.saveConfig(newConfig, configPath);
         }
 
+        outStream.println("Setting up project " + projectName + " successful.");
         //There should not be any logic after this system exit
         if (!changesDetected) {
             outStream.println(
