@@ -301,6 +301,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.saveConfig(newConfig, configPath);
         }
 
+        outStream.println("Setting up project " + projectName + " successful.");
         //There should not be any logic after this system exit
         if (!changesDetected) {
             outStream.println(
@@ -364,7 +365,6 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     private static void init(String workspace, String projectName, String configPath) {
         try {
-            GatewayCmdUtils.createWorkspaceStructure(workspace);
             GatewayCmdUtils.createProjectStructure(workspace, projectName);
             GatewayCmdUtils.createLabelConfig(workspace, projectName);
 

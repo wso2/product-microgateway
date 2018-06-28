@@ -66,12 +66,10 @@ public class OAuthServiceImpl implements OAuthService {
                 JsonNode rootNode = mapper.readTree(responseStr);
                 return rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
             } else {
-                logger.error("Error occurred while getting token. Status code: {} ", responseCode);
-                throw new CLIInternalException();
+                throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
             }
         } catch (IOException e) {
-            logger.error("Error occurred while communicate with token endpoint {}", tokenEndpoint, e);
-            throw new CLIInternalException();
+            throw new CLIInternalException("Error occurred while communicate with token endpoint " + tokenEndpoint, e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
