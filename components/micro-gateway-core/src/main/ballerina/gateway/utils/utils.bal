@@ -242,24 +242,18 @@ public function getContext(http:FilterContext context) returns (string) {
 
 }
 
-public function getClientIp(http:Request request) returns (string) {
+public function getClientIp(http:Request request, http:Listener listener) returns (string) {
     string clientIp;
-    string header = "";
-    string[] headerNames = request.getHeaderNames();
-    foreach headerName in headerNames {
-        string headerValue = untaint request.getHeader(headerName);
-    }
     if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
-        header = request.getHeader(X_FORWARD_FOR_HEADER);
+        clientIp = request.getHeader(X_FORWARD_FOR_HEADER);
+        int idx = clientIp.indexOf(",");
+        if (idx > -1) {
+            clientIp = clientIp.substring(0, idx);
+        }
     } else {
-        return "";
+        clientIp = listener.remote.host;
     }
-    //TODO need to get the IP from REMOTE_ADDR
-    clientIp = header;
-    int idx = header.indexOf(",");
-    if (idx > -1) {
-        clientIp = clientIp.substring(0, idx);
-    }
+    io:println("remote address: " + clientIp);
     return clientIp;
 }
 

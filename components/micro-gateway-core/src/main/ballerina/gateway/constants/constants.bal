@@ -76,6 +76,12 @@
 @final public string UNAUTHENTICATED_TIER = "Unauthenticated";
 @Description { value: "Anonymous user name" }
 @final public string END_USER_ANONYMOUS = "anonymous";
+@Description { value: "Anonymous app name" }
+@final public string ANONYMOUS_APP_NAME = "anonymous";
+@Description { value: "Anonymous app ID" }
+@final public string ANONYMOUS_APP_ID = "anonymous";
+@Description { value: "Anonymous app owner" }
+@final public string ANONYMOUS_APP_OWNER = "anonymous";
 @Description { value: "message id" }
 @final public string MESSAGE_ID = "MESSAGE_ID";
 @Description { value: "Is requested throttld out" }
@@ -97,6 +103,8 @@
 
 @Description { value: "Filter has return false" }
 @final public string FILTER_FAILED = "filter_failed";
+@Description { value: "remote address as IP" }
+@final public string REMOTE_ADDRESS = "remote_address";
 @Description { value: "error code attribute" }
 @final public string ERROR_CODE = "error_code";
 @Description { value: "error message attribute" }

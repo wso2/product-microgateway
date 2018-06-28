@@ -52,8 +52,9 @@ function getCorrelationData(AnalyticsRequestStream request) returns (string) {
 function generateRequestEvent(http:Request request, http:FilterContext context) returns (AnalyticsRequestStream){
     //ready authentication context to get values
     AnalyticsRequestStream analyticsRequestStream;
-    AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
-    if ( authContext != null) {
+    boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         analyticsRequestStream.consumerKey = authContext.consumerKey;
         analyticsRequestStream.username = authContext.username;
         analyticsRequestStream.applicationId = authContext.applicationId;
@@ -63,10 +64,20 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
         analyticsRequestStream.continuedOnThrottleOut = !authContext.stopOnQuotaReach;
         analyticsRequestStream.apiPublisher = authContext.apiPublisher;
         analyticsRequestStream.keyType = authContext.keyType;
+    } else {
+        analyticsRequestStream.consumerKey = "-";
+        analyticsRequestStream.username = END_USER_ANONYMOUS;
+        analyticsRequestStream.applicationId = ANONYMOUS_APP_ID;
+        analyticsRequestStream.applicationName = ANONYMOUS_APP_NAME;
+        analyticsRequestStream.applicationOwner = ANONYMOUS_APP_OWNER;
+        analyticsRequestStream.tier = UNAUTHENTICATED_TIER;
+        analyticsRequestStream.continuedOnThrottleOut = check <boolean>context.attributes[ALLOWED_ON_QUOTA_REACHED];
+        analyticsRequestStream.apiPublisher = getAPIDetailsFromServiceAnnotation(
+                                                  reflect:getServiceAnnotations(context.serviceType)).publisher;
+        analyticsRequestStream.keyType = PRODUCTION_KEY_TYPE;
     }
     analyticsRequestStream.userAgent = request.userAgent;
-    //todo: check if clientIP is deriving properly
-    analyticsRequestStream.clientIp = "127.0.0.1";//getClientIp(request);
+    analyticsRequestStream.clientIp = <string>context.attributes[REMOTE_ADDRESS];
     analyticsRequestStream.context = getContext(context);
     analyticsRequestStream.tenantDomain = getTenantDomain(context);
     analyticsRequestStream.api = getApiName(context);
