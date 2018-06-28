@@ -44,6 +44,7 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
 
 public function publishNonThrottleEvent(RequestStreamDTO request) {
     requestStream.publish(request);
+    io:println(request);
 }
 function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);

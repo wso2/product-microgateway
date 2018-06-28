@@ -31,28 +31,26 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        boolean requestFilterResult;
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;
         //Throttled decisions
         boolean isThrottled = false;
+        boolean stopOnQuota;
         string apiContext = getContext(context);
         string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
         boolean filterFailed =check <boolean>context.attributes[FILTER_FAILED];
         boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+        context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
         AuthenticationContext keyvalidationResult;
         if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
-            requestFilterResult = true;
-            boolean stopOnQuota;
             (isThrottled, stopOnQuota) = isSubscriptionLevelThrottled(context, keyvalidationResult);
             if (isThrottled) {
                 if (stopOnQuota) {
                     context.attributes[IS_THROTTLE_OUT] = true;
-                    context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
                     context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
@@ -60,7 +58,7 @@ public type ThrottleFilter object {
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
-                    context.attributes[IS_THROTTLE_OUT] = true;
+                    context.attributes[IS_THROTTLE_OUT] = false;
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
                 }
             }
@@ -75,16 +73,22 @@ public type ThrottleFilter object {
         } else if (!isSecured) {
             // setting keytype to invocationContext
             runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
-            if (isUnauthenticateLevelThrottled(context)) {
-                context.attributes[IS_THROTTLE_OUT] = true;
-                context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
-                setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
-                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                sendErrorResponse(listener, request, context);
-                return false;
+            (isThrottled, stopOnQuota) = isUnauthenticateLevelThrottled(context);
+            if (isThrottled) {
+                if (stopOnQuota) {
+                    context.attributes[IS_THROTTLE_OUT] = true;
+                    context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
+                    setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                        THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                    sendErrorResponse(listener, request, context);
+                    return false;
+                } else {
+                    // set properties in order to publish into analytics for billing
+                    context.attributes[IS_THROTTLE_OUT] = false;
+                    context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
+                }
             }
-            // not secured, no need to authenticate
-            string clientIp = getClientIp(request);
+            string clientIp = <string>context.attributes[REMOTE_ADDRESS];
             keyvalidationResult.authenticated = true;
             keyvalidationResult.tier = UNAUTHENTICATED_TIER;
             keyvalidationResult.stopOnQuotaReach = true;
@@ -104,7 +108,7 @@ public type ThrottleFilter object {
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
-        return requestFilterResult;
+        return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -142,13 +146,10 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
     return throttled;
 }
 
-function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean) {
+function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean, boolean) {
     string throttleKey = getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
                                                          reflect:getServiceAnnotations(context.serviceType)).apiVersion;
-    boolean throttled;
-    boolean stopOnQuota;
-    (throttled, stopOnQuota) = isRequestThrottled(throttleKey);
-    return throttled;
+    return isRequestThrottled(throttleKey);
 }
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
@@ -176,49 +177,9 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.appTenant = keyValidationDto.subscriberTenantDomain;
     requestStreamDto.apiTenant = getTenantDomain(context);
     requestStreamDto.apiName = getApiName(context);
+    requestStreamDto.appId = keyValidationDto.applicationId;
 
     json properties = {};
-    string remoteAddr = getClientIp(req);
-    if(remoteAddr != "") {
-        properties.ip = ipToLong(remoteAddr);
-    }
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
-}
-
-function ipToLong(string ipAddress) returns (int) {
-    int result = 0;
-    string[] ipAddressInArray = ipAddress.split("\\.");
-    int i = 3;
-    while (i >= 0 && (3-i) < lengthof ipAddressInArray) {
-        match <int>ipAddressInArray[3 - i] {
-            int ip => {
-                result = result + shiftLeft(ip, i * 8);
-                i = i - 1;
-                //left shifting 24,16,8,0 and bitwise OR
-                //1. 192 << 24
-                //1. 168 << 16
-                //1. 1   << 8
-                //1. 2   << 0
-            }
-            error e => {
-                log:printError("Error while converting Ip address to long");
-                i = i - 1;
-            }
-        }
-    }
-    return result;
-}
-
-function shiftLeft(int a, int b) returns (int) {
-    if (b == 0) {
-        return a;
-    }
-    int i = b;
-    int result = a;
-    while (i > 0) {
-        result = result * 2;
-        i = i - 1;
-    }
-    return result;
 }
