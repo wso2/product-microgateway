@@ -32,6 +32,7 @@ public type ThrottleFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
         log:printDebug("Processing request in ThrottleFilter");
+        int startingTime = getCurrentTime();
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;

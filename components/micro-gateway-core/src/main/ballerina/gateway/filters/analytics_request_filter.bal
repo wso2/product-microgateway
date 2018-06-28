@@ -38,6 +38,12 @@ public type AnalyticsRequestFilter object {
                 //todo: publish
             }
         }
+        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+            ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
+            EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
+            eventStream.publish(eventDTO);
+        }
+        //ResponseDTO responseDTO =
         return true;
     }
 

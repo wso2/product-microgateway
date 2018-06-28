@@ -13,7 +13,7 @@ function getExecutionTimePayload(ExecutionTimeDTO executionTimeDTO) returns stri
 }
 
 function getMetaDataForExecutionTimeDTO(ExecutionTimeDTO dto) returns string {
-    return "";
+    return "{\\\"keyType\\\":\"" + dto.keyType + "\",\\\"correlationID\\\":\"" + dto.correleationID + "\"}";
 }
 
 function generateEventFromExecutionTime(ExecutionTimeDTO executionTimeDTO) returns EventDTO {
@@ -26,7 +26,7 @@ function generateEventFromExecutionTime(ExecutionTimeDTO executionTimeDTO) retur
     return eventDTO;
 }
 
-function generateExecutionTimeEvent(http:Request request, http:FilterContext context) returns ExecutionTimeDTO {
+function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
     ExecutionTimeDTO executionTimeDTO;
     AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
     if (authContext != null ) {

@@ -151,6 +151,7 @@ public type AuthnFilter object {
                                             status);
                                     setErrorMessageToFilterContext(context, status);
                                     sendErrorResponse(listener, request, context);
+                                    setLatency(startingTime, context, SECURITY_LATENCY);
                                     return false;
                                 }
                             }
@@ -158,6 +159,7 @@ public type AuthnFilter object {
                                 log:printError(err.message, err = err);
                                 setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
                                 sendErrorResponse(listener, request, context);
+                                setLatency(startingTime, context, SECURITY_LATENCY);
                                 return false;
                             }
                         }
@@ -166,6 +168,7 @@ public type AuthnFilter object {
                         log:printError(err.message, err = err);
                         setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                         sendErrorResponse(listener, request, context);
+                        setLatency(startingTime, context, SECURITY_LATENCY);
                         return false;
                     }
                 }
@@ -173,8 +176,10 @@ public type AuthnFilter object {
 
         } else {
             // not secured, no need to authenticate
+            setLatency(startingTime, context, SECURITY_LATENCY);
             return true;
         }
+        setLatency(startingTime, context, SECURITY_LATENCY);
         return isAuthorized;
     }
 
