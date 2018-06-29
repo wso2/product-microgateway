@@ -9,20 +9,34 @@ import wso2/gateway;
 
 {{#endpointConfig.prodEndpoints}}
 endpoint http:Client {{qualifiedServiceName}}_PROD_EP {
-    url: gateway:retrieveEndPointURL("{{api.name}}.{{api.version}}.prodEndpoints.0", "{{endpointConfig.prodEndpoints.0.endpointUrl}}"){{#equals api.responseCaching "Disabled"}},
+    url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.prodEndpoints.0", "{{endpointConfig.prodEndpoints.0.endpointUrl}}"){{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }
     {{else}},
     cache: { isShared: true }
+    {{/equals}}{{#api.endpointSecurity}}{{#equals api.endpointSecurity.type "basic"}},
+    auth: {
+        scheme: "Basic",
+        username: gateway:retrieveConfig("{{api.name}}.{{api.version}}.basic.username", "{{api.endpointSecurity.username}}"),
+        password: gateway:retrieveConfig("{{api.name}}.{{api.version}}.basic.password", "")
+    }
     {{/equals}}
+    {{/api.endpointSecurity}}
 };
 {{/endpointConfig.prodEndpoints}}
 {{#endpointConfig.sandEndpoints}}
 endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
-    url: gateway:retrieveEndPointURL("{{api.name}}.{{api.version}}.sandEndpoints.0", "{{endpointConfig.sandEndpoints.0.endpointUrl}}"){{#equals api.responseCaching "Disabled"}},
+    url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.sandEndpoints.0", "{{endpointConfig.sandEndpoints.0.endpointUrl}}"){{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }
     {{else}},
         cache: { isShared: true }
+    {{/equals}}{{#api.endpointSecurity}}{{#equals api.endpointSecurity.type "basic"}},
+    auth: {
+        scheme: "Basic",
+        username: gateway:retrieveConfig("{{api.name}}.{{api.version}}.basic.username", "{{api.endpointSecurity.username}}"),
+        password: gateway:retrieveConfig("{{api.name}}.{{api.version}}.basic.password", "")
+    }
     {{/equals}}
+    {{/api.endpointSecurity}}
 };
 {{/endpointConfig.sandEndpoints}}
 
