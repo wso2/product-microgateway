@@ -203,7 +203,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         soapBody.setChildren(validateXml);
         xml soapEnvelope = xml `<soapenv:Envelope></soapenv:Envelope>`;
         soapEnvelope.setChildren(soapBody);
-
+        log:printTrace("Key validation request:" + soapEnvelope.getTextValue());
         keyValidationRequest.setXmlPayload(soapEnvelope);
         keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, "text/xml");
         keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
@@ -234,6 +234,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
             }
             xml responseXml => {
                 responsepayload = responseXml;
+                log:printTrace("Key validation response:" + responsepayload.getTextValue());
             }
         }
         json payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
