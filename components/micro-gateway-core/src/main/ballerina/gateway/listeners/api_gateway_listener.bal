@@ -85,9 +85,13 @@ public type EndpointConfiguration {
 
 public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
     initiateGatewayConfigurations(endpointConfig);
+    log:printDebug("Initiallized gateway configurations for port:" + endpointConfig.port);
     initiateAuthProviders(endpointConfig);
+    log:printDebug("Initiallized auth providers for port:" + endpointConfig.port);
     addAuthFiltersForAPIGatewayListener(endpointConfig);
+    log:printDebug("Initiallized filters for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
+    log:printDebug("Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
 }
 
 @Description {value:"Add authn and authz filters"}

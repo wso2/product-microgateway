@@ -30,20 +30,25 @@ public type SubscriptionFilter object {
     public function filterRequest (http:Listener listener, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         string authScheme = runtime:getInvocationContext().authContext.scheme;
+        log:printDebug("Auth scheme: " + authScheme);
         if(authScheme == AUTH_SCHEME_JWT ){
             string jwtToken = runtime:getInvocationContext().authContext.authToken;
             string currentAPIContext = getContext(filterContext);
             AuthenticationContext authenticationContext;
             match getEncodedJWTPayload(jwtToken) {
                 string  jwtPayload => {
+                    log:printTrace("Encoded JWT payload: " + jwtPayload);
                     match getDecodedJWTPayload(jwtPayload) {
                         json decodedPayload => {
+                            log:printTrace("Decoded JWT payload: " + decodedPayload.toString());
                             json subscribedAPIList = decodedPayload.subscribedAPIs;
                             APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:
                                 getServiceAnnotations(filterContext.serviceType));
                             foreach subscription in subscribedAPIList {
                                 if (subscription.name.toString() == apiConfig.name &&
                                     subscription["version"].toString() == apiConfig.apiVersion) {
+                                    log:printDebug("Found a matching subscription with name:" + 
+                                            subscription.name.toString() + " version:" + subscription["version"].toString());
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = subscription.subscriptionTier.toString();
                                     authenticationContext.apiKey = jwtToken;
@@ -60,8 +65,10 @@ public type SubscriptionFilter object {
                                     .subscriberTenantDomain.toString();
                                     authenticationContext.keyType = decodedPayload.keytype.toString();
                                     // setting keytype to invocationContext
+                                    log:printDebug("Setting key type as " + authenticationContext.keyType);
                                     runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                                     filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                                    log:printDebug("Subscription validation success.");
                                     return true;
                                 }
                             }

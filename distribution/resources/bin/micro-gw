@@ -146,7 +146,7 @@ if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW
     pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
         # clean the content of target folder
         if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
-            rm -r $MICRO_GW_LABEL_PROJECT_DIR/target
+            rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
         fi
         # build the ballerina source code for the label
         ballerina build src/ -o $CMD_PRO_NAME_VAL.balx

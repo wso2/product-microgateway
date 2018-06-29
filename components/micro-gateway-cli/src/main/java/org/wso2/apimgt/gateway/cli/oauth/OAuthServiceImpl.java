@@ -117,7 +117,7 @@ public class OAuthServiceImpl implements OAuthService {
             }
         } catch (IOException e) {
             logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint, e);
-            throw new CLIInternalException("Error occurred while communicate with DCR endpoint");
+            throw new CLIInternalException("Error occurred while communicate with DCR endpoint", e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

@@ -21,7 +21,7 @@ public type TierConfiguration {
 
 };
 
-@Description {value:"Resource level tier annaotation"}
+@Description {value:"Resource level tier annotation"}
 public annotation <resource> RateLimit TierConfiguration;
 
 @Description {value:"Configuration used for api version annotation"}
@@ -37,7 +37,7 @@ public type APIConfiguration {
 
 };
 
-@Description {value:"API relted details annotation"}
+@Description {value:"API related details annotation"}
 public annotation <service> API APIConfiguration;
 
 

@@ -83,9 +83,19 @@ public type AuthnFilter object {
                     log:printDebug("Replace the custom auth header : " + authHeaderName + " with default auth header
                     :" + AUTH_HEADER);
                 }
-                isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
-                log:printDebug("Authentication handler chain returned with value : " + isAuthorized);
-                checkAndRemoveAuthHeaders(request, authHeaderName);
+
+                try {
+                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
+                    log:printDebug("Authentication handler chain returned with value : " + isAuthorized);
+                    checkAndRemoveAuthHeaders(request, authHeaderName);
+                } catch (error err) {
+                    // todo: need to properly handle this exception. Currently this is a generic exception catching.
+                    // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
+                    log:printError("Error while authenticating via JWT token.");
+                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+                    sendErrorResponse(listener, request, context);
+                    return false;
+                }
             } else {
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
