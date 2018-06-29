@@ -394,6 +394,11 @@ public function retrieveEndPointURL(string key, string default) returns string {
     return config:getAsString(key, default = default);
 }
 
+@Description {value:"Retrieve external configurations defined against a key"}
+public function retrieveConfig(string key, string default) returns string { 
+    return config:getAsString(key, default = default);
+}
+
 function initStreamPublisher() {
     log:printInfo("Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
