@@ -254,7 +254,6 @@ public function getClientIp(http:Request request, http:Listener listener) return
     } else {
         clientIp = listener.remote.host;
     }
-    io:println("remote address: " + clientIp);
     return clientIp;
 }
 
