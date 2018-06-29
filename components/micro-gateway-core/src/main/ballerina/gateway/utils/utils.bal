@@ -390,6 +390,9 @@ public function rotateFile(string fileName) returns string|error  {
         }
     }
 }
+public function retrieveEndPointURL(string key, string default) returns string { 
+    return config:getAsString(key, default = default);
+}
 
 function initStreamPublisher() {
     log:printInfo("Subscribing writing method to event stream");
