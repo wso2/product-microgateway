@@ -45,8 +45,7 @@ endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
 @http:ServiceConfig {
     basePath: "{{api.context}}{{#unless api.isDefaultVersion}}/{{api.version}}{{/unless}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
-        authProviders:["oauth2"],
-        authentication:{enabled:true}
+        authProviders:["oauth2"]
     },
     cors: {
             allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
