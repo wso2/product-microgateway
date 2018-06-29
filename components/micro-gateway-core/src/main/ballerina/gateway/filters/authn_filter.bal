@@ -44,6 +44,7 @@ public type AuthnFilter object {
         //Setting UUID
         context.attributes[MESSAGE_ID] = system:uuid();
         context.attributes[FILTER_FAILED] = false;
+        context.attributes[REMOTE_ADDRESS] = getClientIp(request, listener);
         runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR] = context.serviceType;
         runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
         // get auth config for this resource
@@ -171,17 +172,6 @@ public type AuthnFilter object {
 
         } else {
             // not secured, no need to authenticate
-            string clientIp = getClientIp(request);
-            authenticationContext.authenticated = true;
-            authenticationContext.tier = UNAUTHENTICATED_TIER;
-            authenticationContext.stopOnQuotaReach = true;
-            authenticationContext.apiKey = clientIp ;
-            authenticationContext.username = END_USER_ANONYMOUS;
-            authenticationContext.applicationId = clientIp;
-            authenticationContext.keyType = PRODUCTION_KEY_TYPE;
-            // setting keytype to invocationContext
-            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-            context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             return true;
         }
         return isAuthorized;

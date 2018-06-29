@@ -58,14 +58,21 @@ public type OAuthzFilter object {
         // In authorization filter we have specifically set the error payload since we are using ballerina in built
         // authzFilter
         if (response.statusCode == FORBIDDEN) {
-            match context.attributes[ERROR_CODE]{
+            match runtime:getInvocationContext().attributes[ERROR_CODE] {
                 () => {
-                    setAuthorizationFailureMessage(response, context);
+                    match context.attributes[ERROR_CODE] {
+                        () => {
+                            setAuthorizationFailureMessage(response, context);
+                        }
+                        any code => {// no need to set error codes
+                        }
+                    }
                 }
                 any code => {// no need to set error codes
-                }
 
+                }
             }
+
         }
         return true;
     }

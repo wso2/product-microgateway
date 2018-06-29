@@ -32,13 +32,14 @@ public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn,
             isSecured = authn.enabled;
         }
         () => {
-            // if not found at resource level, check in the rest level
+            // if not found at resource level, check in the service level
             match serviceLevelAuthAnn.authentication {
                 http:Authentication authn => {
                     isSecured = authn.enabled;
                 }
                 () => {
-                    isSecured = false;
+                    // by default if no value given, we think auth is enabled in gateway
+                    isSecured = true;
                 }
             }
         }
@@ -242,23 +243,16 @@ public function getContext(http:FilterContext context) returns (string) {
 
 }
 
-public function getClientIp(http:Request request) returns (string) {
+public function getClientIp(http:Request request, http:Listener listener) returns (string) {
     string clientIp;
-    string header = "";
-    string[] headerNames = request.getHeaderNames();
-    foreach headerName in headerNames {
-        string headerValue = untaint request.getHeader(headerName);
-    }
     if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
-        header = request.getHeader(X_FORWARD_FOR_HEADER);
+        clientIp = request.getHeader(X_FORWARD_FOR_HEADER);
+        int idx = clientIp.indexOf(",");
+        if (idx > -1) {
+            clientIp = clientIp.substring(0, idx);
+        }
     } else {
-        return "";
-    }
-    //TODO need to get the IP from REMOTE_ADDR
-    clientIp = header;
-    int idx = header.indexOf(",");
-    if (idx > -1) {
-        clientIp = clientIp.substring(0, idx);
+        clientIp = listener.remote.host;
     }
     return clientIp;
 }

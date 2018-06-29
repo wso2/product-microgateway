@@ -359,7 +359,7 @@ public class GatewayCmdUtils {
         if (!pathFile.exists()) {
             boolean created = pathFile.createNewFile();
             if (created) {
-                logger.debug("Hashed file: {} created. ", resourceHashesFileLocation);
+                logger.trace("Hashed file: {} created. ", resourceHashesFileLocation);
             } else {
                 logger.error("Failed to create hash file: {} ", resourceHashesFileLocation);
                 throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -420,7 +420,7 @@ public class GatewayCmdUtils {
             writer.write(linuxShContent);
             boolean success = pathFile.setExecutable(true);
             if (success) {
-                logger.debug("File: {} set to executable. ", pathFile.getAbsolutePath());
+                logger.trace("File: {} set to executable. ", pathFile.getAbsolutePath());
             } else {
                 logger.error("Failed to set executable file: {} ", pathFile.getAbsolutePath());
                 throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -554,7 +554,7 @@ public class GatewayCmdUtils {
             if (!destinationFolder.exists()) {
                 boolean created = destinationFolder.mkdir();
                 if (created) {
-                    logger.debug("Dir: {} created. ", destinationFolder.getAbsolutePath());
+                    logger.trace("Dir: {} created. ", destinationFolder.getAbsolutePath());
                 } else {
                     logger.error("Failed to create dir: {} ", destinationFolder.getAbsolutePath());
                     throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -591,7 +591,7 @@ public class GatewayCmdUtils {
         if (!folder.exists() && !folder.isDirectory()) {
             boolean created = folder.mkdir();
             if (created) {
-                logger.debug("Dir: {} created. ", path);
+                logger.trace("Dir: {} created. ", path);
             } else {
                 logger.error("Failed to create dir: {} ", path);
                 throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -610,7 +610,7 @@ public class GatewayCmdUtils {
         if (!folder.exists() && !folder.isDirectory()) {
             boolean created = folder.mkdirs();
             if (created) {
-                logger.debug("Dir: {} created. ", path);
+                logger.trace("Dir: {} created. ", path);
             } else {
                 logger.error("Failed to create dir: {} ", path);
                 throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -650,7 +650,7 @@ public class GatewayCmdUtils {
             try {
                 boolean created = file.createNewFile();
                 if (created) {
-                    logger.debug("File: {} created. ", path);
+                    logger.trace("File: {} created. ", path);
                 } else {
                     logger.error("Failed to create file: {} ", path);
                     throw new CLIInternalException("Error occurred while setting up workspace structure");
@@ -676,7 +676,7 @@ public class GatewayCmdUtils {
         if (!file.exists()) {
             boolean created = file.createNewFile();
             if (created) {
-                logger.debug("Workspace dir: {} created. ", workspace);
+                logger.trace("Workspace dir: {} created. ", workspace);
             } else {
                 logger.error("Failed to create workspace dir: {} ", workspace);
                 throw new CLIInternalException("Error occurred while setting up workspace structure");

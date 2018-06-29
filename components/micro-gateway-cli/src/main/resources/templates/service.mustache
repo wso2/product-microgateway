@@ -6,6 +6,7 @@ import ballerina/swagger;
 
 import wso2/gateway;
 
+{{#endpointConfig.prodEndpoints}}
 endpoint http:Client {{qualifiedServiceName}}_PROD_EP {
     url: "{{endpointConfig.prodEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }
@@ -13,7 +14,8 @@ endpoint http:Client {{qualifiedServiceName}}_PROD_EP {
     cache: { isShared: true }
     {{/equals}}
 };
-
+{{/endpointConfig.prodEndpoints}}
+{{#endpointConfig.sandEndpoints}}
 endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
     url: "{{endpointConfig.sandEndpoints.0.endpointUrl}}"{{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }
@@ -21,7 +23,7 @@ endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
         cache: { isShared: true }
     {{/equals}}
 };
-
+{{/endpointConfig.sandEndpoints}}
 
 {{>docker}}
 {{>kubernetes}}
@@ -45,8 +47,7 @@ endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
 @http:ServiceConfig {
     basePath: "{{api.context}}{{#unless api.isDefaultVersion}}/{{api.version}}{{/unless}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
-        authProviders:["oauth2"],
-        authentication:{enabled:true}
+        authProviders:["oauth2"]
     },
     cors: {
             allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -56,6 +57,7 @@ endpoint http:Client {{qualifiedServiceName}}_SAND_EP {
 }
 
 @gateway:API {
+    publisher:"{{api.provider}}",
     name:"{{api.name}}",
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}}
@@ -96,11 +98,46 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
         http:Response|error clientResponse;
-        if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-            clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
-        } else {
-            clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
-        }
+        {{#endpointConfig.prodEndpoints}}
+            {{#endpointConfig.sandEndpoints}}
+                if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
+                } else {
+                    clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
+                }
+            {{/endpointConfig.sandEndpoints}}
+            {{^endpointConfig.sandEndpoints}}
+                if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
+                } else {
+                    http:Response res = new;
+                    res.statusCode = 403;
+                    json payload = {
+                        ERROR_CODE: "900901",
+                        ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
+                    };
+                    runtime:getInvocationContext().attributes["error_code"] = "900901";
+                    res.setPayload(payload);
+                    clientResponse = res;
+                }
+            {{/endpointConfig.sandEndpoints}}
+        {{/endpointConfig.prodEndpoints}}
+        {{^endpointConfig.prodEndpoints}}
+            if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
+            } else {
+                http:Response res = new;
+                res.statusCode = 403;
+                json payload = {
+                    ERROR_CODE: "900901",
+                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
+                };
+                runtime:getInvocationContext().attributes["error_code"] = "900901";
+                res.setPayload(payload);
+                clientResponse = res;
+            }
+        {{/endpointConfig.prodEndpoints}}
+
         match clientResponse {
 
             http:Response res => {
