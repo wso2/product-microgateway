@@ -130,7 +130,7 @@ Following is the structure of the label generated when running micro-gw setup co
 ```bash
 micro-gw-<label>
 ├── bin (The binary scripts of the micro-gateway distribution)
-│   └── micro-gw.sh
+│   └── gateway
 ├── conf (micro gateway distribution configuration)
 │   └── micro-gw.conf
 ├── exec (generated balx ballerina executable for the APIs)

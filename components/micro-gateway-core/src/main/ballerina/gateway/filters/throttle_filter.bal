@@ -31,6 +31,7 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
+        log:printDebug("Processing request in ThrottleFilter");
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;
@@ -108,6 +109,7 @@ public type ThrottleFilter object {
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
+        log:printDebug("Request is not throttled");
         return true;
     }
 

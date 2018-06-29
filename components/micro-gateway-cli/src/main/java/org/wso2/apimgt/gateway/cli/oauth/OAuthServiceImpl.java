@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class OAuthServiceImpl implements OAuthService {
     private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);
@@ -69,7 +71,11 @@ public class OAuthServiceImpl implements OAuthService {
                 throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
             }
         } catch (IOException e) {
-            throw new CLIInternalException("Error occurred while communicate with token endpoint " + tokenEndpoint, e);
+            String serverUrl = getServerUrl(tokenEndpoint);
+            throw new CLIRuntimeException(
+                    "Error occurred while trying to connect with server. Is the server running at " + serverUrl + "?",
+                    "Error occurred while trying to connect with token endpoint: " + tokenEndpoint, 1,
+                    e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -101,27 +107,41 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
                     TokenManagementConstants.BASIC + " " + clientEncoded);
             urlConn.getOutputStream().write(requestBody.getBytes(TokenManagementConstants.UTF_8));
+            logger.debug("DCR url: {}", dcrEndpoint);
+            logger.trace("Request body for DCR call: {}", requestBody);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                logger.debug("Received response status code for DCR call: {}", responseCode);
+                logger.trace("Received response body for DCR call: {}", responseStr);
                 JsonNode rootNode = mapper.readTree(responseStr);
                 JsonNode clientIdNode = rootNode.path(TokenManagementConstants.CLIENT_ID);
                 JsonNode clientSecretNode = rootNode.path(TokenManagementConstants.CLIENT_SECRET);
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
                 String[] clientInfo = { clientId, clientSecret };
+                logger.debug("Successfully received client id:{} from DCR endpoint", clientId);
                 return clientInfo;
             } else { //If DCR call fails
-                logger.error("Error occurred while creating oAuth application. Status code: {} ", responseCode);
-                throw new CLIInternalException("Error occurred while creating oAuth application");
+                throw new CLIInternalException(
+                        "Error occurred while creating oAuth application Status code: " + responseCode);
             }
         } catch (IOException e) {
-            logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint, e);
-            throw new CLIInternalException("Error occurred while communicate with DCR endpoint", e);
+            String serverUrl = getServerUrl(dcrEndpoint);
+            throw new CLIRuntimeException(
+                    "Error occurred while trying to connect with server. Is the server running at " + serverUrl + "?",
+                    "Error occurred while communicate with DCR endpoint: " + dcrEndpoint, 1,
+                    e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
             }
         }
+    }
+
+    private String getServerUrl(String dcrEndpoint) {
+        String[] serverUrlParts = dcrEndpoint.split("/", 4);
+        return String.join("/",
+                Arrays.copyOfRange(serverUrlParts, 0, serverUrlParts.length >= 3 ? 3 : serverUrlParts.length));
     }
 }

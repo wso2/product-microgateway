@@ -125,20 +125,36 @@ fi
 
 # ----- Process the input command ----------------------------------------------
 
-for c in "$@"
+ALL_ARGS=()
+DEFAULT_ARGS=()
+while [[ $# -gt 0 ]]
 do
-    if [ "$c" = "--java.debug" ] || [ "$c" = "-java.debug" ] || [ "$c" = "java.debug" ]; then
-          CMD="--java.debug"
-    elif [ "$CMD" = "--java.debug" ] && [ -z "$PORT" ]; then
-          PORT=$c
-    elif [ "$c" = "run" ] || [ "$c" = "build" ]; then
-          CMD_COMMAND=$c
-    elif [ "$c" = "--name" ] || [ "$c" = "-n" ]; then
-          CMD_PRO_NAME=$c
-    elif ([ "$CMD_PRO_NAME" = "--name" ] || [ "$CMD_PRO_NAME" = "-n" ]) && [ -z "$CMD_PRO_NAME_VAL" ]; then
-          CMD_PRO_NAME_VAL=$c
-    fi
+key="$1"
+case $key in
+    --java.debug|-java.debug|java.debug)
+    CMD="--java.debug"
+    PORT="$2"
+    shift # past java.debug argument
+    shift # past port value
+    ;;
+    build)
+    ALL_ARGS+=("$1")
+    CMD_COMMAND="$1"
+    shift # past build argument
+    ;;
+    *)    # default argument
+    DEFAULT_ARGS+=("$1") # save it in DEFAULT_ARGS array
+    ALL_ARGS+=("$1")
+    shift # past argument
+    ;;
+esac
 done
+
+# restore all the shifted arguments
+set -- "${ALL_ARGS[@]}"
+
+# take the first default argument as the project name
+CMD_PRO_NAME_VAL=${DEFAULT_ARGS[0]}
 
 #execute build command
 if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
@@ -149,13 +165,7 @@ if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW
             rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
         fi
         # build the ballerina source code for the label
-        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx
-    popd > /dev/null
-elif [ "$CMD_COMMAND" = "run" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
-    MICRO_GW_LABEL_PROJECT_TARGET_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL/target"
-    pushd $MICRO_GW_LABEL_PROJECT_TARGET_DIR> /dev/null
-        ballerina run $CMD_PRO_NAME_VAL.balx
-        exit 1
+        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline
     popd > /dev/null
 fi
 
