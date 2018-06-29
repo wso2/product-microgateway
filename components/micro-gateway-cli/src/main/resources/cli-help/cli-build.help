@@ -1,27 +1,14 @@
 NAME
-    micro-gw run  - run command use to start services generated from the
-                          from api definitions of given label. Using build command, it's generating the binary(balx)
-                          sources of given label. Run command is used to start the services
+    micro-gw build  - The build command generates a gateway distribution using the given project resources. 
 
 SYNOPSIS
-     micro-gw run [-l|--label] [args...]
+    micro-gw build <project> 
 
 DESCRIPTION
-    Run command executes services generated for the APIs specified for the given label
-
-    It's required run build command to compile a source and
-    provide the generated binary file (.balx file)
-
-OPTIONS
-
-     --n <project-name>
-     --project <project-name>
-        Name of the project that should run the generated services from binary(balx) source
-
-DEFAULT BEHAVIOR
-    Runs the services generated for given label
+    The build command generates a gateway distribution using the resources in the given project. The project should exist
+    in the current working directory and should be previously created using "micro-gw setup" command.
 
 EXAMPLES
     Run the services of given label
-    $ micro-gw build -l accounts
+    $ micro-gw build accounts-project
 

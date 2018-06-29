@@ -345,8 +345,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException(
                     "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) " 
                             + "should be provided." 
-                            + "\n\nEx:\tmicro-gw setup -l accounts -n accounts-project" 
-                            + "\n\tmicro-gw setup -a Pizzashack -v 1.0.0 -n pizzashack-project");
+                            + "\n\nEx:\tmicro-gw setup accounts-project -l accounts" 
+                            + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
         }
     }
 

@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class OAuthServiceImpl implements OAuthService {
     private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);
@@ -69,7 +71,11 @@ public class OAuthServiceImpl implements OAuthService {
                 throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
             }
         } catch (IOException e) {
-            throw new CLIInternalException("Error occurred while communicate with token endpoint " + tokenEndpoint, e);
+            String serverUrl = getServerUrl(tokenEndpoint);
+            throw new CLIRuntimeException(
+                    "Error occurred while trying to connect with server. Is the server running at " + serverUrl + "?",
+                    "Error occurred while trying to connect with token endpoint: " + tokenEndpoint, 1,
+                    e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -121,11 +127,21 @@ public class OAuthServiceImpl implements OAuthService {
                         "Error occurred while creating oAuth application Status code: " + responseCode);
             }
         } catch (IOException e) {
-            throw new CLIInternalException("Error occurred while communicate with DCR endpoint: " + dcrEndpoint, e);
+            String serverUrl = getServerUrl(dcrEndpoint);
+            throw new CLIRuntimeException(
+                    "Error occurred while trying to connect with server. Is the server running at " + serverUrl + "?",
+                    "Error occurred while communicate with DCR endpoint: " + dcrEndpoint, 1,
+                    e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
             }
         }
+    }
+
+    private String getServerUrl(String dcrEndpoint) {
+        String[] serverUrlParts = dcrEndpoint.split("/", 4);
+        return String.join("/",
+                Arrays.copyOfRange(serverUrlParts, 0, serverUrlParts.length >= 3 ? 3 : serverUrlParts.length));
     }
 }

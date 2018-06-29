@@ -50,7 +50,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_FILTERS = "filters";
     public static final String GW_DIST_RUNTIME = "runtime";
     public static final String GW_DIST_EXEC = "exec";
-    public static final String GW_DIST_SH = "micro-gw.sh";
+    public static final String GW_DIST_SH = "gateway";
     public static final String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator + GW_DIST_SH;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
