@@ -102,6 +102,9 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-v", "--version" }, hidden = true)
     private String version;
 
+    @Parameter(names = { "-f", "--force" }, hidden = true, arity = 0)
+    private boolean isForcefully;
+
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -118,6 +121,10 @@ public class SetupCmd implements GatewayLauncherCmd {
             configPath = GatewayCmdUtils.getMainConfigLocation();
         }
 
+        if (new File(workspace + File.separator + projectName).exists() && !isForcefully) {
+            throw GatewayCmdUtils.createUsageException("Project name `" + projectName
+                    + "` already exist. use -f or --force to forcefully update the project directory.");
+        }
         init(workspace, projectName, configPath);
 
         Config config = GatewayCmdUtils.getConfig();

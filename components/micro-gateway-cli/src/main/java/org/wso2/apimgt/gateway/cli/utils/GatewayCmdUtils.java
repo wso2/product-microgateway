@@ -576,7 +576,13 @@ public class GatewayCmdUtils {
             }
         } else {
             //Copy the file content from one place to another
-            Files.copy(sourceFolder.toPath(), destinationFolder.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourceFolder.toPath(), destinationFolder.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.COPY_ATTRIBUTES);
+            //Make it writable, so that next time can clear the files without a permission issue
+            boolean success = destinationFolder.setWritable(true);
+            if (!success) {
+                logger.debug("Setting write permission failed for {}", destinationFolder.getAbsolutePath());
+            }
         }
     }
 
