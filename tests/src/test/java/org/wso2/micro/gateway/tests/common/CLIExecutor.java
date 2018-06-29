@@ -54,7 +54,7 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-        String[] args = { "setup", "--label", label, "--project", project, "--username", "admin", "--password",
+        String[] args = { "setup", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config };

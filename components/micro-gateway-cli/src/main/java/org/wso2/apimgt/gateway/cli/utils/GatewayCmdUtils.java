@@ -18,6 +18,7 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
@@ -43,6 +45,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.List;
 
 public class GatewayCmdUtils {
 
@@ -370,6 +374,21 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Validate the list of main args and returns the first element as the project name
+     * 
+     * @param mainArgs List of main args provided to the command
+     * @return first element
+     */
+    public static String getProjectName (List<String> mainArgs) {
+        if (mainArgs.size() != 1) {
+            throw new CLIRuntimeException("Only one argument accepted as the project name, " 
+                    + "but provided: " + String.join(",", mainArgs));
+        } else {
+            return mainArgs.get(0);
+        }
+    }
+
+    /**
      * Get resource hash holder file path
      *
      * @return resource hash holder file path
@@ -446,7 +465,7 @@ public class GatewayCmdUtils {
         if (balxSourceFile.exists()) {
             FileUtils.copyFile(balxSourceFile, gatewayDistExecPathFile);
         } else {
-            System.err.println(labelName + ".balx could not be found in " + labelTargetPath);
+            throw new CLIInternalException(labelName + ".balx could not be found in " + labelTargetPath);
         }
     }
 

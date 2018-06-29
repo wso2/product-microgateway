@@ -101,23 +101,27 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
                     TokenManagementConstants.BASIC + " " + clientEncoded);
             urlConn.getOutputStream().write(requestBody.getBytes(TokenManagementConstants.UTF_8));
+            logger.debug("DCR url: {}", dcrEndpoint);
+            logger.trace("Request body for DCR call: {}", requestBody);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                logger.debug("Received response status code for DCR call: {}", responseCode);
+                logger.trace("Received response body for DCR call: {}", responseStr);
                 JsonNode rootNode = mapper.readTree(responseStr);
                 JsonNode clientIdNode = rootNode.path(TokenManagementConstants.CLIENT_ID);
                 JsonNode clientSecretNode = rootNode.path(TokenManagementConstants.CLIENT_SECRET);
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
                 String[] clientInfo = { clientId, clientSecret };
+                logger.debug("Successfully received client id:{} from DCR endpoint", clientId);
                 return clientInfo;
             } else { //If DCR call fails
-                logger.error("Error occurred while creating oAuth application. Status code: {} ", responseCode);
-                throw new CLIInternalException("Error occurred while creating oAuth application");
+                throw new CLIInternalException(
+                        "Error occurred while creating oAuth application Status code: " + responseCode);
             }
         } catch (IOException e) {
-            logger.error("Error occurred while communicate with DCR endpoint {}", dcrEndpoint, e);
-            throw new CLIInternalException("Error occurred while communicate with DCR endpoint", e);
+            throw new CLIInternalException("Error occurred while communicate with DCR endpoint: " + dcrEndpoint, e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

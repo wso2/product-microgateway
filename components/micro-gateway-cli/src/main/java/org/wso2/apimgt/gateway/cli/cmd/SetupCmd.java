@@ -68,6 +68,11 @@ import java.util.List;
 public class SetupCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.err;
+
+    @SuppressWarnings("unused")
+    @Parameter(hidden = true, required = true)
+    private List<String> mainArgs;
+
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
@@ -78,6 +83,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-p", "--password" }, hidden = true)
     private String password;
 
+    @SuppressWarnings("unused")
     @Parameter(names = { "-l", "--label" }, hidden = true)
     private String label;
 
@@ -90,18 +96,18 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-w", "--truststore-pass" }, hidden = true)
     private String trustStorePassword;
 
-    @Parameter(names = { "-n", "--project" }, hidden = true, required = true)
-    private String projectName;
-
     @Parameter(names = { "-c", "--config" }, hidden = true)
     private String configPath;
 
+    @SuppressWarnings("unused")
     @Parameter(names = { "-a", "--api-name" }, hidden = true)
     private String apiName;
 
+    @SuppressWarnings("unused")
     @Parameter(names = { "-v", "--version" }, hidden = true)
     private String version;
 
+    @SuppressWarnings("unused")
     @Parameter(names = { "-f", "--force" }, hidden = true, arity = 0)
     private boolean isForcefully;
 
@@ -115,6 +121,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
 
+        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         validateAPIGetRequestParams(label, apiName, version);
 
         if (StringUtils.isEmpty(configPath)) {
@@ -308,11 +315,15 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.saveConfig(newConfig, configPath);
         }
 
-        outStream.println("Setting up project " + projectName + " successful.");
-        //There should not be any logic after this system exit
         if (!changesDetected) {
             outStream.println(
-                    "No changes received from the server. If you already have a built distribution, it can be reused.");
+                    "No changes received from the server since the previous setup." 
+                            + " If you already have a built distribution, it can be reused.");
+        }
+        outStream.println("Setting up project " + projectName + " successful.");
+
+        //There should not be any logic after this system exit
+        if (!changesDetected) {
             Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
         }
     }
