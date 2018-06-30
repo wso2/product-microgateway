@@ -16,11 +16,14 @@
 
 import ballerina/cache;
 
-
+cache:Cache gatewayTokenCache;
 cache:Cache gatewayKeyValidationCache;
 cache:Cache invalidTokenCache;
 
 public function initGatewayCaches() {
+    gatewayTokenCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+            900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
     gatewayKeyValidationCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
             900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
         evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
@@ -38,11 +41,17 @@ public type APIGatewayCache object {
 
    public function removeFromGatewayKeyValidationCache (string tokenCacheKey);
 
-   public function retrieveFromInvalidTokenCache(string tokenCacheKey) returns (boolean|());
+   public function retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |());
 
    public function removeFromInvalidTokenCache (string tokenCacheKey);
 
    public function addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) ;
+
+   public function retrieveFromTokenCache(string accessToken) returns (boolean|());
+
+   public function removeFromTokenCache (string accessToken);
+
+   public function addToTokenCache (string accessToken, boolean isValid) ;
 };
 
 public function APIGatewayCache::authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns (APIKeyValidationDto|()) {
@@ -65,9 +74,9 @@ public function APIGatewayCache::removeFromGatewayKeyValidationCache (string tok
     gatewayKeyValidationCache.remove(tokenCacheKey);
 }
 
-public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCacheKey) returns (boolean|()) {
-    match <boolean> invalidTokenCache.get(tokenCacheKey){
-        boolean authorize => {
+public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |()) {
+    match <APIKeyValidationDto> invalidTokenCache.get(tokenCacheKey){
+        APIKeyValidationDto authorize => {
             return authorize;
         }
         error err => {
@@ -82,4 +91,23 @@ public function APIGatewayCache::addToInvalidTokenCache (string tokenCacheKey, A
 
 public function APIGatewayCache::removeFromInvalidTokenCache (string tokenCacheKey) {
     invalidTokenCache.remove(tokenCacheKey);
+}
+
+public function APIGatewayCache::retrieveFromTokenCache(string accessToken) returns (boolean|()) {
+    match <boolean> gatewayTokenCache.get(accessToken){
+        boolean authorize => {
+            return authorize;
+        }
+        error err => {
+            return ();
+        }
+    }
+}
+
+public function APIGatewayCache::addToTokenCache (string accessToken, boolean isValid) {
+    gatewayTokenCache.put(accessToken, isValid);
+}
+
+public function APIGatewayCache::removeFromTokenCache (string accessToken) {
+    gatewayTokenCache.remove(accessToken);
 }
