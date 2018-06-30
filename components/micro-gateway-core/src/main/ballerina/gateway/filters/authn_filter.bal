@@ -130,8 +130,7 @@ public type AuthnFilter object {
                                     authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
                                     .contentAware;
                                     authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
-                                    if(getConfigBooleanValue(JWT_CONFIG_INSTANCE_ID, JWT_ENABLED, false) &&
-                                        authenticationContext.callerToken != "") {
+                                    if(authenticationContext.callerToken != "") {
                                         string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
                                             JWT_HEADER_NAME);
                                         request.setHeader(jwtheaderName, authenticationContext.callerToken);

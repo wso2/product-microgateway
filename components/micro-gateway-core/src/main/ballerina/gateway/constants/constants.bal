@@ -223,8 +223,6 @@
 
 @Description { value: "JWT  related configs"}
 @final public string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
-@Description { value: "JWT enabled in gateway"}
-@final public string JWT_ENABLED = "enabled";
 @Description { value: "JWT  header name"}
 @final public string JWT_HEADER = "header";
 
