@@ -296,6 +296,18 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
 
             if (RESTServiceConstants.FAILOVER.equalsIgnoreCase(endpointType)) {
+                //ballerina does not treat primary/failover endpoint separately. Hence, primary production/sandbox
+                //  eps (if any) will be added into failover list.
+                if (endpointConf.getProdEndpoints() != null
+                        && endpointConf.getProdEndpoints().getEndpoints().size() > 0) {
+                    endpointConf.addProdFailoverEndpoint(endpointConf.getProdEndpoints().getEndpoints().get(0));
+                }
+                if (endpointConf.getSandEndpoints() != null
+                        && endpointConf.getSandEndpoints().getEndpoints().size() > 0) {
+                    endpointConf.addSandFailoverEndpoint(endpointConf.getSandEndpoints().getEndpoints().get(0));
+                }
+
+                //Adding additional production/sandbox failover endpoints
                 JsonNode prodFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.PRODUCTION_FAILOVERS);
                 if (prodFailoverEndpointNode != null) {
                     for (JsonNode node : prodFailoverEndpointNode) {

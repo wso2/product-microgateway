@@ -1,0 +1,3 @@
+endpoint http:Client {{qualifiedServiceName}}_{{endpointUrlType}} {
+    url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{endpointUrlType}}.0", "{{endpoints.0.endpointUrl}}"){{>caching}}{{>basicAuth}}
+};

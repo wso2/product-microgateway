@@ -108,10 +108,10 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateCommonEndpoints() throws IOException {
-        String srcFile = GeneratorConstants.ENDPOINTS + GeneratorConstants.BALLERINA_EXTENSION;
+        String srcFile = GeneratorConstants.LISTENERS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
         String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.ENDPOINT_TEMPLATE_NAME);
+                GeneratorConstants.LISTENERS_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
