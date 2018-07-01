@@ -16,6 +16,10 @@
 
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+/**
+ * Enum to represent endpoint URL types (Production, Sandbox)
+ * 
+ */
 public enum EndpointUrlTypeEnum {
     PROD_EP, SAND_EP
 }
