@@ -284,14 +284,18 @@ public class GatewayCmdUtils {
         copyTargetDistBalx(projectRoot, labelName);
 
         //copy micro-gw.conf file to the distribution
-        GatewayCmdUtils.copyFilesToSources(
+        copyFilesToSources(
                 GatewayCmdUtils.getConfigFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE,
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
+        String targetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP;
         //creating an archive of the distribution
-        ZipUtils.zip(distPath, getLabelTargetDirectoryPath(projectRoot, labelName) + File.separator + File.separator
-                + GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP);
+        ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
+        
+        //clean the target folder while keeping the distribution zip file
+        cleanFolder(targetPath, zipFileName);
     }
 
     /**
@@ -559,6 +563,51 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Cleans the given folder while keeping a set of specified files
+     *
+     * @param targetPath    path of folder to clean
+     * @param keep          files to keep
+     * @throws IOException  error while cleaning the folder
+     */
+    private static void cleanFolder(String targetPath, String... keep) throws IOException {
+        File targetFolder = new File(targetPath);
+        logger.debug("Cleaning target folder: {}", targetPath);
+        if (!targetFolder.isDirectory()) {
+            logger.warn("Nothing to delete. Target folder {} is not a directory.", targetPath);
+            return;
+        }
+        //Get all files from source directory
+        String files[] = targetFolder.list();
+        if (files == null) {
+            logger.warn("Nothing to delete. Target folder {} is empty.", targetPath);
+            return;
+        }
+        for (String file : files) {
+            for (String keepFile : keep) {
+                if (file.equals(keepFile)) {
+                    logger.trace("Keeping file: {}", file);
+                    continue;
+                }
+                logger.trace("Deleting file: {}", file);
+                File fileToDelete = new File(targetFolder, file);
+                boolean success;
+                if (fileToDelete.isDirectory()) {
+                    FileUtils.deleteDirectory(fileToDelete);
+                    success = !fileToDelete.exists();
+                } else {
+                    success = fileToDelete.delete();
+                }
+                if (success) {
+                    logger.trace("Deleting file {} success.", file);
+                } else {
+                    logger.trace("Deleting file {} failed.", file);
+                }
+            }
+        }
+        logger.debug("Cleaning target folder {} completed.", targetPath);
+    }
+
+    /**
      * This function recursively copy all the sub folder and files from sourceFolder to destinationFolder
      *
      * @param sourceFolder      source location
@@ -623,24 +672,6 @@ public class GatewayCmdUtils {
             }
         }
         return folder;
-    }
-
-    /**
-     * Creates a new folders if not exists
-     *
-     * @param path folder path
-     */
-    private static void createFoldersIfNotExist(String path) {
-        File folder = new File(path);
-        if (!folder.exists() && !folder.isDirectory()) {
-            boolean created = folder.mkdirs();
-            if (created) {
-                logger.trace("Dir: {} created. ", path);
-            } else {
-                logger.error("Failed to create dir: {} ", path);
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
-            }
-        }
     }
 
     /**
