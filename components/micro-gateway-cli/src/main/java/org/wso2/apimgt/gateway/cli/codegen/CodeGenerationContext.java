@@ -17,13 +17,13 @@
 package org.wso2.apimgt.gateway.cli.codegen;
 
 public class CodeGenerationContext {
-    private String label;
+    private String projectName;
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
-    public String getLabel() {
-        return label;
+    public String getProjectName() {
+        return projectName;
     }
 }

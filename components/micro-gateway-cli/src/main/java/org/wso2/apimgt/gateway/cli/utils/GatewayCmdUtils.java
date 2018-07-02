@@ -243,21 +243,21 @@ public class GatewayCmdUtils {
 
     /**
      * Get temp folder location
-     *
+     * 
+     * @param projectName name of the project
      * @return temp folder location
      */
-    private static String getTempFolderLocation() {
-        return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
+    private static String getProjectTempFolderLocation(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
     }
 
     /**
-     * Create a project structure for a particular label.
+     * Create a project structure for a particular project name.
      *
-     * @param workspace   project root location
      * @param projectName name of the project
      */
-    public static void createProjectStructure(String workspace, String projectName) {
-        File projectDir = createFolderIfNotExist(workspace + File.separator + projectName);
+    public static void createProjectStructure(String projectName) {
+        File projectDir = createFolderIfNotExist(getUserDir() + File.separator + projectName);
 
         String srcDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
         createFolderIfNotExist(srcDirPath);
@@ -273,21 +273,20 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create a micro gateway distribution for the provided label
+     * Create a micro gateway distribution for the provided project name
      *
-     * @param projectRoot project root location
      * @param projectName   name of the project
      * @throws IOException erro while creating micro gateway distribution
      */
-    public static void createProjectGWDistribution(String projectRoot, String projectName) throws IOException {
-        createTargetGatewayDistStructure(projectRoot, projectName);
+    public static void createProjectGWDistribution(String projectName) throws IOException {
+        createTargetGatewayDistStructure(projectName);
 
-        String distPath = getTargetDistPath(projectRoot, projectName);
-        String gwDistPath = getTargetGatewayDistPath(projectRoot, projectName);
+        String distPath = getTargetDistPath(projectName);
+        String gwDistPath = getTargetGatewayDistPath(projectName);
         copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
                 + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
-        copyTargetDistBinScripts(projectRoot, projectName);
-        copyTargetDistBalx(projectRoot, projectName);
+        copyTargetDistBinScripts(projectName);
+        copyTargetDistBalx(projectName);
 
         //copy micro-gw.conf file to the distribution
         copyFilesToSources(
@@ -295,7 +294,7 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        String targetPath = getProjectTargetDirectoryPath(projectRoot, projectName);
+        String targetPath = getProjectTargetDirectoryPath(projectName);
         String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
@@ -306,40 +305,39 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Creates the distribution structure for the label
+     * Creates the distribution structure for the project name
      *
-     * @param projectRoot project root location
-     * @param labelName   name of the label
+     * @param projectName   name of the label
      */
-    private static void createTargetGatewayDistStructure(String projectRoot, String labelName) {
-        //path : {label}/target
-        String projectTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
+    private static void createTargetGatewayDistStructure(String projectName) {
+        //path : {projectName}/target
+        String projectTargetPath = getProjectTargetDirectoryPath(projectName);
         createFolderIfNotExist(projectTargetPath);
 
-        //path : {label}/target/distribution
-        String distPath = getTargetDistPath(projectRoot, labelName);
+        //path : {projectName}/target/distribution
+        String distPath = getTargetDistPath(projectName);
         createFolderIfNotExist(distPath);
 
-        //path : {label}/target/distribution/micro-gw-{label}
-        String distMicroGWPath = getTargetGatewayDistPath(projectRoot, labelName);
+        //path : {projectName}/target/distribution/micro-gw-{projectName}
+        String distMicroGWPath = getTargetGatewayDistPath(projectName);
         createFolderIfNotExist(distMicroGWPath);
 
-        //path : {label}/target/distribution/micro-gw-{label}/bin
+        //path : {projectName}/target/distribution/micro-gw-{projectName}/bin
         String distBinPath = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_BIN;
         createFolderIfNotExist(distBinPath);
 
-        //path : {label}/target/distribution/micro-gw-{label}/conf
+        //path : {projectName}/target/distribution/micro-gw-{projectName}/conf
         String distConfPath = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_CONF;
         createFolderIfNotExist(distConfPath);
 
-        //path : {label}/target/distribution/micro-gw-{label}/logs
+        //path : {projectName}/target/distribution/micro-gw-{projectName}/logs
         String logsDirPath = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_LOGS_DIRECTORY_NAME;
         createFolderIfNotExist(logsDirPath);
 
-        //path : {label}/target/distribution/micro-gw-{label}/logs/access_logs
+        //path : {projectName}/target/distribution/micro-gw-{projectName}/logs/access_logs
         createFileIfNotExist(logsDirPath, GatewayCliConstants.ACCESS_LOG_FILE);
 
-        //path : {label}/target/distribution/micro-gw-{label}/exec
+        //path : {projectName}/target/distribution/micro-gw-{projectName}/exec
         String distExec = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         createFolderIfNotExist(distExec);
     }
@@ -347,11 +345,12 @@ public class GatewayCmdUtils {
     /**
      * Load the stored resource hash content from the CLI temp folder
      *
+     * @param projectName name of the project
      * @return stored resource hash content from the CLI temp folder
      * @throws IOException error while loading stored resource hash content
      */
-    public static String loadStoredResourceHashes() throws IOException {
-        String resourceHashFileLocation = getResourceHashHolderFileLocation();
+    public static String loadStoredResourceHashes(String projectName) throws IOException {
+        String resourceHashFileLocation = getResourceHashHolderFileLocation(projectName);
         String content = null;
         if (new File(resourceHashFileLocation).exists()) {
             content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
@@ -363,13 +362,14 @@ public class GatewayCmdUtils {
      * Saves the resource hash content to the CLI temp folder
      *
      * @param content resource hash content
+     * @param projectName name of the project
      * @throws IOException error while saving resource hash content
      */
-    public static void storeResourceHashesFileContent(String content) throws IOException {
-        String tempDirPath = getTempFolderLocation();
+    public static void storeResourceHashesFileContent(String content, String projectName) throws IOException {
+        String tempDirPath = getProjectTempFolderLocation(projectName);
         createFolderIfNotExist(tempDirPath);
 
-        String resourceHashesFileLocation = getResourceHashHolderFileLocation();
+        String resourceHashesFileLocation = getResourceHashHolderFileLocation(projectName);
         File pathFile = new File(resourceHashesFileLocation);
         if (!pathFile.exists()) {
             boolean created = pathFile.createNewFile();
@@ -401,49 +401,45 @@ public class GatewayCmdUtils {
 
     /**
      * Get resource hash holder file path
-     *
+     * 
+     * @param projectName name of the project
      * @return resource hash holder file path
      */
-    private static String getResourceHashHolderFileLocation() {
-        return GatewayCmdUtils.getTempFolderLocation() + File.separator
+    private static String getResourceHashHolderFileLocation(String projectName) {
+        return getProjectTempFolderLocation(projectName) + File.separator
                 + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
     }
 
     /**
-     * Get the distribution path for a given label
+     * Get the distribution path for a given project name
      *
-     * @param projectRoot project root location
-     * @param labelName   name of the label
-     * @return distribution path for a given label
+     * @param projectName   name of the project
+     * @return distribution path for a given project name
      */
-    private static String getTargetDistPath(String projectRoot, String labelName) {
-        String labelTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
-        return labelTargetPath + File.separator + GatewayCliConstants.GW_TARGET_DIST;
+    private static String getTargetDistPath(String projectName) {
+        return getProjectTargetDirectoryPath(projectName) + File.separator + GatewayCliConstants.GW_TARGET_DIST;
     }
 
     /**
-     * Get the gateway distribution path for a given label
+     * Get the gateway distribution path for a given project name
      *
-     * @param projectRoot project root location
-     * @param labelName   name of the label
-     * @return gateway distribution path for a given label
+     * @param projectName   name of the project
+     * @return gateway distribution path for a given project name
      */
-    private static String getTargetGatewayDistPath(String projectRoot, String labelName) {
-        String labelTargetPath = getTargetDistPath(projectRoot, labelName);
-        return labelTargetPath + File.separator + GatewayCliConstants.GW_DIST_PREFIX + labelName;
+    private static String getTargetGatewayDistPath(String projectName) {
+        return getTargetDistPath(projectName) + File.separator + GatewayCliConstants.GW_DIST_PREFIX + projectName;
     }
 
     /**
      * Copies shell scripts to the distribution location
      *
-     * @param projectRoot project root location
-     * @param labelName   name of the label
+     * @param projectName   name of the project
      * @throws IOException error while coping scripts
      */
-    private static void copyTargetDistBinScripts(String projectRoot, String labelName) throws IOException {
+    private static void copyTargetDistBinScripts(String projectName) throws IOException {
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
-        linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, labelName);
-        String shTargetPath = getTargetGatewayDistPath(projectRoot, labelName);
+        linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
+        String shTargetPath = getTargetGatewayDistPath(projectName);
         File pathFile = new File(shTargetPath + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator
                 + GatewayCliConstants.GW_DIST_SH);
         try (FileWriter writer = new FileWriter(pathFile)) {
@@ -461,22 +457,21 @@ public class GatewayCmdUtils {
     /**
      * Copies balx binaries to the distribution location
      *
-     * @param projectRoot project root location
-     * @param labelName   name of the label
+     * @param projectName   name of the project
      * @throws IOException error while coping balx files
      */
-    private static void copyTargetDistBalx(String projectRoot, String labelName) throws IOException {
-        String labelTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
+    private static void copyTargetDistBalx(String projectName) throws IOException {
+        String projectTargetDirectoryPath = getProjectTargetDirectoryPath(projectName);
         String gatewayDistExecPath =
-                getTargetGatewayDistPath(projectRoot, labelName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
+                getTargetGatewayDistPath(projectName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         File gatewayDistExecPathFile = new File(
-                gatewayDistExecPath + File.separator + labelName + GatewayCliConstants.EXTENSION_BALX);
+                gatewayDistExecPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
         File balxSourceFile = new File(
-                labelTargetPath + File.separator + labelName + GatewayCliConstants.EXTENSION_BALX);
+                projectTargetDirectoryPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
         if (balxSourceFile.exists()) {
             FileUtils.copyFile(balxSourceFile, gatewayDistExecPathFile);
         } else {
-            throw new CLIInternalException(labelName + ".balx could not be found in " + labelTargetPath);
+            throw new CLIInternalException(projectName + ".balx could not be found in " + projectTargetDirectoryPath);
         }
     }
 
@@ -491,58 +486,53 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the label conf folder in the project root
+     * Returns path to the project conf folder
      *
-     * @param root project root location
-     * @return path to the label conf folder in the project root
+     * @return path to the project conf folder
      */
-    private static String getDeploymentConfigDirPath(String root, String label) {
-        return getLabelDirectoryPath(root, label) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+    private static String getProjectConfigDirPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
     /**
-     * Returns location of the main configuration file of given project root
+     * Returns location of the deployment configuration file of given project
      *
-     * @param root project root location
-     * @return path label configuration file
+     * @param projectName name of the project
+     * @return path to deployment configuration file
      */
-    public static String getDeploymentConfigLocation(String root, String projectName) {
-        return getDeploymentConfigDirPath(root, projectName) + File.separator
-                + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
+    public static String getDeploymentConfigLocation(String projectName) {
+        return getProjectConfigDirPath(projectName) + File.separator + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
     }
 
     /**
-     * Returns path to the given label project in the project root path
+     * Returns path to the given project in the current working directory
      *
-     * @param root      project root location
-     * @param labelName name of the label
-     * @return path to the given label project in the project root path
+     * @param projectName name of the project
+     * @return path to the given project in the current working directory
      */
-    public static String getLabelDirectoryPath(String root, String labelName) {
-        return root + File.separator + labelName;
+    public static String getProjectDirectoryPath(String projectName) {
+        return getUserDir() + File.separator + projectName;
     }
 
     /**
-     * Returns path to the /src of a given label project in the project root path
+     * Returns path to the /src of a given project in the current working directory
      *
-     * @param root      project root location
-     * @param labelName name of the label
-     * @return path to the /src of a given label project in the project root path
+     * @param projectName name of the project
+     * @return path to the /src of a given project in the current working directory
      */
-    public static String getProjectSrcDirectoryPath(String root, String labelName) {
-        return getLabelDirectoryPath(root, labelName) + File.separator
+    public static String getProjectSrcDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
     }
 
     /**
-     * Returns path to the /target of a given label project in the project root path
+     * Returns path to the /target of a given project in the current working directory
      *
-     * @param root      project root location
-     * @param labelName name of the label
-     * @return path to the /target of a given label project in the project root path
+     * @param projectName name of the project
+     * @return path to the /target of a given project in the current working directory
      */
-    private static String getProjectTargetDirectoryPath(String root, String labelName) {
-        return getLabelDirectoryPath(root, labelName) + File.separator
+    private static String getProjectTargetDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
     }
 
@@ -730,15 +720,14 @@ public class GatewayCmdUtils {
      * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath', 
      *  it will be taken as the deployment configuration. Otherwise, a default configuration will be copied. 
      *
-     * @param workspace  workspace location
-     * @param projectName label name
+     * @param projectName project name
      * @param deploymentConfPath path to deployment config
      * @throws IOException if file create went wrong
      */
-    public static void createDeploymentConfig(String workspace, String projectName, String deploymentConfPath)
+    public static void createDeploymentConfig(String projectName, String deploymentConfPath)
             throws IOException {
         
-        String depConfig = getDeploymentConfigDirPath(workspace, projectName) + File.separator
+        String depConfig = getProjectConfigDirPath(projectName) + File.separator
                 + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
         File file = new File(depConfig);
 
@@ -747,10 +736,9 @@ public class GatewayCmdUtils {
                 String defaultConfig = null;
                 boolean created = file.createNewFile();
                 if (created) {
-                    logger.trace("Workspace dir: {} created. ", workspace);
+                    logger.debug("Deployment config file: {} created.", depConfig);
                 } else {
-                    logger.error("Failed to create workspace dir: {} ", workspace);
-                    throw new CLIInternalException("Error occurred while setting up workspace structure");
+                    throw new CLIInternalException("Failed to create deployment config file: " + depConfig);
                 }
                 //Write Content
                 defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME, true);

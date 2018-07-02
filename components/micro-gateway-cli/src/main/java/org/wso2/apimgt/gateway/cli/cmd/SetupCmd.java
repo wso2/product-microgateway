@@ -136,7 +136,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
-        init(workspace, projectName, toolkitConfigPath, deploymentConfigPath);
+        init(projectName, toolkitConfigPath, deploymentConfigPath);
 
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
@@ -277,14 +277,14 @@ public class SetupCmd implements GatewayLauncherCmd {
         CodeGenerator codeGenerator = new CodeGenerator();
         boolean changesDetected;
         try {
-            policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(workspace, projectName) + File.separator
+            policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
                     + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
-            codeGenerator.generate(workspace, projectName, apis, true);
-            //Initializing the ballerina label project and creating .bal folder.
-            InitHandler.initialize(Paths.get(GatewayCmdUtils.getLabelDirectoryPath(workspace, projectName)), null,
+            codeGenerator.generate(projectName, apis, true);
+            //Initializing the ballerina project and creating .bal folder.
+            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                     new ArrayList<>(), null);
             try {
-                changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies);
+                changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies, projectName);
             } catch (HashingException e) {
                 logger.error("Error while checking for changes of resources. Skipping no-change detection..");
                 throw new CLIInternalException(
@@ -386,10 +386,10 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
     }
 
-    private static void init(String workspace, String projectName, String configPath, String deploymentConfigPath) {
+    private static void init(String projectName, String configPath, String deploymentConfigPath) {
         try {
-            GatewayCmdUtils.createProjectStructure(workspace, projectName);
-            GatewayCmdUtils.createDeploymentConfig(workspace, projectName, deploymentConfigPath);
+            GatewayCmdUtils.createProjectStructure(projectName);
+            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
 
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
@@ -400,18 +400,18 @@ public class SetupCmd implements GatewayLauncherCmd {
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
 
-            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(workspace, projectName);
+            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setLabel(projectName);
+            codeGenerationContext.setProjectName(projectName);
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
             logger.error("Error while parsing the config {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
-            logger.error("Error while generating label configs", e);
+            logger.error("Error while generating project configs", e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }

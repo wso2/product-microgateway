@@ -33,7 +33,7 @@ public class KubernetesService {
     public String getName() {
         if (name == null) {
             CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
-            return codeGenerationContext.getLabel() + GatewayCliConstants.K8S_SERVICE + UUID.randomUUID()
+            return codeGenerationContext.getProjectName() + GatewayCliConstants.K8S_SERVICE + UUID.randomUUID()
                     .toString();
         } else {
             return name;
