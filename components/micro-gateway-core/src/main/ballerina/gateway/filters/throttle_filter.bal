@@ -44,6 +44,8 @@ public type ThrottleFilter object {
         boolean filterFailed =check <boolean>context.attributes[FILTER_FAILED];
         boolean isSecured =check <boolean>context.attributes[IS_SECURED];
         context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
+        context.attributes[IS_THROTTLE_OUT] = false;
+
         AuthenticationContext keyvalidationResult;
         if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             keyvalidationResult = check <AuthenticationContext>context.attributes[
@@ -59,7 +61,6 @@ public type ThrottleFilter object {
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
-                    context.attributes[IS_THROTTLE_OUT] = false;
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
                 }
             }
@@ -85,7 +86,6 @@ public type ThrottleFilter object {
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
-                    context.attributes[IS_THROTTLE_OUT] = false;
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
                 }
             }
@@ -149,7 +149,8 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 }
 
 function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean, boolean) {
-    string throttleKey = getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
+    string clientIp = <string>context.attributes[REMOTE_ADDRESS];
+    string throttleKey = clientIp + ":" + getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
                                                          reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     return isRequestThrottled(throttleKey);
 }

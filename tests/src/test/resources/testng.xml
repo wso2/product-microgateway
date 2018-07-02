@@ -31,8 +31,8 @@
             <package name="org.wso2.micro.gateway.tests.services"/>
         </packages>
         <classes>
-            <class name="org.wso2.micro.gateway.tests.services.APIInvokeTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.services.ThrottlingTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>
         </classes>
     </test>
 
