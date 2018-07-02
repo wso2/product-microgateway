@@ -86,7 +86,7 @@ goto setupArgs
 
 :usageInfo
 	echo Missing command operand
-	echo "Usage: micro-gw [-v] ([ -l | --label ] setup | build | run)"
+	echo "Usage: micro-gw [-v] ([ -l | --label | -n | --projec ] setup | build | run)"
 goto :end
 
 :commandBuild
@@ -94,30 +94,30 @@ goto :end
 
 	set found=false
 	for %%a in (!originalArgs!) do (
-		if %verbose%==T echo [%date% %time%] DEBUG: looking for -l or --label in `%%a` found = %found%
+		if %verbose%==T echo [%date% %time%] DEBUG: looking for -n or --name in `%%a` found = %found%
 		if !found!==true (
-			set label=%%a
-			goto :labelFound
+			set name=%%a
+			goto :nameFound
 		)
 		:: Below if conditions will break if simplify into one line
-		if %%a==-label (
+		if %%a==--name (
 			set found=true
 			)
-		if %%a==-l (
+		if %%a==-n (
 			set found=true
 			)
 	)
 	if !found!==false goto :usageInfo
 
-	:labelFound
-		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for label %label%
+	:nameFound
+		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for name %name%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		set MICRO_GW_LABEL_PROJECT_DIR="%CURRENT_D%\micro-gw-resources\projects\%label%"
+		set MICRO_GW_LABEL_PROJECT_DIR="%CURRENT_D%\micro-gw-resources\projects\%name%"
 		if exist %MICRO_GW_LABEL_PROJECT_DIR% goto :continueBuild
 			REM Exit, if can not find a project with given label
 			if %verbose%==T echo [%date% %time%] DEBUG: Project directory does not exist for given label %MICRO_GW_LABEL_PROJECT_DIR%
-			echo "Incorrect label `%label%` or Workspace not initialized, Run setup befor building the project!"
+			echo "Incorrect label `%name%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
 	:continueBuild
@@ -127,7 +127,7 @@ goto :end
 			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
 			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
 			if exist "%TARGET_DIR%"  ( rmdir "%TARGET_DIR%" /s /q )
-			ballerina build src -o %label%.balx
+			ballerina build src -o %name%.balx
 		popd
 		if %verbose%==T echo [%date% %time%] DEBUG: Ballerina build completed
 goto :end
@@ -161,13 +161,13 @@ goto end
 
 	if %verbose%==T echo [%date% %time%] DEBUG: CLI_CLASSPATH = "%CLI_CLASSPATH%"
 
-	set JAVACMD=-Xms256m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%MICROGW_TOOLKIT_HOME%\heap-dump.hprof" %JAVA_OPTS% -classpath %CLI_CLASSPATH% -Djava.security.egd=file:/dev/./urandom -Dballerina.home="%BALLERINA_HOME%" -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -Dfile.encoding=UTF8 -Dcli.home="%MICROGW_TOOLKIT_HOME%" -Dtemplates.dir.path=.\resources\templates
+	set JAVACMD=-Xms256m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%MICROGW_TOOLKIT_HOME%\heap-dump.hprof" %JAVA_OPTS% -classpath %CLI_CLASSPATH% -Djava.security.egd=file:/dev/./urandom -Dballerina.home="%BALLERINA_HOME%" -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -Dfile.encoding=UTF8 -Dcli.home="%MICROGW_TOOLKIT_HOME%" -Dtemplates.dir.path=.\resources\templates -Duser.dir="%CURRENT_D%"
 	if %verbose%==T echo [%date% %time%] DEBUG: JAVACMD = !JAVACMD!
 
 :runJava
 	REM Jump to GW-CLI exec location when running the jar
 	CD %MICROGW_TOOLKIT_HOME%
-	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs% --path %CURRENT_D%
+	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
 	if "%ERRORLEVEL%"=="121" goto runJava
 :end
 goto endlocal
