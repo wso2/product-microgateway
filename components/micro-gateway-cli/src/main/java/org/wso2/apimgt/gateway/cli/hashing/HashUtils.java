@@ -56,12 +56,13 @@ public class HashUtils {
      * @param apis APIs list
      * @param subscriptionPolicies Subscription Policies list
      * @param appPolicies Application policies list
+     * @param projectName Name of the project
      * @return true if there are changes detected vs the previous check
      * @throws HashingException error while change detection
      */
     public static boolean detectChanges(List<ExtendedAPI> apis,
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies,
-            List<ApplicationThrottlePolicyDTO> appPolicies) throws HashingException {
+            List<ApplicationThrottlePolicyDTO> appPolicies, String projectName) throws HashingException {
         
         boolean hasChanges = true;
         Map<String, String> allHashesMap = new HashMap<>();
@@ -78,13 +79,13 @@ public class HashUtils {
         allHashesMap.putAll(subsPolicyHashesMap);
 
         try {
-            Map<String, String> storedHashes = loadStoredResourceHashes();
+            Map<String, String> storedHashes = loadStoredResourceHashes(projectName);
             if (equalMaps(storedHashes, allHashesMap)) {
                 logger.debug("No changes detected from calculating hashes.");
                 hasChanges = false;
             } else {
                 logger.debug("Storing calculated resource hashes.");
-                storeResourceHashes(allHashesMap);
+                storeResourceHashes(allHashesMap, projectName);
                 logger.debug("Storing calculated resource hashes success.");
             }
         } catch (IOException e) {
@@ -96,11 +97,13 @@ public class HashUtils {
     /**
      * Loads the stored resource hashes
      * 
+     * @param projectName name of the project
+     * 
      * @return a map with id to hash mapping loaded from the CLI temp
      * @throws IOException error while loading the stored hashes
      */
-    private static Map<String, String> loadStoredResourceHashes() throws IOException {
-        String content = GatewayCmdUtils.loadStoredResourceHashes();
+    private static Map<String, String> loadStoredResourceHashes(String projectName) throws IOException {
+        String content = GatewayCmdUtils.loadStoredResourceHashes(projectName);
         Map<String, String> hashes = new HashMap<>();
         if (StringUtils.isNotEmpty(content)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -113,12 +116,13 @@ public class HashUtils {
      * Store the calculated hashes of API/policy resources in CLI temp folder
      * 
      * @param hashesMap map of id against hashes to be stored
+     * @param projectName name of the project
      * @throws IOException error while storing hash values
      */
-    private static void storeResourceHashes(Map<String, String> hashesMap) throws IOException {
+    private static void storeResourceHashes(Map<String, String> hashesMap, String projectName) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         String stringifiedHashes = mapper.writeValueAsString(hashesMap);
-        GatewayCmdUtils.storeResourceHashesFileContent(stringifiedHashes);
+        GatewayCmdUtils.storeResourceHashesFileContent(stringifiedHashes, projectName);
     }
 
     /**

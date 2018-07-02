@@ -52,13 +52,13 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectRoot, String labelName, List<ExtendedAPI> apis, boolean overwrite)
+    public void generate(String projectName, List<ExtendedAPI> apis, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
         String projectSrcPath = GatewayCmdUtils
-                .getProjectSrcDirectoryPath(projectRoot, labelName);
+                .getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
         for (ExtendedAPI api : apis) {
             parser = new SwaggerParser();
