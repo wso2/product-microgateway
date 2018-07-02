@@ -18,8 +18,18 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 /**
  * Enum to represent endpoint URL types (Production, Sandbox)
- * 
  */
 public enum EndpointUrlTypeEnum {
-    PROD_EP, SAND_EP
+    PROD("prod"), SAND("sand");
+
+    private String name;
+
+    EndpointUrlTypeEnum(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

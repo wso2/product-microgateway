@@ -64,28 +64,28 @@ public class EndpointConfig {
 
     public void addSandEndpoint(Endpoint endpoint) {
         if (sandEndpoints == null) {
-            sandEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND_EP);
+            sandEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND);
         }
         sandEndpoints.addEndpoint(endpoint);
     }
 
     public void addProdEndpoint(Endpoint endpoint) {
         if (prodEndpoints == null) {
-            prodEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD_EP);
+            prodEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD);
         }
         prodEndpoints.addEndpoint(endpoint);
     }
 
     public void addProdFailoverEndpoint(Endpoint endpoint) {
         if (prodFailoverEndpoints == null) {
-            prodFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD_EP);
+            prodFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD);
         }
         prodFailoverEndpoints.addEndpoint(endpoint);
     }
 
     public void addSandFailoverEndpoint(Endpoint endpoint) {
         if (sandFailoverEndpoints == null) {
-            sandFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND_EP);
+            sandFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND);
         }
         sandFailoverEndpoints.addEndpoint(endpoint);
     }

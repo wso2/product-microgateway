@@ -96,14 +96,14 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
+                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                 } else {
-                    clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
+                    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    clientResponse = {{qualifiedServiceName}}_PROD_EP->forward(urlPostfix, req);
+                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                 } else {
                     http:Response res = new;
                     res.statusCode = 403;
@@ -119,7 +119,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                clientResponse = {{qualifiedServiceName}}_SAND_EP->forward(urlPostfix, req);
+                clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
             } else {
                 http:Response res = new;
                 res.statusCode = 403;
