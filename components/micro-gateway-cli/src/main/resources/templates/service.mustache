@@ -1,11 +1,9 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/swagger;
-<<<<<<< 11e41601ccd72d12afb10310379964fbe3cd76c5
 import ballerina/config;
-=======
 import ballerina/time;
->>>>>>> Modifying analytics filter.
+
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
 
