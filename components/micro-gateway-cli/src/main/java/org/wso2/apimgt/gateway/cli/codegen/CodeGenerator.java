@@ -57,8 +57,8 @@ public class CodeGenerator {
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
-        String labelPath = GatewayCmdUtils
-                .getLabelSrcDirectoryPath(projectRoot, labelName);
+        String projectSrcPath = GatewayCmdUtils
+                .getProjectSrcDirectoryPath(projectRoot, labelName);
         List<GenSrcFile> genFiles = new ArrayList<>();
         for (ExtendedAPI api : apis) {
             parser = new SwaggerParser();
@@ -78,10 +78,10 @@ public class CodeGenerator {
 
         }
         genFiles.add(generateCommonEndpoints());
-        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(labelPath), overwrite);
+        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                labelPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
 
 
     }

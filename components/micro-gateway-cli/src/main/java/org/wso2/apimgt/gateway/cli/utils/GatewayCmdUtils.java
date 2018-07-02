@@ -18,6 +18,7 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
@@ -275,18 +276,18 @@ public class GatewayCmdUtils {
      * Create a micro gateway distribution for the provided label
      *
      * @param projectRoot project root location
-     * @param labelName   name of the label
+     * @param projectName   name of the project
      * @throws IOException erro while creating micro gateway distribution
      */
-    public static void createLabelGWDistribution(String projectRoot, String labelName) throws IOException {
-        createTargetGatewayDistStructure(projectRoot, labelName);
+    public static void createProjectGWDistribution(String projectRoot, String projectName) throws IOException {
+        createTargetGatewayDistStructure(projectRoot, projectName);
 
-        String distPath = getTargetDistPath(projectRoot, labelName);
-        String gwDistPath = getTargetGatewayDistPath(projectRoot, labelName);
+        String distPath = getTargetDistPath(projectRoot, projectName);
+        String gwDistPath = getTargetGatewayDistPath(projectRoot, projectName);
         copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
                 + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
-        copyTargetDistBinScripts(projectRoot, labelName);
-        copyTargetDistBalx(projectRoot, labelName);
+        copyTargetDistBinScripts(projectRoot, projectName);
+        copyTargetDistBalx(projectRoot, projectName);
 
         //copy micro-gw.conf file to the distribution
         copyFilesToSources(
@@ -294,13 +295,14 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        String targetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
-        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + labelName + GatewayCliConstants.EXTENSION_ZIP;
+        String targetPath = getProjectTargetDirectoryPath(projectRoot, projectName);
+        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
-        
-        //clean the target folder while keeping the distribution zip file
-        cleanFolder(targetPath, zipFileName);
+
+        // clean the target folder while keeping the distribution zip file
+        cleanFolder(targetPath, ArrayUtils.add(GatewayCliConstants.PROJECTS_TARGET_DELETE_FILES,
+                projectName + GatewayCliConstants.EXTENSION_BALX));
     }
 
     /**
@@ -311,8 +313,8 @@ public class GatewayCmdUtils {
      */
     private static void createTargetGatewayDistStructure(String projectRoot, String labelName) {
         //path : {label}/target
-        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
-        createFolderIfNotExist(labelTargetPath);
+        String projectTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
+        createFolderIfNotExist(projectTargetPath);
 
         //path : {label}/target/distribution
         String distPath = getTargetDistPath(projectRoot, labelName);
@@ -415,7 +417,7 @@ public class GatewayCmdUtils {
      * @return distribution path for a given label
      */
     private static String getTargetDistPath(String projectRoot, String labelName) {
-        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+        String labelTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
         return labelTargetPath + File.separator + GatewayCliConstants.GW_TARGET_DIST;
     }
 
@@ -464,7 +466,7 @@ public class GatewayCmdUtils {
      * @throws IOException error while coping balx files
      */
     private static void copyTargetDistBalx(String projectRoot, String labelName) throws IOException {
-        String labelTargetPath = getLabelTargetDirectoryPath(projectRoot, labelName);
+        String labelTargetPath = getProjectTargetDirectoryPath(projectRoot, labelName);
         String gatewayDistExecPath =
                 getTargetGatewayDistPath(projectRoot, labelName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         File gatewayDistExecPathFile = new File(
@@ -494,7 +496,7 @@ public class GatewayCmdUtils {
      * @param root project root location
      * @return path to the label conf folder in the project root
      */
-    private static String getLabelConfigDirPath(String root, String label) {
+    private static String getDeploymentConfigDirPath(String root, String label) {
         return getLabelDirectoryPath(root, label) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
     }
 
@@ -504,8 +506,9 @@ public class GatewayCmdUtils {
      * @param root project root location
      * @return path label configuration file
      */
-    public static String getLabelConfigLocation(String root, String labelName) {
-        return getLabelConfigDirPath(root, labelName) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
+    public static String getDeploymentConfigLocation(String root, String projectName) {
+        return getDeploymentConfigDirPath(root, projectName) + File.separator
+                + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
     }
 
     /**
@@ -526,7 +529,7 @@ public class GatewayCmdUtils {
      * @param labelName name of the label
      * @return path to the /src of a given label project in the project root path
      */
-    public static String getLabelSrcDirectoryPath(String root, String labelName) {
+    public static String getProjectSrcDirectoryPath(String root, String labelName) {
         return getLabelDirectoryPath(root, labelName) + File.separator
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
     }
@@ -538,7 +541,7 @@ public class GatewayCmdUtils {
      * @param labelName name of the label
      * @return path to the /target of a given label project in the project root path
      */
-    private static String getLabelTargetDirectoryPath(String root, String labelName) {
+    private static String getProjectTargetDirectoryPath(String root, String labelName) {
         return getLabelDirectoryPath(root, labelName) + File.separator
                 + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
     }
@@ -568,13 +571,13 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Cleans the given folder while keeping a set of specified files
+     * Cleans the given folder by deleting a set of specified files
      *
      * @param targetPath    path of folder to clean
-     * @param keep          files to keep
+     * @param delete          files to delete
      * @throws IOException  error while cleaning the folder
      */
-    private static void cleanFolder(String targetPath, String... keep) throws IOException {
+    private static void cleanFolder(String targetPath, String... delete) throws IOException {
         File targetFolder = new File(targetPath);
         logger.debug("Cleaning target folder: {}", targetPath);
         if (!targetFolder.isDirectory()) {
@@ -588,8 +591,8 @@ public class GatewayCmdUtils {
             return;
         }
         for (String file : files) {
-            for (String keepFile : keep) {
-                if (file.equals(keepFile)) {
+            for (String deleteFile : delete) {
+                if (!file.equals(deleteFile)) {
                     logger.trace("Keeping file: {}", file);
                     continue;
                 }
@@ -724,27 +727,53 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create initial label configuration
+     * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath', 
+     *  it will be taken as the deployment configuration. Otherwise, a default configuration will be copied. 
      *
      * @param workspace  workspace location
-     * @param label label name
+     * @param projectName label name
+     * @param deploymentConfPath path to deployment config
      * @throws IOException if file create went wrong
      */
-    public static void createLabelConfig(String workspace, String label) throws IOException {
-        String mainConfig =
-                getLabelConfigDirPath(workspace, label) + File.separator + GatewayCliConstants.LABEL_CONFIG_FILE_NAME;
-        File file = new File(mainConfig);
-        if (!file.exists()) {
-            boolean created = file.createNewFile();
-            if (created) {
-                logger.trace("Workspace dir: {} created. ", workspace);
-            } else {
-                logger.error("Failed to create workspace dir: {} ", workspace);
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
+    public static void createDeploymentConfig(String workspace, String projectName, String deploymentConfPath)
+            throws IOException {
+        
+        String depConfig = getDeploymentConfigDirPath(workspace, projectName) + File.separator
+                + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
+        File file = new File(depConfig);
+
+        if (deploymentConfPath == null) {
+            if (!file.exists()) {
+                String defaultConfig = null;
+                boolean created = file.createNewFile();
+                if (created) {
+                    logger.trace("Workspace dir: {} created. ", workspace);
+                } else {
+                    logger.error("Failed to create workspace dir: {} ", workspace);
+                    throw new CLIInternalException("Error occurred while setting up workspace structure");
+                }
+                //Write Content
+                defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME, true);
+                writeContent(defaultConfig, file);
             }
-            //Write Content
-            String defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_LABEL_CONFIG_FILE_NAME, true);
-            writeContent(defaultConfig, file);
+        } else {
+            File inputDepConfFile = new File(deploymentConfPath);
+            if (inputDepConfFile.exists()) {
+                String inputConfigContent = readFileAsString(deploymentConfPath, false);
+                //validate the provided file
+                try {
+                    TOMLConfigParser.parse(deploymentConfPath, ContainerConfig.class);
+                } catch (ConfigParserException | IllegalStateException e) {
+                    throw new CLIRuntimeException(
+                            "Error while reading deployment configuration file: " + deploymentConfPath
+                                    + ". The content is invalid.", e);
+                }
+                writeContent(inputConfigContent, file);
+            } else {
+                throw new CLIRuntimeException(
+                        "Error while reading deployment configuration file. Probably file path " + deploymentConfPath
+                                + "is invalid.");
+            }
         }
     }
 

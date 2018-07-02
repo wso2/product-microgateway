@@ -29,6 +29,10 @@ public class CLIRuntimeException extends RuntimeException {
         this(message, message, DEFAULT_EXIT_CODE);
     }
 
+    public CLIRuntimeException(String message, Throwable e) {
+        this(message, message, DEFAULT_EXIT_CODE, e);
+    }
+
     public CLIRuntimeException(String message, int exitCode) {
         this (message, message, exitCode);
     }
