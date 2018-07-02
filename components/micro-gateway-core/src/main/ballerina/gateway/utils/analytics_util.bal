@@ -15,7 +15,7 @@
 // under the License.
 
 function populateThrottleAnalyticdDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
-    boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     time:Time time = time:currentTime();
@@ -30,10 +30,10 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     eventDto.api_version = apiVersion;
     eventDto.context = getContext(context);
     eventDto.throttledTime = currentTimeMills;
-    eventDto.throttledOutReason = <string> context.attributes[THROTTLE_OUT_REASON];
-    if(isSecured){
+    eventDto.throttledOutReason = <string>context.attributes[THROTTLE_OUT_REASON];
+    if (isSecured) {
         AuthenticationContext authConext = check <AuthenticationContext>context
-            .attributes[AUTHENTICATION_CONTEXT];
+        .attributes[AUTHENTICATION_CONTEXT];
         metaInfo.keyType = authConext.keyType;
         eventDto.userId = authConext.username;
         eventDto.apiPublisher = authConext.apiPublisher;

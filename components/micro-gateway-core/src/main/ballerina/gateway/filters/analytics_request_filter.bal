@@ -31,7 +31,7 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if(context.attributes.hasKey(IS_THROTTLE_OUT)) {
+        if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
             boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
             if (isThrottleOut) {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
