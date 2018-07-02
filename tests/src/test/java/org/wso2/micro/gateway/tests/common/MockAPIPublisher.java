@@ -134,8 +134,12 @@ public class MockAPIPublisher {
         try {
             String xmlResponse = IOUtils.toString(new FileInputStream(
                     getClass().getClassLoader().getResource("key-validation-response.xml").getPath()));
-            xmlResponse = xmlResponse.replace("$APINAME", info.getApiName());
             xmlResponse = xmlResponse.replace("$KEY_TYPE", info.getKeyType());
+            xmlResponse = xmlResponse.replace("$APINAME", info.getApi().getName());
+            xmlResponse = xmlResponse.replace("$APPLICATION_ID", String.valueOf(info.getApplication().getId()));
+            xmlResponse = xmlResponse.replace("$APPLICATION_NAME", info.getApplication().getName());
+            xmlResponse = xmlResponse.replace("$APPLICATION_TIER", info.getApplication().getTier());
+            xmlResponse = xmlResponse.replace("$TIER", info.getSubscriptionTier());
             return xmlResponse;
         } catch (IOException e) {
             log.error("Error occurred when generating response", e);

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.tests.services;
+package org.wso2.micro.gateway.tests.toolkit;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
@@ -46,8 +46,8 @@ public class APIInvokeTestCase extends BaseTestCase {
         API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
-        api.setProdEndpoint("http://localhost:9443/echo/prod");
-        api.setSandEndpoint("http://localhost:9443/echo/sand");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -61,20 +61,22 @@ public class APIInvokeTestCase extends BaseTestCase {
 
         //Register a production token with key validation info
         KeyValidationInfo info = new KeyValidationInfo();
-        info.setApiName(api.getName());
-        info.setApiPublisher(api.getProvider());
+        info.setApi(api);
+        info.setApplication(application);
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
+        info.setSubscriptionTier("Unlimited");
 
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
         //Register a sandbox token with key validation info
         KeyValidationInfo infoSand = new KeyValidationInfo();
-        infoSand.setApiName(api.getName());
-        infoSand.setApiPublisher(api.getProvider());
+        infoSand.setApi(api);
+        infoSand.setApplication(application);
         infoSand.setAuthorized(true);
         infoSand.setKeyType(TestConstant.KEY_TYPE_SANDBOX);
+        infoSand.setSubscriptionTier("Unlimited");
         sandToken = pub.getAndRegisterAccessToken(infoSand);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION);
@@ -106,7 +108,7 @@ public class APIInvokeTestCase extends BaseTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");

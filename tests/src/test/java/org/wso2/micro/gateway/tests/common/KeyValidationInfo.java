@@ -17,29 +17,25 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
+import org.wso2.micro.gateway.tests.common.model.API;
+import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
+
 /**
  * Key validation info holder
  */
 public class KeyValidationInfo {
-    private String apiName;
-    private String apiPublisher;
+    private API api;
+    private ApplicationDTO application;
     private boolean authorized;
     private String keyType;
+    private String subscriptionTier;
 
-    public String getApiName() {
-        return apiName;
+    public String getSubscriptionTier() {
+        return subscriptionTier;
     }
 
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
-    }
-
-    public String getApiPublisher() {
-        return apiPublisher;
-    }
-
-    public void setApiPublisher(String apiPublisher) {
-        this.apiPublisher = apiPublisher;
+    public void setSubscriptionTier(String subscriptionTier) {
+        this.subscriptionTier = subscriptionTier;
     }
 
     public boolean getAuthorized() {
@@ -60,5 +56,21 @@ public class KeyValidationInfo {
 
     public void setKeyType(String keyType) {
         this.keyType = keyType;
+    }
+
+    public API getApi() {
+        return api;
+    }
+
+    public void setApi(API api) {
+        this.api = api;
+    }
+
+    public ApplicationDTO getApplication() {
+        return application;
+    }
+
+    public void setApplication(ApplicationDTO application) {
+        this.application = application;
     }
 }

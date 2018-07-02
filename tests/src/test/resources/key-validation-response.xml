@@ -10,9 +10,9 @@
                 <ax2133:apiName>$APINAME</ax2133:apiName>
                 <ax2133:apiPublisher>admin</ax2133:apiPublisher>
                 <ax2133:apiTier xsi:nil="true" />
-                <ax2133:applicationId>11</ax2133:applicationId>
-                <ax2133:applicationName>app1</ax2133:applicationName>
-                <ax2133:applicationTier>Unlimited</ax2133:applicationTier>
+                <ax2133:applicationId>$APPLICATION_ID</ax2133:applicationId>
+                <ax2133:applicationName>$APPLICATION_NAME</ax2133:applicationName>
+                <ax2133:applicationTier>$APPLICATION_TIER</ax2133:applicationTier>
                 <ax2133:authorized>true</ax2133:authorized>
                 <ax2133:authorizedDomains xsi:nil="true" />
                 <ax2133:consumerKey>fxzmNBTonG00FViQELefepgKF2Qa</ax2133:consumerKey>
@@ -28,7 +28,7 @@
                 <ax2133:subscriber>admin</ax2133:subscriber>
                 <ax2133:subscriberTenantDomain>carbon.super</ax2133:subscriberTenantDomain>
                 <ax2133:throttlingDataList>api_level_throttling_key</ax2133:throttlingDataList>
-                <ax2133:tier>Unlimited</ax2133:tier>
+                <ax2133:tier>$TIER</ax2133:tier>
                 <ax2133:type>$KEY_TYPE</ax2133:type>
                 <ax2133:userType>APPLICATION</ax2133:userType>
                 <ax2133:validationStatus>0</ax2133:validationStatus>

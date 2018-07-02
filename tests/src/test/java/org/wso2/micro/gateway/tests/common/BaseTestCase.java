@@ -19,14 +19,18 @@ package org.wso2.micro.gateway.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.testng.Assert;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
+import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -43,6 +47,7 @@ import java.util.UUID;
 public class BaseTestCase {
     protected ServerInstance microGWServer;
     protected MockHttpServer mockHttpServer;
+    protected final static int MOCK_SERVER_PORT = 9443;
 
     protected void init(String label, String project) throws Exception {
         CLIExecutor cliExecutor;
@@ -50,7 +55,9 @@ public class BaseTestCase {
         microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
         String cliHome = microGWServer.getServerHome();
 
-        mockHttpServer = new MockHttpServer(9443);
+        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
+        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
+        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
@@ -70,23 +77,12 @@ public class BaseTestCase {
     }
 
     protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType) throws Exception {
-        return getJWT(api.getName(), "/" + api.getContext() + "/" + api.getVersion(), api.getVersion(), tier,
-                applicationDTO.getName(), applicationDTO.getTier(), keyType);
-    }
-
-    private String getJWT(String apiName, String context, String version, String subTier, String appName,
-            String appTier, String keyType) throws Exception {
-        ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setId(10);
-        applicationDTO.setName(appName);
-        applicationDTO.setTier(appTier);
-
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        subscribedApiDTO.setContext(context);
-        subscribedApiDTO.setName(apiName);
-        subscribedApiDTO.setVersion(version);
+        subscribedApiDTO.setContext("/" + api.getContext() + "/" + api.getVersion());
+        subscribedApiDTO.setName(api.getName());
+        subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");
-        subscribedApiDTO.setSubscriptionTier(subTier);
+        subscribedApiDTO.setSubscriptionTier(tier);
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
 
         JSONObject jwtTokenInfo = new JSONObject();
@@ -132,5 +128,13 @@ public class BaseTestCase {
         byte[] signedAssertion = signature.sign();
         String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
         return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
+    }
+
+    protected String getServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_PORT), servicePath).toString();
+    }
+
+    protected String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + MOCK_SERVER_PORT), servicePath).toString();
     }
 }
