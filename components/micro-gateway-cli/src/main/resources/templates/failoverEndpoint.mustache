@@ -2,5 +2,5 @@ endpoint http:FailoverClient {{qualifiedServiceName}}_{{endpointUrlType}} {
     targets: [
     {{#endpoints}}    {url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{endpointUrlType}}.{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
     {{/unless}}{{/endpoints}}
-    ]
+    ]{{>basicAuth}}
 };
