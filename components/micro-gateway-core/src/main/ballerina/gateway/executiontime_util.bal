@@ -38,18 +38,19 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
     apiVersion;
     executionTimeDTO.tenantDomain = getTenantDomain(context);
     executionTimeDTO.context = getContext(context);
-    executionTimeDTO.correleationID = "71c60dbd-b2be-408d-9e2e-4fd11f60cfbc";
+    executionTimeDTO.correleationID = <string> context.attributes[MESSAGE_ID];
 
     //todo:calculate each laterncy time
     executionTimeDTO.securityLatency = check <int> context.attributes[SECURITY_LATENCY];
     executionTimeDTO.eventTime = getCurrentTime();
-    //io:print(context.attributes["securityLatency"]);
     executionTimeDTO.throttlingLatency = check <int> context.attributes[THROTTLE_LATENCY];
     //io:println(context.attributes["throttlingLatency"]);
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
     executionTimeDTO.responseMediationLatency = 0;
-    executionTimeDTO.backEndLatency = 43543;
+    int timeRequestOut = check <int> runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
+    int timeResponseIn = check <int> runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
+    executionTimeDTO.backEndLatency = timeResponseIn - timeRequestOut;
 
     return executionTimeDTO;
 }

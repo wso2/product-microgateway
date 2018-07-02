@@ -68,12 +68,14 @@ public type ResponseDTO {
     string consumerKey;
     string context;
     string apiVersion;
+    string correlationID;
+    string keyType;
     string api;
     string resourcePath;
     string resourceTemplate;
     string method;
     string versionOnly;
-    string response;
+    int response;
     int responseTime;
     int serviceTime;
     int backendTime;
@@ -85,10 +87,10 @@ public type ResponseDTO {
     string apiPublisher;
     string appName;
     string appId;
-    string cacheHit;
-    string responseSize;
-    string protoco;
-    string responseCode;
+    boolean cacheHit;
+    int responseSize;
+    string protocol;
+    int responseCode;
     string destination;
 };
 

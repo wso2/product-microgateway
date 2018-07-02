@@ -13,7 +13,6 @@ function sendFileRotatingEvent() returns error? {
     internal:Path path = new(API_USAGE_FILE);
 
     if (path.exists()) {
-        io:println("file exists");
         var result = rotateFile(API_USAGE_FILE);
         match result {
             string name => {
@@ -28,28 +27,10 @@ function sendFileRotatingEvent() returns error? {
         error er = {message: "No files present to rotate."};
         return er;
     }
-    //foreach pathEntry in pathList {
-    //    string fileName = pathEntry.getName();
-    //    if (fileName.contains(ZIP_EXTENSION)) {
-    //        http:Response response =  multipartSender(pathEntry.getName());
-    //        if (response.statusCode == 201) {
-    //            var result = pathEntry.delete();
-    //        } else {
-    //            log:printError("Error occurred while uploading file");
-    //        }
-    //        cnt++;
-    //    }
-    //}
-    //if ( cnt == 0 ) {
-    //    error er = {message: "No files present to upload."};
-    //    return er;
-    //} else {
-    //    return ();
-    //}
 }
 
 function errorOnRotating(error e) {
-    log:printInfo("File were not present to rotate:" + e.message);
+    log:printDebug("File were not present to rotate:" + e.message);
 }
 
 function rotatingTask() {

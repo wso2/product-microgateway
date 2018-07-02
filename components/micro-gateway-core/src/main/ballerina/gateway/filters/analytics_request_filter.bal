@@ -18,14 +18,17 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/time;
 
-
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
-        EventDTO eventDto = generateEventFromRequest(requestEventStream);
-        eventStream.publish(eventDto);
+        if (context.attributes[IS_THROTTLE_OUT] == true) {
+            if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true ) {
+                doFilterRequest(request, context);
+            }
+        } else {
+            doFilterRequest(request, context);
+        }
         return true;
 
     }
@@ -36,15 +39,33 @@ public type AnalyticsRequestFilter object {
             if (isThrottleOut) {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
                 //todo: publish
+            } else {
+                doFilterResponse(response, context);
+            }
+        } else {
+            if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+                doFilterResponse(response, context);
             }
         }
-        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-            ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
-            EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
-            eventStream.publish(eventDTO);
-        }
-        //ResponseDTO responseDTO =
         return true;
     }
 
 };
+
+
+function doFilterRequest( http:Request request, http:FilterContext context) {
+    AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
+    EventDTO eventDto = generateEventFromRequest(requestEventStream);
+    eventStream.publish(eventDto);
+}
+
+function doFilterResponse(http:Response response, http:FilterContext context) {
+    //Execution time data publishing
+    ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
+    EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
+    eventStream.publish(eventDTO);
+    //Response data publishing
+    ResponseDTO responseDto = generateResponseDataEvent(response, context);
+    EventDTO event = generateEventFromResponseDTO(responseDto);
+    eventStream.publish(event);
+}

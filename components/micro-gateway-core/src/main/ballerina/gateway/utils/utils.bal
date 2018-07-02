@@ -367,7 +367,8 @@ public function getCurrentTime() returns int {
 
 }
 
-public function rotateFile(string fileName) returns string|error  {
+public function rotateFile(string fileName) returns string|error {
+    //todo: append an uuid to zip name as unique identifies
     //string uuid = system:uuid();
     //string zipName = fileName + "." + uuid + ZIP_EXTENSION;
     int rotatingTimeStamp = getCurrentTime();

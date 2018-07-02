@@ -1,7 +1,11 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/swagger;
+<<<<<<< 11e41601ccd72d12afb10310379964fbe3cd76c5
 import ballerina/config;
+=======
+import ballerina/time;
+>>>>>>> Modifying analytics filter.
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
 
@@ -93,6 +97,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
         http:Response|error clientResponse;
+        runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
@@ -132,6 +137,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
                 clientResponse = res;
             }
         {{/endpointConfig.prodEndpoints}}
+        runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 
         match clientResponse {
 

@@ -59,6 +59,7 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                     sendErrorResponse(listener, request, context);
+                    setLatency(startingTime, context, THROTTLE_LATENCY);
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
@@ -71,6 +72,7 @@ public type ThrottleFilter object {
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
                     THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(listener, request, context);
+                setLatency(startingTime, context, THROTTLE_LATENCY);
                 return false;
             }
         } else if (!isSecured) {
@@ -104,6 +106,7 @@ public type ThrottleFilter object {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                 INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
             sendErrorResponse(listener, request, context);
+            setLatency(startingTime, context, THROTTLE_LATENCY);
             return false;
         }
 

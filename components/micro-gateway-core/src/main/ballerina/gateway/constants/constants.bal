@@ -155,6 +155,13 @@
 @final public string THROTTLE_LATENCY = "THROTTLE_LATENCY";
 @Description { value: "Time spent on the authentication filter" }
 @final public string SECURITY_LATENCY = "SECURITY_LATENCY";
+@Description { value: "HTTP Method" }
+@final public string METHOD = "METHOD";
+@Description { value: "Time stamp before sending to backend" }
+@final public string TS_REQUEST_OUT = "timeStampRequestOut";
+@Description { value: "Time stamp after response came in" }
+@final public string TS_RESPONSE_IN = "timeStampResponseIn";
+
 
 
 
