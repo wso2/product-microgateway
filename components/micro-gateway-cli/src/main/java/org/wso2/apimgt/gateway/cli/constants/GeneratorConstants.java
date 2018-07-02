@@ -24,8 +24,8 @@ public class GeneratorConstants {
 
     public static final String SERVICE_TEMPLATE_NAME = "service";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
-    public static final String ENDPOINT_TEMPLATE_NAME = "endpoints";
-    public static final String ENDPOINTS = "endpoints";
+    public static final String LISTENERS_TEMPLATE_NAME = "listeners";
+    public static final String LISTENERS = "listeners";
     public static final String BALLERINA_EXTENSION = ".bal";
     public static final String THROTTLE_POLICY_INIT_TEMPLATE_NAME = "policy_init";
 

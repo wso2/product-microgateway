@@ -15,15 +15,12 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class EndpointConfig {
     private String endpointType;
-    private List<Endpoint> prodEndpoints = null;
-    private List<Endpoint> prodFailoverEndpoints = null;
-    private List<Endpoint> sandEndpoints = null;
-    private List<Endpoint> sandFailoverEndpoints = null;
+    private EndpointList prodEndpoints = null;
+    private EndpointList prodFailoverEndpoints = null;
+    private EndpointList sandEndpoints = null;
+    private EndpointList sandFailoverEndpoints = null;
 
     public String getEndpointType() {
         return endpointType;
@@ -33,63 +30,63 @@ public class EndpointConfig {
         this.endpointType = endpointType;
     }
 
-    public List<Endpoint> getProdEndpoints() {
+    public EndpointList getProdEndpoints() {
         return prodEndpoints;
     }
 
-    public void setProdEndpoints(List<Endpoint> prodEndpoints) {
+    public void setProdEndpoints(EndpointList prodEndpoints) {
         this.prodEndpoints = prodEndpoints;
     }
 
-    public List<Endpoint> getProdFailoverEndpoints() {
+    public EndpointList getProdFailoverEndpoints() {
         return prodFailoverEndpoints;
     }
 
-    public void setProdFailoverEndpoints(List<Endpoint> prodFailoverEndpoints) {
+    public void setProdFailoverEndpoints(EndpointList prodFailoverEndpoints) {
         this.prodFailoverEndpoints = prodFailoverEndpoints;
     }
 
-    public List<Endpoint> getSandEndpoints() {
+    public EndpointList getSandEndpoints() {
         return sandEndpoints;
     }
 
-    public void setSandEndpoints(List<Endpoint> sandEndpoints) {
+    public void setSandEndpoints(EndpointList sandEndpoints) {
         this.sandEndpoints = sandEndpoints;
     }
 
-    public List<Endpoint> getSandFailoverEndpoints() {
+    public EndpointList getSandFailoverEndpoints() {
         return sandFailoverEndpoints;
     }
 
-    public void setSandFailoverEndpoints(List<Endpoint> sandFailoverEndpoints) {
+    public void setSandFailoverEndpoints(EndpointList sandFailoverEndpoints) {
         this.sandFailoverEndpoints = sandFailoverEndpoints;
     }
 
     public void addSandEndpoint(Endpoint endpoint) {
         if (sandEndpoints == null) {
-            sandEndpoints = new ArrayList<>();
+            sandEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND);
         }
-        sandEndpoints.add(endpoint);
+        sandEndpoints.addEndpoint(endpoint);
     }
 
     public void addProdEndpoint(Endpoint endpoint) {
         if (prodEndpoints == null) {
-            prodEndpoints = new ArrayList<>();
+            prodEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD);
         }
-        prodEndpoints.add(endpoint);
+        prodEndpoints.addEndpoint(endpoint);
     }
 
     public void addProdFailoverEndpoint(Endpoint endpoint) {
         if (prodFailoverEndpoints == null) {
-            prodFailoverEndpoints = new ArrayList<>();
+            prodFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.PROD);
         }
-        prodFailoverEndpoints.add(endpoint);
+        prodFailoverEndpoints.addEndpoint(endpoint);
     }
 
     public void addSandFailoverEndpoint(Endpoint endpoint) {
         if (sandFailoverEndpoints == null) {
-            sandFailoverEndpoints = new ArrayList<>();
+            sandFailoverEndpoints = new EndpointList(EndpointUrlTypeEnum.SAND);
         }
-        sandFailoverEndpoints.add(endpoint);
+        sandFailoverEndpoints.addEndpoint(endpoint);
     }
 }

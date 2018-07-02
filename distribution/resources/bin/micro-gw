@@ -61,9 +61,6 @@ fi
 # set BALLERINA_HOME
 BALLERINA_HOME="$MICROGW_TOOLKIT_HOME/lib/platform"
 
-echo BALLERINA_HOME environment variable is set to $BALLERINA_HOME
-echo MICROGW_TOOLKIT_HOME environment variable is set to $MICROGW_TOOLKIT_HOME
-
 export BALLERINA_HOME=$BALLERINA_HOME
 export PATH=$BALLERINA_HOME/bin:$PATH
 
