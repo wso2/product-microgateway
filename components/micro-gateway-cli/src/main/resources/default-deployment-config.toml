@@ -20,7 +20,7 @@
     #isBallerinaConf = ''
 [kubernetes]
   [kubernetes.kubernetesDeployment]
-    enable = "false"
+    enable = false
     #name = ''
     #labels = ''
     #replicas = ''
@@ -41,7 +41,7 @@
     #baseImage = ''
     #singleYAML = ''
   [kubernetes.kubernetesService]
-    enable = "false"
+    enable = false
     #name = ''
     #labels = ''
     #serviceType = ''

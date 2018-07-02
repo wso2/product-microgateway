@@ -60,7 +60,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
             String projectRoot = GatewayCmdUtils.getUserDir();
-            GatewayCmdUtils.createLabelGWDistribution(projectRoot, projectName);
+            GatewayCmdUtils.createProjectGWDistribution(projectRoot, projectName);
             outStream.println("Build success");
         } catch (IOException e) {
             logger.error("Error while creating micro gateway distribution for project {}.", projectName, e);

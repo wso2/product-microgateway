@@ -30,11 +30,10 @@ public class GatewayCliConstants {
     public static final String ACCESS_LOG_FILE = "access_logs";
     public static final String PROJECTS_TARGET_DIRECTORY_NAME = "target";
     public static final String MAIN_CONFIG_FILE_NAME = "cli-config.toml";
-    public static final String LABEL_CONFIG_FILE_NAME = "label-config.toml";
+    public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
-    public static final String PROJECT_ROOT_HOLDER_FILE_NAME = "workspace.txt";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
-    public static final String DEFAULT_LABEL_CONFIG_FILE_NAME = "default-label-config.toml";
+    public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
     public static final String CLI_CONF = "conf";
@@ -73,4 +72,9 @@ public class GatewayCliConstants {
     public static final List<String> accessControlAllowHeaders = Arrays
             .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction");
     public static final boolean accessControlAllowCredentials = false;
+
+    public static final String[] PROJECTS_TARGET_DELETE_FILES = new String[] {
+            GW_TARGET_DIST,
+            "Ballerina.lock"
+    };
 }

@@ -97,7 +97,11 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String trustStorePassword;
 
     @Parameter(names = { "-c", "--config" }, hidden = true)
-    private String configPath;
+    private String toolkitConfigPath;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = { "-d", "--deployment-config" }, hidden = true)
+    private String deploymentConfigPath;
 
     @SuppressWarnings("unused")
     @Parameter(names = { "-a", "--api-name" }, hidden = true)
@@ -124,15 +128,15 @@ public class SetupCmd implements GatewayLauncherCmd {
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         validateAPIGetRequestParams(label, apiName, version);
 
-        if (StringUtils.isEmpty(configPath)) {
-            configPath = GatewayCmdUtils.getMainConfigLocation();
+        if (StringUtils.isEmpty(toolkitConfigPath)) {
+            toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
 
         if (new File(workspace + File.separator + projectName).exists() && !isForcefully) {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
-        init(workspace, projectName, configPath);
+        init(workspace, projectName, toolkitConfigPath, deploymentConfigPath);
 
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
@@ -272,7 +276,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         CodeGenerator codeGenerator = new CodeGenerator();
         boolean changesDetected;
         try {
-            policyGenerator.generate(GatewayCmdUtils.getLabelSrcDirectoryPath(workspace, projectName) + File.separator
+            policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(workspace, projectName) + File.separator
                     + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
             codeGenerator.generate(workspace, projectName, apis, true);
             //Initializing the ballerina label project and creating .bal folder.
@@ -312,7 +316,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                     .build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-            GatewayCmdUtils.saveConfig(newConfig, configPath);
+            GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
 
         if (!changesDetected) {
@@ -381,10 +385,10 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
     }
 
-    private static void init(String workspace, String projectName, String configPath) {
+    private static void init(String workspace, String projectName, String configPath, String deploymentConfigPath) {
         try {
             GatewayCmdUtils.createProjectStructure(workspace, projectName);
-            GatewayCmdUtils.createLabelConfig(workspace, projectName);
+            GatewayCmdUtils.createDeploymentConfig(workspace, projectName, deploymentConfigPath);
 
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
@@ -395,8 +399,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
 
-            String labelConfigPath = GatewayCmdUtils.getLabelConfigLocation(workspace, projectName);
-            ContainerConfig containerConfig = TOMLConfigParser.parse(labelConfigPath, ContainerConfig.class);
+            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(workspace, projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
