@@ -85,7 +85,7 @@ goto setupArgs
 
 :usageInfo
 	echo Missing command operand
-	echo "Usage: micro-gw [-v] ([ -l | --label | -n | --projec ] setup | build | run)"
+	echo "Usage: micro-gw [-v] ([ -l ] setup | build)"
 goto :end
 
 :commandBuild
@@ -104,17 +104,17 @@ goto :end
 		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for project %project_name%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		set MICRO_GW_LABEL_PROJECT_DIR="%CURRENT_D%\%project_name%"
-		if exist %MICRO_GW_LABEL_PROJECT_DIR% goto :continueBuild
-			REM Exit, if can not find a project with given label
-			if %verbose%==T echo [%date% %time%] DEBUG: Project directory does not exist for given label %MICRO_GW_LABEL_PROJECT_DIR%
-			echo "Incorrect label `%project_name%` or Workspace not initialized, Run setup befor building the project!"
+		set MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name%"
+		if exist %MICRO_GW_PROJECT_DIR% goto :continueBuild
+			REM Exit, if can not find a project with given project name
+			if %verbose%==T echo [%date% %time%] DEBUG: Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
+			echo "Incorrect project name `%project_name%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
 	:continueBuild
-		pushd "%MICRO_GW_LABEL_PROJECT_DIR%"
+		pushd "%MICRO_GW_PROJECT_DIR%"
 			if %verbose%==T echo [%date% %time%] DEBUG: current dir %CD%
-			set TARGET_DIR="%MICRO_GW_LABEL_PROJECT_DIR%\target"
+			set TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
 			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
 			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
 			if exist "%TARGET_DIR%"  ( rmdir "%TARGET_DIR%" /s /q )
