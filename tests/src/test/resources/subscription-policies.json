@@ -59,13 +59,13 @@
       "policyId": "c440bd93-0b8c-426d-9f61-b97a4ebd5450",
       "policyName": "Unauthenticated",
       "displayName": "Unauthenticated",
-      "description": "Allows 500 request(s) per minute",
+      "description": "Allows 10 request(s) per minute",
       "isDeployed": true,
       "defaultLimit": {
         "type": "RequestCountLimit",
         "timeUnit": "min",
         "unitTime": 1,
-        "requestCount": 500
+        "requestCount": 10
       },
       "rateLimitCount": 0,
       "rateLimitTimeUnit": null,

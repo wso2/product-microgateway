@@ -72,7 +72,7 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
                     .getResource("keyManager" + File.separator + "unauthenticated.bal").getPath();
             startKMServer(kmServerFile);
             Map<String, String> headers = new HashMap<>();
-            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer asds-34234");
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer invalid");
             HttpResponse response = HttpClientRequest
                     .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
             Assert.assertNotNull(response);

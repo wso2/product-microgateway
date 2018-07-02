@@ -226,7 +226,8 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         File trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.isAbsolute()) {
-            trustStoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation;
+            trustStoreLocation = GatewayCmdUtils.getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator
+                    + trustStoreLocation);
         }
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
@@ -324,7 +325,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                     "No changes received from the server since the previous setup." 
                             + " If you already have a built distribution, it can be reused.");
         }
-        outStream.println("Setting up project " + projectName + " successful.");
+        outStream.println("Setting up project " + projectName + " is successful.");
 
         //There should not be any logic after this system exit
         if (!changesDetected) {
