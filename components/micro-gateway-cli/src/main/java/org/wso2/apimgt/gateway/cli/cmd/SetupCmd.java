@@ -222,7 +222,8 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         File trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.isAbsolute()) {
-            trustStoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation;
+            trustStoreLocation = GatewayCmdUtils.getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator
+                    + trustStoreLocation);
         }
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {

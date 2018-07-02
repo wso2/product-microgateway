@@ -18,7 +18,6 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
@@ -45,7 +44,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
 import java.util.List;
 
 public class GatewayCmdUtils {
@@ -82,6 +80,7 @@ public class GatewayCmdUtils {
     public static String readFileAsString(String path, boolean inResource) throws IOException {
         InputStream is;
         if (inResource) {
+            path = getUnixPath(path);
             is = ClassLoader.getSystemResourceAsStream(path);
         } else {
             is = new FileInputStream(new File(path));
@@ -185,7 +184,13 @@ public class GatewayCmdUtils {
      * @return current user dir
      */
     public static String getUserDir() {
-        return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
+        String currentDirProp = System.getProperty(GatewayCliConstants.SYS_PROP_CURRENT_DIR);
+        if (currentDirProp != null) {
+            return currentDirProp;
+        }
+        else {
+            return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
+        }
     }
 
     /**
@@ -767,5 +772,14 @@ public class GatewayCmdUtils {
         corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.accessControlAllowHeaders);
         corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.accessControlAllowCredentials);
         return corsConfigurationDTO;
+    }
+
+    /**
+     * Replace backslashes `\` in windows path string with forward slashes `/`
+     * @param path Location of a resource (file or directory)
+     * @return {String} File path with unix style file separator
+     */
+    public static String getUnixPath(String path) {
+        return path.replace(File.separator, "/");
     }
 }
