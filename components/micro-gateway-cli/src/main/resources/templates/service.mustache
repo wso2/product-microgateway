@@ -163,7 +163,21 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
             error err => {
                 http:Response res = new;
                 res.statusCode = 500;
-                res.setPayload(err.message);
+                string errorMessage = err.message;
+                string errorCode = "101503";
+                string errorDescription = "Error connecting to the back end";
+
+                if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
+                    errorCode = "101504";
+                    errorDescription = "Connection timed out";
+                }
+                json payload = {fault : {
+                    code : errorCode,
+                    message : "Runtime Error",
+                    description : errorDescription
+                }};
+                res.setPayload(payload);
+                log:printError("Error in client response", err = err);
                 outboundEp->respond(res) but { error e =>
                 log:printError("Error sending response", err = e) };
             }

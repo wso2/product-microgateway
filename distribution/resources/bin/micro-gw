@@ -224,5 +224,6 @@ $JAVACMD \
 	-Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
 	-Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
 	-Dfile.encoding=UTF8 \
+	-Dtemplates.dir.path="$MICROGW_TOOLKIT_HOME/resources/templates" \
 	-Dcli.home=$MICROGW_TOOLKIT_HOME \
 	org.wso2.apimgt.gateway.cli.cmd.Main "$@"
