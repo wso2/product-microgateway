@@ -212,6 +212,8 @@
 
 @Description { value: "Caching configs"}
 @final public string CACHING_ID = "caching";
+@Description { value: "Token cache enabled or not "}
+@final public string TOKEN_CACHE_ENABLED = "enabled";
 @Description { value: "Token cache expirt time "}
 @final public string TOKEN_CACHE_EXPIRY = "tokenCache.expiryTime";
 @Description { value: "Token cache capacity"}
@@ -221,8 +223,6 @@
 
 @Description { value: "JWT  related configs"}
 @final public string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
-@Description { value: "JWT enabled in gateway"}
-@final public string JWT_ENABLED = "enabled";
 @Description { value: "JWT  header name"}
 @final public string JWT_HEADER = "header";
 

@@ -85,10 +85,10 @@ function  getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {
 
 
 @Description {value:"Represents a OAuth2 Authenticator"}
-@Field {value:"gatewayTokenCache: Authentication cache object"}
+@Field {value:"gatewayCache: Authentication cache object"}
 public type OAuthAuthProvider object {
     public {
-        APIGatewayCache gatewayTokenCache;
+        APIGatewayCache gatewayCache;
     }
 
 
@@ -105,66 +105,149 @@ public type OAuthAuthProvider object {
 public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
                                                                                                               (APIKeyValidationDto) {
     string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
+    string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized;
     APIKeyValidationDto apiKeyValidationDto;
-    match self.gatewayTokenCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
-        APIKeyValidationDto apiKeyValidationDtoFromcache => {
-        if(isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
-            self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
-            self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDtoFromcache);
-            apiKeyValidationDtoFromcache.authorized= "false";
-            log:printDebug("Access token found in cache. But token is expired");
-            return apiKeyValidationDtoFromcache;
-        }
-        authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
-        apiKeyValidationDto = apiKeyValidationDtoFromcache;
-        log:printDebug("Access token " + apiRequestMetaDataDto.accessToken + " found in cache.");
-        }
-        () => {
-            match self.gatewayTokenCache.retrieveFromInvalidTokenCache(cacheKey) {
-                boolean cacheAuthorizedValue => {
-                    APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:
-                    API_AUTH_INVALID_CREDENTIALS_STRING };
-                    log:printDebug("Access token found in invalid token cache.");
-                    return apiKeyValidationInfoDTO;
-                }
-                () => {
-                    log:printDebug("Access token not found in cache. Hence calling the key vaidation service.");
-                    json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
-                    match <string>keyValidationInfoJson.authorized {
-                        string authorizeValue => {
-                            boolean auth = <boolean>authorizeValue;
-                            if (auth) {
-                                match <APIKeyValidationDto>keyValidationInfoJson {
-                                    APIKeyValidationDto dto => {
-                                        apiKeyValidationDto = dto;
-                                        // specifically setting the key type since type is a keyword in ballerina.
-                                        apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
+    if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+        match self.gatewayCache.retrieveFromTokenCache(accessToken) {
+            boolean isTokenCached => {
+                log:printDebug("Access token found in token cache.");
+                match self.gatewayCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
+                    APIKeyValidationDto apiKeyValidationDtoFromcache => {
+                        if (isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
+                            self.gatewayCache.removeFromGatewayKeyValidationCache(cacheKey);
+                            self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
+                            self.gatewayCache.removeFromTokenCache(accessToken);
+                            apiKeyValidationDtoFromcache.authorized = "false";
+                            log:printDebug("Access token found in key validation cache. But token is expired");
+                            return apiKeyValidationDtoFromcache;
+                        }
+                        authorized = <boolean>apiKeyValidationDtoFromcache.authorized;
+                        apiKeyValidationDto = apiKeyValidationDtoFromcache;
+                        log:printDebug("Access token found in key validation cache.");
+                    }
+                    () => {
+                        log:printDebug(
+                            "Access token not found in key validation cache. Hence calling the key vaidation service.");
+                        json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
+                        match <string>keyValidationInfoJson.authorized {
+                            string authorizeValue => {
+                                boolean auth = <boolean>authorizeValue;
+                                if (auth) {
+                                    match <APIKeyValidationDto>keyValidationInfoJson {
+                                        APIKeyValidationDto dto => {
+                                            apiKeyValidationDto = dto;
+                                            // specifically setting the key type since type is a keyword in ballerina.
+                                            apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
+                                        }
+                                        error err => {
+                                            log:printError(
+                                                "Error while converting key validation response json to type APIKeyValidationDto"
+                                                , err = err);
+                                            throw err;
+                                        }
                                     }
-                                    error err => {
-                                        log:printError("Error while converting key validation response json to type APIKeyValidationDto"
-                                            , err = err);
-                                        throw err;
-                                    }
+                                    authorized = auth;
+                                    self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
+                                    self.gatewayCache.addToTokenCache(accessToken, true);
+                                } else {
+                                    apiKeyValidationDto.authorized = "false";
+                                    apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.
+                                    validationStatus;
+                                    self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
+                                    log:printDebug(
+                                        "Access token added to inavlid token cache from key validation cache.");
                                 }
-                                authorized = auth;
-                                self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
-                            } else {
-                                apiKeyValidationDto.authorized = "false";
-                                apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.
-                                validationStatus;
-                                self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDto);
+                            }
+                            error err => {
+                                log:printError("Error while converting authorzed value from key vaidation respnse to a
+                            string value", err = err);
+                                throw err;
                             }
                         }
-                        error err => {
-                            log:printError("Error while converting authorzed value from key vaidation respnse to a
-                            string value", err=err);
-                            throw err;
+
+                    }
+                }
+            }
+            () => {
+                match self.gatewayCache.retrieveFromInvalidTokenCache(accessToken) {
+                    APIKeyValidationDto cacheAuthorizedValue => {
+                        log:printDebug("Access token found in invalid token cache.");
+                        return cacheAuthorizedValue;
+                    }
+                    () => {
+                        log:printDebug("Access token not found in token cache. Hence calling the key vaidation service.");
+                        json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
+                        match <string>keyValidationInfoJson.authorized {
+                            string authorizeValue => {
+                                boolean auth = <boolean>authorizeValue;
+                                if (auth) {
+                                    match <APIKeyValidationDto>keyValidationInfoJson {
+                                        APIKeyValidationDto dto => {
+                                            apiKeyValidationDto = dto;
+                                            // specifically setting the key type since type is a keyword in ballerina.
+                                            apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
+                                        }
+                                        error err => {
+                                            log:printError(
+                                                "Error while converting key validation response json to type APIKeyValidationDto"
+                                                , err = err);
+                                            throw err;
+                                        }
+                                    }
+                                    authorized = auth;
+                                    self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
+                                    self.gatewayCache.addToTokenCache(accessToken, true);
+                                } else {
+                                    apiKeyValidationDto.authorized = "false";
+                                    apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.
+                                    validationStatus;
+                                    self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
+                                    log:printDebug("Access token added to inavlid token cache.");
+                                }
+                            }
+                            error err => {
+                                log:printError("Error while converting authorzed value from key vaidation respnse to a
+                            string value", err = err);
+                                throw err;
+                            }
                         }
                     }
                 }
             }
-
+        }
+    } else {
+        log:printDebug("Gateway cache disabled. Hence calling the key vaidation service.");
+        json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
+        match <string>keyValidationInfoJson.authorized {
+            string authorizeValue => {
+                boolean auth = <boolean>authorizeValue;
+                if (auth) {
+                    match <APIKeyValidationDto>keyValidationInfoJson {
+                        APIKeyValidationDto dto => {
+                            apiKeyValidationDto = dto;
+                            // specifically setting the key type since type is a keyword in ballerina.
+                            apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
+                        }
+                        error err => {
+                            log:printError(
+                                "Error while converting key validation response json to type APIKeyValidationDto"
+                                , err = err);
+                            throw err;
+                        }
+                    }
+                    authorized = auth;
+                } else {
+                    authorized = auth;
+                    apiKeyValidationDto.authorized = "false";
+                    apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.validationStatus;
+                }
+            }
+            error err => {
+                log:printError("Error while converting authorzed value from key vaidation respnse to a
+                            string value", err = err);
+                throw err;
+            }
         }
     }
     if (authorized) {
