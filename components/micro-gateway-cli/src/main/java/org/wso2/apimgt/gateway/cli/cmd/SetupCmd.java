@@ -280,7 +280,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
                     + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
             codeGenerator.generate(projectName, apis, true);
-            //Initializing the ballerina label project and creating .bal folder.
+            //Initializing the ballerina project and creating .bal folder.
             InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                     new ArrayList<>(), null);
             try {
@@ -405,13 +405,13 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setLabel(projectName);
+            codeGenerationContext.setProjectName(projectName);
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
             logger.error("Error while parsing the config {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
-            logger.error("Error while generating label configs", e);
+            logger.error("Error while generating project configs", e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }

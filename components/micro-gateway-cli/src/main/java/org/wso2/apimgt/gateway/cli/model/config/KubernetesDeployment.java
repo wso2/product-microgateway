@@ -49,7 +49,7 @@ public class KubernetesDeployment {
     public String getName() {
         if (name == null) {
             CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
-            return codeGenerationContext.getLabel() + GatewayCliConstants.K8S_DEPLOYMENT + UUID.randomUUID()
+            return codeGenerationContext.getProjectName() + GatewayCliConstants.K8S_DEPLOYMENT + UUID.randomUUID()
                     .toString();
         } else {
             return name;
