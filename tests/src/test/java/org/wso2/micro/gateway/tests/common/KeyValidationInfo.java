@@ -29,6 +29,8 @@ public class KeyValidationInfo {
     private boolean authorized;
     private String keyType;
     private String subscriptionTier;
+    private String stringResponse;
+    private boolean responsePresent = false;
 
     public String getSubscriptionTier() {
         return subscriptionTier;
@@ -72,5 +74,18 @@ public class KeyValidationInfo {
 
     public void setApplication(ApplicationDTO application) {
         this.application = application;
+    }
+
+    public String getStringResponse() {
+        return stringResponse;
+    }
+
+    public void setStringResponse(String stringResponse) {
+        responsePresent = true;
+        this.stringResponse = stringResponse;
+    }
+
+    public boolean isResponsePresent() {
+        return responsePresent;
     }
 }
