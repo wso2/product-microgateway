@@ -21,7 +21,6 @@ GatewayConf gatewayConf = new;
 public type GatewayConf object {
     private {
         KeyManagerConf keyManagerConf;
-        ThrottleConf throttleConf;
     }
     public function getGatewayConf() returns (GatewayConf) {
         return gatewayConf;
@@ -32,12 +31,6 @@ public type GatewayConf object {
     }
     public function getKeyManagerConf() returns(KeyManagerConf) {
         return gatewayConf.keyManagerConf;
-    }
-    public function setThrottleConf(ThrottleConf throttleConfig) {
-        gatewayConf.throttleConf = throttleConfig;
-    }
-    public function getThrottleConf() returns(ThrottleConf) {
-        return gatewayConf.throttleConf;
     }
 };
 

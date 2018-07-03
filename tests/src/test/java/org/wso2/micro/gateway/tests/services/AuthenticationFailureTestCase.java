@@ -19,47 +19,67 @@
 package org.wso2.micro.gateway.tests.services;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.IntegrationTestCase;
-import org.wso2.micro.gateway.tests.context.MicroGWTestException;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Testing the pizza_shack api rest for authentication error messages
  */
-public class AuthenticationFailureTestCase extends IntegrationTestCase {
-    private ServerInstance microGWServer;
-    private ServerInstance kmServer;
-    private String keyManagerServiceDir = "src" + File.separator + "test" + File.separator + "resources" + File
-            .separator + "keyManager";
+public class AuthenticationFailureTestCase extends BaseTestCase {
+    private String invalidSubscriptionToken, invalidScopeToken;
 
     @BeforeClass
     private void setup() throws Exception {
-        microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
-        kmServer = ServerInstance.initMicroGwServer(TestConstant.KM_LISTENER_PORT);
-        String relativePath = getClass().getClassLoader()
-                .getResource("apis" + File.separator + "pizza_shack_api.bal").getPath();
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "base.conf").getPath();
-        startServer(relativePath, configPath);
+        String label = "apimTestLabel";
+        String project = "apimTestProject";
+        //get mock APIM Instance
+        MockAPIPublisher pub = MockAPIPublisher.getInstance();
+        API api = new API();
+        api.setName("PizzaShackAPI");
+        api.setContext("/pizzashack");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
+        api.setVersion("1.0.0");
+        api.setProvider("admin");
+        //Register API with label
+        pub.addApi(label, api);
+
+        String response = IOUtils.toString(new FileInputStream(
+                getClass().getClassLoader().getResource("keyManager" + File.separator + "invalid_subscription.xml")
+                        .getPath()));
+        KeyValidationInfo info = new KeyValidationInfo();
+        info.setStringResponse(response);
+        invalidSubscriptionToken = pub.getAndRegisterAccessToken(info);
+
+        String response1 = IOUtils.toString(new FileInputStream(
+                getClass().getClassLoader().getResource("keyManager" + File.separator + "unauthorized.xml").getPath()));
+        KeyValidationInfo info1 = new KeyValidationInfo();
+        info1.setStringResponse(response1);
+        invalidScopeToken = pub.getAndRegisterAccessToken(info1);
+
+        super.init(label, project);
     }
 
     @Test(description = "Test without auth header")
     public void testWithoutAuthHeader() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
-        HttpResponse response = HttpClientRequest
-                .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("Missing Credentials"), "Message content mismatched");
@@ -67,75 +87,40 @@ public class AuthenticationFailureTestCase extends IntegrationTestCase {
 
     @Test(description = "Test with invalid token")
     public void testWithInvalidToken() throws Exception {
-        try {
-            String kmServerFile = getClass().getClassLoader()
-                    .getResource("keyManager" + File.separator + "unauthenticated.bal").getPath();
-            startKMServer(kmServerFile);
-            Map<String, String> headers = new HashMap<>();
-            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer invalid");
-            HttpResponse response = HttpClientRequest
-                    .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
-            Assert.assertNotNull(response);
-            Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
-            Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Message " + "content mismatched");
-        } finally {
-            kmServer.stopServer(false);
-        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer invalid");
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Message " + "content mismatched");
     }
 
     @Test(description = "Test with invalid scopes")
     public void testWithInvalidScopes() throws Exception {
-        try {
-            String kmServerFile = getClass().getClassLoader()
-                    .getResource("keyManager" + File.separator + "unauthorized.bal").getPath();
-            startKMServer(kmServerFile);
-            Map<String, String> headers = new HashMap<>();
-            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer asds-34234");
-            HttpResponse response = HttpClientRequest
-                    .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
-            Assert.assertNotNull(response);
-            Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
-            Assert.assertTrue(
-                    response.getData().contains("The access token does not allow you to access the requested resource"),
-                    "Message content mismatched");
-        } finally {
-            kmServer.stopServer(false);
-        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidScopeToken);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
+        Assert.assertTrue(
+                response.getData().contains("The access token does not allow you to access the requested resource"),
+                "Message content mismatched");
     }
 
     @Test(description = "Test with invalid subscription")
     public void testWithInvalidSubscription() throws Exception {
-        try {
-            String kmServerFile = getClass().getClassLoader()
-                    .getResource("keyManager" + File.separator + "invalid_subscription.bal").getPath();
-            startKMServer(kmServerFile);
-            Map<String, String> headers = new HashMap<>();
-            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer sample-token");
-            HttpResponse response = HttpClientRequest
-                    .doGet(microGWServer.getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
-            Assert.assertNotNull(response);
-            Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
-            Assert.assertTrue(response.getData().contains("Resource forbidden"));
-        } finally {
-            kmServer.stopServer(false);
-        }
-    }
-
-
-    private void startServer(String balFile, String configFile) throws Exception {
-        microGWServer.startMicroGwServerWithConfigPath(balFile, configFile);
-    }
-
-    private void startKMServer(String balFile) throws Exception {
-        kmServer.startMicroGwServer(balFile);
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidSubscriptionToken);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Resource forbidden"));
     }
 
     @AfterClass
-    private void cleanUp() throws MicroGWTestException {
-        microGWServer.stopServer(true);
+    public void stop() throws Exception {
+        //Stop all the mock servers
+        super.finalize();
     }
-
-
-
 }
 
