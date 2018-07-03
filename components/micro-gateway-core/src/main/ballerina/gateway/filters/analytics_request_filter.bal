@@ -22,19 +22,23 @@ public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        if (context.attributes[IS_THROTTLE_OUT] == true) {
-            if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true ) {
+        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+        if (!filterFailed && context.attributes[IS_THROTTLE_OUT] == true) {
+            if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true) {
                 doFilterRequest(request, context);
             }
         } else {
-            doFilterRequest(request, context);
+            if (!filterFailed) {
+                doFilterRequest(request, context);
+            }
         }
         return true;
 
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
+        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+        if (!filterFailed && context.attributes.hasKey(IS_THROTTLE_OUT)) {
             boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
             if (isThrottleOut) {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
@@ -43,7 +47,8 @@ public type AnalyticsRequestFilter object {
                 doFilterResponse(response, context);
             }
         } else {
-            if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+            if (!filterFailed) {
+                context.attributes["THROTTLE_LATENCY"] = 0;
                 doFilterResponse(response, context);
             }
         }

@@ -10,7 +10,8 @@ future rotatingFtr = start rotatingTask();
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
-    internal:Path path = new(API_USAGE_FILE);
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
+    internal:Path path = new(fileLocation + API_USAGE_FILE);
 
     if (path.exists()) {
         var result = rotateFile(API_USAGE_FILE);

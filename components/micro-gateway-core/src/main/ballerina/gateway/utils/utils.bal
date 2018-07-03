@@ -371,10 +371,11 @@ public function rotateFile(string fileName) returns string|error {
     //todo: append an uuid to zip name as unique identifies
     //string uuid = system:uuid();
     //string zipName = fileName + "." + uuid + ZIP_EXTENSION;
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp + ZIP_EXTENSION;
-    internal:Path zipLocation = new(zipName);
-    internal:Path fileToZip = new(fileName);
+    internal:Path zipLocation = new(fileLocation + zipName);
+    internal:Path fileToZip = new(fileLocation + fileName);
     match internal:compress(fileToZip, zipLocation) {
         error compressError => {
             log:printError("Error occurred while compressing the file: ", err = compressError);

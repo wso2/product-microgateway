@@ -5,13 +5,13 @@ import ballerina/mime;
 stream<string> filesToUpload;
 
 
-function multipartSender(string file) returns http:Response {
+function multipartSender(string location, string file) returns http:Response {
     endpoint http:Client clientEP {
         url: uploadingUrl
     };
     mime:Entity filePart = new;
     filePart.setContentDisposition(getContentDispositionForFormData("file"));
-    filePart.setFileAsEntityBody(file);
+    filePart.setFileAsEntityBody(location + file);
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
 

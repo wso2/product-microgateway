@@ -161,6 +161,10 @@
 @final public string TS_REQUEST_OUT = "timeStampRequestOut";
 @Description { value: "Time stamp after response came in" }
 @final public string TS_RESPONSE_IN = "timeStampResponseIn";
+@Description { value: "API usage data path variable" }
+@final public string API_USAGE_PATH = "api.usage.data.path";
+@Description { value: "API usage data directory" }
+@final public string API_USAGE_DIR = "api-usage-data";
 
 
 

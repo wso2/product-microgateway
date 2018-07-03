@@ -11,12 +11,13 @@ future timerFtr = start timerTask();
 
 function searchFilesToUpload() returns error? {
     int cnt = 0;
-    internal:Path ex = new("");
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
+    internal:Path ex = new(fileLocation);
     internal:Path[] pathList = check ex.list();
     foreach pathEntry in pathList {
         string fileName = pathEntry.getName();
         if (fileName.contains(ZIP_EXTENSION)) {
-            http:Response response =  multipartSender(pathEntry.getName());
+            http:Response response =  multipartSender(fileLocation + PATH_SEPERATOR,  pathEntry.getName());
             if (response.statusCode == 201) {
                 var result = pathEntry.delete();
             } else {
@@ -34,7 +35,7 @@ function searchFilesToUpload() returns error? {
 }
 
 function informError(error e) {
-    log:printInfo("File were not present to upload yet:" + e.message);
+    log:printDebug("File were not present to upload yet:" + e.message);
 }
 
 function timerTask() {

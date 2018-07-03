@@ -35,14 +35,23 @@ function generateEventFromResponseDTO(ResponseDTO responseDTO) returns EventDTO 
 
 function generateResponseDataEvent(http:Response response, http:FilterContext context) returns ResponseDTO {
     ResponseDTO responseDto;
-    AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
-    if (authContext != null) {
+    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
+    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         responseDto.apiPublisher = authContext.apiPublisher;
         responseDto.keyType = authContext.keyType;
         responseDto.consumerKey = authContext.consumerKey;
         responseDto.userName = authContext.username;
         responseDto.appId = authContext.applicationId;
         responseDto.appName = authContext.applicationName;
+    } else {
+        responseDto.apiPublisher = getAPIDetailsFromServiceAnnotation(
+                                       reflect:getServiceAnnotations(context.serviceType)).publisher;
+        responseDto.keyType = PRODUCTION_KEY_TYPE;
+        responseDto.consumerKey = "-";
+        responseDto.userName = END_USER_ANONYMOUS;
+        responseDto.appId = ANONYMOUS_APP_ID;
+        responseDto.appName = ANONYMOUS_APP_NAME;
     }
     responseDto.api = getApiName(context);
     string versionOfApi = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
