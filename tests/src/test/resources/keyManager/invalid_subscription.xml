@@ -1,0 +1,34 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+   <soapenv:Body>
+      <ns:validateKeyResponse xmlns:ns="http://org.apache.axis2/xsd">
+         <ns:return xsi:type="ax2133:APIKeyValidationInfoDTO" xmlns:ax2135="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2136="http://dto.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2131="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ax2133:apiName xsi:nil="true"/>
+            <ax2133:apiPublisher xsi:nil="true"/>
+            <ax2133:apiTier xsi:nil="true"/>
+            <ax2133:applicationId xsi:nil="true"/>
+            <ax2133:applicationName xsi:nil="true"/>
+            <ax2133:applicationTier xsi:nil="true"/>
+            <ax2133:authorized>false</ax2133:authorized>
+            <ax2133:authorizedDomains xsi:nil="true"/>
+            <ax2133:consumerKey>wSCwFZAqg33nBliYbmuwrl8ARuYa</ax2133:consumerKey>
+            <ax2133:contentAware>false</ax2133:contentAware>
+            <ax2133:endUserName>admin@carbon.super</ax2133:endUserName>
+            <ax2133:endUserToken xsi:nil="true"/>
+            <ax2133:issuedTime>1530630699528</ax2133:issuedTime>
+            <ax2133:scopes>default</ax2133:scopes>
+            <ax2133:scopes>am_application_scope</ax2133:scopes>
+            <ax2133:spikeArrestLimit>0</ax2133:spikeArrestLimit>
+            <ax2133:spikeArrestUnit xsi:nil="true"/>
+            <ax2133:stopOnQuotaReach>false</ax2133:stopOnQuotaReach>
+            <ax2133:subscriber xsi:nil="true"/>
+            <ax2133:subscriberTenantDomain xsi:nil="true"/>
+            <ax2133:throttlingDataList xsi:nil="true"/>
+            <ax2133:tier xsi:nil="true"/>
+            <ax2133:type xsi:nil="true"/>
+            <ax2133:userType>APPLICATION</ax2133:userType>
+            <ax2133:validationStatus>900908</ax2133:validationStatus>
+            <ax2133:validityPeriod>3589000</ax2133:validityPeriod>
+         </ns:return>
+      </ns:validateKeyResponse>
+   </soapenv:Body>
+</soapenv:Envelope>

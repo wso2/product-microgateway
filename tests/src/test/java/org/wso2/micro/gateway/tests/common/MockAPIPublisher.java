@@ -127,20 +127,27 @@ public class MockAPIPublisher {
 
     public String getKeyValidationResponseForToken(String token) {
         KeyValidationInfo info = tokenInfo.get(token);
-        if (info == null) {
-            log.error("Token not registered");
-            throw new RuntimeException("Token not registered");
-        }
         try {
-            String xmlResponse = IOUtils.toString(new FileInputStream(
-                    getClass().getClassLoader().getResource("key-validation-response.xml").getPath()));
-            xmlResponse = xmlResponse.replace("$KEY_TYPE", info.getKeyType());
-            xmlResponse = xmlResponse.replace("$APINAME", info.getApi().getName());
-            xmlResponse = xmlResponse.replace("$APPLICATION_ID", String.valueOf(info.getApplication().getId()));
-            xmlResponse = xmlResponse.replace("$APPLICATION_NAME", info.getApplication().getName());
-            xmlResponse = xmlResponse.replace("$APPLICATION_TIER", info.getApplication().getTier());
-            xmlResponse = xmlResponse.replace("$TIER", info.getSubscriptionTier());
-            return xmlResponse;
+            if (info == null) {
+                log.error("Token not registered");
+                String xmlResponse = IOUtils.toString(new FileInputStream(
+                        getClass().getClassLoader().getResource("key-validation-error-response.xml").getPath()));
+                return xmlResponse;
+            } else {
+                if (info.isResponsePresent()) {
+                    return info.getStringResponse();
+                } else {
+                    String xmlResponse = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("key-validation-response.xml").getPath()));
+                    xmlResponse = xmlResponse.replace("$KEY_TYPE", info.getKeyType());
+                    xmlResponse = xmlResponse.replace("$APINAME", info.getApi().getName());
+                    xmlResponse = xmlResponse.replace("$APPLICATION_ID", String.valueOf(info.getApplication().getId()));
+                    xmlResponse = xmlResponse.replace("$APPLICATION_NAME", info.getApplication().getName());
+                    xmlResponse = xmlResponse.replace("$APPLICATION_TIER", info.getApplication().getTier());
+                    xmlResponse = xmlResponse.replace("$TIER", info.getSubscriptionTier());
+                    return xmlResponse;
+                }
+            }
         } catch (IOException e) {
             log.error("Error occurred when generating response", e);
             throw new RuntimeException(e.getMessage(), e);

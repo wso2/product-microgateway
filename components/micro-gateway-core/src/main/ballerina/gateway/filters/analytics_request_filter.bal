@@ -18,27 +18,59 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/time;
 
-
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
-        EventDTO eventDto = generateEventFromRequest(requestEventStream);
-        eventStream.publish(eventDto);
+        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+        if (!filterFailed && context.attributes[IS_THROTTLE_OUT] == true) {
+            if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true) {
+                doFilterRequest(request, context);
+            }
+        } else {
+            if (!filterFailed) {
+                doFilterRequest(request, context);
+            }
+        }
         return true;
 
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
+        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+        if (!filterFailed && context.attributes.hasKey(IS_THROTTLE_OUT)) {
             boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
             if (isThrottleOut) {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
                 //todo: publish
+            } else {
+                doFilterResponse(response, context);
+            }
+        } else {
+            if (!filterFailed) {
+                context.attributes["THROTTLE_LATENCY"] = 0;
+                doFilterResponse(response, context);
             }
         }
         return true;
     }
 
 };
+
+
+function doFilterRequest( http:Request request, http:FilterContext context) {
+    AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
+    EventDTO eventDto = generateEventFromRequest(requestEventStream);
+    eventStream.publish(eventDto);
+}
+
+function doFilterResponse(http:Response response, http:FilterContext context) {
+    //Execution time data publishing
+    ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
+    EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
+    eventStream.publish(eventDTO);
+    //Response data publishing
+    ResponseDTO responseDto = generateResponseDataEvent(response, context);
+    EventDTO event = generateEventFromResponseDTO(responseDto);
+    eventStream.publish(event);
+}

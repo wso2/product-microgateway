@@ -340,6 +340,10 @@ public class GatewayCmdUtils {
         //path : {projectName}/target/distribution/micro-gw-{projectName}/exec
         String distExec = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         createFolderIfNotExist(distExec);
+
+        //path : {label}/target/distribution/micro-gw-{label}/api-usage-data
+        String apiUsageDir = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_API_USAGE_DIRECTORY_NAME;
+        createFolderIfNotExist(apiUsageDir);
     }
 
     /**
@@ -437,21 +441,19 @@ public class GatewayCmdUtils {
      * @throws IOException error while coping scripts
      */
     private static void copyTargetDistBinScripts(String projectName) throws IOException {
+        String targetPath = getTargetGatewayDistPath(projectName);
+        String binDir = targetPath + File.separator
+                + GatewayCliConstants.GW_DIST_BIN + File.separator;
+
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
         linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        String shTargetPath = getTargetGatewayDistPath(projectName);
-        File pathFile = new File(shTargetPath + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator
-                + GatewayCliConstants.GW_DIST_SH);
-        try (FileWriter writer = new FileWriter(pathFile)) {
-            writer.write(linuxShContent);
-            boolean success = pathFile.setExecutable(true);
-            if (success) {
-                logger.trace("File: {} set to executable. ", pathFile.getAbsolutePath());
-            } else {
-                logger.error("Failed to set executable file: {} ", pathFile.getAbsolutePath());
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
-            }
-        }
+        File shPathFile = new File(binDir+GatewayCliConstants.GW_DIST_SH);
+        saveScript(linuxShContent, shPathFile);
+
+        String winBatContent = readFileAsString(GatewayCliConstants.GW_DIST_BAT_PATH, true);
+        winBatContent = winBatContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
+        File batPathFile = new File(binDir+GatewayCliConstants.GW_DIST_BAT);
+        saveScript(winBatContent, batPathFile);
     }
 
     /**
@@ -798,5 +800,23 @@ public class GatewayCmdUtils {
      */
     public static String getUnixPath(String path) {
         return path.replace(File.separator, "/");
+    }
+
+    /**
+     * Create script file in the given path with the given content
+     * @param content Content needs to be added to the script file
+     * @param path File object containing the path to save the script
+     */
+    private static void saveScript(String content, File path) throws IOException {
+        try (FileWriter writer = new FileWriter(path)) {
+            writer.write(content);
+            boolean success = path.setExecutable(true);
+            if (success) {
+                logger.trace("File: {} set to executable. ", path.getAbsolutePath());
+            } else {
+                logger.error("Failed to set executable file: {} ", path.getAbsolutePath());
+                throw new CLIInternalException("Error occurred while setting up workspace structure");
+            }
+        }
     }
 }

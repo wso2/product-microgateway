@@ -23,6 +23,7 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 import ballerina/internal;
+import ballerina/system;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
@@ -369,11 +370,15 @@ public function getCurrentTime() returns int {
 
 }
 
-public function rotateFile(string fileName) returns string|error  {
+public function rotateFile(string fileName) returns string|error {
+    //todo: append an uuid to zip name as unique identifies
+    //string uuid = system:uuid();
+    //string zipName = fileName + "." + uuid + ZIP_EXTENSION;
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp + ZIP_EXTENSION;
-    internal:Path zipLocation = new(zipName);
-    internal:Path fileToZip = new(fileName);
+    internal:Path zipLocation = new(fileLocation + zipName);
+    internal:Path fileToZip = new(fileLocation + fileName);
     match internal:compress(fileToZip, zipLocation) {
         error compressError => {
             log:printError("Error occurred while compressing the file: ", err = compressError);
@@ -446,6 +451,12 @@ function getAnalyticsConfig() {
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
     printDebug(KEY_UTILS, "Analytics config values read");
+}
+
+function setLatency(int starting, http:FilterContext context, string latencyType) {
+    int ending = getCurrentTime();
+    context.attributes[latencyType] = ending - starting;
+    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
 }
 
 future streamftr = start initStreamPublisher();

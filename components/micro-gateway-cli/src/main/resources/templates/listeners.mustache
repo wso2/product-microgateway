@@ -1,16 +1,49 @@
 import wso2/gateway;
+import ballerina/http;
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
+// Get authentication filter
+gateway:AuthnFilter authnFilter = getAuthenticationFilter();
+// Subscription validation filter
+gateway:SubscriptionFilter subscriptionFilter = new;
+// Throttling filter
+gateway:ThrottleFilter throttleFilter = new();
+// Analytics filter
+gateway:AnalyticsRequestFilter analyticsFilter = new();
+// Extension filter
 ExtensionFilter extensionFilter;
+// Authorization filter
+gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095,
-    filters:[extensionFilter]
+    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };
 
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
     port:9090,
-    filters:[extensionFilter]
+    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };
+
+function getAuthenticationFilter() returns gateway:AuthnFilter {
+    http:AuthHandlerRegistry registry;
+    // Getting basic and JWT authentication providers
+    http:AuthProvider[] authProviders = gateway:getAuthProviders();
+    int i = 1;
+    foreach provider in authProviders {
+        if (lengthof provider.id > 0) {
+            registry.add(provider.id, gateway:createAuthHandler(provider));
+        } else {
+            registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
+        }
+        i++;
+    }
+    // Adding basic and JWT authentication providers to a the handler chain
+    http:AuthnHandlerChain authnHandlerChain = new(registry);
+    // OAuth authentication handler
+    gateway:OAuthnAuthenticator oauthAuthenticator = new;
+    // Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
+    return new gateway:AuthnFilter(oauthAuthenticator, authnHandlerChain);
+}

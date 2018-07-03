@@ -85,8 +85,9 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
     apiVersion;
 
     //todo: hostname verify
-    analyticsRequestStream.hostName = "localhost";   //todo:get the host properl
+    analyticsRequestStream.hostName = "localhost";
     analyticsRequestStream.method = request.method;
+    context.attributes[METHOD] = request.method;
     analyticsRequestStream.resourceTemplate = getResourceConfigAnnotation
     (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
     analyticsRequestStream.resourcePath = getResourceConfigAnnotation
@@ -118,27 +119,11 @@ function getEventData(EventDTO dto) returns string {
 }
 
 function writeEventToFile(EventDTO eventDTO) {
-    //todo:batch events to reduce IO cost
-    int currentTime = getCurrentTime();
-    if (initializingTime == 0) {
-        initializingTime = getCurrentTime();
-    }
-    if (currentTime - initializingTime > rotatingTime) {
-        var result = rotateFile(API_USAGE_FILE);
-        initializingTime = getCurrentTime();
-        match result {
-            string name => {
-                log:printInfo("File rotated successfully.");
-            }
-            error err => {
-                log:printError("Error occurred while rotating the file: ", err = err);
-            }
-        }
-    }
-    io:ByteChannel channel = io:openFile(API_USAGE_FILE, io:APPEND);
-    io:CharacterChannel  charChannel = new(channel,  "UTF-8");
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
+    io:ByteChannel channel = io:openFile(fileLocation + API_USAGE_FILE, io:APPEND);
+    io:CharacterChannel charChannel = new(channel, "UTF-8");
     try {
-        match charChannel.write(getEventData(eventDTO),0) {
+        match charChannel.write(getEventData(eventDTO), 0) {
             int numberOfCharsWritten => {
                 log:printInfo("Event is getting written");
             }
@@ -146,7 +131,6 @@ function writeEventToFile(EventDTO eventDTO) {
                 throw err;
             }
         }
-
     } finally {
         match charChannel.close() {
             error sourceCloseError => {

@@ -34,12 +34,6 @@ public type RequestStreamDTO {
     string properties;
 };
 
-public type ThrottleConf {
-    boolean enabledHeaderConditions = false;
-    boolean enabledJWTClaimConditions = false;
-    boolean enabledQueryParamConditions = false;
-};
-
 public type GlobalThrottleStreamDTO {
     string throttleKey ;
     boolean isThrottled;

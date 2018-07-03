@@ -84,125 +84,13 @@ public type EndpointConfiguration {
 
 
 public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
-    printDebug(KEY_GW_LISTNER, "Initiallizing APIGatewayListener for port:" + endpointConfig.port);
     initiateGatewayConfigurations(endpointConfig);
     printDebug(KEY_GW_LISTNER, "Initiallized gateway configurations for port:" + endpointConfig.port);
-    initiateAuthProviders(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Initiallized auth filters for port:" + endpointConfig.port);
-    addAuthFiltersForAPIGatewayListener(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Initiallized filters for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
     printDebug(KEY_GW_LISTNER, "Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
 }
 
-@Description {value:"Add authn and authz filters"}
-@Param {value:"config: EndpointConfiguration instance"}
-function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
-    // add wso2 gateway related filters  as the first set of filters.
-    // if there are any other filters specified, those should be added after the gateway filters.
-    if (config.filters == null) {
-        // can add authn and authz filters directly
-        printDebug(KEY_GW_LISTNER, "No external filters defined. Directly adding default filters.");
-        config.filters = createAuthFiltersForSecureListener(config);
-    } else {
-        printDebug(KEY_GW_LISTNER, "External filters defined. Adding default filters at the beginning.");
-        http:Filter[] newFilters = createAuthFiltersForSecureListener(config);
-        // add existing filters next. WSO2 retaled ballerina services by default does not contain additional filters.
-        // But custom filters can be plugeed in while initiating the listener as an endpoint.
-        // for ex:
-        //    endpoint gateway:APIGatewayListener listener {
-        //    filters:[customFilter]
-        //    };
-        int i = 0;
-        while (i < lengthof config.filters) {
-            newFilters[i + (lengthof newFilters)] = config.filters[i];
-            i = i + 1;
-        }
-        config.filters = newFilters;
-    }
-}
-
-@Description {value:"Create an array of gateway filters"}
-@Param {value:"config: EndpointConfiguration instance"}
-@Return {value:"Array of Filters comprising of authn and authz Filters"}
-function createAuthFiltersForSecureListener (EndpointConfiguration config) returns (http:Filter[]) {
-    // parse and create authentication handlers
-    http:AuthHandlerRegistry registry;
-    match config.authProviders {
-        http:AuthProvider[] providers => {
-            int i = 1;
-            foreach provider in providers {
-                printDebug(KEY_GW_LISTNER, "Registering " + provider.id + " auth provider.");
-                if (lengthof provider.id > 0) {
-                    registry.add(provider.id, createAuthHandler(provider));
-                } else {
-                    registry.add(provider.scheme + "-" + i, createAuthHandler(provider));
-                }
-                i++;
-            }
-        }
-        () => {
-            printDebug(KEY_GW_LISTNER, "No Authenticator found");
-        }
-
-    }
-    printDebug(KEY_GW_LISTNER, "Finished adding authenticators to registry.");
-
-    http:Filter[] authFilters = [];
-    http:AuthnHandlerChain authnHandlerChain = new(registry);
-    //http:AuthnFilter authnFilter = new(authnHandlerChain);
-    OAuthnAuthenticator oauthAuthenticator = new;
-    AuthnFilter authnFilter = new(oauthAuthenticator, authnHandlerChain);
-
-    ThrottleFilter throttleFilter = new();
-    SubscriptionFilter subscriptionFilter = new;
-    AnalyticsRequestFilter analyticsFilter = new();
-
-    // use the ballerina in built scope(authz) filter
-    cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-    900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-    evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-    auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
-    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
-    http:AuthzFilter authzFilter = new(authzHandler);
-    // wraps the ballerina authz filter in new gateway filter
-    OAuthzFilter authzFilterWrapper = new(authzFilter);
-    map defaultMap = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true,
-                    ANALYTICS_FILTER: true};
-
-    map filterConfig = getConfigMapValue(FILTERS);
-    json filterConfigJson = check <json>filterConfig;
-    printDebug(KEY_GW_LISTNER, "Filter configurations:" + filterConfigJson.toString());
-
-    if(lengthof filterConfig == 0) {
-        filterConfig = defaultMap;
-    }
-    int i=0;
-    if(check <boolean> filterConfig[AUTHN_FILTER]) {
-        authFilters[i] = < http:Filter> authnFilter;
-        i++;
-    }
-    if(check <boolean> filterConfig[AUTHN_FILTER]) {
-        authFilters[i] = < http:Filter> authzFilterWrapper;
-        i++;
-    }
-    if(check <boolean> filterConfig[SUBSCRIPTION_FILTER]) {
-        authFilters[i] = < http:Filter> subscriptionFilter;
-        i++;
-    }
-    if(check <boolean> filterConfig[THROTTLE_FILTER]) {
-        authFilters[i] = < http:Filter> throttleFilter;
-        i++;
-    }
-    if(check <boolean> filterConfig[ANALYTICS_FILTER]) {
-        authFilters[i] = < http:Filter> analyticsFilter;
-        i++;
-    }
-    return authFilters;
-}
-
-function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
+public function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
         auth:AuthStoreProvider authStoreProvider;
         if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
@@ -240,22 +128,11 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     intitateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initiallized key manager configurations");
-    printDebug(KEY_GW_LISTNER, "Initiallized key manager configurations");
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initiallized gateway caches");
-    initiateThrottleConfigs();
-    printDebug(KEY_GW_LISTNER, "Initiallized throttling configurations");
 }
 
-function initiateThrottleConfigs() {
-    ThrottleConf config;
-    config.enabledHeaderConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledHeaderConditions", false);
-    config.enabledJWTClaimConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledJWTClaimConditions", false);
-    config.enabledQueryParamConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledQueryParamConditions", false);
-    getGatewayConfInstance().setThrottleConf(config);
-}
-
-function initiateAuthProviders(EndpointConfiguration config) {
+public function getAuthProviders() returns http:AuthProvider[] {
     http:AuthProvider jwtAuthProvider = {
         id: AUTH_SCHEME_JWT,
         scheme: AUTH_SCHEME_JWT,
@@ -272,7 +149,20 @@ function initiateAuthProviders(EndpointConfiguration config) {
         scheme: AUTHN_SCHEME_BASIC,
         authStoreProvider: AUTH_PROVIDER_CONFIG
     };
-    config.authProviders = [jwtAuthProvider, basicAuthProvider];
+    return [jwtAuthProvider, basicAuthProvider];
+}
+
+public function getDefaultAuthorizationFilter() returns OAuthzFilter {
+    cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
+        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
+        CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+
+    auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
+    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
+    http:AuthzFilter authzFilter = new(authzHandler);
+    OAuthzFilter authzFilterWrapper = new(authzFilter);
+    return authzFilterWrapper;
 }
 
 function intitateKeyManagerConfigurations() {

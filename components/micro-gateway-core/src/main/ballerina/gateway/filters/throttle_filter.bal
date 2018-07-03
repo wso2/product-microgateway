@@ -32,6 +32,7 @@ public type ThrottleFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
         printDebug(KEY_THROTTLE_FILTER, "Processing request in ThrottleFilter");
+        int startingTime = getCurrentTime();
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;
@@ -63,6 +64,7 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                     sendErrorResponse(listener, request, context);
+                    setLatency(startingTime, context, THROTTLE_LATENCY);
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
@@ -78,6 +80,7 @@ public type ThrottleFilter object {
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
                     THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(listener, request, context);
+                setLatency(startingTime, context, THROTTLE_LATENCY);
                 return false;
             } else {
                 printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
@@ -120,12 +123,14 @@ public type ThrottleFilter object {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                 INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
             sendErrorResponse(listener, request, context);
+            setLatency(startingTime, context, THROTTLE_LATENCY);
             return false;
         }
 
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
+        setLatency(startingTime, context, THROTTLE_LATENCY);
         printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
         return true;
     }

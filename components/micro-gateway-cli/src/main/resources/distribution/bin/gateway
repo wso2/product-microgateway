@@ -87,13 +87,21 @@ if [ "$CMD" = "start" ]; then
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
   PROCESS_ID=""
-  while [ -z "$PROCESS_ID" ]
+  TEMP_PID=""
+  while : ; 
   do
-  	PROCESS_ID=$(ps -ef | grep -P "^[^ ]+\s+[^ ]+\s+$SESS_PID\s" | awk '{print $2}')
-  	sleep 0.1
+    #spawns different child processes during startup. get the last existing one
+    TEMP_PID=$(ps -ef | pgrep -P "$SESS_PID" | awk '{print $1}')
+    if [ "$TEMP_PID" = "" ] ; then
+      continue;
+    fi 
+    if [ "$PROCESS_ID" = "$TEMP_PID" ] ; then
+      echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
+      exit 0
+    fi  
+    PROCESS_ID=$TEMP_PID
+    sleep 0.1
   done
-  echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
-  exit 0
 elif [ "$CMD" = "stop" ]; then
   export GWHOME="$GWHOME"
   kill -term `cat "$GWHOME"/bin/gateway.pid`
@@ -115,14 +123,22 @@ elif [ "$CMD" = "restart" ]; then
   nohup sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args &
   SESS_PID=$!
   PROCESS_ID=""
-  while [ -z "$PROCESS_ID" ]
+  TEMP_PID=""
+  while : ; 
   do
-  	PROCESS_ID=$(ps -ef | grep -P "^[^ ]+\s+[^ ]+\s+$SESS_PID\s" | awk '{print $2}')
-  	sleep 0.1
+    #spawns different child processes during startup. get the last existing one
+    TEMP_PID=$(ps -ef | pgrep -P "$SESS_PID" | awk '{print $1}')
+    if [ "$TEMP_PID" = "" ] ; then
+      continue;
+    fi 
+    if [ "$PROCESS_ID" = "$TEMP_PID" ] ; then
+      echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
+      exit 0
+    fi  
+    PROCESS_ID=$TEMP_PID
+    sleep 0.1
   done
-  echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
-  exit 0
 fi
 
 # run the balx created for ${label} APIs
-sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@"
+sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@"

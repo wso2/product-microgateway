@@ -27,6 +27,7 @@ public class GatewayCliConstants {
     public static final String CONF_DIRECTORY_NAME = "conf";
     public static final String PROJECTS_SRC_DIRECTORY_NAME = "src";
     public static final String PROJECTS_LOGS_DIRECTORY_NAME = "logs";
+    public static final String PROJECTS_API_USAGE_DIRECTORY_NAME = "api-usage-data";
     public static final String ACCESS_LOG_FILE = "access_logs";
     public static final String PROJECTS_TARGET_DIRECTORY_NAME = "target";
     public static final String MAIN_CONFIG_FILE_NAME = "cli-config.toml";
@@ -50,7 +51,11 @@ public class GatewayCliConstants {
     public static final String GW_DIST_RUNTIME = "runtime";
     public static final String GW_DIST_EXEC = "exec";
     public static final String GW_DIST_SH = "gateway";
-    public static final String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator + GW_DIST_SH;
+    public static final String GW_DIST_BAT = "gateway.bat";
+    public static final String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator
+            + GW_DIST_SH;
+    public static final String GW_DIST_BAT_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator
+            + GW_DIST_BAT;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
     public static final String K8S_DEPLOYMENT = "-deployment-";
