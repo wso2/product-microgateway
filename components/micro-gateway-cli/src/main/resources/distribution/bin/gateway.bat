@@ -72,7 +72,7 @@ goto end
 	if %verbose%==T echo [%date% %time%] DEBUG: configs = %unix_style_path%
 	if %verbose%==T echo [%date% %time%] DEBUG: Starting micro gateway server...
 
-    ballerina run "%GWHOME%\exec\${label}.balx" -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*"
+    %GWHOME%\runtime\bin\ballerina run "%GWHOME%\exec\${label}.balx" -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*"
 :end
 goto endlocal
 
