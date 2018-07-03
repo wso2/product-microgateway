@@ -44,6 +44,77 @@ public type AnalyticsRequestStream  {
 
 };
 
+public type ExecutionTimeDTO {
+    string apiName;
+    string apiVersion;
+    string tenantDomain;
+    string provider;
+    string context;
+    string keyType;
+    string correleationID;
+    int apiResponseTime;
+    int tenantId;
+    int eventTime;
+    int securityLatency;
+    int throttlingLatency;
+    int requestMediationLatency;
+    int responseMediationLatency;
+    int backEndLatency;
+    int otherLatency;
+};
+
+
+public type ResponseDTO {
+    string consumerKey;
+    string context;
+    string apiVersion;
+    string correlationID;
+    string keyType;
+    string api;
+    string resourcePath;
+    string resourceTemplate;
+    string method;
+    string versionOnly;
+    int response;
+    int responseTime;
+    int serviceTime;
+    int backendTime;
+    string userName;
+    int eventTime;
+    string tenantDomain;
+    string userAgent;
+    string hostname;
+    string apiPublisher;
+    string appName;
+    string appId;
+    boolean cacheHit;
+    int responseSize;
+    string protocol;
+    int responseCode;
+    string destination;
+};
+
+
+public type faultDTO {
+    string consumerKey;
+    string context;
+    string apiVersion;
+    string apiName;
+    string resourcePath;
+    string method;
+    string versionOnly;
+    string errorCode;
+    string errorMessage;
+    string requestTime;
+    string userName;
+    string tenantDomain;
+    string hostName;
+    string apiPublisher;
+    string appName;
+    string appId;
+    string protoco;
+};
+
 public type EventDTO {
     string streamId;
     int timeStamp;

@@ -340,6 +340,10 @@ public class GatewayCmdUtils {
         //path : {projectName}/target/distribution/micro-gw-{projectName}/exec
         String distExec = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         createFolderIfNotExist(distExec);
+
+        //path : {label}/target/distribution/micro-gw-{label}/api-usage-data
+        String apiUsageDir = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_API_USAGE_DIRECTORY_NAME;
+        createFolderIfNotExist(apiUsageDir);
     }
 
     /**

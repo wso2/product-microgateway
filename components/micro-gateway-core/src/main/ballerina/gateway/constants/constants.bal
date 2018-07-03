@@ -149,6 +149,23 @@
 @final public string ROTATING_TIME = "rotatingPeriod";
 @Description { value: "Uploading endpoing of the microgateway" }
 @final public string UPLOADING_EP = "uploadingEndpoint";
+@Description { value: "Starting time of the request" }
+@final public string REQUEST_TIME = "REQUEST_TIME";
+@Description { value: "Time spent on the throttling filter" }
+@final public string THROTTLE_LATENCY = "THROTTLE_LATENCY";
+@Description { value: "Time spent on the authentication filter" }
+@final public string SECURITY_LATENCY = "SECURITY_LATENCY";
+@Description { value: "HTTP Method" }
+@final public string METHOD = "METHOD";
+@Description { value: "Time stamp before sending to backend" }
+@final public string TS_REQUEST_OUT = "timeStampRequestOut";
+@Description { value: "Time stamp after response came in" }
+@final public string TS_RESPONSE_IN = "timeStampResponseIn";
+@Description { value: "API usage data path variable" }
+@final public string API_USAGE_PATH = "api.usage.data.path";
+@Description { value: "API usage data directory" }
+@final public string API_USAGE_DIR = "api-usage-data";
+
 
 
 
