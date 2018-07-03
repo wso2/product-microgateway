@@ -84,14 +84,15 @@ public type EndpointConfiguration {
 
 
 public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
+    printDebug(KEY_GW_LISTNER, "Initiallizing APIGatewayListener for port:" + endpointConfig.port);
     initiateGatewayConfigurations(endpointConfig);
-    log:printDebug("Initiallized gateway configurations for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Initiallized gateway configurations for port:" + endpointConfig.port);
     initiateAuthProviders(endpointConfig);
-    log:printDebug("Initiallized auth providers for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Initiallized auth filters for port:" + endpointConfig.port);
     addAuthFiltersForAPIGatewayListener(endpointConfig);
-    log:printDebug("Initiallized filters for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Initiallized filters for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
-    log:printDebug("Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
 }
 
 @Description {value:"Add authn and authz filters"}
@@ -101,8 +102,10 @@ function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
     // if there are any other filters specified, those should be added after the gateway filters.
     if (config.filters == null) {
         // can add authn and authz filters directly
+        printDebug(KEY_GW_LISTNER, "No external filters defined. Directly adding default filters.");
         config.filters = createAuthFiltersForSecureListener(config);
     } else {
+        printDebug(KEY_GW_LISTNER, "External filters defined. Adding default filters at the beginning.");
         http:Filter[] newFilters = createAuthFiltersForSecureListener(config);
         // add existing filters next. WSO2 retaled ballerina services by default does not contain additional filters.
         // But custom filters can be plugeed in while initiating the listener as an endpoint.
@@ -129,6 +132,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
         http:AuthProvider[] providers => {
             int i = 1;
             foreach provider in providers {
+                printDebug(KEY_GW_LISTNER, "Registering " + provider.id + " auth provider.");
                 if (lengthof provider.id > 0) {
                     registry.add(provider.id, createAuthHandler(provider));
                 } else {
@@ -138,10 +142,12 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
             }
         }
         () => {
-            log:printDebug("No Authenticator found");
+            printDebug(KEY_GW_LISTNER, "No Authenticator found");
         }
 
     }
+    printDebug(KEY_GW_LISTNER, "Finished adding authenticators to registry.");
+
     http:Filter[] authFilters = [];
     http:AuthnHandlerChain authnHandlerChain = new(registry);
     //http:AuthnFilter authnFilter = new(authnHandlerChain);
@@ -164,7 +170,11 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     OAuthzFilter authzFilterWrapper = new(authzFilter);
     map defaultMap = {AUTHN_FILTER: true, AUTHZ_FILTER: true, SUBSCRIPTION_FILTER:true, THROTTLE_FILTER: true,
                     ANALYTICS_FILTER: true};
+
     map filterConfig = getConfigMapValue(FILTERS);
+    json filterConfigJson = check <json>filterConfig;
+    printDebug(KEY_GW_LISTNER, "Filter configurations:" + filterConfigJson.toString());
+
     if(lengthof filterConfig == 0) {
         filterConfig = defaultMap;
     }
@@ -189,7 +199,6 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
         authFilters[i] = < http:Filter> analyticsFilter;
         i++;
     }
-
     return authFilters;
 }
 
@@ -230,8 +239,12 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     intitateKeyManagerConfigurations();
+    printDebug(KEY_GW_LISTNER, "Initiallized key manager configurations");
+    printDebug(KEY_GW_LISTNER, "Initiallized key manager configurations");
     initGatewayCaches();
+    printDebug(KEY_GW_LISTNER, "Initiallized gateway caches");
     initiateThrottleConfigs();
+    printDebug(KEY_GW_LISTNER, "Initiallized throttling configurations");
 }
 
 function initiateThrottleConfigs() {

@@ -39,12 +39,15 @@ public type AuthnFilter object {
     public new (oauthnHandler, authnHandlerChain) {}
 
     @Description {value:"filterRequest: Request filter function"}
-    public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                 boolean {
+    public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) 
+                        returns boolean {
         //Setting UUID
         context.attributes[MESSAGE_ID] = system:uuid();
-        context.attributes[FILTER_FAILED] = false;
+        runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
+        printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
+
         context.attributes[REMOTE_ADDRESS] = getClientIp(request, listener);
+        context.attributes[FILTER_FAILED] = false;
         runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR] = context.serviceType;
         runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
         // get auth config for this resource
@@ -55,6 +58,7 @@ public type AuthnFilter object {
         //APIKeyValidationDto apiKeyValidationInfoDto;
         AuthenticationContext authenticationContext;
         boolean isAuthorized;
+        printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
         if (isSecured) {
             string authHeader;
             string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceType));
@@ -69,7 +73,7 @@ public type AuthnFilter object {
             string providerId = getAuthenticationProviderType(authHeader);
             // if auth providers are there, use those to authenticate
             if(providerId != AUTH_SCHEME_OAUTH2) {
-                log:printDebug("Non oauth token found. Hence calling the auth scheme : " + providerId );
+                printDebug(KEY_AUTHN_FILTER, "Non OAuth token found. Hence calling the auth scheme : " + providerId );
                 string[] providerIds = [providerId];
                 // if authorization header is not default auth header we need to set it to the default header in
                 // order for jwt to work. If there is an already default auth header we back up it to a temp auth
@@ -77,16 +81,17 @@ public type AuthnFilter object {
                 if(authHeaderName != AUTH_HEADER) {
                     if(request.hasHeader(AUTH_HEADER)) {
                         request.setHeader(TEMP_AUTH_HEADER, request.getHeader(AUTH_HEADER));
-                        log:printDebug("Authorization header found in request hence backing up original value");
+                        printDebug(KEY_AUTHN_FILTER, "Authorization header found in request hence backing up original value");
                     }
                     request.setHeader(AUTH_HEADER, authHeader);
-                    log:printDebug("Replace the custom auth header : " + authHeaderName + " with default auth header
+                    printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName + " with default auth header
                     :" + AUTH_HEADER);
                 }
 
                 try {
+                    printDebug(KEY_AUTHN_FILTER, "Processing request with Authentication handler chain");
                     isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
-                    log:printDebug("Authentication handler chain returned with value : " + isAuthorized);
+                    printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
                 } catch (error err) {
                     // todo: need to properly handle this exception. Currently this is a generic exception catching.
@@ -100,11 +105,11 @@ public type AuthnFilter object {
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
                         runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
-                        log:printDebug("Successfully extracted the oauth toke from header : " + authHeaderName);
+                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the oauth toke from header : " + authHeaderName);
                         match self.oauthnHandler.handle(request) {
                             APIKeyValidationDto apiKeyValidationDto => {
                                 isAuthorized = <boolean>apiKeyValidationDto.authorized;
-                                log:printDebug("Authentication handler returned with value : " + isAuthorized);
+                                printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " + isAuthorized);
                                 if(isAuthorized) {
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = apiKeyValidationDto.tier;
@@ -145,7 +150,7 @@ public type AuthnFilter object {
                                     authContext.authToken = token;
                                 } else {
                                     int status = check <int> apiKeyValidationDto.validationStatus;
-                                    log:printDebug("Authentication handler returned with validation status : " +
+                                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with validation status : " +
                                             status);
                                     setErrorMessageToFilterContext(context, status);
                                     sendErrorResponse(listener, request, context);
@@ -234,13 +239,13 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
 function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName)  {
     if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, true)) {
         request.removeHeader(authHeaderName);
-        log:printDebug("Removed header : " + authHeaderName + " from the request");
+        printDebug(KEY_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
     }
     if(request.hasHeader(TEMP_AUTH_HEADER)) {
         request.setHeader(AUTH_HEADER, request.getHeader(TEMP_AUTH_HEADER));
-        log:printDebug("Setting the backed up auth header value to the header: " + AUTH_HEADER);
+        printDebug(KEY_AUTHN_FILTER, "Setting the backed up auth header value to the header: " + AUTH_HEADER);
         request.removeHeader(TEMP_AUTH_HEADER);
-        log:printDebug("Removed header : " + TEMP_AUTH_HEADER + " from the request");
+        printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
 }
 

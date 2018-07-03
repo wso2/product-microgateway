@@ -68,10 +68,12 @@ public function APIGatewayCache::authenticateFromGatewayKeyValidationCache(strin
 public function APIGatewayCache::addToGatewayKeyValidationCache (string tokenCacheKey, APIKeyValidationDto
     apiKeyValidationDto) {
     gatewayKeyValidationCache.put(tokenCacheKey, apiKeyValidationDto);
+    printDebug(KEY_GW_CACHE, "Added key validation info to key validation cache. key: " + mask(tokenCacheKey));
 }
 
 public function APIGatewayCache::removeFromGatewayKeyValidationCache (string tokenCacheKey) {
     gatewayKeyValidationCache.remove(tokenCacheKey);
+    printDebug(KEY_GW_CACHE, "Removed key validation info from key validation cache. key: " + mask(tokenCacheKey));
 }
 
 public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |()) {
@@ -87,10 +89,12 @@ public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCache
 
 public function APIGatewayCache::addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
     invalidTokenCache.put(tokenCacheKey, apiKeyValidationDto);
+    printDebug(KEY_GW_CACHE, "Added key validation info to invalid token cache. key: " + mask(tokenCacheKey));
 }
 
 public function APIGatewayCache::removeFromInvalidTokenCache (string tokenCacheKey) {
     invalidTokenCache.remove(tokenCacheKey);
+    printDebug(KEY_GW_CACHE, "Removed from invalid key validation cache. key: " + mask(tokenCacheKey));
 }
 
 public function APIGatewayCache::retrieveFromTokenCache(string accessToken) returns (boolean|()) {
@@ -106,8 +110,10 @@ public function APIGatewayCache::retrieveFromTokenCache(string accessToken) retu
 
 public function APIGatewayCache::addToTokenCache (string accessToken, boolean isValid) {
     gatewayTokenCache.put(accessToken, isValid);
+    printDebug(KEY_GW_CACHE, "Added validity info to token cache. key: " + mask(accessToken));
 }
 
 public function APIGatewayCache::removeFromTokenCache (string accessToken) {
     gatewayTokenCache.remove(accessToken);
+    printDebug(KEY_GW_CACHE, "Removed from token cache. key: " + mask(accessToken));
 }
