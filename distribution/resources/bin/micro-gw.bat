@@ -34,8 +34,16 @@ if ""%1%""==""-v"" ( set verbose=T ) else ( set verbose=F )
 if %verbose%==T ( echo Verbose mode enabled )
 
 REM Get the location of this(micro-gw.bat) file
-SET PRGDIR=%~dp0
+SET PRGDIR=%~sdp0
 set CURRENT_D=%CD%
+
+REM If the current disk drive ie: `E:\` is different from the drive where this (micro-gw.bat) resides(i:e `C:\`), Change the driver label the current drive
+:switchDrive
+	SET curDrive=%CURRENT_D:~0,1%
+	SET wsasDrive=%PRGDIR:~0,1%
+	if %verbose%==T ( echo Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
+	if not "%curDrive%" == "%wsasDrive%" %wsasDrive%:
+
 if "%MICROGW_TOOLKIT_HOME%" == "" set MICROGW_TOOLKIT_HOME=%PRGDIR%..
 
 REM  set BALLERINA_HOME
