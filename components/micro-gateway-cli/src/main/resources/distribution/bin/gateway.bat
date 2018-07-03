@@ -67,12 +67,12 @@ goto end
     set "separator=/"
     set log_path="%GWHOME%\conf\micro-gw.conf"
     call set unix_style_path=%%log_path:\=%separator%%%
-	if %verbose%==T echo [%date% %time%] DEBUG: balx location = "%GWHOME%\exec\pro2.balx" 
+	if %verbose%==T echo [%date% %time%] DEBUG: balx location = "%GWHOME%\exec\${label}.balx"
 	if %verbose%==T echo [%date% %time%] DEBUG: b7a.http.accesslog.path = "%GWHOME%\logs\access_logs"
 	if %verbose%==T echo [%date% %time%] DEBUG: configs = %unix_style_path%
 	if %verbose%==T echo [%date% %time%] DEBUG: Starting micro gateway server...
 
-    ballerina run "%GWHOME%\exec\pro2.balx" -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*"
+    ballerina run "%GWHOME%\exec\${label}.balx" -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*"
 :end
 goto endlocal
 
