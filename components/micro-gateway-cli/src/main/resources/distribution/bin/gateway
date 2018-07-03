@@ -141,4 +141,4 @@ elif [ "$CMD" = "restart" ]; then
 fi
 
 # run the balx created for ${label} APIs
-sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf
+sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@"
