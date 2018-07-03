@@ -79,6 +79,8 @@ public type ThrottleFilter object {
                     THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(listener, request, context);
                 return false;
+            } else {
+                printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
             }
         } else if (!isSecured) {
             printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");

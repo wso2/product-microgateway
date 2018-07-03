@@ -420,6 +420,11 @@ public function getMessageId() returns string {
     }
 }
 
+@Description {value:"Add a error log with provided key (class) and message ID"}
+public function printError(string key, string message) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+}
+
 @Description {value:"Add a debug log with provided key (class) and message ID"}
 public function printDebug(string key, string message) {
     log:printDebug(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
@@ -440,7 +445,7 @@ function getAnalyticsConfig() {
     map vals = getConfigMapValue(ANALYTICS);
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
-    log:printDebug("Analytics config values read");
+    printDebug(KEY_UTILS, "Analytics config values read");
 }
 
 future streamftr = start initStreamPublisher();

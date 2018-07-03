@@ -96,7 +96,7 @@ public type AuthnFilter object {
                 } catch (error err) {
                     // todo: need to properly handle this exception. Currently this is a generic exception catching.
                     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
-                    log:printError("Error while authenticating via JWT token.");
+                    printError(KEY_AUTHN_FILTER, "Error while authenticating via JWT token.");
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
                     sendErrorResponse(listener, request, context);
                     return false;
