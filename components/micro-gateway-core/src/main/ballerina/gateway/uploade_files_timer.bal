@@ -57,10 +57,16 @@ function informError(error e) {
 function timerTask() {
     task:Timer? timer;
     map vals = getConfigMapValue(ANALYTICS);
-    int timeSpan =  check <int> vals[UPLOADING_TIME_SPAN];
-    (function() returns error?) onTriggerFunction = searchFilesToUpload;
-    function(error) onErrorFunction = informError;
-    timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
-    timer.start();
+    boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
+    if (uploadFiles) {
+        log:printInfo("File uploading task is enabled.");
+        int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
+        (function() returns error?) onTriggerFunction = searchFilesToUpload;
+        function(error) onErrorFunction = informError;
+        timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
+        timer.start();
+    } else {
+        log:printInfo("File uploading task is disabled.");
+    }
 }
 
