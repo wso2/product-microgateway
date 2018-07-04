@@ -122,6 +122,9 @@ public class OAuthServiceImpl implements OAuthService {
                 String[] clientInfo = { clientId, clientSecret };
                 logger.debug("Successfully received client id:{} from DCR endpoint", clientId);
                 return clientInfo;
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
             } else { //If DCR call fails
                 throw new CLIInternalException(
                         "Error occurred while creating oAuth application Status code: " + responseCode);

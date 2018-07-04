@@ -87,10 +87,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 for (ExtendedAPI api : apiListDTO.getList()) {
                     setAdditionalConfigs(api);
                 }
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             String msg = "Error while getting all APIs with label " + labelName;
             throw new RuntimeException(msg, e);
         } finally {
@@ -147,13 +150,16 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     }
                     //set additional configs such as CORS configs from the toolkit configuration
                     setAdditionalConfigs(matchedAPI);
+                } else if (responseCode == 401) {
+                    throw new CLIRuntimeException(
+                            "Invalid user credentials or the user does not have required permissions");
                 } else {
                     throw new CLIInternalException("No proper response received for get API request.");
                 }
             } else {
                 throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             String msg = "Error while getting the API with name:" + apiName + ", version: " + version;
             throw new CLIInternalException(msg, e);
         } finally {
@@ -212,10 +218,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             String msg = "Error while creating the new token for token regeneration.";
             throw new RuntimeException(msg, e);
         } finally {
@@ -256,10 +265,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                         filteredPolicyDTOS.add(policyDTO);
                     }
                 }
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
             } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             String msg = "Error while creating the new token for token regeneration.";
             throw new RuntimeException(msg, e);
         } finally {
