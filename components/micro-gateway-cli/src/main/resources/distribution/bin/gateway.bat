@@ -68,7 +68,7 @@ goto end
 
 :callBallerina
 	rem ---------- Run balx with ballerina ----------------
-	powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms256m ','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx1024m ','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
+	powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
 	powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
 	powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
     set "separator=/"
