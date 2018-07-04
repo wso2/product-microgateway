@@ -381,7 +381,7 @@ public class GatewayCmdUtils {
                 logger.trace("Hashed file: {} created. ", resourceHashesFileLocation);
             } else {
                 logger.error("Failed to create hash file: {} ", resourceHashesFileLocation);
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up the workspace structure");
             }
         }
         //Write Content
@@ -622,9 +622,9 @@ public class GatewayCmdUtils {
             if (!destinationFolder.exists()) {
                 boolean created = destinationFolder.mkdir();
                 if (created) {
-                    logger.trace("Dir: {} created. ", destinationFolder.getAbsolutePath());
+                    logger.trace("Directory: {} created. ", destinationFolder.getAbsolutePath());
                 } else {
-                    logger.error("Failed to create dir: {} ", destinationFolder.getAbsolutePath());
+                    logger.error("Failed to create directory: {} ", destinationFolder.getAbsolutePath());
                     throw new CLIInternalException("Error occurred while setting up workspace structure");
                 }
             }
@@ -665,9 +665,9 @@ public class GatewayCmdUtils {
         if (!folder.exists() && !folder.isDirectory()) {
             boolean created = folder.mkdir();
             if (created) {
-                logger.trace("Dir: {} created. ", path);
+                logger.trace("Directory: {} created. ", path);
             } else {
-                logger.error("Failed to create dir: {} ", path);
+                logger.error("Failed to create directory: {} ", path);
                 throw new CLIInternalException("Error occurred while setting up workspace structure");
             }
         }

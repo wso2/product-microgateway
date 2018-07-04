@@ -37,7 +37,7 @@ function searchFilesToUpload() returns error? {
             if (response.statusCode == 201) {
                 var result = pathEntry.delete();
             } else {
-                log:printError("Error occurred while uploading file");
+                log:printError("Error occurred while uploading the file");
             }
             cnt++;
         }

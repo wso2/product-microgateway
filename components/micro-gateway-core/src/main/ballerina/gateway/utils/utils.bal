@@ -348,7 +348,7 @@ public function sendErrorResponse(http:Listener listener, http:Request request, 
     response.setJsonPayload(payload);
     var value = caller->respond(response);
     match value {
-        error err => log:printError("Error while sending the error response", err = err);
+        error err => log:printError("Error occurred while sending the error response", err = err);
         () => {}
     }
 }
@@ -391,7 +391,7 @@ public function rotateFile(string fileName) returns string|error {
                     log:printInfo("Existed file deleted successfully");
                 }
                 error err => {
-                    log:printError("Error occurred while deleting file: " + fileName, err = err);
+                    log:printError("Error occurred while deleting the file: " + fileName, err = err);
                 }
             }
             return zipName;

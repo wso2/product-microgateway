@@ -70,7 +70,7 @@ public function OAuthnAuthenticator::handle (http:Request req)
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
         apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
     } catch (error err) {
-        log:printError("Error while getting key validation info for access token", err = err);
+        log:printError("Error occurred while getting key validation information for the access token", err = err);
         return err;
     }
     return apiKeyValidationDto;
@@ -207,7 +207,7 @@ public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto api
             }
         }
         error err => {
-            log:printError("Error while converting authorzed value from key vaidation respnse to a
+            log:printError("Error occurred while converting the authorized value from the key validation response to a
                             string value", err = err);
             throw err;
         }
@@ -257,7 +257,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
                     startTimeMills) + "ms");
         match result1 {
             error err => {
-                log:printError("Error occurred while reading key validation response",err =err);
+                log:printError("Error occurred while reading the key validation response",err =err);
                 return {};
             }
             http:Response prod => {
@@ -267,7 +267,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         xml responsepayload;
         match keyValidationResponse.getXmlPayload() {
             error err => {
-                log:printError("Error occurred while getting key validation service xml response payload ",err=err);
+                log:printError("Error occurred while getting the key validation service XML response payload ",err=err);
                 return {};
             }
             xml responseXml => {
@@ -280,7 +280,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         return(payloadJson);
 
     } catch (error err) {
-        log:printError("Error occurred while validating token",err =err);
+        log:printError("Error occurred while validating the token",err =err);
         return {};
     }
 }

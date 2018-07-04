@@ -96,7 +96,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -104,7 +104,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
                 res.statusCode = 500;
                 res.setPayload(err.message);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }
@@ -130,7 +130,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -138,7 +138,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
                 res.statusCode = 500;
                 res.setPayload(err.message);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }
@@ -173,7 +173,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -181,7 +181,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
                 res.statusCode = 500;
                 res.setPayload(err.message);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }
@@ -223,7 +223,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -231,7 +231,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
                 res.statusCode = 500;
                 res.setPayload(err.message);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }
@@ -266,7 +266,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -274,7 +274,7 @@ service<http:Service> PizzaShackAPI_1_0_0 bind apiListener {
                 res.statusCode = 500;
                 res.setPayload(err.message);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }

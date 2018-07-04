@@ -60,10 +60,10 @@ public class BuildCmd implements GatewayLauncherCmd {
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
             GatewayCmdUtils.createProjectGWDistribution(projectName);
-            outStream.println("Build is successful for the project - " + projectName);
+            outStream.println("Build successful for the project - " + projectName);
         } catch (IOException e) {
-            logger.error("Error while creating micro gateway distribution for project {}.", projectName, e);
-            throw new CLIInternalException("Error while creating micro gateway distribution for project");
+            logger.error("Error occurred while creating micro gateway distribution for project {}.", projectName, e);
+            throw new CLIInternalException("Error occurred while creating micro gateway distribution for project");
         }
     }
 
