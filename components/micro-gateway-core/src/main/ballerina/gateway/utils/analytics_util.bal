@@ -22,12 +22,8 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     int currentTimeMills = time.time;
 
     json metaInfo = {};
-    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
-    eventDto.clientType = metaInfo.toString();
-    eventDto.accessToken = "-";
     eventDto.tenantDomain = getTenantDomain(context);
     eventDto.api = getApiName(context);
-    eventDto.api_version = apiVersion;
     eventDto.context = getContext(context);
     eventDto.throttledTime = currentTimeMills;
     eventDto.throttledOutReason = <string>context.attributes[THROTTLE_OUT_REASON];
@@ -40,6 +36,8 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
+        //consumer key is sent here. (not using for stat)
+        eventDto.accessToken = authContext.consumerKey;
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.userId = END_USER_ANONYMOUS;
@@ -49,6 +47,9 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
     }
+    eventDto.api_version = eventDto.apiPublisher + ":" + apiVersion;
+    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
+    eventDto.clientType = metaInfo.toString();
     return eventDto;
 }
 
