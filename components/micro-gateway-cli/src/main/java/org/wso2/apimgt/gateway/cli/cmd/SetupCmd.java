@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
@@ -268,7 +269,20 @@ public class SetupCmd implements GatewayLauncherCmd {
             apis = service.getAPIs(label, accessToken);
         } else {
             ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-            apis.add(api);
+            if (api != null) {
+                apis.add(api);
+            }
+        }
+        if (apis == null || (apis != null && apis.isEmpty())) {
+            // Delete folder
+            GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
+            String errorMsg;
+            if (label != null) {
+                errorMsg = "No APIs found for the given label: " + label;
+            } else {
+                errorMsg = "No Published APIs matched for name:" + apiName + ", version:" + version;
+            }
+            throw new CLIRuntimeException(errorMsg);
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
