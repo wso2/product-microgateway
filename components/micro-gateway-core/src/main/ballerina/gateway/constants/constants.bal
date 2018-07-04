@@ -165,6 +165,8 @@
 @final public string API_USAGE_PATH = "api.usage.data.path";
 @Description { value: "API usage data directory" }
 @final public string API_USAGE_DIR = "api-usage-data";
+@Description { value: "Key of file uploading config" }
+@final public string FILE_UPLOAD_TASK = "task.uploadFiles";
 
 
 
