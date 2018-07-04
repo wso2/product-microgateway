@@ -40,9 +40,9 @@ function getPayload(AnalyticsRequestStream requestStreamForPayload) returns (str
         .applicationOwner;
 }
 
-function getMetaData(AnalyticsRequestStream requestStreamForMetaData) returns (string) {
-    return "{\\\"keyType\\\":\"" + requestStreamForMetaData.keyType + "\",\\\"correlationID\\\":\"" + requestStreamForMetaData
-        .correlationID + "\"}";
+function getMetaData(AnalyticsRequestStream dto) returns (string) {
+    json metaData = { "keyType": dto.keyType, "correlationID": dto.correlationID };
+    return metaData.toString();
 }
 
 function getCorrelationData(AnalyticsRequestStream request) returns (string) {
