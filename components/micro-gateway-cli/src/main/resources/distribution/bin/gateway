@@ -74,7 +74,7 @@ do
 done
 
 if [ "$CMD" = "start" ]; then
-  if [ -e "$GWHOME/bin/gateway.pid" ] && [ -z "$PID" ]; then
+  if [ -e "$GWHOME/bin/gateway.pid" ]; then
     if  ps -p $PID > /dev/null ; then
       echo "Process is already running"
       exit 0
