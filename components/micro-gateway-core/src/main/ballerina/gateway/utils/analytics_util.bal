@@ -22,24 +22,22 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     int currentTimeMills = time.time;
 
     json metaInfo = {};
-    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
-    eventDto.clientType = metaInfo.toString();
-    eventDto.accessToken = "-";
     eventDto.tenantDomain = getTenantDomain(context);
     eventDto.api = getApiName(context);
-    eventDto.api_version = apiVersion;
     eventDto.context = getContext(context);
     eventDto.throttledTime = currentTimeMills;
     eventDto.throttledOutReason = <string>context.attributes[THROTTLE_OUT_REASON];
     if (isSecured) {
-        AuthenticationContext authConext = check <AuthenticationContext>context
+        AuthenticationContext authContext = check <AuthenticationContext>context
         .attributes[AUTHENTICATION_CONTEXT];
-        metaInfo.keyType = authConext.keyType;
-        eventDto.userId = authConext.username;
-        eventDto.apiPublisher = authConext.apiPublisher;
-        eventDto.applicationName = authConext.applicationName;
-        eventDto.applicationId = authConext.applicationId;
-        eventDto.subscriber = authConext.subscriber;
+        metaInfo.keyType = authContext.keyType;
+        eventDto.userId = authContext.username;
+        eventDto.apiPublisher = authContext.apiPublisher;
+        eventDto.applicationName = authContext.applicationName;
+        eventDto.applicationId = authContext.applicationId;
+        eventDto.subscriber = authContext.subscriber;
+        //consumer key is sent here. (not using for stat)
+        eventDto.accessToken = authContext.consumerKey;
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.userId = END_USER_ANONYMOUS;
@@ -49,5 +47,51 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
     }
+    eventDto.api_version = eventDto.apiPublisher + ":" + apiVersion;
+    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
+    eventDto.clientType = metaInfo.toString();
+    return eventDto;
+}
+
+function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
+    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
+    FaultDTO eventDto;
+    string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+    time:Time time = time:currentTime();
+    int currentTimeMills = time.time;
+    json metaInfo = {};
+    eventDto.context = getContext(context);
+    eventDto.apiVersion = apiVersion;
+    eventDto.apiName = getApiName(context);
+    eventDto.resourcePath = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceType,
+            context.resourceName)).path;
+    eventDto.method = <string>context.attributes[METHOD];
+    eventDto.versionOnly = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+    apiVersion;
+    eventDto.errorCode = check <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
+    eventDto.errorMessage = err.message;
+    eventDto.faultTime = currentTimeMills;
+    eventDto.tenantDomain = getTenantDomain(context);
+    eventDto.hostName = <string>context.attributes[HOSTNAME_PROPERTY];
+    eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
+    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+        metaInfo.keyType = authContext.keyType;
+        eventDto.consumerKey = authContext.consumerKey;
+        eventDto.apiPublisher = authContext.apiPublisher;
+        eventDto.userName = authContext.username;
+        eventDto.applicationName = authContext.applicationName;
+        eventDto.applicationId = authContext.applicationId;
+    } else {
+        metaInfo.keyType = PRODUCTION_KEY_TYPE;
+        eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
+        eventDto.apiPublisher = getAPIDetailsFromServiceAnnotation(
+                                    reflect:getServiceAnnotations(context.serviceType)).publisher;
+        eventDto.userName = END_USER_ANONYMOUS;
+        eventDto.applicationName = ANONYMOUS_APP_NAME;
+        eventDto.applicationId = ANONYMOUS_APP_ID;
+    }
+    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
+    eventDto.clientType = metaInfo.toString();
     return eventDto;
 }

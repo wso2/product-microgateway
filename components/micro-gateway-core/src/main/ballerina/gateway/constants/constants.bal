@@ -82,6 +82,8 @@
 @final public string ANONYMOUS_APP_ID = "anonymous";
 @Description { value: "Anonymous app owner" }
 @final public string ANONYMOUS_APP_OWNER = "anonymous";
+@Description { value: "Anonymous consumer key" }
+@final public string ANONYMOUS_CONSUMER_KEY = "anonymous";
 @Description { value: "message id" }
 @final public string MESSAGE_ID = "MESSAGE_ID";
 @Description { value: "Is requested throttld out" }
@@ -128,6 +130,12 @@
 @final public string KEY_TYPE_ATTR = "KEY_TYPE";
 @final public string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
 @final public string ACCESS_TOKEN_ATTR = "ACCESS_TOKEN";
+@final public string HOST_HEADER_NAME = "Host";
+@final public string HOSTNAME_PROPERTY = "hostname";
+@final public string PROTOCOL_PROPERTY = "protocol";
+@final public string ERROR_RESPONSE = "error_response";
+@final public string ERROR_RESPONSE_CODE = "error_response_code";
+
 
 //Analytics filter related constants
 @final public string ZIP_EXTENSION = ".zip";
@@ -167,6 +175,8 @@
 @final public string API_USAGE_DIR = "api-usage-data";
 @Description { value: "Key of file uploading config" }
 @final public string FILE_UPLOAD_TASK = "task.uploadFiles";
+@Description { value: "Destination" }
+@final public string DESTINATION = "destination";
 
 
 
@@ -279,7 +289,10 @@
 @final string KEY_AUTHZ_FILTER = "AuthzFilter";
 @final string KEY_SUBSCRIPTION_FILTER = "SubscriptionFilter";
 @final string KEY_THROTTLE_FILTER = "ThrottleFilter";
+@final string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
 @final string KEY_THROTTLE_UTIL = "ThrottleUtil";
 @final string KEY_GW_CACHE = "GatewayCache";
 @final string KEY_UTILS = "Utils";
 @final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
+@final string KEY_UPLOAD_TASK = "UploadTimerTask";
+@final string KEY_ROTATE_TASK = "RotateTImerTask";

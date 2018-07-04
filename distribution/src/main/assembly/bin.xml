@@ -89,6 +89,14 @@
             <source>${basedir}/resources/bin/micro-gw.bat</source>
             <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}/bin</outputDirectory>
         </file>
+        <file>
+            <source>${basedir}/../README.txt</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/../release-notes.html</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${pom.version}</outputDirectory>
+        </file>
     </files>
 
     <dependencySets>

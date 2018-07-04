@@ -184,6 +184,10 @@ public type AuthnFilter object {
             setLatency(startingTime, context, SECURITY_LATENCY);
             return true;
         }
+        if (!isAuthorized) {
+            setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+            sendErrorResponse(listener, request, context);
+        }
         setLatency(startingTime, context, SECURITY_LATENCY);
         return isAuthorized;
     }

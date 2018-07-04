@@ -65,7 +65,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
         responseDto.apiPublisher = getAPIDetailsFromServiceAnnotation(
                                        reflect:getServiceAnnotations(context.serviceType)).publisher;
         responseDto.keyType = PRODUCTION_KEY_TYPE;
-        responseDto.consumerKey = "-";
+        responseDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
         responseDto.userName = END_USER_ANONYMOUS;
         responseDto.appId = ANONYMOUS_APP_ID;
         responseDto.appName = ANONYMOUS_APP_NAME;
@@ -90,7 +90,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
             //todo: cacheHit does not gives boolean
         }
     }
-    responseDto.hostname = "127.0.0.1";
+    responseDto.hostname = <string>context.attributes[HOSTNAME_PROPERTY];
     responseDto.response = 1;
     //todo: Response size is yet to be decided
     responseDto.responseSize = 0;
@@ -108,8 +108,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
     responseDto.backendTime = timeResponseIn - timeRequestOut;
     responseDto.responseTime = timeResponseIn - initTime;
     //dummy values for protocol and destination for now
-    responseDto.protocol = "http";
-    responseDto.destination = "https://dummyDestination";
-
+    responseDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
+    responseDto.destination = <string> runtime:getInvocationContext().attributes[DESTINATION];
     return responseDto;
 }

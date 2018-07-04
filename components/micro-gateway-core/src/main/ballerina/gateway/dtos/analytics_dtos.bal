@@ -95,7 +95,8 @@ public type ResponseDTO {
 };
 
 
-public type faultDTO {
+public type FaultDTO {
+    string clientType;
     string consumerKey;
     string context;
     string apiVersion;
@@ -103,16 +104,16 @@ public type faultDTO {
     string resourcePath;
     string method;
     string versionOnly;
-    string errorCode;
+    int errorCode;
     string errorMessage;
-    string requestTime;
+    int faultTime;
     string userName;
     string tenantDomain;
     string hostName;
     string apiPublisher;
-    string appName;
-    string appId;
-    string protoco;
+    string applicationName;
+    string applicationId;
+    string protocol;
 };
 
 public type EventDTO {

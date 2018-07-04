@@ -134,9 +134,15 @@ case $key in
     shift # past java.debug argument
     shift # past port value
     ;;
+    help)
+    ALL_ARGS+=("$1")
+    ALL_ARGS+=("$2")
+    shift # past help argument
+    shift # past next argument after help
+    ;;
     build)
     ALL_ARGS+=("$1")
-    CMD_COMMAND="$1"
+    IS_BUILD_COMMAND=true
     shift # past build argument
     ;;
     *)    # default argument
@@ -154,7 +160,7 @@ set -- "${ALL_ARGS[@]}"
 CMD_PRO_NAME_VAL=${DEFAULT_ARGS[0]}
 
 #execute build command
-if [ "$CMD_COMMAND" = "build" ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
+if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
     MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
     pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
         # clean the content of target folder
