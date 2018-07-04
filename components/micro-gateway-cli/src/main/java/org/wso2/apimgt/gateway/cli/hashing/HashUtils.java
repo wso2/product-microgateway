@@ -81,7 +81,7 @@ public class HashUtils {
         try {
             Map<String, String> storedHashes = loadStoredResourceHashes(projectName);
             if (equalMaps(storedHashes, allHashesMap)) {
-                logger.debug("No changes detected from calculating hashes.");
+                logger.debug("No changes detected after calculating hashes.");
                 hasChanges = false;
             } else {
                 logger.debug("Storing calculated resource hashes.");

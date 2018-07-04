@@ -75,7 +75,7 @@ public type AuthnFilter object {
             string providerId = getAuthenticationProviderType(authHeader);
             // if auth providers are there, use those to authenticate
             if(providerId != AUTH_SCHEME_OAUTH2) {
-                printDebug(KEY_AUTHN_FILTER, "Non OAuth token found. Hence calling the auth scheme : " + providerId );
+                printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId );
                 string[] providerIds = [providerId];
                 // if authorization header is not default auth header we need to set it to the default header in
                 // order for jwt to work. If there is an already default auth header we back up it to a temp auth
@@ -83,22 +83,22 @@ public type AuthnFilter object {
                 if(authHeaderName != AUTH_HEADER) {
                     if(request.hasHeader(AUTH_HEADER)) {
                         request.setHeader(TEMP_AUTH_HEADER, request.getHeader(AUTH_HEADER));
-                        printDebug(KEY_AUTHN_FILTER, "Authorization header found in request hence backing up original value");
+                        printDebug(KEY_AUTHN_FILTER, "Authorization header found in the request. Backing up original value");
                     }
                     request.setHeader(AUTH_HEADER, authHeader);
-                    printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName + " with default auth header
-                    :" + AUTH_HEADER);
+                    printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
+                    + " with default the auth header:" + AUTH_HEADER);
                 }
 
                 try {
-                    printDebug(KEY_AUTHN_FILTER, "Processing request with Authentication handler chain");
+                    printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
                     isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
                 } catch (error err) {
                     // todo: need to properly handle this exception. Currently this is a generic exception catching.
                     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
-                    printError(KEY_AUTHN_FILTER, "Error while authenticating via JWT token.");
+                    printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
                     sendErrorResponse(listener, request, context);
                     return false;
@@ -107,7 +107,7 @@ public type AuthnFilter object {
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
                         runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
-                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the oauth toke from header : " + authHeaderName);
+                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth toke from header : " + authHeaderName);
                         match self.oauthnHandler.handle(request) {
                             APIKeyValidationDto apiKeyValidationDto => {
                                 isAuthorized = <boolean>apiKeyValidationDto.authorized;
@@ -183,6 +183,10 @@ public type AuthnFilter object {
             // not secured, no need to authenticate
             setLatency(startingTime, context, SECURITY_LATENCY);
             return true;
+        }
+        if (!isAuthorized) {
+            setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+            sendErrorResponse(listener, request, context);
         }
         setLatency(startingTime, context, SECURITY_LATENCY);
         return isAuthorized;

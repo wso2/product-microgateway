@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
@@ -231,8 +232,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
-            logger.error("Provided trust store location {} not exist.", trustStoreLocation);
-            throw new CLIInternalException("Provided trust store not exist.");
+            logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
+            throw new CLIInternalException("Provided trust store does not exist.");
         }
 
         //set the trustStore
@@ -268,7 +269,20 @@ public class SetupCmd implements GatewayLauncherCmd {
             apis = service.getAPIs(label, accessToken);
         } else {
             ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-            apis.add(api);
+            if (api != null) {
+                apis.add(api);
+            }
+        }
+        if (apis == null || (apis != null && apis.isEmpty())) {
+            // Delete folder
+            GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
+            String errorMsg;
+            if (label != null) {
+                errorMsg = "No APIs found for the given label: " + label;
+            } else {
+                errorMsg = "No Published APIs matched for name:" + apiName + ", version:" + version;
+            }
+            throw new CLIRuntimeException(errorMsg);
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
@@ -323,7 +337,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (!changesDetected) {
             outStream.println(
                     "No changes received from the server since the previous setup." 
-                            + " If you already have a built distribution, it can be reused.");
+                            + " If you have already a built distribution, it can be reused.");
         }
         outStream.println("Setting up project " + projectName + " is successful.");
 
@@ -381,8 +395,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
             tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
         } catch (MalformedURLException e) {
-            logger.error("Malformed URL is provided {}", host);
-            throw new CLIInternalException("Error occurred while setting up url configurations.");
+            logger.error("Malformed URL provided {}", host);
+            throw new CLIInternalException("Error occurred while setting up URL configurations.");
         }
     }
 
@@ -396,7 +410,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
                 GatewayCmdUtils.setConfig(config);
             } else {
-                logger.error("Config: {} Not found.", configPath);
+                logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
 
@@ -408,10 +422,10 @@ public class SetupCmd implements GatewayLauncherCmd {
             codeGenerationContext.setProjectName(projectName);
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
-            logger.error("Error while parsing the config {}", configPath, e);
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
-            logger.error("Error while generating project configs", e);
+            logger.error("Error occurred while generating project configurationss", e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }

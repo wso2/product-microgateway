@@ -37,7 +37,7 @@ function searchFilesToUpload() returns error? {
             if (response.statusCode == 201) {
                 var result = pathEntry.delete();
             } else {
-                log:printError("Error occurred while uploading file");
+                log:printError("Error occurred while uploading the file");
             }
             cnt++;
         }
@@ -51,16 +51,22 @@ function searchFilesToUpload() returns error? {
 }
 
 function informError(error e) {
-    log:printDebug("File were not present to upload yet:" + e.message);
+    log:printDebug("Files not present for upload:" + e.message);
 }
 
 function timerTask() {
     task:Timer? timer;
     map vals = getConfigMapValue(ANALYTICS);
-    int timeSpan =  check <int> vals[UPLOADING_TIME_SPAN];
-    (function() returns error?) onTriggerFunction = searchFilesToUpload;
-    function(error) onErrorFunction = informError;
-    timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
-    timer.start();
+    boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
+    if (uploadFiles) {
+        log:printInfo("Enabled file uploading task.");
+        int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
+        (function() returns error?) onTriggerFunction = searchFilesToUpload;
+        function(error) onErrorFunction = informError;
+        timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
+        timer.start();
+    } else {
+        log:printInfo("Disabled file uploading task.");
+    }
 }
 

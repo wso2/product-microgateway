@@ -141,7 +141,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
 
             http:Response res => {
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
 
             error err => {
@@ -163,7 +163,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
                 res.setPayload(payload);
                 log:printError("Error in client response", err = err);
                 outboundEp->respond(res) but { error e =>
-                log:printError("Error sending response", err = e) };
+                log:printError("Error when sending response", err = e) };
             }
         }
     }

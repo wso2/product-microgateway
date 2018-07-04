@@ -17,11 +17,6 @@ function initThrottlePolicies() {
     log:printDebug("Throttle policies initialized.");
 }
 
-function isStopOnQuotaReach(string policy) returns boolean {
-{{#stopOnQutaInfo}}
-    if("{{name}}" == policy) {
-        return {{value}};
-    }
-{{/stopOnQutaInfo}}
-    return true;
+function getDeployedPolicies() returns map {
+    return { {{#policyNames}}"{{.}}":true{{#unless @last}},{{/unless}}{{/policyNames}} };
 }

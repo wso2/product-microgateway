@@ -44,7 +44,7 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
 
 public function publishNonThrottleEvent(RequestStreamDTO request) {
     requestStream.publish(request);
-    printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to queue.");
+    printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
 }
 function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
