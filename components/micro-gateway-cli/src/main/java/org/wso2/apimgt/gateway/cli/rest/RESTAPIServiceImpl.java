@@ -143,8 +143,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                         }
                     }
                     if (matchedAPI == null) {
-                        throw new CLIRuntimeException(
-                                "No Published APIs matched for name:" + apiName + ", version:" + version);
+                        return matchedAPI;
                     }
                     //set additional configs such as CORS configs from the toolkit configuration
                     setAdditionalConfigs(matchedAPI);
