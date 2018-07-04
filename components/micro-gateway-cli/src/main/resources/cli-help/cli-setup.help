@@ -51,19 +51,19 @@ OPTIONS
     --truststore
         <Optional>
         Path to the trustStore file
-        By default, consider <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
+        If the argument is not specified, it uses <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
 
     -w
     --truststore-pass
         <Optional>
         Password for the given trustStore
-        Use the default trustStore password
+        If the argument is not specified, it uses the default trustStore password
 
     -c
     --config
         <Optional>
         Path to the toolkit configuration file
-        By default, use the <TOOLKIT_HOME>/conf/toolkit-config.toml
+        If the argument is not specified, it uses <TOOLKIT_HOME>/conf/toolkit-config.toml
 
     -a
     --api-name
