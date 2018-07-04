@@ -28,6 +28,10 @@ setlocal EnableDelayedExpansion
 if ""%1%""==""-v"" ( set verbose=T ) else ( set verbose=F )
 if %verbose%==T ( echo Verbose mode enabled )
 
+REM Set Java Xms and Xmx values. The values specified here will set in gateway runtime.
+SET JAVA_XMS_VALUE="256m"
+SET JAVA_XMX_VALUE="512m"
+
 REM Get the location of this(gateway.bat) file
 SET PRGDIR=%~dp0
 SET GWHOME=%PRGDIR%..
@@ -64,6 +68,9 @@ goto end
 
 :callBallerina
 	rem ---------- Run balx with ballerina ----------------
+	powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms256m ','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx1024m ','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
+	powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
+	powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
     set "separator=/"
     set log_path="%GWHOME%\conf\micro-gw.conf"
     call set unix_style_path=%%log_path:\=%separator%%%
