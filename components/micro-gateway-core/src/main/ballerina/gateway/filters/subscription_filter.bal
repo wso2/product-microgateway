@@ -66,15 +66,15 @@ public type SubscriptionFilter object {
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = subscription.subscriptionTier.toString();
                                     authenticationContext.apiKey = jwtToken;
-                                    authenticationContext.username = decodedPayload.endUser.toString();
+                                    authenticationContext.username = decodedPayload.sub.toString();
                                     authenticationContext.callerToken = jwtToken    ;
                                     authenticationContext.applicationId = decodedPayload.application.id.toString();
                                     authenticationContext.applicationName = decodedPayload.application.name.toString();
                                     authenticationContext.applicationTier = decodedPayload.application.tier.toString();
-                                    authenticationContext.subscriber = subscription.subscriber.toString();
+                                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
                                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
                                     authenticationContext.apiTier = decodedPayload.apiTier.toString();
-                                    authenticationContext.apiPublisher = decodedPayload.publisher.toString();
+                                    authenticationContext.apiPublisher = subscription.publisher.toString();
                                     authenticationContext.subscriberTenantDomain = decodedPayload
                                     .subscriberTenantDomain.toString();
                                     authenticationContext.keyType = decodedPayload.keytype.toString();
