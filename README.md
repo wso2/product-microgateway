@@ -59,7 +59,7 @@ Following are the set of commands included within the Microgateway Toolkit.
 
 ##### Setup
 
-`$micro-gw setup`
+`$ micro-gw setup`
 
 The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
 distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
@@ -73,19 +73,16 @@ Example
 
 1. Setting up a project for a single API.
 
-    `$micro-gw setup pizzashack-project -a PizzaShackAPI -v 1.0.0`
+    `$ micro-gw setup pizzashack-project -a PizzaShackAPI -v 1.0.0`
 
 1. Setting up a project for a group of APIs.
 
-    `$micro-gw setup pizzashack-project -l label-name`
+    `$ micro-gw setup pizzashack-project -l label-name`
 
 
 ##### Build
 
-`$micro-gw build`
-
-Build
-$micro-gw build
+`$ micro-gw build`
 
 Upon execution of this command, the toolkit will build the micro gateway distribution for the specified project.
 
@@ -93,7 +90,7 @@ Execute `micro-gw help build` to get more detailed information regarding the bui
 
 Example
 
-	$micro-gw build pizzashack-project
+	$ micro-gw build pizzashack-project
 
 #### Project Structure
 
@@ -141,7 +138,7 @@ micro-gw-pizzashack-project.zip
 
 * Unzip the micro-gw-pizzashack-project.zip and run the `gateway` script inside the bin folder of the extracted zip using below command.
 
-`bash gateway `
+`$ bash gateway `
 
 ```
 micro-gw-internal/bin$ bash gateway
