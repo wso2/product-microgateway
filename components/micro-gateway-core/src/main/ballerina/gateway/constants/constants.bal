@@ -135,6 +135,8 @@
 @final public string PROTOCOL_PROPERTY = "protocol";
 @final public string ERROR_RESPONSE = "error_response";
 @final public string ERROR_RESPONSE_CODE = "error_response_code";
+@final public string USERNAME = "username";
+@final public string PASSWORD = "password";
 
 
 //Analytics filter related constants
