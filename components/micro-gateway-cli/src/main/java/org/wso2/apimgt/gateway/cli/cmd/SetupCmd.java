@@ -269,12 +269,12 @@ public class SetupCmd implements GatewayLauncherCmd {
             apis = service.getAPIs(label, accessToken);
         } else {
             ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-            if(api != null) {
+            if (api != null) {
                 apis.add(api);
             }
         }
         if (apis == null || (apis != null && apis.isEmpty())) {
-            //Delete folder
+            // Delete folder
             GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
             String errorMsg = "";
             if (label != null) {
