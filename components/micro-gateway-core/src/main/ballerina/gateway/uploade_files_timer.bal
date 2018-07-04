@@ -51,7 +51,7 @@ function searchFilesToUpload() returns error? {
 }
 
 function informError(error e) {
-    log:printDebug("File were not present to upload yet:" + e.message);
+    log:printDebug("Files not present for upload:" + e.message);
 }
 
 function timerTask() {
@@ -59,14 +59,14 @@ function timerTask() {
     map vals = getConfigMapValue(ANALYTICS);
     boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
     if (uploadFiles) {
-        log:printInfo("File uploading task is enabled.");
+        log:printInfo("Enabled file uploading task.");
         int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
         (function() returns error?) onTriggerFunction = searchFilesToUpload;
         function(error) onErrorFunction = informError;
         timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
         timer.start();
     } else {
-        log:printInfo("File uploading task is disabled.");
+        log:printInfo("Disabled file uploading task.");
     }
 }
 

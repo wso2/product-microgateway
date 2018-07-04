@@ -50,7 +50,7 @@ public type SubscriptionFilter object {
                             apiKeyValidationDto.issuedTime = <string>tokenIssuedTime;
 
                             if (isAccessTokenExpired(apiKeyValidationDto)) {
-                                printDebug(KEY_SUBSCRIPTION_FILTER, "JWT Access token is expired.");
+                                printDebug(KEY_SUBSCRIPTION_FILTER, "JWT Access token has expired.");
                                 setErrorMessageToFilterContext(filterContext, API_AUTH_INVALID_CREDENTIALS);
                                 sendErrorResponse(listener, request, filterContext);
                                 return false;

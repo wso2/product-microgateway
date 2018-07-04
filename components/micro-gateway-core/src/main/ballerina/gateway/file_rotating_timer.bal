@@ -47,7 +47,7 @@ function sendFileRotatingEvent() returns error? {
 }
 
 function errorOnRotating(error e) {
-    log:printDebug("File were not present to rotate:" + e.message);
+    log:printDebug("File not present to rotate:" + e.message);
 }
 
 function rotatingTask() {

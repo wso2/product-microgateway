@@ -388,7 +388,7 @@ public function rotateFile(string fileName) returns string|error {
             log:printInfo("File compressed successfully");
             match fileToZip.delete() {
                 () => {
-                    log:printInfo("Existed file deleted successfully");
+                    log:printInfo("Existing file deleted successfully");
                 }
                 error err => {
                     log:printError("Error occurred while deleting the file: " + fileName, err = err);
@@ -450,7 +450,7 @@ function getAnalyticsConfig() {
     map vals = getConfigMapValue(ANALYTICS);
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
-    printDebug(KEY_UTILS, "Analytics config values read");
+    printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
 function setLatency(int starting, http:FilterContext context, string latencyType) {

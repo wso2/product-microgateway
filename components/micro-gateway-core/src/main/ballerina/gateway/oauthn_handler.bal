@@ -108,16 +108,16 @@ public type OAuthAuthProvider object {
 public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
               (APIKeyValidationDto) {
 
-    printDebug(KEY_OAUTH_PROVIDER, "Authenticating request using request meta data.");
+    printDebug(KEY_OAUTH_PROVIDER, "Authenticating request using the request metadata.");
     string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
     string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized;
     APIKeyValidationDto apiKeyValidationDto;
     if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
-        printDebug(KEY_OAUTH_PROVIDER, "Checking access token in gateway token cache.");
+        printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the gateway token cache.");
         match self.gatewayCache.retrieveFromTokenCache(accessToken) {
             boolean isTokenCached => {
-                printDebug(KEY_OAUTH_PROVIDER, "Access token found in token cache.");
+                printDebug(KEY_OAUTH_PROVIDER, "Access token found in the token cache.");
                 match self.gatewayCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
                     APIKeyValidationDto apiKeyValidationDtoFromcache => {
                         if (isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
@@ -125,38 +125,38 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
                             self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
                             self.gatewayCache.removeFromTokenCache(accessToken);
                             apiKeyValidationDtoFromcache.authorized = "false";
-                            printDebug(KEY_OAUTH_PROVIDER, "Token is expired");
+                            printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
                             return apiKeyValidationDtoFromcache;
                         }
                         authorized = <boolean>apiKeyValidationDtoFromcache.authorized;
                         apiKeyValidationDto = apiKeyValidationDtoFromcache;
-                        printDebug(KEY_OAUTH_PROVIDER, "authorized value from token cache: " + authorized);
+                        printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
                     }
                     () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Key validation details not found in key validation cache. 
-+                                Hence calling the key vaidation service.");
+                        printDebug(KEY_OAUTH_PROVIDER, "Key validation details not found in the key validation cache.
++                                 Calling the key validation service.");
                         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                     }
                 }
             }
             () => {
-                printDebug(KEY_OAUTH_PROVIDER, "Access token not found in gateway token cache.");
+                printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the gateway token cache.");
 
-                printDebug(KEY_OAUTH_PROVIDER, "Checking access token in invalid token cache.");
+                printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the invalid token cache.");
                 match self.gatewayCache.retrieveFromInvalidTokenCache(accessToken) {
                     APIKeyValidationDto cacheAuthorizedValue => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token found in invalid token cache.");
+                        printDebug(KEY_OAUTH_PROVIDER, "Access token found in the invalid token cache.");
                         return cacheAuthorizedValue;
                     }
                     () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in invalid token cache. Hence calling the key vaidation service.");
+                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache. Calling the key validation service.");
                         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                     }
                 }
             }
         }
     } else {
-        printDebug(KEY_OAUTH_PROVIDER, "Gateway cache disabled. Hence calling the key vaidation service.");
+        printDebug(KEY_OAUTH_PROVIDER, "Gateway cache disabled. Calling the key validation service.");
         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
     }
     if (authorized) {
@@ -176,7 +176,7 @@ public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto api
     match <string>keyValidationInfoJson.authorized {
         string authorizeValue => {
             boolean auth = <boolean>authorizeValue;
-            printDebug(KEY_OAUTH_PROVIDER, "authorized value from key validation service: " + auth);
+            printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
             if (auth) {
                 match <APIKeyValidationDto>keyValidationInfoJson {
                     APIKeyValidationDto dto => {
@@ -253,7 +253,7 @@ public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiReq
         var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
         time = time:currentTime();
         int endTimeMills = time.time;
-        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for key validation service call : " + (endTimeMills -
+        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
                     startTimeMills) + "ms");
         match result1 {
             error err => {
