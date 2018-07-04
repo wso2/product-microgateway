@@ -65,7 +65,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
         responseDto.apiPublisher = getAPIDetailsFromServiceAnnotation(
                                        reflect:getServiceAnnotations(context.serviceType)).publisher;
         responseDto.keyType = PRODUCTION_KEY_TYPE;
-        responseDto.consumerKey = "-";
+        responseDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
         responseDto.userName = END_USER_ANONYMOUS;
         responseDto.appId = ANONYMOUS_APP_ID;
         responseDto.appName = ANONYMOUS_APP_NAME;
@@ -109,7 +109,6 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
     responseDto.responseTime = timeResponseIn - initTime;
     //dummy values for protocol and destination for now
     responseDto.protocol = "http";
-    responseDto.destination = "https://dummyDestination";
-
+    responseDto.destination = <string> runtime:getInvocationContext().attributes[DESTINATION];
     return responseDto;
 }

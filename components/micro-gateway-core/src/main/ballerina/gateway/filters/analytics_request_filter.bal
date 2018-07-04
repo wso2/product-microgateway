@@ -28,34 +28,27 @@ public type AnalyticsRequestFilter object {
             context.attributes[HOSTNAME_PROPERTY] = "localhost";
         }
         context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
-        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
-        if (!filterFailed && context.attributes[IS_THROTTLE_OUT] == true) {
-            if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true) {
-                doFilterRequest(request, context);
-            }
-        } else {
-            if (!filterFailed) {
-                doFilterRequest(request, context);
-            }
-        }
+        doFilterRequest(request, context);
         return true;
 
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
-        if (!filterFailed && context.attributes.hasKey(IS_THROTTLE_OUT)) {
+        if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
             boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
             if (isThrottleOut) {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
-                //todo: publish
+                eventStream.publish(getEventFromThrottleData(eventDto));
             } else {
-                doFilterResponse(response, context);
-                doFilterFault(context);
+                if (!filterFailed ) {
+                    doFilterResponse(response, context);
+                    doFilterFault(context);
+                }
             }
         } else {
             if (!filterFailed) {
-                context.attributes["THROTTLE_LATENCY"] = 0;
+                context.attributes[THROTTLE_LATENCY] = 0;
                 doFilterResponse(response, context);
                 doFilterFault(context);
             }
