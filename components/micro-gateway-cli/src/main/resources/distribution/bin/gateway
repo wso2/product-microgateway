@@ -23,6 +23,10 @@
 # OS specific support.  $var _must_ be set to either true or false.
 #ulimit -n 100000
 
+# Set Java Xms and Xmx values. The values specified here will set in gateway runtime.
+JAVA_XMS_VALUE="256m"
+JAVA_XMX_VALUE="512m"
+
 # resolve links - $0 may be a softlink
 PRG="$0"
 
@@ -46,6 +50,10 @@ export BALLERINA_HOME=$GWHOME'/runtime'
 if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
+
+# Set JAVA Xms and Xmx values in Ballerina runtime
+sed -i "s/-Xms[0-9]*m\+/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
+sed -i "s/-Xmx[0-9]*m\+/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
 
 # ----- Process the input command ----------------------------------------------
 args=""
