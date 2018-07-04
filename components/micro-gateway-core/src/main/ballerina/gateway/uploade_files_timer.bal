@@ -22,10 +22,12 @@ import ballerina/runtime;
 import ballerina/log;
 
 string uploadingUrl;
+string analyticsUsername;
+string analyticsPassword;
 
 future timerFtr = start timerTask();
 
-function searchFilesToUpload() returns error? {
+function searchFilesToUpload() returns (error?) {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
     internal:Path ex = new(fileLocation);
@@ -33,7 +35,8 @@ function searchFilesToUpload() returns error? {
     foreach pathEntry in pathList {
         string fileName = pathEntry.getName();
         if (fileName.contains(ZIP_EXTENSION)) {
-            http:Response response =  multipartSender(fileLocation + PATH_SEPERATOR,  pathEntry.getName());
+            http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
+                analyticsUsername, analyticsPassword);
             if (response.statusCode == 201) {
                 var result = pathEntry.delete();
             } else {
@@ -42,8 +45,8 @@ function searchFilesToUpload() returns error? {
             cnt++;
         }
     }
-    if ( cnt == 0 ) {
-        error er = {message: "No files present to upload."};
+    if (cnt == 0) {
+        error er = { message: "No files present to upload." };
         return er;
     } else {
         return ();
@@ -58,6 +61,8 @@ function timerTask() {
     task:Timer? timer;
     map vals = getConfigMapValue(ANALYTICS);
     boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
+    analyticsUsername = <string>vals[USERNAME];
+    analyticsPassword = <string>vals[PASSWORD];
     if (uploadFiles) {
         log:printInfo("Enabled file uploading task.");
         int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
