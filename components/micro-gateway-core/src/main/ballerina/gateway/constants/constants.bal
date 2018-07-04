@@ -269,3 +269,15 @@
 
 
 @final string PATH_SEPERATOR = "/";
+
+
+// logging keys
+@final string KEY_GW_LISTNER = "APIGatewayListener";
+@final string KEY_AUTHN_FILTER = "AuthnFilter";
+@final string KEY_AUTHZ_FILTER = "AuthzFilter";
+@final string KEY_SUBSCRIPTION_FILTER = "SubscriptionFilter";
+@final string KEY_THROTTLE_FILTER = "ThrottleFilter";
+@final string KEY_THROTTLE_UTIL = "ThrottleUtil";
+@final string KEY_GW_CACHE = "GatewayCache";
+@final string KEY_UTILS = "Utils";
+@final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";

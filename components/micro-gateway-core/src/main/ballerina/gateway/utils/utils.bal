@@ -187,6 +187,9 @@ public function getKeyValidationRequestObject() returns APIRequestMetaDataDto {
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
     apiKeyValidationRequest.accessToken = <string>runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR];
+    printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext 
+            + ", resource: " + apiKeyValidationRequest.matchingResource
+            + ", verb: " + apiKeyValidationRequest.httpVerb);
     return apiKeyValidationRequest;
 
 }
@@ -401,6 +404,42 @@ public function retrieveConfig(string key, string default) returns string {
     return config:getAsString(key, default = default);
 }
 
+@Description {value:"mask all letters with given text except last 4 charactors."}
+public function mask(string text) returns string {
+    if (text.length() > 4) {
+        string last = text.substring(text.length() - 4, text.length());
+        string first = text.substring(0, text.length() - 4).replaceAll(".", "x");
+        return first + last;
+    } else {
+        return "xxxx";
+    }
+}
+
+@Description {value:"Returns the current message ID (uuid)"}
+public function getMessageId() returns string {
+    string messageId = <string> runtime:getInvocationContext().attributes[MESSAGE_ID];
+    if (messageId == null) {
+        return "-";
+    } else {
+        return messageId;
+    }
+}
+
+@Description {value:"Add a error log with provided key (class) and message ID"}
+public function printError(string key, string message) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+}
+
+@Description {value:"Add a debug log with provided key (class) and message ID"}
+public function printDebug(string key, string message) {
+    log:printDebug(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+}
+
+@Description {value:"Add a trace log with provided key (class) and message ID"}
+public function printTrace(string key, string message) {
+    log:printTrace(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+}
+
 function initStreamPublisher() {
     log:printInfo("Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
@@ -411,12 +450,13 @@ function getAnalyticsConfig() {
     map vals = getConfigMapValue(ANALYTICS);
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
-    log:printDebug("Analytics config values read");
+    printDebug(KEY_UTILS, "Analytics config values read");
 }
 
 function setLatency(int starting, http:FilterContext context, string latencyType) {
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
+    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
 }
 
 future streamftr = start initStreamPublisher();

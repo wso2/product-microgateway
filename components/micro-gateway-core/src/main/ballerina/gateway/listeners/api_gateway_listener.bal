@@ -85,9 +85,9 @@ public type EndpointConfiguration {
 
 public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
     initiateGatewayConfigurations(endpointConfig);
-    log:printDebug("Initiallized gateway configurations for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Initiallized gateway configurations for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
-    log:printDebug("Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
+    printDebug(KEY_GW_LISTNER, "Successfully initiallized APIGatewayListener for port:" + endpointConfig.port);
 }
 
 public function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
@@ -127,7 +127,9 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     intitateKeyManagerConfigurations();
+    printDebug(KEY_GW_LISTNER, "Initiallized key manager configurations");
     initGatewayCaches();
+    printDebug(KEY_GW_LISTNER, "Initiallized gateway caches");
 }
 
 public function getAuthProviders() returns http:AuthProvider[] {

@@ -31,7 +31,7 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        log:printDebug("Processing request in ThrottleFilter");
+        printDebug(KEY_THROTTLE_FILTER, "Processing request in ThrottleFilter");
         int startingTime = getCurrentTime();
         //Throttle Tiers
         string applicationLevelTier;
@@ -49,11 +49,16 @@ public type ThrottleFilter object {
 
         AuthenticationContext keyvalidationResult;
         if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+            printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
+            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttled out.");
             (isThrottled, stopOnQuota) = isSubscriptionLevelThrottled(context, keyvalidationResult);
+            printDebug(KEY_THROTTLE_FILTER, "Subscription level throttled result:: isThrottled:"
+                    + isThrottled + ", stopOnQuota:" + stopOnQuota);
             if (isThrottled) {
                 if (stopOnQuota) {
+                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
                     context.attributes[IS_THROTTLE_OUT] = true;
                     context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
@@ -64,9 +69,12 @@ public type ThrottleFilter object {
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
+                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota set to false.");
                 }
             }
+            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttled out.");
             if (isApplicationLevelThrottled(keyvalidationResult)) {
+                printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
                 context.attributes[IS_THROTTLE_OUT] = true;
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
@@ -74,13 +82,20 @@ public type ThrottleFilter object {
                 sendErrorResponse(listener, request, context);
                 setLatency(startingTime, context, THROTTLE_LATENCY);
                 return false;
+            } else {
+                printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
             }
         } else if (!isSecured) {
+            printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
             // setting keytype to invocationContext
             runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
+
             (isThrottled, stopOnQuota) = isUnauthenticateLevelThrottled(context);
+            printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
+                    + isThrottled + ", stopOnQuota:" + stopOnQuota);
             if (isThrottled) {
                 if (stopOnQuota) {
+                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
                     context.attributes[IS_THROTTLE_OUT] = true;
                     context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
@@ -90,6 +105,7 @@ public type ThrottleFilter object {
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
+                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(2nd) since stopOnQuota set to false.");
                 }
             }
             string clientIp = <string>context.attributes[REMOTE_ADDRESS];
@@ -103,6 +119,7 @@ public type ThrottleFilter object {
             // setting keytype to invocationContext
             runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
         } else {
+            printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                 INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
             sendErrorResponse(listener, request, context);
@@ -113,9 +130,8 @@ public type ThrottleFilter object {
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
-        int endingTime = getCurrentTime();
         setLatency(startingTime, context, THROTTLE_LATENCY);
-        log:printDebug("Request is not throttled");
+        printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
         return true;
     }
 

@@ -112,6 +112,3 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
 
     return responseDto;
 }
-
-
-

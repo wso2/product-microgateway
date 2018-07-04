@@ -45,13 +45,16 @@ public type OAuthzFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
+        printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
         string authScheme = runtime:getInvocationContext().authContext.scheme;
+        boolean result = true;
         // scope validation is done in authn filter for oauth2, hence we only need to
         //validate scopes if auth scheme is jwt.
         if (authScheme == AUTH_SCHEME_JWT){
-            return self.authzFilter.filterRequest(listener, request, context);
+            result = self.authzFilter.filterRequest(listener, request, context);
         }
-        return true;
+        printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result);
+        return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
