@@ -1,12 +1,14 @@
-# product-microgateway
+# WSO2 API Manager Micro Gateway Toolkit 
 
-The Microgateway is a specialized form of the WSO2 API Gateway. Its main characteristics are
+The Microgateway Toolkit provides the capability to create specialized gateway distribution (Microgateway distributions) where only a single API or a group of APIs are included. Once a Microgateway distribution is started, it will start serving those specific API(s) right away. 
+
+In summary, a Microgateway is a specialized form of the WSO2 API Gateway by having below main characteristics:
 
 1. Its ability to execute in isolation without mandatory connections to other components (Key Manager, Traffic Manager, etc).
 1. Ability to host a subset of APIs of choice (defined on the API Publisher) instead of all.
 1. Immutability - if you update an API you need to re-create the container/instance, no hot deployment.
 
-Microgateway offers you a proxy that is capable of performing security validations (OAuth, Basic Auth, Signed JWT), in-memory (local) rate limiting and operational analytics.
+Microgateway offers you a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and operational analytics.
 
 #### Design Goals
 
@@ -25,52 +27,57 @@ The following diagram illustrates the process of getting an API (or a selected s
 
 #### Setting up microgateway
 
- This product will include a CLI, the B7a platform distribution and a few B7a extensions (Endpoints and Filters). The CLI will have two main responsibilities.
+ This product will include a toolkit, the B7a platform distribution and a few B7a extensions (Endpoints and Filters). The toolkit will have two main responsibilities.
 
- 1. Setting up a Microgateway project.
- 1. Running the Microgateway project.
+ 1. Setting up a microgateway project.
+ 1. Building the microgateway project and creating a microgateway distribution.
+ 1. Running the microgateway distribution.
 
- These two steps will be treated as two phases. One will first complete the setup phase and move on to the Run phase. The reason for treating them as phases is to make it possible for developers to take control of the runtime if and when required. For example, what gets run as default on a Microgateway is a simple API proxy. If a developer needs to perform some sort of an integration or change the Ballerina source files for some other reason, he could engage with the project after the setup phase and do the required modifications before the runtime is deployed.
+ These steps can be treated as phases. One will first complete the setup phase and move on to the build phase. The reason for treating them as phases is to make it possible for developers to take control of the runtime if and when required. For example, what gets run as default on a microgateway is a simple API proxy.
 
-##### Setting up the Microgateway Project
+##### Setting up a microgateway project
 
-The first step of setting up a Microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs) of a given label. Once this step is completed it will convert the JSON representation of the APIs to B7a source files and create a single B7a project structure. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the CLI can see. These generated files can optionally be managed via source management repositories (Git).
+To setup a microgateway project, a developer can choose two ways.
+
+ 1. Create a microgateway project for a single API
+ 1. Create a microgateway project for a group of APIs
+
+The first step of setting up a microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs). Once this step is completed it will convert the JSON representation of the APIs to B7a source files and create a single B7a project structure. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the toolkit can see. These generated files can optionally be managed via source management repositories (Git).
 
 What gets downloaded/pulled?
 * The JSON representation of the API files
 * The subscription information of each API
 * The rate limiting policies associated with each API
 
-##### Running the Microgateway Project
+##### Building a microgateway project
 
-Once the B7a projects have been created, the next step is to run the Microgateway. Running the Microgateway project would result in the relevant project being built and run.
+Once the project has been created, the next step is to build the project sources.
 
-#### Microgateway CLI commands
+#### Microgateway toolkit commands
 
-Following are the set of commands and arguments of the CLI included within the Microgateway SDK.
+Following are the set of commands included within the Microgateway Toolkit.
 
 ##### Setup
 
 `$micro-gw setup`
 
-###### Arguments
-	Required
-		--label, -l (the label of the APIs to download)
-	Optional
-		--username, -u (the user performing the action. If not provided, will be prompted on first attempt)
-		--password, -p (the password of the user performing the action. If not provided, will be prompted on first attempt)
-		--path (The path to the workspace directory. This is mandatory when using the toolkit for the first time. Afterwards, the previously specified path will be used as the workspace path)
+The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
+distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
+details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
+
+If the project already exists a warning will be prompted requesting permission to override existing source.
+
+Execute `micro-gw help setup` to get more detailed information regarding the setup command.
 
 Example
 
-	$micro-gw setup -l accounts --path /home/user/gateway-project
+1. Setting up a project for a single API.
 
-Purpose
+    `$micro-gw setup pizzashack-project -a PizzaShackAPI -v 1.0.0`
 
-	Upon execution of this command the CLI will download all APIs labeled with the corresponding label and convert each API definition
-	into a B7a service which acts as a secure proxy to the back-end service of the API.
-	All B7a source files will be created under a project directory. The name of the project will be the name of the label.
-	If the project already exists a warning will be prompted requesting permission to override existing source.
+1. Setting up a project for a group of APIs.
+
+    `$micro-gw setup pizzashack-project -l label-name`
 
 
 ##### Build
@@ -80,61 +87,46 @@ Purpose
 Build
 $micro-gw build
 
-###### Arguments
-	Required
-		--label, -l (the label of the APIs to be build)
+Upon execution of this command, the toolkit will build the micro gateway distribution for the specified project.
+
+Execute `micro-gw help build` to get more detailed information regarding the build command.
 
 Example
 
-	$micro-gw build -l accounts
+	$micro-gw build pizzashack-project
 
-Purpose
+#### Project Structure
 
-	Upon execution of this command the CLI will build the micro gateway distribution for the specified label.
+Following is the structure of a project generated when running micro-gw setup command.
 
-
-#### Workspace Structure
-
-Following is the structure of the workspace generated when running micro-gw setup command.
-There will be separate structures created for each label specifying with -l <label>.
-
-```bash
-micro-gw-resources
-    ├── conf
-    │   └── config.toml
-    └── projects
-        └── <label-1>
-        └── <label-2>
-        └── ...
 ```
-
-#### Label Structure
-
-Following is the structure of the label generated when running micro-gw setup command under projects folder in the workspace.
-
-```bash
-└── projects
-        └── <label-1>
-├── conf (micro gateway dist files)
-│   └── label-config.toml
-├── src (Generated source files)
-│   ├── endpoints.bal
-│   ├── extension_filter.bal
-│   ├── SampleAPI_1_0_0.bal
-│   └── policies  (Generated throttling policies)
-└── target
-    └── micro-gw-<label-1>.zip
+.
+└── pizzashack-project
+    ├── conf
+    │   └── label-config.toml
+    ├── src
+    │   ├── endpoints.bal
+    │   ├── extension_filter.bal
+    │   ├── PizzaShackAPI_1_0_0.bal
+    │   └── policies
+    │       ├── application_10PerMin.bal
+    │       ├── application_20PerMin.bal
+    │       ├── ...
+    │       └── throttle_policy_initializer.bal
+    └── target
 ```
 
 #### Microgateway Distribution structure for a label
-```bash
-micro-gw-<label>
+```
+micro-gw-pizzashack-project
 ├── bin (The binary scripts of the micro-gateway distribution)
 │   └── gateway
+    └── gateway.bat
 ├── conf (micro gateway distribution configuration)
 │   └── micro-gw.conf
 ├── exec (generated balx ballerina executable for the APIs)
-│   └── internal.balx
+│   └── pizzashack-project.balx
+├── logs (logs generated from the gateway)
 └── runtime
 ```
 
@@ -143,17 +135,17 @@ micro-gw-<label>
 One the **setup, build** commands are executed, the source files which were generated will be built and a micro gateway distribution will be created under target folder.
 
 ```
-../internal/target$ ls
-micro-gw-internal.zip
+../pizzashack-project/target$ ls
+micro-gw-pizzashack-project.zip
 ```
 
-* Unzip the micro-gw-internal.zip and run the micro-gw.sh inside the bin folder of the extracted zip using below command.
+* Unzip the micro-gw-pizzashack-project.zip and run the `gateway` script inside the bin folder of the extracted zip using below command.
 
-`bash micro-gw.sh `
+`bash gateway `
 
 ```
-micro-gw-internal/bin$ bash micro-gw.sh
-ballerina: initiating service(s) in '/home/wso2/gw-workspace/micro-gw-resources/projects/internal/target/micro-gw-internal/exec/internal.balx'
+micro-gw-internal/bin$ bash gateway
+ballerina: initiating service(s) in '/home/user/pizzashack-project/target/micro-gw-pizzashack-project/exec/internal.balx'
 ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
