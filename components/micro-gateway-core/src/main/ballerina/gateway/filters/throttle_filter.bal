@@ -31,7 +31,7 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        printDebug(KEY_THROTTLE_FILTER, "Processing request in ThrottleFilter");
+        printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
         int startingTime = getCurrentTime();
         //Throttle Tiers
         string applicationLevelTier;
@@ -52,13 +52,13 @@ public type ThrottleFilter object {
             printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
-            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttled out.");
+            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
             (isThrottled, stopOnQuota) = isSubscriptionLevelThrottled(context, keyvalidationResult);
-            printDebug(KEY_THROTTLE_FILTER, "Subscription level throttled result:: isThrottled:"
+            printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
                     + isThrottled + ", stopOnQuota:" + stopOnQuota);
             if (isThrottled) {
                 if (stopOnQuota) {
-                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
+                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out responses.");
                     context.attributes[IS_THROTTLE_OUT] = true;
                     context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
@@ -69,10 +69,10 @@ public type ThrottleFilter object {
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
-                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota set to false.");
+                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota is set to false.");
                 }
             }
-            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttled out.");
+            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
             if (isApplicationLevelThrottled(keyvalidationResult)) {
                 printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
                 context.attributes[IS_THROTTLE_OUT] = true;
@@ -105,7 +105,7 @@ public type ThrottleFilter object {
                 } else {
                     // set properties in order to publish into analytics for billing
                     context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
-                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(2nd) since stopOnQuota set to false.");
+                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(2nd) since stopOnQuota is set to false.");
                 }
             }
             string clientIp = <string>context.attributes[REMOTE_ADDRESS];

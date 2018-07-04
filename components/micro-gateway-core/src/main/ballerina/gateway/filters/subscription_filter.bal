@@ -50,7 +50,7 @@ public type SubscriptionFilter object {
                             apiKeyValidationDto.issuedTime = <string>tokenIssuedTime;
 
                             if (isAccessTokenExpired(apiKeyValidationDto)) {
-                                printDebug(KEY_SUBSCRIPTION_FILTER, "JWT Access token is expired.");
+                                printDebug(KEY_SUBSCRIPTION_FILTER, "JWT Access token has expired.");
                                 setErrorMessageToFilterContext(filterContext, API_AUTH_INVALID_CREDENTIALS);
                                 sendErrorResponse(listener, request, filterContext);
                                 return false;
@@ -91,7 +91,7 @@ public type SubscriptionFilter object {
                             return false;
                         }
                         error err => {
-                            log:printError("Error while decoding jwt token with payload : " +
+                            log:printError("Error occurred while decoding the JWT token with the payload : " +
                                     jwtPayload, err = err);
                             setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
                             sendErrorResponse(listener, request, filterContext);

@@ -47,7 +47,7 @@ function multipartSender(string location, string file) returns http:Response {
             return response;
         }
         http:Response returnResult => {
-            log:printInfo("successfully uploaded the file: " + file);
+            log:printInfo("Successfully uploaded the file: " + file);
             return returnResult;
         }
     }
