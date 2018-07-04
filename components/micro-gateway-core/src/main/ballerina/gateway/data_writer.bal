@@ -84,8 +84,7 @@ function generateRequestEvent(http:Request request, http:FilterContext context) 
     analyticsRequestStream.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
     apiVersion;
 
-    //todo: hostname verify
-    analyticsRequestStream.hostName = "localhost";
+    analyticsRequestStream.hostName = <string>context.attributes[HOSTNAME_PROPERTY];
     analyticsRequestStream.method = request.method;
     context.attributes[METHOD] = request.method;
     analyticsRequestStream.resourceTemplate = getResourceConfigAnnotation

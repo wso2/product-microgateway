@@ -22,6 +22,12 @@ public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
+        if(request.hasHeader(HOST_HEADER_NAME)){
+            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
+        } else {
+            context.attributes[HOSTNAME_PROPERTY] = "localhost";
+        }
+        context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
         boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
         if (!filterFailed && context.attributes[IS_THROTTLE_OUT] == true) {
             if (context.attributes[ALLOWED_ON_QUOTA_REACHED] == true) {
@@ -45,11 +51,13 @@ public type AnalyticsRequestFilter object {
                 //todo: publish
             } else {
                 doFilterResponse(response, context);
+                doFilterFault(context);
             }
         } else {
             if (!filterFailed) {
                 context.attributes["THROTTLE_LATENCY"] = 0;
                 doFilterResponse(response, context);
+                doFilterFault(context);
             }
         }
         return true;
@@ -62,6 +70,20 @@ function doFilterRequest( http:Request request, http:FilterContext context) {
     AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
     EventDTO eventDto = generateEventFromRequest(requestEventStream);
     eventStream.publish(eventDto);
+}
+
+function doFilterFault(http:FilterContext context) {
+    match runtime:getInvocationContext().attributes[ERROR_RESPONSE] {
+        () => {
+            printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
+        }
+        any code => {
+            printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+            error err = <error>code;
+            FaultDTO faultDTO = populateFaultAnalyticdDTO(context, err);
+            //todo publish
+        }
+    }
 }
 
 function doFilterResponse(http:Response response, http:FilterContext context) {
