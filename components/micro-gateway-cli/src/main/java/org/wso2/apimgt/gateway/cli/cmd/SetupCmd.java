@@ -323,7 +323,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (!changesDetected) {
             outStream.println(
                     "No changes received from the server since the previous setup." 
-                            + " If you already have a built distribution, it can be reused.");
+                            + " If you have already a built distribution, it can be reused.");
         }
         outStream.println("Setting up project " + projectName + " is successful.");
 

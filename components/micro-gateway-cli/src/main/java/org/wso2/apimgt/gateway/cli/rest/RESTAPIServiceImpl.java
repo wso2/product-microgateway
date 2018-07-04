@@ -69,7 +69,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             String urlStr = publisherEp + RESTServiceConstants.APIS_GET_URI
                     .replace(GatewayCliConstants.LABEL_PLACEHOLDER,
                             URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
-            logger.debug("GET APIs URL: {}", urlStr);
+            logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -152,7 +152,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     throw new CLIInternalException("No proper response received for get API request.");
                 }
             } else {
-                throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
+                throw new CLIInternalException("Error occurred while getting the token. Status code: " + responseCode);
             }
         } catch (Exception e) {
             String msg = "Error while getting the API with name:" + apiName + ", version: " + version;

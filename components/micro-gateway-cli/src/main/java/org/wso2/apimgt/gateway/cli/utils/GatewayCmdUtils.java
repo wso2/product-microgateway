@@ -571,7 +571,7 @@ public class GatewayCmdUtils {
      */
     private static void cleanFolder(String targetPath, String... delete) throws IOException {
         File targetFolder = new File(targetPath);
-        logger.debug("Cleaning target folder: {}", targetPath);
+        logger.debug("Cleaning the target folder: {}", targetPath);
         if (!targetFolder.isDirectory()) {
             logger.warn("Nothing to delete. Target folder {} is not a directory.", targetPath);
             return;
@@ -598,13 +598,13 @@ public class GatewayCmdUtils {
                     success = fileToDelete.delete();
                 }
                 if (success) {
-                    logger.trace("Deleting file {} success.", file);
+                    logger.trace("Deleting file {} is successful.", file);
                 } else {
                     logger.trace("Deleting file {} failed.", file);
                 }
             }
         }
-        logger.debug("Cleaning target folder {} completed.", targetPath);
+        logger.debug("Cleaning the target folder {} complete.", targetPath);
     }
 
     /**
@@ -625,7 +625,7 @@ public class GatewayCmdUtils {
                     logger.trace("Directory: {} created. ", destinationFolder.getAbsolutePath());
                 } else {
                     logger.error("Failed to create directory: {} ", destinationFolder.getAbsolutePath());
-                    throw new CLIInternalException("Error occurred while setting up workspace structure");
+                    throw new CLIInternalException("Error occurred while setting up the workspace structure");
                 }
             }
 
@@ -668,7 +668,7 @@ public class GatewayCmdUtils {
                 logger.trace("Directory: {} created. ", path);
             } else {
                 logger.error("Failed to create directory: {} ", path);
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up the workspace structure");
             }
         }
         return folder;
@@ -709,11 +709,11 @@ public class GatewayCmdUtils {
                     logger.trace("File: {} created. ", path);
                 } else {
                     logger.error("Failed to create file: {} ", path);
-                    throw new CLIInternalException("Error occurred while setting up workspace structure");
+                    throw new CLIInternalException("Error occurred while setting up the workspace structure");
                 }
             } catch (IOException e) {
                 logger.error("Failed to create file: {} ", path, e);
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up the workspace structure");
             }
         }
     }
@@ -738,9 +738,9 @@ public class GatewayCmdUtils {
                 String defaultConfig = null;
                 boolean created = file.createNewFile();
                 if (created) {
-                    logger.debug("Deployment config file: {} created.", depConfig);
+                    logger.debug("Deployment configuration file: {} created.", depConfig);
                 } else {
-                    throw new CLIInternalException("Failed to create deployment config file: " + depConfig);
+                    throw new CLIInternalException("Failed to create the deployment configuration file: " + depConfig);
                 }
                 //Write Content
                 defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME, true);
@@ -812,10 +812,10 @@ public class GatewayCmdUtils {
             writer.write(content);
             boolean success = path.setExecutable(true);
             if (success) {
-                logger.trace("File: {} set to executable. ", path.getAbsolutePath());
+                logger.trace("File: {} is set to executable. ", path.getAbsolutePath());
             } else {
                 logger.error("Failed to set executable file: {} ", path.getAbsolutePath());
-                throw new CLIInternalException("Error occurred while setting up workspace structure");
+                throw new CLIInternalException("Error occurred while setting up the workspace structure");
             }
         }
     }

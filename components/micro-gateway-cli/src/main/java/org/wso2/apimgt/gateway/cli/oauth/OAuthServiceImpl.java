@@ -68,7 +68,7 @@ public class OAuthServiceImpl implements OAuthService {
                 JsonNode rootNode = mapper.readTree(responseStr);
                 return rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
             } else {
-                throw new CLIInternalException("Error occurred while getting token. Status code: " + responseCode);
+                throw new CLIInternalException("Error occurred while getting the token. Status code: " + responseCode);
             }
         } catch (IOException e) {
             String serverUrl = getServerUrl(tokenEndpoint);
@@ -107,7 +107,7 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
                     TokenManagementConstants.BASIC + " " + clientEncoded);
             urlConn.getOutputStream().write(requestBody.getBytes(TokenManagementConstants.UTF_8));
-            logger.debug("DCR url: {}", dcrEndpoint);
+            logger.debug("DCR URL: {}", dcrEndpoint);
             logger.trace("Request body for DCR call: {}", requestBody);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
