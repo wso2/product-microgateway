@@ -52,7 +52,7 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     return eventDto;
 }
 
-function populateFaultAnalyticdDTO(http:FilterContext context, error err) returns (FaultDTO) {
+function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     FaultDTO eventDto;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;

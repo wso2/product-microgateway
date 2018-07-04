@@ -80,7 +80,7 @@ function doFilterFault(http:FilterContext context) {
         any code => {
             printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
             error err = <error>code;
-            FaultDTO faultDTO = populateFaultAnalyticdDTO(context, err);
+            FaultDTO faultDTO = populateFaultAnalyticsDTO(context, err);
             //todo publish
         }
     }
