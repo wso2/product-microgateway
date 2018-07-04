@@ -57,7 +57,7 @@ function populateFaultAnalyticdDTO(http:FilterContext context, error err) return
     FaultDTO eventDto;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     time:Time time = time:currentTime();
-    int currentTimeMills = time.time;s
+    int currentTimeMills = time.time;
     json metaInfo = {};
     metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
     eventDto.context = getContext(context);
