@@ -1,5 +1,5 @@
 NAME
-    micro-gw build  - The build command generates a gateway distribution using the given project resources. 
+    micro-gw build - The build command generates a gateway distribution using the given project resources. 
 
 SYNOPSIS
     micro-gw build <project> 
@@ -9,6 +9,5 @@ DESCRIPTION
     in the current working directory and should be previously created using "micro-gw setup" command.
 
 EXAMPLES
-    Run the services of given label
     $ micro-gw build accounts-project
 
