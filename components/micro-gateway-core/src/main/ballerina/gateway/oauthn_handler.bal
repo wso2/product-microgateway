@@ -133,8 +133,8 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
                         printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
                     }
                     () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Key validation details not found in the key validation cache.
-+                                 Calling the key validation service.");
+                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache."
+                        + " Calling the key validation service.");
                         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                     }
                 }
