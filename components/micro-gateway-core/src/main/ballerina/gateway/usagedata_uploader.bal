@@ -21,7 +21,7 @@ import ballerina/mime;
 stream<string> filesToUpload;
 
 
-function multipartSender(string location, string file) returns http:Response {
+function multipartSender(string location, string file, string username, string password) returns http:Response {
     endpoint http:Client clientEP {
         url: uploadingUrl
     };
@@ -31,7 +31,7 @@ function multipartSender(string location, string file) returns http:Response {
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
 
-    request.addHeader(AUTH_HEADER, getBasicAuthHeaderValue("admin", "admin"));
+    request.addHeader(AUTH_HEADER, getBasicAuthHeaderValue(username, password));
     request.addHeader(FILE_NAME, file);
     request.addHeader(ACCEPT, APPLICATION_JSON);
     request.setBodyParts(bodyParts);
