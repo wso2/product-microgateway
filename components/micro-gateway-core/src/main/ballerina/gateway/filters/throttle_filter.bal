@@ -25,6 +25,12 @@ import ballerina/time;
 @Field { value: "filterRequest: response filter method (not used this scenario)" }
 public type ThrottleFilter object {
 
+    public {
+        map deployedPolicies;
+    }
+
+    public new (deployedPolicies) {}
+
     @Description { value: "Filter function implementation which tries to throttle the request" }
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
@@ -52,6 +58,16 @@ public type ThrottleFilter object {
             printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
+            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '"+ keyvalidationResult.tier
+                +"' exist.");
+            if (keyvalidationResult.tier != UNLIMITED_TIER && !deployedPolicies.hasKey(keyvalidationResult.tier)) {
+                printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '"+ keyvalidationResult.tier
+                +"' is not exist.");
+                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                    INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+                sendErrorResponse(listener, request, context);
+                return false;
+            }
             printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
             (isThrottled, stopOnQuota) = isSubscriptionLevelThrottled(context, keyvalidationResult);
             printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
@@ -72,6 +88,17 @@ public type ThrottleFilter object {
                     printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota is set to false.");
                 }
             }
+            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
+                + keyvalidationResult.applicationTier + "' exist.");
+            if (keyvalidationResult.applicationTier != UNLIMITED_TIER &&
+                    !deployedPolicies.hasKey(keyvalidationResult.applicationTier)) {
+                printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
+                    + keyvalidationResult.applicationTier + "' is not exist.");
+                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                    INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+                sendErrorResponse(listener, request, context);
+                return false;
+            }
             printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
             if (isApplicationLevelThrottled(keyvalidationResult)) {
                 printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
@@ -90,6 +117,16 @@ public type ThrottleFilter object {
             // setting keytype to invocationContext
             runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
 
+            printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
+                + "' exist.");
+            if (!deployedPolicies.hasKey(UNAUTHENTICATED_TIER)) {
+                printDebug(KEY_THROTTLE_FILTER, "Unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
+                    + "' is not exist.");
+                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                    INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+                sendErrorResponse(listener, request, context);
+                return false;
+            }
             (isThrottled, stopOnQuota) = isUnauthenticateLevelThrottled(context);
             printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
                     + isThrottled + ", stopOnQuota:" + stopOnQuota);

@@ -26,13 +26,13 @@ import java.util.List;
 
 public class ThrottlePolicyInitializer {
     private List<String> policyInitNames;
-    private List<StopOnQutaInfo> stopOnQutaInfo;
+    private List<String> policyNames;
     private String srcPackage;
     private String modelPackage;
 
     public ThrottlePolicyInitializer() {
         policyInitNames = new ArrayList<>();
-        stopOnQutaInfo = new ArrayList<>();
+        policyNames = new ArrayList<>();
     }
 
     public List<String> getPolicyInitNames() {
@@ -47,6 +47,7 @@ public class ThrottlePolicyInitializer {
         for (ApplicationThrottlePolicyDTO policyDTO : applicationPolicies) {
             policyInitNames.add(GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + policyDTO.getPolicyName()
                     + GeneratorConstants.INIT_FUNC_SUFFIX);
+            policyNames.add(policyDTO.getPolicyName());
         }
         return this;
     }
@@ -55,7 +56,7 @@ public class ThrottlePolicyInitializer {
         for (SubscriptionThrottlePolicyDTO policyDTO : subscriptionPolicies) {
             policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + policyDTO.getPolicyName()
                     + GeneratorConstants.INIT_FUNC_SUFFIX);
-            stopOnQutaInfo.add(new StopOnQutaInfo(policyDTO.getPolicyName(), policyDTO.getStopOnQuotaReach()));
+            policyNames.add(policyDTO.getPolicyName());
         }
         return this;
     }
@@ -72,15 +73,5 @@ public class ThrottlePolicyInitializer {
             this.modelPackage = modelPackage.replaceFirst("\\.", "/");
         }
         return this;
-    }
-}
-
-class StopOnQutaInfo {
-    String name;
-    boolean value;
-
-    public StopOnQutaInfo(String name, boolean value) {
-        this.name = name;
-        this.value = value;
     }
 }
