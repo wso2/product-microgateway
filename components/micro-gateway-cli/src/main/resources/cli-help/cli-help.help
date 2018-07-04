@@ -1,35 +1,32 @@
 NAME
-    Micro-gw help - Display help information about Gateway cli
+    micro-gw help - Display help information about the toolkit.
 
 SYNOPSIS
     micro-gw help [COMMAND]
 
 DESCRIPTION
-     With no COMMAND given, the synopsis of the gateway cli command
-     and a list of gateway cli commands are printed on the standard
-     output.
+    With no COMMAND given, the synopsis of the "micro-gw" command and a list of commands are printed on the 
+    standard output.
+    
+    If a command is given, the help page for the given command is printed.
+    
+    Note that "micro-gw ?", "micro-gw –h", and "micro-gw --help" are identical to "micro-gw help". 
+    Those formats are internally converted into "micro-gw help".
 
-     If a command is given, the help page for the given command
-     is printed.
+micro-gw command synopsis:
+    micro-gw [COMMAND] [options]
 
-     Note that micro-gw ?, micro-gw –h, and micro-gw --help are
-     identical to micro-gw help. Those formats are internally
-     converted into micro-gw help.
-
-     micro-gw command synopsis:
-         micro-gw [COMMAND] [options]
-
-     COMMAND is one of the available commands listed below:
-         setup        Generate ballerina source files for APIs belongs to the given label
-         build        Generate executables and the archive
-         run          Run generate balx
+COMMAND is one of the available commands listed below:
+    1. micro-gw setup : Setting up a project specifying a single API or a group of APIs.
+    2. micro-gw build : Building the project.
+    3. micro-gw reset : Reset toolkit configuration to default.
 
 OPTIONS
-     Gateway Cli help takes no command line options
+    "micro-gw help" takes no command line options
 
 EXAMPLES
-     Look for help on how to use the gateway cli command
-     $ ballerina help
+    Look for help on how to use the "micro-gw" command
+    $ micro-gw help
 
-     Learn how to use the gateway cli setup command
-     $ ballerina help setup
+    Learn how to use the "micro-gw setup" command
+    $ micro-gw help setup

@@ -30,7 +30,7 @@ public class GatewayCliConstants {
     public static final String PROJECTS_API_USAGE_DIRECTORY_NAME = "api-usage-data";
     public static final String ACCESS_LOG_FILE = "access_logs";
     public static final String PROJECTS_TARGET_DIRECTORY_NAME = "target";
-    public static final String MAIN_CONFIG_FILE_NAME = "cli-config.toml";
+    public static final String MAIN_CONFIG_FILE_NAME = "toolkit-config.toml";
     public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";

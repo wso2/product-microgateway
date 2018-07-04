@@ -483,8 +483,8 @@ public class GatewayCmdUtils {
      * @return path configuration file
      */
     public static String getMainConfigLocation() {
-        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_RESOURCES + File.separator
-                + GatewayCliConstants.GW_DIST_CONF + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
+                + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
     }
 
     /**
