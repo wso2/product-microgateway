@@ -5,15 +5,17 @@ import ballerina/http;
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter
+// Authorization filter
+gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
+// Get deployed policies
+map deployedPolicies = getDeployedPolicies();
 // Throttling filter
-gateway:ThrottleFilter throttleFilter = new();
+gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 // Analytics filter
 gateway:AnalyticsRequestFilter analyticsFilter = new();
 // Extension filter
 ExtensionFilter extensionFilter;
-// Authorization filter
-gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
