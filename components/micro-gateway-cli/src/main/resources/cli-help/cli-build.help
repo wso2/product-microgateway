@@ -6,9 +6,9 @@ SYNOPSIS
 
 DESCRIPTION
     The build command generates a gateway distribution using the resources in the given project. The project should exist
-    in the current working directory and should be previously created using "micro-gw setup" command.
+    in the current working directory and should have been previously created using the "micro-gw setup" command.
 
 EXAMPLES
-    Run the services of given label
+    Run the services of a given label.
     $ micro-gw build accounts-project
 

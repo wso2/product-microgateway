@@ -1,22 +1,22 @@
 NAME
-    micro-gw help setup - set up the environment and generate the ballerina sources from the APIs of given label
+    micro-gw help setup - set up the environment and generate the ballerina sources from the APIs of given label.
 
 SYNOPSIS
     micro-gw setup <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-u|--username] [-p|--password] 
         [-s|--server-url] [-c|--config] [-t|--trust-store] [-w|--truststore-pass]
 
 DESCRIPTION
-     Setup command is used to create ballerina sources from api definition of given label. Setup command take username
-     and password as input to generate the OAuth application and obtain access token. Then this access token
-     is used to retrieve the APIs of the label given in the label flag to generate the ballerina services. In addition
-     setup command will generate the throttling policies as well.
+     The setup command is used to create ballerina sources from the API definitions of a given label. The setup command
+     takes the username and password as input to generate the OAuth application and obtain the access token.
+     This access token is used to retrieve the APIs of the label given in the label flag to generate the ballerina
+     services. In addition, the setup command will generate the throttling policies as well.
 
 OPTIONS
 
     -l <label-name>
     --label <label-name>
         <Optional>
-        Name of the label which compile ballerina sources should be generated
+        Name of the label from which compiled ballerina sources should be generated
 
     -u
     --username
@@ -30,7 +30,7 @@ OPTIONS
     -s
     --server-url
         <Optional>
-        APIM base url assuming all the portals are running in same node. By default base-url is https://localhost:9443/
+        API-M based URL, assuming all the portals are running in same node. By default the base-url is https://localhost:9443/
 
     -t
     --truststore
@@ -42,12 +42,12 @@ OPTIONS
     --truststore-pass
         <Optional>
         Password for the given trustStore
-        By default use default trustStore password
+        By default use the default trustStore password
 
     -c
     --config
         <Optional>
-        Path to the cli configuration file
+        Path to the CLI configuration file
         Be default use the <CLI_HOME>/resources/conf/cli-config.toml
         
     -a

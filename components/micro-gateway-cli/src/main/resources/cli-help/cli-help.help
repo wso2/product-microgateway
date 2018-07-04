@@ -1,12 +1,12 @@
 NAME
-    Micro-gw help - Display help information about Gateway cli
+    Micro-gw help - Display help information about the Gateway CLI
 
 SYNOPSIS
     micro-gw help [COMMAND]
 
 DESCRIPTION
-     With no COMMAND given, the synopsis of the gateway cli command
-     and a list of gateway cli commands are printed on the standard
+     With no COMMAND given, the synopsis of the gateway CLI command
+     and a list of gateway CLI commands are printed on the standard
      output.
 
      If a command is given, the help page for the given command
@@ -14,7 +14,7 @@ DESCRIPTION
 
      Note that micro-gw ?, micro-gw –h, and micro-gw --help are
      identical to micro-gw help. Those formats are internally
-     converted into micro-gw help.
+     converted to micro-gw help.
 
      micro-gw command synopsis:
          micro-gw [COMMAND] [options]
@@ -25,11 +25,11 @@ DESCRIPTION
          run          Run generate balx
 
 OPTIONS
-     Gateway Cli help takes no command line options
+     Gateway CLI help has no command line options
 
 EXAMPLES
-     Look for help on how to use the gateway cli command
+     Look for help on how to use the gateway CLI command
      $ ballerina help
 
-     Learn how to use the gateway cli setup command
+     Learn how to use the gateway CLI setup command
      $ ballerina help setup
