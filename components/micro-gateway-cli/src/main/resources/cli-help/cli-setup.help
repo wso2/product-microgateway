@@ -1,22 +1,37 @@
 NAME
-    micro-gw help setup - set up the environment and generate the ballerina sources from the APIs of given label.
+    micro-gw help setup - Set up the environment and initialize a project with artifacts required for 
+    generating a microgateway distribution.
 
 SYNOPSIS
     micro-gw setup <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-u|--username] [-p|--password] 
         [-s|--server-url] [-c|--config] [-t|--trust-store] [-w|--truststore-pass]
 
 DESCRIPTION
-     The setup command is used to create ballerina sources from the API definitions of a given label. The setup command
-     takes the username and password as input to generate the OAuth application and obtain the access token.
-     This access token is used to retrieve the APIs of the label given in the label flag to generate the ballerina
-     services. In addition, the setup command will generate the throttling policies as well.
+     The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
+     distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
+     details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
+     
+     There are two main ways to set up a project.
+     
+        1. Setting up a project for a single API.
+             
+            Specify the name and the version of the API using the below format and execute the "setup" command.
+            
+            The micro-gw setup <project> -a <api-name> -v <version> [args..]
+        
+        2. Setting up a project for a group of APIs using a label.
+             
+            Specify the label which represents the group of APIs using below format and execute the "setup" command.
+                    
+            The micro-gw setup <project> -l <label-name> [args..]
+             
 
 OPTIONS
 
     -l <label-name>
     --label <label-name>
         <Optional>
-        Name of the label from which compiled ballerina sources should be generated
+        Name of the label which indicates a group of APIs.
 
     -u
     --username
@@ -30,26 +45,26 @@ OPTIONS
     -s
     --server-url
         <Optional>
-        API-M based URL, assuming all the portals are running in same node. By default the base-url is https://localhost:9443/
+        API-M base URL assuming all the portals are running in same node. By default, the base-url is https://localhost:9443/
 
     -t
     --truststore
         <Optional>
         Path to the trustStore file
-        By default consider <CLI_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
+        By default, consider <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
 
     -w
     --truststore-pass
         <Optional>
         Password for the given trustStore
-        By default use the default trustStore password
+        Use the default trustStore password
 
     -c
     --config
         <Optional>
-        Path to the CLI configuration file
-        Be default use the <CLI_HOME>/resources/conf/cli-config.toml
-        
+        Path to the toolkit configuration file
+        By default, use the <TOOLKIT_HOME>/conf/toolkit-config.toml
+
     -a
     --api-name
        <Optional>
@@ -59,6 +74,12 @@ OPTIONS
     --version
        <Optional>
        Version of the API
+       
+    -f
+    --force
+       <Optional>
+       By default, when the toolkit does not allow you to run "micro-gw setup" upon an existing project. But, if you
+       want to overwrite the existing project, specify -f option when running "micro-gw setup" command.
 
 EXAMPLES
     Setup the project using a label

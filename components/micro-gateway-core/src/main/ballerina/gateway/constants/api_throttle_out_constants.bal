@@ -18,6 +18,7 @@
 @final public int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
 @final public int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
 @final public int INTERNAL_ERROR_CODE = 900808;
+@final public int INTERNAL_ERROR_CODE_POLICY_NOT_FOUND = 900809;
 
 @final public string THROTTLE_OUT_MESSAGE = "Message throttled out";
 @final public string THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";

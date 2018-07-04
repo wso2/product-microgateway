@@ -483,8 +483,8 @@ public class GatewayCmdUtils {
      * @return path configuration file
      */
     public static String getMainConfigLocation() {
-        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_RESOURCES + File.separator
-                + GatewayCliConstants.GW_DIST_CONF + File.separator + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
+                + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
     }
 
     /**
@@ -817,6 +817,37 @@ public class GatewayCmdUtils {
                 logger.error("Failed to set executable file: {} ", path.getAbsolutePath());
                 throw new CLIInternalException("Error occurred while setting up the workspace structure");
             }
+        }
+    }
+    
+    /**
+     * Delete project folder
+     * @param projectPath project path
+     */
+    public static void deleteProject(String projectPath) {
+        File file = new File(projectPath);
+        try {
+            // Deleting the directory recursively.
+            delete(file);
+        } catch (IOException e) {
+            // not throwing the error because deleting faild project is not
+            // a critical task. This can be deleted manually if not used.
+            logger.error("Failed to delete project : {} ", projectPath, e);
+        }
+    }
+
+    private static void delete(File file) throws IOException {
+        for (File childFile : file.listFiles()) {
+            if (childFile.isDirectory()) {
+                delete(childFile);
+            } else {
+                if (!childFile.delete()) {
+                    throw new IOException();
+                }
+            }
+        }
+        if (!file.delete()) {
+            throw new IOException();
         }
     }
 }

@@ -1,18 +1,23 @@
 NAME
-     micro-gw help reset - resets all the configurations specified previously.
+     micro-gw help reset - resets all the previously specified configurations.
 
 SYNOPSIS
-     micro-gw reset
+     micro-gw reset [-c|--config]
 
 DESCRIPTION
     
-     The reset command is used to clear all the configurations specified previously, such as "--server-url", "--username",
+     The reset command is used to clear all the previously specified configurations, such as "--server-url", "--username",
       etc.
      
      When running the setup command for the first time, those configurations are stored internally within the microgateway
      toolkit and will be reused for subsequent setup commands. To rerun the setup command with a new set of configurations,
      the reset command needs to be run beforehand.
+     
+     Using "micro-gw reset -c <config-file>", we can reset an externally provided config file. 
 
 EXAMPLES
     Reset all the configuration to default.
     $ micro-gw reset
+    
+    Reset an external config file
+    $ micro-gw reset -c /home/user/micro-gw/external-config.toml

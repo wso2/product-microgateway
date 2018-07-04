@@ -36,7 +36,8 @@ function getReponseDataPayload(ResponseDTO responseDTO) returns string {
 }
 
 function getMetaDataForResponseData(ResponseDTO dto) returns string {
-    return "{\\\"keyType\\\":\"" + dto.keyType + "\",\\\"correlationID\\\":\"" + dto.correlationID + "\"}";
+    json metaData = { "keyType": dto.keyType, "correlationID": dto.correlationID };
+    return metaData.toString();
 }
 
 function generateEventFromResponseDTO(ResponseDTO responseDTO) returns EventDTO {
