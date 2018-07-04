@@ -149,8 +149,8 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
                         return cacheAuthorizedValue;
                     }
                     () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache.
-                         Calling the key validation service.");
+                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache." 
+                                + " Calling the key validation service.");
                         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                     }
                 }
@@ -168,6 +168,9 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
     return apiKeyValidationDto;
 }
 
+@Description {value:"Do a key validation request to Key Manager using the request metadata"}
+@Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
+@Return {value:"boolean: true if authentication is a success, else false. APIKeyValidationDto: key validation response"}
 public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
             APIKeyValidationDto) {
     APIKeyValidationDto apiKeyValidationDto;
