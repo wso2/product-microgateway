@@ -31,7 +31,8 @@ function getExecutionTimePayload(ExecutionTimeDTO executionTimeDTO) returns stri
 }
 
 function getMetaDataForExecutionTimeDTO(ExecutionTimeDTO dto) returns string {
-    return "{\\\"keyType\\\":\"" + dto.keyType + "\",\\\"correlationID\\\":\"" + dto.correleationID + "\"}";
+    json metaData = { "keyType": dto.keyType, "correlationID": dto.correleationID };
+    return metaData.toString();
 }
 
 function generateEventFromExecutionTime(ExecutionTimeDTO executionTimeDTO) returns EventDTO {
