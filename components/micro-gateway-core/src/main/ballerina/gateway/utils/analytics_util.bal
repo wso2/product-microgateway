@@ -60,15 +60,14 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
     json metaInfo = {};
-    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
     eventDto.context = getContext(context);
     eventDto.apiVersion = apiVersion;
     eventDto.apiName = getApiName(context);
     eventDto.resourcePath = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName)).path;
-    eventDto.method = <string> context.attributes[METHOD];
+    eventDto.method = <string>context.attributes[METHOD];
     eventDto.versionOnly = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
-            apiVersion;
+    apiVersion;
     eventDto.errorCode = check <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
     eventDto.errorMessage = err.message;
     eventDto.faultTime = currentTimeMills;
@@ -92,6 +91,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
     }
+    metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
     eventDto.clientType = metaInfo.toString();
     return eventDto;
 }
