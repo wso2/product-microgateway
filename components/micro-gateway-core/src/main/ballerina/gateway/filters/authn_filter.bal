@@ -86,8 +86,8 @@ public type AuthnFilter object {
                         printDebug(KEY_AUTHN_FILTER, "Authorization header found in the request. Backing up original value");
                     }
                     request.setHeader(AUTH_HEADER, authHeader);
-                    printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName + " with default the auth header
-                    :" + AUTH_HEADER);
+                    printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
+                    + " with default the auth header:" + AUTH_HEADER);
                 }
 
                 try {

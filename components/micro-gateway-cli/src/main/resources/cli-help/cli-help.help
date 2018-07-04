@@ -19,10 +19,10 @@ micro-gw command synopsis:
 COMMAND is one of the available commands listed below:
     1. micro-gw setup : Setting up a project specifying a single API or a group of APIs.
     2. micro-gw build : Building the project.
-    3. micro-gw reset : Reset toolkit configuration to default.
+    3. micro-gw reset : Reset toolkit configurations to default.
 
 OPTIONS
-    "micro-gw help" takes no command line options
+    "micro-gw help" has no command line options
 
 EXAMPLES
     Look for help on how to use the "micro-gw" command

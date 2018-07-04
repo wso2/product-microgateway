@@ -7,11 +7,11 @@ SYNOPSIS
         [-s|--server-url] [-c|--config] [-t|--trust-store] [-w|--truststore-pass]
 
 DESCRIPTION
-     "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway 
-     distribution. During setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the 
+     The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
+     distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
      details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
      
-     There are two main ways of setting up a project.
+     There are two main ways to set up a project.
      
         1. Setting up a project for a single API.
              
@@ -45,25 +45,25 @@ OPTIONS
     -s
     --server-url
         <Optional>
-        APIM base url assuming all the portals are running in same node. By default base-url is https://localhost:9443/
+        API-M base URL assuming all the portals are running in same node. By default, the base-url is https://localhost:9443/
 
     -t
     --truststore
         <Optional>
         Path to the trustStore file
-        By default consider <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
+        By default, consider <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12
 
     -w
     --truststore-pass
         <Optional>
         Password for the given trustStore
-        By default use default trustStore password
+        Use the default trustStore password
 
     -c
     --config
         <Optional>
         Path to the toolkit configuration file
-        By default use the <TOOLKIT_HOME>/conf/toolkit-config.toml
+        By default, use the <TOOLKIT_HOME>/conf/toolkit-config.toml
 
     -a
     --api-name
@@ -78,7 +78,7 @@ OPTIONS
     -f
     --force
        <Optional>
-       By default, when the toolkit will not allow you to run "micro-gw setup" upon an existing project. But, if you 
+       By default, when the toolkit does not allow you to run "micro-gw setup" upon an existing project. But, if you
        want to overwrite the existing project, specify -f option when running "micro-gw setup" command.
 
 EXAMPLES
