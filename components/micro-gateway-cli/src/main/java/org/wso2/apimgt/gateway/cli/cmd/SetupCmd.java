@@ -276,13 +276,12 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (apis == null || (apis != null && apis.isEmpty())) {
             // Delete folder
             GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
-            String errorMsg = "";
+            String errorMsg;
             if (label != null) {
                 errorMsg = "No APIs found for the given label: " + label;
             } else {
                 errorMsg = "No Published APIs matched for name:" + apiName + ", version:" + version;
             }
-            logger.error("Error while generating ballerina source." + errorMsg);
             throw new CLIRuntimeException(errorMsg);
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);

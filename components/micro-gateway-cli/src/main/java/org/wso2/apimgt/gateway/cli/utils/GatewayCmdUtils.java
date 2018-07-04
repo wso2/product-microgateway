@@ -825,23 +825,19 @@ public class GatewayCmdUtils {
      * @param projectPath project path
      */
     public static void deleteProject(String projectPath) {
-
         File file = new File(projectPath);
         try {
             // Deleting the directory recursively.
             delete(file);
         } catch (IOException e) {
-	    //not throwing the error because deleting faild project is not
+            // not throwing the error because deleting faild project is not
             // a critical task. This can be deleted manually if not used.
             logger.error("Failed to delete project : {} ", projectPath, e);
         }
-
     }
 
     private static void delete(File file) throws IOException {
-
         for (File childFile : file.listFiles()) {
-
             if (childFile.isDirectory()) {
                 delete(childFile);
             } else {
@@ -850,7 +846,6 @@ public class GatewayCmdUtils {
                 }
             }
         }
-
         if (!file.delete()) {
             throw new IOException();
         }
