@@ -41,16 +41,14 @@ public type AnalyticsRequestFilter object {
                 ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
                 eventStream.publish(getEventFromThrottleData(eventDto));
             } else {
-                if (!filterFailed ) {
-                    doFilterResponse(response, context);
-                    doFilterFault(context);
+                if (!filterFailed) {
+                    doFilterAll(response, context);
                 }
             }
         } else {
             if (!filterFailed) {
                 context.attributes[THROTTLE_LATENCY] = 0;
-                doFilterResponse(response, context);
-                doFilterFault(context);
+                doFilterAll(response, context);
             }
         }
         return true;
@@ -65,27 +63,37 @@ function doFilterRequest( http:Request request, http:FilterContext context) {
     eventStream.publish(eventDto);
 }
 
-function doFilterFault(http:FilterContext context) {
-    match runtime:getInvocationContext().attributes[ERROR_RESPONSE] {
-        () => {
-            printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
-        }
-        any code => {
-            printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-            error err = <error>code;
-            FaultDTO faultDTO = populateFaultAnalyticsDTO(context, err);
-            //todo publish
-        }
-    }
+function doFilterFault(http:FilterContext context, error err) {
+    FaultDTO faultDTO = populateFaultAnalyticsDTO(context, err);
+    eventStream.publish(getEventFromFaultData(faultDTO));
 }
 
-function doFilterResponse(http:Response response, http:FilterContext context) {
-    //Execution time data publishing
-    ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
-    EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
-    eventStream.publish(eventDTO);
+function doFilterResponseData(http:Response response, http:FilterContext context) {
     //Response data publishing
     ResponseDTO responseDto = generateResponseDataEvent(response, context);
     EventDTO event = generateEventFromResponseDTO(responseDto);
     eventStream.publish(event);
+}
+
+function doFilterExecutionTimeData(http:Response response, http:FilterContext context) {
+    //Execution time data publishing
+    ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
+    EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
+    eventStream.publish(eventDTO);
+}
+
+function doFilterAll(http:Response response, http:FilterContext context) {
+    match runtime:getInvocationContext().attributes[ERROR_RESPONSE] {
+        () => {
+            printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
+            doFilterResponseData(response, context);
+            doFilterExecutionTimeData(response, context);
+        }
+        any code => {
+            printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+            error err = <error>code;
+            doFilterExecutionTimeData(response, context);
+            doFilterFault(context, err);
+        }
+    }
 }

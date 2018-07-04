@@ -108,7 +108,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
     responseDto.backendTime = timeResponseIn - timeRequestOut;
     responseDto.responseTime = timeResponseIn - initTime;
     //dummy values for protocol and destination for now
-    responseDto.protocol = "http";
+    responseDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
     responseDto.destination = <string> runtime:getInvocationContext().attributes[DESTINATION];
     return responseDto;
 }
