@@ -90,7 +90,7 @@ function generateResponseDataEvent(http:Response response, http:FilterContext co
             //todo: cacheHit does not gives boolean
         }
     }
-    responseDto.hostname = "127.0.0.1";
+    responseDto.hostname = <string>context.attributes[HOSTNAME_PROPERTY];
     responseDto.response = 1;
     //todo: Response size is yet to be decided
     responseDto.responseSize = 0;

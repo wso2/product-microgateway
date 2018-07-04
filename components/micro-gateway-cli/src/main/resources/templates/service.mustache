@@ -148,13 +148,15 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind apiListener,apiSecur
                 http:Response res = new;
                 res.statusCode = 500;
                 string errorMessage = err.message;
-                string errorCode = "101503";
+                int errorCode = 101503;
                 string errorDescription = "Error connecting to the back end";
 
                 if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
-                    errorCode = "101504";
+                    errorCode = 101504;
                     errorDescription = "Connection timed out";
                 }
+                runtime:getInvocationContext().attributes["error_response"] = err;
+                runtime:getInvocationContext().attributes["error_response_code"] = errorCode;
                 json payload = {fault : {
                     code : errorCode,
                     message : "Runtime Error",
