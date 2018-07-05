@@ -304,4 +304,4 @@
 @final string KEY_UTILS = "Utils";
 @final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
 @final string KEY_UPLOAD_TASK = "UploadTimerTask";
-@final string KEY_ROTATE_TASK = "RotateTImerTask";
+@final string KEY_ROTATE_TASK = "RotateTimerTask";

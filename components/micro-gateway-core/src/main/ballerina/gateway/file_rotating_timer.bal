@@ -32,10 +32,10 @@ function sendFileRotatingEvent() returns error? {
         var result = rotateFile(API_USAGE_FILE);
         match result {
             string name => {
-                log:printInfo("File rotated successfully.");
+                printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
             }
             error err => {
-                log:printError("Error occurred while rotating the file: ", err = err);
+                printFullError(KEY_ROTATE_TASK, err);
             }
         }
         return ();
@@ -46,7 +46,7 @@ function sendFileRotatingEvent() returns error? {
 }
 
 function errorOnRotating(error e) {
-    log:printDebug("File not present to rotate:" + e.message);
+    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.message);
 }
 
 function rotatingTask() {
