@@ -21,9 +21,7 @@ package org.wso2.micro.gateway.tests.util;
  * Constants used in test cases.
  */
 public class TestConstant {
-    public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String CONTENT_TYPE_TEXT_PLAIN = "text/plain";
-    public static final String CONTENT_TYPE_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String CHARSET_NAME = "UTF-8";
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";
@@ -33,6 +31,7 @@ public class TestConstant {
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
 
-    public static final int GATEWAY_LISTENER_PORT = 9090;
-    public static final int KM_LISTENER_PORT = 9943;
+    public static final int GATEWAY_LISTENER_HTTP_PORT = 9590;
+    public static final int GATEWAY_LISTENER_HTTPS_PORT = 9595;
+    public static final int GATEWAY_LISTENER_HTTPS_TOKEN_PORT = 9596;
 }
