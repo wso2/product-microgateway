@@ -216,7 +216,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (StringUtils.isEmpty(configuredTrustStorePass)) {
             if (StringUtils.isEmpty(trustStorePassword)) {
                 isOverwriteRequired = true;
-                if ((trustStorePassword = promptForTextInput("Enter Trust store password: [ use default? ]")).trim()
+                if ((trustStorePassword = promptForPasswordInput("Enter Trust store password: [ use default? ]")).trim()
                         .isEmpty()) {
                     trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
                 }
