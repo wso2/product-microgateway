@@ -137,6 +137,7 @@
 @final public string ERROR_RESPONSE_CODE = "error_response_code";
 @final public string USERNAME = "username";
 @final public string PASSWORD = "password";
+@final public string ENABLE = "enable";
 
 
 //Analytics filter related constants

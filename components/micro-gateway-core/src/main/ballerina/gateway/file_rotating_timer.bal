@@ -22,7 +22,6 @@ import ballerina/runtime;
 import ballerina/log;
 
 
-future rotatingFtr = start rotatingTask();
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
