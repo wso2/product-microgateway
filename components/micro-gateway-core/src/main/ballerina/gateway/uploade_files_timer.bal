@@ -25,7 +25,6 @@ string uploadingUrl;
 string analyticsUsername;
 string analyticsPassword;
 
-future timerFtr = start timerTask();
 
 function searchFilesToUpload() returns (error?) {
     int cnt = 0;
