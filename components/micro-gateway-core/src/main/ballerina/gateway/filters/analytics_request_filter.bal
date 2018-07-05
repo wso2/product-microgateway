@@ -18,37 +18,68 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/time;
 
+boolean isAnalyticsEnabled = false;
+boolean configsRead = false;
+
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        if(request.hasHeader(HOST_HEADER_NAME)){
-            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
-        } else {
-            context.attributes[HOSTNAME_PROPERTY] = "localhost";
+        if (!configsRead) {
+            getAnalyticsEnableCOnfig();
+            if (isAnalyticsEnabled) {
+                printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
+                future uploadTask = start timerTask();
+                future rotateTask = start rotatingTask();
+            } else {
+                printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
+            }
         }
-        context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
-        doFilterRequest(request, context);
+        //Filter only is analytics is enabled.
+        if (isAnalyticsEnabled) {
+            checkOrSetMessageID(context);
+            if (request.hasHeader(HOST_HEADER_NAME)) {
+                context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
+            } else {
+                context.attributes[HOSTNAME_PROPERTY] = "localhost";
+            }
+            context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
+            doFilterRequest(request, context);
+        }
         return true;
 
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
-        if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
-            boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
-            if (isThrottleOut) {
-                ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
-                eventStream.publish(getEventFromThrottleData(eventDto));
+
+        if (!configsRead) {
+            getAnalyticsEnableCOnfig();
+            if (isAnalyticsEnabled) {
+                printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
+                future uploadTask = start timerTask();
+                future rotateTask = start rotatingTask();
+            } else {
+                printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
+            }
+        }
+
+        if (isAnalyticsEnabled) {
+            boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+            if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
+                boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
+                if (isThrottleOut) {
+                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
+                    eventStream.publish(getEventFromThrottleData(eventDto));
+                } else {
+                    if (!filterFailed) {
+                        doFilterAll(response, context);
+                    }
+                }
             } else {
                 if (!filterFailed) {
+                    context.attributes[THROTTLE_LATENCY] = 0;
                     doFilterAll(response, context);
                 }
-            }
-        } else {
-            if (!filterFailed) {
-                context.attributes[THROTTLE_LATENCY] = 0;
-                doFilterAll(response, context);
             }
         }
         return true;
@@ -96,4 +127,11 @@ function doFilterAll(http:Response response, http:FilterContext context) {
             doFilterFault(context, err);
         }
     }
+}
+
+function getAnalyticsEnableCOnfig() {
+    map vals = getConfigMapValue(ANALYTICS);
+    isAnalyticsEnabled = check <boolean>vals[ENABLE];
+    configsRead = true;
+    printDebug(KEY_UTILS, "Analytics configuration values read");
 }

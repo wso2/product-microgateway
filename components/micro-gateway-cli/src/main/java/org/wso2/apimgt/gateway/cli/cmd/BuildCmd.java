@@ -24,8 +24,10 @@ import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
@@ -59,6 +61,10 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
+            File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
+            if (!projectLocation.exists()) {
+                throw new CLIRuntimeException("Project " + projectName + " does not exist.");
+            }
             GatewayCmdUtils.createProjectGWDistribution(projectName);
             outStream.println("Build successful for the project - " + projectName);
         } catch (IOException e) {

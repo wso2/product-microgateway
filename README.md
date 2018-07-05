@@ -1,23 +1,16 @@
-# WSO2 API Manager Micro Gateway Toolkit 
+# WSO2 API Manager Microgateway Toolkit 
 
 The Microgateway Toolkit provides the capability to create specialized gateway distribution (Microgateway distributions) where only a single API or a group of APIs are included. Once a Microgateway distribution is started, it will start serving those specific API(s) right away. 
 
-In summary, a Microgateway is a specialized form of the WSO2 API Gateway by having below main characteristics:
+In summary, a Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
 
-1. Its ability to execute in isolation without mandatory connections to other components (Key Manager, Traffic Manager, etc).
+1. Its ability to execute in isolation without mandatory connections to other components (Key Manager, Traffic Manager, Anayltics).
 1. Ability to host a subset of APIs of choice (defined on the API Publisher) instead of all.
-1. Immutability - if you update an API you need to re-create the container/instance, no hot deployment.
-
-Microgateway offers you a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and operational analytics.
-
-#### Design Goals
-
-Following are some of its main expectations of Microgateway
-
-1. Ability to host just one or a selected set (subset) of APIs only.
-1. Ability to execute in complete isolation once setup, without having the need to contact the Management or Security components.
-1. Easy integration with CI/CD processes.
+1. Immutability - The gateway runtime is immutable. If APIs or Policies change after the Microgateway has been built, a rebuild process is required to capture the changes.
 1. Seamless integration with deployment automation tools and techniques.
+1. Easy integration with CI/CD processes.
+
+Microgateway offers you a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
 
 #### Architecture
 
@@ -25,15 +18,13 @@ The following diagram illustrates the process of getting an API (or a selected s
 
 ![Alt text](architecture.png?raw=true "Title")
 
-#### Setting up microgateway
+#### Running the microgateway
 
- This product will include a toolkit, the B7a platform distribution and a few B7a extensions (Endpoints and Filters). The toolkit will have two main responsibilities.
+Running the Microgateway is a 3 step process. The first two steps are involved in building the runtime.
 
  1. Setting up a microgateway project.
  1. Building the microgateway project and creating a microgateway distribution.
  1. Running the microgateway distribution.
-
- These steps can be treated as phases. One will first complete the setup phase and move on to the build phase. The reason for treating them as phases is to make it possible for developers to take control of the runtime if and when required. For example, what gets run as default on a microgateway is a simple API proxy.
 
 ##### Setting up a microgateway project
 
@@ -42,7 +33,7 @@ To setup a microgateway project, a developer can choose two ways.
  1. Create a microgateway project for a single API
  1. Create a microgateway project for a group of APIs
 
-The first step of setting up a microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs). Once this step is completed it will convert the JSON representation of the APIs to B7a source files and create a single B7a project structure. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the toolkit can see. These generated files can optionally be managed via source management repositories (Git).
+The first step of setting up a microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs). Once this step is completed it will convert the JSON representation of the APIs to Ballarina source code. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the toolkit can see. These generated files can optionally be managed via source management repositories (Git).
 
 What gets downloaded/pulled?
 * The JSON representation of the API files
@@ -56,6 +47,8 @@ Once the project has been created, the next step is to build the project sources
 #### Microgateway toolkit commands
 
 Following are the set of commands included within the Microgateway Toolkit.
+
+Note: Before you execute any of the commands below you need to add the path to the <micro-gw-toolkit-home>/bin directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw-toolkit/bin
 
 ##### Setup
 
@@ -129,7 +122,7 @@ micro-gw-pizzashack-project
 
 #### How to run the microgateway distribution
 
-One the **setup, build** commands are executed, the source files which were generated will be built and a micro gateway distribution will be created under target folder.
+One the **setup, build** commands are executed, a micro gateway distribution will be created under target folder.
 
 ```
 ../pizzashack-project/target$ ls

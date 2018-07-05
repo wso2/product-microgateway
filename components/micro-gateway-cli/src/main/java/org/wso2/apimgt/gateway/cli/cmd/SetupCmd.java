@@ -216,7 +216,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (StringUtils.isEmpty(configuredTrustStorePass)) {
             if (StringUtils.isEmpty(trustStorePassword)) {
                 isOverwriteRequired = true;
-                if ((trustStorePassword = promptForTextInput("Enter Trust store password: [ use default? ]")).trim()
+                if ((trustStorePassword = promptForPasswordInput("Enter Trust store password: [ use default? ]")).trim()
                         .isEmpty()) {
                     trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
                 }
@@ -233,7 +233,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
             logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
-            throw new CLIInternalException("Provided trust store does not exist.");
+            throw new CLIRuntimeException("Provided trust store location does not exist.");
         }
 
         //set the trustStore

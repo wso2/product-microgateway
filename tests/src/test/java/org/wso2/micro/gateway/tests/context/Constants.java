@@ -29,7 +29,4 @@ public class Constants {
     public static final String BALLERINA_SERVER_SCRIPT_NAME = "ballerina";
     //File extension the the ballerina rest file
     public static final String SERVICE_FILE_EXTENSION = ".bal";
-    //Default HTTP port of the server
-    public static final int DEFAULT_HTTP_PORT = 9070;
-
 }

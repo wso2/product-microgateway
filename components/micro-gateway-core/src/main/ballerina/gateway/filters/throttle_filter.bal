@@ -31,14 +31,25 @@ public type ThrottleFilter object {
 
     public new (deployedPolicies) {}
 
+    @Param { value: "request: Request instance" }
+    @Param { value: "context: FilterContext instance" }
+    @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
+    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+            boolean {
+        int startingTime = getCurrentTime();
+        checkOrSetMessageID(context);
+        boolean result = doFilterRequest(listener, request, context);
+        setLatency(startingTime, context, THROTTLE_LATENCY);
+        return result;
+    }
+
     @Description { value: "Filter function implementation which tries to throttle the request" }
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean {
+    @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
+    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+            boolean {
         printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
-        int startingTime = getCurrentTime();
         //Throttle Tiers
         string applicationLevelTier;
         string subscriptionLevelTier;
@@ -48,13 +59,12 @@ public type ThrottleFilter object {
         string apiContext = getContext(context);
         string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
-        boolean filterFailed =check <boolean>context.attributes[FILTER_FAILED];
         boolean isSecured =check <boolean>context.attributes[IS_SECURED];
         context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
         context.attributes[IS_THROTTLE_OUT] = false;
 
         AuthenticationContext keyvalidationResult;
-        if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
@@ -80,7 +90,6 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                     sendErrorResponse(listener, request, context);
-                    setLatency(startingTime, context, THROTTLE_LATENCY);
                     return false;
                 } else {
                     // set properties in order to publish into analytics for billing
@@ -107,7 +116,6 @@ public type ThrottleFilter object {
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
                     THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(listener, request, context);
-                setLatency(startingTime, context, THROTTLE_LATENCY);
                 return false;
             } else {
                 printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
@@ -160,14 +168,12 @@ public type ThrottleFilter object {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                 INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
             sendErrorResponse(listener, request, context);
-            setLatency(startingTime, context, THROTTLE_LATENCY);
             return false;
         }
 
         //Publish throttle event to internal policies
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
         publishNonThrottleEvent(throttleEvent);
-        setLatency(startingTime, context, THROTTLE_LATENCY);
         printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
         return true;
     }
@@ -215,8 +221,7 @@ function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boo
 }
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
-             returns (
-                     RequestStreamDTO) {
+             returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDto;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;

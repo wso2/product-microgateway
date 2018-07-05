@@ -43,11 +43,10 @@ function multipartSender(string location, string file, string username, string p
             string errorMessage = "Error occurred while sending multipart request: SC " + 500;
             response.setPayload(errorMessage);
             response.statusCode = 500;
-            log:printError(errorMessage, err = err);
+            printFullError(KEY_UPLOAD_TASK, err);
             return response;
         }
         http:Response returnResult => {
-            log:printInfo("Successfully uploaded the file: " + file);
             return returnResult;
         }
     }

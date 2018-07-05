@@ -28,7 +28,17 @@ public type SubscriptionFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Listener listener, http:Request request, http:FilterContext filterContext)
-                        returns boolean {
+        returns boolean {
+        int startingTime = getCurrentTime();
+        checkOrSetMessageID(filterContext);
+        boolean result = doFilterRequest(listener, request, filterContext);
+        setLatency(startingTime, filterContext, SECURITY_LATENCY_SUBS);
+        return result;
+    }
+
+    @Description {value:"filterRequest: Request filter function"}
+    public function doFilterRequest (http:Listener listener, http:Request request, http:FilterContext filterContext)
+        returns boolean {
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         printDebug(KEY_SUBSCRIPTION_FILTER, "Auth scheme: " + authScheme);
         if(authScheme == AUTH_SCHEME_JWT ){

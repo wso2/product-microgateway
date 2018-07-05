@@ -25,7 +25,6 @@ string uploadingUrl;
 string analyticsUsername;
 string analyticsPassword;
 
-future timerFtr = start timerTask();
 
 function searchFilesToUpload() returns (error?) {
     int cnt = 0;
@@ -38,9 +37,10 @@ function searchFilesToUpload() returns (error?) {
             http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
                 analyticsUsername, analyticsPassword);
             if (response.statusCode == 201) {
+                printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                 var result = pathEntry.delete();
             } else {
-                log:printError("Error occurred while uploading the file");
+                printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
             }
             cnt++;
         }
@@ -54,7 +54,7 @@ function searchFilesToUpload() returns (error?) {
 }
 
 function informError(error e) {
-    log:printDebug("Files not present for upload:" + e.message);
+    printDebug(KEY_UPLOAD_TASK, "Files not present for upload:" + e.message);
 }
 
 function timerTask() {
@@ -64,14 +64,14 @@ function timerTask() {
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];
     if (uploadFiles) {
-        log:printInfo("Enabled file uploading task.");
+        printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
         int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
         (function() returns error?) onTriggerFunction = searchFilesToUpload;
         function(error) onErrorFunction = informError;
         timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
         timer.start();
     } else {
-        log:printInfo("Disabled file uploading task.");
+        printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
     }
 }
 

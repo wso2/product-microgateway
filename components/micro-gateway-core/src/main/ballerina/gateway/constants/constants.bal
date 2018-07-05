@@ -137,6 +137,7 @@
 @final public string ERROR_RESPONSE_CODE = "error_response_code";
 @final public string USERNAME = "username";
 @final public string PASSWORD = "password";
+@final public string ENABLE = "enable";
 
 
 //Analytics filter related constants
@@ -164,7 +165,13 @@
 @Description { value: "Time spent on the throttling filter" }
 @final public string THROTTLE_LATENCY = "THROTTLE_LATENCY";
 @Description { value: "Time spent on the authentication filter" }
-@final public string SECURITY_LATENCY = "SECURITY_LATENCY";
+@final public string SECURITY_LATENCY_AUTHN = "SECURITY_LATENCY_AUTHN";
+@Description { value: "Time spent on the authorization filter" }
+@final public string SECURITY_LATENCY_AUTHZ = "SECURITY_LATENCY_AUTHZ";
+@Description { value: "Time spent on the authorization response filter" }
+@final public string SECURITY_LATENCY_AUTHZ_RESPONSE = "SECURITY_LATENCY_AUTHZ_RESPONSE";
+@Description { value: "Time spent on the subscription filter" }
+@final public string SECURITY_LATENCY_SUBS = "SECURITY_LATENCY_SUBS";
 @Description { value: "HTTP Method" }
 @final public string METHOD = "METHOD";
 @Description { value: "Time stamp before sending to backend" }
@@ -297,4 +304,4 @@
 @final string KEY_UTILS = "Utils";
 @final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
 @final string KEY_UPLOAD_TASK = "UploadTimerTask";
-@final string KEY_ROTATE_TASK = "RotateTImerTask";
+@final string KEY_ROTATE_TASK = "RotateTimerTask";

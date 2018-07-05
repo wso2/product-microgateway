@@ -371,27 +371,25 @@ public function getCurrentTime() returns int {
 }
 
 public function rotateFile(string fileName) returns string|error {
-    //todo: append an uuid to zip name as unique identifies
-    //string uuid = system:uuid();
-    //string zipName = fileName + "." + uuid + ZIP_EXTENSION;
+    string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileName + "." + rotatingTimeStamp + ZIP_EXTENSION;
+    string zipName = fileName + "." + rotatingTimeStamp + "." + uuid +  ZIP_EXTENSION;
     internal:Path zipLocation = new(fileLocation + zipName);
     internal:Path fileToZip = new(fileLocation + fileName);
     match internal:compress(fileToZip, zipLocation) {
         error compressError => {
-            log:printError("Error occurred while compressing the file: ", err = compressError);
+            printFullError(KEY_UTILS, compressError);
             return compressError;
         }
         () => {
-            log:printInfo("File compressed successfully");
+            printInfo(KEY_UTILS, "File compressed successfully");
             match fileToZip.delete() {
                 () => {
-                    log:printInfo("Existing file deleted successfully");
+                    printInfo(KEY_UTILS, "Existing file deleted successfully");
                 }
                 error err => {
-                    log:printError("Error occurred while deleting the file: " + fileName, err = err);
+                    printFullError(KEY_UTILS, err);
                 }
             }
             return zipName;
@@ -440,8 +438,18 @@ public function printTrace(string key, string message) {
     log:printTrace(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
+@Description {value:"Add a info log with provided key (class) and message ID"}
+public function printInfo(string key, string message) {
+    log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+}
+
+@Description {value:"Add a full error log with provided key (class) and message ID"}
+public function printFullError(string key, error message) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.message), err = message);
+}
+
 function initStreamPublisher() {
-    log:printInfo("Subscribing writing method to event stream");
+    printDebug(KEY_UTILS, "Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
     getAnalyticsConfig();
 }
@@ -457,6 +465,13 @@ function setLatency(int starting, http:FilterContext context, string latencyType
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
     printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
+}
+
+@Description { value: "Check MESSAGE_ID in context and set if it is not" }
+function checkOrSetMessageID(http:FilterContext context) {
+    if (!context.attributes.hasKey(MESSAGE_ID)) {
+        context.attributes[MESSAGE_ID] = system:uuid();
+    }
 }
 
 future streamftr = start initStreamPublisher();
