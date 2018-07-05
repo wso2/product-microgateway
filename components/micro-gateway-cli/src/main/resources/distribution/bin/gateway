@@ -149,5 +149,5 @@ elif [ "$CMD" = "restart" ]; then
   done
 fi
 
-# run the balx created for ${label} APIs
-sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@"
+# run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
+sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1 | tee -a $GWHOME/logs/microgateway.log

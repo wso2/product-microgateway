@@ -51,7 +51,7 @@ set BALLERINA_HOME=%MICROGW_TOOLKIT_HOME%\lib\platform
 set PATH=%PATH%;%BALLERINA_HOME%\bin\
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 
-echo MICROGW_TOOLKIT_HOME environment variable is set to %MICROGW_TOOLKIT_HOME%
+if %verbose%==T echo MICROGW_TOOLKIT_HOME environment variable is set to %MICROGW_TOOLKIT_HOME%
 
 rem Check JAVA availability
 :checkJava
@@ -64,7 +64,7 @@ rem Check JAVA availability
 goto end
 
 :checkJava
-	"%JAVA_HOME%\bin\java" -version
+	"%JAVA_HOME%\bin\java" -version >nul 2>&1
 	IF ERRORLEVEL 1 goto noJava
 	goto runServer
 
@@ -73,7 +73,7 @@ goto end
 goto end
 
 :runServer
-	echo JAVA_HOME environment variable was set to %JAVA_HOME%
+	if %verbose%==T echo JAVA_HOME environment variable was set to %JAVA_HOME%
 	set originalArgs=%*
 	if ""%1""=="""" goto usageInfo
 
