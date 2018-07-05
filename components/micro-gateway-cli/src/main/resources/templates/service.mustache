@@ -59,7 +59,7 @@ import wso2/gateway;
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}}
 }
-service<http:Service> {{cut qualifiedServiceName " "}} bind {{api.transport}}{{this}}apiListener,apiSecureListener{{api.transport}} {
+service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},{{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
 {{#paths}}{{#value}}{{#operations}}{{#value}}
     @swagger:ResourceInfo {
         summary: "{{summary}}"{{#if tags}},
