@@ -22,6 +22,7 @@ public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
+        checkOrSetMessageID(context);
         if(request.hasHeader(HOST_HEADER_NAME)){
             context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
         } else {

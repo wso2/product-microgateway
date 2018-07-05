@@ -64,7 +64,7 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
     executionTimeDTO.context = getContext(context);
     executionTimeDTO.correleationID = <string> context.attributes[MESSAGE_ID];
 
-    executionTimeDTO.securityLatency = check <int> context.attributes[SECURITY_LATENCY];
+    executionTimeDTO.securityLatency = getSecurityLatency(context);
     executionTimeDTO.eventTime = getCurrentTime();
     executionTimeDTO.throttlingLatency = check <int> context.attributes[THROTTLE_LATENCY];
     executionTimeDTO.requestMediationLatency = 0;
@@ -77,3 +77,19 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
     return executionTimeDTO;
 }
 
+function getSecurityLatency(http:FilterContext context) returns int {
+    int latency = 0;
+    if (context.attributes.hasKey(SECURITY_LATENCY_AUTHN)) {
+        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHN];
+    }
+    if (context.attributes.hasKey(SECURITY_LATENCY_AUTHZ)) {
+        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHZ];
+    }
+    if (context.attributes.hasKey(SECURITY_LATENCY_AUTHZ_RESPONSE)) {
+        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHZ_RESPONSE];
+    }
+    if (context.attributes.hasKey(SECURITY_LATENCY_SUBS)) {
+        latency += check <int>context.attributes[SECURITY_LATENCY_SUBS];
+    }
+    return latency;
+}

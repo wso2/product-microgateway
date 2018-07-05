@@ -43,8 +43,16 @@ public type OAuthzFilter object {
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
-    {
+        boolean {
+        int startingTime = getCurrentTime();
+        checkOrSetMessageID(context);
+        boolean result = doFilterRequest(listener, request, context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
+        return result;
+    }
+    
+    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+        boolean {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         boolean result = true;
@@ -58,6 +66,13 @@ public type OAuthzFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        int startingTime = getCurrentTime();
+        boolean result = doFilterResponse(response, context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ_RESPONSE);
+        return result;
+    }
+
+    public function doFilterResponse(http:Response response, http:FilterContext context) returns boolean {
         // In authorization filter we have specifically set the error payload since we are using ballerina in built
         // authzFilter
         if (response.statusCode == FORBIDDEN) {

@@ -129,7 +129,7 @@ public class MockAPIPublisher {
         KeyValidationInfo info = tokenInfo.get(token);
         try {
             if (info == null) {
-                log.error("Token not registered");
+                log.debug("Token not registered");
                 String xmlResponse = IOUtils.toString(new FileInputStream(
                         getClass().getClassLoader().getResource("key-validation-error-response.xml").getPath()));
                 return xmlResponse;

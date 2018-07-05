@@ -459,4 +459,11 @@ function setLatency(int starting, http:FilterContext context, string latencyType
     printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
 }
 
+@Description { value: "Check MESSAGE_ID in context and set if it is not" }
+function checkOrSetMessageID(http:FilterContext context) {
+    if (!context.attributes.hasKey(MESSAGE_ID)) {
+        context.attributes[MESSAGE_ID] = system:uuid();
+    }
+}
+
 future streamftr = start initStreamPublisher();
