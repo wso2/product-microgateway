@@ -62,7 +62,8 @@ public class ServerInstance implements Server {
         initialize();
     }
 
-    public ServerInstance(String serverDistributionPath, int serverHttpPort, int serverHttpsPort, int serverHttpsTokenPort) throws MicroGWTestException {
+    public ServerInstance(String serverDistributionPath, int serverHttpPort, int serverHttpsPort,
+            int serverHttpsTokenPort) throws MicroGWTestException {
         this.serverDistribution = serverDistributionPath;
         this.httpServerPort = serverHttpPort;
         this.httpsServerPort = serverHttpsPort;
@@ -73,11 +74,14 @@ public class ServerInstance implements Server {
     /**
      * Method to start Micro-GW server given the port and bal file.
      *
-     * @param port                  In which server starts.
+     * @param httpPort       http server port
+     * @param httpsPort      https server port
+     * @param tokenHttpsPost https server token endpoint port
      * @return microGWServer      Started server instance.
      * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost) throws MicroGWTestException {
+    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost)
+            throws MicroGWTestException {
         String serverZipPath = System.getProperty(Constants.SYSTEM_PROP_SERVER_ZIP);
         ServerInstance microGWServer = new ServerInstance(serverZipPath, httpPort, httpsPort, tokenHttpsPost);
         return microGWServer;
