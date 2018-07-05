@@ -19,7 +19,8 @@
 
 <suite name="Micro-GW-Test-Suite">
     <listeners>
-        <listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>
+        <!--Disabled since there are no any pre configured apis -->
+        <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
         <listener class-name="org.wso2.micro.gateway.tests.listener.TestNGListener"/>
     </listeners>
 

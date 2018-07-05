@@ -52,7 +52,7 @@ public class BaseTestCase {
     protected void init(String label, String project) throws Exception {
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer(TestConstant.GATEWAY_LISTENER_PORT);
+        microGWServer = ServerInstance.initMicroGwServer();
         String cliHome = microGWServer.getServerHome();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
@@ -131,7 +131,7 @@ public class BaseTestCase {
     }
 
     protected String getServiceURLHttp(String servicePath) throws MalformedURLException {
-        return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_PORT), servicePath).toString();
+        return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath).toString();
     }
 
     protected String getMockServiceURLHttp(String servicePath) throws MalformedURLException {

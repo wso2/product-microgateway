@@ -48,13 +48,12 @@ public type ThrottleFilter object {
         string apiContext = getContext(context);
         string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
-        boolean filterFailed =check <boolean>context.attributes[FILTER_FAILED];
         boolean isSecured =check <boolean>context.attributes[IS_SECURED];
         context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
         context.attributes[IS_THROTTLE_OUT] = false;
 
         AuthenticationContext keyvalidationResult;
-        if (!filterFailed && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
             printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];

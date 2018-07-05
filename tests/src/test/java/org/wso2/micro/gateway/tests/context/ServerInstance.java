@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mina.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,7 +47,9 @@ public class ServerInstance implements Server {
     private ServerLogReader serverInfoLogReader;
     private ServerLogReader serverErrorLogReader;
     private boolean isServerRunning;
-    private int httpServerPort = 9070; //Constants.DEFAULT_HTTP_PORT;
+    private int httpServerPort = TestConstant.GATEWAY_LISTENER_HTTP_PORT;
+    private int httpsServerPort = TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
+    private int httpServerPortToken = TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT;
     private ConcurrentHashSet<LogLeecher> tmpLeechers = new ConcurrentHashSet<>();
 
     /**
@@ -56,28 +59,31 @@ public class ServerInstance implements Server {
 
     public ServerInstance(String serverDistributionPath) throws MicroGWTestException {
         this.serverDistribution = serverDistributionPath;
-
         initialize();
     }
 
-    public ServerInstance(String serverDistributionPath, int serverHttpPort) throws MicroGWTestException {
+    public ServerInstance(String serverDistributionPath, int serverHttpPort, int serverHttpsPort,
+            int serverHttpsTokenPort) throws MicroGWTestException {
         this.serverDistribution = serverDistributionPath;
         this.httpServerPort = serverHttpPort;
-
+        this.httpsServerPort = serverHttpsPort;
+        this.httpServerPortToken = serverHttpsTokenPort;
         initialize();
     }
 
     /**
      * Method to start Micro-GW server given the port and bal file.
      *
-     * @param port                  In which server starts.
+     * @param httpPort       http server port
+     * @param httpsPort      https server port
+     * @param tokenHttpsPost https server token endpoint port
      * @return microGWServer      Started server instance.
      * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer(int port) throws MicroGWTestException {
+    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost)
+            throws MicroGWTestException {
         String serverZipPath = System.getProperty(Constants.SYSTEM_PROP_SERVER_ZIP);
-        ServerInstance microGWServer = new ServerInstance(serverZipPath, port);
-
+        ServerInstance microGWServer = new ServerInstance(serverZipPath, httpPort, httpsPort, tokenHttpsPost);
         return microGWServer;
     }
 
@@ -88,11 +94,8 @@ public class ServerInstance implements Server {
      * @throws MicroGWTestException
      */
     public static ServerInstance initMicroGwServer() throws MicroGWTestException {
-        int defaultPort = Constants.DEFAULT_HTTP_PORT;
-        String serverZipPath = System.getProperty(Constants.SYSTEM_PROP_SERVER_ZIP);
-        ServerInstance microGWServer = new ServerInstance(serverZipPath, defaultPort);
-
-        return microGWServer;
+        return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
+                TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT);
     }
 
     public void startMicroGwServer(String balFile) throws MicroGWTestException {
@@ -139,6 +142,8 @@ public class ServerInstance implements Server {
         }
 
         Utils.checkPortAvailability(httpServerPort);
+        Utils.checkPortAvailability(httpsServerPort);
+        Utils.checkPortAvailability(httpServerPortToken);
 
         log.info("Starting server..");
 

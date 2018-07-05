@@ -124,7 +124,7 @@ function writeEventToFile(EventDTO eventDTO) {
     try {
         match charChannel.write(getEventData(eventDTO), 0) {
             int numberOfCharsWritten => {
-                log:printInfo("Event is being written");
+                log:printDebug("Event is being written");
             }
             error err => {
                 throw err;
