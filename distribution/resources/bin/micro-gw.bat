@@ -82,6 +82,7 @@ rem of arguments (up to the command line limit, anyway).
 :setupArgs
 	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
+	if ""%1""==""help""     goto passToJar
 
 	if ""%1""==""build""     goto commandBuild
 
