@@ -115,7 +115,7 @@ public type AuthnFilter object {
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
                         runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
-                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth toke from header : " + authHeaderName);
+                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " + authHeaderName);
                         match self.oauthnHandler.handle(request) {
                             APIKeyValidationDto apiKeyValidationDto => {
                                 isAuthorized = <boolean>apiKeyValidationDto.authorized;
