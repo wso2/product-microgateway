@@ -46,7 +46,7 @@ function sendFileRotatingEvent() returns error? {
 }
 
 function errorOnRotating(error e) {
-    printDebug(KEY_ROTATE_TASK,"File not present to rotate:" + e.message);
+    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.message);
 }
 
 function rotatingTask() {

@@ -133,8 +133,8 @@ function writeEventToFile(EventDTO eventDTO) {
     } finally {
         match charChannel.close() {
             error sourceCloseError => {
-                printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: " + sourceCloseError.message
-                );
+                printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
+                        + sourceCloseError.message);
             }
             () => {
                 printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
