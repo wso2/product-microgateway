@@ -50,7 +50,7 @@ public type OAuthzFilter object {
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
         return result;
     }
-    
+
     public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
         boolean {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
