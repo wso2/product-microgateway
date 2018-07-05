@@ -233,7 +233,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
             logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
-            throw new CLIInternalException("Provided trust store does not exist.");
+            throw new CLIRuntimeException("Provided trust store location does not exist.");
         }
 
         //set the trustStore
