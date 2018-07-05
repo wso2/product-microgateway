@@ -39,6 +39,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 import java.util.UUID;
 
 /**
@@ -76,7 +77,8 @@ public class BaseTestCase {
         MockAPIPublisher.getInstance().clear();
     }
 
-    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType) throws Exception {
+    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
+            throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext("/" + api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
@@ -93,7 +95,7 @@ public class BaseTestCase {
         jwtTokenInfo.put("iss", "https://localhost:8244/token");
         jwtTokenInfo.put("keytype", keyType);
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
-        jwtTokenInfo.put("exp", System.currentTimeMillis() + 3600 * 1000);
+        jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("iat", System.currentTimeMillis());
         jwtTokenInfo.put("jti", UUID.randomUUID());
 
