@@ -124,7 +124,7 @@ function writeEventToFile(EventDTO eventDTO) {
     try {
         match charChannel.write(getEventData(eventDTO), 0) {
             int numberOfCharsWritten => {
-                log:printDebug("Event is being written");
+                printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
             }
             error err => {
                 throw err;
@@ -133,10 +133,11 @@ function writeEventToFile(EventDTO eventDTO) {
     } finally {
         match charChannel.close() {
             error sourceCloseError => {
-                log:printError("Error occurred while closing the channel: ", err = sourceCloseError);
+                printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: " + sourceCloseError.message
+                );
             }
             () => {
-                log:printDebug("Source channel closed successfully.");
+                printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
             }
         }
     }
