@@ -35,14 +35,17 @@ public type AnalyticsRequestFilter object {
                 printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
             }
         }
-        checkOrSetMessageID(context);
-        if(request.hasHeader(HOST_HEADER_NAME)){
-            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
-        } else {
-            context.attributes[HOSTNAME_PROPERTY] = "localhost";
+        //Filter only is analytics is enabled.
+        if (isAnalyticsEnabled) {
+            checkOrSetMessageID(context);
+            if (request.hasHeader(HOST_HEADER_NAME)) {
+                context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
+            } else {
+                context.attributes[HOSTNAME_PROPERTY] = "localhost";
+            }
+            context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
+            doFilterRequest(request, context);
         }
-        context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
-        doFilterRequest(request, context);
         return true;
 
     }
