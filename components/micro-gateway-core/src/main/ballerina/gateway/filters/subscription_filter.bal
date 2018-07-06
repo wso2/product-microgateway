@@ -63,7 +63,7 @@ public type SubscriptionFilter object {
                                     authenticationContext.tier = subscription.subscriptionTier.toString();
                                     authenticationContext.apiKey = jwtToken;
                                     authenticationContext.username = decodedPayload.sub.toString();
-                                    authenticationContext.callerToken = jwtToken    ;
+                                    authenticationContext.callerToken = jwtToken;
                                     authenticationContext.applicationId = decodedPayload.application.id.toString();
                                     authenticationContext.applicationName = decodedPayload.application.name.toString();
                                     authenticationContext.applicationTier = decodedPayload.application.tier.toString();

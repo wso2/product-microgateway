@@ -144,8 +144,8 @@ public type AuthnFilter object {
                                     authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.stopOnQuotaReach;
                                     authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
                                     .contentAware;
-                                    authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
-                                    if(authenticationContext.callerToken != "") {
+                                    printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.callerToken);
+                                    if(authenticationContext.callerToken != "" && authenticationContext.callerToken != null) {
                                         string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
                                             JWT_HEADER_NAME);
                                         request.setHeader(jwtheaderName, authenticationContext.callerToken);
