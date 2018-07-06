@@ -88,10 +88,10 @@ public class ThrottlingTestCase extends BaseTestCase {
         application3.setId((int) (Math.random() * 1000));
 
         //Register a token with key validation info
-        jwtToken = getJWT(api, application, subscriptionPolicy.getPolicyName(), TestConstant.KEY_TYPE_PRODUCTION);
-        jwtToken2 = getJWT(api, application2, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION);
+        jwtToken = getJWT(api, application, subscriptionPolicy.getPolicyName(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        jwtToken2 = getJWT(api, application2, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         continueOnQuotaToken = getJWT(api, application3, subPolicyContinueOnLimit.getPolicyName(),
-                TestConstant.KEY_TYPE_PRODUCTION);
+                TestConstant.KEY_TYPE_PRODUCTION, 3600);
 
         KeyValidationInfo info = new KeyValidationInfo();
         info.setApi(api);
@@ -114,8 +114,8 @@ public class ThrottlingTestCase extends BaseTestCase {
         appWithNonExistPolicy.setTier("AppPolicyNotExist");
         appWithNonExistPolicy.setId((int) (Math.random() * 1000));
 
-        noSubPolicyJWT = getJWT(api, application, "SubPolicyNotExist", TestConstant.KEY_TYPE_PRODUCTION);
-        noAppPolicyJWT = getJWT(api, appWithNonExistPolicy, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION);
+        noSubPolicyJWT = getJWT(api, application, "SubPolicyNotExist", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        noAppPolicyJWT = getJWT(api, appWithNonExistPolicy, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
 
         KeyValidationInfo info3 = new KeyValidationInfo();
         info3.setApi(api);

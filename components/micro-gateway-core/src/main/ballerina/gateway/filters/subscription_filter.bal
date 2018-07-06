@@ -51,20 +51,6 @@ public type SubscriptionFilter object {
                     match getDecodedJWTPayload(jwtPayload) {
                         json decodedPayload => {
                             printTrace(KEY_SUBSCRIPTION_FILTER, "Decoded JWT payload: " + decodedPayload.toString());
-
-                            //todo: Adding this as a temporary fix until Ballerina validates the JWT expiry.
-                            APIKeyValidationDto apiKeyValidationDto;
-                            int tokenIssuedTime = check <int> decodedPayload.iat;
-                            int tokenExpiredTime = check <int> decodedPayload.exp;
-                            apiKeyValidationDto.validityPeriod = <string>(tokenExpiredTime - tokenIssuedTime);
-                            apiKeyValidationDto.issuedTime = <string>tokenIssuedTime;
-
-                            if (isAccessTokenExpired(apiKeyValidationDto)) {
-                                printDebug(KEY_SUBSCRIPTION_FILTER, "JWT Access token has expired.");
-                                setErrorMessageToFilterContext(filterContext, API_AUTH_INVALID_CREDENTIALS);
-                                sendErrorResponse(listener, request, filterContext);
-                                return false;
-                            }
                             json subscribedAPIList = decodedPayload.subscribedAPIs;
                             APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:
                                 getServiceAnnotations(filterContext.serviceType));

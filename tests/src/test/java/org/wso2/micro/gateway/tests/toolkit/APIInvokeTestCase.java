@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class APIInvokeTestCase extends BaseTestCase {
-    private String prodToken, sandToken, jwtTokenProd, jwtTokenSand;
+    private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
@@ -79,8 +79,9 @@ public class APIInvokeTestCase extends BaseTestCase {
         infoSand.setSubscriptionTier("Unlimited");
         sandToken = pub.getAndRegisterAccessToken(infoSand);
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION);
-        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX);
+        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
+        expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
         //generate apis with CLI and start the micro gateway server
         super.init(label, project);
     }
@@ -88,22 +89,30 @@ public class APIInvokeTestCase extends BaseTestCase {
     @Test(description = "Test API invocation with a oauth token")
     public void testApiInvoke() throws Exception {
         //test prod endpoint
-        invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE);
+        invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //test sand endpoint
-        invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE);
+        invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
     }
 
     @Test(description = "Test API invocation with a JWT token")
     public void testApiInvokeWithJWT() throws Exception {
         //test prod endpoint with jwt token
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE);
+        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //test sand endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE);
+        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ex) {
+            Assert.fail("thread sleep interrupted!");
+        }
+        //test invoking with an expired JWT token
+        invoke(expiringJwtTokenProd, 401);
     }
 
-    private void invoke(String token, String responseData) throws Exception {
+    private void invoke(String token, String responseData, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
@@ -111,7 +120,17 @@ public class APIInvokeTestCase extends BaseTestCase {
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
+
+    private void invoke(String token, int responseCode) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
     @AfterClass
