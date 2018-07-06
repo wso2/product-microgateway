@@ -1,6 +1,6 @@
 {{#if containerConfig.docker.dockerConfig.enable}}
 @docker:Config {
-    name:"{{qualifiedServiceName}}"{{#if containerConfig.docker.dockerConfig.registry}},
+    {{#containerConfig.docker.dockerConfig.name}}name:"{{containerConfig.docker.dockerConfig.name}}"{{/containerConfig.docker.dockerConfig.name}}{{^containerConfig.docker.dockerConfig.name}}name:"{{qualifiedServiceName}}"{{/containerConfig.docker.dockerConfig.name}}{{#if containerConfig.docker.dockerConfig.registry}},
     registry:"{{containerConfig.docker.dockerConfig.registry}}"{{/if}}{{#if containerConfig.docker.dockerConfig.tag}},
     tag:"{{containerConfig.docker.dockerConfig.tag}}"{{/if}}{{#if containerConfig.docker.dockerConfig.buildImage}},
     buildImage:"{{containerConfig.docker.dockerConfig.buildImage}}"{{/if}}{{#if containerConfig.docker.dockerConfig.dockerHost}},
