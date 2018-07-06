@@ -752,7 +752,8 @@ public class GatewayCmdUtils {
                 String inputConfigContent = readFileAsString(deploymentConfPath, false);
                 //validate the provided file
                 try {
-                    TOMLConfigParser.parse(deploymentConfPath, ContainerConfig.class);
+                    ContainerConfig config = TOMLConfigParser.parse(deploymentConfPath, ContainerConfig.class);
+                    System.out.println(config);
                 } catch (ConfigParserException | IllegalStateException e) {
                     throw new CLIRuntimeException(
                             "Error while reading deployment configuration file: " + deploymentConfPath

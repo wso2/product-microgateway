@@ -17,35 +17,41 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import java.util.ArrayList;
-import java.util.List;
+public class KubernetesConfigMapConfigItem {
+    private String name;
+    private String mountPath;
+    private String readOnly;
+    private String[] data;
 
-public class KubernetesConfigMap {
-    private String ballerinaConf;
-    private boolean enable = false;
-    private List<KubernetesConfigMapConfigItem> configMaps = new ArrayList<>();
-
-    public String getBallerinaConf() {
-        return ballerinaConf;
+    public String getName() {
+        return name;
     }
 
-    public void setBallerinaConf(String ballerinaConf) {
-        this.ballerinaConf = ballerinaConf;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean isEnable() {
-        return enable;
+    public String getMountPath() {
+        return mountPath;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setMountPath(String mountPath) {
+        this.mountPath = mountPath;
     }
 
-    public List<KubernetesConfigMapConfigItem> getConfigMaps() {
-        return configMaps;
+    public String getReadOnly() {
+        return readOnly;
     }
 
-    public void setConfigMaps(List<KubernetesConfigMapConfigItem> files) {
-        this.configMaps = files;
+    public void setReadOnly(String readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public String[] getData() {
+        return data;
+    }
+
+    public void setData(String[] data) {
+        this.data = data;
     }
 }
