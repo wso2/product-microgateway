@@ -1,10 +1,14 @@
 {{#if containerConfig.kubernetes.kubernetesConfigMap.enable}}
-@kubernetes:ConfigMap {
-    {{#if containerConfig.kubernetes.kubernetesConfigMap.name}}
-    name:"{{containerConfig.kubernetes.kubernetesConfigMap.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesConfigMap.mountPath}},
-    mountPath:"{{containerConfig.kubernetes.kubernetesConfigMap.mountPath}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesConfigMap.readOnly}},
-    readOnly:"{{containerConfig.kubernetes.kubernetesConfigMap.readOnly}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesConfigMap.ballerinaConf}},
-    ballerinaConf:"{{containerConfig.kubernetes.kubernetesConfigMap.ballerinaConf}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesConfigMap.data}},
-    data:"{{containerConfig.kubernetes.kubernetesConfigMap.data}}"{{/if}}
-}
+{{#containerConfig.kubernetes.kubernetesConfigMap}}@kubernetes:ConfigMap {
+{{#ballerinaConf}}
+    ballerinaConf: "{{ballerinaConf}}"{{#if configMaps}},{{/if}}{{/ballerinaConf}}{{#if configMaps}}
+    configMaps: [ {{#configMaps}}
+        { {{#name}}
+            name:"{{name}}",{{/name}}{{#readOnly}}
+            readOnly:{{readOnly}},{{/readOnly}}{{#if data}}
+            data:[{{#data}}"{{.}}"{{#unless @last}},{{/unless}}{{/data}}],{{/if}}{{#mountPath}}
+            mountPath:"{{mountPath}}"{{/mountPath}}
+        }{{#unless @last}},{{/unless}}{{/configMaps}}
+    ]{{/if}}
+}{{/containerConfig.kubernetes.kubernetesConfigMap}}
 {{/if}}
