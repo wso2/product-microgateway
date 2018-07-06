@@ -72,7 +72,7 @@
     #data = ''
   [kubernetes.kubernetesConfigMap]
     enable = false
-    ballerinaConf = 'path/to/ballerina.conf'
+    ballerinaConf = 'path/to/micro-gw.conf'
     [[kubernetes.kubernetesConfigMap.configMaps]]
         name = ''
         mountPath = ''
