@@ -15,9 +15,10 @@
     #password = ''
   [docker.dockerCopyFiles]
     enable = false
-    #source = ''
-    #target = ''
-    #isBallerinaConf = ''
+    [[docker.dockerCopyFiles.files]]
+        source = ''
+        target = ''
+        isBallerinaConf = false
 [kubernetes]
   [kubernetes.kubernetesDeployment]
     enable = false
