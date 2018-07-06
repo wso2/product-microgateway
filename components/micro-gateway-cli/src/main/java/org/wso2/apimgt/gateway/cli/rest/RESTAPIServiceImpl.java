@@ -81,7 +81,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
-                logger.debug("Response body: {}", responseStr);
+                logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
                 for (ExtendedAPI api : apiListDTO.getList()) {
@@ -135,7 +135,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
-                logger.debug("Response body: {}", responseStr);
+                logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
                 if (apiList != null) {
