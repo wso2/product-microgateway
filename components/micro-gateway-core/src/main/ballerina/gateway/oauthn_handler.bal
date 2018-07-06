@@ -177,6 +177,7 @@ public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto api
     string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized = false;
     json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
+    printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationInfoJson.toString());
     match <string>keyValidationInfoJson.authorized {
         string authorizeValue => {
             boolean auth = <boolean>authorizeValue;
