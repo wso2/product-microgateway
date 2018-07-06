@@ -33,7 +33,7 @@ SET JAVA_XMS_VALUE="256m"
 SET JAVA_XMX_VALUE="512m"
 
 REM Get the location of this(gateway.bat) file
-SET PRGDIR=%~dp0
+SET PRGDIR=%~sdp0
 SET GWHOME=%PRGDIR%..
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
@@ -68,18 +68,50 @@ goto end
 
 :callBallerina
 	rem ---------- Run balx with ballerina ----------------
-	powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
-	powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
-	powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
-    set "separator=/"
-    set log_path="%GWHOME%\conf\micro-gw.conf"
-    call set unix_style_path=%%log_path:\=%separator%%%
+	REM Change the windows style `\` path separator to unix style `/path/to/file` for log file path
+	set "separator=/"
+	set log_path="%GWHOME%\logs\access_logs"
+	call set unix_style_path=%%log_path:\=%separator%%%
+
+	REM Do the same for analytics data file path
+	set usage_data_path=%GWHOME%\api-usage-data
+	call set usage_data_path=%%usage_data_path:\=%separator%%%
+
 	if %verbose%==T echo [%date% %time%] DEBUG: balx location = "%GWHOME%\exec\${label}.balx"
 	if %verbose%==T echo [%date% %time%] DEBUG: b7a.http.accesslog.path = "%GWHOME%\logs\access_logs"
 	if %verbose%==T echo [%date% %time%] DEBUG: configs = %unix_style_path%
 	if %verbose%==T echo [%date% %time%] DEBUG: Starting micro gateway server...
 
-    %GWHOME%\runtime\bin\ballerina run "%GWHOME%\exec\${label}.balx" -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*"
+	REM Check if powershell is available
+	WHERE powershell >nul 2>nul
+	IF %ERRORLEVEL% NEQ 0 (
+		echo [%date% %time%] WARN: Can't find powershell in the system!
+		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
+		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
+		%GWHOME%\runtime\bin\ballerina run "%GWHOME%\exec\${label}.balx" -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
+	) else (
+		REM Change Java heap Xmx and Xmx values
+		powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
+		powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
+		powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
+		CD %GWHOME%
+		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
+			set /a n=!n!+1
+			set c=%%A
+			if !n!==1 set PSVersion=!c!
+		)
+		set PSVersion=!PSVersion: =!
+		if %verbose%==T echo [%date% %time%] DEBUG: PowerShell version !PSVersion! detected!
+		set PSVersion=!PSVersion:~0,1!
+		echo [%date% %time%] Starting Micro-Gateway
+		IF !PSVersion! LEQ 3 (
+			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
+			call powershell ".\runtime\bin\ballerina run .\exec\${label}.balx -e api.usage.data.path=$Env:usage_data_path  -e b7a.http.accesslog.path=$Env:unix_style_path --config .\conf\micro-gw.conf *>&1 | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+		 ) else (
+			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
+			call powershell ".\runtime\bin\ballerina run .\exec\${label}.balx -e api.usage.data.path=$Env:usage_data_path -e b7a.http.accesslog.path=$Env:unix_style_path --config .\conf\micro-gw.conf *>&1 |  tee -Append .\logs\microgateway.log"
+		)
+	)
 :end
 goto endlocal
 

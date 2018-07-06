@@ -92,7 +92,9 @@ if [ "$CMD" = "start" ]; then
   export GWHOME="$GWHOME"
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
-  nohup sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args &
+  nohup $SHELL <<EOF &
+    sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1 | tee -a $GWHOME/logs/microgateway.log
+EOF
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
   PROCESS_ID=""
@@ -114,11 +116,13 @@ if [ "$CMD" = "start" ]; then
 elif [ "$CMD" = "stop" ]; then
   export GWHOME="$GWHOME"
   kill -term `cat "$GWHOME"/bin/gateway.pid`
+  kill -9 `lsof -t $GWHOME/logs/access_logs`
   rm -f file $GWHOME/bin/gateway.pid
   exit 0
 elif [ "$CMD" = "restart" ]; then
   export GWHOME="$GWHOME"
   kill -term `cat "$GWHOME"/bin/gateway.pid`
+  kill -9 `lsof -t $GWHOME/logs/access_logs`
   process_status=0
   pid=`cat "$GWHOME"/bin/gateway.pid`
   while [ "$process_status" -eq "0" ]
@@ -129,7 +133,9 @@ elif [ "$CMD" = "restart" ]; then
   done
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
-  nohup sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args &
+  nohup $SHELL <<EOF &
+   sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1 | tee -a $GWHOME/logs/microgateway.log
+EOF
   SESS_PID=$!
   PROCESS_ID=""
   TEMP_PID=""
@@ -149,5 +155,5 @@ elif [ "$CMD" = "restart" ]; then
   done
 fi
 
-# run the balx created for ${label} APIs
-sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@"
+# run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
+sh $BALLERINA_HOME/bin/ballerina run $GWHOME/exec/${label}.balx -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1 | tee -a $GWHOME/logs/microgateway.log
