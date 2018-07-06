@@ -21,20 +21,12 @@ import ballerina/time;
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
+future analyticsConfigReader = start startAnalyticsRelatedFuns();
+
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean {
-        if (!configsRead) {
-            getAnalyticsEnableCOnfig();
-            if (isAnalyticsEnabled) {
-                printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-                future uploadTask = start timerTask();
-                future rotateTask = start rotatingTask();
-            } else {
-                printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
-            }
-        }
         //Filter only is analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -51,17 +43,6 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-
-        if (!configsRead) {
-            getAnalyticsEnableCOnfig();
-            if (isAnalyticsEnabled) {
-                printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-                future uploadTask = start timerTask();
-                future rotateTask = start rotatingTask();
-            } else {
-                printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
-            }
-        }
 
         if (isAnalyticsEnabled) {
             boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
@@ -134,4 +115,18 @@ function getAnalyticsEnableCOnfig() {
     isAnalyticsEnabled = check <boolean>vals[ENABLE];
     configsRead = true;
     printDebug(KEY_UTILS, "Analytics configuration values read");
+}
+
+
+function startAnalyticsRelatedFuns() {
+    if (!configsRead) {
+        getAnalyticsEnableCOnfig();
+        if (isAnalyticsEnabled) {
+            printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
+            future uploadTask = start timerTask();
+            future rotateTask = start rotatingTask();
+        } else {
+            printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
+        }
+    }
 }
