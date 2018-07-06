@@ -17,27 +17,33 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import java.util.ArrayList;
-import java.util.List;
+public class DockerCopyFile {
+    private String source;
+    private String target;
+    private String isBallerinaConf;
 
-public class DockerCopyFiles {
-
-    private boolean enable = false;
-    private List<DockerCopyFile> files = new ArrayList<>();
-
-    public boolean isEnable() {
-        return enable;
+    public String getIsBallerinaConf() {
+        return isBallerinaConf;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setIsBallerinaConf(String isBallerinaConf) {
+        this.isBallerinaConf = isBallerinaConf;
     }
 
-    public List<DockerCopyFile> getFiles() {
-        return files;
+    public String getTarget() {
+        return target;
     }
 
-    public void setFiles(List<DockerCopyFile> files) {
-        this.files = files;
+    public void setTarget(String target) {
+        this.target = target;
     }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
 }
