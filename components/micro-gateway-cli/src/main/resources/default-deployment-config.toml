@@ -73,11 +73,11 @@
   [kubernetes.kubernetesConfigMap]
     enable = false
     ballerinaConf = 'path/to/micro-gw.conf'
-    [[kubernetes.kubernetesConfigMap.configMaps]]
-        name = ''
-        mountPath = ''
-        readOnly = false
-        data = ['']
+    #[[kubernetes.kubernetesConfigMap.configMaps]]
+    #    name = ''
+    #    mountPath = ''
+    #    readOnly = false
+    #    data = ['']
   [kubernetes.kubernetesPersistentVolumeClaim]
     enable = false
     #name = ''
