@@ -17,12 +17,14 @@ gateway:AnalyticsRequestFilter analyticsFilter = new();
 // Extension filter
 ExtensionFilter extensionFilter;
 
+{{>secureKubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095,
     filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };
 
+{{>kubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
     port:9090,

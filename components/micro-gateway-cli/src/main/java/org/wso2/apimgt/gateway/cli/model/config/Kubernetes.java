@@ -22,6 +22,7 @@ public class Kubernetes {
     private KubernetesDeployment kubernetesDeployment;
     private KubernetesHpa kubernetesHpa;
     private KubernetesIngress kubernetesIngress;
+    private SecureKubernetesIngress secureKubernetesIngress;
     private KubernetesJob kubernetesJob;
     private KubernetesPersistentVolumeClaim kubernetesPersistentVolumeClaim;
     private KubernetesSecret kubernetesSecret;
@@ -89,5 +90,13 @@ public class Kubernetes {
 
     public void setKubernetesService(KubernetesService kubernetesService) {
         this.kubernetesService = kubernetesService;
+    }
+
+    public SecureKubernetesIngress getSecureKubernetesIngress() {
+        return secureKubernetesIngress;
+    }
+
+    public void setSecureKubernetesIngress(SecureKubernetesIngress secureKubernetesIngress) {
+        this.secureKubernetesIngress = secureKubernetesIngress;
     }
 }

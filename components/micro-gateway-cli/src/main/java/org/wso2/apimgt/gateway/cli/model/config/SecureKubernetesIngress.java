@@ -21,7 +21,7 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
-public class KubernetesIngress {
+public class SecureKubernetesIngress {
     private String name;
     private String labels;
     private String hostname;
@@ -34,7 +34,7 @@ public class KubernetesIngress {
     public String getName() {
         if (name == null) {
             CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
-            return codeGenerationContext.getProjectName() + "-" + GatewayCliConstants.K8S_INGRESS ;
+            return codeGenerationContext.getProjectName() + "-tls-" + GatewayCliConstants.K8S_INGRESS ;
         } else {
             return name;
         }
@@ -100,3 +100,4 @@ public class KubernetesIngress {
         this.enable = enable;
     }
 }
+

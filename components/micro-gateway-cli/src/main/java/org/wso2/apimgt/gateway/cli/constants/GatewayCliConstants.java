@@ -60,6 +60,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";
+    public static final String K8S_INGRESS = "ingress";
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String API_NAME_PLACEHOLDER = "${name}";
     public static final String VERSION_PLACEHOLDER = "${version}";

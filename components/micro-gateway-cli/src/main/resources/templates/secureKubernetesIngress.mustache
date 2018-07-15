@@ -1,0 +1,13 @@
+{{#if containerConfig.kubernetes.secureKubernetesIngress.enable}}
+@kubernetes:Ingress {
+    {{#if containerConfig.kubernetes.secureKubernetesIngress.name}}
+    name:"{{containerConfig.kubernetes.secureKubernetesIngress.name}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.labels}},
+    labels:"{{containerConfig.kubernetes.secureKubernetesIngress.labels}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.hostname}},
+    hostname:"{{containerConfig.kubernetes.secureKubernetesIngress.hostname}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.annotations}},
+    annotations:"{{containerConfig.kubernetes.secureKubernetesIngress.annotations}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.path}},
+    path:"{{containerConfig.kubernetes.secureKubernetesIngress.path}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.targetPath}},
+    targetPath:"{{containerConfig.kubernetes.secureKubernetesIngress.targetPath}}"{{/if}}{{#if containerConfig.kubernetes.secureKubernetesIngress.ingressClass}},
+    ingressClass:"{{containerConfig.kubernetes.secureKubernetesIngress.ingressClass}}"{{/if}},
+    enableTLS:true
+}
+{{/if}}
