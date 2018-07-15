@@ -56,7 +56,15 @@
     #path = ''
     #targetPath = ''
     #ingressClass = ''
-    #enableTLS = ''
+  [kubernetes.secureKubernetesIngress]
+    enable = false
+    #name = ''
+    #labels = ''
+    #hostname = ''
+    #annotations = ''
+    #path = ''
+    #targetPath = ''
+    #ingressClass = ''
   [kubernetes.kubernetesHpa]
     enable = false
     #name = ''

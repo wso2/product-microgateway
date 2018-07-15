@@ -51,6 +51,8 @@ public class ContainerConfig {
                                 .isEnable()) ||
                         (kubernetes.getKubernetesHpa() != null && kubernetes.getKubernetesHpa().isEnable()) ||
                         (kubernetes.getKubernetesIngress() != null && kubernetes.getKubernetesIngress().isEnable()) ||
+                        (kubernetes.getKubernetesIngress() != null &&
+                                kubernetes.getSecureKubernetesIngress().isEnable()) ||
                         (kubernetes.getKubernetesJob() != null && kubernetes.getKubernetesJob().isEnable()) ||
                         (kubernetes.getKubernetesPersistentVolumeClaim() != null && kubernetes
                                 .getKubernetesPersistentVolumeClaim().isEnable()) ||
