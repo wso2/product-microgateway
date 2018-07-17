@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type RequestStreamDTO {
+public type RequestStreamDTO record {
     string messageID;
     string apiKey;
     string appKey;
@@ -34,20 +34,20 @@ public type RequestStreamDTO {
     string properties;
 };
 
-public type GlobalThrottleStreamDTO {
+public type GlobalThrottleStreamDTO record {
     string throttleKey ;
     boolean isThrottled;
     boolean stopOnQuota;
     int expiryTimeStamp;
 };
 
-public type EligibilityStreamDTO {
+public type EligibilityStreamDTO record {
     string messageID;
     boolean isEligible;
     string throttleKey;
 };
 
-public type ThrottleAnalyticsEventDTO {
+public type ThrottleAnalyticsEventDTO record {
     string clientType;
     string accessToken;
     string userId;

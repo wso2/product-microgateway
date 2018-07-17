@@ -19,9 +19,8 @@ import ballerina /io;
 
 GatewayConf gatewayConf = new;
 public type GatewayConf object {
-    private {
-        KeyManagerConf keyManagerConf;
-    }
+    private KeyManagerConf keyManagerConf;
+
     public function getGatewayConf() returns (GatewayConf) {
         return gatewayConf;
     }

@@ -25,9 +25,8 @@ import ballerina/time;
 @Field { value: "filterRequest: response filter method (not used this scenario)" }
 public type ThrottleFilter object {
 
-    public {
-        map deployedPolicies;
-    }
+    public map deployedPolicies;
+
 
     public new (deployedPolicies) {}
 

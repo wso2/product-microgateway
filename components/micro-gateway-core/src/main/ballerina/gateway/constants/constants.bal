@@ -37,7 +37,7 @@
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
 @Description {value:"API annotation name in service level"}
-@final public string API_ANN_NAME = "0.0.0"; //todo This value should be API,
+@final public string API_ANN_NAME = "API";
 @Description {value:"skip filters annotation name in service level"}
 @final public string SKIP_FILTERS_ANN_NAME = "SkipFilters";
 @Description {value:"gateway annotation package"}
@@ -305,3 +305,6 @@
 @final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
 @final string KEY_UPLOAD_TASK = "UploadTimerTask";
 @final string KEY_ROTATE_TASK = "RotateTimerTask";
+
+
+@final public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins

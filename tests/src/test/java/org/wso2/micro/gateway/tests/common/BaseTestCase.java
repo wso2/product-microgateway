@@ -80,7 +80,7 @@ public class BaseTestCase {
     protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
             throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        subscribedApiDTO.setContext("/" + api.getContext() + "/" + api.getVersion());
+        subscribedApiDTO.setContext( api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
         subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");

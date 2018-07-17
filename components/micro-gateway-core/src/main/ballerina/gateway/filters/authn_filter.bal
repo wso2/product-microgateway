@@ -31,10 +31,9 @@ import ballerina/reflect;
 @Field {value:"filterRequest: request filter method which attempts to authenticated the request"}
 public type AuthnFilter object {
 
-    public {
-        OAuthnAuthenticator oauthnHandler;// Handles the oauth2 authentication;
-        http:AuthnHandlerChain authnHandlerChain;
-    }
+    public OAuthnAuthenticator oauthnHandler;// Handles the oauth2 authentication;
+    public http:AuthnHandlerChain authnHandlerChain;
+
 
     public new (oauthnHandler, authnHandlerChain) {}
 
@@ -77,7 +76,7 @@ public type AuthnFilter object {
             } else {
                 log:printError("No authorization header was provided");
                 setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                sendErrorResponse(listener, request, context);
+                sendErrorResponse(listener, request, untaint context);
                 return false;
             }
             string providerId = getAuthenticationProviderType(authHeader);
@@ -108,7 +107,7 @@ public type AuthnFilter object {
                     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
                     printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
             } else {
@@ -163,14 +162,14 @@ public type AuthnFilter object {
                                     printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with validation status : " +
                                             status);
                                     setErrorMessageToFilterContext(context, status);
-                                    sendErrorResponse(listener, request, context);
+                                    sendErrorResponse(listener, request, untaint context);
                                     return false;
                                 }
                             }
                             error err => {
                                 log:printError(err.message, err = err);
                                 setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                                sendErrorResponse(listener, request, context);
+                                sendErrorResponse(listener, request, untaint context);
                                 return false;
                             }
                         }
@@ -178,7 +177,7 @@ public type AuthnFilter object {
                     error err => {
                         log:printError(err.message, err = err);
                         setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                        sendErrorResponse(listener, request, context);
+                        sendErrorResponse(listener, request, untaint context);
                         return false;
                     }
                 }
@@ -190,7 +189,7 @@ public type AuthnFilter object {
         }
         if (!isAuthorized) {
             setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            sendErrorResponse(listener, request, context);
+            sendErrorResponse(listener, request, untaint context);
         }
         return isAuthorized;
     }

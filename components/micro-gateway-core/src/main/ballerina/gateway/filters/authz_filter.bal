@@ -31,9 +31,7 @@ import ballerina/reflect;
 @Field {value:"filterRequest: response filter method (not used this scenario)"}
 public type OAuthzFilter object {
 
-    public {
-        http:AuthzFilter authzFilter;
-    }
+    public http:AuthzFilter authzFilter;
 
     public new(authzFilter) {
     }
