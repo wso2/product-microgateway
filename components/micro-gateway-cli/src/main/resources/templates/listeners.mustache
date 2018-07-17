@@ -1,5 +1,7 @@
 import wso2/gateway;
 import ballerina/http;
+
+{{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
 // Get authentication filter
@@ -17,6 +19,7 @@ gateway:AnalyticsRequestFilter analyticsFilter = new();
 // Extension filter
 ExtensionFilter extensionFilter;
 
+{{>docker}}
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
