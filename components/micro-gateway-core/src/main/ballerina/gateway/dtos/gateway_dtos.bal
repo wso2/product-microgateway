@@ -16,7 +16,7 @@
 
 //TODO : change the proper varaible types(ex: authorized should be boolean)
 
-public type APIKeyValidationDto {
+public type APIKeyValidationDto record {
     string apiName ;
     string apiPublisher ;
     string apiTier ;
@@ -43,7 +43,7 @@ public type APIKeyValidationDto {
     string validityPeriod;
 };
 
-public type APIRequestMetaDataDto {
+public type APIRequestMetaDataDto record {
     string context;
     string apiVersion;
     string accessToken;
@@ -53,7 +53,7 @@ public type APIRequestMetaDataDto {
     string httpVerb;
 };
 
-public type AuthenticationContext {
+public type AuthenticationContext record {
     boolean authenticated;
     string username;
     string applicationTier;
@@ -75,12 +75,12 @@ public type AuthenticationContext {
     string apiPublisher;
 };
 
-public type KeyManagerConf {
+public type KeyManagerConf record {
    string serverUrl;
    Credentials credentials;
 };
 
-public type Credentials {
+public type Credentials record {
    string username;
    string password;
 };

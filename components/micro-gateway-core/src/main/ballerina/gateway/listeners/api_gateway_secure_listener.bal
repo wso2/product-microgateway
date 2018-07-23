@@ -26,9 +26,8 @@ import ballerina/io;
 @Description {value:"Representation of an API gateway secure listener"}
 @Field {value:"apiGatewayListener: API Gateway listener instance"}
 public type APIGatewaySecureListener object {
-    public {
-        APIGatewayListener apiGatewayListener;
-    }
+    public APIGatewayListener apiGatewayListener;
+
     new () {
         apiGatewayListener = new;
     }
@@ -55,7 +54,7 @@ public type APIGatewaySecureListener object {
 };
 
 
-public function APIGatewaySecureListener::init (EndpointConfiguration config) {
+function APIGatewaySecureListener::init (EndpointConfiguration config) {
     initiateGatewaySecureConfigurations(config);
     self.apiGatewayListener.init(config);
 
@@ -63,30 +62,30 @@ public function APIGatewaySecureListener::init (EndpointConfiguration config) {
 
 @Description {value:"Gets called when the endpoint is being initialize during package init time"}
 @Return {value:"Error occured during initialization"}
-public function APIGatewaySecureListener::initEndpoint() returns (error) {
+function APIGatewaySecureListener::initEndpoint() returns (error) {
     return self.apiGatewayListener.initEndpoint();
 }
 
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
 @Param {value:"ep: The endpoint to which the service should be registered to"}
 @Param {value:"serviceType: The type of the service to be registered"}
-public function APIGatewaySecureListener::register (typedesc serviceType) {
+function APIGatewaySecureListener::register (typedesc serviceType) {
     self.apiGatewayListener.register(serviceType);
 }
 
 @Description {value:"Starts the registered service"}
-public function APIGatewaySecureListener::start () {
+function APIGatewaySecureListener::start () {
     self.apiGatewayListener.start();
 }
 
 @Description {value:"Returns the connector that client code uses"}
 @Return {value:"The connector that client code uses"}
-public function APIGatewaySecureListener::getCallerActions () returns (http:Connection) {
+function APIGatewaySecureListener::getCallerActions () returns (http:Connection) {
     return self.apiGatewayListener.getCallerActions();
 }
 
 @Description {value:"Stops the registered service"}
-public function APIGatewaySecureListener::stop () {
+function APIGatewaySecureListener::stop () {
     self.apiGatewayListener.stop();
 }
 

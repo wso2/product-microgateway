@@ -17,7 +17,7 @@
 
 import ballerina/io;
 
-public type AnalyticsRequestStream  {
+public type AnalyticsRequestStream record {
     string consumerKey;
     string username;
     string tenantDomain;
@@ -44,7 +44,7 @@ public type AnalyticsRequestStream  {
 
 };
 
-public type ExecutionTimeDTO {
+public type ExecutionTimeDTO record {
     string apiName;
     string apiVersion;
     string tenantDomain;
@@ -64,7 +64,7 @@ public type ExecutionTimeDTO {
 };
 
 
-public type ResponseDTO {
+public type ResponseDTO record {
     string consumerKey;
     string context;
     string apiVersion;
@@ -95,7 +95,7 @@ public type ResponseDTO {
 };
 
 
-public type FaultDTO {
+public type FaultDTO record {
     string clientType;
     string consumerKey;
     string context;
@@ -116,7 +116,7 @@ public type FaultDTO {
     string protocol;
 };
 
-public type EventDTO {
+public type EventDTO record {
     string streamId;
     int timeStamp;
     string metaData;

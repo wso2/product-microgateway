@@ -16,7 +16,7 @@
 
 @Description {value:"Configuration used for resource level tier annotation"}
 @Field {value:"policy: Rate limit speicified for the particular resource"}
-public type TierConfiguration {
+public type TierConfiguration record {
     string policy;
 
 };
@@ -29,7 +29,7 @@ public annotation <resource> RateLimit TierConfiguration;
 @Field {value:"apiVersion: version specified for the API"}
 @Field {value:"publisher: provider of the API"}
 @Field {value:"authorizationHeader: authorization header specified for the API"}
-public type APIConfiguration {
+public type APIConfiguration record {
     string apiVersion;
     string name;
     string publisher;

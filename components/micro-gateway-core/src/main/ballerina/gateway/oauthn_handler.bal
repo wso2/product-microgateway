@@ -29,10 +29,9 @@ import ballerina/io;
 @Field {value:"oAuthAuthenticator: OAuthAuthProvider instance"}
 @Field {value:"name: Authentication handler name"}
 public type OAuthnAuthenticator object {
-    public {
-        string name= "oauth2";
-        OAuthAuthProvider oAuthAuthenticator = new;
-    }
+    public string name= "oauth2";
+    public OAuthAuthProvider oAuthAuthenticator = new;
+
 
     public function canHandle (http:Request req) returns (boolean);
     public function handle (http:Request req)
@@ -43,7 +42,7 @@ public type OAuthnAuthenticator object {
 @Description {value:"Intercepts a HTTP request for authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if authentication is a success, else false"}
-public function OAuthnAuthenticator::canHandle (http:Request req) returns (boolean) {
+function OAuthnAuthenticator::canHandle (http:Request req) returns (boolean) {
     string authHeader;
     try {
         authHeader = req.getHeader(AUTH_HEADER);
@@ -63,7 +62,7 @@ public function OAuthnAuthenticator::canHandle (http:Request req) returns (boole
 @Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-public function OAuthnAuthenticator::handle (http:Request req)
+function OAuthnAuthenticator::handle (http:Request req)
                                    returns (APIKeyValidationDto| error) {
     APIKeyValidationDto apiKeyValidationDto;
     try {
@@ -87,9 +86,8 @@ function  getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {
 @Description {value:"Represents a OAuth2 Authenticator"}
 @Field {value:"gatewayCache: Authentication cache object"}
 public type OAuthAuthProvider object {
-    public {
-        APIGatewayCache gatewayCache;
-    }
+    public APIGatewayCache gatewayCache;
+
 
 
     public function authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns (APIKeyValidationDto);
@@ -105,7 +103,7 @@ public type OAuthAuthProvider object {
 @Description {value:"Authenticate with a oauth2 token"}
 @Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
 @Return {value:"boolean: true if authentication is a success, else false"}
-public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
+function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
               (APIKeyValidationDto) {
 
     printDebug(KEY_OAUTH_PROVIDER, "Authenticating request using the request metadata.");
@@ -171,7 +169,7 @@ public function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiReques
 @Description {value:"Do a key validation request to Key Manager using the request metadata"}
 @Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
 @Return {value:"boolean: true if authentication is a success, else false. APIKeyValidationDto: key validation response"}
-public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
+function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
             APIKeyValidationDto) {
     APIKeyValidationDto apiKeyValidationDto;
     string accessToken = apiRequestMetaDataDto.accessToken;
@@ -221,7 +219,7 @@ public function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto api
 
 }
 
-public function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto)
+function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto)
                                        returns (json) {
     try {
         string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +

@@ -28,10 +28,9 @@ import ballerina/io;
 @Field {value:"config: EndpointConfiguration instance"}
 @Field {value:"httpListener: HTTP Listener instance"}
 public type APIGatewayListener object {
-    public {
-        EndpointConfiguration config;
-        http:Listener httpListener;
-    }
+    public EndpointConfiguration config;
+    public http:Listener httpListener;
+
 
     new () {
         httpListener = new;
@@ -70,7 +69,7 @@ public type APIGatewayListener object {
 @Field {value:"requestLimits: Request validation limits configuration"}
 @Field {value:"filters: Filters to be applied to the request before dispatched to the actual resource"}
 @Field {value:"authProviders: The array of AuthProviders which are used to authenticate the users"}
-public type EndpointConfiguration {
+public type EndpointConfiguration record {
     string host,
     int port =9090,
     http:KeepAlive keepAlive = "AUTO",
@@ -78,12 +77,13 @@ public type EndpointConfiguration {
     string httpVersion = "1.1",
     http:RequestLimits? requestLimits,
     http:Filter[] filters,
+    int timeoutMillis = DEFAULT_LISTENER_TIMEOUT,
     http:AuthProvider[]? authProviders,
     boolean isSecured,
 };
 
 
-public function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
+function APIGatewayListener::init (EndpointConfiguration endpointConfig) {
     initiateGatewayConfigurations(endpointConfig);
     printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
@@ -179,29 +179,29 @@ function intitateKeyManagerConfigurations() {
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
 @Param {value:"ep: The endpoint to which the service should be registered to"}
 @Param {value:"serviceType: The type of the service to be registered"}
-public function APIGatewayListener::register (typedesc serviceType) {
+function APIGatewayListener::register (typedesc serviceType) {
     self.httpListener.register(serviceType);
 }
 
 @Description {value:"Gets called when the endpoint is being initialize during package init time"}
 @Return {value:"Error occured during initialization"}
-public function APIGatewayListener::initEndpoint() returns (error) {
+function APIGatewayListener::initEndpoint() returns (error) {
     return self.httpListener.initEndpoint();
 }
 
 @Description {value:"Starts the registered service"}
-public function APIGatewayListener::start () {
+function APIGatewayListener::start () {
     self.httpListener.start();
 }
 
 @Description {value:"Returns the connector that client code uses"}
 @Return {value:"The connector that client code uses"}
-public function APIGatewayListener::getCallerActions () returns (http:Connection) {
+function APIGatewayListener::getCallerActions () returns (http:Connection) {
     return self.httpListener.getCallerActions();
 }
 
 @Description {value:"Stops the registered service"}
-public function APIGatewayListener::stop () {
+function APIGatewayListener::stop () {
     self.httpListener.stop();
 }
 
