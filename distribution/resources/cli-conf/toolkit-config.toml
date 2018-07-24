@@ -13,7 +13,7 @@ trustStoreLocation = ""
 trustStorePassword = ""
 
 [corsConfiguration]
-corsConfigurationEnabled = false
+corsConfigurationEnabled = true
 accessControlAllowCredentials = false
 accessControlAllowOrigins = ["*"]
 accessControlAllowHeaders = ["authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"]
