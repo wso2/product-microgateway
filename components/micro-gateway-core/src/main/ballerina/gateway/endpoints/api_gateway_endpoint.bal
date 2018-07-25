@@ -24,7 +24,10 @@ endpoint http:Client conditionRetrievalEndpoint {
 };
 endpoint http:Client keyValidationEndpoint {
     url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
-    cache: { enabled: false }
+    cache: { enabled: false },
+    secureSocket:{
+        verifyHostname:getConfigBooleanValue(KM_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    }
 };
 
 endpoint http:Listener tokenListenerEndpoint {
