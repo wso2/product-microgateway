@@ -20,10 +20,10 @@ package org.wso2.apimgt.gateway.cli.model.config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DockerCopyFiles {
+public class CopyFileConfig {
 
     private boolean enable = false;
-    private List<DockerCopyFile> files = new ArrayList<>();
+    private List<CopyFile> files = new ArrayList<>();
 
     public boolean isEnable() {
         return enable;
@@ -33,11 +33,11 @@ public class DockerCopyFiles {
         this.enable = enable;
     }
 
-    public List<DockerCopyFile> getFiles() {
+    public List<CopyFile> getFiles() {
         return files;
     }
 
-    public void setFiles(List<DockerCopyFile> files) {
+    public void setFiles(List<CopyFile> files) {
         this.files = files;
     }
 }
