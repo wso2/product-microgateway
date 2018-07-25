@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-public class DockerCopyFile {
+public class CopyFile {
     private String source;
     private String target;
     private String isBallerinaConf;

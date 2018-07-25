@@ -19,13 +19,13 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 public class Docker {
     private DockerConfig dockerConfig;
-    private DockerCopyFiles dockerCopyFiles;
+    private CopyFileConfig dockerCopyFiles;
 
-    public DockerCopyFiles getDockerCopyFiles() {
+    public CopyFileConfig getDockerCopyFiles() {
         return dockerCopyFiles;
     }
 
-    public void setDockerCopyFiles(DockerCopyFiles dockerCopyFiles) {
+    public void setDockerCopyFiles(CopyFileConfig dockerCopyFiles) {
         this.dockerCopyFiles = dockerCopyFiles;
     }
 
