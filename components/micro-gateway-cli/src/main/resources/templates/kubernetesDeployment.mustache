@@ -11,8 +11,16 @@
     image:"{{containerConfig.kubernetes.kubernetesDeployment.image}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.imagePullPolicy}},
     imagePullPolicy:"{{containerConfig.kubernetes.kubernetesDeployment.imagePullPolicy}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.env}},
     env:"{{containerConfig.kubernetes.kubernetesDeployment.env}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.buildImage}},
-    buildImage:{{containerConfig.kubernetes.kubernetesDeployment.buildImage}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.copyFiles}},
-    copyFiles:"{{containerConfig.kubernetes.kubernetesDeployment.copyFiles}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerHost}},
+    buildImage:{{containerConfig.kubernetes.kubernetesDeployment.buildImage}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.copyFiles.enable}},
+    copyFiles:[
+      {{#containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
+          {
+            {{#if source}} source:"{{source}}", {{/if}}
+            {{#if target}} target:"{{target}}", {{/if}}
+            {{#if isBallerinaConf}} isBallerinaConf:{{isBallerinaConf}} {{/if}}
+          }{{#unless @last}},{{/unless}}
+      {{/containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
+    ]{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerHost}},
     dockerHost:"{{containerConfig.kubernetes.kubernetesDeployment.dockerHost}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}},
     dockerCertPath:"{{containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.push}},
     push:{{containerConfig.kubernetes.kubernetesDeployment.push}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.password}},

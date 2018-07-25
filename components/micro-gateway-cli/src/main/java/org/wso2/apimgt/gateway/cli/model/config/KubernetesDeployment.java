@@ -36,7 +36,7 @@ public class KubernetesDeployment {
     private String image;
     private String env;
     private String buildImage;
-    private String copyFiles;
+    private DockerCopyFiles copyFiles;
     private String dockerHost;
     private String dockerCertPath;
     private String push;
@@ -140,11 +140,11 @@ public class KubernetesDeployment {
         this.buildImage = buildImage;
     }
 
-    public String getCopyFiles() {
+    public DockerCopyFiles getCopyFiles() {
         return copyFiles;
     }
 
-    public void setCopyFiles(String copyFiles) {
+    public void setCopyFiles(DockerCopyFiles copyFiles) {
         this.copyFiles = copyFiles;
     }
 
