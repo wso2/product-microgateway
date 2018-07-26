@@ -202,6 +202,8 @@
 @final public string KM_TOKEN_CONTEXT = "/oauth2";
 @Description { value: "time stamp skew for auth caches"}
 @final public string TIMESTAMP_SKEW = "timestampSkew";
+@Description { value: "Hostname verification enabled or not"}
+@final public string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
 
 
 @Description { value: "Block condition state"}
