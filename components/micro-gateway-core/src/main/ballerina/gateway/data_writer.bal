@@ -58,7 +58,6 @@ function getEventData(EventDTO dto) returns string {
     return output;
 }
 
-
 function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     io:ByteChannel channel = io:openFile(fileLocation + API_USAGE_FILE, io:APPEND);

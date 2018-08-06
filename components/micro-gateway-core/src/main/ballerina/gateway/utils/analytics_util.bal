@@ -21,8 +21,6 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
-
-
     json metaInfo = {};
     eventDto.tenantDomain = getTenantDomain(context);
     eventDto.api = getApiName(context);
