@@ -17,81 +17,49 @@
 
 import ballerina/io;
 
-public type AnalyticsRequestStream record {
-    string consumerKey;
-    string username;
-    string tenantDomain;
-    string context;
-    string apiVersion;
-    string api;
-    string resourcePath;
-    string resourceTemplate;
-    string method;
-    string hostName;
-    string apiPublisher;
+public type RequestResponseExecutionDTO record {
+    string metaClientType;
+    string applicationConsumerKey;
     string applicationName;
     string applicationId;
-    string protocol;
-    string clientIp;
     string applicationOwner;
-    string keyType;
-    string correlationID;
-    int requestTime;
+    string apiContext;
+    string apiName;
+    string apiVersion;
+    string apiResourcePath;
+    string apiResourceTemplate;
+    string apiMethod;
+    string apiCreator;
+    string apiCreatorTenantDomain;
+    string apiTier;
+    string apiHostname;
+    string userName;
+    string userTenantDomain;
+    string userIp;
     string userAgent;
-    string tier;
-    boolean continuedOnThrottleOut;
-    int requestCount;
-
+    int requestTimestamp;
+    boolean throttledOut;
+    int responseTime;
+    int serviceTime;
+    int backendTime;
+    boolean responseCacheHit;
+    int responseSize;
+    string protocol;
+    int responseCode;
+    string destination;
+    ExecutionTimeDTO executionTime;
+    string gatewayType;
+    string label;
+    string correlationId;
 };
 
 public type ExecutionTimeDTO record {
-    string apiName;
-    string apiVersion;
-    string tenantDomain;
-    string provider;
-    string context;
-    string keyType;
-    string correleationID;
-    int apiResponseTime;
-    int tenantId;
-    int eventTime;
     int securityLatency;
     int throttlingLatency;
     int requestMediationLatency;
     int responseMediationLatency;
     int backEndLatency;
     int otherLatency;
-};
-
-
-public type ResponseDTO record {
-    string consumerKey;
-    string context;
-    string apiVersion;
-    string correlationID;
-    string keyType;
-    string api;
-    string resourcePath;
-    string resourceTemplate;
-    string method;
-    string versionOnly;
-    int response;
-    int responseTime;
-    int serviceTime;
-    int backendTime;
-    string userName;
-    int eventTime;
-    string tenantDomain;
-    string userAgent;
-    string hostname;
-    string apiPublisher;
-    string appName;
-    string appId;
-    boolean cacheHit;
-    int responseSize;
-    string protocol;
-    int responseCode;
-    string destination;
 };
 
 
