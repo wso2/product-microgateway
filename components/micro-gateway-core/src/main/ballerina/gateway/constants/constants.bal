@@ -133,6 +133,18 @@
 @final public string HOST_HEADER_NAME = "Host";
 @final public string HOSTNAME_PROPERTY = "hostname";
 @final public string PROTOCOL_PROPERTY = "protocol";
+@final public string APPLICATION_OWNER_PROPERTY = "applicationOwner";
+@final public string API_CREATOR_TENANT_DOMAIN_PROPERTY = "apiCreatorTenantDomain";
+@final public string API_TIER_PROPERTY = "apiTier";
+@final public string API_METHOD_PROPERTY = "apiMethod";
+@final public string CONTINUE_ON_TROTTLE_PROPERTY = "throttledOut";
+@final public string USER_AGENT_PROPERTY = "userAgent";
+@final public string USER_IP_PROPERTY = "userIp";
+@final public string REQUEST_TIME_PROPERTY = "requestTimestamp";
+@final public string GATEWAY_TYPE_PROPERTY = "gatewayType";
+@final public string GATEWAY_TYPE = "MICRO";
+
+
 @final public string ERROR_RESPONSE = "error_response";
 @final public string ERROR_RESPONSE_CODE = "error_response_code";
 @final public string USERNAME = "username";

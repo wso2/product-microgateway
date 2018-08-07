@@ -26,7 +26,8 @@ future analyticsConfigReader = start startAnalyticsRelatedFuns();
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean {
+                                                                                                                boolean
+    {
         //Filter only is analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -69,10 +70,8 @@ public type AnalyticsRequestFilter object {
 };
 
 
-function doFilterRequest( http:Request request, http:FilterContext context) {
-    AnalyticsRequestStream requestEventStream = generateRequestEvent(request, context);
-    EventDTO eventDto = generateEventFromRequest(requestEventStream);
-    eventStream.publish(eventDto);
+function doFilterRequest(http:Request request, http:FilterContext context) {
+    setRequestAttributesToContext(request, context);
 }
 
 function doFilterFault(http:FilterContext context, error err) {
@@ -82,16 +81,10 @@ function doFilterFault(http:FilterContext context, error err) {
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
     //Response data publishing
-    ResponseDTO responseDto = generateResponseDataEvent(response, context);
-    EventDTO event = generateEventFromResponseDTO(responseDto);
+    RequestResponseExecutionDTO requestResponseExecutionDTO = generateRequestResponseExecutionDataEvent(response,
+        context);
+    EventDTO event = generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
     eventStream.publish(event);
-}
-
-function doFilterExecutionTimeData(http:Response response, http:FilterContext context) {
-    //Execution time data publishing
-    ExecutionTimeDTO executionTimeDTO = generateExecutionTimeEvent(context);
-    EventDTO eventDTO = generateEventFromExecutionTime(executionTimeDTO);
-    eventStream.publish(eventDTO);
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
@@ -99,18 +92,16 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         () => {
             printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
             doFilterResponseData(response, context);
-            doFilterExecutionTimeData(response, context);
         }
         any code => {
             printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
             error err = <error>code;
-            doFilterExecutionTimeData(response, context);
             doFilterFault(context, err);
         }
     }
 }
 
-function getAnalyticsEnableCOnfig() {
+function getAnalyticsEnableConfig() {
     map vals = getConfigMapValue(ANALYTICS);
     isAnalyticsEnabled = check <boolean>vals[ENABLE];
     configsRead = true;
@@ -120,7 +111,7 @@ function getAnalyticsEnableCOnfig() {
 
 function startAnalyticsRelatedFuns() {
     if (!configsRead) {
-        getAnalyticsEnableCOnfig();
+        getAnalyticsEnableConfig();
         if (isAnalyticsEnabled) {
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
             future uploadTask = start timerTask();
