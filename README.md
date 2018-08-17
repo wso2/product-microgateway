@@ -1,6 +1,6 @@
-# WSO2 API Manager Microgateway Toolkit 
+# WSO2 API Manager Microgateway
 
-The Microgateway Toolkit provides the capability to create specialized gateway distribution (Microgateway distributions) where only a single API or a group of APIs are included. Once a Microgateway distribution is started, it will start serving those specific API(s) right away. 
+The Microgateway provides the capability to create specialized gateway distribution (Microgateway distributions) where only a single API or a group of APIs are included. Once a Microgateway distribution is started, it will start serving those specific API(s) right away.
 
 In summary, a Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
 
@@ -33,7 +33,7 @@ To setup a microgateway project, a developer can choose two ways.
  1. Create a microgateway project for a single API
  1. Create a microgateway project for a group of APIs
 
-The first step of setting up a microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs). Once this step is completed it will convert the JSON representation of the APIs to Ballarina source code. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the toolkit can see. These generated files can optionally be managed via source management repositories (Git).
+The first step of setting up a microgateway project includes connecting to the API Publisher (Management Layer) and downloading the relevant API artifacts (JSON representation of the APIs). Once this step is completed it will convert the JSON representation of the APIs to Ballarina source code. The annotations that go into these source files (k8s, docker annotations, etc) are governed by a config file which the microgateway can see. These generated files can optionally be managed via source management repositories (Git).
 
 What gets downloaded/pulled?
 * The JSON representation of the API files
@@ -44,18 +44,18 @@ What gets downloaded/pulled?
 
 Once the project has been created, the next step is to build the project sources.
 
-#### Microgateway toolkit commands
+#### Microgateway commands
 
-Following are the set of commands included within the Microgateway Toolkit.
+Following are the set of commands included within the Microgateway.
 
-Note: Before you execute any of the commands below you need to add the path to the <micro-gw-toolkit-home>/bin directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw-toolkit/bin
+Note: Before you execute any of the commands below you need to add the path to the <micro-gw-home>/bin directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw/bin
 
 ##### Setup
 
 `$ micro-gw setup`
 
 The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
-distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
+distribution. During the setup phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve the
 details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
 
 If the project already exists a warning will be prompted requesting permission to override existing source.
@@ -77,7 +77,7 @@ Example
 
 `$ micro-gw build`
 
-Upon execution of this command, the toolkit will build the micro gateway distribution for the specified project.
+Upon execution of this command, the Microgateway CLI tool will build the micro gateway distribution for the specified project.
 
 Execute `micro-gw help build` to get more detailed information regarding the build command.
 

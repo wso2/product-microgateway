@@ -53,13 +53,13 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-# if MICROGW_TOOLKIT_HOME environment variable not set then set it relative to the micro-gw binary location
-if [[ -z "${MICROGW_TOOLKIT_HOME}" ]]; then
-  export MICROGW_TOOLKIT_HOME=`cd "$PRGDIR/.." ; pwd`
+# if MICROGW_HOME environment variable not set then set it relative to the micro-gw binary location
+if [[ -z "${MICROGW_HOME}" ]]; then
+  export MICROGW_HOME=`cd "$PRGDIR/.." ; pwd`
 fi
 
 # set BALLERINA_HOME
-BALLERINA_HOME="$MICROGW_TOOLKIT_HOME/lib/platform"
+BALLERINA_HOME="$MICROGW_HOME/lib/platform"
 
 export BALLERINA_HOME=$BALLERINA_HOME
 export PATH=$BALLERINA_HOME/bin:$PATH
@@ -70,7 +70,7 @@ MICRO_GW_PROJECT_DIR=$(pwd)
 if $cygwin; then
   [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
-  [ -n "$MICROGW_TOOLKIT_HOME" ] && MICROGW_TOOLKIT_HOME=`cygpath --unix "$MICROGW_TOOLKIT_HOME"`
+  [ -n "$MICROGW_HOME" ] && MICROGW_HOME=`cygpath --unix "$MICROGW_HOME"`
 fi
 
 # For OS400
@@ -92,8 +92,8 @@ if $mingw ; then
     BALLERINA_HOME="`(cd "$BALLERINA_HOME"; pwd)`"
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  [ -n "$MICROGW_TOOLKIT_HOME" ] &&
-    MICROGW_TOOLKIT_HOME="`(cd "$MICROGW_TOOLKIT_HOME"; pwd)`"
+  [ -n "$MICROGW_HOME" ] &&
+    MICROGW_HOME="`(cd "$MICROGW_HOME"; pwd)`"
 fi
 
 if [ -z "$JAVACMD" ] ; then
@@ -201,7 +201,7 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
-for j in "$MICROGW_TOOLKIT_HOME"/target/*.jar
+for j in "$MICROGW_HOME"/target/*.jar
 do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
@@ -219,7 +219,7 @@ fi
 $JAVACMD \
 	-Xms256m -Xmx1024m \
 	-XX:+HeapDumpOnOutOfMemoryError \
-	-XX:HeapDumpPath="$MICROGW_TOOLKIT_HOME/heap-dump.hprof" \
+	-XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
 	$JAVA_OPTS \
 	-classpath "$CLI_CLASSPATH" \
 	-Djava.security.egd=file:/dev/./urandom \
@@ -227,6 +227,6 @@ $JAVACMD \
 	-Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
 	-Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
 	-Dfile.encoding=UTF8 \
-	-Dtemplates.dir.path="$MICROGW_TOOLKIT_HOME/resources/templates" \
-	-Dcli.home=$MICROGW_TOOLKIT_HOME \
+	-Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+	-Dcli.home=$MICROGW_HOME \
 	org.wso2.apimgt.gateway.cli.cmd.Main "$@"

@@ -8,7 +8,7 @@ SYNOPSIS
 
 DESCRIPTION
      The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
-     distribution. During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve the
+     distribution. During the setup phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve the
      details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
      
      There are two main ways to set up a project.
@@ -51,7 +51,7 @@ OPTIONS
     --truststore
         <Optional>
         Path to the trustStore file
-        By default the <TOOLKIT_HOME>/lib/platform/bre/security/ballerinaTruststore.p12 will be used if a parameter
+        By default the <MICROGATEWAY_HOME>/lib/platform/bre/security/ballerinaTruststore.p12 will be used if a parameter
         is not specified for -t
 
     -w
@@ -63,8 +63,8 @@ OPTIONS
     -c
     --config
         <Optional>
-        Path to the toolkit configuration file
-        The <TOOLKIT_HOME>/conf/toolkit-config.toml configuration file will be used if a parameter is not specified for -c
+        Path to the microgateway configuration file
+        The <MICROGATEWAY_HOME>/conf/toolkit-config.toml configuration file will be used if a parameter is not specified for -c
 
     -a
     --api-name
@@ -79,7 +79,7 @@ OPTIONS
     -f
     --force
        <Optional>
-       By default, when the toolkit does not allow you to run "micro-gw setup" upon an existing project. But, if you
+       By default, when the microgateway CLI does not allow you to run "micro-gw setup" upon an existing project. But, if you
        want to overwrite the existing project, specify -f option when running "micro-gw setup" command.
 
 EXAMPLES
