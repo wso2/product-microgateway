@@ -122,7 +122,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-toolkit-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-${pom.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
