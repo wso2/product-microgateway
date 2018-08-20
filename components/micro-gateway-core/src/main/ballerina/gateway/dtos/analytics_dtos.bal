@@ -64,24 +64,24 @@ public type ExecutionTimeDTO record {
 
 
 public type FaultDTO record {
-    string clientType;
+    string metaClientType;
     string consumerKey;
-    string context;
     string apiVersion;
     string apiName;
+    string apiContext;
     string resourcePath;
     string method;
-    string versionOnly;
+    string apiCreator;
+    string userName;
+    string userTenantDomain;
+    string apiCreatorTenantDomain;
+    string hostName;
+    string applicationId;
+    string applicationName;
+    string protocol;
     int errorCode;
     string errorMessage;
     int faultTime;
-    string userName;
-    string tenantDomain;
-    string hostName;
-    string apiPublisher;
-    string applicationName;
-    string applicationId;
-    string protocol;
 };
 
 public type EventDTO record {

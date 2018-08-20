@@ -76,6 +76,8 @@
 @final public string UNAUTHENTICATED_TIER = "Unauthenticated";
 @Description { value: "Anonymous user name" }
 @final public string END_USER_ANONYMOUS = "anonymous";
+@Description { value: "Anonymous user tenant domain" }
+@final public string ANONYMOUS_USER_TENANT_DOMAIN = "anonymous";
 @Description { value: "Anonymous app name" }
 @final public string ANONYMOUS_APP_NAME = "anonymous";
 @Description { value: "Anonymous app ID" }

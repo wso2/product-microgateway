@@ -50,7 +50,7 @@ public type AnalyticsRequestFilter object {
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
-                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
+                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticsDTO(context);
                     eventStream.publish(getEventFromThrottleData(eventDto));
                 } else {
                     if (!filterFailed) {
