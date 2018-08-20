@@ -58,7 +58,7 @@ public type SubscriptionFilter object {
                             foreach subscription in subscribedAPIList {
                                 if (subscription.name.toString() == apiConfig.name &&
                                     subscription["version"].toString() == apiConfig.apiVersion) {
-                                    printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
+                                    printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" + 
                                             subscription.name.toString() + " version:" + subscription["version"].toString());
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = subscription.subscriptionTier.toString();
