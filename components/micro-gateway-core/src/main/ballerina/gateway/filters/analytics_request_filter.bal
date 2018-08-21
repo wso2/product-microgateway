@@ -18,11 +18,6 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/time;
 
-boolean isAnalyticsEnabled = false;
-boolean configsRead = false;
-
-future analyticsConfigReader = start startAnalyticsRelatedFuns();
-
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
@@ -106,27 +101,6 @@ function doFilterAll(http:Response response, http:FilterContext context) {
             error err = <error>code;
             doFilterExecutionTimeData(response, context);
             doFilterFault(context, err);
-        }
-    }
-}
-
-function getAnalyticsEnableCOnfig() {
-    map vals = getConfigMapValue(ANALYTICS);
-    isAnalyticsEnabled = check <boolean>vals[ENABLE];
-    configsRead = true;
-    printDebug(KEY_UTILS, "Analytics configuration values read");
-}
-
-
-function startAnalyticsRelatedFuns() {
-    if (!configsRead) {
-        getAnalyticsEnableCOnfig();
-        if (isAnalyticsEnabled) {
-            printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-            future uploadTask = start timerTask();
-            future rotateTask = start rotatingTask();
-        } else {
-            printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
         }
     }
 }
