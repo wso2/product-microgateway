@@ -55,6 +55,23 @@ public type SubscriptionFilter object {
                             APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:
                                 getServiceAnnotations(filterContext.serviceType));
                             if (subscribedAPIList != null){
+                                int l = lengthof subscribedAPIList;
+                                if (l == 0){
+                                    authenticationContext.authenticated = true;
+                                    authenticationContext.tier = "Unlimited";
+                                    authenticationContext.apiKey = jwtToken;
+                                    authenticationContext.applicationId = decodedPayload.application.id.toString();
+                                    authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    authenticationContext.applicationTier = decodedPayload.application.tier.toString();
+                                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
+                                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                                    authenticationContext.apiTier = decodedPayload.apiTier.toString();
+                                    authenticationContext.apiPublisher = "";
+                                    authenticationContext.subscriberTenantDomain = "";
+                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                                    return true;
+                                }
                             foreach subscription in subscribedAPIList {
                                 if (subscription.name.toString() == apiConfig.name &&
                                     subscription["version"].toString() == apiConfig.apiVersion) {
