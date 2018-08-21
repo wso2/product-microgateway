@@ -130,6 +130,7 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
+    initializeAnalytics();
 }
 
 public function getAuthProviders() returns http:AuthProvider[] {

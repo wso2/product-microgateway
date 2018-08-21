@@ -448,19 +448,6 @@ public function printFullError(string key, error message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.message), err = message);
 }
 
-function initStreamPublisher() {
-    printDebug(KEY_UTILS, "Subscribing writing method to event stream");
-    eventStream.subscribe(writeEventToFile);
-    getAnalyticsConfig();
-}
-
-function getAnalyticsConfig() {
-    map vals = getConfigMapValue(ANALYTICS);
-    rotatingTime =  check <int> vals[ROTATING_TIME];
-    uploadingUrl = <string> vals[UPLOADING_EP];
-    printDebug(KEY_UTILS, "Analytics configuration values read");
-}
-
 function setLatency(int starting, http:FilterContext context, string latencyType) {
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
@@ -473,5 +460,3 @@ function checkOrSetMessageID(http:FilterContext context) {
         context.attributes[MESSAGE_ID] = system:uuid();
     }
 }
-
-future streamftr = start initStreamPublisher();

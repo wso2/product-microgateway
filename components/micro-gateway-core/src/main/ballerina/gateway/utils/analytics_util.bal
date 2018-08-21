@@ -14,6 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+boolean isAnalyticsEnabled = false;
+boolean configsRead = false;
+
 function populateThrottleAnalyticdDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto;
@@ -94,4 +97,34 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     metaInfo.correlationID = <string>context.attributes[MESSAGE_ID];
     eventDto.clientType = metaInfo.toString();
     return eventDto;
+}
+
+
+function getAnalyticsEnableConfig() {
+    map vals = getConfigMapValue(ANALYTICS);
+    isAnalyticsEnabled = check <boolean>vals[ENABLE];
+    rotatingTime =  check <int> vals[ROTATING_TIME];
+    uploadingUrl = <string> vals[UPLOADING_EP];
+    configsRead = true;
+    printDebug(KEY_UTILS, "Analytics configuration values read");
+}
+
+
+function initializeAnalytics() {
+    if (!configsRead) {
+        getAnalyticsEnableConfig();
+        if (isAnalyticsEnabled) {
+            initStreamPublisher();
+            printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
+            future uploadTask = start timerTask();
+            future rotateTask = start rotatingTask();
+        } else {
+            printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
+        }
+    }
+}
+
+function initStreamPublisher() {
+    printDebug(KEY_UTILS, "Subscribing writing method to event stream");
+    eventStream.subscribe(writeEventToFile);
 }

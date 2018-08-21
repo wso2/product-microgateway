@@ -57,5 +57,6 @@ function rotatingTask() {
     function(error) onErrorFunction = errorOnRotating;
     rotatinTimer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = timeSpan + 5000);
     rotatinTimer.start();
+    printDebug(KEY_ROTATE_TASK, "File rotating task initialized");
 }
 
