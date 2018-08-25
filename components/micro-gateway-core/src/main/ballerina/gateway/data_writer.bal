@@ -34,7 +34,7 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         context.attributes[APPLICATION_OWNER_PROPERTY] = authContext.subscriber;
-        context.attributes[API_TIER_PROPERTY] = authContext.tier;
+        context.attributes[API_TIER_PROPERTY] = authContext.apiTier;
         context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = !authContext.stopOnQuotaReach;
     } else {
         context.attributes[APPLICATION_OWNER_PROPERTY] = ANONYMOUS_APP_OWNER;

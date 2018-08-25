@@ -87,7 +87,6 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         () => {
             printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
             doFilterResponseData(response, context);
-            doFilterExecutionTimeData(response, context);
         }
         any code => {
             printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");

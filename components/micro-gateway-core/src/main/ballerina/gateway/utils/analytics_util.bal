@@ -14,11 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
-function populateThrottleAnalyticdDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
+function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
@@ -31,7 +30,7 @@ function populateThrottleAnalyticdDTO(http:FilterContext context) returns (Throt
     eventDto.apiContext = getContext(context);
     eventDto.throttledTime = currentTimeMills;
     eventDto.throttledOutReason = <string>context.attributes[THROTTLE_OUT_REASON];
-    eventDto.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
+    eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.gatewayType = GATEWAY_TYPE;
     if (isSecured) {
         AuthenticationContext authContext = check <AuthenticationContext>context
@@ -69,7 +68,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     eventDto.apiName = getApiName(context);
     eventDto.resourcePath = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName)).path;
-    eventDto.method = <string>context.attributes[METHOD];
+    eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
     eventDto.errorCode = check <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
     eventDto.errorMessage = err.message;
     eventDto.faultTime = currentTimeMills;
