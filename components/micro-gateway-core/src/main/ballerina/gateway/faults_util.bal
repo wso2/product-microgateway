@@ -18,21 +18,19 @@
 
 
 public function getFaultMetaData(FaultDTO dto) returns string {
-    return dto.clientType;
+    return dto.metaClientType;
 }
 
 public function getFaultPayloadData(FaultDTO dto) returns string {
-    return dto.consumerKey + OBJ + dto.context + OBJ + dto.apiVersion + OBJ + dto.apiName + OBJ +
-        dto.resourcePath + OBJ + dto.method + OBJ + dto.versionOnly + OBJ + dto.errorCode + OBJ +
-        dto.errorMessage + OBJ + dto.faultTime + OBJ + dto.userName + OBJ + dto.tenantDomain
-        + OBJ + dto.hostName + OBJ + dto.apiPublisher + OBJ + dto.applicationName + OBJ +
-        dto.applicationId + OBJ + dto.protocol;
-
+    return dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
+        dto.resourcePath + OBJ + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ + dto.userTenantDomain + OBJ +
+        dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
+        dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode + OBJ + dto.errorMessage + OBJ + dto.faultTime;
 }
 
 public function getEventFromFaultData(FaultDTO dto) returns EventDTO {
     EventDTO eventDTO;
-    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:1.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getFaultMetaData(dto);
     eventDTO.correlationData = "null";

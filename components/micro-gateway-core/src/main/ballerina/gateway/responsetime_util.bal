@@ -84,6 +84,7 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
         requestResponseExecutionDTO.userName = authContext.username;
         requestResponseExecutionDTO.applicationId = authContext.applicationId;
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
+        requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
         requestResponseExecutionDTO.apiCreator = getAPIDetailsFromServiceAnnotation(
                                                      reflect:getServiceAnnotations(context.serviceType)).publisher;
@@ -92,12 +93,12 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
         requestResponseExecutionDTO.applicationId = ANONYMOUS_APP_ID;
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
+        requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
     requestResponseExecutionDTO.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.
             serviceType)).
     apiVersion;
-    requestResponseExecutionDTO.userTenantDomain = getTenantDomain(context);
     requestResponseExecutionDTO.apiContext = getContext(context);
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
 

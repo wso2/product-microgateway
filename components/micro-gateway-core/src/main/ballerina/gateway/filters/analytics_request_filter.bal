@@ -18,11 +18,6 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/time;
 
-boolean isAnalyticsEnabled = false;
-boolean configsRead = false;
-
-future analyticsConfigReader = start startAnalyticsRelatedFuns();
-
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
@@ -50,7 +45,7 @@ public type AnalyticsRequestFilter object {
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
-                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticdDTO(context);
+                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticsDTO(context);
                     eventStream.publish(getEventFromThrottleData(eventDto));
                 } else {
                     if (!filterFailed) {
@@ -97,27 +92,6 @@ function doFilterAll(http:Response response, http:FilterContext context) {
             printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
             error err = <error>code;
             doFilterFault(context, err);
-        }
-    }
-}
-
-function getAnalyticsEnableConfig() {
-    map vals = getConfigMapValue(ANALYTICS);
-    isAnalyticsEnabled = check <boolean>vals[ENABLE];
-    configsRead = true;
-    printDebug(KEY_UTILS, "Analytics configuration values read");
-}
-
-
-function startAnalyticsRelatedFuns() {
-    if (!configsRead) {
-        getAnalyticsEnableConfig();
-        if (isAnalyticsEnabled) {
-            printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-            future uploadTask = start timerTask();
-            future rotateTask = start rotatingTask();
-        } else {
-            printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
         }
     }
 }

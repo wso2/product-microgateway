@@ -69,9 +69,9 @@ public type SubscriptionFilter object {
                                     authenticationContext.applicationTier = decodedPayload.application.tier.toString();
                                     authenticationContext.subscriber = decodedPayload.application.owner.toString();
                                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
-                                    authenticationContext.apiTier = decodedPayload.apiTier.toString();
+                                    authenticationContext.apiTier = subscription.subscriptionTier.toString();
                                     authenticationContext.apiPublisher = subscription.publisher.toString();
-                                    authenticationContext.subscriberTenantDomain = decodedPayload
+                                    authenticationContext.subscriberTenantDomain = subscription
                                     .subscriberTenantDomain.toString();
                                     authenticationContext.keyType = decodedPayload.keytype.toString();
                                     // setting keytype to invocationContext
