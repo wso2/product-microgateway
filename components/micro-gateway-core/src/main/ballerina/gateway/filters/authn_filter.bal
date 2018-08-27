@@ -120,8 +120,6 @@ public type AuthnFilter object {
                                 isAuthorized = <boolean>apiKeyValidationDto.authorized;
                                 printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " + isAuthorized);
                                 if(isAuthorized) {
-                                    printInfo(KEY_AUTHN_FILTER,"%%%%%%%%####");
-                                    io:println(apiKeyValidationDto);
                                     authenticationContext.authenticated = true;
                                     authenticationContext.tier = apiKeyValidationDto.tier;
                                     authenticationContext.apiKey = token;
