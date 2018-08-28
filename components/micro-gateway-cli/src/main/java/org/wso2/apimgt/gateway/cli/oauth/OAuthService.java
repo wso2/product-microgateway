@@ -27,17 +27,18 @@ public interface OAuthService {
      * @param password      password
      * @param clientId      client consumer key
      * @param clientSecret  client consumer secret
+     * @param inSecure
      * @return access token
      */
     String generateAccessToken(String tokenEndpoint, String username, char[] password, String clientId,
-            String clientSecret);
+                               String clientSecret, boolean inSecure);
 
     /**
      * Generate OAuth application via DCR
-     *
-     * @param dcrEndpoint DCR endpoint
+     *  @param dcrEndpoint DCR endpoint
      * @param username    user
      * @param password    password password of the user
+     * @param inSecure
      */
-    String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password);
+    String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password, boolean inSecure);
 }
