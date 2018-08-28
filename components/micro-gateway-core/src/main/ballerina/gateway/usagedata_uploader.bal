@@ -26,7 +26,7 @@ function multipartSender(string location, string file, string username, string p
         url: uploadingUrl
     };
     mime:Entity filePart = new;
-    filePart.setContentDisposition(getContentDispositionForFormData("file"));
+    filePart.setContentId("file");
     filePart.setFileAsEntityBody(location + file);
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
