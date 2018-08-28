@@ -115,6 +115,9 @@ public class SetupCmd implements GatewayLauncherCmd {
     @SuppressWarnings("unused")
     @Parameter(names = { "-f", "--force" }, hidden = true, arity = 0)
     private boolean isForcefully;
+    @SuppressWarnings("unused")
+    @Parameter(names = { "-k", "--insecure" }, hidden = true, arity = 0)
+    private boolean isInsecure;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -255,16 +258,17 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         if (StringUtils.isEmpty(clientID) || StringUtils.isEmpty(clientSecret)) {
             String[] clientInfo = manager
-                    .generateClientIdAndSecret(registrationEndpoint, username, password.toCharArray());
+                    .generateClientIdAndSecret(registrationEndpoint, username, password.toCharArray(), isInsecure);
             clientID = clientInfo[0];
             clientSecret = clientInfo[1];
         }
 
         String accessToken = manager
-                .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret);
+                .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret,
+                        isInsecure);
 
         List<ExtendedAPI> apis = new ArrayList<>();
-        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint);
+        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint,isInsecure);
         if (label != null) {
             apis = service.getAPIs(label, accessToken);
         } else {

@@ -38,21 +38,23 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
     
     private String publisherEp;
     private String adminEp;
+    private boolean inSecure;
 
-    public RESTAPIServiceImpl(String publisherEp, String adminEp) {
+    public RESTAPIServiceImpl(String publisherEp, String adminEp, boolean inSecure) {
         this.publisherEp = publisherEp;
         this.adminEp = adminEp;
+        this.inSecure = inSecure;
     }
 
     /**
@@ -61,7 +63,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     public List<ExtendedAPI> getAPIs(String labelName, String accessToken) {
         logger.debug("Retrieving APIs with label {}", labelName);
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         APIListDTO apiListDTO;
         //calling token endpoint
         try {
@@ -71,7 +73,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                             URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
@@ -112,7 +117,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     public ExtendedAPI getAPI(String apiName, String version, String accessToken) {
         logger.debug("Retrieving API with name {}, version {}", apiName, version);
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         ExtendedAPI matchedAPI = null;
         //calling token endpoint
         try {
@@ -125,7 +130,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
             
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
@@ -193,7 +201,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      */
     public List<ApplicationThrottlePolicyDTO> getApplicationPolicies(String accessToken) {
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         ApplicationThrottlePolicyListDTO appsList;
         List<ApplicationThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
@@ -201,7 +209,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             String urlStr = adminEp + "throttling/policies/application";
             url = new URL(urlStr);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
@@ -240,7 +251,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      */
     public List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken) {
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         SubscriptionThrottlePolicyListDTO subsList;
         List<SubscriptionThrottlePolicyDTO> filteredPolicyDTOS = new ArrayList<>();
         //calling token endpoint
@@ -248,7 +259,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             String urlStr = adminEp + "throttling/policies/subscription";
             url = new URL(urlStr);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
             urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
