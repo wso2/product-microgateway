@@ -111,7 +111,8 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
             //todo: cacheHit does not gives boolean
         }
     }
-    requestResponseExecutionDTO.apiHostname = <string>context.attributes[HOSTNAME_PROPERTY];
+    requestResponseExecutionDTO.apiHostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
+        HOSTNAME_PROPERTY]);
     //todo: Response size is yet to be decided
     requestResponseExecutionDTO.responseSize = 0;
     requestResponseExecutionDTO.responseCode = response.statusCode;

@@ -128,3 +128,7 @@ function initStreamPublisher() {
     printDebug(KEY_UTILS, "Subscribing writing method to event stream");
     eventStream.subscribe(writeEventToFile);
 }
+
+function retrieveHostname(string key, string default) returns string {
+    return config:getAsString(key, default = default);
+}
