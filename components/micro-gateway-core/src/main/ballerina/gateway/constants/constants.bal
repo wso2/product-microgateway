@@ -176,6 +176,8 @@
 @final public string UPLOADING_EP = "uploadingEndpoint";
 @Description { value: "Starting time of the request" }
 @final public string REQUEST_TIME = "REQUEST_TIME";
+@Description { value: "Environment variable for datacenter Id" }
+@final public string DATACENTER_ID = "datacenterId";
 @Description { value: "Time spent on the throttling filter" }
 @final public string THROTTLE_LATENCY = "THROTTLE_LATENCY";
 @Description { value: "Time spent on the authentication filter" }

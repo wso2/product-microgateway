@@ -62,4 +62,5 @@ public type ThrottleAnalyticsEventDTO record {
     string throttledOutReason;
     string gatewayType;
     int throttledTime;
+    string hostname;
 };

@@ -66,7 +66,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
     return dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
         dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
         dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
-        gatewayType + OBJ + dto.throttledTime;
+        gatewayType + OBJ + dto.throttledTime + OBJ + dto.hostname;
 
 }
 
