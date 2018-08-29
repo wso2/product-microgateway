@@ -137,6 +137,6 @@ public class BaseTestCase {
     }
 
     protected String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
-        return new URL(new URL("http://localhost:" + MOCK_SERVER_PORT), servicePath).toString();
+        return new URL(new URL("https://localhost:" + MOCK_SERVER_PORT), servicePath).toString();
     }
 }

@@ -82,6 +82,11 @@ OPTIONS
        By default, when the toolkit does not allow you to run "micro-gw setup" upon an existing project. But, if you
        want to overwrite the existing project, specify -f option when running "micro-gw setup" command.
 
+    -k
+    --insecure
+       <Optional>
+       Allow insecure server connections when using SSL
+
 EXAMPLES
     Setup the project using a label
     $ micro-gw setup accounts-project -l accounts

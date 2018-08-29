@@ -28,26 +28,33 @@ import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.xml.bind.DatatypeConverter;
 
 public class OAuthServiceImpl implements OAuthService {
+
     private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);
 
     /**
-     * @see OAuthService#generateAccessToken(String, String, char[], String, String)
+     * @see OAuthService#generateAccessToken(String, String, char[], String, String, boolean)
      */
     public String generateAccessToken(String tokenEndpoint, String username, char[] password, String clientId,
-            String clientSecret) {
+                                      String clientSecret, boolean inSecure) {
+
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         try {
             url = new URL(tokenEndpoint);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
@@ -58,8 +65,8 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setDoOutput(true);
             String postBody = new OAuthTokenRequestBuilder().setClientKey(clientId)
                     .setClientSecret(clientSecret.toCharArray()).setGrantType(TokenManagementConstants.PASSWORD)
-                    .setPassword(password).setScopes(new String[] { TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE,
-                            TokenManagementConstants.VIEW_API_SCOPE }).setUsername(username).requestBody();
+                    .setPassword(password).setScopes(new String[]{TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE,
+                            TokenManagementConstants.VIEW_API_SCOPE}).setUsername(username).requestBody();
             urlConn.getOutputStream().write((postBody).getBytes(TokenManagementConstants.UTF_8));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
@@ -84,20 +91,24 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     /**
-     * @see OAuthService#generateClientIdAndSecret(String, String, char[])
+     * @see OAuthService#generateClientIdAndSecret(String, String, char[], boolean)
      */
-    public String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password) {
+    public String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password, boolean inSecure) {
+
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpsURLConnection urlConn = null;
         try {
             String requestBody = new DCRRequestBuilder()
                     .setCallbackUrl(TokenManagementConstants.APPLICATION_CALLBACK_URL)
                     .setClientName(TokenManagementConstants.APPLICATION_NAME).setOwner(username).setSaasApp(true)
-                    .setGrantTypes(new String[] { TokenManagementConstants.PASSWORD_GRANT_TYPE })
+                    .setGrantTypes(new String[]{TokenManagementConstants.PASSWORD_GRANT_TYPE})
                     .setTokenScope(TokenManagementConstants.TOKEN_SCOPE_PRODUCTION).requestBody();
             ObjectMapper mapper = new ObjectMapper();
             url = new URL(dcrEndpoint);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
@@ -119,7 +130,7 @@ public class OAuthServiceImpl implements OAuthService {
                 JsonNode clientSecretNode = rootNode.path(TokenManagementConstants.CLIENT_SECRET);
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
-                String[] clientInfo = { clientId, clientSecret };
+                String[] clientInfo = {clientId, clientSecret};
                 logger.debug("Successfully received client id:{} from DCR endpoint", clientId);
                 return clientInfo;
             } else if (responseCode == 401) {
@@ -143,6 +154,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private String getServerUrl(String dcrEndpoint) {
+
         String[] serverUrlParts = dcrEndpoint.split("/", 4);
         return String.join("/",
                 Arrays.copyOfRange(serverUrlParts, 0, serverUrlParts.length >= 3 ? 3 : serverUrlParts.length));
