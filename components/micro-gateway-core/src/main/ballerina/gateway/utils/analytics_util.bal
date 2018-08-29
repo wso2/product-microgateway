@@ -32,6 +32,8 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     eventDto.throttledOutReason = <string>context.attributes[THROTTLE_OUT_REASON];
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.gatewayType = GATEWAY_TYPE;
+    eventDto.hostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
+        HOSTNAME_PROPERTY]);
     if (isSecured) {
         AuthenticationContext authContext = check <AuthenticationContext>context
         .attributes[AUTHENTICATION_CONTEXT];
@@ -73,7 +75,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     eventDto.errorMessage = err.message;
     eventDto.faultTime = currentTimeMills;
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
-    eventDto.hostName = <string>context.attributes[HOSTNAME_PROPERTY];
+    eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
