@@ -44,14 +44,14 @@ REM If the current disk drive ie: `E:\` is different from the drive where this (
 	if %verbose%==T ( echo Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
 	if not "%curDrive%" == "%wsasDrive%" %wsasDrive%:
 
-if "%MICROGW_TOOLKIT_HOME%" == "" set MICROGW_TOOLKIT_HOME=%PRGDIR%..
+if "%MICROGW_HOME%" == "" set MICROGW_HOME=%PRGDIR%..
 
 REM  set BALLERINA_HOME
-set BALLERINA_HOME=%MICROGW_TOOLKIT_HOME%\lib\platform
+set BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 set PATH=%PATH%;%BALLERINA_HOME%\bin\
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 
-if %verbose%==T echo MICROGW_TOOLKIT_HOME environment variable is set to %MICROGW_TOOLKIT_HOME%
+if %verbose%==T echo MICROGW_HOME environment variable is set to %MICROGW_HOME%
 
 rem Check JAVA availability
 :checkJava
@@ -170,12 +170,12 @@ goto end
 
 	if %verbose%==T echo [%date% %time%] DEBUG: CLI_CLASSPATH = "%CLI_CLASSPATH%"
 
-	set JAVACMD=-Xms256m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%MICROGW_TOOLKIT_HOME%\heap-dump.hprof" %JAVA_OPTS% -classpath %CLI_CLASSPATH% -Djava.security.egd=file:/dev/./urandom -Dballerina.home="%BALLERINA_HOME%" -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -Dfile.encoding=UTF8 -Dcli.home="%MICROGW_TOOLKIT_HOME%" -Dtemplates.dir.path=.\resources\templates -Dcurrent.dir=%CURRENT_D%
+	set JAVACMD=-Xms256m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%MICROGW_HOME%\heap-dump.hprof" %JAVA_OPTS% -classpath %CLI_CLASSPATH% -Djava.security.egd=file:/dev/./urandom -Dballerina.home="%BALLERINA_HOME%" -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -Dfile.encoding=UTF8 -Dcli.home="%MICROGW_HOME%" -Dtemplates.dir.path=.\resources\templates -Dcurrent.dir=%CURRENT_D%
 	if %verbose%==T echo [%date% %time%] DEBUG: JAVACMD = !JAVACMD!
 
 :runJava
 	REM Jump to GW-CLI exec location when running the jar
-	CD %MICROGW_TOOLKIT_HOME%
+	CD %MICROGW_HOME%
 	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
 	if "%ERRORLEVEL%"=="121" goto runJava
 :end

@@ -59,19 +59,20 @@ public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
 }
 
 public function getThrottleMetaData(ThrottleAnalyticsEventDTO dto) returns string {
-    return dto.clientType;
+    return dto.metaClientType;
 }
 
 public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns string {
-    return dto.accessToken + OBJ + dto.userId + OBJ + dto.tenantDomain + OBJ + dto.api + OBJ +
-        dto.api_version + OBJ + dto.context + OBJ + dto.apiPublisher + OBJ + dto.throttledTime + OBJ +
-        dto.applicationName + OBJ + dto.applicationId + OBJ + dto.subscriber + OBJ + dto.throttledOutReason;
+    return dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
+        dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
+        dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
+        gatewayType + OBJ + dto.throttledTime + OBJ + dto.hostname;
 
 }
 
 public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO {
     EventDTO eventDTO;
-    eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:1.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getThrottleMetaData(dto);
     eventDTO.correlationData = "null";

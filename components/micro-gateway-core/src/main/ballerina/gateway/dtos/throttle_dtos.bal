@@ -48,17 +48,19 @@ public type EligibilityStreamDTO record {
 };
 
 public type ThrottleAnalyticsEventDTO record {
-    string clientType;
-    string accessToken;
-    string userId;
-    string tenantDomain;
-    string api;
-    string api_version;
-    string context;
-    string apiPublisher;
-    int throttledTime;
-    string applicationName;
+    string metaClientType;
+    string userName;
+    string userTenantDomain;
+    string apiName;
+    string apiVersion;
+    string apiContext;
+    string apiCreator;
+    string apiCreatorTenantDomain;
     string applicationId;
+    string applicationName;
     string subscriber;
     string throttledOutReason;
+    string gatewayType;
+    int throttledTime;
+    string hostname;
 };

@@ -1,19 +1,19 @@
 NAME
-    WSO2 API Manager Microgateway Toolkit - A Toolkit to generate microgateway distributions for a single API 
+    WSO2 API Manager Microgateway - A CLI to generate microgateway distributions for a single API
     or a subset of APIs in the system.
 
 SYNOPSIS
     micro-gw [?|-h|--help]
 
 DESCRIPTION
-    This is a toolkit which allow users to generate microgateway distributions for specific API(s) in the system.
+    This is a CLI which allow users to generate microgateway distributions for specific API(s) in the system.
     It can be a single API or a subset of APIs created in WSO2 API Manager. The generation process is done by two
-    simple steps from the toolkit, which are
+    simple steps, which are
     
     1. micro-gw setup : Setting up a project specifying a single API or a group of APIs. (see "micro-gw help setup")
     2. micro-gw build : Building the project. (see "micro-gw help build")
 
-    During the setup phase, the toolkit will communicate with the API Manager REST APIs and retrieve
+    During the setup phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve
     the details of the resources (APIs, policies, etc.) which are needed to generate the artifacts required for the
     distribution. During the build phase, the artifacts will be built to generate a gateway distribution.
     
@@ -29,9 +29,9 @@ OPTIONS
 
 MICRO GATEWAY COMMANDS
     Available commands are:
-        setup        Setup the toolkit and a microgateway project.
+        setup        Setup the CLI and a microgateway project.
         build        Build a microgateway distribution from the project.
-        reset        Reset the current toolkit configurations to default.
+        reset        Reset the current configurations to default.
 
 EXAMPLES
     Check the current version of micro gateway in use, in your system

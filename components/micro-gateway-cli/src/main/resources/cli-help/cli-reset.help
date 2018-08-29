@@ -10,7 +10,7 @@ DESCRIPTION
       etc.
      
      When running the setup command for the first time, those configurations are stored internally within the microgateway
-     toolkit and will be reused for subsequent setup commands. To rerun the setup command with a new set of configurations,
+     CLI tool and will be reused for subsequent setup commands. To rerun the setup command with a new set of configurations,
      the reset command needs to be run beforehand.
      
      Using "micro-gw reset -c <config-file>", we can reset an externally provided config file. 
