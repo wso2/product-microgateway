@@ -26,8 +26,9 @@ import ballerina/reflect;
 import wso2/gateway;
 
 // Extension filter used to send custom error messages and to do customizations.
-@Description {value:"Representation of the Subscription filter"}
-@Field {value:"filterRequest: request filter method which attempts to validate the subscriptions"}
+@Description { value: "Represents the extension filter, which used to customize and extend the request and response
+                handling" }
+@Field {value:"filterRequest: intercepts the request flow"}
 public type ExtensionFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
