@@ -761,8 +761,8 @@ public class GatewayCmdUtils {
                 writeContent(inputConfigContent, file);
             } else {
                 throw new CLIRuntimeException(
-                        "Error while reading deployment configuration file. Probably file path " + deploymentConfPath
-                                + "is invalid.");
+                        "Error while reading deployment configuration file. Probably the file path '" + deploymentConfPath
+                                + "' is invalid.");
             }
         }
     }
