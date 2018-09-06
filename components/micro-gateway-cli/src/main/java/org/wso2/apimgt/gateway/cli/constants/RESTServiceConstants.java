@@ -37,9 +37,9 @@ public class RESTServiceConstants {
     public static final String API_GET_BY_NAME_VERSION_URI =
             "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
                     + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
-    public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v0.13";
-    public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v0.13";
-    public static final String DCR_RESOURCE_PATH = "/client-registration/v0.13/register";
+    public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v0.14";
+    public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v0.14";
+    public static final String DCR_RESOURCE_PATH = "/client-registration/v0.14/register";
     public static final String TOKEN_PATH = "/oauth2/token";
 
     public static final String DEFAULT_HOST = "https://localhost:9443/";

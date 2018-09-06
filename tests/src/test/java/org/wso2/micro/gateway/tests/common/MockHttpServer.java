@@ -71,9 +71,9 @@ public class MockHttpServer extends Thread {
     private HttpsServer httpServer;
     private String KMServerUrl;
     private int KMServerPort = -1;
-    private String DCRRestAPIBasePath = "/client-registration/v0.13";
-    private String PubRestAPIBasePath = "/api/am/publisher/v0.13";
-    private String AdminRestAPIBasePath = "/api/am/admin/v0.13";
+    private String DCRRestAPIBasePath = "/client-registration/v0.14";
+    private String PubRestAPIBasePath = "/api/am/publisher/v0.14";
+    private String AdminRestAPIBasePath = "/api/am/admin/v0.14";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
 
