@@ -61,8 +61,16 @@ public type SubscriptionFilter object {
                                     authenticationContext.tier = "Unauthenticated";
                                     authenticationContext.apiKey = jwtToken;
                                     authenticationContext.username = decodedPayload.sub.toString();
-                                    authenticationContext.applicationId = decodedPayload.application.id.toString();
-                                    authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    if (decodedPayload.application.id != null) {
+                                        authenticationContext.applicationId = decodedPayload.application.id.toString();
+                                    } else {
+                                        authenticationContext.applicationId = "__unknown__";
+                                    }
+                                    if (decodedPayload.application.name != null) {
+                                        authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    } else {
+                                        authenticationContext.applicationName = "__unknown__";
+                                    }
                                     if (decodedPayload.application.tier != null) {
                                         authenticationContext.applicationTier = decodedPayload.application.tier.toString();
                                     } else {
