@@ -58,12 +58,24 @@ public type SubscriptionFilter object {
                                 int l = lengthof subscribedAPIList;
                                 if (l == 0){
                                     authenticationContext.authenticated = true;
-                                    authenticationContext.tier = "Unlimited";
+                                    authenticationContext.tier = "Unauthenticated";
                                     authenticationContext.apiKey = jwtToken;
                                     authenticationContext.username = decodedPayload.sub.toString();
-                                    authenticationContext.applicationId = decodedPayload.application.id.toString();
-                                    authenticationContext.applicationName = decodedPayload.application.name.toString();
-                                    authenticationContext.applicationTier = decodedPayload.application.tier.toString();
+                                    if (decodedPayload.application.id != null) {
+                                        authenticationContext.applicationId = decodedPayload.application.id.toString();
+                                    } else {
+                                        authenticationContext.applicationId = "__unknown__";
+                                    }
+                                    if (decodedPayload.application.name != null) {
+                                        authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    } else {
+                                        authenticationContext.applicationName = "__unknown__";
+                                    }
+                                    if (decodedPayload.application.tier != null) {
+                                        authenticationContext.applicationTier = decodedPayload.application.tier.toString();
+                                    } else {
+                                        authenticationContext.applicationTier = "Unlimited";
+                                    }
                                     authenticationContext.subscriber = decodedPayload.application.owner.toString();
                                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
                                     authenticationContext.apiTier = "Unlimited";
@@ -106,7 +118,7 @@ public type SubscriptionFilter object {
                             else
                             {
                                 authenticationContext.authenticated = true;
-                                authenticationContext.tier = "Unlimited";
+                                authenticationContext.tier = "Unauthenticated";
                                 authenticationContext.apiKey = jwtToken;
                                 authenticationContext.username = decodedPayload.sub.toString();
                                 authenticationContext.applicationId = "__unknown__";
