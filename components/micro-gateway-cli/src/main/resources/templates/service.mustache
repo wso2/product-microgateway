@@ -57,6 +57,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     {{operationId}} (endpoint outboundEp, http:Request req) {
+    gateway:checkExpectHeaderPresent(req);
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
     {{else}}

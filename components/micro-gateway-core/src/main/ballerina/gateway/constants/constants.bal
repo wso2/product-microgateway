@@ -281,6 +281,7 @@
 @final public string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
 @Description { value: "JWT  header name"}
 @final public string JWT_HEADER = "header";
+@final public string EXPECT_HEADER = "Expect";
 
 // end of config constants
 

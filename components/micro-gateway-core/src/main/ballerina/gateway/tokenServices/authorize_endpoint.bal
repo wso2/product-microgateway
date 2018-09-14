@@ -25,6 +25,7 @@ service<http:Service> authorizeService bind tokenListenerEndpoint {
         path: "/*"
     }
     authorizeResource(endpoint caller, http:Request req) {
+        checkExpectHeaderPresent(req);
         var response = keyValidationEndpoint->forward(getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, "/oauth2") +
                 untaint req.rawPath, req);
         match response {
