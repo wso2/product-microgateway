@@ -460,3 +460,11 @@ function checkOrSetMessageID(http:FilterContext context) {
         context.attributes[MESSAGE_ID] = system:uuid();
     }
 }
+
+public function checkExpectHeaderPresent(http:Request request) {
+    if (request.expects100Continue()) {
+        request.removeHeader(EXPECT_HEADER);
+        printDebug(KEY_UTILS, "Expect header is removed from the request");
+
+    }
+}
