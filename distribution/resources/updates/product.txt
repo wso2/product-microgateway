@@ -1,1 +1,1 @@
-wso2am-micro-gw-toolkit-2.6.0
+wso2am-micro-gw-2.6.0
