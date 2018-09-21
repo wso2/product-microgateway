@@ -22,7 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.micro.gateway.tests.common.model.API;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 
@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 public class MockAPIPublisher {
     private static final Logger log = LoggerFactory.getLogger(MockAPIPublisher.class);
-    private Map<String, List<API>> apis;
+    private Map<String, List<APIDTO>> apis;
     private Map<String, KeyValidationInfo> tokenInfo;
     private static MockAPIPublisher instance;
     private static List<SubscriptionPolicy> subscriptionPolicies;
@@ -60,7 +60,7 @@ public class MockAPIPublisher {
         applicationPolicies = new ArrayList<>();
     }
 
-    public void addApi(String label, API api) {
+    public void addApi(String label, APIDTO api) {
 
         try {
             api = populateJson(api);
@@ -75,7 +75,7 @@ public class MockAPIPublisher {
         }
     }
 
-    private API populateJson(API api) throws IOException {
+    private APIDTO populateJson(APIDTO api) throws IOException {
         String apiJson = IOUtils
                 .toString(new FileInputStream(getClass().getClassLoader().getResource("api-json.json").getPath()));
         String apiDefinition = IOUtils.toString(
@@ -83,12 +83,9 @@ public class MockAPIPublisher {
         String endpointJson = IOUtils
                 .toString(new FileInputStream(getClass().getClassLoader().getResource("endpoint.json").getPath()));
 
-        JSONObject endpoint = new JSONObject(endpointJson);
-        endpoint.getJSONObject("production_endpoints").put("url", api.getProdEndpoint());
-        endpoint.getJSONObject("sandbox_endpoints").put("url", api.getSandEndpoint());
-
+        JSONArray endpoint = new JSONArray(endpointJson);
         JSONObject apiJsonObj = new JSONObject(apiJson);
-        apiJsonObj.put("endpointConfig", endpoint.toString());
+        apiJsonObj.put("endpoint", endpoint);
         apiJsonObj.put("apiDefinition", apiDefinition);
         apiJsonObj.put("name", api.getName());
         apiJsonObj.put("version", api.getVersion());
@@ -96,23 +93,33 @@ public class MockAPIPublisher {
         apiJsonObj.put("provider", api.getProvider());
 
         //todo: set tiers and swagger
-        api.setSwagger(apiJsonObj.toString());
         return api;
     }
 
     public String getAPIResponseForLabel(String label) {
-        List<API> filterd = apis.get(label);
+        List<APIDTO> filterd = apis.get(label);
         try {
+            String apiJson = IOUtils
+                    .toString(new FileInputStream(getClass().getClassLoader().getResource("api-json.json").getPath()));
             String restResponse = IOUtils.toString(
                     new FileInputStream(getClass().getClassLoader().getResource("api-response.json").getPath()));
             JSONObject response = new JSONObject(restResponse);
             response.put("count", filterd.size());
             JSONArray arr = new JSONArray();
-            for (API api : filterd) {
-                arr.put(new JSONObject(api.getSwagger()));
+            for (APIDTO api : filterd) {
+                arr.put(new JSONObject(apiJson));
             }
             response.put("list", arr);
             return response.toString();
+        } catch (IOException e) {
+            log.error("Error occurred when generating response", e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public String getSwaggerResponseForAPI() {
+        try {
+            return IOUtils.toString(new FileInputStream(getClass().getClassLoader().getResource("api-definition.json").getPath()));
         } catch (IOException e) {
             log.error("Error occurred when generating response", e);
             throw new RuntimeException(e.getMessage(), e);

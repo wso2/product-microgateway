@@ -25,11 +25,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.HashingConstants;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +60,7 @@ public class HashUtils {
      * @return true if there are changes detected vs the previous check
      * @throws HashingException error while change detection
      */
-    public static boolean detectChanges(List<ExtendedAPI> apis,
+    public static boolean detectChanges(List<APIInfoDTO> apis,
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies,
             List<ApplicationThrottlePolicyDTO> appPolicies, String projectName) throws HashingException {
         
@@ -140,7 +140,7 @@ public class HashUtils {
                 if (obj instanceof ExtendedAPI) {
                     hashes.put(((ExtendedAPI)obj).getId(), hash);
                 } else if (obj instanceof ThrottlePolicyDTO) {
-                    hashes.put(((ThrottlePolicyDTO)obj).getPolicyId(), hash);
+                    hashes.put(((ThrottlePolicyDTO)obj).getId(), hash);
                 } else {
                     logger.warn("Incompatible type for generating hash: " + obj + ", class: " + obj.getClass());
                 }

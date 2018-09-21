@@ -2,112 +2,96 @@
   "count": 6,
   "list": [
     {
-      "policyId": "29db13c1-861a-4c3b-afa6-f8be3ebfa141",
+      "id": "29db13c1-861a-4c3b-afa6-f8be3ebfa141",
       "policyName": "Gold",
       "displayName": "Gold",
       "description": "Allows 5000 requests per minute",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 5000
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 5000
-      },
-      "rateLimitCount": 0,
-      "rateLimitTimeUnit": null,
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
     },
     {
-      "policyId": "4bdbd3c8-3c18-4ecc-b9da-aa9e035f433c",
+      "id": "4bdbd3c8-3c18-4ecc-b9da-aa9e035f433c",
       "policyName": "Silver",
       "displayName": "Silver",
       "description": "Allows 2000 requests per minute",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 2000
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 2000
-      },
-      "rateLimitCount": 0,
-      "rateLimitTimeUnit": null,
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
     },
     {
-      "policyId": "a8d163fe-21ab-4a66-bd17-bb8a3d54219d",
+      "id": "a8d163fe-21ab-4a66-bd17-bb8a3d54219d",
       "policyName": "Bronze",
       "displayName": "Bronze",
       "description": "Allows 1000 requests per minute",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 1000
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 1000
-      },
-      "rateLimitCount": 0,
-      "rateLimitTimeUnit": null,
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
     },
     {
-      "policyId": "c440bd93-0b8c-426d-9f61-b97a4ebd5450",
+      "id": "c440bd93-0b8c-426d-9f61-b97a4ebd5450",
       "policyName": "Unauthenticated",
       "displayName": "Unauthenticated",
       "description": "Allows 10 request(s) per minute",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 10
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 10
-      },
-      "rateLimitCount": 0,
-      "rateLimitTimeUnit": null,
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
+
     },
     {
-      "policyId": "15c4b57d-59ce-40c2-be11-95de3a59766b",
+      "id": "15c4b57d-59ce-40c2-be11-95de3a59766b",
       "policyName": "Unlimited",
       "displayName": "Unlimited",
       "description": "Allows unlimited requests",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 2147483647
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 2147483647
-      },
-      "rateLimitCount": 0,
-      "rateLimitTimeUnit": null,
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
+
     },
     {
-      "policyId": "80681031-540d-4970-af5d-2de87930bac5",
+      "id": "80681031-540d-4970-af5d-2de87930bac5",
       "policyName": "5min",
       "displayName": "5min",
       "description": "",
       "isDeployed": true,
       "defaultLimit": {
+        "requestCountLimit": {
+          "requestCount": 5
+        },
         "type": "RequestCountLimit",
         "timeUnit": "min",
-        "unitTime": 1,
-        "requestCount": 5
-      },
-      "rateLimitCount": -1,
-      "rateLimitTimeUnit": "NA",
-      "customAttributes": [],
-      "stopOnQuotaReach": true,
-      "billingPlan": "FREE"
+        "unitTime": 1
+      }
     }
   ]
 }

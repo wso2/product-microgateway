@@ -22,7 +22,7 @@ import org.wso2.apimgt.gateway.cli.model.oauth.OAuthTokenRequest;
 public class OAuthTokenRequestBuilder {
 
     private OAuthTokenRequest oAuthTokenRequest;
-    private String request;
+    private String request = "";
 
     public OAuthTokenRequestBuilder() {
         oAuthTokenRequest = new OAuthTokenRequest();
@@ -37,13 +37,13 @@ public class OAuthTokenRequestBuilder {
     }
 
     public OAuthTokenRequestBuilder setClientSecret(char[] clientSecret) {
-        this.request += "&clientSecret=" + new String(clientSecret);
+        this.request += "&client_secret=" + new String(clientSecret);
         oAuthTokenRequest.setClientSecret(clientSecret);
         return this;
     }
 
     public OAuthTokenRequestBuilder setClientKey(String clientKey) {
-        this.request += "&clientId=" + clientKey;
+        this.request += "client_id=" + clientKey;
         this.oAuthTokenRequest.setClientKey(clientKey);
         return this;
     }
@@ -67,8 +67,15 @@ public class OAuthTokenRequestBuilder {
     }
 
     public OAuthTokenRequestBuilder setGrantType(String grantType) {
-        this.request = "grant_type=" + grantType;
+        this.request += "grant_type=" + grantType;
         oAuthTokenRequest.setGrantType(grantType);
         return this;
+    }
+
+    public OAuthTokenRequestBuilder setValidityPeriod(String validityPeriod) {
+        this.request += "&validity_period=" + validityPeriod;
+        oAuthTokenRequest.setValidityPeriod(validityPeriod);
+        return this;
+
     }
 }

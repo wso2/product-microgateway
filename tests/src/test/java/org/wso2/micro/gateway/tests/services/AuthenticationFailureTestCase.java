@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
@@ -49,11 +50,9 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        API api = new API();
+        APIDTO api = new APIDTO();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
