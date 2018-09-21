@@ -32,9 +32,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.bind.DatatypeConverter;
 
 public class OAuthServiceImpl implements OAuthService {
@@ -63,10 +61,11 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setRequestProperty(TokenManagementConstants.AUTHORIZATION,
                     TokenManagementConstants.BASIC + " " + clientEncoded);
             urlConn.setDoOutput(true);
-            String postBody = new OAuthTokenRequestBuilder().setClientKey(clientId)
-                    .setClientSecret(clientSecret.toCharArray()).setGrantType(TokenManagementConstants.PASSWORD)
-                    .setPassword(password).setScopes(new String[]{TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE,
-                            TokenManagementConstants.VIEW_API_SCOPE}).setUsername(username).requestBody();
+            String postBody = new OAuthTokenRequestBuilder().setGrantType(TokenManagementConstants.PASSWORD)
+                    .setPassword(password).setScopes(new String[] { TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE,
+                            TokenManagementConstants.VIEW_API_SCOPE })
+                    .setUsername(username).setValidityPeriod("3600000").
+                            requestBody();
             urlConn.getOutputStream().write((postBody).getBytes(TokenManagementConstants.UTF_8));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
@@ -121,13 +120,13 @@ public class OAuthServiceImpl implements OAuthService {
             logger.debug("DCR URL: {}", dcrEndpoint);
             logger.trace("Request body for DCR call: {}", requestBody);
             int responseCode = urlConn.getResponseCode();
-            if (responseCode == 200) {  //If the DCR call is success
+            if (responseCode == 201 || responseCode == 200) {  //If the DCR call is success
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 logger.debug("Received response status code for DCR call: {}", responseCode);
                 logger.trace("Received response body for DCR call: {}", responseStr);
                 JsonNode rootNode = mapper.readTree(responseStr);
-                JsonNode clientIdNode = rootNode.path(TokenManagementConstants.CLIENT_ID);
-                JsonNode clientSecretNode = rootNode.path(TokenManagementConstants.CLIENT_SECRET);
+                JsonNode clientIdNode = rootNode.path("client_id");
+                JsonNode clientSecretNode = rootNode.path("client_secret");
                 String clientId = clientIdNode.asText();
                 String clientSecret = clientSecretNode.asText();
                 String[] clientInfo = {clientId, clientSecret};

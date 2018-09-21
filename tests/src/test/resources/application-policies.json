@@ -1,52 +1,59 @@
 {
   "count": 4,
   "list": [{
-    "policyId": "19fddab8-bbdc-40a2-95df-aeb28e09f07c",
+    "id": "19fddab8-bbdc-40a2-95df-aeb28e09f07c",
     "policyName": "50PerMin",
     "displayName": "50PerMin",
     "description": "Allows 50 request per minute",
     "isDeployed": true,
     "defaultLimit": {
+      "requestCountLimit": {
+        "requestCount": 50
+      },
       "type": "RequestCountLimit",
       "timeUnit": "min",
-      "unitTime": 1,
-      "requestCount": 50
+      "unitTime": 1
     }
   }, {
-    "policyId": "73a24186-764e-4cb7-80cc-a378931d587b",
+    "id": "73a24186-764e-4cb7-80cc-a378931d587b",
     "policyName": "20PerMin",
     "displayName": "20PerMin",
     "description": "Allows 20 request per minute",
     "isDeployed": true,
     "defaultLimit": {
+      "requestCountLimit": {
+        "requestCount": 20
+      },
       "type": "RequestCountLimit",
       "timeUnit": "min",
-      "unitTime": 1,
-      "requestCount": 20
+      "unitTime": 1
     }
   }, {
-    "policyId": "d97fdb4b-2128-4f7a-9926-d4da0c1551af",
+    "id": "d97fdb4b-2128-4f7a-9926-d4da0c1551af",
     "policyName": "10PerMin",
     "displayName": "10PerMin",
     "description": "Allows 10 request per minute",
     "isDeployed": true,
     "defaultLimit": {
+      "requestCountLimit": {
+        "requestCount": 10
+      },
       "type": "RequestCountLimit",
       "timeUnit": "min",
-      "unitTime": 1,
-      "requestCount": 10
+      "unitTime": 1
     }
   }, {
-    "policyId": "c66cb7de-283e-4d34-85d6-740deee912b4",
+    "id": "c66cb7de-283e-4d34-85d6-740deee912b4",
     "policyName": "Unlimited",
     "displayName": "Unlimited",
     "description": "Allows unlimited requests",
     "isDeployed": true,
     "defaultLimit": {
+      "requestCountLimit": {
+      },
       "type": "RequestCountLimit",
       "timeUnit": "min",
-      "unitTime": 1,
-      "requestCount": 2147483647
+      "unitTime": 1
     }
   }]
 }

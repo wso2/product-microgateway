@@ -18,9 +18,10 @@
 package org.wso2.apimgt.gateway.cli.model.template.policy;
 
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.RequestCountLimitDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RequestCountLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 
 import java.util.concurrent.TimeUnit;
 
@@ -118,11 +119,12 @@ public class ThrottlePolicy {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
-    public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {
+    public ThrottlePolicy buildContext(
+            ApplicationThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
         this.name = applicationPolicy.getPolicyName();
-        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
-        this.count = requestCountLimitDTO.getRequestCount();
+        ThrottleLimitDTO requestCountLimitDTO =  applicationPolicy.getDefaultLimit();
+        this.count = requestCountLimitDTO.getRequestCountLimit().getRequestCount();
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
         this.funcName = GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
                 + GeneratorConstants.INIT_FUNC_SUFFIX;
@@ -135,8 +137,8 @@ public class ThrottlePolicy {
     public ThrottlePolicy buildContext(SubscriptionThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
         this.name = applicationPolicy.getPolicyName();
-        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
-        this.count = requestCountLimitDTO.getRequestCount();
+        ThrottleLimitDTO requestCountLimitDTO =  applicationPolicy.getDefaultLimit();
+        this.count = requestCountLimitDTO.getRequestCountLimit().getRequestCount();;
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
         this.funcName = GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
                 + GeneratorConstants.INIT_FUNC_SUFFIX;

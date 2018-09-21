@@ -23,10 +23,11 @@ import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -41,9 +42,9 @@ import java.util.UUID;
  */
 public class BallerinaService implements BallerinaSwaggerObject<BallerinaService, Swagger> {
     private String name;
-    private ExtendedAPI api;
+    private APIInfoDTO api;
     private ContainerConfig containerConfig;
-    private EndpointConfig endpointConfig;
+    private List<API_endpointDTO> endpointConfig;
     private String srcPackage;
     private String modelPackage;
     private String qualifiedServiceName;
@@ -73,12 +74,14 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
     }
 
     @Override
-    public BallerinaService buildContext(Swagger definition, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaService buildContext(Swagger definition, APIInfoDTO api) throws BallerinaServiceGenException {
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
-        this.endpointConfig = api.getEndpointConfigRepresentation();
+        if(api instanceof APIDTO) {
+            this.endpointConfig = ((APIDTO)api).getEndpoint();
+        }
         return buildContext(definition);
     }
 
@@ -166,20 +169,20 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.name = name;
     }
 
-    public EndpointConfig getEndpointConfig() {
-        return endpointConfig;
-    }
-
-    public void setEndpointConfig(EndpointConfig endpointConfig) {
-        this.endpointConfig = endpointConfig;
-    }
-
-    public ExtendedAPI getApi() {
+    public APIInfoDTO getApi() {
         return api;
     }
 
-    public void setApi(ExtendedAPI api) {
+    public void setApi(APIDTO api) {
         this.api = api;
+    }
+
+    public List<API_endpointDTO> getEndpointConfig() {
+        return endpointConfig;
+    }
+
+    public void setEndpointConfig(List<API_endpointDTO> endpointConfig) {
+        this.endpointConfig = endpointConfig;
     }
 
     public String getQualifiedServiceName() {

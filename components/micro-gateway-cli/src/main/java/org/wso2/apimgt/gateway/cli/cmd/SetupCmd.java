@@ -42,14 +42,15 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,58 +66,51 @@ import java.util.List;
 /**
  * This class represents the "setup" command and it holds arguments and flags specified by the user.
  */
-@Parameters(commandNames = "setup", commandDescription = "setup information")
-public class SetupCmd implements GatewayLauncherCmd {
+@Parameters (commandNames = "setup", commandDescription = "setup information") public class SetupCmd
+        implements GatewayLauncherCmd {
+
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.err;
 
-    @SuppressWarnings("unused")
-    @Parameter(hidden = true, required = true)
+    @SuppressWarnings ("unused") @Parameter (hidden = true, required = true)
     private List<String> mainArgs;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = "--java.debug", hidden = true)
+    @SuppressWarnings ("unused") @Parameter (names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = { "-u", "--username" }, hidden = true)
+    @Parameter (names = { "-u", "--username" }, hidden = true)
     private String username;
 
-    @Parameter(names = { "-p", "--password" }, hidden = true)
+    @Parameter (names = { "-p", "--password" }, hidden = true)
     private String password;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-l", "--label" }, hidden = true)
+    @SuppressWarnings ("unused") @Parameter (names = { "-l", "--label" }, hidden = true)
     private String label;
 
-    @Parameter(names = { "-s", "--server-url" }, hidden = true)
+    @Parameter (names = { "-s", "--server-url" }, hidden = true)
     private String baseUrl;
 
-    @Parameter(names = { "-t", "--truststore" }, hidden = true)
+    @Parameter (names = { "-t", "--truststore" }, hidden = true)
     private String trustStoreLocation;
 
-    @Parameter(names = { "-w", "--truststore-pass" }, hidden = true)
+    @Parameter (names = { "-w", "--truststore-pass" }, hidden = true)
     private String trustStorePassword;
 
-    @Parameter(names = { "-c", "--config" }, hidden = true)
+    @Parameter (names = { "-c", "--config" }, hidden = true)
     private String toolkitConfigPath;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-d", "--deployment-config" }, hidden = true)
+    @SuppressWarnings ("unused") @Parameter (names = { "-d", "--deployment-config" }, hidden = true)
     private String deploymentConfigPath;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-a", "--api-name" }, hidden = true)
+    @SuppressWarnings ("unused") @Parameter (names = { "-a", "--api-name" }, hidden = true)
     private String apiName;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-v", "--version" }, hidden = true)
+    @SuppressWarnings ("unused") @Parameter (names = { "-v", "--version" }, hidden = true)
     private String version;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-f", "--force" }, hidden = true, arity = 0)
+    @SuppressWarnings ("unused") @Parameter (names = { "-f", "--force" }, hidden = true, arity = 0)
     private boolean isForcefully;
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-k", "--insecure" }, hidden = true, arity = 0)
+    @SuppressWarnings ("unused") @Parameter (names = { "-k", "--insecure" }, hidden = true, arity = 0)
     private boolean isInsecure;
 
     private String publisherEndpoint;
@@ -124,6 +118,36 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String registrationEndpoint;
     private String tokenEndpoint;
     private String clientSecret;
+
+    private static void init(String projectName, String configPath, String deploymentConfigPath) {
+        try {
+            GatewayCmdUtils.createProjectStructure(projectName);
+            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
+
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+
+            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
+
+            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
+            codeGenerationContext.setProjectName(projectName);
+            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        } catch (IOException e) {
+            logger.error("Error occurred while generating project configurationss", e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
+    }
 
     public void execute() {
         String clientID;
@@ -230,8 +254,8 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         File trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.isAbsolute()) {
-            trustStoreLocation = GatewayCmdUtils.getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator
-                    + trustStoreLocation);
+            trustStoreLocation = GatewayCmdUtils
+                    .getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator + trustStoreLocation);
         }
         trustStoreFile = new File(trustStoreLocation);
         if (!trustStoreFile.exists()) {
@@ -267,12 +291,14 @@ public class SetupCmd implements GatewayLauncherCmd {
                 .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret,
                         isInsecure);
 
-        List<ExtendedAPI> apis = new ArrayList<>();
-        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint,isInsecure);
+        List<APIInfoDTO> apis = new ArrayList<>();
+        List<String> swaggerDefinitionList;
+        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, isInsecure);
+        APIDTO api;
         if (label != null) {
             apis = service.getAPIs(label, accessToken);
         } else {
-            ExtendedAPI api = service.getAPI(apiName, version, accessToken);
+            api = service.getAPI(apiName, version, accessToken);
             if (api != null) {
                 apis.add(api);
             }
@@ -288,6 +314,11 @@ public class SetupCmd implements GatewayLauncherCmd {
             }
             throw new CLIRuntimeException(errorMsg);
         }
+        //get the swagger definitions of each api
+        swaggerDefinitionList = new ArrayList<>();
+        for (APIInfoDTO apidto : apis) {
+            swaggerDefinitionList.add(service.getAPISwaggerDefinition(apidto.getId(), accessToken));
+        }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
@@ -297,7 +328,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         try {
             policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
                     + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
-            codeGenerator.generate(projectName, apis, true);
+            codeGenerator.generate(projectName, apis, swaggerDefinitionList, true);
             //Initializing the ballerina project and creating .bal folder.
             InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                     new ArrayList<>(), null);
@@ -322,26 +353,18 @@ public class SetupCmd implements GatewayLauncherCmd {
 
             String encryptedCS = GatewayCmdUtils.encrypt(clientSecret, password);
             String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, password);
-            Token token = new TokenBuilder()
-                    .setPublisherEndpoint(publisherEndpoint)
-                    .setAdminEndpoint(adminEndpoint)
-                    .setRegistrationEndpoint(registrationEndpoint)
-                    .setTokenEndpoint(tokenEndpoint)
-                    .setUsername(username)
-                    .setClientId(clientID)
-                    .setClientSecret(encryptedCS)
-                    .setTrustStoreLocation(trustStoreLocation)
-                    .setTrustStorePassword(encryptedTrustStorePass)
-                    .build();
+            Token token = new TokenBuilder().setPublisherEndpoint(publisherEndpoint).setAdminEndpoint(adminEndpoint)
+                    .setRegistrationEndpoint(registrationEndpoint).setTokenEndpoint(tokenEndpoint).setUsername(username)
+                    .setClientId(clientID).setClientSecret(encryptedCS).setTrustStoreLocation(trustStoreLocation)
+                    .setTrustStorePassword(encryptedTrustStorePass).build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
             GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
 
         if (!changesDetected) {
-            outStream.println(
-                    "No changes received from the server since the previous setup." 
-                            + " If you have already a built distribution, it can be reused.");
+            outStream.println("No changes received from the server since the previous setup."
+                    + " If you have already a built distribution, it can be reused.");
         }
         outStream.println("Setting up project " + projectName + " is successful.");
 
@@ -361,25 +384,22 @@ public class SetupCmd implements GatewayLauncherCmd {
      * @param version API version
      */
     private void validateAPIGetRequestParams(String label, String apiName, String version) {
-        if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
-                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) || 
-                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) || 
-                (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
+        if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version)))
+                || StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version))
+                || (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) || (StringUtils.isNotEmpty(apiName)
+                && StringUtils.isEmpty(version))) {
             throw GatewayCmdUtils.createUsageException(
-                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) " 
-                            + "should be provided." 
-                            + "\n\nEx:\tmicro-gw setup accounts-project -l accounts" 
+                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) "
+                            + "should be provided." + "\n\nEx:\tmicro-gw setup accounts-project -l accounts"
                             + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
         }
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return GatewayCliCommands.SETUP;
     }
 
-    @Override
-    public void setParentCmdParser(JCommander parentCmdParser) {
+    @Override public void setParentCmdParser(JCommander parentCmdParser) {
     }
 
     private String promptForTextInput(String msg) {
@@ -394,43 +414,21 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     private void populateHosts(String host) {
         try {
-            publisherEndpoint = new URL(new URL(host), RESTServiceConstants.PUB_RESOURCE_PATH).toString();
-            adminEndpoint = new URL(new URL(host), RESTServiceConstants.ADMIN_RESOURCE_PATH).toString();
-            registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
-            tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
+            publisherEndpoint = (publisherEndpoint != null && !publisherEndpoint.isEmpty()) ?
+                    publisherEndpoint :
+                    new URL(new URL(host), RESTServiceConstants.PUB_RESOURCE_PATH).toString();
+            adminEndpoint = (adminEndpoint != null && !adminEndpoint.isEmpty()) ?
+                    adminEndpoint :
+                    new URL(new URL(host), RESTServiceConstants.ADMIN_RESOURCE_PATH).toString();
+            registrationEndpoint = (registrationEndpoint != null && !registrationEndpoint.isEmpty()) ?
+                    registrationEndpoint :
+                    new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
+            tokenEndpoint = (tokenEndpoint != null && !tokenEndpoint.isEmpty()) ?
+                    tokenEndpoint :
+                    new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();
         } catch (MalformedURLException e) {
             logger.error("Malformed URL provided {}", host);
             throw new CLIInternalException("Error occurred while setting up URL configurations.");
-        }
-    }
-
-    private static void init(String projectName, String configPath, String deploymentConfigPath) {
-        try {
-            GatewayCmdUtils.createProjectStructure(projectName);
-            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
-
-            Path configurationFile = Paths.get(configPath);
-            if (Files.exists(configurationFile)) {
-                Config config = TOMLConfigParser.parse(configPath, Config.class);
-                GatewayCmdUtils.setConfig(config);
-            } else {
-                logger.error("Configuration: {} Not found.", configPath);
-                throw new CLIInternalException("Error occurred while loading configurations.");
-            }
-
-            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
-            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            GatewayCmdUtils.setContainerConfig(containerConfig);
-
-            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setProjectName(projectName);
-            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
-        } catch (ConfigParserException e) {
-            logger.error("Error occurred while parsing the configurations {}", configPath, e);
-            throw new CLIInternalException("Error occurred while loading configurations.");
-        } catch (IOException e) {
-            logger.error("Error occurred while generating project configurationss", e);
-            throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }
 }
