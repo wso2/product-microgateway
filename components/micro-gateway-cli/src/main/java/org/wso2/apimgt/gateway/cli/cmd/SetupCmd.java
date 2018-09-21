@@ -110,6 +110,7 @@ import java.util.List;
 
     @SuppressWarnings ("unused") @Parameter (names = { "-f", "--force" }, hidden = true, arity = 0)
     private boolean isForcefully;
+
     @SuppressWarnings ("unused") @Parameter (names = { "-k", "--insecure" }, hidden = true, arity = 0)
     private boolean isInsecure;
 
