@@ -17,9 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.rest;
 
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public interface RESTAPIService {
      * @param accessToken access token
      * @return list of APIs belong to the given label
      */
-    List<ExtendedAPI> getAPIs(String labelName, String accessToken);
+    List<APIInfoDTO> getAPIs(String labelName, String accessToken);
 
     /**
      * Gets the API specified by name and version
@@ -42,7 +43,7 @@ public interface RESTAPIService {
      * @param accessToken access token
      * @return the API specified by name and version by calling the Publisher REST API
      */
-    ExtendedAPI getAPI(String apiName, String version, String accessToken);
+    APIDTO getAPI(String apiName, String version, String accessToken);
 
     /**
      * Get list of application
@@ -59,4 +60,6 @@ public interface RESTAPIService {
      * @return list of subscription policies
      */
     List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken);
+
+    String getAPISwaggerDefinition(String apiId, String accessToken) ;
 }

@@ -17,6 +17,7 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class APIListDTO  {
   private Integer count = null;
   private String next = null;
   private String previous = null;
-  private List<ExtendedAPI> list = new ArrayList<ExtendedAPI>();
+  private List<APIDTO> list = new ArrayList<APIDTO>();
   private APIListPaginationDTO pagination = null;
 
   
@@ -64,10 +65,10 @@ public class APIListDTO  {
   }
 
   @JsonProperty("list")
-  public List<ExtendedAPI> getList() {
+  public List<APIDTO> getList() {
     return list;
   }
-  public void setList(List<ExtendedAPI> list) {
+  public void setList(List<APIDTO> list) {
     this.list = list;
   }
 

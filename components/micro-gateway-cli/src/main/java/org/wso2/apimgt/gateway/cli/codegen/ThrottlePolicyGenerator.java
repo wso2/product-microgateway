@@ -24,12 +24,12 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicyInitializer;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -71,11 +71,11 @@ public class ThrottlePolicyGenerator {
      * @return list of {@code GenSrcFile}
      * @throws IOException when file operations fail
      */
-    private List<GenSrcFile> generateApplicationPolicies(List<ApplicationThrottlePolicyDTO> applicationPolicies)
+    private List<GenSrcFile> generateApplicationPolicies(List<org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO> applicationPolicies)
             throws IOException {
         ThrottlePolicy policyContext;
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        for (ApplicationThrottlePolicyDTO applicationPolicy : applicationPolicies) {
+        for (org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO applicationPolicy : applicationPolicies) {
             policyContext = new ThrottlePolicy().buildContext(applicationPolicy);
             sourceFiles.add(generatePolicy(policyContext));
         }

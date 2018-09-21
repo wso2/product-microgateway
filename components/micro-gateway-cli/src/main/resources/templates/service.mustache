@@ -7,6 +7,9 @@ import ballerina/time;
 
 import wso2/gateway;
 
+{{#endpointConfig}}
+{{>httpEndpoint}}
+{{/endpointConfig}}
 {{#equals endpointConfig.endpointType "http"}}
 {{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
@@ -65,49 +68,18 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     {{/if}}
         http:Response|error clientResponse;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#endpointConfig.prodEndpoints}}
-            {{#endpointConfig.sandEndpoints}}
+        {{#endpointConfig.0}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
-                } else {
-                    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                    clientResponse = {{qualifiedServiceName}}_Production->forward(urlPostfix, req);
+                    runtime:getInvocationContext().attributes["destination"] = "{{inline.endpointConfig.list.0.url}}";
                 }
-            {{/endpointConfig.sandEndpoints}}
-            {{^endpointConfig.sandEndpoints}}
-                if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
-                } else {
-                    http:Response res = new;
-                    res.statusCode = 403;
-                    json payload = {
-                        ERROR_CODE: "900901",
-                        ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
-                    };
-                    runtime:getInvocationContext().attributes["error_code"] = "900901";
-                    res.setPayload(payload);
-                    clientResponse = res;
+        {{/endpointConfig.0}}
+        {{#endpointConfig.1}}
+                else {
+                    clientResponse = {{qualifiedServiceName}}_Sandbox->forward(urlPostfix, req);
+                    runtime:getInvocationContext().attributes["destination"] = "{{inline.endpointConfig.list.0.url}}";
                 }
-            {{/endpointConfig.sandEndpoints}}
-        {{/endpointConfig.prodEndpoints}}
-        {{^endpointConfig.prodEndpoints}}
-            if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
-            } else {
-                http:Response res = new;
-                res.statusCode = 403;
-                json payload = {
-                    ERROR_CODE: "900901",
-                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
-                };
-                runtime:getInvocationContext().attributes["error_code"] = "900901";
-                res.setPayload(payload);
-                clientResponse = res;
-            }
-        {{/endpointConfig.prodEndpoints}}
+        {{/endpointConfig.1}}
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 
         match clientResponse {

@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.rest;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -25,17 +26,16 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.io.IOException;
 import java.net.URL;
@@ -45,8 +45,9 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
+
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
-    
+
     private String publisherEp;
     private String adminEp;
     private boolean inSecure;
@@ -60,10 +61,11 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     /**
      * @see RESTAPIService#getAPIs(String, String)
      */
-    public List<ExtendedAPI> getAPIs(String labelName, String accessToken) {
+    public List<APIInfoDTO> getAPIs(String labelName, String accessToken) {
         logger.debug("Retrieving APIs with label {}", labelName);
         URL url;
         HttpsURLConnection urlConn = null;
+        List<APIInfoDTO> apisList = new ArrayList<>();
         APIListDTO apiListDTO;
         //calling token endpoint
         try {
@@ -85,12 +87,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
-                for (ExtendedAPI api : apiListDTO.getList()) {
-                    setAdditionalConfigs(api);
+                for (APIDTO api : apiListDTO.getList()) {
+                    apisList.add(api);
                 }
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
@@ -107,18 +110,17 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
         }
         logger.debug("Retrieving APIs with label {} was successful.", labelName);
-        return apiListDTO.getList();
+        return apisList;
     }
-
 
     /**
      * @see RESTAPIService#getAPI(String, String, String)
      */
-    public ExtendedAPI getAPI(String apiName, String version, String accessToken) {
+    public APIDTO getAPI(String apiName, String version, String accessToken) {
         logger.debug("Retrieving API with name {}, version {}", apiName, version);
         URL url;
         HttpsURLConnection urlConn = null;
-        ExtendedAPI matchedAPI = null;
+        APIDTO apidto = null;
         //calling token endpoint
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
@@ -129,7 +131,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                             URLEncoder.encode(version, GatewayCliConstants.CHARSET_UTF8));
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
-            
+
             urlConn = (HttpsURLConnection) url.openConnection();
             if (inSecure) {
                 urlConn.setHostnameVerifier((s, sslSession) -> true);
@@ -145,19 +147,44 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
-                APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
+                org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO apiList = mapper
+                        .readValue(responseStr, org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO.class);
                 if (apiList != null) {
-                    for (ExtendedAPI api: apiList.getList()) {
+                    for (APIInfoDTO api : apiList.getList()) {
                         if (apiName.equals(api.getName()) && version.equals(api.getVersion())) {
-                            matchedAPI = api;
-                            break;
+                            HttpsURLConnection urlConn1 = null;
+                            try {
+                                String id = api.getId();
+                                String urlOfAPIget = publisherEp + "apis/" + id;
+                                logger.debug("GET API URL: {}", urlOfAPIget);
+                                url = new URL(urlOfAPIget);
+
+                                urlConn1 = (HttpsURLConnection) url.openConnection();
+                                if (inSecure) {
+                                    urlConn.setHostnameVerifier((s, sslSession) -> true);
+                                }
+                                urlConn1.setDoOutput(true);
+                                urlConn1.setRequestMethod(RESTServiceConstants.GET);
+                                urlConn1.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                                        RESTServiceConstants.BEARER + " " + accessToken);
+                                int responseCodeForGet = urlConn1.getResponseCode();
+                                if (responseCodeForGet == 200) {
+                                    ObjectMapper mapper1 = new ObjectMapper();
+                                    String responseStr1 = TokenManagementUtil
+                                            .getResponseString(urlConn1.getInputStream());
+                                    //convert json string to object
+                                    apidto = mapper1.readValue(responseStr1, APIDTO.class);
+                                }
+                            } finally {
+                                if (urlConn1 != null) {
+                                    urlConn1.disconnect();
+                                }
+                            }
                         }
                     }
-                    if (matchedAPI == null) {
-                        return matchedAPI;
-                    }
+
                     //set additional configs such as CORS configs from the toolkit configuration
-                    setAdditionalConfigs(matchedAPI);
+                    //setAdditionalConfigs(matchedAPI);
                 } else if (responseCode == 401) {
                     throw new CLIRuntimeException(
                             "Invalid user credentials or the user does not have required permissions");
@@ -176,10 +203,43 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
         }
         logger.debug("Retrieving API with name {}, version {} was successful.", apiName, version);
-        return matchedAPI;
+        return apidto;
     }
 
-    private void setAdditionalConfigs(ExtendedAPI api) throws IOException {
+    public String getAPISwaggerDefinition(String apiId, String accessToken) {
+        HttpsURLConnection urlConn1 = null;
+        String swagger = null;
+        URL url;
+        try {
+            String urlOfAPIget = publisherEp + "apis/" + apiId + "/swagger";
+            url = new URL(urlOfAPIget);
+
+            urlConn1 = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn1.setHostnameVerifier((s, sslSession) -> true);
+            }
+            urlConn1.setDoOutput(true);
+            urlConn1.setRequestMethod(RESTServiceConstants.GET);
+            urlConn1.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
+            int responseCodeForGet = urlConn1.getResponseCode();
+            if (responseCodeForGet == 200) {
+                ObjectMapper mapper1 = new ObjectMapper();
+                String responseStr1 = TokenManagementUtil.getResponseString(urlConn1.getInputStream());
+                //convert json string to object
+                swagger = responseStr1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (urlConn1 != null) {
+                urlConn1.disconnect();
+            }
+        }
+        return swagger;
+    }
+
+    /*private void setAdditionalConfigs(APIDTO api) throws IOException {
         String endpointConfig = api.getEndpointConfig();
         api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
         // set default values from config if per api cors is not enabled
@@ -194,7 +254,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 api.setCorsConfiguration(config.getCorsConfiguration());
             }
         }
-    }
+    }*/
 
     /**
      * @see RESTAPIService#getApplicationPolicies(String)
@@ -207,7 +267,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         //calling token endpoint
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
-            String urlStr = adminEp + "throttling/policies/application";
+            String urlStr = adminEp + "policies/throttling/application";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             if (inSecure) {
@@ -257,7 +317,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         //calling token endpoint
         adminEp = adminEp.endsWith("/") ? adminEp : adminEp + "/";
         try {
-            String urlStr = adminEp + "throttling/policies/subscription";
+            String urlStr = adminEp + "policies/throttling/subscription";
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             if (inSecure) {
@@ -270,6 +330,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 subsList = mapper.readValue(responseStr, SubscriptionThrottlePolicyListDTO.class);

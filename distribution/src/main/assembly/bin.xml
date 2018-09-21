@@ -116,6 +116,14 @@
             </includes>
         </dependencySet>
         <dependencySet>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/lib</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher:jar</include>
+                <include>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.admin:jar</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>

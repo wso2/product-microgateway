@@ -18,5 +18,10 @@ function initThrottlePolicies() {
 }
 
 function getDeployedPolicies() returns map {
+    {{#if policyNames}}
     return { {{#policyNames}}"{{.}}":true{{#unless @last}},{{/unless}}{{/policyNames}} };
+    {{else}}
+    map m;
+    return m;
+    {{/if}}
 }

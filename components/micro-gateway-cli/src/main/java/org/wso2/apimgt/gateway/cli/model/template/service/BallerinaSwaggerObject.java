@@ -18,7 +18,7 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 /**
  * Contract interface for creating a ballerina wrapper from a swagger parser object model.
@@ -46,7 +46,7 @@ public interface BallerinaSwaggerObject<C, D> {
      * @return parsed context model {@code C} of Open Api definition/component {@code D}
      * @throws BallerinaServiceGenException on error when parsing the Open Api definition
      */
-    C buildContext(D definition, ExtendedAPI api) throws BallerinaServiceGenException;
+    C buildContext(D definition, APIInfoDTO api) throws BallerinaServiceGenException;
 
     /**
      * Retrieve the default value for this type.

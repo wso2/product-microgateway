@@ -177,25 +177,31 @@ public class MockHttpServer extends Thread {
             });
             httpServer.createContext(PubRestAPIBasePath + "/apis", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
-
-                    String query = parseParas(exchange.getRequestURI()).get("query");
-                    String[] paras = URLDecoder.decode(query, GatewayCliConstants.CHARSET_UTF8).split(" ");
-                    String label = null;
-                    for (String para : paras) {
-                        String[] searchQuery = para.split(":");
-                        if ("label".equalsIgnoreCase(searchQuery[0])) {
-                            label = searchQuery[1];
-                        }
-                    }
-
-                    if (!StringUtils.isEmpty(label)) {
-                        byte[] response = MockAPIPublisher.getInstance().getAPIResponseForLabel(label).getBytes();
+                    if(exchange.getRequestURI().getPath().contains("swagger")) {
+                        byte[] response = MockAPIPublisher.getInstance().getSwaggerResponseForAPI().getBytes();
                         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                         exchange.getResponseBody().write(response);
                         exchange.close();
                     } else {
-                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-                        exchange.close();
+                        String query = parseParas(exchange.getRequestURI()).get("query");
+                        String[] paras = URLDecoder.decode(query, GatewayCliConstants.CHARSET_UTF8).split(" ");
+                        String label = null;
+                        for (String para : paras) {
+                            String[] searchQuery = para.split(":");
+                            if ("label".equalsIgnoreCase(searchQuery[0])) {
+                                label = searchQuery[1];
+                            }
+                        }
+
+                        if (!StringUtils.isEmpty(label)) {
+                            byte[] response = MockAPIPublisher.getInstance().getAPIResponseForLabel(label).getBytes();
+                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                            exchange.getResponseBody().write(response);
+                            exchange.close();
+                        } else {
+                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                            exchange.close();
+                        }
                     }
 
                 }
@@ -232,7 +238,7 @@ public class MockHttpServer extends Thread {
 
                 }
             });
-            httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/application", new HttpHandler() {
+            httpServer.createContext(AdminRestAPIBasePath + "/policies/throttling/application", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     String defaultPolicies = IOUtils.toString(new FileInputStream(
@@ -247,7 +253,7 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
-            httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/subscription", new HttpHandler() {
+            httpServer.createContext(AdminRestAPIBasePath + "/policies/throttling/subscription", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     String defaultPolicies = IOUtils.toString(new FileInputStream(
