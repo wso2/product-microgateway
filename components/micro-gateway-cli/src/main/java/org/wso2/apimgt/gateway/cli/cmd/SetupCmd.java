@@ -66,8 +66,8 @@ import java.util.List;
 /**
  * This class represents the "setup" command and it holds arguments and flags specified by the user.
  */
-@Parameters (commandNames = "setup", commandDescription = "setup information") public class SetupCmd
-        implements GatewayLauncherCmd {
+@Parameters (commandNames = "setup", commandDescription = "setup information")
+public class SetupCmd implements GatewayLauncherCmd {
 
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.err;
