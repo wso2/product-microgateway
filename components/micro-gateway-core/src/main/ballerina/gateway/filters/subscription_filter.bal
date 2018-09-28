@@ -54,6 +54,38 @@ public type SubscriptionFilter object {
                             json subscribedAPIList = decodedPayload.subscribedAPIs;
                             APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:
                                 getServiceAnnotations(filterContext.serviceType));
+                            if (subscribedAPIList != null){
+                                int l = lengthof subscribedAPIList;
+                                if (l == 0){
+                                    authenticationContext.authenticated = true;
+                                    authenticationContext.tier = "Unauthenticated";
+                                    authenticationContext.apiKey = jwtToken;
+                                    authenticationContext.username = decodedPayload.sub.toString();
+                                    if (decodedPayload.application.id != null) {
+                                        authenticationContext.applicationId = decodedPayload.application.id.toString();
+                                    } else {
+                                        authenticationContext.applicationId = "__unknown__";
+                                    }
+                                    if (decodedPayload.application.name != null) {
+                                        authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    } else {
+                                        authenticationContext.applicationName = "__unknown__";
+                                    }
+                                    if (decodedPayload.application.tier != null) {
+                                        authenticationContext.applicationTier = decodedPayload.application.tier.toString();
+                                    } else {
+                                        authenticationContext.applicationTier = "Unlimited";
+                                    }
+                                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
+                                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                                    authenticationContext.apiTier = "Unlimited";
+                                    authenticationContext.apiPublisher = "__unknown__";
+                                    authenticationContext.subscriberTenantDomain = "__unknown__";
+                                    authenticationContext.keyType = decodedPayload.keytype.toString();
+                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                                    return true;
+                                }
                             foreach subscription in subscribedAPIList {
                                 if (subscription.name.toString() == apiConfig.name &&
                                     subscription["version"].toString() == apiConfig.apiVersion) {
@@ -81,6 +113,27 @@ public type SubscriptionFilter object {
                                     printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
                                     return true;
                                 }
+                            }
+                            }
+                            else
+                            {
+                                authenticationContext.authenticated = true;
+                                authenticationContext.tier = "Unauthenticated";
+                                authenticationContext.apiKey = jwtToken;
+                                authenticationContext.username = decodedPayload.sub.toString();
+                                authenticationContext.applicationId = "__unknown__";
+                                authenticationContext.applicationName = "__unknown__";
+                                authenticationContext.applicationTier = "Unlimited";
+                                authenticationContext.subscriber = "__unknown__";
+                                authenticationContext.consumerKey = "__unknown__";
+                                authenticationContext.apiTier = "Unlimited";
+                                authenticationContext.apiPublisher = "__unknown__";
+                                authenticationContext.subscriberTenantDomain = "__unknown__";
+                                authenticationContext.keyType = "__unknown__";
+                                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType
+                                ;
+                                filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                                return true;
                             }
                             setErrorMessageToFilterContext(filterContext, API_AUTH_FORBIDDEN);
                             sendErrorResponse(listener, request, filterContext);

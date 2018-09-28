@@ -21,7 +21,6 @@ import io.swagger.models.Info;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
-import org.apache.commons.lang3.StringUtils;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
@@ -34,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Wrapper for {@link Swagger}.
@@ -106,8 +106,8 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             balPath.getOperations().forEach(operation -> {
                 if (operation.getValue().getOperationId() == null) {
-                    String pathName = path.getKey().substring(1); // need to drop '/' prefix from the key, ex:'/path'
-                    String operationId = operation.getKey() + CodegenUtils.trim(StringUtils.capitalize(pathName));
+                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
+                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                     operation.getValue().setOperationId(operationId);
                 }
             });
