@@ -121,7 +121,7 @@ public type AuthnFilter object {
                                 printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " + isAuthorized);
                                 if(isAuthorized) {
                                     authenticationContext.authenticated = true;
-                                    authenticationContext.tier = apiKeyValidationDto.tier;
+                                    authenticationContext.tier = UNAUTHENTICATED_TIER; // todo: set the proper tier
                                     authenticationContext.apiKey = token;
                                     if (apiKeyValidationDto.endUserName != "") {
                                         authenticationContext.username = apiKeyValidationDto.endUserName;
@@ -133,16 +133,12 @@ public type AuthnFilter object {
                                     authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
                                     authenticationContext.applicationId = apiKeyValidationDto.applicationId;
                                     authenticationContext.applicationName = apiKeyValidationDto.applicationName;
-                                    authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
+                                    authenticationContext.applicationTier = UNLIMITED_TIER; // todo: set the proper tier
                                     authenticationContext.subscriber = apiKeyValidationDto.subscriber;
                                     authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
                                     authenticationContext.apiTier = apiKeyValidationDto.apiTier;
                                     authenticationContext.subscriberTenantDomain = apiKeyValidationDto.subscriberTenantDomain;
-                                    authenticationContext.spikeArrestLimit = check <int> apiKeyValidationDto.spikeArrestLimit;
                                     authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                                    authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.stopOnQuotaReach;
-                                    authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
-                                    .contentAware;
                                     printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.callerToken);
                                     if(authenticationContext.callerToken != "" && authenticationContext.callerToken != null) {
                                         string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,

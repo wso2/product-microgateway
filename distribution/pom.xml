@@ -52,6 +52,14 @@
             <type>zip</type>
             <classifier>micro-gw-binary-repo</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

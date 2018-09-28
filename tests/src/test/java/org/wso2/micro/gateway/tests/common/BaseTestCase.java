@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.tests.common;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
@@ -77,7 +78,7 @@ public class BaseTestCase {
         MockAPIPublisher.getInstance().clear();
     }
 
-    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
+    protected String getJWT(APIDTO api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
             throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext( api.getContext() + "/" + api.getVersion());

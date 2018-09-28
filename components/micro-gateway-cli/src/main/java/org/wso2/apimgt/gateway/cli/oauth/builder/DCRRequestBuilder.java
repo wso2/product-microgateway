@@ -18,9 +18,12 @@
 package org.wso2.apimgt.gateway.cli.oauth.builder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.model.oauth.DCRRequest;
+
+import java.util.Arrays;
 
 public class DCRRequestBuilder {
     private DCRRequest dcrRequest;
@@ -60,7 +63,9 @@ public class DCRRequestBuilder {
     public DCRRequestBuilder setGrantTypes(String[] grantTypes) {
         String grantTypesStr = String.join(" ", grantTypes);
         this.dcrRequest.setGrantTypes(grantTypes);
-        this.request.put(TokenManagementConstants.GRANT_TYPE, grantTypesStr);
+        //this.request.put(TokenManagementConstants.GRANT_TYPE, grantTypesStr);
+        ArrayNode grantTypeArray = this.request.putArray(TokenManagementConstants.GRANT_TYPE);
+        Arrays.stream(grantTypes).forEach( val -> grantTypeArray.add(val));
         return this;
     }
 

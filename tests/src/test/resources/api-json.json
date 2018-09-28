@@ -1,70 +1,51 @@
 {
-  "id": "4a731db3-3a76-4950-a2d9-9778fd73b31c",
-  "name": "",
-  "description": "This is a simple API for Pizza Shack online pizza delivery store.",
-  "context": "",
-  "version": "",
-  "provider": "",
-  "status": "PUBLISHED",
-  "thumbnailUri": "/apis/4a731db3-3a76-4950-a2d9-9778fd73b31c/thumbnail",
-  "apiDefinition": "",
-  "wsdlUri": null,
-  "responseCaching": "Disabled",
-  "cacheTimeout": 300,
-  "destinationStatsEnabled": null,
-  "isDefaultVersion": false,
-  "type": "HTTP",
+  "name": "Swagger Petstore",
+  "context": "/v2",
+  "version": "1.0.0",
+  "description": "This is a sample server Petstore server.",
   "transport": [
     "http",
     "https"
   ],
-  "tags": [
-    "pizza"
-  ],
-  "tiers": [
-    "5min",
-    "Unlimited"
-  ],
-  "apiLevelPolicy": null,
-  "maxTps": null,
-  "visibility": "PUBLIC",
-  "visibleRoles": [],
-  "visibleTenants": [],
-  "endpointConfig": "",
-  "endpointSecurity": null,
-  "gatewayEnvironments": "Production and Sandbox",
-  "labels": [],
-  "sequences": [],
-  "subscriptionAvailability": null,
-  "subscriptionAvailableTenants": [],
-  "additionalProperties": {},
-  "accessControl": "NONE",
-  "accessControlRoles": [],
-  "businessInformation": {
-    "businessOwner": "Jane Roe",
-    "businessOwnerEmail": "marketing@pizzashack.com",
-    "technicalOwner": "John Doe",
-    "technicalOwnerEmail": "architecture@pizzashack.com"
-  },
-  "corsConfiguration": {
-    "corsConfigurationEnabled": false,
-    "accessControlAllowOrigins": [
-      "*"
-    ],
-    "accessControlAllowCredentials": false,
-    "accessControlAllowHeaders": [
-      "authorization",
-      "Access-Control-Allow-Origin",
-      "Content-Type",
-      "SOAPAction"
-    ],
-    "accessControlAllowMethods": [
-      "GET",
-      "PUT",
-      "POST",
-      "DELETE",
-      "PATCH",
-      "OPTIONS"
-    ]
-  }
+  "endpoint": [
+    {
+      "type": "Production",
+      "inline": {
+        "name": "Ep1",
+        "endpointConfig": {
+          "list": [
+            {
+              "url": "https://localhost:9095/",
+              "timeout": "1000"
+            }
+          ],
+          "endpointType": "SINGLE"
+        },
+        "endpointSecurity": {
+          "enabled": false
+        },
+        "type": "http"
+      }
+    },
+    {
+      "type": "Sandbox",
+      "inline": {
+        "name": "Ep2",
+        "endpointConfig": {
+          "list": [
+            {
+              "url": "https://localhost:9095/",
+              "timeout": "1000"
+            }
+          ],
+          "endpointType": "SINGLE"
+        },
+        "endpointSecurity": {
+          "enabled": false
+        },
+        "type": "http"
+      }
+    }
+  ]
+
 }

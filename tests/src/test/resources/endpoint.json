@@ -1,11 +1,40 @@
-{
-  "production_endpoints": {
-    "url": "",
-    "config": null
+[
+  {
+    "type": "Production",
+    "inline": {
+      "name": "Ep1",
+      "endpointConfig": {
+        "list": [
+          {
+            "url": "serviceUrl",
+            "timeout": "1000"
+          }
+        ],
+        "endpointType": "SINGLE"
+      },
+      "endpointSecurity": {
+        "enabled": false
+      },
+      "type": "http"
+    }
   },
-  "sandbox_endpoints": {
-    "url": "",
-    "config": null
-  },
-  "endpoint_type": "http"
-}
+  {
+    "type": "Sandbox",
+    "inline": {
+      "name": "Ep2",
+      "endpointConfig": {
+        "list": [
+          {
+            "url": "serviceUrl",
+            "timeout": "1000"
+          }
+        ],
+        "endpointType": "SINGLE"
+      },
+      "endpointSecurity": {
+        "enabled": false
+      },
+      "type": "http"
+    }
+  }
+]

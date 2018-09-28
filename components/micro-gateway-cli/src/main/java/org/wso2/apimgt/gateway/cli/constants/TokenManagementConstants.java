@@ -24,7 +24,7 @@ public class TokenManagementConstants {
     public static final String TOKEN_SCOPE_PRODUCTION = "PRODUCTION";
     public static final String OWNER = "owner";
     public static final String SAAS_APP = "saasApp";
-    public static final String GRANT_TYPE = "grantType";
+    public static final String GRANT_TYPE = "grant_types";
     public static final String APPLICATION_NAME = "Micro Gateway Cli";
     public static final String APPLICATION_CALLBACK_URL = "https://wso2.org";
     public static final String POLICY_VIEW_TOKEN_SCOPE = "apim:tier_view";

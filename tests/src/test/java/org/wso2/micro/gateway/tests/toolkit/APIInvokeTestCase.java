@@ -22,11 +22,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class APIInvokeTestCase extends BaseTestCase {
+
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
@@ -43,11 +44,9 @@ public class APIInvokeTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        API api = new API();
+        APIDTO api = new APIDTO();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -86,8 +85,7 @@ public class APIInvokeTestCase extends BaseTestCase {
         super.init(label, project);
     }
 
-    @Test(description = "Test API invocation with a oauth token")
-    public void testApiInvoke() throws Exception {
+    @Test (description = "Test API invocation with a oauth token") public void testApiInvoke() throws Exception {
         //test prod endpoint
         invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
@@ -95,8 +93,7 @@ public class APIInvokeTestCase extends BaseTestCase {
         invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
     }
 
-    @Test(description = "Test API invocation with a JWT token")
-    public void testApiInvokeWithJWT() throws Exception {
+    @Test (description = "Test API invocation with a JWT token") public void testApiInvokeWithJWT() throws Exception {
         //test prod endpoint with jwt token
         invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
@@ -105,7 +102,7 @@ public class APIInvokeTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
         //test invoking with an expired JWT token
@@ -133,8 +130,7 @@ public class APIInvokeTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
-    @AfterClass
-    public void stop() throws Exception {
+    @AfterClass public void stop() throws Exception {
         //Stop all the mock servers
         super.finalize();
     }

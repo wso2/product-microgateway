@@ -26,12 +26,12 @@ import io.swagger.parser.SwaggerParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,28 +52,18 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, List<ExtendedAPI> apis, boolean overwrite)
+    public void generate(String projectName, List<APIInfoDTO> apis, List<String> swaggerDefs, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
-        String projectSrcPath = GatewayCmdUtils
-                .getProjectSrcDirectoryPath(projectName);
+        String projectSrcPath = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
-        for (ExtendedAPI api : apis) {
+        for (int apiCount = 0; apiCount < apis.size(); apiCount++) {
             parser = new SwaggerParser();
-            swagger = parser.parse(api.getApiDefinition());
+            APIInfoDTO api = apis.get(apiCount);
+            swagger = parser.parse(swaggerDefs.get(apiCount));
             definitionContext = new BallerinaService().buildContext(swagger, api);
-            // we need to generate the bal service for default versioned apis as well
-            if(definitionContext.getApi().getIsDefaultVersion()) {
-                // without building the definitionContext again we use the same context to build default version as
-                // well. Hence setting the default version as false to generate the api with base path having version.
-                definitionContext.getApi().setIsDefaultVersion(false);
-                genFiles.add(generateService(definitionContext));
-                definitionContext.getApi().setIsDefaultVersion(true);
-                definitionContext.setQualifiedServiceName(CodegenUtils.trim(api.getName()));
-            }
-
             genFiles.add(generateService(definitionContext));
 
         }
@@ -82,7 +72,6 @@ public class CodeGenerator {
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-
 
     }
 
@@ -114,7 +103,6 @@ public class CodeGenerator {
                 GeneratorConstants.LISTENERS_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
-
 
     /**
      * Retrieve generated source content as a String value.

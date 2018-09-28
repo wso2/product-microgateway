@@ -26,6 +26,16 @@ public class OAuthTokenRequest {
     private String username;
     private String grantType;
 
+    public String getValidityPeriod() {
+        return validityPeriod;
+    }
+
+    public void setValidityPeriod(String validityPeriod) {
+        this.validityPeriod = validityPeriod;
+    }
+
+    private String validityPeriod;
+
     public char[] getClientSecret() {
         return clientSecret;
     }
