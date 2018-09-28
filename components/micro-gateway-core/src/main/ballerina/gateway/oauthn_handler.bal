@@ -176,25 +176,14 @@ function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequest
     boolean authorized = false;
     json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
     printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationInfoJson.toString());
-    match <string>keyValidationInfoJson.authorized {
-        string authorizeValue => {
+    string authorizeValue = keyValidationInfoJson.active.toString();
             boolean auth = <boolean>authorizeValue;
             printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
             if (auth) {
-                match <APIKeyValidationDto>keyValidationInfoJson {
-                    APIKeyValidationDto dto => {
-                        apiKeyValidationDto = dto;
-                        // specifically setting the key type since type is a keyword in ballerina.
-                        apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
-                        printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
-                    }
-                    error err => {
-                        log:printError(
-                            "Error while converting key validation response json to type APIKeyValidationDto"
-                            , err = err);
-                        throw err;
-                    }
-                }
+                apiKeyValidationDto.authorized = "true";
+                apiKeyValidationDto.consumerKey = keyValidationInfoJson.client_id.toString();
+                apiKeyValidationDto.endUserName = keyValidationInfoJson.username.toString();
+                apiKeyValidationDto.validityPeriod = keyValidationInfoJson.exp.toString();
                 authorized = auth;
                 if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                     string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
@@ -208,13 +197,8 @@ function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequest
                     self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
                 }
             }
-        }
-        error err => {
-            log:printError("Error occurred while converting the authorized value from the key validation response to a
-                            string value", err = err);
-            throw err;
-        }
-    }
+
+
     return (authorized, apiKeyValidationDto);
 
 }
@@ -228,35 +212,16 @@ function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMet
 
         http:Request keyValidationRequest = new;
         http:Response keyValidationResponse = new;
-        xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
-        xmlns "http://org.apache.axis2/xsd" as xsd;
-        xml contextXml = xml `<xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>`;
-        xml versionXml = xml `<xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>`;
-        xml tokenXml = xml `<xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>`;
-        xml authLevelXml = xml `<xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto
-        .requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>`;
-        xml clientDomainXml = xml `<xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>`;
-        xml resourceXml = xml `<xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>`;
-        xml httpVerbXml = xml `<xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>`;
-        xml soapBody = xml`<soapenv:Body></soapenv:Body>`;
-        xml validateXml = xml`<xsd:validateKey></xsd:validateKey>`;
-        xml requestValuesxml = contextXml + versionXml + tokenXml + authLevelXml + clientDomainXml + resourceXml +
-            httpVerbXml;
-        validateXml.setChildren(requestValuesxml);
-        soapBody.setChildren(validateXml);
-        xml soapEnvelope = xml `<soapenv:Envelope></soapenv:Envelope>`;
-        soapEnvelope.setChildren(soapBody);
-        keyValidationRequest.setXmlPayload(soapEnvelope);
-        keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, "text/xml");
-        keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
-                encodedBasicAuthHeader);
-        keyValidationRequest.setHeader("SOAPAction", "urn:validateKey");
+        string payload  = "token=" + apiRequestMetaDataDto.accessToken;
+        keyValidationRequest.setTextPayload(payload);
+        keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, X_WWW_FORM_URLENCODED);
+        keyValidationRequest.setHeader(ACCEPT, APPLICATION_JSON);
         time:Time time = time:currentTime();
         int startTimeMills = time.time;
-        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
+        var result1 = keyValidationEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", keyValidationRequest);
         time = time:currentTime();
         int endTimeMills = time.time;
-        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
+        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key introspect call : " + (endTimeMills -
                     startTimeMills) + "ms");
         match result1 {
             error err => {
@@ -267,20 +232,19 @@ function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMet
                 keyValidationResponse = prod;
             }
         }
-        xml responsepayload;
-        match keyValidationResponse.getXmlPayload() {
+        json responsepayload;
+        match keyValidationResponse.getJsonPayload() {
             error err => {
-                log:printError("Error occurred while getting the key validation service XML response payload ",err=err);
+                log:printError("Error occurred while getting the key validation service JSON response payload ",
+                    err=err);
                 return {};
             }
-            xml responseXml => {
-                responsepayload = responseXml;
-                printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responsepayload.getTextValue());
+            json responseJson => {
+                responsepayload = responseJson;
+                printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responsepayload.toString());
             }
         }
-        json payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
-        payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
-        return(payloadJson);
+        return responsepayload;
 
     } catch (error err) {
         log:printError("Error occurred while validating the token",err =err);
