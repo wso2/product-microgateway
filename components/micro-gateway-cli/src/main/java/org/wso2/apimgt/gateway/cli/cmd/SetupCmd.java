@@ -54,12 +54,15 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,8 +95,14 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseUrl;
 
-    @Parameter(names = { "-e", "--external" }, hidden = true)
+    @Parameter(names = { "-o", "--open-api" }, hidden = true)
     private String external;
+
+    @Parameter(names = { "-e", "--endpoint" }, hidden = true)
+    private String endpoint;
+
+    @Parameter(names = { "-ec", "--endpointConfig" }, hidden = true)
+    private String endpointConfig;
 
     @Parameter(names = {"-t", "--truststore"}, hidden = true)
     private String trustStoreLocation;
@@ -159,7 +168,16 @@ public class SetupCmd implements GatewayLauncherCmd {
             String api = ExternalUtils.readApi(external);
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
-                codeGenerator.generateSwagger(projectName, api, "{\"production_endpoints\":{\"url\":\"http://0.0.0.0:9090/hello/sayHello\",\"config\":null,\"template_not_supported\":false},\"endpoint_type\":\"http\"}", true);
+                if (StringUtils.isEmpty(endpointConfig)) {
+                    if (StringUtils.isEmpty(endpoint)) {
+                        if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
+                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                        }
+                    }
+                    endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
+                            "\"},\"endpoint_type\":\"http\"}";
+                }
+                codeGenerator.generateSwagger(projectName, api, endpointConfig, true);
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
@@ -300,6 +318,9 @@ public class SetupCmd implements GatewayLauncherCmd {
                     apis.add(api);
                 }
             }
+
+
+
             if (apis == null || (apis != null && apis.isEmpty())) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);

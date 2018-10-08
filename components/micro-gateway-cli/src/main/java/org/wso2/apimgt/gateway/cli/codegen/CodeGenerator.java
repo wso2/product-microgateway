@@ -134,13 +134,13 @@ public class CodeGenerator {
                 .build();
         return template.apply(context);
     }
-public void generateSwagger(String projectName, String apiDef, String endpointDef, boolean overwrite)
+
+    public void generateSwagger(String projectName, String apiDef, String endpointDef, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
-        String projectSrcPath = GatewayCmdUtils
-                .getProjectSrcDirectoryPath(projectName);
+        String projectSrcPath = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
 
         parser = new SwaggerParser();
