@@ -31,12 +31,14 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.ExternalUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -131,5 +133,34 @@ public class CodeGenerator {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
         return template.apply(context);
+    }
+public void generateSwagger(String projectName, String apiDef, String endpointDef, boolean overwrite)
+            throws IOException, BallerinaServiceGenException {
+        BallerinaService definitionContext;
+        SwaggerParser parser;
+        Swagger swagger;
+        String projectSrcPath = GatewayCmdUtils
+                .getProjectSrcDirectoryPath(projectName);
+        List<GenSrcFile> genFiles = new ArrayList<>();
+
+        parser = new SwaggerParser();
+        swagger = parser.parse(apiDef);
+        ExtendedAPI api = new ExtendedAPI();
+        api.setName(swagger.getInfo().getTitle());
+        api.setVersion(swagger.getInfo().getVersion());
+        api.setContext(swagger.getBasePath());
+        api.setEndpointConfig(endpointDef);
+        api.setTransport(Arrays.asList("http", "https"));
+        ExternalUtils.setAdditionalConfigs(api);
+        definitionContext = new BallerinaService().buildContext(swagger, api);
+        genFiles.add(generateService(definitionContext));
+
+        genFiles.add(generateCommonEndpoints());
+        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
+                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
+                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+        GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), projectSrcPath
+                + File.separator + GatewayCliConstants.GW_DIST_POLICIES);
     }
 }

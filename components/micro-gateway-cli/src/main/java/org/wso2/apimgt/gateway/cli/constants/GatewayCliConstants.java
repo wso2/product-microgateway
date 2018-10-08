@@ -48,6 +48,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_CONF = "conf";
     public static final String GW_DIST_RESOURCES = "resources";
     public static final String GW_DIST_FILTERS = "filters";
+    public static final String GW_DIST_POLICIES = "policies";
     public static final String GW_DIST_RUNTIME = "runtime";
     public static final String GW_DIST_EXEC = "exec";
     public static final String GW_DIST_SH = "gateway";
