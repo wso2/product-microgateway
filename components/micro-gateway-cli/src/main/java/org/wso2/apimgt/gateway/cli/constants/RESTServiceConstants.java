@@ -17,6 +17,12 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
+import io.swagger.util.Json;
+
+import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
+
 public class RESTServiceConstants {
 
     public static final String ENDPOINT_TYPE = "endpoint_type";
@@ -46,4 +52,7 @@ public class RESTServiceConstants {
     public static final String DEFAULT_HOST = "https://localhost:9443/";
     public static final String DEFAULT_TRUSTSTORE_PATH = "lib/platform/bre/security/ballerinaTruststore.p12";
     public static final String DEFAULT_TRUSTSTORE_PASS = "ballerina";
+    public static final String DEFAULT_KEYSTORE_PATH = "lib/platform/bre/security/ballerinaKeystore.p12";
+    public static final String DEFAULT_KEYSTORE_PASS = "ballerina";
+
 }

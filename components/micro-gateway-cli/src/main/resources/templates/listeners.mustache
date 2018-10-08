@@ -2,7 +2,9 @@ import wso2/gateway;
 import ballerina/http;
 
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
-{{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
+{{#if containerConfig.kubernetes.kubernetesService.enabl
+      e}}import ballerinax/kubernetes;{{/if}}
+{{#if config.hasMutualSSL}}import ballerinax/log;{{/if}}
 
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
@@ -24,7 +26,12 @@ ExtensionFilter extensionFilter;
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095,
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
+    {{>mutualSSL}}
+
+    filters:[  subscriptionFilter, analyticsFilter,
+    extensionFilter]
+
+
 };
 
 {{>kubernetesIngress}}

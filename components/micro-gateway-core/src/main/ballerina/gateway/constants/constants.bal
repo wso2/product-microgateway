@@ -104,6 +104,8 @@
 @final public string ANY_AUTHENTICATION_LEVEL = "Any";
 @Description { value: "API Name attribute" }
 @final public string API_VERSION = "apiVersion";
+@Description { value: "MutualSSl enable" }
+@final public string IS_AUTHENTICATED= "isAuthenticated";
 
 @Description { value: "Filter has return false" }
 @final public string FILTER_FAILED = "filter_failed";
@@ -127,6 +129,7 @@
 @final public string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
 @final public string THROTTLE_FILTER = "THROTTLE_FILTER";
 @final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
+@final public string MUTUAL_SSL_FILTER= "MUTUAL_SSL_FILTER";
 
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 @final public string KEY_TYPE_ATTR = "KEY_TYPE";
@@ -246,6 +249,21 @@
 @Description { value: "Set of filters to be enabled"}
 @final public string FILTERS = "filters";
 
+@Description { value: "Mutual SSL related configs"}
+@final public string MTSL_CONF_INSTANCE_ID = "mtslConfig";
+@Description { value: "MutualSSL protocol name"}
+@final public string MTSL_CONF_PROTOCOL_NAME = "protocolName";
+@Description { value: "MutualSSL protocol versions"}
+@final public string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
+@Description { value: "MutualSSL ciphers"}
+@final public string MTSL_CONF_CIPHERS = "ciphers";
+@Description { value: "MutualSSL Verification"}
+@final public string MTSL_CONF_SSLVERIFYCLIENT = "sslVerifyClient";
+@Description { value: "MutualSSL Enabling"}
+@final public string MTSL_CONF_ENABLE = "MTSLEnable";
+
+
+
 @Description { value: "Authentication related configs"}
 @final public string AUTH_CONF_INSTANCE_ID = "authConfig";
 @Description { value: "The authoization header config name"}
@@ -318,6 +336,7 @@
 @final string KEY_SUBSCRIPTION_FILTER = "SubscriptionFilter";
 @final string KEY_THROTTLE_FILTER = "ThrottleFilter";
 @final string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
+@final string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
 @final string KEY_THROTTLE_UTIL = "ThrottleUtil";
 @final string KEY_GW_CACHE = "GatewayCache";
 @final string KEY_UTILS = "Utils";

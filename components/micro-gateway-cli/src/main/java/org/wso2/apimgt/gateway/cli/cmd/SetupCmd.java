@@ -37,6 +37,10 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
@@ -113,6 +117,12 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     @SuppressWarnings ("unused") @Parameter (names = { "-k", "--insecure" }, hidden = true, arity = 0)
     private boolean isInsecure;
+
+
+    @Parameter(names = { "-enableMTSL" }, hidden = true, arity = 0)
+    private boolean mtsl;
+
+
 
     private String publisherEndpoint;
     private String adminEndpoint;
