@@ -37,11 +37,7 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -51,6 +47,7 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
+import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -118,6 +115,12 @@ public class SetupCmd implements GatewayLauncherCmd {
     @SuppressWarnings("unused")
     @Parameter(names = { "-k", "--insecure" }, hidden = true, arity = 0)
     private boolean isInsecure;
+
+
+    @Parameter(names = { "-enableMTSL" }, hidden = true, arity = 0)
+    private boolean mtsl;
+
+
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -238,6 +241,12 @@ public class SetupCmd implements GatewayLauncherCmd {
             logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
             throw new CLIRuntimeException("Provided trust store location does not exist.");
         }
+        if(mtsl){
+            MutualSSL mutualSSL= new MutualSSL();
+            mutualSSL.setSslVerify(true);
+            config.setMutualSSL(mutualSSL);
+        }
+
 
         //set the trustStore
         System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
