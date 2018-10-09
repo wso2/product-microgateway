@@ -149,7 +149,7 @@ public type AuthnFilter object {
                                     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
                                     // setting keytype to invocationContext
-                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = "PRODUCTION"; // key  type not returned by introspect call
                                     runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
                                     authContext.scheme = AUTH_SCHEME_OAUTH2;
                                     authContext.authToken = token;

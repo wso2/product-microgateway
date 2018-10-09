@@ -184,6 +184,7 @@ function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequest
                 apiKeyValidationDto.consumerKey = keyValidationInfoJson.client_id.toString();
                 apiKeyValidationDto.endUserName = keyValidationInfoJson.username.toString();
                 apiKeyValidationDto.validityPeriod = keyValidationInfoJson.exp.toString();
+                apiKeyValidationDto.issuedTime = keyValidationInfoJson.iat.toString();
                 authorized = auth;
                 if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                     string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
@@ -192,7 +193,7 @@ function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequest
                 }
             } else {
                 apiKeyValidationDto.authorized = "false";
-                apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.validationStatus;
+                apiKeyValidationDto.validationStatus = API_AUTH_INVALID_CREDENTIALS_STRING;
                 if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                     self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
                 }
