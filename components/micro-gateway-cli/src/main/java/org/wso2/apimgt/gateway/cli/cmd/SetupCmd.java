@@ -68,7 +68,7 @@ import java.util.List;
 @Parameters(commandNames = "setup", commandDescription = "setup information")
 public class SetupCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
-    private static PrintStream outStream = System.err;
+    private static PrintStream outStream = System.out;
 
     @SuppressWarnings("unused")
     @Parameter(hidden = true, required = true)
