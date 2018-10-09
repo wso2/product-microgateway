@@ -38,7 +38,7 @@ import java.util.List;
 @Parameters(commandNames = "build", commandDescription = "micro gateway build information")
 public class BuildCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
-    private static PrintStream outStream = System.err;
+    private static PrintStream outStream = System.out;
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
