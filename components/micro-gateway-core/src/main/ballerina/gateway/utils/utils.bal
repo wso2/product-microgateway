@@ -227,7 +227,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     int validityPeriod = check <int>apiKeyValidationDto.validityPeriod;
     int issuedTime = check <int>apiKeyValidationDto.issuedTime;
     int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
-    int currentTime = time:currentTime().time;
+    int currentTime = time:currentTime().time/1000; // current time in milli seconds
     int intMaxValue = 9223372036854775807;
     if (validityPeriod != intMaxValue &&
             // For cases where validityPeriod is closer to int.MAX_VALUE (then issuedTime + validityPeriod would spill
