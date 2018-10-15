@@ -5,7 +5,8 @@ import ballerina/http;
 {{#if containerConfig.kubernetes.kubernetesService.enabl
       e}}import ballerinax/kubernetes;{{/if}}
 {{#if config.hasMutualSSL}}import ballerinax/log;{{/if}}
-
+//Mutual_SSL filter
+gateway: MTSLfilter mtslFilter = new;
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter
@@ -28,7 +29,7 @@ endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095,
     {{>mutualSSL}}
 
-    filters:[  subscriptionFilter, analyticsFilter,
+    filters:[  mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter,
     extensionFilter]
 
 
