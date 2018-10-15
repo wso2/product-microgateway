@@ -42,11 +42,20 @@ public type OAuthzFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
         boolean {
-        int startingTime = getCurrentTime();
-        checkOrSetMessageID(context);
-        boolean result = doFilterRequest(listener, request, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
-        return result;
+
+        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
+
+        if(!checkAuthentication.equalsIgnoreCase("require")){
+            //Setting UUID
+            int startingTime = getCurrentTime();
+            checkOrSetMessageID(context);
+            boolean result = doFilterRequest(listener, request, context);
+            setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
+            return result;
+        }else{
+            // Skip this filter is mutualSSL is enabled.
+            return true;
+        }
     }
 
     public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns

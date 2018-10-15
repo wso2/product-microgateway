@@ -35,11 +35,13 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
             boolean {
+
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doFilterRequest(listener, request, context);
         setLatency(startingTime, context, THROTTLE_LATENCY);
         return result;
+
     }
 
     @Description { value: "Filter function implementation which tries to throttle the request" }
