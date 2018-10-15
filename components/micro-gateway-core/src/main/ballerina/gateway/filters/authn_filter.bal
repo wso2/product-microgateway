@@ -39,11 +39,11 @@ public type AuthnFilter object {
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
-        returns boolean {
+                        returns boolean {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
+        //Setting UUID
         if(!checkAuthentication.equalsIgnoreCase("require")){
-            //Setting UUID
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
@@ -55,12 +55,11 @@ public type AuthnFilter object {
             return true;
         }
 
-
     }
 
     @Description {value:"filterRequest: Request filter function"}
     public function doFilterRequest (http:Listener listener, http:Request request, http:FilterContext context)
-            returns boolean {
+                        returns boolean {
         runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
         printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
 
@@ -103,7 +102,7 @@ public type AuthnFilter object {
                     }
                     request.setHeader(AUTH_HEADER, authHeader);
                     printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
-                    + " with default the auth header:" + AUTH_HEADER);
+                            + " with default the auth header:" + AUTH_HEADER);
                 }
 
                 try {
@@ -217,11 +216,11 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
     string[] authProviderIds = [];
     // get authn details from the resource level
     http:ListenerAuthConfig? resourceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
-    RESOURCE_ANN_NAME,
-    reflect:getResourceAnnotations(context.serviceType, context.resourceName));
+        RESOURCE_ANN_NAME,
+        reflect:getResourceAnnotations(context.serviceType, context.resourceName));
     http:ListenerAuthConfig? serviceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
-    SERVICE_ANN_NAME,
-    reflect:getServiceAnnotations(context.serviceType));
+        SERVICE_ANN_NAME,
+        reflect:getServiceAnnotations(context.serviceType));
     // check if authentication is enabled
     resourceSecured = isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further
@@ -270,5 +269,4 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
 }
-
 
