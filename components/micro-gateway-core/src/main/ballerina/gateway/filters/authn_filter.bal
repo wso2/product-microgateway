@@ -40,13 +40,22 @@ public type AuthnFilter object {
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
         returns boolean {
-        //Setting UUID
-        int startingTime = getCurrentTime();
-        context.attributes[REQUEST_TIME] = startingTime;
-        checkOrSetMessageID(context);
-        boolean result = doFilterRequest (listener, request, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
-        return result;
+
+        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
+        if(!checkAuthentication.equalsIgnoreCase("require")){
+            //Setting UUID
+            int startingTime = getCurrentTime();
+            context.attributes[REQUEST_TIME] = startingTime;
+            checkOrSetMessageID(context);
+            boolean result = doFilterRequest (listener, request, context);
+            setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
+            return result;
+        }else{
+            // Skip this filter is mutualSSL is enabled.
+            return true;
+        }
+
+
     }
 
     @Description {value:"filterRequest: Request filter function"}
