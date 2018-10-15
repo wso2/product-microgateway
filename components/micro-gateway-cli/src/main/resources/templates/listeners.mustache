@@ -1,12 +1,12 @@
 import wso2/gateway;
 import ballerina/http;
+import ballerina/log;
 
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
-{{#if containerConfig.kubernetes.kubernetesService.enabl
-      e}}import ballerinax/kubernetes;{{/if}}
-{{#if config.hasMutualSSL}}import ballerinax/log;{{/if}}
-//Mutual_SSL filter
-gateway: MTSLfilter mtslFilter = new;
+{{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
+
+//Get mutualSSL filter
+gateway: MTSLfilter  mtslFilter= new;
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter
@@ -28,18 +28,15 @@ ExtensionFilter extensionFilter;
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095,
     {{>mutualSSL}}
-
-    filters:[  mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter,
-    extensionFilter]
-
-
+    filters:[ mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter,
+analyticsFilter, extensionFilter]
 };
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
     port:9090,
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
+    filters:[  authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };
 
 function getAuthenticationFilter() returns gateway:AuthnFilter {
