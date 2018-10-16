@@ -75,7 +75,7 @@ public type EndpointConfiguration record {
     int port = 9090,
     http:KeepAlive keepAlive = "AUTO",
     http:ServiceSecureSocket? secureSocket,
-    string httpVersion = "1.1",
+    string httpVersion = "2.0",
     http:RequestLimits? requestLimits,
     http:Filter[] filters,
     int timeoutMillis = DEFAULT_LISTENER_TIMEOUT,
