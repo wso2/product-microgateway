@@ -36,6 +36,8 @@ ExtensionFilter extensionFilter;
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
+    port:9095{{>http2}},
+    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 port:9095,
 {{>mutualSSL}}
 filters:[ mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter,
@@ -45,6 +47,8 @@ analyticsFilter, extensionFilter]
 {{>kubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
+    port:9090{{>http2}},
+    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 port:9090,
 filters:[  authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };

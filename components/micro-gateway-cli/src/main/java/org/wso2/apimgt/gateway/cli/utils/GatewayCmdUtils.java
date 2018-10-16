@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.HTTP2;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
 import java.io.BufferedReader;
@@ -53,6 +54,16 @@ public class GatewayCmdUtils {
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
+
+    public static HTTP2 getHttp2() {
+        return http2;
+    }
+
+    public static void setHttp2(HTTP2 http2) {
+        GatewayCmdUtils.http2 = http2;
+    }
+
+    private static HTTP2 http2;
 
     public static Config getConfig() {
         return config;
@@ -285,7 +296,7 @@ public class GatewayCmdUtils {
      * Create a micro gateway distribution for the provided project name
      *
      * @param projectName   name of the project
-     * @throws IOException erro while creating micro gateway distribution
+     * @throws IOException error while creating micro gateway distribution
      */
     public static void createProjectGWDistribution(String projectName) throws IOException {
         createTargetGatewayDistStructure(projectName);
