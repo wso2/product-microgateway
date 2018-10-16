@@ -49,7 +49,7 @@ public class CodeGenerator {
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
-     * <p>Method can be user for generating Ballerina mock services and clients</p>
+     * <p>Method can be used for generating Ballerina mock services and clients</p>
      *
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
