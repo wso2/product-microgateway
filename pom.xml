@@ -48,7 +48,7 @@
     <modules>
         <module>components</module>
         <module>distribution</module>
-        <!--<module>tests</module>-->
+        <module>tests</module>
     </modules>
 
     <repositories>

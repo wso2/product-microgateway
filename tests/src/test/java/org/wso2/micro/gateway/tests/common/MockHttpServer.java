@@ -20,7 +20,6 @@ package org.wso2.micro.gateway.tests.common;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
@@ -35,6 +34,18 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -43,24 +54,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Mock http server for key-manager and APIM rest api endpoints
@@ -77,11 +70,6 @@ public class MockHttpServer extends Thread {
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
 
-    public static void main(String[] args) {
-
-        MockHttpServer mockHttpServer = new MockHttpServer(9443);
-        mockHttpServer.start();
-    }
 
     public MockHttpServer(int KMServerPort) {
 
@@ -159,6 +147,32 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
+            httpServer.createContext("/api/identity/oauth2/introspect/v1.0/introspect", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    String requestBody = IOUtils.toString(exchange.getRequestBody());
+                    JSONObject payload = new JSONObject();
+                    String[] payloadParams = requestBody.split("=");
+                    if (payloadParams.length > 1 && MockAPIPublisher.getInstance().getIntrospectInfo()
+                            .containsKey(payloadParams[1])) {
+                        IntrospectInfo info = MockAPIPublisher.getInstance().getIntrospectInfo().get(payloadParams[1]);
+                        payload.put("active", info.isActive());
+                        payload.put("client_id", info.getClientId());
+                        payload.put("iat", info.getIat());
+                        payload.put("exp", info.getExp());
+                        payload.put("scope", info.getScopes());
+                        payload.put("username", info.getUsername());
+
+                    } else {
+                        payload.put("active", false);
+                    }
+
+                    byte[] response = payload.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
             httpServer.createContext("/oauth2/token", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
@@ -188,7 +202,7 @@ public class MockHttpServer extends Thread {
                         String label = null;
                         for (String para : paras) {
                             String[] searchQuery = para.split(":");
-                            if ("label".equalsIgnoreCase(searchQuery[0])) {
+                            if ("gatewayLabel".equalsIgnoreCase(searchQuery[0])) {
                                 label = searchQuery[1];
                             }
                         }
