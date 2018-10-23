@@ -1,6 +1,6 @@
 {
-  "name": "Swagger Petstore",
-  "context": "/v2",
+  "name": "PizzaShackAPI",
+  "context": "/pizzashack",
   "version": "1.0.0",
   "description": "This is a sample server Petstore server.",
   "transport": [
@@ -15,7 +15,7 @@
         "endpointConfig": {
           "list": [
             {
-              "url": "https://localhost:9095/",
+              "url": "https://localhost:9443/echo/prod",
               "timeout": "1000"
             }
           ],
@@ -34,7 +34,7 @@
         "endpointConfig": {
           "list": [
             {
-              "url": "https://localhost:9095/",
+              "url": "https://localhost:9443/echo/sand",
               "timeout": "1000"
             }
           ],

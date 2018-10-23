@@ -50,6 +50,7 @@
     "isDeployed": true,
     "defaultLimit": {
       "requestCountLimit": {
+        "requestCount": 2147483647
       },
       "type": "RequestCountLimit",
       "timeUnit": "min",

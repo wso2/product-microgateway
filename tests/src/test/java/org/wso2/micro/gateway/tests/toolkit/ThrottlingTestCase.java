@@ -21,12 +21,12 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
@@ -36,6 +36,8 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.util.HashMap;
 import java.util.Map;
 
+//TODO : enable Throttling test class  when throttling is supported by 3.0.0.
+@Ignore
 public class ThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
             noSubPolicyToken, noAppPolicyToken;

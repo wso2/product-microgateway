@@ -280,6 +280,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);

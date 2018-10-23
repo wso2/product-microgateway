@@ -18,3 +18,7 @@ accessControlAllowCredentials = false
 accessControlAllowOrigins = ["*"]
 accessControlAllowHeaders = ["authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"]
 accessControlAllowMethods = ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"]
+
+
+[b7a.log]
+level="TRACE"

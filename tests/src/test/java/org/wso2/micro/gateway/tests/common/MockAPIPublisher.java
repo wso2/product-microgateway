@@ -42,6 +42,8 @@ public class MockAPIPublisher {
     private static final Logger log = LoggerFactory.getLogger(MockAPIPublisher.class);
     private Map<String, List<APIDTO>> apis;
     private Map<String, KeyValidationInfo> tokenInfo;
+
+    private Map<String, IntrospectInfo> introspectInfo;
     private static MockAPIPublisher instance;
     private static List<SubscriptionPolicy> subscriptionPolicies;
     private static List<ApplicationPolicy> applicationPolicies;
@@ -56,6 +58,7 @@ public class MockAPIPublisher {
     public MockAPIPublisher() {
         apis = new HashMap<>();
         tokenInfo = new HashMap<>();
+        introspectInfo = new HashMap<>();
         subscriptionPolicies = new ArrayList<>();
         applicationPolicies = new ArrayList<>();
     }
@@ -132,6 +135,12 @@ public class MockAPIPublisher {
         return token;
     }
 
+    public String getAndRegisterAccessToken(IntrospectInfo info) {
+        String token = UUID.randomUUID().toString();
+        introspectInfo.put(token, info);
+        return token;
+    }
+
     public String getKeyValidationResponseForToken(String token) {
         KeyValidationInfo info = tokenInfo.get(token);
         try {
@@ -183,4 +192,9 @@ public class MockAPIPublisher {
     public static List<ApplicationPolicy> getApplicationPolicies() {
         return applicationPolicies;
     }
+
+    public Map<String, IntrospectInfo> getIntrospectInfo() {
+        return introspectInfo;
+    }
+
 }
