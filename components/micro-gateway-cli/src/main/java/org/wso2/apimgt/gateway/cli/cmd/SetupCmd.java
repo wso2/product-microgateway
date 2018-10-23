@@ -117,8 +117,6 @@ public class SetupCmd implements GatewayLauncherCmd {
     private boolean isInsecure;
 
 
-    @Parameter(names = { "-enableMTSL" }, hidden = true, arity = 0)
-    private boolean mtsl;
 
 
 
@@ -127,6 +125,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String registrationEndpoint;
     private String tokenEndpoint;
     private String clientSecret;
+    private String clientCertEndpoint;
 
     public void execute() {
         String clientID;
@@ -241,11 +240,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
             throw new CLIRuntimeException("Provided trust store location does not exist.");
         }
-        if(mtsl){
-            MutualSSL mutualSSL= new MutualSSL();
-            mutualSSL.setSslVerify(true);
-            config.setMutualSSL(mutualSSL);
-        }
+
 
 
         //set the trustStore
@@ -299,6 +294,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
+      //  List<clientCertificates> clientCertificates = service.getClientCerts(accessToken);
 
         ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -404,6 +400,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private void populateHosts(String host) {
         try {
             publisherEndpoint = new URL(new URL(host), RESTServiceConstants.PUB_RESOURCE_PATH).toString();
+            clientCertEndpoint = new URL(new URL(host),RESTServiceConstants.PUB_CLIENT_CERT_PATH).toString();
             adminEndpoint = new URL(new URL(host), RESTServiceConstants.ADMIN_RESOURCE_PATH).toString();
             registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
             tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();

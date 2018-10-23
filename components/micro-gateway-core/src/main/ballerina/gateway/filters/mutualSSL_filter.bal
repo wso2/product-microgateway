@@ -29,61 +29,68 @@ import ballerina/reflect;
 
 @Description { value: "Representation of the MutualSSL filter" }
 
-public type MTSLfilter object {
+public type MutualSSLFilter object {
+
+    public map trottleTiers;
 
 
+    public new (trottleTiers) {}
 
-    @Param {value:"listener: Listner endpoint"}
+    @Param { value: "listener: Listner endpoint" }
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: MTSL result to indicate which folw is selected for request to proceed" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean{
+                                                                                                                boolean
+    {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doFilterRequest(listener, request, context);
         return result;
     }
 
-    @Description {value: "representation of Dofilter Request"}
-    @Param {value:"listener: Listner endpoint"}
+    @Description { value: "representation of Dofilter Request" }
+    @Param { value: "listener: Listner endpoint" }
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: MTSL result to indicate which folw is selected for request to proceed" }
-    public function doFilterRequest (http:Listener listener, http:Request request, http:FilterContext context)
+    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context)
                         returns boolean {
+        boolean isAuthenticated = false;
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
-        if(checkAuthentication.equalsIgnoreCase("require")) {
+
+
+        if (checkAuthentication == "require") {
             // get  config for this resource
             AuthenticationContext authenticationContext;
             boolean isSecured = true;
+            io:println(trottleTiers);
+
             context.attributes[IS_SECURED] = isSecured;
-            authenticationContext.authenticated = true;
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
+            context.attributes[FILTER_FAILED] = false;
+            isAuthenticated = true;
+            context.attributes[IS_AUTHENTICATED] = isAuthenticated;
+            //Set authenticationContext data
+            authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
             authenticationContext.applicationTier = UNLIMITED_TIER;
-            context.attributes[FILTER_FAILED] = false;
-            boolean isAuthenticated = true;
-            context.attributes[IS_AUTHENTICATED] = isAuthenticated;
-            context.attributes[AUTHENTICATION_CONTEXT]=authenticationContext;
+            context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
             return isAuthenticated;
 
 
         } else {
             //mutual ssl is not anabled and skip this filter
-            io:println("MutualSSL Filter Skip");
+            context.attributes[IS_AUTHENTICATED] = false;
             return true;
         }
     }
 
-
-
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
-
 
 
 

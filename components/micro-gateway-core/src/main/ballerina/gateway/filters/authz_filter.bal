@@ -45,7 +45,7 @@ public type OAuthzFilter object {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
-        if(!checkAuthentication.equalsIgnoreCase("require")){
+        if(checkAuthentication != "require"){
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
