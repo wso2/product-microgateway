@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.tests.services;
 
 import org.testng.Assert;
+import org.testng.TestException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,6 +27,7 @@ import org.wso2.micro.gateway.tests.common.*;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
+import org.wso2.micro.gateway.tests.listener.TestNGListener;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,11 +86,11 @@ public class MutualSSLTestCase extends BaseTestCase{
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
     public void mutualSSLEstablished()throws Exception{
 
-
+        String trustStorePath = getClass().getClassLoader()
+                .getResource("keyStores" + File.separator + "ballerinaTruststore.p12").getPath();
         Properties systemProps = System.getProperties();
         systemProps.put("javax.net.debug","ssl");
-        systemProps.put("javax.net.ssl.trustStore",
-                "/usr/lib/ballerina/ballerina-0.981.1/bre/security/ballerinaTruststore.p12");
+        systemProps.put("javax.net.ssl.trustStore", trustStorePath);
         systemProps.put("javax.net.ssl.trustStorePassword","ballerina");
         System.setProperties(systemProps);
 
@@ -117,24 +119,26 @@ public class MutualSSLTestCase extends BaseTestCase{
 
 
         try {
+//
+//            int port= 9595;
+//            String host="localhost" ;
+//            int connectTimeout=100000;
 //            SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket();
 //            sslsocket.connect(new InetSocketAddress(host, port), connectTimeout);
 //            sslsocket.startHandshake();
-            System.out.println("Test is working properly1");
-
-
             URL url = new URL("https://localhost:9595/pizzashack/1.0.0/menu");
             HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
             conn.setSSLSocketFactory(sslsocketfactory);
             InputStream inputstream = conn.getInputStream();
-            System.out.println("Test is working properly2");
+            System.out.println("Test is working properly");
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
-            String x=bufferedreader.readLine();
-            System.out.println(x);
-            String string = null;
-        while ((string = bufferedreader.readLine()) != null) {
-            System.out.println("Received " + string);
+            String example=bufferedreader.readLine();
+            System.out.println(example);
+
+        while (example != null) {
+            System.out.println("Received " + example);
+            break;
         }
 
         } catch (UnknownHostException e) {
@@ -151,11 +155,11 @@ public class MutualSSLTestCase extends BaseTestCase{
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
     public void mutualSSLfail()throws Exception{
 
-
+        String trustStorePath = getClass().getClassLoader()
+                .getResource("keyStores" + File.separator + "ballerinaTruststore.p12").getPath();
         Properties systemProps = System.getProperties();
         systemProps.put("javax.net.debug","ssl");
-        systemProps.put("javax.net.ssl.trustStore",
-                "/usr/lib/ballerina/ballerina-0.981.1/bre/security/ballerinaTruststore.p12");
+        systemProps.put("javax.net.ssl.trustStore", trustStorePath);
         systemProps.put("javax.net.ssl.trustStorePassword","ballerina");
         System.setProperties(systemProps);
         SSLContext sslcontext;
@@ -182,34 +186,34 @@ public class MutualSSLTestCase extends BaseTestCase{
 
         try {
 
-            int port= 9595;
-            String host="localhost" ;
-            int connectTimeout=100000;
-            SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket();
-            sslsocket.connect(new InetSocketAddress(host, port), connectTimeout);
-            sslsocket.startHandshake();
-            System.out.println("Test is working properly1");
+//            int port= 9595;
+//            String host="localhost" ;
+//            int connectTimeout=100000;
+//            SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket();
+//            sslsocket.connect(new InetSocketAddress(host, port), connectTimeout);
+//            sslsocket.startHandshake();
+
             URL url = new URL("https://localhost:9595/pizzashack/1.0.0/menu");
             HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
             conn.setSSLSocketFactory(sslsocketfactory);
             InputStream inputstream = conn.getInputStream();
-            System.out.println("Test is working properly 2");
+            System.out.println("Test is working properly ");
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
-            String x=bufferedreader.readLine();
-            System.out.println(x);
+            String example=bufferedreader.readLine();
             String string = null;
             while ((string = bufferedreader.readLine()) != null) {
             System.out.println("Received " + string);
+            break;
         }
 
-
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            //e.printStackTrace();
+            String x =e.toString();
+            if(x.equalsIgnoreCase("javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate")){
+                System.out.println("Test is working properly");
+            }
         }
 
     }

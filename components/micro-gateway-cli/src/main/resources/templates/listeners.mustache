@@ -5,8 +5,15 @@ import ballerina/log;
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
+//Throttle tier data initiation
+string certificateAlias = "sdas";
+string tier = "adsad" ;
+
+map trottleTiers = {certificateAlias : certificateAlias, throttleTier : tier};
+
+
 //Get mutualSSL filter
-gateway: MTSLfilter  mtslFilter= new;
+gateway: MutualSSLFilter  mtslFilter= new(trottleTiers);
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter

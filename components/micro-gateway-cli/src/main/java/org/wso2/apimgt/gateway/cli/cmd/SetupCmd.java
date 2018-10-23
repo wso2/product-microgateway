@@ -119,8 +119,6 @@ public class SetupCmd implements GatewayLauncherCmd {
     private boolean isInsecure;
 
 
-    @Parameter(names = { "-enableMTSL" }, hidden = true, arity = 0)
-    private boolean mtsl;
 
 
 
@@ -129,36 +127,9 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String registrationEndpoint;
     private String tokenEndpoint;
     private String clientSecret;
+    private String clientCertEndpoint;
 
-    private static void init(String projectName, String configPath, String deploymentConfigPath) {
-        try {
-            GatewayCmdUtils.createProjectStructure(projectName);
-            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
 
-            Path configurationFile = Paths.get(configPath);
-            if (Files.exists(configurationFile)) {
-                Config config = TOMLConfigParser.parse(configPath, Config.class);
-                GatewayCmdUtils.setConfig(config);
-            } else {
-                logger.error("Configuration: {} Not found.", configPath);
-                throw new CLIInternalException("Error occurred while loading configurations.");
-            }
-
-            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
-            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            GatewayCmdUtils.setContainerConfig(containerConfig);
-
-            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setProjectName(projectName);
-            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
-        } catch (ConfigParserException e) {
-            logger.error("Error occurred while parsing the configurations {}", configPath, e);
-            throw new CLIInternalException("Error occurred while loading configurations.");
-        } catch (IOException e) {
-            logger.error("Error occurred while generating project configurationss", e);
-            throw new CLIInternalException("Error occurred while loading configurations.");
-        }
-    }
 
     public void execute() {
         String clientID;
@@ -332,6 +303,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
+      //  List<clientCertificates> clientCertificates = service.getClientCerts(accessToken);
 
         ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -440,6 +412,36 @@ public class SetupCmd implements GatewayLauncherCmd {
         } catch (MalformedURLException e) {
             logger.error("Malformed URL provided {}", host);
             throw new CLIInternalException("Error occurred while setting up URL configurations.");
+        }
+    }
+
+    private static void init(String projectName, String configPath, String deploymentConfigPath) {
+        try {
+            GatewayCmdUtils.createProjectStructure(projectName);
+            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
+
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+
+            deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
+
+            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
+            codeGenerationContext.setProjectName(projectName);
+            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        } catch (IOException e) {
+            logger.error("Error occurred while generating project configurationss", e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }
 }

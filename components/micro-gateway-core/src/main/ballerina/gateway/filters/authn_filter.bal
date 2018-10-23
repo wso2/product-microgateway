@@ -43,7 +43,7 @@ public type AuthnFilter object {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if(!checkAuthentication.equalsIgnoreCase("require")){
+        if(checkAuthentication != "require"){
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
