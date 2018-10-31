@@ -104,7 +104,7 @@
 @final public string ANY_AUTHENTICATION_LEVEL = "Any";
 @Description { value: "API Name attribute" }
 @final public string API_VERSION = "apiVersion";
-@Description { value: "MutualSSl enable" }
+@Description { value: "Is MutualSSl enabled" }
 @final public string IS_AUTHENTICATED= "isAuthenticated";
 
 @Description { value: "Filter has return false" }

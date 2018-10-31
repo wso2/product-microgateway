@@ -17,73 +17,46 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import com.google.gson.JsonObject;
+import io.swagger.v3.core.util.Json;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import com.google.gson.JsonArray;
+
 
 import java.io.File;
 import java.util.List;
 
 public class MutualSSL {
 
-    private String keyStoreLocation;
-    private String keyStorePassword;
-    private String trustStoreLocation;
-    private String trustStorePassword;
-    private String protocolName;
-    private String  protocolVersion;
-    private String cypher;
+    private List<ClientCertMetadataDTO> clientCertificates;
+     JsonArray certificateDetails;
 
-    private boolean sslVerify = false;
+    public List<ClientCertMetadataDTO> getClientCertificates() {
+        return clientCertificates;
+    }
 
+    public void setClientCertificates(List<ClientCertMetadataDTO> clientCertificates) {
+        this.clientCertificates = clientCertificates;
+    }
 
-
-    public String getKeyStoreLocation() { return keyStoreLocation; }
-
-  /*  public String getKeyStoreAbsoluteLocation() {
-        String absolutekeyoreLocation = trustStoreLocation;
-        File file = new File(absolutekeyoreLocation);
-        if (!file.isAbsolute()) {
-            absolutekeyoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + absolutekeyoreLocation;
-            file = new File(absolutekeyoreLocation);
-            if (!file.exists()) {
-                System.err.println("Error while loading trust store location: " + absolutekeyoreLocation);
-                Runtime.getRuntime().exit(1);
-            }
+    public JsonArray getCertificateDetails() {
+        int count=clientCertificates.size();
+        JsonArray certificateData= new JsonArray();
+        for (int i=0; i < count ;i++){
+            String alias= clientCertificates.get(i).getAlias();
+            String tier = clientCertificates.get(i).getTier();
+            JsonObject element= new JsonObject();
+            element.addProperty("Alias",alias);
+            element.addProperty("Tier",tier);
+            certificateData.add(element);
         }
-        return absolutekeyoreLocation;
-    }*/
-
-
-    public void setKeyStoreLocation(String keyStoreLocation) { this.keyStoreLocation = keyStoreLocation; }
-
-    public String getKeyStorePassword() { return keyStorePassword; }
-
-    public void setKeyStorePassword(String keyStorePassword) { this.keyStorePassword = keyStorePassword; }
-
-    public String getTrustStoreLocation() { return trustStoreLocation; }
-
-    public void setTrustStoreLocation(String trustStoreLocation) { this.trustStoreLocation = trustStoreLocation; }
-
-    public String getTrustStorePassword() { return trustStorePassword; }
-
-    public void setTrustStorePassword(String trustStorePassword) { this.trustStorePassword = trustStorePassword; }
-
-    public String getProtocolName() {
-        return protocolName;
+       // String certificateDetails= certificateData.toString();
+        JsonArray certificateDetails=certificateData;
+        return certificateDetails;
     }
 
-    public void setProtocolName(String protocolName) {
-        this.protocolName = protocolName;
+    public void setCertificateDetails(JsonArray certificateDetails) {
+        this.certificateDetails = certificateDetails;
     }
-
-     public String getProtocolVersion() { return protocolVersion; }
-
-    public void setProtocolVersion(String protocolVersion) { this.protocolVersion = protocolVersion;}
-
-    public String getCypher() { return cypher; }
-
-    public void setCypher(String cypher) { this.cypher = cypher; }
-
-    public boolean isSslVerify() { return sslVerify; }
-
-    public void setSslVerify(boolean sslVerify) { this.sslVerify = sslVerify; }
 }

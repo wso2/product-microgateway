@@ -53,10 +53,6 @@ public class Config {
 
     public void setMutualSSL(MutualSSL mutualSSL) { this.mutualSSL = mutualSSL; }
 
-    public boolean getHasMutualSSL() {
 
-        boolean confirm= mutualSSL != null && (mutualSSL.isSslVerify());
-        return confirm;
-    }
 
 }

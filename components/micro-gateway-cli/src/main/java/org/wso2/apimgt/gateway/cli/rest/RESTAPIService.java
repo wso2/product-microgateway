@@ -17,6 +17,8 @@
  */
 package org.wso2.apimgt.gateway.cli.rest;
 
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -59,4 +61,12 @@ public interface RESTAPIService {
      * @return list of subscription policies
      */
     List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken);
+
+    /**
+     * Get list of client certificates
+     *
+     * @param accessToken access token
+     * @return list of  client certificates
+     */
+   List<ClientCertMetadataDTO> getClientCertificates(String accessToken);
 }

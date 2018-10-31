@@ -31,7 +31,7 @@ import ballerina/reflect;
 
 public type MutualSSLFilter object {
 
-    public map trottleTiers;
+    public json trottleTiers;
 
 
     public new (trottleTiers) {}
@@ -43,6 +43,7 @@ public type MutualSSLFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
+
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doFilterRequest(listener, request, context);
@@ -64,7 +65,7 @@ public type MutualSSLFilter object {
             // get  config for this resource
             AuthenticationContext authenticationContext;
             boolean isSecured = true;
-            io:println(trottleTiers);
+
 
             context.attributes[IS_SECURED] = isSecured;
             int startingTime = getCurrentTime();
