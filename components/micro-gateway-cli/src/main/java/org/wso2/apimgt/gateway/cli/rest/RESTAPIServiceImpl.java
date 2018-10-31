@@ -26,6 +26,11 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
+import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
+import org.wso2.apimgt.gateway.cli.model.rest.*;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
@@ -433,5 +438,65 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
         }
         return endpointConf;
+    }
+
+    /**
+     * @see RESTAPIService#getClientCertificates(String)
+     */
+    public List<ClientCertMetadataDTO> getClientCertificates(String accessToken) {
+        Config config = GatewayCmdUtils.getConfig();
+        URL url;
+        HttpsURLConnection urlConn = null;
+        ClientCertificatesDTO certList;
+        List<ClientCertMetadataDTO> selectedCertificates = new ArrayList<>();
+        //calling token endpoint
+        publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
+        try {
+            String urlStr = publisherEp + "clientCertificates";
+            url = new URL(urlStr);
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode == 200) {
+                ObjectMapper mapper = new ObjectMapper();
+                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                //convert json string to object
+                certList = mapper.readValue(responseStr, ClientCertificatesDTO.class);
+                List<ClientCertMetadataDTO> certDTOS = certList.getCertificates();
+                for (ClientCertMetadataDTO certDTO : certDTOS) {
+                    if (!RESTServiceConstants.UNLIMITED.equalsIgnoreCase(certDTO.getTier())) {
+                        selectedCertificates.add(certDTO);
+                    }
+                }
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
+            }else if (responseCode == 404){
+                selectedCertificates= null;
+
+            }
+            else {
+                throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
+            }
+        } catch (IOException e) {
+            String msg = "Error while creating the new token for token regeneration.";
+            throw new RuntimeException(msg, e);
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
+        if(selectedCertificates!=null) {
+            MutualSSL clientDetails = new MutualSSL();
+            clientDetails.setClientCertificates(selectedCertificates);
+            config.setMutualSSL(clientDetails);
+        }
+        return selectedCertificates;
     }
 }

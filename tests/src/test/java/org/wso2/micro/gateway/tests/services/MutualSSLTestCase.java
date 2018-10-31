@@ -152,7 +152,7 @@ public class MutualSSLTestCase extends BaseTestCase{
     }
 
 
-    @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
+    @Test(description = "mutual SSL is filed due to bad certificate")
     public void mutualSSLfail()throws Exception{
 
         String trustStorePath = getClass().getClassLoader()
