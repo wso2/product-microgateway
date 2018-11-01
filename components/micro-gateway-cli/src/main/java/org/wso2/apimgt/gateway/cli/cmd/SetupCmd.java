@@ -160,6 +160,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
 
+
         //Setup username
         String configuredUser = config.getToken().getUsername();
         if (StringUtils.isEmpty(configuredUser)) {

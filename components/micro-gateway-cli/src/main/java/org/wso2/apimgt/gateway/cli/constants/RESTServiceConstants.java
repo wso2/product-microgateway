@@ -17,12 +17,6 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
-import io.swagger.util.Json;
-
-import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
-
 public class RESTServiceConstants {
 
     public static final String ENDPOINT_TYPE = "endpoint_type";
@@ -42,17 +36,14 @@ public class RESTServiceConstants {
             "apis?query=gatewayLabel:" + GatewayCliConstants.LABEL_PLACEHOLDER +
                     "&expand=true";
     public static final String API_GET_BY_NAME_VERSION_URI =
-            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
-                    + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
-    public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v0.14";
-    public static final String PUB_CLIENT_CERT_PATH = "/api/am/publisher/v0.14/clientCertificates";
-    public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v0.14";
-    public static final String DCR_RESOURCE_PATH = "/client-registration/v0.14/register";
+            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%2Cversion:"
+                    + GatewayCliConstants.VERSION_PLACEHOLDER ;
+    public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v1.0/";
+    public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v1.0/";
+    public static final String DCR_RESOURCE_PATH = "/api/identity/oauth2/dcr/v1.0/register";
+    public static final String TOKEN_PATH = "/api/auth/oauth2/v1.0/token";
 
     public static final String DEFAULT_HOST = "https://localhost:9443/";
     public static final String DEFAULT_TRUSTSTORE_PATH = "lib/platform/bre/security/ballerinaTruststore.p12";
     public static final String DEFAULT_TRUSTSTORE_PASS = "ballerina";
-    public static final String DEFAULT_KEYSTORE_PATH = "lib/platform/bre/security/ballerinaKeystore.p12";
-    public static final String DEFAULT_KEYSTORE_PASS = "ballerina";
-
 }
