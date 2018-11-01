@@ -102,7 +102,18 @@ function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
        MTSL_CONF_PROTOCOL_NAME, "TLS");
     string [] protocolVersions= ["TLSv1.2", "TLSv1.1"];
-    string [] ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"];
+    string [] ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256","TLS_RSA_WITH_AES_128_CBC_SHA256","TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"," TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA","TLS_RSA_WITH_AES_128_CBC_SHA",
+    "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA","TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"," TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+    "TLS_DHE_DSS_WITH_AES_128_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    ,"TLS_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256",
+    "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"," TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"
+    ,"TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA","TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA","SSL_RSA_WITH_3DES_EDE_CBC_SHA",
+    "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"," TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA","SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+    "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA"," TLS_EMPTY_RENEGOTIATION_INFO_SCSV"];
+
     string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID,
         MTSL_CONF_SSLVERIFYCLIENT, "");
 
@@ -110,7 +121,8 @@ function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
     http:TrustStore trustStore = {path:trustStorePath, password:trustStorePassword};
     http:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
     http: Protocols protocol= {name:protocolName, versions:protocolVersions};
-    http:ServiceSecureSocket secureSocket = { trustStore:trustStore, keyStore: keyStore,  sslVerifyClient:sslVerifyClient};
+    http:ServiceSecureSocket secureSocket = { trustStore:trustStore, keyStore: keyStore,
+        sslVerifyClient:sslVerifyClient};
     config.secureSocket = secureSocket;
     config.isSecured = true;
 
