@@ -21,19 +21,13 @@ import wso2/gateway;
 {{#endpointConfig.sandFailoverEndpoints}}{{>failoverEndpoint}}{{/endpointConfig.sandFailoverEndpoints}}
 {{/equals}}
 
-{{>kubernetes}}
 
+{{>kubernetes}}
 
 @http:ServiceConfig {
     basePath: "{{api.context}}{{#unless api.isDefaultVersion}}/{{api.version}}{{/unless}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
-    {{#if config.basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if config.basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}}
+        authProviders:["oauth2"]
     }{{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -56,13 +50,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         authConfig:{
-    {{#if config.basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if config.basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}} {{#unless isSecured}},
+            authProviders:["oauth2"] {{#unless isSecured}},
             authentication:{enabled:false} {{/unless}} {{#if scope}},
             scopes: ["{{scope}}"] {{/if}}
 
@@ -70,7 +58,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     {{operationId}} (endpoint outboundEp, http:Request req) {
-    gateway:checkExpectHeaderPresent(req);
+
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
     {{else}}
@@ -78,18 +66,31 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     {{/if}}
         http:Response|error clientResponse;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
+        {{#equals etcd.etcdEnabled "true"}}boolean reinitRequired;
+        string etcdKey;
+        boolean|error hasUrlChanged;
+        http:ClientEndpointConfig newConfig;{{/equals}}
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                {{#equals etcd.etcdEnabled "true"}}
+                    {{>endpointReinit}}
+                {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 } else {
+                {{#equals etcd.etcdEnabled "true"}}
+                    {{>endpointReinit}}
+                {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                {{#equals etcd.etcdEnabled "true"}}
+                    {{>endpointReinit}}
+                {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 } else {
@@ -107,6 +108,9 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+            {{#equals etcd.etcdEnabled "true"}}
+                {{>endpointReinit}}
+            {{/equals}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                 runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
             } else {
@@ -121,6 +125,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 clientResponse = res;
             }
         {{/endpointConfig.prodEndpoints}}
+
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 
         match clientResponse {

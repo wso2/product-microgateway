@@ -25,6 +25,10 @@ import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
 
+public map etcdUrls;
+public map urlChanged;
+public boolean etcdPeriodicQueryInitialized = false;
+
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
     boolean isSecured = true;
@@ -472,3 +476,196 @@ public function checkExpectHeaderPresent(http:Request request) {
 
     }
 }
+
+public function initiateEtcdPeriodicQuery()
+{
+    if(!etcdPeriodicQueryInitialized)
+    {
+        task:Timer? timer;
+        io:println("Initializing Periodic etcd call");
+        (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
+        function(error) onErrorFunction = etcdError;
+        timer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
+        timer.start();
+        etcdPeriodicQueryInitialized = true;
+    }
+}
+
+public function etcdPeriodicQuery() returns error? {
+    foreach k, v in etcdUrls {
+
+        string currentUrl = <string>v;
+        string fetchedUrl = etcdLookup(<string>k);
+
+        if(currentUrl != fetchedUrl)
+        {
+            io:println("Url changed");
+            etcdUrls[<string>k] = fetchedUrl;
+            urlChanged[<string>k] = true;
+        }
+        //etcdUrls[k] = getValue(k);
+
+        io:println("letter: ", k, ", word: ", etcdUrls[<string>k]);
+        io:println(etcdUrls);
+    }
+    return ();
+}
+
+public function etcdError(error e) {
+    io:print("[ERROR] etcd failed");
+    io:println(e);
+}
+
+public function etcdSetup(string key, string default, string configKey) returns string
+{
+    string etcdKey = config:getAsString(configKey, default=key);
+    etcdUrls[etcdKey] = etcdLookup(etcdKey);
+    urlChanged[etcdKey] = false;
+    io:println(<string>etcdUrls[etcdKey]);
+    io:println(etcdEndpoint.config.url);
+    return <string>etcdUrls[etcdKey];
+}
+
+@Description {value:"Calls etcd passing the key and retrieves value"}
+public function etcdLookup(string key10) returns string
+{
+    string key64;
+    string value64;
+    string endpointUrl;
+    http:Request req;
+
+    var key = key10.base64Encode(charset = "utf-8");
+    match key {
+        string matchedKey => key64 = matchedKey;
+        error err => io:println("error: " + err.message);
+    }
+
+    req.setPayload({"key": untaint key64});
+
+    var response = etcdEndpoint->post("/v3alpha/kv/range",req);
+    match response {
+        http:Response resp => {
+            var msg = resp.getJsonPayload();
+            match msg {
+                json jsonPayload => {
+                    var val64 = <string>jsonPayload.kvs[0].value;
+                    match val64 {
+                        string matchedValue => value64 = matchedValue;
+                        error err => value64 = "Not found";
+                    }
+                }
+                error err => {
+                    io:println("error 1");
+                    log:printError(err.message, err = err);
+                }
+            }
+        }
+        error err => { io:println("error2"); log:printError(err.message, err = err); }
+    }
+
+    if(value64 == "Not found")
+    {
+        endpointUrl = value64;
+    }
+    else
+    {
+        var value10 = value64.base64Decode(charset = "utf-8");
+        match value10 {
+            string matchedValue10 => endpointUrl = untaint matchedValue10;
+            error err => io:println("error: " + err.message);
+        }
+    }
+    io:println(endpointUrl);
+    return endpointUrl;
+}
+
+//public function getEtcdUrl() returns string
+//{
+//    return config:getAsString("etcdurl",default="http://127.0.0.1:2379");
+//}
+
+//public function reinitializeEndpoint(http:Client apiEndpoint, string configKey)
+//{
+//    string configUrl = apiEndpoint.config.url;
+//    string etcdKey = config:getAsString(configKey);
+//    string etcdUrl = <string>etcdUrls[etcdKey];
+//
+//    io:println("configUrl:"+configUrl);
+//    io:println("etcdUrl:"+etcdUrl);
+//    if(etcdUrl != configKey)
+//    {
+//        http:ClientEndpointConfig clientEndpointConfig = {url:etcdUrl};
+//        apiEndpoint.init(clientEndpointConfig);
+//    }
+//}
+
+//public function checkEndpointChange(http:Client apiEndpoint, string configKey)
+//{
+//    string configUrl = apiEndpoint.config.url;
+//    string etcdKey = config:getAsString(configKey);
+//    string etcdUrl = <string>etcdUrls[etcdKey];
+//    if(etcdUrl != configKey)
+//    {
+//        http:ClientEndpointConfig clientEndpointConfig = {url:etcdUrl};
+//        apiEndpoint.init(clientEndpointConfig);
+//    }
+//}
+
+//@Description {value:"Retrieve the Production and SandBox Urls for the API"}
+//public function retrieveUrls(string key, string default) returns string {
+//    string etcdurl = config:getAsString("etcdurl");
+//    string clientUrl;
+//    if(etcdurl == "")
+//    {
+//        io:println("ETCD not enabled");
+//        clientUrl = retrieveConfig(key, default);
+//    }
+//    else
+//    {
+//        io:println("ETCD enabled");
+//        clientUrl = getValue(key);
+//        if(clientUrl == "Not found")
+//        {
+//            io:println("Value Not found");
+//            clientUrl = retrieveConfig(key, default);
+//        }
+//    }
+//    return clientUrl;
+//}
+
+//@Description {value:"Get Urls using the etcd node by providing relevant key"}
+//public function etcdLookup(string key, string default, string configKey) returns string {
+//    string etcdUrl = config:getAsString("etcdurl");
+//
+//    //string etcdconfig = config:getAsString("etcdconfig");
+//    string etcdKey = config:getAsString(configKey);
+//    io:println("etcdkey:"+etcdKey);
+//    string clientUrl;
+//    if(etcdUrl == "")
+//    {
+//        io:println("ETCD url not provided");
+//        clientUrl = retrieveConfig(key, default);
+//    }
+//    else
+//    {
+//        io:println("ETCD url provided");
+//        if(etcdKey == "")
+//        {
+//            io:println("ETCD key is empty.");
+//            clientUrl = getValue(key);
+//        }
+//        else
+//        {
+//            io:println("ETCD key is provided");
+//            clientUrl = getValue(etcdKey);
+//        }
+//        //clientUrl = getValue(key);
+//        if(clientUrl == "Not found")
+//        {
+//            io:println("Value Not found in ETCD");
+//            clientUrl = retrieveConfig(key, default);
+//        }
+//    }
+//    io:println("Url:"+clientUrl);
+//    return clientUrl;
+//}

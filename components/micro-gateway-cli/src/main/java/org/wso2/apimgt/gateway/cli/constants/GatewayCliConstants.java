@@ -35,6 +35,7 @@ public class GatewayCliConstants {
     public static final String TEMP_DIR_NAME = "temp";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
     public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
+    //public static final String CLI_HOME = "/home/hisan/Documents/API-Microgateway/wso2am-micro-gw-toolkit-2.5.0";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
     public static final String CLI_CONF = "conf";
@@ -86,4 +87,7 @@ public class GatewayCliConstants {
             GW_TARGET_DIST,
             "Ballerina.lock"
     };
+
+    public static final String ETCD_ENABLED = "etcdEnabled";
+    public static final String TEMP_ETCD_FILE = ".etcd";
 }

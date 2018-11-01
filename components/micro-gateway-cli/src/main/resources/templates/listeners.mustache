@@ -2,6 +2,8 @@ import wso2/gateway;
 import ballerina/http;
 import ballerina/log;
 
+
+
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
@@ -33,6 +35,7 @@ gateway:ValidationFilter validationFilter = new;
 gateway:AnalyticsRequestFilter analyticsFilter = new();
 // Extension filter
 ExtensionFilter extensionFilter;
+
 
 {{>docker}}
 {{>secureKubernetesIngress}}
