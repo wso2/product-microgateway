@@ -308,12 +308,12 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        boolean etcdFileExists = checkForEtcdFile(projectName);
-        if(etcdFileExists)
-        {
-            changePropertyForEtcd(gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                    + GatewayCliConstants.GW_DIST_CONF_FILE, "true");
-        }
+//        boolean etcdFileExists = checkForEtcdFile(projectName);
+//        if(etcdFileExists)
+//        {
+//            changePropertyForEtcd(gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
+//                    + GatewayCliConstants.GW_DIST_CONF_FILE, "true");
+//        }
 
         String targetPath = getProjectTargetDirectoryPath(projectName);
         String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;

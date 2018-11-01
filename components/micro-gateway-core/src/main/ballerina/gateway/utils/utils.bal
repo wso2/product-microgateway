@@ -479,8 +479,8 @@ public function checkExpectHeaderPresent(http:Request request) {
 
 public function initiateEtcdPeriodicQuery()
 {
-    if(!etcdPeriodicQueryInitialized)
-    {
+    //if(!etcdPeriodicQueryInitialized)
+    //{
         task:Timer? timer;
         io:println("Initializing Periodic etcd call");
         (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
@@ -488,7 +488,7 @@ public function initiateEtcdPeriodicQuery()
         timer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
         timer.start();
         etcdPeriodicQueryInitialized = true;
-    }
+    //}
 }
 
 public function etcdPeriodicQuery() returns error? {
@@ -518,11 +518,16 @@ public function etcdError(error e) {
 
 public function etcdSetup(string key, string default, string configKey) returns string
 {
+    if(!etcdPeriodicQueryInitialized)
+    {
+        initiateEtcdPeriodicQuery();
+        etcdPeriodicQueryInitialized = true;
+    }
     string etcdKey = config:getAsString(configKey, default=key);
     etcdUrls[etcdKey] = etcdLookup(etcdKey);
     urlChanged[etcdKey] = false;
-    io:println(<string>etcdUrls[etcdKey]);
-    io:println(etcdEndpoint.config.url);
+    //io:println(<string>etcdUrls[etcdKey]);
+    //io:println(etcdEndpoint.config.url);
     return <string>etcdUrls[etcdKey];
 }
 

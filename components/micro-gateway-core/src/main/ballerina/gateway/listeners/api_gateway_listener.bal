@@ -132,10 +132,10 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     initializeAnalytics();
-    if(getConfigValue(SERVICE_DISCOVERY_INSTANCE_ID, IS_ETCD_ENABLED, "false") == TRUE)
-    {
-        initiateEtcdPeriodicQuery();
-    }
+    //if(getConfigValue(SERVICE_DISCOVERY_INSTANCE_ID, IS_ETCD_ENABLED, "false") == TRUE)
+    //{
+    //    initiateEtcdPeriodicQuery();
+    //}
 }
 
 public function getAuthProviders() returns http:AuthProvider[] {
