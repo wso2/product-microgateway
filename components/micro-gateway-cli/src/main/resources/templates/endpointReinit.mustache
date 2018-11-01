@@ -1,0 +1,13 @@
+etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{endpointUrlType}}.etcd.key","{{api.name}}.{{api.version}}.{{endpointUrlType}}.endpoint.0");
+hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+match hasUrlChanged{
+    boolean matchUrlChanged => reinitRequired=matchUrlChanged;
+    error err => io:println("error: " + err.message);
+}
+if(reinitRequired)
+{
+    io:println("Re-initializing the endpoint");
+    newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+    gateway:urlChanged[etcdKey] = false;
+    {{qualifiedServiceName}}_{{endpointUrlType}}.init(newConfig);
+}
