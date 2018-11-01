@@ -102,6 +102,7 @@ function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
        MTSL_CONF_PROTOCOL_NAME, "TLS");
     string [] protocolVersions= ["TLSv1.2", "TLSv1.1"];
+
     string [] ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
     "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256","TLS_RSA_WITH_AES_128_CBC_SHA256","TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
     "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
