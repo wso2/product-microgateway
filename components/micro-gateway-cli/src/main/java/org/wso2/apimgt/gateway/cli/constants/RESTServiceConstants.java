@@ -17,12 +17,6 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
-import io.swagger.util.Json;
-
-import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
-
 public class RESTServiceConstants {
 
     public static final String ENDPOINT_TYPE = "endpoint_type";
@@ -57,6 +51,4 @@ public class RESTServiceConstants {
 
     public static final String CERTIFICATE_ALIAS = "Alias";
     public static final String CERTIFICATE_TIER = "Tier";
-
-
 }

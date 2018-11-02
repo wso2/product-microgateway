@@ -47,7 +47,6 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -236,7 +235,6 @@ public class SetupCmd implements GatewayLauncherCmd {
             logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
             throw new CLIRuntimeException("Provided trust store location does not exist.");
         }
-
 
         //set the trustStore
         System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");

@@ -259,8 +259,6 @@
 @final public string MTSL_CONF_CIPHERS = "ciphers";
 @Description { value: "MutualSSL Verification" }
 @final public string MTSL_CONF_SSLVERIFYCLIENT = "sslVerifyClient";
-@Description { value: "MutualSSL Enabling" }
-
 
 @Description { value: "Authentication related configs" }
 @final public string AUTH_CONF_INSTANCE_ID = "authConfig";

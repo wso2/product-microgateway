@@ -234,7 +234,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.authorizationHeader = authorizationHeader;
     }
 
-
     /**
      * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both.
      * If it is not set OAuth2 will be set as the security for the current API.\n
@@ -256,7 +255,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setMaxTps(APIMaxTpsDTO maxTps) {
         this.maxTps = maxTps;
     }
-
 
     /**
      * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE,
@@ -283,7 +281,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setVisibleRoles(List<String> visibleRoles) {
         this.visibleRoles = visibleRoles;
     }
-
 
     @JsonProperty("visibleTenants")
     public List<String> getVisibleTenants() {
@@ -314,7 +311,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.endpointSecurity = endpointSecurity;
     }
 
-
     /**
      * Comma separated list of gateway environments.\n
      **/
@@ -326,7 +322,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setGatewayEnvironments(String gatewayEnvironments) {
         this.gatewayEnvironments = gatewayEnvironments;
     }
-
 
     /**
      * Labels of micro-gateway environments attached to the APIDetailedDTO.\n
@@ -340,7 +335,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.labels = labels;
     }
 
-
     @JsonProperty("sequences")
     public List<SequenceDTO> getSequences() {
         return sequences;
@@ -349,7 +343,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setSequences(List<SequenceDTO> sequences) {
         this.sequences = sequences;
     }
-
 
     /**
      * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
@@ -363,7 +356,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.subscriptionAvailability = subscriptionAvailability;
     }
 
-
     @JsonProperty("subscriptionAvailableTenants")
     public List<String> getSubscriptionAvailableTenants() {
         return subscriptionAvailableTenants;
@@ -372,7 +364,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
         this.subscriptionAvailableTenants = subscriptionAvailableTenants;
     }
-
 
     /**
      * Map of custom properties of APIDetailedDTO
@@ -400,7 +391,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setAccessControl(AccessControlEnum accessControl) {
         this.accessControl = accessControl;
     }
-
 
     /**
      * The user roles that are able to view/modify as APIDetailedDTO publisher or creator.
@@ -432,6 +422,4 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
     }
-
-
 }

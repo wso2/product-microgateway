@@ -56,6 +56,4 @@ public class Config {
     public void setMutualSSL(MutualSSL mutualSSL) {
         this.mutualSSL = mutualSSL;
     }
-
-
 }

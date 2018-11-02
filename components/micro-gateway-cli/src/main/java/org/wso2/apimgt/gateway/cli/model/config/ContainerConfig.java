@@ -38,9 +38,9 @@ public class ContainerConfig {
     }
 
     public boolean getHasDocker() {
-        return docker!=null && (
-                (docker.getDockerConfig()!=null && docker.getDockerConfig().isEnable()) ||
-                (docker.getDockerCopyFiles()!=null && docker.getDockerCopyFiles().isEnable())
+        return docker != null && (
+                (docker.getDockerConfig() != null && docker.getDockerConfig().isEnable()) ||
+                        (docker.getDockerCopyFiles() != null && docker.getDockerCopyFiles().isEnable())
         );
     }
 

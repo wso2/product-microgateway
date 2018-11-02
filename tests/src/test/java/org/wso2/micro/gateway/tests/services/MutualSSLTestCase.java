@@ -26,15 +26,18 @@ import org.wso2.micro.gateway.tests.common.*;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
+import sun.rmi.runtime.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
-import javax.net.ssl.*;
-import java.security.*;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.security.KeyStore;
 import java.util.Properties;
-
+import java.util.logging.Logger;
 
 /**
  * Testing the pizza_shack api rest for mutualSSL feature
@@ -77,7 +80,6 @@ public class MutualSSLTestCase extends BaseTestCase {
         String[] args = {"--config", configPath};
         System.out.println("MTSL TEST CASE");
         microGWServer.startMicroGwServer(balPath, args);
-
     }
 
 
@@ -114,8 +116,6 @@ public class MutualSSLTestCase extends BaseTestCase {
         }
 
         SSLSocketFactory sslsocketfactory = sslcontext.getSocketFactory();
-
-
         try {
 
             URL url = new URL("https://localhost:9595/pizzashack/1.0.0/menu");
@@ -135,12 +135,14 @@ public class MutualSSLTestCase extends BaseTestCase {
 
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger logger = null;
+            logger.info("An UnknownHostException  occurred: " + e);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            Logger logger = null;
+            logger.info("An IOException occurred: " + e);
 
+        }
     }
 
 
@@ -174,8 +176,6 @@ public class MutualSSLTestCase extends BaseTestCase {
         }
 
         SSLSocketFactory sslsocketfactory = sslcontext.getSocketFactory();
-
-
         try {
 
             URL url = new URL("https://localhost:9595/pizzashack/1.0.0/menu");
@@ -207,5 +207,4 @@ public class MutualSSLTestCase extends BaseTestCase {
         //Stop all the mock servers
         super.finalize();
     }
-
 }

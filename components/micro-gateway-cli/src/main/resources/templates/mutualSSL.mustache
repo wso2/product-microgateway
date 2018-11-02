@@ -1,19 +1,17 @@
+secureSocket: {
+keyStore: {
+path:  config:getAsString("listenerConfig.keyStore.path"),
+password: config:getAsString("listenerConfig.keyStore.password")
+},
+trustStore: {
+path:  config:getAsString("jwtTokenConfig.trustStore.path"),
+password: config:getAsString("jwtTokenConfig.trustStore.password")
+},
+protocol: {
+name: config:getAsString("mtslConfig.ProtocolName"),
+versions: ["TLSv1.2", "TLSv1.1"]
+},
 
 
-    secureSocket: {
-    keyStore: {
-    path:  config:getAsString("listenerConfig.keyStore.path"),
-    password: config:getAsString("listenerConfig.keyStore.password")
-    },
-    trustStore: {
-    path:  config:getAsString("jwtTokenConfig.trustStore.path"),
-    password: config:getAsString("jwtTokenConfig.trustStore.password")
-    },
-    protocol: {
-    name: config:getAsString("mtslConfig.ProtocolName"),
-    versions: ["TLSv1.2", "TLSv1.1"]
-    },
-
-
-    sslVerifyClient: config:getAsString("mtslConfig.sslVerifyClient")
-    },
+sslVerifyClient: config:getAsString("mtslConfig.sslVerifyClient")
+},
