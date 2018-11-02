@@ -45,7 +45,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
-    
+
     private String publisherEp;
     private String adminEp;
     private boolean inSecure;
@@ -129,7 +129,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                             URLEncoder.encode(version, GatewayCliConstants.CHARSET_UTF8));
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
-            
+
             urlConn = (HttpsURLConnection) url.openConnection();
             if (inSecure) {
                 urlConn.setHostnameVerifier((s, sslSession) -> true);
@@ -147,7 +147,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 //convert json string to object
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
                 if (apiList != null) {
-                    for (ExtendedAPI api: apiList.getList()) {
+                    for (ExtendedAPI api : apiList.getList()) {
                         if (apiName.equals(api.getName()) && version.equals(api.getVersion())) {
                             matchedAPI = api;
                             break;
@@ -410,11 +410,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
                         "Invalid user credentials or the user does not have required permissions");
-            }else if (responseCode == 404){
-                selectedCertificates= null;
+            } else if (responseCode == 404) {
+                selectedCertificates = null;
 
-            }
-            else {
+            } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
             }
         } catch (IOException e) {
@@ -425,7 +424,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 urlConn.disconnect();
             }
         }
-        if(selectedCertificates!=null) {
+        if (selectedCertificates != null) {
             MutualSSL clientDetails = new MutualSSL();
             clientDetails.setClientCertificates(selectedCertificates);
             config.setMutualSSL(clientDetails);

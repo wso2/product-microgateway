@@ -49,10 +49,13 @@ public class Config {
         this.corsConfiguration = corsConfiguration;
     }
 
-    public  MutualSSL getMutualSSL() { return mutualSSL; }
+    public MutualSSL getMutualSSL() {
+        return mutualSSL;
+    }
 
-    public void setMutualSSL(MutualSSL mutualSSL) { this.mutualSSL = mutualSSL; }
-
+    public void setMutualSSL(MutualSSL mutualSSL) {
+        this.mutualSSL = mutualSSL;
+    }
 
 
 }

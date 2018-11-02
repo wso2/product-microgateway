@@ -55,4 +55,8 @@ public class RESTServiceConstants {
     public static final String DEFAULT_KEYSTORE_PATH = "lib/platform/bre/security/ballerinaKeystore.p12";
     public static final String DEFAULT_KEYSTORE_PASS = "ballerina";
 
+    public static final String CERTIFICATE_ALIAS = "Alias";
+    public static final String CERTIFICATE_TIER = "Tier";
+
+
 }

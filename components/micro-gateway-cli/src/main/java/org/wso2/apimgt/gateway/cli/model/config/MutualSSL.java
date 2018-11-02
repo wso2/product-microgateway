@@ -18,19 +18,17 @@
 package org.wso2.apimgt.gateway.cli.model.config;
 
 import com.google.gson.JsonObject;
-import io.swagger.v3.core.util.Json;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import com.google.gson.JsonArray;
 
 
-import java.io.File;
 import java.util.List;
 
 public class MutualSSL {
 
     private List<ClientCertMetadataDTO> clientCertificates;
-     JsonArray certificateDetails;
+    JsonArray certificateDetails;
 
     public List<ClientCertMetadataDTO> getClientCertificates() {
         return clientCertificates;
@@ -41,18 +39,17 @@ public class MutualSSL {
     }
 
     public JsonArray getCertificateDetails() {
-        int count=clientCertificates.size();
-        JsonArray certificateData= new JsonArray();
-        for (int i=0; i < count ;i++){
-            String alias= clientCertificates.get(i).getAlias();
+        int count = clientCertificates.size();
+        JsonArray certificateData = new JsonArray();
+        for (int i = 0; i < count; i++) {
+            String alias = clientCertificates.get(i).getAlias();
             String tier = clientCertificates.get(i).getTier();
-            JsonObject element= new JsonObject();
-            element.addProperty("Alias",alias);
-            element.addProperty("Tier",tier);
+            JsonObject element = new JsonObject();
+            element.addProperty(RESTServiceConstants.CERTIFICATE_ALIAS, alias);
+            element.addProperty(RESTServiceConstants.CERTIFICATE_TIER, tier);
             certificateData.add(element);
         }
-       // String certificateDetails= certificateData.toString();
-        JsonArray certificateDetails=certificateData;
+        JsonArray certificateDetails = certificateData;
         return certificateDetails;
     }
 

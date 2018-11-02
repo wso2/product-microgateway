@@ -34,7 +34,7 @@ public type MutualSSLFilter object {
     public json trottleTiers;
 
 
-    public new (trottleTiers) {}
+    public new(trottleTiers) {}
 
     @Param { value: "listener: Listner endpoint" }
     @Param { value: "request: Request instance" }
@@ -66,7 +66,6 @@ public type MutualSSLFilter object {
             AuthenticationContext authenticationContext;
             boolean isSecured = true;
 
-
             context.attributes[IS_SECURED] = isSecured;
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
@@ -92,7 +91,6 @@ public type MutualSSLFilter object {
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
-
 
 
 };
