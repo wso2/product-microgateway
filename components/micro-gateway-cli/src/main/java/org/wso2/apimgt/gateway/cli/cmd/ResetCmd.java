@@ -42,7 +42,7 @@ public class ResetCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = { "-c", "--config" }, hidden = true)
+    @Parameter(names = {"-c", "--config"}, hidden = true)
     private String configPath;
 
     public void execute() {

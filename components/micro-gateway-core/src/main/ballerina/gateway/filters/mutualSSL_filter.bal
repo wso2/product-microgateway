@@ -34,7 +34,7 @@ public type MutualSSLFilter object {
     public json trottleTiers;
 
 
-    public new (trottleTiers) {}
+    public new(trottleTiers) {}
 
     @Param { value: "listener: Listner endpoint" }
     @Param { value: "request: Request instance" }
@@ -92,7 +92,6 @@ public type MutualSSLFilter object {
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
-
 
 
 };

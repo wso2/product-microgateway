@@ -14,10 +14,10 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-package org.wso2.apimgt.gateway.cli.model.rest;
+    package org.wso2.apimgt.gateway.cli.model.rest;
 
-import java.util.ArrayList;
-import java.util.List;
+    import java.util.ArrayList;
+    import java.util.List;
 
 
     public class ClientCertificatesDTO {

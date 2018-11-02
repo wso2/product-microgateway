@@ -28,8 +28,8 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
-import org.wso2.apimgt.gateway.cli.model.rest.*;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
@@ -63,6 +63,17 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         this.inSecure = inSecure;
     }
 
+    public String getAuthHeader() {
+        String authHeader;
+        String exportHeader = System.getProperty(RESTServiceConstants.AUTH_HEADER);
+        if (exportHeader != null) {
+            authHeader = exportHeader;
+        } else {
+            authHeader = RESTServiceConstants.AUTHORIZATION;
+        }
+        return authHeader;
+    }
+
     /**
      * @see RESTAPIService#getAPIs(String, String)
      */
@@ -86,8 +97,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
@@ -143,8 +154,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
+            ;
             int responseCode = urlConn.getResponseCode();
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
@@ -225,8 +237,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn1.setDoOutput(true);
             urlConn1.setRequestMethod(RESTServiceConstants.GET);
-            urlConn1.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn1.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
+            ;
             int responseCodeForGet = urlConn1.getResponseCode();
             if (responseCodeForGet == 200) {
                 ObjectMapper mapper1 = new ObjectMapper();
@@ -280,8 +293,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -331,8 +344,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -460,8 +473,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(RESTServiceConstants.GET);
-            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
-                    RESTServiceConstants.BEARER + " " + accessToken);
+            String authHeader = getAuthHeader();
+            urlConn.setRequestProperty(authHeader, RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -477,11 +490,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
                         "Invalid user credentials or the user does not have required permissions");
-            }else if (responseCode == 404){
-                selectedCertificates= null;
+            } else if (responseCode == 404) {
+                selectedCertificates = null;
 
-            }
-            else {
+            } else {
                 throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
             }
         } catch (IOException e) {
@@ -492,7 +504,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 urlConn.disconnect();
             }
         }
-        if(selectedCertificates!=null) {
+        if (selectedCertificates != null) {
             MutualSSL clientDetails = new MutualSSL();
             clientDetails.setClientCertificates(selectedCertificates);
             config.setMutualSSL(clientDetails);
