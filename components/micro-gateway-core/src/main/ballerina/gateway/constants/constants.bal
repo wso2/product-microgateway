@@ -104,8 +104,8 @@
 @final public string ANY_AUTHENTICATION_LEVEL = "Any";
 @Description { value: "API Name attribute" }
 @final public string API_VERSION = "apiVersion";
-@Description { value: "Is MutualSSl enabled" }
-@final public string IS_AUTHENTICATED = "isAuthenticated";
+@Description { value: "User name is Unknown" }
+@final public string USER_NAME_UNKNOWN = "Unknown";
 
 @Description { value: "Filter has return false" }
 @final public string FILTER_FAILED = "filter_failed";
@@ -250,7 +250,7 @@
 @final public string FILTERS = "filters";
 
 @Description { value: "Mutual SSL related configs" }
-@final public string MTSL_CONF_INSTANCE_ID = "mtslConfig";
+@final public string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
 @Description { value: "MutualSSL protocol name" }
 @final public string MTSL_CONF_PROTOCOL_NAME = "protocolName";
 @Description { value: "MutualSSL protocol versions" }

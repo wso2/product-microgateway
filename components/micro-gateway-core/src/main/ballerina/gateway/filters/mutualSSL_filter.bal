@@ -65,6 +65,7 @@ public type MutualSSLFilter object {
             // get  config for this resource
             AuthenticationContext authenticationContext;
             boolean isSecured = true;
+            printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 
             context.attributes[IS_SECURED] = isSecured;
             int startingTime = getCurrentTime();
@@ -76,6 +77,7 @@ public type MutualSSLFilter object {
             authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
             authenticationContext.applicationTier = UNLIMITED_TIER;
+            authenticationContext.username = USER_NAME_UNKNOWN;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
             return isAuthenticated;
