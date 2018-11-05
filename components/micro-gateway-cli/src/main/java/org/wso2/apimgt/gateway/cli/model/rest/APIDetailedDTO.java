@@ -84,6 +84,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String authorizationHeader = null;
+    private String apiSecurity = null;
 
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
@@ -422,4 +423,12 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.authorizationHeader = authorizationHeader;
     }
 
+    @JsonProperty("apiSecurity")
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
+    }
 }
