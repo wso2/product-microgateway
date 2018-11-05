@@ -14,57 +14,57 @@
 // specific language governing permissions and limitations
 // under the License.
 
-@Description {value:"Authn scheme basic"}
+@Description { value: "Authn scheme basic" }
 @final public string AUTHN_SCHEME_BASIC = "basic";
-@Description {value:"Authn scheme JWT"}
+@Description { value: "Authn scheme JWT" }
 @final public string AUTH_SCHEME_JWT = "jwt";
-@Description {value:"Authn scheme OAuth2"}
+@Description { value: "Authn scheme OAuth2" }
 @final public string AUTH_SCHEME_OAUTH2 = "oauth2";
-@Description {value:"Auth provider config name"}
+@Description { value: "Auth provider config name" }
 @final public string AUTH_PROVIDER_CONFIG = "config";
-@Description {value:"Authentication header name"}
+@Description { value: "Authentication header name" }
 @final public string AUTH_HEADER = "Authorization";
-@Description {value:"Temp Authentication header name"}
+@Description { value: "Temp Authentication header name" }
 @final public string TEMP_AUTH_HEADER = "WSO2-Authorization";
-@Description {value:"Basic authentication scheme"}
+@Description { value: "Basic authentication scheme" }
 @final public string AUTH_SCHEME_BASIC = "Basic";
-@Description {value:"Bearer authentication scheme"}
+@Description { value: "Bearer authentication scheme" }
 @final public string AUTH_SCHEME_BEARER = "Bearer";
-@Description {value:"Auth annotation package"}
+@Description { value: "Auth annotation package" }
 @final public string ANN_PACKAGE = "ballerina/http";
-@Description {value:"Resource level annotation name"}
+@Description { value: "Resource level annotation name" }
 @final public string RESOURCE_ANN_NAME = "ResourceConfig";
-@Description {value:"Service level annotation name"}
+@Description { value: "Service level annotation name" }
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
-@Description {value:"API annotation name in service level"}
+@Description { value: "API annotation name in service level" }
 @final public string API_ANN_NAME = "API";
-@Description {value:"skip filters annotation name in service level"}
+@Description { value: "skip filters annotation name in service level" }
 @final public string SKIP_FILTERS_ANN_NAME = "SkipFilters";
-@Description {value:"gateway annotation package"}
+@Description { value: "gateway annotation package" }
 @final public string GATEWAY_ANN_PACKAGE = "wso2/gateway";
 
-@Description {value:"Basic prefix for authorization header with ending spce"}
+@Description { value: "Basic prefix for authorization header with ending spce" }
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
-@Description {value:"authorization header "}
+@Description { value: "authorization header " }
 @final public string AUTHORIZATION_HEADER = "Authorization";
-@Description {value:"Content type header "}
+@Description { value: "Content type header " }
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
-@Description {value:"Form url encoded"}
+@Description { value: "Form url encoded" }
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-@Description {value:"Application JSON type"}
+@Description { value: "Application JSON type" }
 @final public string APPLICATION_JSON = "application/json";
 
-@Description {value:"X-Forward-For Header "}
+@Description { value: "X-Forward-For Header " }
 @final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
-@Description {value:"KeyValidation Response"}
+@Description { value: "KeyValidation Response" }
 @final public string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
-@Description {value:"Authentication context attribute"}
+@Description { value: "Authentication context attribute" }
 @final public string AUTHENTICATION_CONTEXT = "AUTHENTICATION_CONTEXT";
-@Description {value:"carbon.super Tenant Domain"}
+@Description { value: "carbon.super Tenant Domain" }
 @final public string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
-@Description {value:"Super Tenant Domain Tenant Id"}
+@Description { value: "Super Tenant Domain Tenant Id" }
 @final public int SUPER_TENANT_ID = -1234;
-@Description {value:"throttleKey"}
+@Description { value: "throttleKey" }
 @final public string THROTTLE_KEY = "throttleKey";
 @Description { value: "Resource Tier annotation package" }
 @final public string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
@@ -105,7 +105,7 @@
 @Description { value: "API Name attribute" }
 @final public string API_VERSION = "apiVersion";
 @Description { value: "Is MutualSSl enabled" }
-@final public string IS_AUTHENTICATED= "isAuthenticated";
+@final public string IS_AUTHENTICATED = "isAuthenticated";
 
 @Description { value: "Filter has return false" }
 @final public string FILTER_FAILED = "filter_failed";
@@ -129,7 +129,7 @@
 @final public string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
 @final public string THROTTLE_FILTER = "THROTTLE_FILTER";
 @final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
-@final public string MUTUAL_SSL_FILTER= "MUTUAL_SSL_FILTER";
+@final public string MUTUAL_SSL_FILTER = "MUTUAL_SSL_FILTER";
 
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 @final public string KEY_TYPE_ATTR = "KEY_TYPE";
@@ -148,6 +148,7 @@
 @final public string REQUEST_TIME_PROPERTY = "requestTimestamp";
 @final public string GATEWAY_TYPE_PROPERTY = "gatewayType";
 @final public string GATEWAY_TYPE = "MICRO";
+@final public string USER_NAME_UNKNOWN = "Unknown";
 
 
 @final public string ERROR_RESPONSE = "error_response";
@@ -211,98 +212,98 @@
 
 
 // config constants
-@Description { value: "Key manager related configs"}
+@Description { value: "Key manager related configs" }
 @final public string KM_CONF_INSTANCE_ID = "keyManager";
-@Description { value: "Throttling related configs"}
+@Description { value: "Throttling related configs" }
 @final public string THROTTLE_CONF_INSTANCE_ID = "Throttling";
-@Description { value: "Key manager server URL parameter"}
+@Description { value: "Key manager server URL parameter" }
 @final public string KM_SERVER_URL = "serverUrl";
-@Description { value: "Key manager oauth2 endpoint contexs"}
+@Description { value: "Key manager oauth2 endpoint contexs" }
 @final public string KM_TOKEN_CONTEXT = "/oauth2";
-@Description { value: "time stamp skew for auth caches"}
+@Description { value: "time stamp skew for auth caches" }
 @final public string TIMESTAMP_SKEW = "timestampSkew";
-@Description { value: "Hostname verification enabled or not"}
+@Description { value: "Hostname verification enabled or not" }
 @final public string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
 
 
-@Description { value: "Block condition state"}
+@Description { value: "Block condition state" }
 @final public string BLOCKING_CONDITION_STATE = "state";
-@Description { value: "Block condition key"}
+@Description { value: "Block condition key" }
 @final public string BLOCKING_CONDITION_KEY = "blockingCondition";
-@Description { value: "Block Condition Value"}
+@Description { value: "Block Condition Value" }
 @final public string BLOCKING_CONDITION_VALUE = "conditionValue";
 
-@Description { value: "Listener endpoint related configs"}
+@Description { value: "Listener endpoint related configs" }
 @final public string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
-@Description { value: "Listener endpoint host"}
+@Description { value: "Listener endpoint host" }
 @final public string LISTENER_CONF_HOST = "host";
-@Description { value: "Listener endpoint http port"}
+@Description { value: "Listener endpoint http port" }
 @final public string LISTENER_CONF_HTTP_PORT = "httpPort";
-@Description { value: "Listener endpoint https port"}
+@Description { value: "Listener endpoint https port" }
 @final public string LISTENER_CONF_HTTPS_PORT = "httpsPort";
-@Description { value: "Listener endpoint key store path"}
+@Description { value: "Listener endpoint key store path" }
 @final public string LISTENER_CONF_KEY_STORE_PATH = "keyStore.path";
-@Description { value: "Listener endpoint key store password"}
+@Description { value: "Listener endpoint key store password" }
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
-@Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints"}
+@Description { value: "The port which exposes /token,/revoke, /authorize and etc endpoints" }
 @final public string TOKEN_LISTENER_PORT = "tokenListenerPort";
-@Description { value: "Set of filters to be enabled"}
+@Description { value: "Set of filters to be enabled" }
 @final public string FILTERS = "filters";
 
-@Description { value: "Mutual SSL related configs"}
-@final public string MTSL_CONF_INSTANCE_ID = "mtslConfig";
-@Description { value: "MutualSSL protocol name"}
+@Description { value: "Mutual SSL related configs" }
+@final public string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
+@Description { value: "MutualSSL protocol name" }
 @final public string MTSL_CONF_PROTOCOL_NAME = "protocolName";
-@Description { value: "MutualSSL protocol versions"}
+@Description { value: "MutualSSL protocol versions" }
 @final public string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
-@Description { value: "MutualSSL ciphers"}
+@Description { value: "MutualSSL ciphers" }
 @final public string MTSL_CONF_CIPHERS = "ciphers";
-@Description { value: "MutualSSL Verification"}
+@Description { value: "MutualSSL Verification" }
 @final public string MTSL_CONF_SSLVERIFYCLIENT = "sslVerifyClient";
 
 
-@Description { value: "Authentication related configs"}
+@Description { value: "Authentication related configs" }
 @final public string AUTH_CONF_INSTANCE_ID = "authConfig";
-@Description { value: "The authoization header config name"}
+@Description { value: "The authoization header config name" }
 @final public string AUTH_HEADER_NAME = "authorizationHeader";
-@Description { value: "Config name to remove auth header from out going message"}
+@Description { value: "Config name to remove auth header from out going message" }
 @final public string REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE = "removeAuthHeaderFromOutMessage";
 
-@Description { value: "JWT Token related configs"}
+@Description { value: "JWT Token related configs" }
 @final public string JWT_INSTANCE_ID = "jwtTokenConfig";
-@Description { value: "JWT issuer"}
+@Description { value: "JWT issuer" }
 @final public string ISSUER = "issuer";
-@Description { value: "JWT audience"}
+@Description { value: "JWT audience" }
 @final public string AUDIENCE = "audience";
-@Description { value: "jwt signed cert alias"}
+@Description { value: "jwt signed cert alias" }
 @final public string CERTIFICATE_ALIAS = "certificateAlias";
-@Description { value: "trust store  path"}
+@Description { value: "trust store  path" }
 @final public string TRUST_STORE_PATH = "trustStore.path";
-@Description { value: "Trust store password"}
+@Description { value: "Trust store password" }
 @final public string TRSUT_STORE_PASSWORD = "trustStore.password";
 
-@Description { value: "Caching configs"}
+@Description { value: "Caching configs" }
 @final public string CACHING_ID = "caching";
-@Description { value: "Token cache enabled or not "}
+@Description { value: "Token cache enabled or not " }
 @final public string TOKEN_CACHE_ENABLED = "enabled";
-@Description { value: "Token cache expirt time "}
+@Description { value: "Token cache expirt time " }
 @final public string TOKEN_CACHE_EXPIRY = "tokenCache.expiryTime";
-@Description { value: "Token cache capacity"}
+@Description { value: "Token cache capacity" }
 @final public string TOKEN_CACHE_CAPACITY = "tokenCache.capacity";
-@Description { value: "Token cache eviction factor"}
+@Description { value: "Token cache eviction factor" }
 @final public string TOKEN_CACHE_EVICTION_FACTOR = "tokenCache.evictionFactor";
 
-@Description { value: "JWT  related configs"}
+@Description { value: "JWT  related configs" }
 @final public string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
-@Description { value: "JWT  header name"}
+@Description { value: "JWT  header name" }
 @final public string JWT_HEADER = "header";
 @final public string EXPECT_HEADER = "Expect";
 
 // end of config constants
 
-@Description { value: "Is Throttled"}
+@Description { value: "Is Throttled" }
 @final public string IS_THROTTLED = "isThrottled";
-@Description { value: "Expiry TimeStamp"}
+@Description { value: "Expiry TimeStamp" }
 @final public string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 @final string TRUE = "true";
 @final string REQUEST_BLOCKED = "REQUEST_BLOCKED";

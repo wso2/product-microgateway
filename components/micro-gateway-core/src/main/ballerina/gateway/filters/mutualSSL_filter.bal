@@ -59,7 +59,7 @@ public type MutualSSLFilter object {
                         returns boolean {
         boolean isAuthenticated = false;
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
-
+        printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 
         if (checkAuthentication == "require") {
             // get  config for this resource
@@ -77,6 +77,7 @@ public type MutualSSLFilter object {
             authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
             authenticationContext.applicationTier = UNLIMITED_TIER;
+            authenticationContext.username= USER_NAME_UNKNOWN;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
             return isAuthenticated;
