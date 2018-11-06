@@ -121,10 +121,7 @@ public class CodegenUtils {
         if (key == null) {
             return null;
         }
-        key = key.replaceAll(" ", "_");
-        key = key.replaceAll("/", "_");
-        key = key.replaceAll("\\{", "_");
-        key = key.replaceAll("}", "_");
+        key = key.replaceAll("(\\.)|(-)|(\\{)|(})|(\\s)|(/)", "_");
         if (key.contains("*")) {
             key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
         }
