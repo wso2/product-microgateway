@@ -187,7 +187,7 @@ public function getKeyValidationRequestObject() returns APIRequestMetaDataDto {
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
     apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0];
     apiKeyValidationRequest.accessToken = <string>runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR];
-    printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext 
+    printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
             + ", resource: " + apiKeyValidationRequest.matchingResource
             + ", verb: " + apiKeyValidationRequest.httpVerb);
     return apiKeyValidationRequest;
@@ -249,7 +249,7 @@ public function getContext(http:FilterContext context) returns (string) {
 
 public function getClientIp(http:Request request, http:Listener listener) returns (string) {
     string clientIp;
-    if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
+    if (request.hasHeader(X_FORWARD_FOR_HEADER)) {
         clientIp = request.getHeader(X_FORWARD_FOR_HEADER);
         int idx = clientIp.indexOf(",");
         if (idx > -1) {
@@ -261,17 +261,17 @@ public function getClientIp(http:Request request, http:Listener listener) return
     return clientIp;
 }
 
-public function extractAccessToken (http:Request req, string authHeaderName) returns (string|error) {
+public function extractAccessToken(http:Request req, string authHeaderName) returns (string|error) {
     string authHeader = req.getHeader(authHeaderName);
     string[] authHeaderComponents = authHeader.split(" ");
-    if(lengthof authHeaderComponents != 2){
+    if (lengthof authHeaderComponents != 2){
         return handleError("Incorrect bearer authentication header format");
     }
     return authHeaderComponents[1];
 }
 
 public function handleError(string message) returns (error) {
-    error e = {message: message};
+    error e = { message: message };
     return e;
 }
 public function getTenantDomain(http:FilterContext context) returns (string) {
@@ -330,7 +330,7 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
 }
 
-@Description {value:"Default error response sender with json error response"}
+@Description { value: "Default error response sender with json error response" }
 public function sendErrorResponse(http:Listener listener, http:Request request, http:FilterContext context) {
     endpoint http:Listener caller = listener;
     int statusCode = check <int>context.attributes[HTTP_STATUS_CODE];
@@ -340,11 +340,11 @@ public function sendErrorResponse(http:Listener listener, http:Request request, 
     http:Response response;
     response.statusCode = statusCode;
     response.setContentType(APPLICATION_JSON);
-    json payload = {fault : {
-        code : errorCode,
-        message : errorMesssage,
-        description : errorDescription
-    }};
+    json payload = { fault: {
+        code: errorCode,
+        message: errorMesssage,
+        description: errorDescription
+    } };
     response.setJsonPayload(payload);
     var value = caller->respond(response);
     match value {
@@ -365,7 +365,7 @@ public function getAuthorizationHeader(reflect:annotationData[] annData) returns
 
 public function getCurrentTime() returns int {
     time:Time currentTime = time:currentTime();
-    int  time = currentTime.time;
+    int time = currentTime.time;
     return time;
 
 }
@@ -374,7 +374,7 @@ public function rotateFile(string fileName) returns string|error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileName + "." + rotatingTimeStamp + "." + uuid +  ZIP_EXTENSION;
+    string zipName = fileName + "." + rotatingTimeStamp + "." + uuid + ZIP_EXTENSION;
     internal:Path zipLocation = new(fileLocation + zipName);
     internal:Path fileToZip = new(fileLocation + fileName);
     match internal:compress(fileToZip, zipLocation) {
@@ -397,12 +397,12 @@ public function rotateFile(string fileName) returns string|error {
     }
 }
 
-@Description {value:"Retrieve external configurations defined against a key"}
-public function retrieveConfig(string key, string default) returns string { 
+@Description { value: "Retrieve external configurations defined against a key" }
+public function retrieveConfig(string key, string default) returns string {
     return config:getAsString(key, default = default);
 }
 
-@Description {value:"mask all letters with given text except last 4 charactors."}
+@Description { value: "mask all letters with given text except last 4 charactors." }
 public function mask(string text) returns string {
     if (text.length() > 4) {
         string last = text.substring(text.length() - 4, text.length());
@@ -413,9 +413,9 @@ public function mask(string text) returns string {
     }
 }
 
-@Description {value:"Returns the current message ID (uuid)"}
+@Description { value: "Returns the current message ID (uuid)" }
 public function getMessageId() returns string {
-    string messageId = <string> runtime:getInvocationContext().attributes[MESSAGE_ID];
+    string messageId = <string>runtime:getInvocationContext().attributes[MESSAGE_ID];
     if (messageId == null) {
         return "-";
     } else {
@@ -423,27 +423,27 @@ public function getMessageId() returns string {
     }
 }
 
-@Description {value:"Add a error log with provided key (class) and message ID"}
+@Description { value: "Add a error log with provided key (class) and message ID" }
 public function printError(string key, string message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-@Description {value:"Add a debug log with provided key (class) and message ID"}
+@Description { value: "Add a debug log with provided key (class) and message ID" }
 public function printDebug(string key, string message) {
     log:printDebug(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-@Description {value:"Add a trace log with provided key (class) and message ID"}
+@Description { value: "Add a trace log with provided key (class) and message ID" }
 public function printTrace(string key, string message) {
     log:printTrace(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-@Description {value:"Add a info log with provided key (class) and message ID"}
+@Description { value: "Add a info log with provided key (class) and message ID" }
 public function printInfo(string key, string message) {
     log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-@Description {value:"Add a full error log with provided key (class) and message ID"}
+@Description { value: "Add a full error log with provided key (class) and message ID" }
 public function printFullError(string key, error message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.message), err = message);
 }

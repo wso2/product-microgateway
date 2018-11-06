@@ -1,9 +1,22 @@
 import wso2/gateway;
 import ballerina/http;
+import ballerina/log;
 
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
+//Throttle tier data initiation
+
+{{#if config.mutualSSL.certificateDetails}}
+    json ClientCerts ={{{config.mutualSSL.certificateDetails}}};
+{{else}}
+    json ClientCerts=null;
+{{/if}}
+
+
+
+//Get mutualSSL filter
+gateway: MutualSSLFilter  mtslFilter= new(ClientCerts);
 // Get authentication filter
 gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter
@@ -23,34 +36,36 @@ ExtensionFilter extensionFilter;
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
-    port:9095,
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
+port:9095,
+{{>mutualSSL}}
+filters:[ mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter,
+analyticsFilter, extensionFilter]
 };
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
-    port:9090,
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
+port:9090,
+filters:[  authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
 };
 
 function getAuthenticationFilter() returns gateway:AuthnFilter {
-    http:AuthHandlerRegistry registry;
-    // Getting basic and JWT authentication providers
-    http:AuthProvider[] authProviders = gateway:getAuthProviders();
-    int i = 1;
-    foreach provider in authProviders {
-        if (lengthof provider.id > 0) {
-            registry.add(provider.id, gateway:createAuthHandler(provider));
-        } else {
-            registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
-        }
-        i++;
-    }
-    // Adding basic and JWT authentication providers to a the handler chain
-    http:AuthnHandlerChain authnHandlerChain = new(registry);
-    // OAuth authentication handler
-    gateway:OAuthnAuthenticator oauthAuthenticator = new;
-    // Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
-    return new gateway:AuthnFilter(oauthAuthenticator, authnHandlerChain);
+http:AuthHandlerRegistry registry;
+// Getting basic and JWT authentication providers
+http:AuthProvider[] authProviders = gateway:getAuthProviders();
+int i = 1;
+foreach provider in authProviders {
+if (lengthof provider.id > 0) {
+registry.add(provider.id, gateway:createAuthHandler(provider));
+} else {
+registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
+}
+i++;
+}
+// Adding basic and JWT authentication providers to a the handler chain
+http:AuthnHandlerChain authnHandlerChain = new(registry);
+// OAuth authentication handler
+gateway:OAuthnAuthenticator oauthAuthenticator = new;
+// Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
+return new gateway:AuthnFilter(oauthAuthenticator, authnHandlerChain);
 }

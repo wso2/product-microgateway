@@ -78,45 +78,45 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = { "-u", "--username" }, hidden = true)
+    @Parameter(names = {"-u", "--username"}, hidden = true)
     private String username;
 
-    @Parameter(names = { "-p", "--password" }, hidden = true)
+    @Parameter(names = {"-p", "--password"}, hidden = true)
     private String password;
 
     @SuppressWarnings("unused")
-    @Parameter(names = { "-l", "--label" }, hidden = true)
+    @Parameter(names = {"-l", "--label"}, hidden = true)
     private String label;
 
-    @Parameter(names = { "-s", "--server-url" }, hidden = true)
+    @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseUrl;
 
-    @Parameter(names = { "-t", "--truststore" }, hidden = true)
+    @Parameter(names = {"-t", "--truststore"}, hidden = true)
     private String trustStoreLocation;
 
-    @Parameter(names = { "-w", "--truststore-pass" }, hidden = true)
+    @Parameter(names = {"-w", "--truststore-pass"}, hidden = true)
     private String trustStorePassword;
 
-    @Parameter(names = { "-c", "--config" }, hidden = true)
+    @Parameter(names = {"-c", "--config"}, hidden = true)
     private String toolkitConfigPath;
 
     @SuppressWarnings("unused")
-    @Parameter(names = { "-d", "--deployment-config" }, hidden = true)
+    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
     private String deploymentConfigPath;
 
     @SuppressWarnings("unused")
-    @Parameter(names = { "-a", "--api-name" }, hidden = true)
+    @Parameter(names = {"-a", "--api-name"}, hidden = true)
     private String apiName;
 
     @SuppressWarnings("unused")
-    @Parameter(names = { "-v", "--version" }, hidden = true)
+    @Parameter(names = {"-v", "--version"}, hidden = true)
     private String version;
 
     @SuppressWarnings("unused")
-    @Parameter(names = { "-f", "--force" }, hidden = true, arity = 0)
+    @Parameter(names = {"-f", "--force"}, hidden = true, arity = 0)
     private boolean isForcefully;
     @SuppressWarnings("unused")
-    @Parameter(names = { "-k", "--insecure" }, hidden = true, arity = 0)
+    @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
 
     private String publisherEndpoint;
@@ -124,6 +124,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String registrationEndpoint;
     private String tokenEndpoint;
     private String clientSecret;
+    private String clientCertEndpoint;
 
     public void execute() {
         String clientID;
@@ -268,7 +269,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                         isInsecure);
 
         List<ExtendedAPI> apis = new ArrayList<>();
-        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint,isInsecure);
+        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, isInsecure);
         if (label != null) {
             apis = service.getAPIs(label, accessToken);
         } else {
@@ -340,7 +341,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         if (!changesDetected) {
             outStream.println(
-                    "No changes received from the server since the previous setup." 
+                    "No changes received from the server since the previous setup."
                             + " If you have already a built distribution, it can be reused.");
         }
         outStream.println("Setting up project " + projectName + " is successful.");
@@ -362,13 +363,13 @@ public class SetupCmd implements GatewayLauncherCmd {
      */
     private void validateAPIGetRequestParams(String label, String apiName, String version) {
         if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
-                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) || 
-                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) || 
+                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) ||
+                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) ||
                 (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
             throw GatewayCmdUtils.createUsageException(
-                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) " 
-                            + "should be provided." 
-                            + "\n\nEx:\tmicro-gw setup accounts-project -l accounts" 
+                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) "
+                            + "should be provided."
+                            + "\n\nEx:\tmicro-gw setup accounts-project -l accounts"
                             + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
         }
     }
@@ -395,6 +396,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private void populateHosts(String host) {
         try {
             publisherEndpoint = new URL(new URL(host), RESTServiceConstants.PUB_RESOURCE_PATH).toString();
+            clientCertEndpoint = new URL(new URL(host), RESTServiceConstants.PUB_CLIENT_CERT_PATH).toString();
             adminEndpoint = new URL(new URL(host), RESTServiceConstants.ADMIN_RESOURCE_PATH).toString();
             registrationEndpoint = new URL(new URL(host), RESTServiceConstants.DCR_RESOURCE_PATH).toString();
             tokenEndpoint = new URL(new URL(host), RESTServiceConstants.TOKEN_PATH).toString();

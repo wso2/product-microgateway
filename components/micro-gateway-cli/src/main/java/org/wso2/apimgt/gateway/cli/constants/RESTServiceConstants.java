@@ -38,6 +38,7 @@ public class RESTServiceConstants {
             "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
                     + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
     public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v0.14";
+    public static final String PUB_CLIENT_CERT_PATH = "/api/am/publisher/v0.14/clientCertificates";
     public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v0.14";
     public static final String DCR_RESOURCE_PATH = "/client-registration/v0.14/register";
     public static final String TOKEN_PATH = "/oauth2/token";
@@ -45,4 +46,9 @@ public class RESTServiceConstants {
     public static final String DEFAULT_HOST = "https://localhost:9443/";
     public static final String DEFAULT_TRUSTSTORE_PATH = "lib/platform/bre/security/ballerinaTruststore.p12";
     public static final String DEFAULT_TRUSTSTORE_PASS = "ballerina";
+    public static final String DEFAULT_KEYSTORE_PATH = "lib/platform/bre/security/ballerinaKeystore.p12";
+    public static final String DEFAULT_KEYSTORE_PASS = "ballerina";
+
+    public static final String CERTIFICATE_ALIAS = "Alias";
+    public static final String CERTIFICATE_TIER = "Tier";
 }
