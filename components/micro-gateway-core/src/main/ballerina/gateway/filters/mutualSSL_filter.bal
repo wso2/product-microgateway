@@ -72,7 +72,6 @@ public type MutualSSLFilter object {
             context.attributes[REQUEST_TIME] = startingTime;
             context.attributes[FILTER_FAILED] = false;
             isAuthenticated = true;
-            context.attributes[IS_AUTHENTICATED] = isAuthenticated;
             //Set authenticationContext data
             authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
@@ -81,11 +80,8 @@ public type MutualSSLFilter object {
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
             return isAuthenticated;
-
-
         } else {
             //mutual ssl is not anabled and skip this filter
-            context.attributes[IS_AUTHENTICATED] = false;
             return true;
         }
     }
@@ -93,6 +89,4 @@ public type MutualSSLFilter object {
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
-
-
 };

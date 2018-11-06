@@ -129,14 +129,14 @@ public class MutualSSLTestCase extends BaseTestCase {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setSSLSocketFactory(sslsocketfactory);
             InputStream inputstream = conn.getInputStream();
-            System.out.println("Test is working properly");
+            log.info("Test is working properly");
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
             String example = bufferedreader.readLine();
-            System.out.println(example);
+            log.info(example);
 
             while (example != null) {
-                System.out.println("Received " + example);
+                log.info("Received " + example);
                 break;
             }
 
@@ -187,7 +187,7 @@ public class MutualSSLTestCase extends BaseTestCase {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setSSLSocketFactory(sslsocketfactory);
             InputStream inputstream = conn.getInputStream();
-            System.out.println("Test is working properly ");
+            log.info("Test is working properly ");
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
             String string = null;
