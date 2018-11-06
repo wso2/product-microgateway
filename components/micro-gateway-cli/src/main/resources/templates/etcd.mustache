@@ -74,13 +74,43 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#equals etcd.etcdEnabled "true"}}
-                    {{>endpointReinit}}
+                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
+                    if(etcdKey != "")
+                    {
+                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                        match hasUrlChanged{
+                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
+                            error err => io:println("error: " + err.message);
+                        }
+                        if(reinitRequired)
+                        {
+                            io:println("Re-initializing the endpoint");
+                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            gateway:urlChanged[etcdKey] = false;
+                            {{qualifiedServiceName}}_prod.init(newConfig);
+                        }
+                    }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 } else {
                 {{#equals etcd.etcdEnabled "true"}}
-                    {{>endpointReinit}}
+                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
+                    if(etcdKey != "")
+                    {
+                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                        match hasUrlChanged{
+                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
+                            error err => io:println("error: " + err.message);
+                        }
+                        if(reinitRequired)
+                        {
+                            io:println("Re-initializing the endpoint");
+                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            gateway:urlChanged[etcdKey] = false;
+                            {{qualifiedServiceName}}_sand.init(newConfig);
+                        }
+                    }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
@@ -89,7 +119,22 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#equals etcd.etcdEnabled "true"}}
-                    {{>endpointReinit}}
+                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
+                    if(etcdKey != "")
+                    {
+                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                        match hasUrlChanged{
+                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
+                            error err => io:println("error: " + err.message);
+                        }
+                        if(reinitRequired)
+                        {
+                            io:println("Re-initializing the endpoint");
+                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            gateway:urlChanged[etcdKey] = false;
+                            {{qualifiedServiceName}}_prod.init(newConfig);
+                        }
+                    }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
@@ -109,7 +154,22 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
             {{#equals etcd.etcdEnabled "true"}}
-                {{>endpointReinit}}
+                etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
+                if(etcdKey != "")
+                {
+                    hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                    match hasUrlChanged{
+                        boolean matchUrlChanged => reinitRequired=matchUrlChanged;
+                        error err => io:println("error: " + err.message);
+                    }
+                    if(reinitRequired)
+                    {
+                        io:println("Re-initializing the endpoint");
+                        newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                        gateway:urlChanged[etcdKey] = false;
+                        {{qualifiedServiceName}}_sand.init(newConfig);
+                    }
+                }
             {{/equals}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                 runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";

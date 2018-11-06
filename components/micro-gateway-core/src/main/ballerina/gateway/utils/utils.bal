@@ -27,7 +27,9 @@ import ballerina/system;
 
 public map etcdUrls;
 public map urlChanged;
+public map defaultUrls;
 public boolean etcdPeriodicQueryInitialized = false;
+task:Timer? etcdTimer;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
@@ -481,33 +483,45 @@ public function initiateEtcdPeriodicQuery()
 {
     //if(!etcdPeriodicQueryInitialized)
     //{
-        task:Timer? timer;
-        io:println("Initializing Periodic etcd call");
         (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
         function(error) onErrorFunction = etcdError;
-        timer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
-        timer.start();
-        etcdPeriodicQueryInitialized = true;
+        etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
+
+        io:println("Starting Periodic etcd call");
+        etcdTimer.start();
+
+        //etcdPeriodicQueryInitialized = true;
     //}
 }
 
 public function etcdPeriodicQuery() returns error? {
-    foreach k, v in etcdUrls {
 
-        string currentUrl = <string>v;
-        string fetchedUrl = etcdLookup(<string>k);
+    io:println("periodic task called");
+    if(etcdUrls.count() > 0)
+    {
+        foreach k, v in etcdUrls {
 
-        if(currentUrl != fetchedUrl)
-        {
-            io:println("Url changed");
-            etcdUrls[<string>k] = fetchedUrl;
-            urlChanged[<string>k] = true;
+            string currentUrl = <string>v;
+            string fetchedUrl = etcdLookup(<string>k);
+
+            if(currentUrl != fetchedUrl)
+            {
+                io:println("Url changed");
+                etcdUrls[<string>k] = fetchedUrl;
+                urlChanged[<string>k] = true;
+            }
+            //etcdUrls[k] = getValue(k);
+
+            //io:println("letter: ", k, ", word: ", etcdUrls[<string>k]);
+            io:println(etcdUrls);
         }
-        //etcdUrls[k] = getValue(k);
-
-        io:println("letter: ", k, ", word: ", etcdUrls[<string>k]);
-        io:println(etcdUrls);
     }
+    else
+    {
+        io:println("No etcd keys provided. Stopping etcd periodic call");
+        etcdTimer.stop();
+    }
+
     return ();
 }
 
@@ -518,17 +532,33 @@ public function etcdError(error e) {
 
 public function etcdSetup(string key, string default, string configKey) returns string
 {
+    string endpointUrl;
     if(!etcdPeriodicQueryInitialized)
     {
-        initiateEtcdPeriodicQuery();
+        io:println("etcdSetup init");
         etcdPeriodicQueryInitialized = true;
+        initiateEtcdPeriodicQuery();
     }
-    string etcdKey = config:getAsString(configKey, default=key);
-    etcdUrls[etcdKey] = etcdLookup(etcdKey);
-    urlChanged[etcdKey] = false;
-    //io:println(<string>etcdUrls[etcdKey]);
-    //io:println(etcdEndpoint.config.url);
-    return <string>etcdUrls[etcdKey];
+    string etcdKey = config:getAsString(configKey, default = "");
+
+    if(etcdKey == "")
+    {
+        io:println("etcd Key not provided for: "+key);
+        endpointUrl = retrieveConfig(key, default);
+    }
+    else
+    {
+        defaultUrls[etcdKey] = default;
+        urlChanged[etcdKey] = false;
+        etcdUrls[etcdKey] = etcdLookup(etcdKey);
+
+
+        //io:println(<string>etcdUrls[etcdKey]);
+        //io:println(etcdEndpoint.config.url);
+        endpointUrl = <string>etcdUrls[etcdKey];
+    }
+
+    return endpointUrl;
 }
 
 @Description {value:"Calls etcd passing the key and retrieves value"}
@@ -556,7 +586,7 @@ public function etcdLookup(string key10) returns string
                     var val64 = <string>jsonPayload.kvs[0].value;
                     match val64 {
                         string matchedValue => value64 = matchedValue;
-                        error err => value64 = "Not found";
+                        error err => {io:println(err); value64 = "Not found";}
                     }
                 }
                 error err => {
@@ -570,7 +600,7 @@ public function etcdLookup(string key10) returns string
 
     if(value64 == "Not found")
     {
-        endpointUrl = value64;
+        endpointUrl = <string>defaultUrls[key10];
     }
     else
     {
@@ -580,7 +610,7 @@ public function etcdLookup(string key10) returns string
             error err => io:println("error: " + err.message);
         }
     }
-    io:println(endpointUrl);
+    //io:println(endpointUrl);
     return endpointUrl;
 }
 
