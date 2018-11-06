@@ -18,15 +18,19 @@
 
 package org.wso2.micro.gateway.tests.services;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.CLIExecutor;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
-import sun.rmi.runtime.Log;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
@@ -36,6 +40,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -44,6 +49,8 @@ import java.util.logging.Logger;
  */
 
 public class MutualSSLTestCase extends BaseTestCase {
+
+    private static final Log log = LogFactory.getLog(MutualSSLTestCase.class);
 
     @BeforeClass
     private void setup() throws Exception {
@@ -110,7 +117,7 @@ public class MutualSSLTestCase extends BaseTestCase {
             kmf.init(keyStore, KEY_PASSWORD);
 
             sslcontext = SSLContext.getInstance("TLS");
-            sslcontext.init(kmf.getKeyManagers(), null, new java.security.SecureRandom());
+            sslcontext.init(kmf.getKeyManagers(), null, new SecureRandom());
         } catch (Exception ex) {
             throw new IllegalStateException("Failure initializing default SSL context", ex);
         }
@@ -135,12 +142,10 @@ public class MutualSSLTestCase extends BaseTestCase {
 
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
-            Logger logger = null;
-            logger.info("An UnknownHostException  occurred: " + e);
+            log.error("An UnknownHostException occurred: ", e);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            Logger logger = null;
-            logger.info("An IOException occurred: " + e);
+            log.error("An IOException occurred: " + e);
 
         }
     }
@@ -187,16 +192,15 @@ public class MutualSSLTestCase extends BaseTestCase {
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
             String string = null;
             while ((string = bufferedreader.readLine()) != null) {
-                System.out.println("Received " + string);
+               log.info("Received " + string);
                 break;
             }
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            //e.printStackTrace();
             String x = e.toString();
             if (x.equalsIgnoreCase("javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate")) {
-                System.out.println("Test is working properly");
+                log.info("Test is working properly");
             }
         }
 

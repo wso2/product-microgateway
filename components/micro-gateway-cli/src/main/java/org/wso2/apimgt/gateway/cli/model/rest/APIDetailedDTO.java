@@ -86,7 +86,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
 
-
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
      **/
