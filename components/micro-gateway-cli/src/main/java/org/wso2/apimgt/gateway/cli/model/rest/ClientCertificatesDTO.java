@@ -21,53 +21,38 @@
 
     public class ClientCertificatesDTO {
 
-
         private Integer count = null;
-
         private String next = null;
-
         private String previous = null;
-
         private List<ClientCertMetadataDTO> certificates = new ArrayList<ClientCertMetadataDTO>();
-
         private APIListPaginationDTO pagination = null;
-
         public Integer getCount() {
             return count;
         }
-
         public void setCount(Integer count) {
             this.count = count;
         }
-
         public String getNext() {
             return next;
         }
-
         public void setNext(String next) {
             this.next = next;
         }
-
         public String getPrevious() {
             return previous;
         }
-
         public void setPrevious(String previous) {
             this.previous = previous;
         }
-
         public List<ClientCertMetadataDTO> getCertificates() {
             return certificates;
         }
-
         public void setCertificates(List<ClientCertMetadataDTO> certificates) {
             this.certificates = certificates;
         }
-
         public APIListPaginationDTO getPagination() {
             return pagination;
         }
-
         public void setPagination(APIListPaginationDTO pagination) {
             this.pagination = pagination;
         }

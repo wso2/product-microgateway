@@ -47,7 +47,6 @@ import java.util.logging.Logger;
 /**
  * Testing the pizza_shack api rest for mutualSSL feature
  */
-
 public class MutualSSLTestCase extends BaseTestCase {
 
     private static final Log log = LogFactory.getLog(MutualSSLTestCase.class);
@@ -88,7 +87,6 @@ public class MutualSSLTestCase extends BaseTestCase {
         System.out.println("MTSL TEST CASE");
         microGWServer.startMicroGwServer(balPath, args);
     }
-
 
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
     public void mutualSSLEstablished() throws Exception {
@@ -141,15 +139,12 @@ public class MutualSSLTestCase extends BaseTestCase {
             }
 
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             log.error("An UnknownHostException occurred: ", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             log.error("An IOException occurred: " + e);
 
         }
     }
-
 
     @Test(description = "mutual SSL is filed due to bad certificate")
     public void mutualSSLfail() throws Exception {
@@ -197,7 +192,6 @@ public class MutualSSLTestCase extends BaseTestCase {
             }
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             String x = e.toString();
             if (x.equalsIgnoreCase("javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate")) {
                 log.info("Test is working properly");

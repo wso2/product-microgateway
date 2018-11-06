@@ -40,7 +40,6 @@ public class APIDetailedDTO extends APIInfoDTO {
 
     ;
 
-
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
     private List<String> tags = new ArrayList<String>();
