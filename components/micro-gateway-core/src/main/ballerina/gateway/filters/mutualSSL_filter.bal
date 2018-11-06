@@ -72,7 +72,6 @@ public type MutualSSLFilter object {
             context.attributes[REQUEST_TIME] = startingTime;
             context.attributes[FILTER_FAILED] = false;
             isAuthenticated = true;
-            context.attributes[IS_AUTHENTICATED] = isAuthenticated;
             //Set authenticationContext data
             authenticationContext.authenticated = true;
             authenticationContext.tier = UNAUTHENTICATED_TIER;
@@ -85,7 +84,6 @@ public type MutualSSLFilter object {
 
         } else {
             //mutual ssl is not anabled and skip this filter
-            context.attributes[IS_AUTHENTICATED] = false;
             return true;
         }
     }
