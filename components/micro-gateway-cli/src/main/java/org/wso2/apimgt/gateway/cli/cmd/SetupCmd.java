@@ -351,6 +351,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
         logger.info(String.valueOf(clientCertificates));
 
+        //set etcd requirement
         Etcd etcd = new Etcd();
         etcd.setEtcdEnabled(isEtcd);
         GatewayCmdUtils.setEtcd(etcd);
