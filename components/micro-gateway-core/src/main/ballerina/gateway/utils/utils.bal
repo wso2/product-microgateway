@@ -29,6 +29,10 @@ public map etcdUrls;
 public map urlChanged;
 public map defaultUrls;
 public boolean etcdPeriodicQueryInitialized = false;
+//public boolean etcdAuthenticated = false;
+public boolean etcdConnectionEstablished = false;
+public boolean etcdConnectionAttempted = false;
+public string etcdToken;
 task:Timer? etcdTimer;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
@@ -487,9 +491,11 @@ public function initiateEtcdPeriodicQuery()
         function(error) onErrorFunction = etcdError;
         etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
 
-        io:println("Starting Periodic etcd call");
-        etcdTimer.start();
-
+        //if(etcdAuthenticate())
+        //{
+            io:println("Starting Periodic etcd call");
+            etcdTimer.start();
+        //}
         //etcdPeriodicQueryInitialized = true;
     //}
 }
@@ -513,8 +519,9 @@ public function etcdPeriodicQuery() returns error? {
             //etcdUrls[k] = getValue(k);
 
             //io:println("letter: ", k, ", word: ", etcdUrls[<string>k]);
-            io:println(etcdUrls);
+
         }
+        io:println(etcdUrls);
     }
     else
     {
@@ -533,32 +540,77 @@ public function etcdError(error e) {
 public function etcdSetup(string key, string default, string configKey) returns string
 {
     string endpointUrl;
-    if(!etcdPeriodicQueryInitialized)
-    {
-        io:println("etcdSetup init");
-        etcdPeriodicQueryInitialized = true;
-        initiateEtcdPeriodicQuery();
-    }
-    string etcdKey = config:getAsString(configKey, default = "");
 
-    if(etcdKey == "")
+    if(!etcdConnectionAttempted)
     {
-        io:println("etcd Key not provided for: "+key);
-        endpointUrl = retrieveConfig(key, default);
+        establishEtcdConnection();
+        etcdConnectionAttempted = true;
+    }
+
+    if(etcdConnectionEstablished)
+    {
+        if(!etcdPeriodicQueryInitialized)
+        {
+            io:println("etcdSetup init");
+            etcdPeriodicQueryInitialized = true;
+            initiateEtcdPeriodicQuery();
+        }
+        string etcdKey = config:getAsString(configKey, default = "");
+
+        if(etcdKey == "")
+        {
+            io:println("etcd Key not provided for: "+key);
+            endpointUrl = retrieveConfig(key, default);
+        }
+        else
+        {
+            defaultUrls[etcdKey] = default;
+            urlChanged[etcdKey] = false;
+            etcdUrls[etcdKey] = etcdLookup(etcdKey);
+            //if(etcdAuthenticated)
+            //{
+            //    etcdUrls[etcdKey] = etcdLookup(etcdKey);
+            //}
+            //else
+            //{
+            //    etcdUrls[etcdKey] = default;
+            //}
+            endpointUrl = <string>etcdUrls[etcdKey];
+        }
     }
     else
     {
-        defaultUrls[etcdKey] = default;
-        urlChanged[etcdKey] = false;
-        etcdUrls[etcdKey] = etcdLookup(etcdKey);
-
-
-        //io:println(<string>etcdUrls[etcdKey]);
-        //io:println(etcdEndpoint.config.url);
-        endpointUrl = <string>etcdUrls[etcdKey];
+        //io:println("etcd connection not established. Moving to default behaviour");
+        endpointUrl = retrieveConfig(key, default);
     }
 
     return endpointUrl;
+}
+
+@Description {value:"Establish etcd connection by authenticating etcd"}
+public function establishEtcdConnection()
+{
+    string etcdurl = config:getAsString("etcdurl");
+    boolean authenticated;
+    if(etcdurl != "")
+    {
+        authenticated = etcdAuthenticate();
+        if(authenticated)
+        {
+            io:println("etcd Authentication Successful");
+            etcdConnectionEstablished = true;
+        }
+        else
+        {
+            io:println("etcd Authentication Failed");
+            etcdConnectionEstablished = false;
+        }
+    }
+    else
+    {
+        io:println("etcd url not provided");
+        etcdConnectionEstablished = false;
+    }
 }
 
 @Description {value:"Calls etcd passing the key and retrieves value"}
@@ -576,6 +628,7 @@ public function etcdLookup(string key10) returns string
     }
 
     req.setPayload({"key": untaint key64});
+    req.setHeader("Authorization", etcdToken);
 
     var response = etcdEndpoint->post("/v3alpha/kv/range",req);
     match response {
@@ -586,7 +639,7 @@ public function etcdLookup(string key10) returns string
                     var val64 = <string>jsonPayload.kvs[0].value;
                     match val64 {
                         string matchedValue => value64 = matchedValue;
-                        error err => {io:println(err); value64 = "Not found";}
+                        error err => { value64 = "Not found";}
                     }
                 }
                 error err => {
@@ -612,6 +665,51 @@ public function etcdLookup(string key10) returns string
     }
     //io:println(endpointUrl);
     return endpointUrl;
+}
+
+@Description {value:"Authenticate etcd username and password and retrieve etcd token"}
+public function etcdAuthenticate() returns boolean
+{
+    http:Request req;
+    boolean etcdAuthenticated = false;
+
+    string username = retrieveConfig("etcdusername", "");
+    string password = retrieveConfig("etcdpassword", "");
+
+    req.setPayload({"name": untaint username, "password": untaint password});
+
+    var response = etcdEndpoint->post("/v3alpha/auth/authenticate",req);
+    match response {
+        http:Response resp => {
+            io:println("\nAuthenticating:");
+            var msg = resp.getJsonPayload();
+            match msg {
+                json jsonPayload => {
+                    var token = <string>jsonPayload.token;
+                    match token {
+                        string value => {
+                            etcdToken = untaint value;
+                            etcdAuthenticated = true;
+                            //io:println("Success: etcd Authentication Successful. Token Generated: "+ etcdToken);
+                        }
+                        error err => {
+                            etcdAuthenticated = false;
+                            //io:println("error: etcd Authentication Failed");
+                        }
+                    }
+                }
+                error err => {
+                    io:println("error3: "+ err.message);
+                    log:printError(err.message, err = err);
+                }
+            }
+        }
+        error err => {
+            io:println("error4" + err.message);
+        }
+    }
+
+    return etcdAuthenticated;
 }
 
 //public function getEtcdUrl() returns string

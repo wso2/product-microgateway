@@ -75,7 +75,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
-                    if(etcdKey != "")
+                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
                     {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
                         match hasUrlChanged{
@@ -96,7 +96,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 } else {
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
-                    if(etcdKey != "")
+                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
                     {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
                         match hasUrlChanged{
@@ -120,7 +120,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
-                    if(etcdKey != "")
+                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
                     {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
                         match hasUrlChanged{
@@ -155,7 +155,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
             {{#equals etcd.etcdEnabled "true"}}
                 etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
-                if(etcdKey != "")
+                if(etcdKey != "" && gateway:etcdConnectionEstablished)
                 {
                     hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
                     match hasUrlChanged{
