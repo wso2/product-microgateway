@@ -1,4 +1,4 @@
 endpoint http:Client {{qualifiedServiceName}}_{{type}} {
-    url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{type}}.endpoint.0", "{{inline.endpointConfig.list.0.url}}"){{>http2}}
+    url: {{#equals etcd.etcdEnabled "false"}}gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{type}}.endpoint.0","{{inline.endpointConfig.list.0.url}}"){{/equals}}{{#equals etcd.etcdEnabled "true"}}gateway:etcdSetup("{{api.name}}.{{api.version}}.{{type}}.endpoint.0","{{inline.endpointConfig.list.0.url}}","{{api.name}}.{{api.version}}.{{type}}.etcd.key"){{/equals}}{{>http2}}
     {{>caching}}{{>basicAuth}}
 };

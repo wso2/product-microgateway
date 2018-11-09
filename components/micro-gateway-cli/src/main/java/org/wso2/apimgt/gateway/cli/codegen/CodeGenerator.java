@@ -88,7 +88,7 @@ public class CodeGenerator {
         String concatTitle = context.getQualifiedServiceName();
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.ETCD_TEMPLATE_NAME);
+                GeneratorConstants.SERVICE_TEMPLATE_NAME);
         //System.out.println(context.getEndpointConfig().getProdEndpoints().getEndpoints().get(0).getEndpointUrl());
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
