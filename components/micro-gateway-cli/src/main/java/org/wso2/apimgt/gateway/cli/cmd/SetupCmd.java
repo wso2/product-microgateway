@@ -142,12 +142,15 @@ public class SetupCmd implements GatewayLauncherCmd {
     public void execute() {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
+        boolean isExternal = StringUtils.isNotEmpty(external);
 
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")){
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided: " + projectName);
         }
-        //validateAPIGetRequestParams(label, apiName, version);
+        if (!isExternal) {
+            validateAPIGetRequestParams(label, apiName, version);
+        }
 
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
@@ -163,8 +166,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
 
-        if (external != null) {
-            System.out.println("ll: " + external);
+        if (isExternal) {
+            System.out.println("Loading Open Api Specification from Path: " + external);
             String api = ExternalUtils.readApi(external);
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
@@ -184,7 +187,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             } catch (IOException | BallerinaServiceGenException e) {
                 e.printStackTrace();
             }
-            outStream.println("Setting up project " + projectName + " is successful. Via json file");
+            outStream.println("Setting up project " + projectName + " is successful.");
         } else {
             //Setup username
             String configuredUser = config.getToken().getUsername();
