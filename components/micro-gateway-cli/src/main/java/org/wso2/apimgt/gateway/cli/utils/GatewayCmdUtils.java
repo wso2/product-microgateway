@@ -32,24 +32,29 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Properties;
 
 public class GatewayCmdUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
     private static Config config;
     private static ContainerConfig containerConfig;
-    private static Etcd etcd;
     private static CodeGenerationContext codeGenerationContext;
+    private static Etcd etcd;
 
     public static Etcd getEtcd() {
         return etcd;
@@ -298,16 +303,8 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        boolean etcdFileExists = checkForEtcdFile(projectName);
-        if(etcdFileExists)
-        {
-            changePropertyForEtcd(gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                    + GatewayCliConstants.GW_DIST_CONF_FILE, "true");
-        }
-
         String targetPath = getProjectTargetDirectoryPath(projectName);
         String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
-
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
 
@@ -358,76 +355,6 @@ public class GatewayCmdUtils {
         createFolderIfNotExist(apiUsageDir);
     }
 
-    public static void changePropertyForEtcd(String fileName, String value)
-    {
-        try
-        {
-            GatewayCmdUtils.changeProperty(fileName, GatewayCliConstants.ETCD_ENABLED, value);
-        }
-        catch(IOException e)
-        {
-            logger.error("Failed to change etcdEnabled Property ", e);
-            throw new CLIInternalException("Error occurred while setting up the workspace structure");
-        }
-    }
-
-    public static void changeProperty(String filename, String key, String value) throws IOException {
-        final File tmpFile = new File(filename + ".tmp");
-        final File file = new File(filename);
-        PrintWriter pw = new PrintWriter(tmpFile);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        boolean found = false;
-        final String toAdd = key + '=' + value;
-        for (String line; (line = br.readLine()) != null; ) {
-            if (line.startsWith(key + '=')) {
-                line = toAdd;
-                found = true;
-            }
-            pw.println(line);
-        }
-        if (!found)
-            pw.println(toAdd);
-        br.close();
-        pw.close();
-        tmpFile.renameTo(file);
-    }
-
-    public static void createEtcdFile(String projectName) throws IOException
-    {
-        String tempDirPath = getProjectTempFolderLocation(projectName);
-        createFolderIfNotExist(tempDirPath);
-
-        String tempEtcdFileLocation = getTemporaryEtcdFileLocation(projectName);
-
-        File etcdFile = new File(tempEtcdFileLocation);
-
-        if (!etcdFile.exists()) {
-            boolean created = etcdFile.createNewFile();
-            if (created) {
-                logger.trace("Temporary etcd file: {} created. ", tempEtcdFileLocation);
-            } else {
-                logger.error("Failed to create temporary etcd file: {} ", tempEtcdFileLocation);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
-            }
-        }
-    }
-
-    public static boolean checkForEtcdFile(String projectName)
-    {
-        String tempEtcdFileLocation = getTemporaryEtcdFileLocation(projectName);
-
-        File etcdFile = new File(tempEtcdFileLocation);
-
-        if (etcdFile.exists())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     /**
      * Load the stored resource hash content from the CLI temp folder
      *
@@ -442,11 +369,6 @@ public class GatewayCmdUtils {
             content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
         }
         return content;
-    }
-
-    private static String getTemporaryEtcdFileLocation(String projectName) {
-        return getProjectTempFolderLocation(projectName) + File.separator
-                + GatewayCliConstants.TEMP_ETCD_FILE;
     }
 
     /**
@@ -531,6 +453,7 @@ public class GatewayCmdUtils {
         String targetPath = getTargetGatewayDistPath(projectName);
         String binDir = targetPath + File.separator
                 + GatewayCliConstants.GW_DIST_BIN + File.separator;
+
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
         linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
         File shPathFile = new File(binDir + GatewayCliConstants.GW_DIST_SH);

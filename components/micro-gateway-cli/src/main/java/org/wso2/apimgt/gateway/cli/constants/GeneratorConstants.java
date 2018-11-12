@@ -23,7 +23,6 @@ import java.io.File;
 public class GeneratorConstants {
 
     public static final String SERVICE_TEMPLATE_NAME = "service";
-    public static final String ETCD_TEMPLATE_NAME = "etcd";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String LISTENERS_TEMPLATE_NAME = "listeners";
     public static final String LISTENERS = "listeners";
