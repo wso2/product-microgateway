@@ -349,13 +349,7 @@
 @final string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
 @final string KEY_UPLOAD_TASK = "UploadTimerTask";
 @final string KEY_ROTATE_TASK = "RotateTimerTask";
+@final string KEY_ETCD_UTIL = "EtcdUtil";
 
 
 @final public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
-
-
-// service discovery constants
-@Description { value: "Service Discovery related configs"}
-@final public string SERVICE_DISCOVERY_INSTANCE_ID = "serviceDiscovery";
-@Description { value: "is etcd Enabled"}
-@final public string IS_ETCD_ENABLED = "etcdEnabled";
