@@ -37,9 +37,10 @@ task:Timer? etcdTimer;
 @Description {value:"Setting up etcd timer task"}
 public function initiateEtcdPeriodicQuery()
 {
+    int etcdTriggerTime = config:getAsInt("etcdtimer", default = DEFAULT_ETCD_TRIGGER_TIME);
     (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
     function(error) onErrorFunction = etcdError;
-    etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, 10000, delay = 5000);
+    etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, etcdTriggerTime, delay = 5000);
     etcdTimer.start();
     printInfo(KEY_ETCD_UTIL, "Etcd Periodic Timer Task Started");
 }

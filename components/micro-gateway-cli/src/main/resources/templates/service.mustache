@@ -106,7 +106,6 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                         }
                         if(reinitRequired)
                         {
-                            io:println("Re-initializing the endpoint");
                             newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
                             destination_attribute = <string>gateway:etcdUrls[etcdKey];
                             gateway:urlChanged[etcdKey] = false;
@@ -132,7 +131,6 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                         }
                         if(reinitRequired)
                         {
-                            io:println("Re-initializing the endpoint");
                             newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
                             destination_attribute = <string>gateway:etcdUrls[etcdKey];
                             gateway:urlChanged[etcdKey] = false;
