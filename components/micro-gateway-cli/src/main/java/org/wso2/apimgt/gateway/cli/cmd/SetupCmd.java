@@ -140,10 +140,6 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = { "-etcd", "--etcd" }, hidden = true, arity = 0)
     private boolean isEtcd;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = { "-ettcd", "--ettcd" }, hidden = true)
-    private String Etcd;
-
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -369,6 +365,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
             logger.info(String.valueOf(clientCertificates));
 
+            //set etcd requirement
             Etcd etcd = new Etcd();
             etcd.setEtcdEnabled(isEtcd);
             GatewayCmdUtils.setEtcd(etcd);
