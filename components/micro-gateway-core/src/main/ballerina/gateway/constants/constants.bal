@@ -428,3 +428,4 @@
 
 
 @final public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
+@final public int DEFAULT_ETCD_TRIGGER_TIME = 10000; //10 seconds

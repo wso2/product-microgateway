@@ -77,6 +77,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
         http:Response|error clientResponse;
+        string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
         {{#equals etcd.etcdEnabled "true"}}boolean reinitRequired;
         string etcdKey;
@@ -85,6 +86,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
                     if(etcdKey != "" && gateway:etcdConnectionEstablished)
@@ -97,14 +99,16 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                         if(reinitRequired)
                         {
                             newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
                             gateway:urlChanged[etcdKey] = false;
                             {{qualifiedServiceName}}_prod.init(newConfig);
                         }
                     }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                 } else {
+                    destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
                     if(etcdKey != "" && gateway:etcdConnectionEstablished)
@@ -117,17 +121,19 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                         if(reinitRequired)
                         {
                             newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
                             gateway:urlChanged[etcdKey] = false;
                             {{qualifiedServiceName}}_sand.init(newConfig);
                         }
                     }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 {{#equals etcd.etcdEnabled "true"}}
                     etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
                     if(etcdKey != "" && gateway:etcdConnectionEstablished)
@@ -140,13 +146,14 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                         if(reinitRequired)
                         {
                             newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
                             gateway:urlChanged[etcdKey] = false;
                             {{qualifiedServiceName}}_prod.init(newConfig);
                         }
                     }
                 {{/equals}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                 } else {
                     http:Response res = new;
                     res.statusCode = 403;
@@ -162,6 +169,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
             {{#equals etcd.etcdEnabled "true"}}
                 etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
                 if(etcdKey != "" && gateway:etcdConnectionEstablished)
@@ -174,13 +182,14 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                     if(reinitRequired)
                     {
                         newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                        destination_attribute = <string>gateway:etcdUrls[etcdKey];
                         gateway:urlChanged[etcdKey] = false;
                         {{qualifiedServiceName}}_sand.init(newConfig);
                     }
                 }
             {{/equals}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                runtime:getInvocationContext().attributes["destination"] = destination_attribute;
             } else {
                 http:Response res = new;
                 res.statusCode = 403;
