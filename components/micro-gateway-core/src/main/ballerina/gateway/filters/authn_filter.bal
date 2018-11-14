@@ -32,7 +32,7 @@ import ballerina/reflect;
 public type AuthnFilter object {
 
     public OAuthnAuthenticator oauthnHandler;// Handles the oauth2 authentication;
-    public http:AuthnHandlerChain authnHandlerChain;
+    public AuthnHandlerChain authnHandlerChain;
 
 
     public new (oauthnHandler, authnHandlerChain) {}
@@ -91,7 +91,6 @@ public type AuthnFilter object {
             // if auth providers are there, use those to authenticate
             if(providerId != AUTH_SCHEME_OAUTH2) {
                 printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId );
-                string[] providerIds = [providerId];
                 // if authorization header is not default auth header we need to set it to the default header in
                 // order for jwt to work. If there is an already default auth header we back up it to a temp auth
                 // header and set the default authentication header.
@@ -107,7 +106,7 @@ public type AuthnFilter object {
 
                 try {
                     printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
+                    isAuthorized = self.authnHandlerChain.handle(request);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
                 } catch (error err) {
