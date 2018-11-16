@@ -49,7 +49,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
     private String projectName;
 
-    @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
+    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
     private boolean helpFlag;
 
     public void execute() {
@@ -68,8 +68,10 @@ public class BuildCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.createProjectGWDistribution(projectName);
             outStream.println("Build successful for the project - " + projectName);
         } catch (IOException e) {
-            logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
-            throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
+            logger.error("Error occurred while creating the micro gateway distribution for the project {}.",
+                    projectName, e);
+            throw new CLIInternalException("Error occurred while creating the micro gateway distribution " +
+                    "for the project");
         }
     }
 

@@ -36,16 +36,19 @@ public class APIDetailedDTO extends APIInfoDTO {
     private Boolean isDefaultVersion = null;
 
     public enum TypeEnum {
-        HTTP, WS,
+        HTTP, WS, SOAPTOREST,
     }
 
     ;
+
 
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
     private List<String> tags = new ArrayList<String>();
     private List<String> tiers = new ArrayList<String>();
     private String apiLevelPolicy = null;
+    private String authorizationHeader = null;
+    private String apiSecurity = null;
     private APIMaxTpsDTO maxTps = null;
 
     public enum VisibilityEnum {
@@ -83,7 +86,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private String authorizationHeader = null;
+
 
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
@@ -219,6 +222,32 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.apiLevelPolicy = apiLevelPolicy;
     }
 
+    /**
+     * * The authorization header of the API
+     **/
+    @Hash
+    @JsonProperty("authorizationHeader")
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+
+    /**
+     * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\n
+     * it is not set OAuth2 will be set as the security for the current API.\n
+     **/
+    @JsonProperty("apiSecurity")
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
+    }
 
     @JsonProperty("maxTps")
     public APIMaxTpsDTO getMaxTps() {
@@ -231,7 +260,8 @@ public class APIDetailedDTO extends APIInfoDTO {
 
 
     /**
-     * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
+     * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR
+     * CONTROLLED.
      **/
     @JsonProperty("visibility")
     public VisibilityEnum getVisibility() {
@@ -357,17 +387,12 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.additionalProperties = additionalProperties;
     }
 
-
     /**
-     * Is the APIDetailedDTO is restricted to certain set of publishers or creators or is it visible to all
-     * the\npublishers and creators. If the accessControl restriction is none, this APIDetailedDTO can be modified
-     * by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers a
-     * nd creators,\n based on the restriction.\n
+     * Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and
+     * creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators,
+     * if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.
+     * \n
      **/
-    @ApiModelProperty(value = "Is the APIDetailedDTO is restricted to certain set of publishers or creators" +
-            " or is it visible to all the\npublishers and creators. If the accessControl restriction is none, " +
-            "this APIDetailedDTO can be modified by all the\npublishers and creators, if not it can only be " +
-            "viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n")
     @JsonProperty("accessControl")
     public AccessControlEnum getAccessControl() {
         return accessControl;
@@ -408,18 +433,4 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
     }
-
-    /**
-     * * The authorization header of the API
-     **/
-    @Hash
-    @JsonProperty("authorizationHeader")
-    public String getAuthorizationHeader() {
-        return authorizationHeader;
-    }
-
-    public void setAuthorizationHeader(String authorizationHeader) {
-        this.authorizationHeader = authorizationHeader;
-    }
-
 }

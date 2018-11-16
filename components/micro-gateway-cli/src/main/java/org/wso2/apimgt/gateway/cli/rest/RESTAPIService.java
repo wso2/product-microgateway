@@ -21,15 +21,25 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+
 
 import java.util.List;
 
 public interface RESTAPIService {
 
     /**
+     * Check whether user has set the AUTH_HEADER as System property and if not set default value
+     * @return Authorization Header value
+     */
+
+     String getAuthHeader();
+    /**
      * Get APIs of given label
      *
-     * @param labelName label name
+     * @param labelName   label name
      * @param accessToken access token
      * @return list of APIs belong to the given label
      */
@@ -37,9 +47,9 @@ public interface RESTAPIService {
 
     /**
      * Gets the API specified by name and version
-     * 
-     * @param apiName Name of the API
-     * @param version Version of the API
+     *
+     * @param apiName     Name of the API
+     * @param version     Version of the API
      * @param accessToken access token
      * @return the API specified by name and version by calling the Publisher REST API
      */
@@ -61,5 +71,13 @@ public interface RESTAPIService {
      */
     List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken);
 
-    String getAPISwaggerDefinition(String apiId, String accessToken) ;
+    String getAPISwaggerDefinition(String apiId, String accessToken);
+
+    /**
+     * Get list of client certificates
+     *
+     * @param accessToken access token
+     * @return list of  client certificates
+     */
+    List<ClientCertMetadataDTO> getClientCertificates(String accessToken);
 }

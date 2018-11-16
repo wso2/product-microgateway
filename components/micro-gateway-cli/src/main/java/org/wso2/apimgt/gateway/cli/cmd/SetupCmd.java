@@ -66,53 +66,62 @@ import java.util.List;
 /**
  * This class represents the "setup" command and it holds arguments and flags specified by the user.
  */
-@Parameters (commandNames = "setup", commandDescription = "setup information")
+@Parameters(commandNames = "setup", commandDescription = "setup information")
 public class SetupCmd implements GatewayLauncherCmd {
 
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.err;
 
-    @SuppressWarnings ("unused") @Parameter (hidden = true, required = true)
+    @SuppressWarnings("unused")
+    @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
 
-    @SuppressWarnings ("unused") @Parameter (names = "--java.debug", hidden = true)
+    @SuppressWarnings("unused")
+    @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter (names = { "-u", "--username" }, hidden = true)
+    @Parameter(names = {"-u", "--username"}, hidden = true)
     private String username;
 
-    @Parameter (names = { "-p", "--password" }, hidden = true)
+    @Parameter(names = {"-p", "--password"}, hidden = true)
     private String password;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-l", "--label" }, hidden = true)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-l", "--label"}, hidden = true)
     private String label;
 
-    @Parameter (names = { "-s", "--server-url" }, hidden = true)
+    @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseUrl;
 
-    @Parameter (names = { "-t", "--truststore" }, hidden = true)
+    @Parameter(names = {"-t", "--truststore"}, hidden = true)
     private String trustStoreLocation;
 
-    @Parameter (names = { "-w", "--truststore-pass" }, hidden = true)
+    @Parameter(names = {"-w", "--truststore-pass"}, hidden = true)
     private String trustStorePassword;
 
-    @Parameter (names = { "-c", "--config" }, hidden = true)
+    @Parameter(names = {"-c", "--config"}, hidden = true)
     private String toolkitConfigPath;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-d", "--deployment-config" }, hidden = true)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
     private String deploymentConfigPath;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-a", "--api-name" }, hidden = true)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-a", "--api-name"}, hidden = true)
     private String apiName;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-v", "--version" }, hidden = true)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-v", "--version"}, hidden = true)
     private String version;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-f", "--force" }, hidden = true, arity = 0)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-f", "--force"}, hidden = true, arity = 0)
     private boolean isForcefully;
 
-    @SuppressWarnings ("unused") @Parameter (names = { "-k", "--insecure" }, hidden = true, arity = 0)
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
+
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -169,6 +178,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
+
 
         //Setup username
         String configuredUser = config.getToken().getUsername();
@@ -396,11 +406,13 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
     }
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return GatewayCliCommands.SETUP;
     }
 
-    @Override public void setParentCmdParser(JCommander parentCmdParser) {
+    @Override
+    public void setParentCmdParser(JCommander parentCmdParser) {
     }
 
     private String promptForTextInput(String msg) {

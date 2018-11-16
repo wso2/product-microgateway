@@ -18,18 +18,21 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
+import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 
 public class ListenerEndpoint {
     private ContainerConfig containerConfig;
+    private Config config;
 
     public ListenerEndpoint buildContext() {
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
+        this.config= GatewayCmdUtils.getConfig();
         return this;
     }
 
-    public ContainerConfig getContainerConfig() {
-        return containerConfig;
-    }
+     public ContainerConfig getContainerConfig() { return containerConfig; }
+
+     public  Config getConfig(){ return config; }
 }

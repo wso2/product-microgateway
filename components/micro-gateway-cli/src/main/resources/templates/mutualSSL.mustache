@@ -1,0 +1,16 @@
+secureSocket: {
+keyStore: {
+path:  config:getAsString("listenerConfig.keyStore.path"),
+password: config:getAsString("listenerConfig.keyStore.password")
+},
+trustStore: {
+path:  config:getAsString("jwtTokenConfig.trustStore.path"),
+password: config:getAsString("jwtTokenConfig.trustStore.password")
+},
+protocol: {
+name: config:getAsString("mutualSSLConfig.ProtocolName"),
+versions: ["TLSv1.2", "TLSv1.1"]
+},
+
+sslVerifyClient: config:getAsString("mutualSSLConfig.sslVerifyClient")
+},

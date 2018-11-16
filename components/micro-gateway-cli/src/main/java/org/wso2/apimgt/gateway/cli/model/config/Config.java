@@ -23,6 +23,7 @@ public class Config {
     private Client client;
     private Token token;
     private APICorsConfigurationDTO corsConfiguration;
+    private MutualSSL mutualSSL;
 
     public Token getToken() {
         return token;
@@ -46,5 +47,13 @@ public class Config {
 
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
+    }
+
+    public MutualSSL getMutualSSL() {
+        return mutualSSL;
+    }
+
+    public void setMutualSSL(MutualSSL mutualSSL) {
+        this.mutualSSL = mutualSSL;
     }
 }
