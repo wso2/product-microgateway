@@ -61,7 +61,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
-            projectName = projectName.replaceAll("\\/","");
+            projectName = projectName.replaceAll("[\\/\\\\]","");
             File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
             if (!projectLocation.exists()) {
                 throw new CLIRuntimeException("Project " + projectName + " does not exist.");

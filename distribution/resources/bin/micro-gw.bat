@@ -110,14 +110,14 @@ goto :end
 		goto :usageInfo
 
 	:nameFound
-		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for project %project_name%
+		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for project %project_name:\=%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		set MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name%"
+		set MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name:\=%"
 		if exist %MICRO_GW_PROJECT_DIR% goto :continueBuild
 			REM Exit, if can not find a project with given project name
 			if %verbose%==T echo [%date% %time%] DEBUG: Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
-			echo "Incorrect project name `%project_name%` or Workspace not initialized, Run setup befor building the project!"
+			echo "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
 	:continueBuild
@@ -127,7 +127,7 @@ goto :end
 			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
 			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
 			if exist "%TARGET_DIR%"  ( rmdir "%TARGET_DIR%" /s /q )
-			call ballerina build src -o %project_name%.balx
+			call ballerina build src -o %project_name:\=%.balx
 		popd
 		if %verbose%==T echo [%date% %time%] DEBUG: Ballerina build completed
 		REM Check for a debug param by looping through the remaining args list
