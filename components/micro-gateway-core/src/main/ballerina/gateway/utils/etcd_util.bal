@@ -33,6 +33,7 @@ public boolean etcdConnectionEstablished = false;
 public boolean etcdConnectionAttempted = false;
 public string etcdToken;
 task:Timer? etcdTimer;
+public boolean etcdUrlValid = false;
 
 @Description {value:"Setting up etcd timer task"}
 public function initiateEtcdPeriodicQuery()
@@ -40,7 +41,7 @@ public function initiateEtcdPeriodicQuery()
     int etcdTriggerTime = config:getAsInt("etcdtimer", default = DEFAULT_ETCD_TRIGGER_TIME);
     (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
     function(error) onErrorFunction = etcdError;
-    etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, etcdTriggerTime, delay = 5000);
+    etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, etcdTriggerTime, delay = 1000);
     etcdTimer.start();
     printInfo(KEY_ETCD_UTIL, "Etcd Periodic Timer Task Started");
 }
@@ -126,14 +127,22 @@ public function establishEtcdConnection()
     if(etcdurl != "")
     {
         authenticated = etcdAuthenticate();
-        if(authenticated)
+        if(etcdUrlValid)
         {
-            printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
-            etcdConnectionEstablished = true;
+            if(authenticated)
+            {
+                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
+                etcdConnectionEstablished = true;
+            }
+            else
+            {
+                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Failed");
+                etcdConnectionEstablished = false;
+            }
         }
         else
         {
-            printInfo(KEY_ETCD_UTIL, "Etcd Authentication Failed");
+            printInfo(KEY_ETCD_UTIL, "Invalid Etcd Url Provided");
             etcdConnectionEstablished = false;
         }
     }
@@ -170,7 +179,7 @@ public function etcdLookup(string key10) returns string
                     var val64 = <string>jsonPayload.kvs[0].value;
                     match val64 {
                         string matchedValue => value64 = matchedValue;
-                        error err => { value64 = "Not found";}
+                        error err => { value64 = "Not found"; }
                     }
                 }
                 error err => {
@@ -178,7 +187,10 @@ public function etcdLookup(string key10) returns string
                 }
             }
         }
-        error err => { log:printError(err.message, err = err); }
+        error err => {
+            log:printError(err.message, err = err);
+            value64 = "Not found";
+        }
     }
 
     if(value64 == "Not found")
@@ -213,6 +225,7 @@ public function etcdAuthenticate() returns boolean
             var msg = resp.getJsonPayload();
             match msg {
                 json jsonPayload => {
+                    etcdUrlValid = true;
                     var token = <string>jsonPayload.token;
                     match token {
                         string value => {
@@ -226,6 +239,11 @@ public function etcdAuthenticate() returns boolean
                 }
                 error err => {
                     log:printError(err.message, err = err);
+                    string errorMessage = err.message;
+                    if(errorMessage.contains("Connection refused"))
+                    {
+                        etcdUrlValid = false;
+                    }
                 }
             }
         }
