@@ -136,8 +136,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
-
-    @Parameter(names = { "-etcd", "--etcd" }, hidden = true, arity = 0)
+    @Parameter(names = { "-etcd", "--etcd-enable" }, hidden = true, arity = 0)
     private boolean isEtcd;
 
     private String publisherEndpoint;

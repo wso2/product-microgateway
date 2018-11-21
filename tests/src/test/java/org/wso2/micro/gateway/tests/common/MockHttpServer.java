@@ -81,6 +81,8 @@ public class MockHttpServer extends Thread {
     private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
+    public final static String PROD_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-production\"}";
+    public final static String SAND_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-sandbox\"}";
     public final static String ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE = "[{\"description\":\"Grilled white chicken, " +
             "hickory-smoked bacon and fresh sliced onions in barbeque sauce\", \"price\":\"25.99\"," +
             " \"icon\":\"/images/6.png\"}, {\"name\":\"Chicken Parmesan\", \"description\":\"Grilled chicken, fresh " +
@@ -220,10 +222,28 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
+            httpServer.createContext("/echo/newprod", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = PROD_ENDPOINT_NEW_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
             httpServer.createContext("/echo/sand", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     byte[] response = SAND_ENDPOINT_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/newsand", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = SAND_ENDPOINT_NEW_RESPONSE.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();

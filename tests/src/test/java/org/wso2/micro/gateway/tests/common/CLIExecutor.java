@@ -114,6 +114,43 @@ public class CLIExecutor {
         }
     }
 
+    public void generate(String label, String project, String additionalFlag) throws Exception {
+        org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+
+        String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
+        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
+        log.info("CLI Project Home: " + path.toString());
+
+        System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
+        log.info("CLI Home: " + this.cliHome);
+
+        String config = new File(
+                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
+                        .getPath()).getAbsolutePath();
+        System.setProperty("user.dir", path.toString());
+        String[] args = { "setup", project, "--label", label, "--username", "admin", "--password",
+                "admin", "--server-url", "http://localhost:9443", "--truststore",
+                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
+                config, "--" + additionalFlag };
+        main.main(args);
+
+        String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
+                + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
+        homeDirectory = path + File.separator + project;
+
+        String[] cmdArray = new String[] { "bash", balCommand, "build" };
+        String[] args2 = new String[] { "src", "-o", project };
+        String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
+        Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
+
+        new ServerLogReader("errorStream", process.getErrorStream()).start();
+        new ServerLogReader("inputStream", process.getInputStream()).start();
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Error occurred when building.");
+        }
+    }
+
     public String getHomeDirectory() {
         return homeDirectory;
     }
@@ -144,4 +181,3 @@ public class CLIExecutor {
         return homeDirectory + File.separator + "target" + File.separator + project + ".balx";
     }
 }
-
