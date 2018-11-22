@@ -131,6 +131,11 @@ public class SetupCmd implements GatewayLauncherCmd {
         String workspace = GatewayCmdUtils.getUserDir();
 
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+
+        if (projectName.contains(" ")){
+            throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided: " +projectName);
+        }
+
         validateAPIGetRequestParams(label, apiName, version);
 
         if (StringUtils.isEmpty(toolkitConfigPath)) {
@@ -141,6 +146,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
+
+
         init(projectName, toolkitConfigPath, deploymentConfigPath);
 
         Config config = GatewayCmdUtils.getConfig();
