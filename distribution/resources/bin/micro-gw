@@ -157,7 +157,7 @@ done
 set -- "${ALL_ARGS[@]}"
 
 # take the first default argument as the project name
-CMD_PRO_NAME_VAL=${DEFAULT_ARGS[0]}
+CMD_PRO_NAME_VAL=$(echo ${DEFAULT_ARGS[0]}|sed 's#/##g')
 
 #execute build command
 if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
