@@ -36,36 +36,10 @@ import java.util.List;
 /**
  * Utilities used by ballerina code generator.
  */
-public class ExternalUtils {
+public class OpenApiCodegenUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
 
-    public static List<ExtendedAPI> generateApi(String filePath) {
-//        SwaggerParser parser = new SwaggerParser();
-//        Swagger apiDef = parser.read(filePath);
-//        System.out.println("read");
-//        System.out.println(": " + apiDef.getSwagger());
-        ObjectMapper mapper = new ObjectMapper();
-        List<ExtendedAPI> apis = null;
-        String responseStr = null;
-        try {
-            responseStr = new String(Files.readAllBytes(Paths.get(filePath)));
-            System.out.println("Response body: {}" + responseStr);
-            //convert json string to object
-            APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
-            if (apiList != null) {
-
-                apis = new ArrayList<>(apiList.getList());
-                for (ExtendedAPI api : apis) {
-                    setAdditionalConfigs(api);
-                }
-                System.out.println("mm: " + apis.get(0).getEndpointConfig());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return apis;
-    }
     public static String readApi(String filePath) {
         String responseStr;
         try {

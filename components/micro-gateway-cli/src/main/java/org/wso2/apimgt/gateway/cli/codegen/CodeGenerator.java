@@ -31,7 +31,7 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.ExternalUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
@@ -116,7 +116,7 @@ public class CodeGenerator {
         api.setContext(swagger.getBasePath());
         api.setEndpointConfig(endpointDef);
         api.setTransport(Arrays.asList("http", "https"));
-        ExternalUtils.setAdditionalConfigs(api);
+        OpenApiCodegenUtils.setAdditionalConfigs(api);
         definitionContext = new BallerinaService().buildContext(swagger, api);
         genFiles.add(generateService(definitionContext));
 

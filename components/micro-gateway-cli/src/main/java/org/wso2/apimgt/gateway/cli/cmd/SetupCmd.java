@@ -49,20 +49,17 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
-import org.wso2.apimgt.gateway.cli.utils.ExternalUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,8 +92,8 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseUrl;
 
-    @Parameter(names = { "-o", "--open-api" }, hidden = true)
-    private String external;
+    @Parameter(names = { "-oa", "--open-api" }, hidden = true)
+    private String openApi;
 
     @Parameter(names = { "-e", "--endpoint" }, hidden = true)
     private String endpoint;
@@ -142,8 +139,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     public void execute() {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
-        boolean isExternal = StringUtils.isNotEmpty(external);
-
+        boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")){
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided: " + projectName);
@@ -165,9 +161,9 @@ public class SetupCmd implements GatewayLauncherCmd {
         /*
          * If api is created via an api definition, the setup flow is altered
          */
-        if (isExternal) {
-            System.out.println("Loading Open Api Specification from Path: " + external);
-            String api = ExternalUtils.readApi(external);
+        if (isOpenApi) {
+            System.out.println("Loading Open Api Specification from Path: " + openApi);
+            String api = OpenApiCodegenUtils.readApi(openApi);
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
                 if (StringUtils.isEmpty(endpointConfig)) {
