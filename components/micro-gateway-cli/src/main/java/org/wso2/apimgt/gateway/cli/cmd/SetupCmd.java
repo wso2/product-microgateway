@@ -148,10 +148,6 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (projectName.contains(" ")){
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided: " + projectName);
         }
-        if (!isExternal) {
-            validateAPIGetRequestParams(label, apiName, version);
-        }
-
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
@@ -166,6 +162,9 @@ public class SetupCmd implements GatewayLauncherCmd {
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
 
+        /*
+         * If api is created via an api definition, the setup flow is altered
+         */
         if (isExternal) {
             System.out.println("Loading Open Api Specification from Path: " + external);
             String api = ExternalUtils.readApi(external);
@@ -173,6 +172,10 @@ public class SetupCmd implements GatewayLauncherCmd {
             try {
                 if (StringUtils.isEmpty(endpointConfig)) {
                     if (StringUtils.isEmpty(endpoint)) {
+                        /*
+                         * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                         * the user
+                         */
                         if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                         }
@@ -180,15 +183,18 @@ public class SetupCmd implements GatewayLauncherCmd {
                     endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
                             "\"},\"endpoint_type\":\"http\"}";
                 }
-                codeGenerator.generateSwagger(projectName, api, endpointConfig, true);
+                codeGenerator.generate(projectName, api, endpointConfig, true);
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
             } catch (IOException | BallerinaServiceGenException e) {
-                e.printStackTrace();
+                logger.error("Error while generating ballerina source.");
+                throw new CLIInternalException("Error while generating ballerina source.");
             }
             outStream.println("Setting up project " + projectName + " is successful.");
         } else {
+
+            validateAPIGetRequestParams(label, apiName, version);
             //Setup username
             String configuredUser = config.getToken().getUsername();
             if (StringUtils.isEmpty(configuredUser)) {

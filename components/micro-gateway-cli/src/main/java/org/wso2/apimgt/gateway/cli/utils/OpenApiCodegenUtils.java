@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cmd.SetupCmd;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
@@ -66,11 +67,12 @@ public class ExternalUtils {
         return apis;
     }
     public static String readApi(String filePath) {
-        String responseStr = null;
+        String responseStr;
         try {
             responseStr = new String(Files.readAllBytes(Paths.get(filePath)));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while reading api definition.");
+            throw new CLIInternalException("Error while reading api definition.");
         }
         return responseStr;
     }
