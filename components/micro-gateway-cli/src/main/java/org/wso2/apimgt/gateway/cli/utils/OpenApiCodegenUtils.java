@@ -19,33 +19,29 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.cmd.SetupCmd;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utilities used by ballerina code generator.
  */
 public class OpenApiCodegenUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenApiCodegenUtils.class);
 
     public static String readApi(String filePath) {
         String responseStr;
         try {
-            responseStr = new String(Files.readAllBytes(Paths.get(filePath)));
+            responseStr = new String(Files.readAllBytes(Paths.get(filePath)), GatewayCliConstants.CHARSET_UTF8);
         } catch (IOException e) {
-            logger.error("Error while reading api definition.");
+            logger.error("Error while reading api definition.", e);
             throw new CLIInternalException("Error while reading api definition.");
         }
         return responseStr;
@@ -54,18 +50,6 @@ public class OpenApiCodegenUtils {
     public static void setAdditionalConfigs(ExtendedAPI api) throws IOException {
         String endpointConfig = api.getEndpointConfig();
         api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
-        // set default values from config if per api cors is not enabled
-//        Config config = GatewayCmdUtils.getConfig();
-//        if (config == null) {
-//            if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
-//                api.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-//            }
-//        } else {
-//            if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
-//                    .getCorsConfigurationEnabled()) {
-//                api.setCorsConfiguration(config.getCorsConfiguration());
-//            }
-//        }
     }
 
 

@@ -92,7 +92,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseUrl;
 
-    @Parameter(names = { "-oa", "--open-api" }, hidden = true)
+    @Parameter(names = { "-oa", "--openapi" }, hidden = true)
     private String openApi;
 
     @Parameter(names = { "-e", "--endpoint" }, hidden = true)
@@ -162,8 +162,9 @@ public class SetupCmd implements GatewayLauncherCmd {
          * If api is created via an api definition, the setup flow is altered
          */
         if (isOpenApi) {
-            System.out.println("Loading Open Api Specification from Path: " + openApi);
+            outStream.println("Loading Open Api Specification from Path: " + openApi);
             String api = OpenApiCodegenUtils.readApi(openApi);
+            logger.debug("Successfully read the api definition file");
             CodeGenerator codeGenerator = new CodeGenerator();
             try {
                 if (StringUtils.isEmpty(endpointConfig)) {
@@ -181,10 +182,11 @@ public class SetupCmd implements GatewayLauncherCmd {
                 }
                 codeGenerator.generate(projectName, api, endpointConfig, true);
                 //Initializing the ballerina project and creating .bal folder.
+                logger.debug("Creating source artifacts");
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
             } catch (IOException | BallerinaServiceGenException e) {
-                logger.error("Error while generating ballerina source.");
+                logger.error("Error while generating ballerina source.", e);
                 throw new CLIInternalException("Error while generating ballerina source.");
             }
             outStream.println("Setting up project " + projectName + " is successful.");
@@ -323,9 +325,6 @@ public class SetupCmd implements GatewayLauncherCmd {
                     apis.add(api);
                 }
             }
-
-
-
             if (apis == null || (apis != null && apis.isEmpty())) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
@@ -353,12 +352,12 @@ public class SetupCmd implements GatewayLauncherCmd {
                 try {
                     changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies, applicationPolicies, projectName);
                 } catch (HashingException e) {
-                    logger.error("Error while checking for changes of resources. Skipping no-change detection..");
+                    logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
                     throw new CLIInternalException(
                             "Error while checking for changes of resources. Skipping no-change detection..");
                 }
             } catch (IOException | BallerinaServiceGenException e) {
-                logger.error("Error while generating ballerina source.");
+                logger.error("Error while generating ballerina source.", e);
                 throw new CLIInternalException("Error while generating ballerina source.");
             }
 
