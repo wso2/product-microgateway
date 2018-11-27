@@ -137,12 +137,12 @@ public function getAuthProviders() returns http:AuthProvider[] {
     http:AuthProvider jwtAuthProvider = {
         id: AUTH_SCHEME_JWT,
         scheme: AUTH_SCHEME_JWT,
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
-        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_ISSUER),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
+        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS),
         trustStore: {
-        path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-        password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+        path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+        password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         }
     };
     http:AuthProvider basicAuthProvider = {
@@ -150,7 +150,28 @@ public function getAuthProviders() returns http:AuthProvider[] {
         scheme: AUTHN_SCHEME_BASIC,
         authStoreProvider: AUTH_PROVIDER_CONFIG
     };
-    return [jwtAuthProvider, basicAuthProvider];
+    http:AuthProvider[] authProviders = [jwtAuthProvider, basicAuthProvider];
+
+    string jwtProviderKeysStr = getConfigValue(JWT_INSTANCE_ID, "providers", "");
+    string[] jwtProviderKeys = jwtProviderKeysStr.split(",");
+    foreach jwtProviderKey in jwtProviderKeys {
+        if (jwtProviderKey.length() > 0){
+            string instanceId = JWT_INSTANCE_ID + "." + jwtProviderKey;
+            http:AuthProvider jwtProvider = {
+                id: AUTH_SCHEME_JWT + "." + jwtProviderKey,
+                scheme: AUTH_SCHEME_JWT,
+                issuer: getConfigValue(instanceId, ISSUER, DEFAULT_ISSUER),
+                audience: getConfigValue(instanceId, AUDIENCE, DEFAULT_AUDIENCE),
+                certificateAlias: getConfigValue(instanceId, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS),
+                trustStore: {
+                    path: getConfigValue(instanceId, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                    password: getConfigValue(instanceId, TRSUT_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+                }
+            };
+            authProviders[lengthof authProviders] = jwtProvider;
+        }
+    }
+    return authProviders;
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {

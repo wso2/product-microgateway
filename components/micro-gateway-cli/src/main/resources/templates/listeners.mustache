@@ -63,7 +63,8 @@ registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
 i++;
 }
 // Adding basic and JWT authentication providers to a the handler chain
-http:AuthnHandlerChain authnHandlerChain = new(registry);
+// TODO: use http:AuthnHandlerChain once we update the Ballerina version to 0.983+
+gateway:AuthnHandlerChain authnHandlerChain = new(registry);
 // OAuth authentication handler
 gateway:OAuthnAuthenticator oauthAuthenticator = new;
 // Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
