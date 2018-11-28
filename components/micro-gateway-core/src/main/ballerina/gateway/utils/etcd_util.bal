@@ -27,19 +27,22 @@ import ballerina/system;
 
 public map etcdUrls;
 public map urlChanged;
-public map defaultUrls;
-public boolean etcdPeriodicQueryInitialized = false;
+map defaultUrls;
+string etcdToken;
+boolean etcdPeriodicQueryInitialized = false;
 public boolean etcdConnectionEstablished = false;
-public boolean etcdConnectionAttempted = false;
-public string etcdToken;
-public boolean etcdUrlValid = false;
+boolean etcdConnectionAttempted = false;
+boolean credentialsProvided = false;
+boolean etcdAuthenticationEnabled = true;
 task:Timer? etcdTimer;
+string etcdKVBasePath = "/v3alpha/kv";
+string etcdAuthBasePath = "/v3alpha/auth";
 
 @Description {value:"Setting up etcd timer task"}
-public function initiateEtcdPeriodicQuery()
+public function initiateEtcdTimerTask()
 {
     int etcdTriggerTime = config:getAsInt("etcdtimer", default = DEFAULT_ETCD_TRIGGER_TIME);
-    (function() returns error?) onTriggerFunction = etcdPeriodicQuery;
+    (function() returns error?) onTriggerFunction = etcdTimerTask;
     function(error) onErrorFunction = etcdError;
     etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, etcdTriggerTime, delay = 1000);
     etcdTimer.start();
@@ -47,7 +50,7 @@ public function initiateEtcdPeriodicQuery()
 }
 
 @Description {value:"Periodic Etcd Query. Trigger function of etcd timer task"}
-public function etcdPeriodicQuery() returns error? {
+public function etcdTimerTask() returns error? {
     if(etcdUrls.count() > 0)
     {
         foreach k, v in etcdUrls {
@@ -81,6 +84,7 @@ public function etcdError(error e) {
 public function etcdSetup(string key, string default, string configKey) returns string
 {
     string endpointUrl;
+
     if(!etcdConnectionAttempted)
     {
         establishEtcdConnection();
@@ -92,7 +96,7 @@ public function etcdSetup(string key, string default, string configKey) returns 
         if(!etcdPeriodicQueryInitialized)
         {
             etcdPeriodicQueryInitialized = true;
-            initiateEtcdPeriodicQuery();
+            initiateEtcdTimerTask();
         }
         string etcdKey = retrieveConfig(configKey, "");
 
@@ -121,32 +125,13 @@ public function etcdSetup(string key, string default, string configKey) returns 
 public function establishEtcdConnection()
 {
     string etcdurl = retrieveConfig("etcdurl", "");
-    boolean authenticated;
     if(etcdurl != "")
     {
-        authenticated = etcdAuthenticate();
-        if(etcdUrlValid)
-        {
-            if(authenticated)
-            {
-                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
-                etcdConnectionEstablished = true;
-            }
-            else
-            {
-                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Failed");
-                etcdConnectionEstablished = false;
-            }
-        }
-        else
-        {
-            printInfo(KEY_ETCD_UTIL, "Invalid Etcd Url Provided");
-            etcdConnectionEstablished = false;
-        }
+        etcdAuthenticate();
     }
     else
     {
-        printInfo(KEY_ETCD_UTIL, "Etcd URL not provided");
+        printError(KEY_ETCD_UTIL, "Etcd URL not provided");
         etcdConnectionEstablished = false;
     }
 }
@@ -162,13 +147,17 @@ public function etcdLookup(string key10) returns string
     var key = key10.base64Encode(charset = "utf-8");
     match key {
         string matchedKey => key64 = matchedKey;
-        error err => log:printError(err.message, err = err);
+        error err => printError(KEY_ETCD_UTIL, err.message);
     }
 
     req.setPayload({"key": untaint key64});
-    req.setHeader("Authorization", etcdToken);
 
-    var response = etcdEndpoint->post("/v3alpha/kv/range",req);
+    if(etcdAuthenticationEnabled)
+    {
+        req.setHeader("Authorization", etcdToken);
+    }
+
+    var response = etcdEndpoint->post(etcdKVBasePath + "/range", req);
     match response {
         http:Response resp => {
             var msg = resp.getJsonPayload();
@@ -181,12 +170,12 @@ public function etcdLookup(string key10) returns string
                     }
                 }
                 error err => {
-                    log:printError(err.message, err = err);
+                    printError(KEY_ETCD_UTIL, err.message);
                 }
             }
         }
         error err => {
-            log:printError(err.message, err = err);
+            printError(KEY_ETCD_UTIL, err.message);
             value64 = "Not found";
         }
     }
@@ -200,54 +189,88 @@ public function etcdLookup(string key10) returns string
         var value10 = value64.base64Decode(charset = "utf-8");
         match value10 {
             string matchedValue10 => endpointUrl = untaint matchedValue10;
-            error err => log:printError(err.message, err = err);
+            error err => printError(KEY_ETCD_UTIL, err.message);
         }
     }
     return endpointUrl;
 }
 
 @Description {value:"Authenticate etcd by providing username and password and retrieve etcd token"}
-public function etcdAuthenticate() returns boolean
+public function etcdAuthenticate()
 {
     http:Request req;
-    boolean etcdAuthenticated = false;
 
     string username = retrieveConfig("etcdusername", "");
     string password = retrieveConfig("etcdpassword", "");
 
-    req.setPayload({"name": untaint username, "password": untaint password});
+    if(username == "" && password == "")
+    {
+        credentialsProvided = false;
+    }
+    else
+    {
+        credentialsProvided = true;
+    }
 
-    var response = etcdEndpoint->post("/v3alpha/auth/authenticate",req);
+    req.setPayload({ "name": untaint username, "password": untaint password });
+
+    var response = etcdEndpoint->post(etcdAuthBasePath + "/authenticate", req);
     match response {
         http:Response resp => {
             var msg = resp.getJsonPayload();
             match msg {
                 json jsonPayload => {
-                    etcdUrlValid = true;
-                    var token = <string>jsonPayload.token;
-                    match token {
-                        string value => {
-                            etcdToken = untaint value;
-                            etcdAuthenticated = true;
+                    if(jsonPayload.token!= null)
+                    {
+                        var token = <string>jsonPayload.token;
+                        match token {
+                            string value => {
+                                etcdToken = untaint value;
+                                etcdConnectionEstablished = true;
+                                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
+                            }
+                            error err => {
+                                etcdConnectionEstablished = false;
+                                printError(KEY_ETCD_UTIL, err.message);
+                            }
                         }
-                        error err => {
-                            etcdAuthenticated = false;
+                    }
+                    if(jsonPayload.error!=null)
+                    {
+                        var authenticationError = <string>jsonPayload.error;
+                        match authenticationError {
+                            string value => {
+                                if(value.contains("authentication is not enabled"))
+                                {
+                                    etcdAuthenticationEnabled = false;
+                                    etcdConnectionEstablished = true;
+                                    if(credentialsProvided)
+                                    {
+                                        printInfo(KEY_ETCD_UTIL, value);
+                                    }
+                                }
+                                if(value.contains("authentication failed, invalid user ID or password"))
+                                {
+                                    etcdConnectionEstablished = false;
+                                    printError(KEY_ETCD_UTIL, value);
+                                }
+                            }
+                            error err => {
+                                etcdConnectionEstablished = false;
+                                printError(KEY_ETCD_UTIL, err.message);
+                            }
                         }
                     }
                 }
                 error err => {
-                    string errorMessage = err.message;
-                    if(errorMessage.contains("Connection refused"))
-                    {
-                        etcdUrlValid = false;
-                    }
+                    printError(KEY_ETCD_UTIL, err.message);
+                    etcdConnectionEstablished = false;
                 }
             }
         }
         error err => {
-            log:printError(err.message, err = err);
+            printError(KEY_ETCD_UTIL, err.message);
+            etcdConnectionEstablished = false;
         }
     }
-
-    return etcdAuthenticated;
 }

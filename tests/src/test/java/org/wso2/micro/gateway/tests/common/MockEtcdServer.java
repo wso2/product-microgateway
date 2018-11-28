@@ -17,14 +17,16 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
-import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -42,7 +44,6 @@ public class MockEtcdServer extends Thread {
     private int EtcdServerPort = -1;
     private String EtcdKVBasePath = "/v3alpha/kv";
     private String EtcdAuthBasePath = "/v3alpha/auth";
-    private String EtcdNodeBasePath = "/v3alpha";
     private String etcdUsername = "etcd";
     private String etcdPassword = "etcd";
     Map<String, String> kvStore = new HashMap<String, String>();
@@ -51,6 +52,7 @@ public class MockEtcdServer extends Thread {
     private UUID token;
     private UUID clusterID =  UUID.randomUUID();
     private UUID memberID = UUID.randomUUID();
+    private boolean authenticationEnabled = true;
 
     public static void main(String[] args) {
 
@@ -80,30 +82,43 @@ public class MockEtcdServer extends Thread {
                     JSONObject payload = new JSONObject();
                     byte[] response;
 
-                    if(reqName.equals(etcdUsername) && reqPassword.equals(etcdPassword))
+                    if(authenticationEnabled)
                     {
-                        JSONObject header = new JSONObject();
-                        header.put("cluster_id", clusterID);
-                        header.put("member_id", memberID);
-                        header.put("revision", revision);
-                        header.put("raft_term", raft_term);
-                        payload.put("header", header);
-                        token = UUID.randomUUID();
-                        payload.put("token", token);
+                        if(reqName.equals(etcdUsername) && reqPassword.equals(etcdPassword))
+                        {
+                            JSONObject header = new JSONObject();
+                            header.put("cluster_id", clusterID);
+                            header.put("member_id", memberID);
+                            header.put("revision", revision);
+                            header.put("raft_term", raft_term);
+                            payload.put("header", header);
+                            token = UUID.randomUUID();
+                            payload.put("token", token);
 
-                        response = payload.toString().getBytes();
-                        exchange.getResponseHeaders().set("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                        exchange.getResponseBody().write(response);
+                            response = payload.toString().getBytes();
+                            exchange.getResponseHeaders().set("Content-Type", "application/json");
+                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                            exchange.getResponseBody().write(response);
+                        }
+                        else
+                        {
+                            payload.put("error", "etcdserver: authentication failed, invalid user ID or password");
+                            payload.put("code", 3);
+
+                            response = payload.toString().getBytes();
+                            exchange.getResponseHeaders().set("Content-Type", "application/json");
+                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length);
+                            exchange.getResponseBody().write(response);
+                        }
                     }
                     else
                     {
-                        payload.put("error", "etcdserver: authentication failed, invalid user ID or password");
-                        payload.put("code", 3);
+                        payload.put("error", "etcdserver: authentication is not enabled");
+                        payload.put("code", 9);
 
                         response = payload.toString().getBytes();
                         exchange.getResponseHeaders().set("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length);
+                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_PRECON_FAILED, response.length);
                         exchange.getResponseBody().write(response);
                     }
                     exchange.close();
@@ -173,6 +188,34 @@ public class MockEtcdServer extends Thread {
 
                     JSONObject payload = new JSONObject();
                     payload.put("message", "key deleted");
+
+                    byte[] response = payload.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            etcdServer.createContext(EtcdAuthBasePath + "/enable", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    authenticationEnabled = true;
+
+                    JSONObject payload = new JSONObject();
+                    payload.put("message", "Authentication Enabled");
+
+                    byte[] response = payload.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            etcdServer.createContext(EtcdAuthBasePath + "/disable", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    authenticationEnabled = false;
+
+                    JSONObject payload = new JSONObject();
+                    payload.put("message", "Authentication Disabled");
 
                     byte[] response = payload.toString().getBytes();
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
