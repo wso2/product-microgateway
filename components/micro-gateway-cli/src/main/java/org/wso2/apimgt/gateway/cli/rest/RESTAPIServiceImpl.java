@@ -414,7 +414,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
                         "Invalid user credentials or the user does not have required permissions");
-            } else if (responseCode == 404) {
+            } else if (responseCode == 404 || responseCode == 400) {
                 selectedCertificates = null;
 
             } else {

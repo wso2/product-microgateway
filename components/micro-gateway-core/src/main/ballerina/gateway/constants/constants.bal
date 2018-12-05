@@ -280,17 +280,6 @@
 @Description { value: "Trust store password" }
 @final public string TRSUT_STORE_PASSWORD = "trustStore.password";
 
-@Description { value: "Default value of JWT issuer if not provided in configuration" }
-@final public string DEFAULT_ISSUER = "https://localhost:9443/oauth2/token";
-@Description { value: "Default value of JWT audience if not provided in configuration" }
-@final public string DEFAULT_AUDIENCE = "RQIO7ti2OThP79wh3fE5_Zksszga";
-@Description { value: "Default value of JWT certificate alias if not provided in configuration" }
-@final public string DEFAULT_CERTIFICATE_ALIAS = "ballerina";
-@Description { value: "Default value of JWT validation trust store path if not provided in configuration" }
-@final public string DEFAULT_TRUST_STORE_PATH = "${ballerina.home}/bre/security/ballerinaTruststore.p12";
-@Description { value: "Default value of JWT validation trust store password if not provided in configuration" }
-@final public string DEFAULT_TRUST_STORE_PASSWORD = "ballerina";
-
 @Description { value: "Caching configs" }
 @final public string CACHING_ID = "caching";
 @Description { value: "Token cache enabled or not " }
@@ -344,6 +333,7 @@
 @final string KEY_THROTTLE_FILTER = "ThrottleFilter";
 @final string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
 @final string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
+@final string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 @final string KEY_THROTTLE_UTIL = "ThrottleUtil";
 @final string KEY_GW_CACHE = "GatewayCache";
 @final string KEY_UTILS = "Utils";

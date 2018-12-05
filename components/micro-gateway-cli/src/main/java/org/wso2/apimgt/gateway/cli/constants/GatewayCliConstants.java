@@ -68,6 +68,7 @@ public class GatewayCliConstants {
     public static final String CHARSET_UTF8 = "UTF-8";
     public static final String SYS_PROP_USER_DIR = "user.dir";
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
+    public static final String SYS_PROP_SECURITY = "security";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");

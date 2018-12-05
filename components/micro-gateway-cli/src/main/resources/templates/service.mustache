@@ -26,7 +26,13 @@ import wso2/gateway;
 @http:ServiceConfig {
     basePath: "{{api.context}}{{#unless api.isDefaultVersion}}/{{api.version}}{{/unless}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
-        authProviders:["oauth2"]
+    {{#if config.basicAuth.isOptional}}
+        authProviders:["basic","oauth2","jwt"]
+    {{else if config.basicAuth.isRequired}}
+        authProviders:["basic"]
+    {{else}}
+        authProviders:["jwt","oauth2"]
+    {{/if}}
     }{{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -49,7 +55,13 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         authConfig:{
-            authProviders:["oauth2"] {{#unless isSecured}},
+    {{#if config.basicAuth.isOptional}}
+        authProviders:["basic","oauth2","jwt"]
+    {{else if config.basicAuth.isRequired}}
+        authProviders:["basic"]
+    {{else}}
+        authProviders:["jwt","oauth2"]
+    {{/if}} {{#unless isSecured}},
             authentication:{enabled:false} {{/unless}} {{#if scope}},
             scopes: ["{{scope}}"] {{/if}}
 

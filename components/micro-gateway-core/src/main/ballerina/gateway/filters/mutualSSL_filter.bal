@@ -77,6 +77,14 @@ public type MutualSSLFilter object {
             authenticationContext.tier = UNAUTHENTICATED_TIER;
             authenticationContext.applicationTier = UNLIMITED_TIER;
             authenticationContext.username = USER_NAME_UNKNOWN;
+            authenticationContext.applicationId = "__unknown__";
+            authenticationContext.applicationName = "__unknown__";
+            authenticationContext.applicationTier = "Unlimited";
+            authenticationContext.apiTier = "Unlimited";
+            authenticationContext.apiPublisher = "__unknown__";
+            authenticationContext.subscriberTenantDomain = "__unknown__";
+            authenticationContext.keyType = "__unknown__";
+            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
             return isAuthenticated;

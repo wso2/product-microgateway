@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
@@ -42,7 +43,6 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * Testing the pizza_shack api rest for mutualSSL feature
@@ -66,9 +66,11 @@ public class MutualSSLTestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
+        //set security schemas
+        String security = "oauth2";
 
         CLIExecutor cliExecutor;
-
+        System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         microGWServer = ServerInstance.initMicroGwServer();
         String cliHome = microGWServer.getServerHome();
 
@@ -78,7 +80,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
+        cliExecutor.generate(label, project, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
@@ -187,7 +189,7 @@ public class MutualSSLTestCase extends BaseTestCase {
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
             String string = null;
             while ((string = bufferedreader.readLine()) != null) {
-               log.info("Received " + string);
+                log.info("Received " + string);
                 break;
             }
 
