@@ -14,79 +14,98 @@
 // specific language governing permissions and limitations
 // under the License.
 
-@final public  string API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
-@final public  int API_AUTH_GENERAL_ERROR       = 900900;
-@final public  string API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
+@final public string API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
+@final public int API_AUTH_GENERAL_ERROR = 900900;
+@final public string API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
-@final public  string API_AUTH_INVALID_CREDENTIALS_STRING = "900901";
-@final public  int API_AUTH_INVALID_CREDENTIALS = 900901;
-@final public  string API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
-@final public  string API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
+@final public string API_AUTH_INVALID_CREDENTIALS_STRING = "900901";
+@final public int API_AUTH_INVALID_CREDENTIALS = 900901;
+@final public string API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
+@final public string API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
 "Make sure you have given the correct access token";
 
-@final public  int API_AUTH_MISSING_CREDENTIALS = 900902;
-@final public  string API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
-@final public  string API_AUTH_MISSING_CREDENTIALS_DESCRIPTION =
+@final public int API_AUTH_MISSING_CREDENTIALS = 900902;
+@final public string API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
+@final public string API_AUTH_MISSING_CREDENTIALS_DESCRIPTION =
 "Make sure your API invocation call has a header: \"Authorization: Bearer ACCESS_TOKEN\"";
 
-@final public  int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
-@final public  string API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE = "Access Token Expired";
-@final public  string API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION =
+@final public int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
+@final public string API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE = "Access Token Expired";
+@final public string API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION =
 "Renew the access token and try again";
 
-@final public  int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
-@final public  string API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE = "Access Token Inactive";
-@final public  string API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION =
+@final public int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
+@final public string API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE = "Access Token Inactive";
+@final public string API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION =
 "Generate a new access token and try again";
 
-@final public  int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
-@final public  string API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE = "Incorrect Access Token Type is provided";
+@final public int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
+@final public string API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE = "Incorrect Access Token Type is provided";
 
-@final public  int API_AUTH_INCORRECT_API_RESOURCE = 900906;
-@final public  string API_AUTH_INCORRECT_API_RESOURCE_MESSAGE = "No matching resource found in the API for the given request";
-@final public  string API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION =
+@final public int API_AUTH_INCORRECT_API_RESOURCE = 900906;
+@final public string API_AUTH_INCORRECT_API_RESOURCE_MESSAGE =
+"No matching resource found in the API for the given request";
+@final public string API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION =
 "Check the API documentation and add a proper REST resource path to the invocation URL";
 
-@final public  int API_BLOCKED = 900907;
-@final public  string API_BLOCKED_MESSAGE = "The requested API is temporarily blocked";
+@final public int API_BLOCKED = 900907;
+@final public string API_BLOCKED_MESSAGE = "The requested API is temporarily blocked";
 
-@final public  int API_AUTH_FORBIDDEN = 900908;
-@final public  string API_AUTH_FORBIDDEN_MESSAGE = "Resource forbidden ";
+@final public int API_AUTH_FORBIDDEN = 900908;
+@final public string API_AUTH_FORBIDDEN_MESSAGE = "Resource forbidden ";
 
-@final public  int SUBSCRIPTION_INACTIVE = 900909;
-@final public  string SUBSCRIPTION_INACTIVE_MESSAGE = "The subscription to the API is inactive";
+@final public int SUBSCRIPTION_INACTIVE = 900909;
+@final public string SUBSCRIPTION_INACTIVE_MESSAGE = "The subscription to the API is inactive";
 
-@final public  int INVALID_SCOPE = 900910;
-@final public  string INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
+@final public int INVALID_SCOPE = 900910;
+@final public string INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
 
-@final public  string DESCRIPTION_SEPARATOR = ". ";
+@final public string API_AUTH_INVALID_BASICAUTH_CREDENTIALS_STRING = "900911";
+@final public int API_AUTH_INVALID_BASICAUTH_CREDENTIALS = 900911;
+@final public string API_AUTH_INVALID_BASICAUTH_CREDENTIALS_MESSAGE = "Invalid Credentials";
+@final public string API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION =
+"Make sure you have given the correct username and password";
+
+
+@final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING = "900912";
+@final public int API_AUTH_BASICAUTH_INVALID_FORMAT= 900912;
+@final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE = "Invalid Format";
+@final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION =
+"Make sure you have given the credentials in correct format with \":\" character";
+
+
+@final public string DESCRIPTION_SEPARATOR = ". ";
 
 
 public function getAuthenticationFailureMessage(int errorCode) returns string {
     string errorMessage;
-    if(errorCode == API_AUTH_ACCESS_TOKEN_EXPIRED) {
+    if (errorCode == API_AUTH_ACCESS_TOKEN_EXPIRED) {
         errorMessage = API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE;
     } else if (errorCode == API_AUTH_ACCESS_TOKEN_INACTIVE) {
         errorMessage = API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE;
-    } else if(errorCode == API_AUTH_GENERAL_ERROR) {
+    } else if (errorCode == API_AUTH_GENERAL_ERROR) {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
-    } else if(errorCode == API_AUTH_INVALID_CREDENTIALS) {
+    } else if (errorCode == API_AUTH_INVALID_CREDENTIALS) {
         errorMessage = API_AUTH_INVALID_CREDENTIALS_MESSAGE;
-    } else if(errorCode == API_AUTH_MISSING_CREDENTIALS) {
+    } else if (errorCode == API_AUTH_MISSING_CREDENTIALS) {
         errorMessage = API_AUTH_MISSING_CREDENTIALS_MESSAGE;
-    } else if(errorCode == API_AUTH_INCORRECT_API_RESOURCE) {
+    } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE) {
         errorMessage = API_AUTH_INCORRECT_API_RESOURCE_MESSAGE;
-    } else if(errorCode == API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE) {
+    } else if (errorCode == API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE) {
         errorMessage = API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE;
-    } else if(errorCode == API_BLOCKED) {
+    } else if (errorCode == API_BLOCKED) {
         errorMessage = API_BLOCKED_MESSAGE;
-    } else if(errorCode == API_AUTH_FORBIDDEN) {
+    } else if (errorCode == API_AUTH_FORBIDDEN) {
         errorMessage = API_AUTH_FORBIDDEN_MESSAGE;
-    } else if(errorCode == SUBSCRIPTION_INACTIVE) {
+    } else if (errorCode == SUBSCRIPTION_INACTIVE) {
         errorMessage = SUBSCRIPTION_INACTIVE_MESSAGE;
-    } else if(errorCode == INVALID_SCOPE) {
+    } else if (errorCode == INVALID_SCOPE) {
         errorMessage = INVALID_SCOPE_MESSAGE;
-    } else {
+    } else if (errorCode == API_AUTH_INVALID_BASICAUTH_CREDENTIALS){
+        errorMessage = API_AUTH_INVALID_BASICAUTH_CREDENTIALS_MESSAGE;
+    } else if (errorCode == API_AUTH_BASICAUTH_INVALID_FORMAT){
+        errorMessage = API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE;
+    }else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
     return errorMessage;
@@ -94,16 +113,22 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
 
 public function getFailureMessageDetailDescription(int errorCode, string errorMessage) returns string {
     string errorDescription = errorMessage;
-    if( API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
+    if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION;
-    } else if( API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
+    } else if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION;
-    } else if( API_AUTH_MISSING_CREDENTIALS == errorCode) {
+    } else if (API_AUTH_MISSING_CREDENTIALS == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
-    } else if( API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
+    } else if (API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
-    } else if( API_AUTH_INVALID_CREDENTIALS == errorCode) {
+    } else if (API_AUTH_INVALID_CREDENTIALS == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_CREDENTIALS_DESCRIPTION;
+    } else if (API_AUTH_INVALID_BASICAUTH_CREDENTIALS == errorCode){
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION;
+    }else if(API_AUTH_BASICAUTH_INVALID_FORMAT == errorCode){
+        errorDescription +=DESCRIPTION_SEPARATOR + API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION;
+    }else{
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_GENERAL_ERROR_MESSAGE;
     }
     return errorDescription;
 }

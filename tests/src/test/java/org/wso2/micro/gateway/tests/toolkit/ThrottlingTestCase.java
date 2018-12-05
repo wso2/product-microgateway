@@ -92,6 +92,8 @@ public class ThrottlingTestCase extends BaseTestCase {
         jwtToken2 = getJWT(api, application2, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         continueOnQuotaToken = getJWT(api, application3, subPolicyContinueOnLimit.getPolicyName(),
                 TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        //set security schemas
+        String security = "oauth2";
 
         KeyValidationInfo info = new KeyValidationInfo();
         info.setApi(api);
@@ -130,7 +132,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
 
         //generate apis with CLI and start the micro gateway server
-        super.init(label, project);
+        super.init(label, project, security);
     }
 
     @Test(description = "Test subscription throttling with a JWT and oauth2 token")

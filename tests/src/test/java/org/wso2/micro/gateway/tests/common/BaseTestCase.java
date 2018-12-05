@@ -39,8 +39,8 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.concurrent.TimeUnit;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base test class for CLI based tests
@@ -50,7 +50,7 @@ public class BaseTestCase {
     protected MockHttpServer mockHttpServer;
     protected final static int MOCK_SERVER_PORT = 9443;
 
-    protected void init(String label, String project) throws Exception {
+    protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
 
         microGWServer = ServerInstance.initMicroGwServer();
@@ -60,9 +60,10 @@ public class BaseTestCase {
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
+        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
+        cliExecutor.generate(label, project,security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
