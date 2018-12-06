@@ -38,6 +38,10 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/templates</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/policies</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/policies</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
         </fileSet>

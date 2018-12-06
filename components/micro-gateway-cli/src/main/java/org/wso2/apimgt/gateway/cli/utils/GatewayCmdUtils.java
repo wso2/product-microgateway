@@ -233,6 +233,15 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Get policies folder location
+     *
+     * @return policies folder location
+     */
+    public static String getPoliciesFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES;
+    }
+
+    /**
      * Get config folder location
      *
      * @return config folder location
@@ -545,7 +554,7 @@ public class GatewayCmdUtils {
      * @param destination destination location
      * @throws IOException error while copying folder to destination
      */
-    private static void copyFolder(String source, String destination) throws IOException {
+    public static void copyFolder(String source, String destination) throws IOException {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         copyFolder(sourceFolder, destinationFolder);
