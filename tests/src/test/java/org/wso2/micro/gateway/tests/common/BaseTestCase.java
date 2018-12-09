@@ -71,6 +71,27 @@ public class BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
     }
 
+    protected void init(String label, String project, String endpoint) throws Exception {
+        CLIExecutor cliExecutor;
+
+        microGWServer = ServerInstance.initMicroGwServer();
+        String cliHome = microGWServer.getServerHome();
+
+        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
+        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
+        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
+        mockHttpServer.start();
+        cliExecutor = CLIExecutor.getInstance();
+        cliExecutor.setCliHome(cliHome);
+        cliExecutor.generateFromDefinition(label, project, endpoint);
+
+        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+        String[] args = { "--config", configPath };
+        microGWServer.startMicroGwServer(balPath, args);
+    }
+
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
         microGWServer.stopServer(false);
