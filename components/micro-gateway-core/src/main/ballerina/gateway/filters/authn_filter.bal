@@ -24,7 +24,6 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 
-
 // Authentication filter
 
 @Description {value:"Representation of the Authentication filter"}
@@ -32,10 +31,7 @@ import ballerina/reflect;
 public type AuthnFilter object {
 
     public OAuthnAuthenticator oauthnHandler;// Handles the oauth2 authentication;
-    public http:AuthnHandlerChain authnHandlerChain;
-
-
-    public new (oauthnHandler, authnHandlerChain) {}
+    public boolean oauth2Enabled = false;
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
@@ -70,8 +66,23 @@ public type AuthnFilter object {
         // get auth config for this resource
         boolean authenticated;
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
-        var (isSecured, authProviders) = getResourceAuthConfig(context);
+        var (isSecured, authProvidersIds) = getResourceAuthConfig(context);
         context.attributes[IS_SECURED] = isSecured;
+        //Create auth handler chain with providerIds in service file
+        http:AuthHandlerRegistry registry;
+        http:AuthProvider[] authProviders = getAuthProviders();
+        foreach i in authProvidersIds{
+            if (i == "oauth2"){
+                //check whether Oauth2 is enabled in service files.
+                oauth2Enabled = true;
+            }
+            foreach k in authProviders  {
+                if (k.id == i){
+                    registry.add(k.id, createAuthHandler(k));
+                }
+            }
+        }
+        http:AuthnHandlerChain authnHandlerChain = new(registry);
         //APIKeyValidationDto apiKeyValidationInfoDto;
         AuthenticationContext authenticationContext;
         boolean isAuthorized;
@@ -89,7 +100,7 @@ public type AuthnFilter object {
             }
             string providerId = getAuthenticationProviderType(authHeader);
             // if auth providers are there, use those to authenticate
-            if(providerId != AUTH_SCHEME_OAUTH2) {
+            if (providerId == AUTH_SCHEME_JWT) {
                 printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId );
                 string[] providerIds = [providerId];
                 // if authorization header is not default auth header we need to set it to the default header in
@@ -107,7 +118,7 @@ public type AuthnFilter object {
 
                 try {
                     printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
+                    isAuthorized = authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
                 } catch (error err) {
@@ -118,7 +129,7 @@ public type AuthnFilter object {
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
-            } else {
+            } else if (providerId == AUTH_SCHEME_OAUTH2){
                 match extractAccessToken(request, authHeaderName) {
                     string token => {
                         runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
@@ -185,6 +196,12 @@ public type AuthnFilter object {
                         return false;
                     }
                 }
+            }else if (providerId == AUTHN_SCHEME_BASIC)
+            {
+                //Basic auth valiadation
+                BasicAuthUtils basicAuthentication = new BasicAuthUtils (authnHandlerChain);
+                boolean isValidated = basicAuthentication.processRequest(listener, request, context);
+                return isValidated;
             }
 
         } else {

@@ -66,9 +66,10 @@ public class MutualSSLTestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
+        //set security schemas
+        String security = "oauth2";
 
         CLIExecutor cliExecutor;
-
         microGWServer = ServerInstance.initMicroGwServer();
         String cliHome = microGWServer.getServerHome();
 
@@ -78,7 +79,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
+        cliExecutor.generate(label, project,security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()

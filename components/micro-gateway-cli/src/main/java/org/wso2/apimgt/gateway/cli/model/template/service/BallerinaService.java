@@ -22,6 +22,7 @@ import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
@@ -44,6 +45,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
     private String name;
     private APIInfoDTO api;
     private ContainerConfig containerConfig;
+    private Config config;
     private List<API_endpointDTO> endpointConfig;
     private String srcPackage;
     private String modelPackage;
@@ -69,6 +71,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.externalDocs = swagger.getExternalDocs();
         this.tags = swagger.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
+        this.config = GatewayCmdUtils.getConfig();
         setPaths(swagger);
         return this;
     }
@@ -79,8 +82,8 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.api = api;
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
-        if(api instanceof APIDTO) {
-            this.endpointConfig = ((APIDTO)api).getEndpoint();
+        if (api instanceof APIDTO) {
+            this.endpointConfig = ((APIDTO) api).getEndpoint();
         }
         return buildContext(definition);
     }
@@ -158,7 +161,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
 
     private String replaceAllNonAlphaNumeric(String value) {
-        return value.replaceAll("[^a-zA-Z0-9]+","_");
+        return value.replaceAll("[^a-zA-Z0-9]+", "_");
     }
 
     public String getName() {
@@ -199,5 +202,13 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
     public void setContainerConfig(ContainerConfig containerConfig) {
         this.containerConfig = containerConfig;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 }

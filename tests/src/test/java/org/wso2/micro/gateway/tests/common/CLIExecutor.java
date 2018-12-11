@@ -40,7 +40,7 @@ public class CLIExecutor {
     private String cliHome;
     private static CLIExecutor instance;
 
-    public void generate(String label, String project) throws Exception {
+    public void generate(String label, String project, String security) throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -54,10 +54,10 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-        String[] args = { "setup", project, "--label", label, "--username", "admin", "--password",
+        String[] args = {"setup", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config };
+                config, "--security", security};
         main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
