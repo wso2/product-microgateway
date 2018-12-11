@@ -24,21 +24,16 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 
-
 // Authentication filter
 
 @Description { value: "Representation of the Authentication filter" }
 @Field { value: "filterRequest: request filter method which attempts to authenticated the request" }
 public type AuthnFilter object {
 
-    public OAuthnAuthenticator oauthnHandler;
+    public OAuthnAuthenticator oauthnHandler;//Handles the oauth2 authentication;
     public boolean oauth2Enabled = false;
 
-    @Description { value: "filterRequest: Request filter function" } // Handles the oauth2 authentication;
-
-
-
-    // public new (oauthnHandler, authnHandlerChain) {}
+    @Description { value: "filterRequest: Request filter function" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
                         returns boolean {
 
@@ -227,9 +222,6 @@ public type AuthnFilter object {
                 boolean isValidated = basicAuthentication.processRequest(listener, request, context);
                 return isValidated;
             }
-
-
-
         } else {
             // not secured, no need to authenticate
             return true;
