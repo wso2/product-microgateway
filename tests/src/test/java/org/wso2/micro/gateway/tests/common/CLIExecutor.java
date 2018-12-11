@@ -76,7 +76,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition (String label, String project, String endpoint) throws Exception {
+    public void generateFromDefinition(String label, String project, String endpoint, String security) throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -93,16 +93,16 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("testapi.json")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-        String[] args = { "setup", project, "--label", label,
-                "-oa", oasFilePath, "-e", endpoint, "--config", config };
+        String[] args = {"setup", project, "--label", label,
+                "-oa", oasFilePath, "-e", endpoint, "--config", config, "--security", security};
         main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
         homeDirectory = path + File.separator + project;
 
-        String[] cmdArray = new String[] { "bash", balCommand, "build" };
-        String[] args2 = new String[] { "src", "-o", project };
+        String[] cmdArray = new String[]{"bash", balCommand, "build"};
+        String[] args2 = new String[]{"src", "-o", project};
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 

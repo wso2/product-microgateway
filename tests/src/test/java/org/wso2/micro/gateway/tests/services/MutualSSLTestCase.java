@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
@@ -69,6 +70,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         String security = "oauth2";
 
         CLIExecutor cliExecutor;
+        System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         microGWServer = ServerInstance.initMicroGwServer();
         String cliHome = microGWServer.getServerHome();
 

@@ -41,8 +41,8 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
-import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -117,12 +117,14 @@ public class SetupCmd implements GatewayLauncherCmd {
     @SuppressWarnings("unused")
     @Parameter(names = {"-f", "--force"}, hidden = true, arity = 0)
     private boolean isForcefully;
+
     @SuppressWarnings("unused")
     @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
 
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
+
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -140,8 +142,6 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
         }
-        validateAPIGetRequestParams(label, apiName, version);
-
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
@@ -208,8 +208,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             if (StringUtils.isEmpty(password)) {
                 if ((password = promptForPasswordInput("Enter Password for " + username + ": ")).trim().isEmpty()) {
                     if (StringUtils.isEmpty(password)) {
-                        password = promptForPasswordInput("Password can't be empty; enter password " +
-                                "for " + username + ": ");
+                        password = promptForPasswordInput("Password can't be empty; enter password for "
+                                + username + ": ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
                         }
@@ -226,8 +226,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                     .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint)) {
                 if (StringUtils.isEmpty(baseUrl)) {
                     isOverwriteRequired = true;
-                    if ((baseUrl = promptForTextInput("Enter APIM base URL " +
-                            "[" + RESTServiceConstants.DEFAULT_HOST + "]: "))
+                    if ((baseUrl = promptForTextInput("Enter APIM base URL [" + RESTServiceConstants.DEFAULT_HOST
+                            + "]: "))
                             .trim().isEmpty()) {
                         baseUrl = RESTServiceConstants.DEFAULT_HOST;
                     }
@@ -241,8 +241,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                 if (StringUtils.isEmpty(trustStoreLocation)) {
                     isOverwriteRequired = true;
                     if ((trustStoreLocation = promptForTextInput(
-                            "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]"))
-                            .trim()
+                            "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH +
+                                    "]")).trim()
                             .isEmpty()) {
                         trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
                     }
@@ -268,8 +268,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             if (StringUtils.isEmpty(configuredTrustStorePass)) {
                 if (StringUtils.isEmpty(trustStorePassword)) {
                     isOverwriteRequired = true;
-                    if ((trustStorePassword = promptForPasswordInput(
-                            "Enter Trust store password: [ use default? ]")).trim()
+                    if ((trustStorePassword = promptForPasswordInput("Enter Trust store password: " +
+                            "[ use default? ]")).trim()
                             .isEmpty()) {
                         trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
                     }
@@ -294,6 +294,14 @@ public class SetupCmd implements GatewayLauncherCmd {
             System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
             System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
+            //Security Schemas settings
+            if (security == null) {
+                security = "oauth2";
+            } else if (security == "") {
+                security = "oauth2";
+            }
+            setSecuritySchemas(security);
+
             OAuthService manager = new OAuthServiceImpl();
             clientID = config.getToken().getClientId();
             String encryptedSecret = config.getToken().getClientSecret();
@@ -305,15 +313,6 @@ public class SetupCmd implements GatewayLauncherCmd {
                     clientSecret = null;
                 }
             }
-            //Security Schemas settings
-            if (security == null) {
-                security = "oauth2";
-            } else if (security == "") {
-                security = "oauth2";
-            }
-            setSecuritySchemas(security);
-
-
 
             if (StringUtils.isEmpty(clientID) || StringUtils.isEmpty(clientSecret)) {
                 String[] clientInfo = manager
@@ -347,13 +346,10 @@ public class SetupCmd implements GatewayLauncherCmd {
                 }
                 throw new CLIRuntimeException(errorMsg);
             }
-
-
             List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
             List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
             logger.info(String.valueOf(clientCertificates));
-
 
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
@@ -366,8 +362,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
                 try {
-                    changesDetected = HashUtils.detectChanges(apis,
-                            subscriptionPolicies, applicationPolicies, projectName);
+                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies,
+                            applicationPolicies, projectName);
                 } catch (HashingException e) {
                     logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
                     throw new CLIInternalException(
@@ -526,5 +522,5 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         config.setBasicAuth(basicAuth);
     }
-
 }
+

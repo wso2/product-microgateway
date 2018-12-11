@@ -82,9 +82,10 @@ public class BaseTestCase {
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
+        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generateFromDefinition(label, project, endpoint);
+        cliExecutor.generateFromDefinition(label, project, endpoint,security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()

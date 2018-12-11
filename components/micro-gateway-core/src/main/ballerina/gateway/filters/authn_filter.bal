@@ -222,6 +222,7 @@ public type AuthnFilter object {
                 boolean isValidated = basicAuthentication.processRequest(listener, request, context);
                 return isValidated;
             }
+
         } else {
             // not secured, no need to authenticate
             return true;
