@@ -26,14 +26,10 @@ import ballerina/reflect;
 
 
 // MutualSSL filter
-
 @Description { value: "Representation of the MutualSSL filter" }
-
 public type MutualSSLFilter object {
 
     public json trottleTiers;
-
-
     public new(trottleTiers) {}
 
     @Param { value: "listener: Listner endpoint" }
@@ -43,7 +39,6 @@ public type MutualSSLFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
-
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doFilterRequest(listener, request, context);

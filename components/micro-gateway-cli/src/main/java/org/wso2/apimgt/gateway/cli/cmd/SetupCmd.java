@@ -454,6 +454,9 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
     }
 
+    /**
+     * Get the security Schemas string and based on that set boolean values for schemas to be used in service.bal.
+     */
     public void setSecuritySchemas(String schemas) {
         Config config = GatewayCmdUtils.getConfig();
         BasicAuth basicAuth = new BasicAuth();
