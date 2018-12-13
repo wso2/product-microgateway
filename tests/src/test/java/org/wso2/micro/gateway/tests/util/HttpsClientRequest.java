@@ -103,7 +103,7 @@ public class HttpsClientRequest {
     }
 
     /**
-     * Send a Http POST request to a rest.
+     * Send an HTTP POST request to a rest.
      *
      * @param endpoint - rest endpoint
      * @param postBody - message payload

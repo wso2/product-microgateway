@@ -34,14 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.HTTP2;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -52,8 +45,11 @@ public class GatewayCmdUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
     private static Config config;
+    private static HTTP2 http2;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
+    private static boolean created;
+    private static PrintStream outStream = System.err;
 
     public static HTTP2 getHttp2() {
         return http2;
@@ -63,8 +59,6 @@ public class GatewayCmdUtils {
         GatewayCmdUtils.http2 = http2;
     }
 
-    private static HTTP2 http2;
-
     public static Config getConfig() {
         return config;
     }
@@ -73,18 +67,82 @@ public class GatewayCmdUtils {
         config = configFromFile;
     }
 
+    public static CodeGenerationContext getCodeGenerationContext() {
+        return codeGenerationContext;
+    }
+
     public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
         GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
     }
 
-    public static CodeGenerationContext getCodeGenerationContext() {
-        return codeGenerationContext;
+    /**
+     * create HTTP2 hidden file
+     */
+    public static void createHTTP2File(String projectName) throws IOException {
+
+        String tempDirPath = getProjectTempFolderLocation(projectName);
+        createFolderIfNotExist(tempDirPath);
+
+        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
+        File http2File = new File(tempHTTP2FileLocation);
+        if (!http2File.exists()) {
+            created = http2File.createNewFile();
+            if (created) {
+                logger.trace("Temporary HTTP2 file: {} created. ", tempHTTP2FileLocation);
+            } else {
+                logger.error("Failed to create temporary HTTP2 file: {} ", tempHTTP2FileLocation);
+                throw new CLIInternalException("Error occurred while creating the temporary HTTP file");
+            }
+        }
+
+    }
+
+    /**
+     * Get the location of the hidden HTTP2 file(.http2)
+     */
+    private static String getTemporaryHttp2FileLocation(String projectName) {
+        return getProjectTempFolderLocation(projectName) + File.separator
+                + GatewayCliConstants.TEMP_HTTP2_FILE;
+    }
+
+    /**
+     * Change the property value of HTTP2
+     */
+    public static void changeToHttp2(String filename, String key, String value) throws IOException {
+        final File tmpFile = new File(filename + ".tmp");
+        final File file = new File(filename);
+        PrintWriter pw = new PrintWriter(tmpFile);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        boolean found = false;
+        final String toAdd = key + '=' + value;
+        for (String line; (line = br.readLine()) != null; ) {
+            if (line.startsWith(key + '=')) {
+                line = toAdd;
+                found = true;
+            }
+            pw.println(line);
+        }
+        if (!found)
+            pw.println(toAdd);
+        br.close();
+        pw.close();
+        tmpFile.renameTo(file);
+    }
+
+    /**
+     * Check for the existence of HTTP2 file
+     */
+    public static boolean checkHttp2File(String projectName) {
+
+        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
+        File http2File = new File(tempHTTP2FileLocation);
+        return http2File.exists();
     }
 
     /**
      * Read file as string
      *
-     * @param path to the file
+     * @param path       to the file
      * @param inResource whether file is in resources directory of jar or not
      * @return file content
      * @throws IOException if file read went wrong
@@ -153,7 +211,7 @@ public class GatewayCmdUtils {
         if (s == null) {
             return null;
         }
-        char c[] = s.toCharArray();
+        char[] c = s.toCharArray();
         c[0] = Character.toLowerCase(c[0]);
         return new String(c);
     }
@@ -199,8 +257,7 @@ public class GatewayCmdUtils {
         String currentDirProp = System.getProperty(GatewayCliConstants.SYS_PROP_CURRENT_DIR);
         if (currentDirProp != null) {
             return currentDirProp;
-        }
-        else {
+        } else {
             return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
         }
     }
@@ -263,7 +320,7 @@ public class GatewayCmdUtils {
 
     /**
      * Get temp folder location
-     * 
+     *
      * @param projectName name of the project
      * @return temp folder location
      */
@@ -295,7 +352,7 @@ public class GatewayCmdUtils {
     /**
      * Create a micro gateway distribution for the provided project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException error while creating micro gateway distribution
      */
     public static void createProjectGWDistribution(String projectName) throws IOException {
@@ -314,6 +371,15 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
+        /**if the http2 file exists, call the function to change the value of the http2 property*/
+        boolean http2FileExists = checkHttp2File(projectName);
+
+        outStream.println("http2FileExists : " + http2FileExists);
+        if (http2FileExists) {
+            changePropertyOfHttp2(gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
+                    + GatewayCliConstants.GW_DIST_CONF_FILE, "true");
+        }
+
         String targetPath = getProjectTargetDirectoryPath(projectName);
         String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
         //creating an archive of the distribution
@@ -322,12 +388,32 @@ public class GatewayCmdUtils {
         // clean the target folder while keeping the distribution zip file
         cleanFolder(targetPath, ArrayUtils.add(GatewayCliConstants.PROJECTS_TARGET_DELETE_FILES,
                 projectName + GatewayCliConstants.EXTENSION_BALX));
+
+        // delete the http2 temporary file
+        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
+        File http2File = new File(tempHTTP2FileLocation);
+        if (http2File.delete()) {
+            logger.trace("Deleting file: {}", http2File);
+        }
     }
+
+    /**
+     * determines the value of http2 property as true or false
+     */
+    public static void changePropertyOfHttp2(String fileName, String value) {
+        try {
+            GatewayCmdUtils.changeToHttp2(fileName, GatewayCliConstants.HTTP2_ENABLED, value);
+        } catch (IOException e) {
+            logger.error("Failed to change http2 Property ", e);
+            throw new CLIInternalException("Error occurred while changing the http2 property value");
+        }
+    }
+
 
     /**
      * Creates the distribution structure for the project name
      *
-     * @param projectName   name of the label
+     * @param projectName name of the label
      */
     private static void createTargetGatewayDistStructure(String projectName) {
         //path : {projectName}/target
@@ -385,7 +471,7 @@ public class GatewayCmdUtils {
     /**
      * Saves the resource hash content to the CLI temp folder
      *
-     * @param content resource hash content
+     * @param content     resource hash content
      * @param projectName name of the project
      * @throws IOException error while saving resource hash content
      */
@@ -410,13 +496,13 @@ public class GatewayCmdUtils {
 
     /**
      * Validate the list of main args and returns the first element as the project name
-     * 
+     *
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
-    public static String getProjectName (List<String> mainArgs) {
+    public static String getProjectName(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
-            throw new CLIRuntimeException("Only one argument accepted as the project name, " 
+            throw new CLIRuntimeException("Only one argument accepted as the project name, "
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
@@ -425,7 +511,7 @@ public class GatewayCmdUtils {
 
     /**
      * Get resource hash holder file path
-     * 
+     *
      * @param projectName name of the project
      * @return resource hash holder file path
      */
@@ -437,7 +523,7 @@ public class GatewayCmdUtils {
     /**
      * Get the distribution path for a given project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @return distribution path for a given project name
      */
     private static String getTargetDistPath(String projectName) {
@@ -447,7 +533,7 @@ public class GatewayCmdUtils {
     /**
      * Get the gateway distribution path for a given project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @return gateway distribution path for a given project name
      */
     private static String getTargetGatewayDistPath(String projectName) {
@@ -457,7 +543,7 @@ public class GatewayCmdUtils {
     /**
      * Copies shell scripts to the distribution location
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException error while coping scripts
      */
     private static void copyTargetDistBinScripts(String projectName) throws IOException {
@@ -467,19 +553,19 @@ public class GatewayCmdUtils {
 
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
         linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File shPathFile = new File(binDir+GatewayCliConstants.GW_DIST_SH);
+        File shPathFile = new File(binDir + GatewayCliConstants.GW_DIST_SH);
         saveScript(linuxShContent, shPathFile);
 
         String winBatContent = readFileAsString(GatewayCliConstants.GW_DIST_BAT_PATH, true);
         winBatContent = winBatContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File batPathFile = new File(binDir+GatewayCliConstants.GW_DIST_BAT);
+        File batPathFile = new File(binDir + GatewayCliConstants.GW_DIST_BAT);
         saveScript(winBatContent, batPathFile);
     }
 
     /**
      * Copies balx binaries to the distribution location
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException error while coping balx files
      */
     private static void copyTargetDistBalx(String projectName) throws IOException {
@@ -585,9 +671,9 @@ public class GatewayCmdUtils {
     /**
      * Cleans the given folder by deleting a set of specified files
      *
-     * @param targetPath    path of folder to clean
-     * @param delete          files to delete
-     * @throws IOException  error while cleaning the folder
+     * @param targetPath path of folder to clean
+     * @param delete     files to delete
+     * @throws IOException error while cleaning the folder
      */
     private static void cleanFolder(String targetPath, String... delete) throws IOException {
         File targetFolder = new File(targetPath);
@@ -597,7 +683,7 @@ public class GatewayCmdUtils {
             return;
         }
         //Get all files from source directory
-        String files[] = targetFolder.list();
+        String[] files = targetFolder.list();
         if (files == null) {
             logger.warn("Nothing to delete. Target folder {} is empty.", targetPath);
             return;
@@ -650,7 +736,7 @@ public class GatewayCmdUtils {
             }
 
             //Get all files from source directory
-            String files[] = sourceFolder.list();
+            String[] files = sourceFolder.list();
 
             if (files != null) {
                 //Iterate over all files and copy them to destinationFolder one by one
@@ -698,7 +784,7 @@ public class GatewayCmdUtils {
      * Write content to a specified file
      *
      * @param content content to be written
-     * @param file file object initialized with path
+     * @param file    file object initialized with path
      * @throws IOException error while writing content to file
      */
     private static void writeContent(String content, File file) throws IOException {
@@ -716,7 +802,7 @@ public class GatewayCmdUtils {
     /**
      * Creates file if not exist
      *
-     * @param path folder path
+     * @param path     folder path
      * @param fileName name of the file
      */
     private static void createFileIfNotExist(String path, String fileName) {
@@ -739,16 +825,16 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath', 
-     *  it will be taken as the deployment configuration. Otherwise, a default configuration will be copied. 
+     * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath',
+     * it will be taken as the deployment configuration. Otherwise, a default configuration will be copied.
      *
-     * @param projectName project name
+     * @param projectName        project name
      * @param deploymentConfPath path to deployment config
      * @throws IOException if file create went wrong
      */
     public static void createDeploymentConfig(String projectName, String deploymentConfPath)
             throws IOException {
-        
+
         String depConfig = getProjectConfigDirPath(projectName) + File.separator
                 + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
         File file = new File(depConfig);
@@ -815,6 +901,7 @@ public class GatewayCmdUtils {
 
     /**
      * Replace backslashes `\` in windows path string with forward slashes `/`
+     *
      * @param path Location of a resource (file or directory)
      * @return {String} File path with unix style file separator
      */
@@ -824,8 +911,9 @@ public class GatewayCmdUtils {
 
     /**
      * Create script file in the given path with the given content
+     *
      * @param content Content needs to be added to the script file
-     * @param path File object containing the path to save the script
+     * @param path    File object containing the path to save the script
      */
     private static void saveScript(String content, File path) throws IOException {
         try (FileWriter writer = new FileWriter(path)) {
@@ -839,9 +927,10 @@ public class GatewayCmdUtils {
             }
         }
     }
-    
+
     /**
      * Delete project folder
+     *
      * @param projectPath project path
      */
     public static void deleteProject(String projectPath) {

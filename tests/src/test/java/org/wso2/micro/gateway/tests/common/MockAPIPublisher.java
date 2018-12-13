@@ -64,8 +64,6 @@ public class MockAPIPublisher {
 
         try {
             api = populateJson(api);
-            //for http2
-           // api = populateJson(api);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -81,8 +79,6 @@ public class MockAPIPublisher {
     private API populateJson(API api) throws IOException {
         String apiJson = IOUtils
                 .toString(new FileInputStream(getClass().getClassLoader().getResource("api-json.json").getPath()));
-//        String apiJson2 = IOUtils
-//                .toString(new FileInputStream(getClass().getClassLoader().getResource("api-json2.json").getPath()));
         String apiDefinition = IOUtils.toString(
                 new FileInputStream(getClass().getClassLoader().getResource("api-definition.json").getPath()));
         String endpointJson = IOUtils
@@ -99,14 +95,6 @@ public class MockAPIPublisher {
         apiJsonObj.put("version", api.getVersion());
         apiJsonObj.put("context", api.getContext());
         apiJsonObj.put("provider", api.getProvider());
-
-//        JSONObject apiJsonObj2 = new JSONObject(apiJson2);
-//        apiJsonObj2.put("endpointConfig", endpoint.toString());
-//        apiJsonObj2.put("apiDefinition", apiDefinition);
-//        apiJsonObj2.put("name", api.getName());
-//        apiJsonObj2.put("version", api.getVersion());
-//        apiJsonObj2.put("context", api.getContext());
-//        apiJsonObj2.put("provider", api.getProvider());
 
         //todo: set tiers and swagger
         api.setSwagger(apiJsonObj.toString());

@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.tests.toolkit;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.*;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -53,9 +53,6 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
-
-        //for http2
-       // pub.addApi2(label, api);
 
         //Define application info
         ApplicationDTO application = new ApplicationDTO();

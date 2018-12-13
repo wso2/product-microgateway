@@ -3,7 +3,7 @@ NAME
     generating a microgateway distribution.
 
 SYNOPSIS
-    micro-gw setup <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-u|--username] [-p|--password] 
+    micro-gw setup <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-http2|--http2-enable] [-u|--username] [-p|--password]
         [-s|--server-url] [-c|--config] [-t|--trust-store] [-w|--truststore-pass]
 
 DESCRIPTION
@@ -32,6 +32,11 @@ OPTIONS
     --label <label-name>
         <Optional>
         Name of the label which indicates a group of APIs.
+
+    -http2
+    --http2-enable
+        <optional>
+        Enable HTTP2 support
 
     -u
     --username
