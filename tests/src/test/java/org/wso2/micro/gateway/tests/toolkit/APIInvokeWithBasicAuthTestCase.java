@@ -114,7 +114,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokePassWithBasicAuth() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1:password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -131,7 +130,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
     }
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeWithoutPassword() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1: ";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -149,7 +147,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeFailWithInvalidPassword() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1:Invalid";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -167,7 +164,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeFailWithInvalidFormat() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
