@@ -149,7 +149,6 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-
     }
 
     private void invokeBasic(String token, int responseCode) throws Exception {
