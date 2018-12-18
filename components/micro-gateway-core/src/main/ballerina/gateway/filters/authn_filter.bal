@@ -24,41 +24,37 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 
-
 // Authentication filter
 
-@Description {value:"Representation of the Authentication filter"}
-@Field {value:"filterRequest: request filter method which attempts to authenticated the request"}
+@Description { value: "Representation of the Authentication filter" }
+@Field { value: "filterRequest: request filter method which attempts to authenticated the request" }
 public type AuthnFilter object {
 
-    public OAuthnAuthenticator oauthnHandler;// Handles the oauth2 authentication;
-    public AuthnHandlerChain authnHandlerChain;
+    public OAuthnAuthenticator oauthnHandler;//Handles the oauth2 authentication;
+    public boolean isOauth2Enabled = false;
 
-
-    public new (oauthnHandler, authnHandlerChain) {}
-
-    @Description {value:"filterRequest: Request filter function"}
+    @Description { value: "filterRequest: Request filter function" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
                         returns boolean {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if(checkAuthentication != "require"){
+        if (checkAuthentication != "require"){
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest (listener, request, context);
+            boolean result = doFilterRequest(listener, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
-        }else{
+        } else {
             // Skip this filter is mutualSSL is enabled.
             return true;
         }
 
     }
 
-    @Description {value:"filterRequest: Request filter function"}
-    public function doFilterRequest (http:Listener listener, http:Request request, http:FilterContext context)
+    @Description { value: "filterRequest: Request filter function" }
+    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context)
                         returns boolean {
         runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
         printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
@@ -70,8 +66,23 @@ public type AuthnFilter object {
         // get auth config for this resource
         boolean authenticated;
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
-        var (isSecured, authProviders) = getResourceAuthConfig(context);
+        var (isSecured, authProvidersIds) = getResourceAuthConfig(context);
         context.attributes[IS_SECURED] = isSecured;
+        //Create auth handler chain with providerIds in service file
+        http:AuthHandlerRegistry registry;
+        http:AuthProvider[] authProviders = getAuthProviders();
+        foreach i in authProvidersIds{
+            if (i == "oauth2"){
+                //check whether Oauth2 is enabled in service files.
+                isOauth2Enabled = true;
+            }
+            foreach k in authProviders  {
+                if (k.id == i){
+                    registry.add(k.id, createAuthHandler(k));
+                }
+            }
+        }
+        http:AuthnHandlerChain authnHandlerChain = new(registry);
         //APIKeyValidationDto apiKeyValidationInfoDto;
         AuthenticationContext authenticationContext;
         boolean isAuthorized;
@@ -89,15 +100,16 @@ public type AuthnFilter object {
             }
             string providerId = getAuthenticationProviderType(authHeader);
             // if auth providers are there, use those to authenticate
-            if(providerId != AUTH_SCHEME_OAUTH2) {
-                printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId );
+            if (providerId == AUTH_SCHEME_JWT) {
+                printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId);
                 // if authorization header is not default auth header we need to set it to the default header in
                 // order for jwt to work. If there is an already default auth header we back up it to a temp auth
                 // header and set the default authentication header.
-                if(authHeaderName != AUTH_HEADER) {
-                    if(request.hasHeader(AUTH_HEADER)) {
+                if (authHeaderName != AUTH_HEADER) {
+                    if (request.hasHeader(AUTH_HEADER)) {
                         request.setHeader(TEMP_AUTH_HEADER, request.getHeader(AUTH_HEADER));
-                        printDebug(KEY_AUTHN_FILTER, "Authorization header found in the request. Backing up original value");
+                        printDebug(KEY_AUTHN_FILTER,
+                            "Authorization header found in the request. Backing up original value");
                     }
                     request.setHeader(AUTH_HEADER, authHeader);
                     printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
@@ -106,7 +118,7 @@ public type AuthnFilter object {
 
                 try {
                     printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-                    isAuthorized = self.authnHandlerChain.handle(request);
+                    isAuthorized = authnHandlerChain.handle(request);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
                 } catch (error err) {
@@ -117,77 +129,97 @@ public type AuthnFilter object {
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
-            } else {
-                match extractAccessToken(request, authHeaderName) {
-                    string token => {
-                        runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
-                        printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " + authHeaderName);
-                        match self.oauthnHandler.handle(request) {
-                            APIKeyValidationDto apiKeyValidationDto => {
-                                isAuthorized = <boolean>apiKeyValidationDto.authorized;
-                                printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " + isAuthorized);
-                                if(isAuthorized) {
-                                    authenticationContext.authenticated = true;
-                                    authenticationContext.tier = apiKeyValidationDto.tier;
-                                    authenticationContext.apiKey = token;
-                                    if (apiKeyValidationDto.endUserName != "") {
-                                        authenticationContext.username = apiKeyValidationDto.endUserName;
-                                    } else {
-                                        authenticationContext.username = END_USER_ANONYMOUS;
-                                    }
-                                    authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
-                                    authenticationContext.keyType = apiKeyValidationDto.keyType;
-                                    authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
-                                    authenticationContext.applicationId = apiKeyValidationDto.applicationId;
-                                    authenticationContext.applicationName = apiKeyValidationDto.applicationName;
-                                    authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
-                                    authenticationContext.subscriber = apiKeyValidationDto.subscriber;
-                                    authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
-                                    authenticationContext.apiTier = apiKeyValidationDto.apiTier;
-                                    authenticationContext.subscriberTenantDomain = apiKeyValidationDto.subscriberTenantDomain;
-                                    authenticationContext.spikeArrestLimit = check <int> apiKeyValidationDto.spikeArrestLimit;
-                                    authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                                    authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.stopOnQuotaReach;
-                                    authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
-                                    .contentAware;
-                                    printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.callerToken);
-                                    if(authenticationContext.callerToken != "" && authenticationContext.callerToken != null) {
-                                        string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
-                                            JWT_HEADER_NAME);
-                                        request.setHeader(jwtheaderName, authenticationContext.callerToken);
-                                    }
-                                    checkAndRemoveAuthHeaders(request, authHeaderName);
-                                    context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+            } else if (providerId == AUTH_SCHEME_OAUTH2) {
+                if (isOauth2Enabled) {
+                    match extractAccessToken(request, authHeaderName) {
+                        string token => {
+                            runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
+                            printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
+                                    authHeaderName);
+                            match self.oauthnHandler.handle(request) {
+                                APIKeyValidationDto apiKeyValidationDto => {
+                                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
+                                            isAuthorized);
+                                    if (isAuthorized) {
+                                        authenticationContext.authenticated = true;
+                                        authenticationContext.tier = apiKeyValidationDto.tier;
+                                        authenticationContext.apiKey = token;
+                                        if (apiKeyValidationDto.endUserName != "") {
+                                            authenticationContext.username = apiKeyValidationDto.endUserName;
+                                        } else {
+                                            authenticationContext.username = END_USER_ANONYMOUS;
+                                        }
+                                        authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
+                                        authenticationContext.keyType = apiKeyValidationDto.keyType;
+                                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
+                                        authenticationContext.applicationId = apiKeyValidationDto.applicationId;
+                                        authenticationContext.applicationName = apiKeyValidationDto.applicationName;
+                                        authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
+                                        authenticationContext.subscriber = apiKeyValidationDto.subscriber;
+                                        authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
+                                        authenticationContext.apiTier = apiKeyValidationDto.apiTier;
+                                        authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
+                                        subscriberTenantDomain;
+                                        authenticationContext.spikeArrestLimit = check <int>apiKeyValidationDto.
+                                        spikeArrestLimit;
+                                        authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
+                                        authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.
+                                        stopOnQuotaReach;
+                                        authenticationContext.isContentAwareTierPresent = <boolean>apiKeyValidationDto
+                                        .contentAware;
+                                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
+                                                callerToken);
+                                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken
+                                        != null) {
+                                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
+                                                JWT_HEADER_NAME);
+                                            request.setHeader(jwtheaderName, authenticationContext.callerToken);
+                                        }
+                                        checkAndRemoveAuthHeaders(request, authHeaderName);
+                                        context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
-                                    // setting keytype to invocationContext
-                                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                                    runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
-                                    authContext.scheme = AUTH_SCHEME_OAUTH2;
-                                    authContext.authToken = token;
-                                } else {
-                                    int status = check <int> apiKeyValidationDto.validationStatus;
-                                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with validation status : " +
-                                            status);
-                                    setErrorMessageToFilterContext(context, status);
+                                        // setting keytype to invocationContext
+                                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
+                                        .keyType;
+                                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
+                                        authContext.scheme = AUTH_SCHEME_OAUTH2;
+                                        authContext.authToken = token;
+                                    } else {
+                                        int status = check <int>apiKeyValidationDto.validationStatus;
+                                        printDebug(KEY_AUTHN_FILTER,
+                                                "Authentication handler returned with validation status : " +
+                                                status);
+                                        setErrorMessageToFilterContext(context, status);
+                                        sendErrorResponse(listener, request, untaint context);
+                                        return false;
+                                    }
+                                }
+                                error err => {
+                                    log:printError(err.message, err = err);
+                                    setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
                                     sendErrorResponse(listener, request, untaint context);
                                     return false;
                                 }
                             }
-                            error err => {
-                                log:printError(err.message, err = err);
-                                setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                                sendErrorResponse(listener, request, untaint context);
-                                return false;
-                            }
+                        }
+                        error err => {
+                            log:printError(err.message, err = err);
+                            setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                            sendErrorResponse(listener, request, untaint context);
+                            return false;
                         }
                     }
-                    error err => {
-                        log:printError(err.message, err = err);
-                        setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                        sendErrorResponse(listener, request, untaint context);
-                        return false;
-                    }
+                } else {
+                    setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                    sendErrorResponse(listener, request, untaint context);
+                    return false;
                 }
+            } else if (providerId == AUTHN_SCHEME_BASIC) {
+                //Basic auth valiadation
+                BasicAuthUtils basicAuthentication = new BasicAuthUtils (authnHandlerChain);
+                boolean isValidated = basicAuthentication.processRequest(listener, request, context);
+                return isValidated;
             }
 
         } else {
@@ -207,10 +239,10 @@ public type AuthnFilter object {
 };
 
 
-@Description {value:"Checks if the resource is secured"}
-@Param {value:"context: FilterContext object"}
-@Return {value:"boolean, string[]: tuple of whether the resource is secured and the list of auth provider ids "}
-function getResourceAuthConfig (http:FilterContext context) returns (boolean, string[]) {
+@Description { value: "Checks if the resource is secured" }
+@Param { value: "context: FilterContext object" }
+@Return { value: "boolean, string[]: tuple of whether the resource is secured and the list of auth provider ids " }
+function getResourceAuthConfig(http:FilterContext context) returns (boolean, string[]) {
     boolean resourceSecured;
     string[] authProviderIds = [];
     // get authn details from the resource level
@@ -247,7 +279,7 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
-    if(authHeader.contains(AUTH_SCHEME_BASIC)){
+    if (authHeader.contains(AUTH_SCHEME_BASIC)){
         return AUTHN_SCHEME_BASIC;
     } else if (authHeader.contains(AUTH_SCHEME_BEARER) && authHeader.contains(".")) {
         return AUTH_SCHEME_JWT;
@@ -256,12 +288,12 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
     }
 }
 
-function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName)  {
+function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) {
     if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, true)) {
         request.removeHeader(authHeaderName);
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
     }
-    if(request.hasHeader(TEMP_AUTH_HEADER)) {
+    if (request.hasHeader(TEMP_AUTH_HEADER)) {
         request.setHeader(AUTH_HEADER, request.getHeader(TEMP_AUTH_HEADER));
         printDebug(KEY_AUTHN_FILTER, "Setting the backed up auth header value to the header: " + AUTH_HEADER);
         request.removeHeader(TEMP_AUTH_HEADER);

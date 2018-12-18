@@ -21,7 +21,9 @@ import io.swagger.models.Info;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -43,6 +45,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
     private String name;
     private ExtendedAPI api;
     private ContainerConfig containerConfig;
+    private Config config;
     private EndpointConfig endpointConfig;
     private String srcPackage;
     private String modelPackage;
@@ -68,6 +71,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.externalDocs = swagger.getExternalDocs();
         this.tags = swagger.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
+        this.config = GatewayCmdUtils.getConfig();
         setPaths(swagger);
         return this;
     }
@@ -196,5 +200,13 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
     public void setContainerConfig(ContainerConfig containerConfig) {
         this.containerConfig = containerConfig;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 }

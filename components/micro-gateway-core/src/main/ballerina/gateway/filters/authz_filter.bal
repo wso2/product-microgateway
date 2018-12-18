@@ -26,9 +26,9 @@ import ballerina/reflect;
 
 // authorization filter which wraps the ballerina in built authorization filter.
 
-@Description {value:"Representation of the Authorization filter"}
-@Field {value:"filterRequest: request filter method which attempts to authorize the request"}
-@Field {value:"filterRequest: response filter method (not used this scenario)"}
+@Description { value: "Representation of the Authorization filter" }
+@Field { value: "filterRequest: request filter method which attempts to authorize the request" }
+@Field { value: "filterRequest: response filter method (not used this scenario)" }
 public type OAuthzFilter object {
 
     public http:AuthzFilter authzFilter;
@@ -41,25 +41,27 @@ public type OAuthzFilter object {
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-        boolean {
+                                                                                                                boolean
+    {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
-        if(checkAuthentication != "require"){
+        if (checkAuthentication != "require") {
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
             boolean result = doFilterRequest(listener, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
-        }else{
+        } else {
             // Skip this filter is mutualSSL is enabled.
             return true;
         }
     }
 
     public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-        boolean {
+                                                                                                                  boolean
+    {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
         string authScheme = runtime:getInvocationContext().authContext.scheme;
         boolean result = true;

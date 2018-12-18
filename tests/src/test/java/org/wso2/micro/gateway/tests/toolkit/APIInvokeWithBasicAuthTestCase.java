@@ -31,10 +31,11 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class APIInvokeTestCase extends BaseTestCase {
+public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
@@ -66,6 +67,8 @@ public class APIInvokeTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
+        //set security schemas
+        String security = "basic";
 
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
@@ -82,45 +85,20 @@ public class APIInvokeTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //generate apis with CLI and start the micro gateway server
-        super.init(label, project);
-    }
-
-    @Test(description = "Test API invocation with a oauth token")
-    public void testApiInvoke() throws Exception {
-        //test prod endpoint
-        invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-
-        //test sand endpoint
-        invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+        //generate apis with CLI and start the micro gateway server only supports basic Auth
+        super.init(label, project, security);
     }
 
     @Test(description = "Test API invocation with a JWT token")
-    public void testApiInvokeWithJWT() throws Exception {
-        //test prod endpoint with jwt token
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-
-        //test sand endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+    public void testApiInvokeFailWithJWT() throws Exception {
+        //test  endpoint with jwt token
+        invoke(jwtTokenProd, 401);
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-        //test invoking with an expired JWT token
-        invoke(expiringJwtTokenProd, 401);
-    }
-
-    private void invoke(String token, String responseData, int responseCode) throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
     private void invoke(String token, int responseCode) throws Exception {
@@ -133,9 +111,71 @@ public class APIInvokeTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
+    @Test(description = "Test API invocation with Basic Auth")
+    public void testApiInvokePassWithBasicAuth() throws Exception {
+        //Valid Credentials
+        String originalInput = "generalUser1:password";
+        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+        //test endpoint
+        invokeBasic(basicAuthToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+    }
+
+    @Test(description = "Test API invocation with Basic Auth")
+    public void testApiInvokeWithoutPassword() throws Exception {
+        //Valid Credentials
+        String originalInput = "generalUser1: ";
+        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+        //test endpoint
+        invokeBasic(basicAuthToken, 401);
+    }
+
+    @Test(description = "Test API invocation with Basic Auth")
+    public void testApiInvokeFailWithInvalidPassword() throws Exception {
+        //Valid Credentials
+        String originalInput = "generalUser1:Invalid";
+        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+        //test endpoint
+        invokeBasic(basicAuthToken, 401);
+    }
+
+    @Test(description = "Test API invocation with Basic Auth")
+    public void testApiInvokeFailWithInvalidFormat() throws Exception {
+        //Valid Credentials
+        String originalInput = "generalUser1password";
+        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+        //test endpoint
+        invokeBasic(basicAuthToken, 401);
+    }
+
+    private void invokeBasic(String token, String responseData, int responseCode) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), responseData);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
+
+    private void invokeBasic(String token, int responseCode) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
+
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
         super.finalize();
     }
+
 }

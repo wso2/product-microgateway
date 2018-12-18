@@ -25,6 +25,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,7 +52,6 @@ public class OpenApiCodegenUtils {
         String endpointConfig = api.getEndpointConfig();
         api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
     }
-
 
     private static EndpointConfig getEndpointConfig(String endpointConfig) throws IOException {
         ObjectMapper mapper = new ObjectMapper();

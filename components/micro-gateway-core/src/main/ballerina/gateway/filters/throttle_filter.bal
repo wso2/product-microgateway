@@ -28,13 +28,14 @@ public type ThrottleFilter object {
     public map deployedPolicies;
 
 
-    public new (deployedPolicies) {}
+    public new(deployedPolicies) {}
 
     @Param { value: "request: Request instance" }
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-            boolean {
+                                                                                                                boolean
+    {
 
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
@@ -49,7 +50,8 @@ public type ThrottleFilter object {
     @Param { value: "context: FilterContext instance" }
     @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
     public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-            boolean {
+                                                                                                                  boolean
+    {
         printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
         //Throttle Tiers
         string applicationLevelTier;
@@ -60,7 +62,7 @@ public type ThrottleFilter object {
         string apiContext = getContext(context);
         string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
         apiVersion;
-        boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+        boolean isSecured = check <boolean>context.attributes[IS_SECURED];
         context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
         context.attributes[IS_THROTTLE_OUT] = false;
 
@@ -69,11 +71,11 @@ public type ThrottleFilter object {
             printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
             keyvalidationResult = check <AuthenticationContext>context.attributes[
             AUTHENTICATION_CONTEXT];
-            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '"+ keyvalidationResult.tier
-                +"' exist.");
+            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.tier
+                    + "' exist.");
             if (keyvalidationResult.tier != UNLIMITED_TIER && !deployedPolicies.hasKey(keyvalidationResult.tier)) {
-                printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '"+ keyvalidationResult.tier
-                +"' is not exist.");
+                printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyvalidationResult.tier
+                        + "' is not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                     INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
                 sendErrorResponse(listener, request, context);
@@ -99,11 +101,11 @@ public type ThrottleFilter object {
                 }
             }
             printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
-                + keyvalidationResult.applicationTier + "' exist.");
+                    + keyvalidationResult.applicationTier + "' exist.");
             if (keyvalidationResult.applicationTier != UNLIMITED_TIER &&
-                    !deployedPolicies.hasKey(keyvalidationResult.applicationTier)) {
+                !deployedPolicies.hasKey(keyvalidationResult.applicationTier)) {
                 printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
-                    + keyvalidationResult.applicationTier + "' is not exist.");
+                        + keyvalidationResult.applicationTier + "' is not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                     INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
                 sendErrorResponse(listener, request, context);
@@ -127,10 +129,10 @@ public type ThrottleFilter object {
             runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
 
             printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
-                + "' exist.");
+                    + "' exist.");
             if (!deployedPolicies.hasKey(UNAUTHENTICATED_TIER)) {
                 printDebug(KEY_THROTTLE_FILTER, "Unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
-                    + "' is not exist.");
+                        + "' is not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                     INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
                 sendErrorResponse(listener, request, context);
@@ -158,7 +160,7 @@ public type ThrottleFilter object {
             keyvalidationResult.authenticated = true;
             keyvalidationResult.tier = UNAUTHENTICATED_TIER;
             keyvalidationResult.stopOnQuotaReach = true;
-            keyvalidationResult.apiKey = clientIp ;
+            keyvalidationResult.apiKey = clientIp;
             keyvalidationResult.username = END_USER_ANONYMOUS;
             keyvalidationResult.applicationId = clientIp;
             keyvalidationResult.keyType = PRODUCTION_KEY_TYPE;
@@ -185,7 +187,7 @@ public type ThrottleFilter object {
 };
 
 function setThrottleErrorMessageToContext(http:FilterContext context, int statusCode, int errorCode, string
-    errorMessage, string errorDescription) {
+    errorMessage,                         string errorDescription) {
     context.attributes[HTTP_STATUS_CODE] = statusCode;
     context.attributes[FILTER_FAILED] = true;
     context.attributes[ERROR_CODE] = errorCode;
@@ -195,16 +197,16 @@ function setThrottleErrorMessageToContext(http:FilterContext context, int status
 
 function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns (
             boolean, boolean) {
-    if(keyValidationDto.tier == UNLIMITED_TIER) {
+    if (keyValidationDto.tier == UNLIMITED_TIER) {
         return (false, false);
     }
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext(context) + ":"
-    + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+        + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
-    if(keyValidationDto.applicationTier == UNLIMITED_TIER) {
+    if (keyValidationDto.applicationTier == UNLIMITED_TIER) {
         return false;
     }
     string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
@@ -217,7 +219,8 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean, boolean) {
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string throttleKey = clientIp + ":" + getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
-                                                         reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+                                                                          reflect:getServiceAnnotations(context.
+                                                                              serviceType)).apiVersion;
     return isRequestThrottled(throttleKey);
 }
 
