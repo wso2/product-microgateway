@@ -24,6 +24,7 @@ public class Config {
     private Token token;
     private APICorsConfigurationDTO corsConfiguration;
     private MutualSSL mutualSSL;
+    private BasicAuth basicAuth;
 
     public Token getToken() {
         return token;
@@ -55,5 +56,13 @@ public class Config {
 
     public void setMutualSSL(MutualSSL mutualSSL) {
         this.mutualSSL = mutualSSL;
+    }
+
+    public BasicAuth getBasicAuth() {
+        return basicAuth;
+    }
+
+    public void setBasicAuth(BasicAuth basicAuth) {
+        this.basicAuth = basicAuth;
     }
 }

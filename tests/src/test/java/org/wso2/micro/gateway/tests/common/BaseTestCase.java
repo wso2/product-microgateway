@@ -51,7 +51,7 @@ public class BaseTestCase {
     protected MockHttpServer mockHttpServer;
     protected final static int MOCK_SERVER_PORT = 9443;
 
-    protected void init(String label, String project) throws Exception {
+    protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
 
         microGWServer = ServerInstance.initMicroGwServer();
@@ -63,8 +63,7 @@ public class BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
+        cliExecutor.generate(label, project,security);
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();

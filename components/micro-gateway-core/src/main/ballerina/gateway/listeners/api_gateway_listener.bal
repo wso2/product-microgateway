@@ -153,6 +153,31 @@ public function getAuthProviders() returns http:AuthProvider[] {
     return [jwtAuthProvider, basicAuthProvider];
 }
 
+public function getBasicAuthProvider() returns http:AuthProvider[] {
+    http:AuthProvider basicAuthProvider = {
+        id: AUTHN_SCHEME_BASIC,
+        scheme: AUTHN_SCHEME_BASIC,
+        authStoreProvider: AUTH_PROVIDER_CONFIG
+    };
+    return [basicAuthProvider];
+}
+
+public function getJWTAuthProvider() returns http:AuthProvider[] {
+    http:AuthProvider jwtAuthProvider = {
+        id: AUTH_SCHEME_JWT,
+        scheme: AUTH_SCHEME_JWT,
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
+        trustStore: {
+            path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH,
+                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+            password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+        }
+    };
+    return [jwtAuthProvider];
+}
+
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {
     cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
         capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(

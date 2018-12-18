@@ -37,11 +37,8 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
@@ -122,6 +119,8 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
 
+    @Parameter(names = {"-b", "--security"}, hidden = true)
+    private String security;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -279,6 +278,14 @@ public class SetupCmd implements GatewayLauncherCmd {
         System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
         System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
+        //Security Schemas settings
+        if (security == null) {
+            security = "oauth2";
+        } else if (security == "") {
+            security = "oauth2";
+        }
+        setSecuritySchemas(security);
+
         OAuthService manager = new OAuthServiceImpl();
         clientID = config.getToken().getClientId();
         String encryptedSecret = config.getToken().getClientSecret();
@@ -332,6 +339,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
+        List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
+        logger.info(String.valueOf(clientCertificates));
 
         ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -443,5 +452,34 @@ public class SetupCmd implements GatewayLauncherCmd {
             logger.error("Malformed URL provided {}", host);
             throw new CLIInternalException("Error occurred while setting up URL configurations.");
         }
+    }
+
+    /**
+     * Get the security Schemas string and based on that set boolean values for schemas to be used in service.bal.
+     */
+    public void setSecuritySchemas(String schemas) {
+        Config config = GatewayCmdUtils.getConfig();
+        BasicAuth basicAuth = new BasicAuth();
+        boolean basic = false;
+        boolean oauth2 = false;
+        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+        for (int i = 0; i < schemasArray.length; i++) {
+            if (schemasArray[i].equalsIgnoreCase("basic")) {
+                basic = true;
+            } else if (schemasArray[i].equalsIgnoreCase("oauth2")) {
+                oauth2 = true;
+            }
+        }
+        if (basic && oauth2) {
+            basicAuth.setOptional(true);
+            basicAuth.setRequired(false);
+        } else if (basic && !oauth2) {
+            basicAuth.setRequired(true);
+            basicAuth.setOptional(false);
+        } else if (!basic && oauth2) {
+            basicAuth.setOptional(false);
+            basicAuth.setRequired(false);
+        }
+        config.setBasicAuth(basicAuth);
     }
 }
