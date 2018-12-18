@@ -137,7 +137,6 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeFailWithBasicAuth() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1:password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());

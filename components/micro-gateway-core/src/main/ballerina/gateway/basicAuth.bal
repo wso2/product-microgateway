@@ -25,14 +25,10 @@ import ballerina/io;
 import ballerina/reflect;
 import ballerina/crypto;
 
-
-// MutualSSL filter
-
-@Description { value: "Representation of the BasicAuth filter" }
-
+@Description { value: "Representation of the BasicAuth logic" }
 public type BasicAuthUtils object {
-    public http:AuthnHandlerChain authnHandlerChain;
 
+    public http:AuthnHandlerChain authnHandlerChain;
     public new(authnHandlerChain) {}
 
     @Description { value: "representation of Basic auth validation" }

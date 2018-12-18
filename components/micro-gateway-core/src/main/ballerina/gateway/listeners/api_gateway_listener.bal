@@ -163,6 +163,7 @@ public function getBasicAuthProvider() returns http:AuthProvider[] {
     };
     return [basicAuthProvider];
 }
+
 public function getJWTAuthProvider() returns http:AuthProvider[] {
     http:AuthProvider jwtAuthProvider = {
         id: AUTH_SCHEME_JWT,

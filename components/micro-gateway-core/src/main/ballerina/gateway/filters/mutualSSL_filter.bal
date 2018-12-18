@@ -24,16 +24,11 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 
-
 // MutualSSL filter
-
 @Description { value: "Representation of the MutualSSL filter" }
-
 public type MutualSSLFilter object {
 
     public json trottleTiers;
-
-
     public new(trottleTiers) {}
 
     @Param { value: "listener: Listner endpoint" }
@@ -43,7 +38,6 @@ public type MutualSSLFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
-
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doFilterRequest(listener, request, context);
@@ -59,8 +53,6 @@ public type MutualSSLFilter object {
                         returns boolean {
         boolean isAuthenticated = false;
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
-
-
         if (checkAuthentication == "require") {
             // get  config for this resource
             AuthenticationContext authenticationContext;

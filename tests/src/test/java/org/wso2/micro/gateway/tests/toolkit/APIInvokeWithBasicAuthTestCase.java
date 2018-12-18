@@ -112,7 +112,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokePassWithBasicAuth() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1:password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -125,11 +124,10 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         } catch(InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-
     }
+
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeWithoutPassword() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1: ";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -142,12 +140,10 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         } catch(InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-
     }
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeFailWithInvalidPassword() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1:Invalid";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -160,12 +156,10 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         } catch(InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-
     }
 
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeFailWithInvalidFormat() throws Exception {
-
         //Valid Credentials
         String originalInput = "generalUser1password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
@@ -178,7 +172,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         } catch(InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-
     }
 
     private void invokeBasic(String token, String responseData, int responseCode) throws Exception {
@@ -191,6 +184,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
+
     private void invokeBasic(String token, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
@@ -200,7 +194,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
-
 
     @AfterClass
     public void stop() throws Exception {

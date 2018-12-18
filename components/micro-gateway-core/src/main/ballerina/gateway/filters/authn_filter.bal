@@ -31,7 +31,7 @@ import ballerina/reflect;
 public type AuthnFilter object {
 
     public OAuthnAuthenticator oauthnHandler;//Handles the oauth2 authentication;
-    public boolean oauth2Enabled = false;
+    public boolean isOauth2Enabled = false;
 
     @Description { value: "filterRequest: Request filter function" }
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
@@ -74,7 +74,7 @@ public type AuthnFilter object {
         foreach i in authProvidersIds{
             if (i == "oauth2"){
                 //check whether Oauth2 is enabled in service files.
-                oauth2Enabled = true;
+                isOauth2Enabled = true;
             }
             foreach k in authProviders  {
                 if (k.id == i){
@@ -130,7 +130,7 @@ public type AuthnFilter object {
                     return false;
                 }
             } else if (providerId == AUTH_SCHEME_OAUTH2){
-                if (oauth2Enabled){
+                if (isOauth2Enabled){
                     match extractAccessToken(request, authHeaderName) {
                         string token => {
                             runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;

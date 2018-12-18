@@ -66,16 +66,13 @@
 @final public string API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION =
 "Make sure you have given the correct username and password";
 
-
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING = "900912";
 @final public int API_AUTH_BASICAUTH_INVALID_FORMAT= 900912;
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE = "Invalid Format";
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION =
 "Make sure you have given the credentials in correct format with \":\" character";
 
-
 @final public string DESCRIPTION_SEPARATOR = ". ";
-
 
 public function getAuthenticationFailureMessage(int errorCode) returns string {
     string errorMessage;

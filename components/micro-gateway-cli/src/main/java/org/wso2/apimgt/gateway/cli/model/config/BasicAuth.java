@@ -30,7 +30,6 @@ public class BasicAuth {
             optional = false;
         }
         return optional;
-
     }
 
     public void setOptional(boolean optional) {
