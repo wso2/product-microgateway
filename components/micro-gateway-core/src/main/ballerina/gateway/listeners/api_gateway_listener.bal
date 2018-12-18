@@ -104,7 +104,7 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         }
         http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
         return <http:HttpAuthnHandler>basicAuthHandler;
-    } else if (authProvider.scheme == AUTH_SCHEME_JWT){
+    } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;

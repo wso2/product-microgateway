@@ -129,8 +129,8 @@ public type AuthnFilter object {
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
-            } else if (providerId == AUTH_SCHEME_OAUTH2){
-                if (isOauth2Enabled){
+            } else if (providerId == AUTH_SCHEME_OAUTH2) {
+                if (isOauth2Enabled) {
                     match extractAccessToken(request, authHeaderName) {
                         string token => {
                             runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
@@ -215,8 +215,7 @@ public type AuthnFilter object {
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
-            } else if (providerId == AUTHN_SCHEME_BASIC)
-            {
+            } else if (providerId == AUTHN_SCHEME_BASIC) {
                 //Basic auth valiadation
                 BasicAuthUtils basicAuthentication = new BasicAuthUtils (authnHandlerChain);
                 boolean isValidated = basicAuthentication.processRequest(listener, request, context);

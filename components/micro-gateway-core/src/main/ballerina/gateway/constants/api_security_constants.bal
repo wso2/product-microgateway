@@ -67,7 +67,7 @@
 "Make sure you have given the correct username and password";
 
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING = "900912";
-@final public int API_AUTH_BASICAUTH_INVALID_FORMAT= 900912;
+@final public int API_AUTH_BASICAUTH_INVALID_FORMAT = 900912;
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE = "Invalid Format";
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION =
 "Make sure you have given the credentials in correct format with \":\" character";
@@ -98,11 +98,11 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = SUBSCRIPTION_INACTIVE_MESSAGE;
     } else if (errorCode == INVALID_SCOPE) {
         errorMessage = INVALID_SCOPE_MESSAGE;
-    } else if (errorCode == API_AUTH_INVALID_BASICAUTH_CREDENTIALS){
+    } else if (errorCode == API_AUTH_INVALID_BASICAUTH_CREDENTIALS) {
         errorMessage = API_AUTH_INVALID_BASICAUTH_CREDENTIALS_MESSAGE;
-    } else if (errorCode == API_AUTH_BASICAUTH_INVALID_FORMAT){
+    } else if (errorCode == API_AUTH_BASICAUTH_INVALID_FORMAT) {
         errorMessage = API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE;
-    }else {
+    } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
     return errorMessage;
@@ -120,11 +120,11 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
     } else if (API_AUTH_INVALID_CREDENTIALS == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_CREDENTIALS_DESCRIPTION;
-    } else if (API_AUTH_INVALID_BASICAUTH_CREDENTIALS == errorCode){
+    } else if (API_AUTH_INVALID_BASICAUTH_CREDENTIALS == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION;
-    }else if(API_AUTH_BASICAUTH_INVALID_FORMAT == errorCode){
-        errorDescription +=DESCRIPTION_SEPARATOR + API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION;
-    }else{
+    } else if (API_AUTH_BASICAUTH_INVALID_FORMAT == errorCode) {
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION;
+    } else {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_GENERAL_ERROR_MESSAGE;
     }
     return errorDescription;

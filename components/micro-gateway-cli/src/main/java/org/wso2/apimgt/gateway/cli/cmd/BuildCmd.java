@@ -49,7 +49,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
     private String projectName;
 
-    @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
+    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
     private boolean helpFlag;
 
     public void execute() {
@@ -61,7 +61,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
-            projectName = projectName.replaceAll("[\\/\\\\]","");
+            projectName = projectName.replaceAll("[\\/\\\\]", "");
             File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
             if (!projectLocation.exists()) {
                 throw new CLIRuntimeException("Project " + projectName + " does not exist.");
