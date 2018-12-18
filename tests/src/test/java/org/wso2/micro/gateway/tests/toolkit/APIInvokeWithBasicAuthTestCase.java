@@ -119,12 +119,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
     }
 
     @Test(description = "Test API invocation with Basic Auth")
@@ -135,12 +129,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
     }
 
     @Test(description = "Test API invocation with Basic Auth")
@@ -151,12 +139,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
     }
 
     @Test(description = "Test API invocation with Basic Auth")
@@ -167,12 +149,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
     }
 
     private void invokeBasic(String token, String responseData, int responseCode) throws Exception {
