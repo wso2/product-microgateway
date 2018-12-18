@@ -54,16 +54,16 @@ public type BasicAuthUtils object {
         string passWord;
         match decodedCredentials {
             string decoded => {
-                if(!decoded.contains(":")){
+                if (!decoded.contains(":")){
                     setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
                 string[] decodedCred = decoded.trim().split(":");
                 userName = decodedCred[0];
-                if(lengthof decodedCred < 2){
+                if (lengthof decodedCred < 2){
                     int status;
-                    if(context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
+                    if (context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
                         status = UNAUTHORIZED;
                         context.attributes[HTTP_STATUS_CODE] = status;
                     }
@@ -75,7 +75,7 @@ public type BasicAuthUtils object {
             }
             error => {
                 int status;
-                if(context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
+                if (context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
                     status = UNAUTHORIZED;
                     context.attributes[HTTP_STATUS_CODE] = status;
                 }

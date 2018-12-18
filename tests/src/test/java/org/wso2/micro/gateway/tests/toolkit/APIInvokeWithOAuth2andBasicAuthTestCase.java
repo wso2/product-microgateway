@@ -85,7 +85,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
         //generate apis with CLI and start the micro gateway server
-        super.init(label, project,security);
+        super.init(label, project, security);
     }
 
     @Test(description = "Test API invocation with a oauth token")
@@ -107,7 +107,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
         //test invoking with an expired JWT token
@@ -149,7 +149,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
         //test invoking with invalid credentials

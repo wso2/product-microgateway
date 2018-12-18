@@ -86,16 +86,17 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
         //generate apis with CLI and start the micro gateway server only supports basic Auth
-        super.init(label, project,security);
+        super.init(label, project, security);
     }
+
     @Test(description = "Test API invocation with a JWT token")
     public void testApiInvokeFailWithJWT() throws Exception {
         //test  endpoint with jwt token
-        invoke(jwtTokenProd,401);
+        invoke(jwtTokenProd, 401);
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }
@@ -121,7 +122,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }
@@ -137,7 +138,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }
@@ -153,7 +154,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }
@@ -169,7 +170,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }

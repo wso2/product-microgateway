@@ -63,12 +63,12 @@ public class BaseTestCase {
         //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project,security);
+        cliExecutor.generate(label, project, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = { "--config", configPath };
+        String[] args = {"--config", configPath};
         microGWServer.startMicroGwServer(balPath, args);
     }
 
@@ -85,12 +85,12 @@ public class BaseTestCase {
         //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generateFromDefinition(label, project, endpoint,security);
+        cliExecutor.generateFromDefinition(label, project, endpoint, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = { "--config", configPath };
+        String[] args = {"--config", configPath};
         microGWServer.startMicroGwServer(balPath, args);
     }
 
@@ -103,7 +103,7 @@ public class BaseTestCase {
     protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
             throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        subscribedApiDTO.setContext( api.getContext() + "/" + api.getVersion());
+        subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
         subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");
