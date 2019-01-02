@@ -79,81 +79,41 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         http:Response|error clientResponse;
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#equals etcd.etcdEnabled "true"}}boolean reinitRequired;
+        {{#if etcd.etcdEnabled}}boolean reinitRequired;
         string etcdKey;
+        string etcdKeyConfigValue;
         boolean|error hasUrlChanged;
-        http:ClientEndpointConfig newConfig;{{/equals}}
+        http:ClientEndpointConfig newConfig;
+        boolean reinitFailed = false;{{/if}}
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
-                {{#equals etcd.etcdEnabled "true"}}
-                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                    {
-                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
-                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                            error err => log:printError("Error in checking for Re-initialization", err = err);
-                        }
-                        if(reinitRequired)
-                        {
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            gateway:urlChanged[etcdKey] = false;
-                            {{qualifiedServiceName}}_prod.init(newConfig);
-                        }
-                    }
-                {{/equals}}
+                {{#if etcd.etcdEnabled}}
+                    {{>prodEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 } else {
                     destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
-                {{#equals etcd.etcdEnabled "true"}}
-                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                    {
-                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
-                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                            error err => log:printError("Error in checking for Re-initialization", err = err);
-                        }
-                        if(reinitRequired)
-                        {
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            gateway:urlChanged[etcdKey] = false;
-                            {{qualifiedServiceName}}_sand.init(newConfig);
-                        }
-                    }
-                {{/equals}}
+                {{#if etcd.etcdEnabled}}
+                    {{>sandEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
-                {{#equals etcd.etcdEnabled "true"}}
-                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.prod.etcd.key", "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                    {
-                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
-                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                            error err => log:printError("Error in checking for Re-initialization", err = err);
-                        }
-                        if(reinitRequired)
-                        {
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            gateway:urlChanged[etcdKey] = false;
-                            {{qualifiedServiceName}}_prod.init(newConfig);
-                        }
-                    }
-                {{/equals}}
+                {{#if etcd.etcdEnabled}}
+                    {{>prodEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 } else {
                     http:Response res = new;
                     res.statusCode = 403;
@@ -170,26 +130,12 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
-            {{#equals etcd.etcdEnabled "true"}}
-                etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.sand.etcd.key", "");
-                if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                {
-                    hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                    match hasUrlChanged{
-                        boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                        error err => log:printError("Error in checking for Re-initialization", err = err);
-                    }
-                    if(reinitRequired)
-                    {
-                        newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                        destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                        gateway:urlChanged[etcdKey] = false;
-                        {{qualifiedServiceName}}_sand.init(newConfig);
-                    }
-                }
-            {{/equals}}
+            {{#if etcd.etcdEnabled}}
+                {{>sandEndpointReinit}}
+            {{else}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                 runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+            {{/if}}
             } else {
                 http:Response res = new;
                 res.statusCode = 403;
@@ -221,6 +167,10 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
                     errorCode = 101504;
                     errorDescription = "Connection timed out";
+                }
+                if(errorMessage.contains("Malformed URL")) {
+                    errorCode = 101505;
+                    errorDescription = <string>err.description;
                 }
                 runtime:getInvocationContext().attributes["error_response"] = err;
                 runtime:getInvocationContext().attributes["error_response_code"] = errorCode;

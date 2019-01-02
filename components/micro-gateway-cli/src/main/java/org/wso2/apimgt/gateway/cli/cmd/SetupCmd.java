@@ -137,7 +137,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String security;
 
     @Parameter(names = { "-etcd", "--etcd-enable" }, hidden = true, arity = 0)
-    private boolean isEtcd;
+    private boolean isEtcdEnabled;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -366,7 +366,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
             //set etcd requirement
             Etcd etcd = new Etcd();
-            etcd.setEtcdEnabled(isEtcd);
+            etcd.setEtcdEnabled(isEtcdEnabled);
             GatewayCmdUtils.setEtcd(etcd);
 
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();

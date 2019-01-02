@@ -1,0 +1,39 @@
+etcdKeyConfigValue = gateway:encodeValueToBase64("{{api.name}}_{{api.version}}_sand") + "_etcdKey";
+etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
+if(etcdKey != "" && gateway:etcdConnectionEstablished){
+    hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+    match hasUrlChanged{
+        boolean matchUrlChanged => reinitRequired = matchUrlChanged;
+        error err => log:printError("Error in checking for Re-initialization", err = err);
+    }
+    if(reinitRequired) {
+        newConfig = { url:<string>gateway:etcdUrls[etcdKey] };
+        destination_attribute = <string>gateway:etcdUrls[etcdKey];
+        try{
+            {{qualifiedServiceName}}_sand.init(newConfig);
+            gateway:urlChanged[etcdKey] = false;
+        }catch(error err){
+            reinitFailed = true;
+            gateway:urlChanged[etcdKey] = true;
+
+            http:Response res = new;
+            res.statusCode = 500;
+            json payload = {
+                "fault": {
+                    "code": "101505",
+                    "message": "Runtime Error",
+                    "description": "URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid"
+                }
+            };
+            runtime:getInvocationContext().attributes["error_code"] = "101505";
+            res.setPayload(payload);
+            clientResponse = res;
+            log:printError("URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid");
+        }
+    }
+}
+
+if(!reinitFailed){
+    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+}
