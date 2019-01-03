@@ -29,6 +29,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -266,6 +267,16 @@ public class Utils {
         }
 
         folder.delete();
+    }
+
+    /**
+     * Encode a value to base64 format
+     *
+     * @param value The value to be encoded.
+     */
+    public static String encodeValueToBase64(String value) throws Exception {
+        String encodedValue = Base64.getEncoder().encodeToString(value.getBytes("utf-8"));
+        return encodedValue;
     }
 }
 
