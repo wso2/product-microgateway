@@ -88,58 +88,32 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         http:Response|error clientResponse;
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#equals etcd.etcdEnabled "true"}}boolean reinitRequired;
+        {{#if etcd.etcdEnabled}}boolean reinitRequired;
         string etcdKey;
+        string etcdKeyConfigValue;
         boolean|error hasUrlChanged;
-        http:ClientEndpointConfig newConfig;{{/equals}}
+        http:ClientEndpointConfig newConfig;
+        boolean reinitFailed = false;{{/if}}
         {{#endpointConfig.0}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{inline.endpointConfig.list.0.url}}";
-                {{#equals etcd.etcdEnabled "true"}}
-                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.Production.etcd.key", "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                    {
-                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
-                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                            error err => io:println("error: " + err.message);
-                        }
-                        if(reinitRequired)
-                        {
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            gateway:urlChanged[etcdKey] = false;
-                            {{qualifiedServiceName}}_Production.init(newConfig);
-                        }
-                    }
-                {{/equals}}
+                {{#if etcd.etcdEnabled}}
+                    {{>prodEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_Production->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 }
         {{/endpointConfig.0}}
         {{#endpointConfig.1}}
                 else {
                     destination_attribute = "{{inline.endpointConfig.list.0.url}}";
-                {{#equals etcd.etcdEnabled "true"}}
-                    etcdKey = gateway:retrieveConfig("{{api.name}}.{{api.version}}.Sandbox.etcd.key", "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished)
-                    {
-                        hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
-                            boolean matchUrlChanged => reinitRequired=matchUrlChanged;
-                            error err => io:println("error: " + err.message);
-                        }
-                        if(reinitRequired)
-                        {
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
-                            destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            gateway:urlChanged[etcdKey] = false;
-                            {{qualifiedServiceName}}_Sandbox.init(newConfig);
-                        }
-                    }
-                {{/equals}}
+                {{#if etcd.etcdEnabled}}
+                    {{>sandEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_Sandbox->forward(urlPostfix, req);
                     runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 }
         {{/endpointConfig.1}}
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;

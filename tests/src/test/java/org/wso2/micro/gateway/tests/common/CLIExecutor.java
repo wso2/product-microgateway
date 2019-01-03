@@ -76,7 +76,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generate(String label, String project, String additionalFlag) throws Exception {
+    public void generatePassingFlag(String label, String project, String additionalFlag) throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -93,7 +93,7 @@ public class CLIExecutor {
         String[] args = { "setup", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config, "--" + additionalFlag };
+                config, "--security", "oauth2", "--" + additionalFlag };
         main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"

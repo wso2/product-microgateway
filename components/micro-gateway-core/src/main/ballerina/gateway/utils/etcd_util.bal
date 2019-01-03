@@ -81,14 +81,16 @@ public function etcdError(error e) {
 }
 
 @Description {value:"Setting up etcd requirements"}
-public function etcdSetup(string key, string default, string configKey) returns string
+public function etcdSetup(string keyPrefix, string keySuffix, string etcdConfigKeySuffix, string default) returns string
 {
     string endpointUrl;
+    string base64EncodedEndpointKey = encodeValueToBase64(keyPrefix) + keySuffix;
 
     if(!etcdConnectionAttempted)
     {
         establishEtcdConnection();
         etcdConnectionAttempted = true;
+        printDebug(KEY_ETCD_UTIL, "Etcd Connection Attempted");
     }
 
     if(etcdConnectionEstablished)
@@ -96,18 +98,21 @@ public function etcdSetup(string key, string default, string configKey) returns 
         if(!etcdPeriodicQueryInitialized)
         {
             etcdPeriodicQueryInitialized = true;
+            printDebug(KEY_ETCD_UTIL, "Etcd Periodic Query Initialized");
             initiateEtcdTimerTask();
         }
-        string etcdKey = retrieveConfig(configKey, "");
+        string base64EncodedEtcdKey = encodeValueToBase64(keyPrefix) + etcdConfigKeySuffix;
+        string etcdKey = retrieveConfig(base64EncodedEtcdKey, "");
 
         if(etcdKey == "")
         {
-            printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
-            endpointUrl = retrieveConfig(key, default);
+            printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + base64EncodedEndpointKey);
+            endpointUrl = retrieveConfig(base64EncodedEndpointKey, default);
         }
         else
         {
-            defaultUrls[etcdKey] = default;
+            printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + keyPrefix + keySuffix);
+            defaultUrls[etcdKey] = retrieveConfig(base64EncodedEndpointKey, default);
             urlChanged[etcdKey] = false;
             etcdUrls[etcdKey] = etcdLookup(etcdKey);
             endpointUrl = <string>etcdUrls[etcdKey];
@@ -115,7 +120,7 @@ public function etcdSetup(string key, string default, string configKey) returns 
     }
     else
     {
-        endpointUrl = retrieveConfig(key, default);
+        endpointUrl = retrieveConfig(base64EncodedEndpointKey, default);
     }
 
     return endpointUrl;
