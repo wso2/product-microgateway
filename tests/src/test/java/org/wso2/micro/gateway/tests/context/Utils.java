@@ -18,8 +18,13 @@
 
 package org.wso2.micro.gateway.tests.context;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
+import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,9 +32,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -275,8 +283,59 @@ public class Utils {
      * @param value The value to be encoded.
      */
     public static String encodeValueToBase64(String value) throws Exception {
-        String encodedValue = Base64.getEncoder().encodeToString(value.getBytes("utf-8"));
-        return encodedValue;
+        return Base64.getEncoder().encodeToString(value.getBytes("utf-8"));
     }
+
+    /**
+     * Invoke an API
+     *
+     * @param token The token to be sent with the request header.
+     * @param requestUrl The url to which the request should be sent.
+     */
+    public static HttpResponse invokeApi(String token, String requestUrl) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //invoke api with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        HttpResponse response = HttpClientRequest
+                .doGet(requestUrl, headers);
+        return response;
+    }
+
+    /**
+     * Assert the result of a response
+     *
+     * @param response The response object.
+     * @param responseData The data which is expected as the response
+     * @param responseCode The response code which is expected
+     */
+    public static void assertResult(HttpResponse response, String responseData, int responseCode){
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), responseData);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
+
+    /**
+     * Delay the program for a given time period
+     *
+     * @param delayTime The time in milliseconds for the program to be delayed.
+     */
+    public static void delay(int delayTime){
+        try {
+            Thread.sleep(delayTime);
+        } catch(InterruptedException ex) {
+            Assert.fail("thread sleep interrupted!");
+        }
+    }
+
+//    private void delay(int delayTime){
+//        long startTime = System.currentTimeMillis();
+//        for (int count = 0; ;count++) {
+//            long now = System.currentTimeMillis();
+//            if(now - startTime >= delayTime)
+//                break;
+//            // Do nothing
+//        }
+//    }
+
 }
 

@@ -52,6 +52,7 @@ public function initiateEtcdTimerTask()
 
 @Description {value:"Periodic Etcd Query. Trigger function of etcd timer task"}
 public function etcdTimerTask() returns error? {
+    printDebug(KEY_ETCD_UTIL, "Etcd Periodic Query Initiated");
     if(etcdUrls.count() > 0)
     {
         foreach k, v in etcdUrls {
@@ -99,7 +100,6 @@ public function etcdSetup(string keyPrefix, string keySuffix, string etcdConfigK
         if(!etcdPeriodicQueryInitialized)
         {
             etcdPeriodicQueryInitialized = true;
-            printDebug(KEY_ETCD_UTIL, "Etcd Periodic Query Initialized");
             initiateEtcdTimerTask();
         }
         string base64EncodedEtcdKey = encodeValueToBase64(keyPrefix) + etcdConfigKeySuffix;
