@@ -42,6 +42,8 @@ public class HTTP2TestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
+        //set security schemas
+        String security = "oauth2";
 
         //Define application info
         ApplicationDTO application = new ApplicationDTO();
@@ -69,7 +71,7 @@ public class HTTP2TestCase extends BaseTestCase {
 
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
+        cliExecutor.generate(label, project, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
