@@ -26,7 +26,6 @@ public class HTTP2TestCase extends BaseTestCase {
     protected MockHttp2Server mockHttp2Server;
     protected MockHttp2Server mockHttp2SecureServer;
     protected Http2ClientRequest http2ClientRequest;
-    private String flag = "-http2";
     private String jwtTokenProd;
 
     @BeforeClass
@@ -70,13 +69,12 @@ public class HTTP2TestCase extends BaseTestCase {
 
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, flag);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+                .getResource("confs" + File.separator + "http2-test.conf").getPath();
         String[] args = {"--config", configPath};
-        System.out.println("HTTP2 TEST CASE");
         microGWServer.startMicroGwServer(balPath, args);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);

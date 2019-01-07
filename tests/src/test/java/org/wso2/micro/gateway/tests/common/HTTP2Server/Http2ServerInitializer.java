@@ -12,8 +12,12 @@ import io.netty.handler.codec.http2.Http2ServerUpgradeCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.util.AsciiString;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
+
+    private static final Log log = LogFactory.getLog(Http2ServerInitializer.class);
 
     private static final HttpServerUpgradeHandler.UpgradeCodecFactory upgradeCodecFactory = protocol -> {
         if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
@@ -72,8 +76,8 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
             @Override
             protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) throws Exception {
                 // If this handler is hit then no upgrade has been attempted and the client is just talking HTTP.
-                System.err.println("Directly talking: " + msg.protocolVersion() + " (no upgrade was attempted)");
-                System.out.println("Directly talking: " + msg.protocolVersion() + " (no upgrade was attempted)");
+
+                log.error("Directly talking: " + msg.protocolVersion() + " (no upgrade was attempted)");
 
                 ChannelPipeline pipeline = ctx.pipeline();
                 ChannelHandlerContext thisCtx = pipeline.context(this);
@@ -96,7 +100,7 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
     private static class UserEventLogger extends ChannelInboundHandlerAdapter {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-            System.out.println("User Event Triggered: " + evt);
+            log.info("User Event Triggered: " + evt);
             ctx.fireUserEventTriggered(evt);
         }
     }

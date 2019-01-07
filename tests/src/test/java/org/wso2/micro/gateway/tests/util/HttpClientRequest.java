@@ -18,6 +18,9 @@
 
 package org.wso2.micro.gateway.tests.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,6 +40,8 @@ import java.util.Map;
  * This class can be used to send http request.
  */
 public class HttpClientRequest {
+
+    private static final Log log = LogFactory.getLog(HttpClientRequest.class);
     /**
      * Sends an HTTP GET request to a url.
      *
@@ -203,7 +208,7 @@ public class HttpClientRequest {
             }
         } catch (IOException ex) {
             if (conn.getErrorStream() == null) {
-                ex.printStackTrace();
+                log.error("An IOException occurred" + ex);
                 return null;
             }
             rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()

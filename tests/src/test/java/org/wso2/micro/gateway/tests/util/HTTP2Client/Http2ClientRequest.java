@@ -31,6 +31,8 @@ import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import javax.net.ssl.SSLException;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +46,8 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * a response.
  */
 public final class Http2ClientRequest extends BaseTestCase {
+
+    private static final Log log = LogFactory.getLog(Http2ClientRequest.class);
 
     static final String HOST = System.getProperty("host", "127.0.0.1");
     static final String URL = System.getProperty("url", "/pizzashack/1.0.0/menu");//https://localhost:9595/pizzashack/1.0.0/menu
@@ -65,14 +69,13 @@ public final class Http2ClientRequest extends BaseTestCase {
     }
 
     public void start() throws SSLException {
-
         // Configure SSL.
         final SslContext sslCtx;
 
         // setSSlSystemProperties();
 
         if (SSL) {
-            System.out.println("Configuring SSL");
+            log.info("Configuring SSL");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
             sslCtx = SslContextBuilder.forClient()
                     .sslProvider(provider)
@@ -93,9 +96,6 @@ public final class Http2ClientRequest extends BaseTestCase {
             sslCtx = null;
         }
 
-        System.out.println("SSL: " + SSL);
-        System.out.println("sslCtx: " + sslCtx);
-
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         Http2ClientInitializer initializer = new Http2ClientInitializer(sslCtx, Integer.MAX_VALUE);
 
@@ -110,28 +110,27 @@ public final class Http2ClientRequest extends BaseTestCase {
 
             // Start the client
             Channel channel = b.connect().syncUninterruptibly().channel();
-            System.out.println("Connected to [" + HOST + ':' + PORT + ']');
+            log.info("Connected to [" + HOST + ':' + PORT + ']');
 
             // Wait for the HTTP/2 upgrade to occur
             Http2SettingsHandler http2SettingsHandler = initializer.settingsHandler();
 
             http2SettingsHandler.awaitSettings(5, TimeUnit.SECONDS);
-
-            System.out.println("Wait for the HTTP/2 upgrade to occur");
+            log.info("Wait for the HTTP/2 upgrade to occur");
 
             Http2ResponseHandler responseHandler = initializer.responseHandler();
             int streamId = 3;
             HttpScheme scheme = SSL ? HttpScheme.HTTPS : HttpScheme.HTTP;
             AsciiString hostName = new AsciiString(HOST + ':' + PORT);
 
-            System.out.println(HOST + " " + PORT);
+            log.info(HOST + "\n" + PORT);
 
-            System.err.println("Sending request(s)...");
+            log.info("Sending request(s)...");
 
             if (URL != null) {
                 // Create a simple GET request.
 
-                System.out.println("\nCreate a simple GET request");
+                log.info("\nCreate a simple GET request");
 
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
                 request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
@@ -144,7 +143,7 @@ public final class Http2ClientRequest extends BaseTestCase {
             }
             if (false) {
                 // Create a simple POST request with a body.
-                System.out.println("Create a simple POST request with a body");
+                log.info("Create a simple POST request with a body");
                 FullHttpRequest request2 = new DefaultFullHttpRequest(HTTP_1_1, POST, URL,
                         wrappedBuffer(URLDATA.getBytes(CharsetUtil.UTF_8)));
                 request2.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
@@ -156,7 +155,7 @@ public final class Http2ClientRequest extends BaseTestCase {
             }
             if (false) {
                 // Create a simple OPTIONS request.
-                System.out.println("Create a simple OPTIONS request with a body");
+                log.info("Create a simple OPTIONS request with a body");
                 FullHttpRequest request3 = new DefaultFullHttpRequest(HTTP_1_1, OPTIONS, URL);
                 request3.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
                 request3.headers().add(HttpHeaderNames.HOST, hostName);
@@ -168,7 +167,7 @@ public final class Http2ClientRequest extends BaseTestCase {
             }
             if (false) {
                 // Create a simple HEAD request.
-                System.out.println("Create a simple HEAD request");
+                log.info("Create a simple HEAD request");
                 FullHttpRequest request4 = new DefaultFullHttpRequest(HTTP_1_1, HEAD, URL);
                 request4.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
                 request4.headers().add(HttpHeaderNames.HOST, hostName);
@@ -178,15 +177,15 @@ public final class Http2ClientRequest extends BaseTestCase {
                 responseHandler.put(streamId, channel.write(request4), channel.newPromise());
                 streamId += 2;
             }
-            System.out.println("flushing the channel");
+            log.info("flushing the channel");
             channel.flush();
             responseHandler.awaitResponses(5, TimeUnit.SECONDS);
-            System.out.println("Finished HTTP/2 request(s)");
+            log.info("Finished HTTP/2 request(s)");
 
             // Wait until the connection is closed.
             channel.close().syncUninterruptibly();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("An Exception occurred " + e);
         } finally {
             workerGroup.shutdownGracefully();
         }

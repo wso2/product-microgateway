@@ -86,7 +86,4 @@ public class GatewayCliConstants {
             GW_TARGET_DIST,
             "Ballerina.lock"
     };
-
-    public static final String TEMP_HTTP2_FILE = ".http2";
-    public static final String HTTP2_ENABLED = "http2Enable";
 }

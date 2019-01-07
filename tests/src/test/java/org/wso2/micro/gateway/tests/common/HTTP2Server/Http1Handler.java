@@ -6,6 +6,9 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -17,6 +20,7 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  */
 public class Http1Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private final String establishApproach;
+    private static final Log log = LogFactory.getLog(Http1Handler.class);
 
     public Http1Handler(String establishApproach) {
         this.establishApproach = checkNotNull(establishApproach, "establishApproach");
@@ -52,7 +56,7 @@ public class Http1Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        log.error(cause.getMessage());
         ctx.close();
     }
 }

@@ -11,10 +11,14 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
 public final class MockHttp2Server extends Thread {
+    private static final Log log = LogFactory.getLog(MockHttp2Server.class);
     static boolean SSL;
     //static final boolean SSL = true;
 
@@ -36,19 +40,19 @@ public final class MockHttp2Server extends Thread {
 
         // Configure SSL
         SslContext sslCtx = null;
-        System.out.println("SSL: " + SSL);
-        System.out.println("PORT: " + PORT);
+        log.info("SSL: " + SSL);
+        log.info("PORT: " + PORT);
 
         if (SSL) {
 
-            System.out.println("configuring ssl");
+            log.info("configuring ssl");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
             SelfSignedCertificate ssc = null;
 
             try {
                 ssc = new SelfSignedCertificate();
             } catch (CertificateException e) {
-                e.printStackTrace();
+                log.error("A CertificateException occurred " + e);
             }
             try {
                 sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
@@ -66,13 +70,11 @@ public final class MockHttp2Server extends Thread {
                                 ApplicationProtocolNames.HTTP_1_1))
                         .build();
             } catch (SSLException e) {
-                e.printStackTrace();
+                log.error("An SSLException occurred " + e);
             }
         } else {
             sslCtx = null;
         }
-
-        System.out.println("sslCtx:" + sslCtx);
 
         // Configure the server.
         EventLoopGroup group = new NioEventLoopGroup();
@@ -87,15 +89,12 @@ public final class MockHttp2Server extends Thread {
 
             Channel ch = b.bind(PORT).sync().channel();
 
-            System.err.println("Open your HTTP/2-enabled web browser and navigate to " +
-                    (SSL ? "https" : "http") + "://127.0.0.1:" + PORT + '/');
-
-            System.out.println("Open your HTTP/2-enabled web browser and navigate to " +
+            log.info("Open your HTTP/2-enabled web browser and navigate to " +
                     (SSL ? "https" : "http") + "://127.0.0.1:" + PORT + '/');
 
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("An InterruptedException occurred" + e);
         } finally {
             group.shutdownGracefully();
         }

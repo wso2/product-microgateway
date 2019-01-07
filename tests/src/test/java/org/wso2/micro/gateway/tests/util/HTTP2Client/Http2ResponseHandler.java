@@ -9,6 +9,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http2.HttpConversionUtil;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.PlatformDependent;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Iterator;
@@ -18,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
+    private static final Log log = LogFactory.getLog(Http2ResponseHandler.class);
     private final Map<Integer, Entry<ChannelFuture, ChannelPromise>> streamidPromiseMap;
 
     public Http2ResponseHandler() {
@@ -64,7 +67,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
             if (!promise.isSuccess()) {
                 throw new RuntimeException(promise.cause());
             }
-            System.out.println("---Stream id: " + entry.getKey() + " received---");
+            log.info("Stream id: " + entry.getKey() + " received");
             itr.remove();
         }
     }
@@ -73,13 +76,13 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
         Integer streamId = msg.headers().getInt(HttpConversionUtil.ExtensionHeaderNames.STREAM_ID.text());
         if (streamId == null) {
-            System.err.println("Http2ResponseHandler unexpected message received: " + msg);
+            log.error("Http2ResponseHandler unexpected message received: " + msg);
             return;
         }
 
         Entry<ChannelFuture, ChannelPromise> entry = streamidPromiseMap.get(streamId);
         if (entry == null) {
-            System.err.println("Message received for unknown stream id " + streamId);
+            log.error("Message received for unknown stream id " + streamId);
         } else {
             // Do stuff with the message (for now just print it)
             ByteBuf content = msg.content();
@@ -87,7 +90,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
                 int contentLength = content.readableBytes();
                 byte[] arr = new byte[contentLength];
                 content.readBytes(arr);
-                System.out.println(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
+                log.info(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
             }
 
             entry.getValue().setSuccess();

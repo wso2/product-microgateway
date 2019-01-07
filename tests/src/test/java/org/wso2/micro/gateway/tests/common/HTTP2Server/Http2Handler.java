@@ -6,6 +6,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http2.*;
 import io.netty.util.CharsetUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import static io.netty.buffer.Unpooled.copiedBuffer;
 import static io.netty.buffer.Unpooled.unreleasableBuffer;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -16,6 +19,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 public final class Http2Handler extends Http2ConnectionHandler implements Http2FrameListener {
 
     static final ByteBuf RESPONSE_BYTES = unreleasableBuffer(copiedBuffer("HTTP/2.0 connection", CharsetUtil.UTF_8));
+    private static final Log log = LogFactory.getLog(Http2Handler.class);
 
     Http2Handler(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
                  Http2Settings initialSettings) {
@@ -44,6 +48,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
         if (evt instanceof HttpServerUpgradeHandler.UpgradeEvent) {
             HttpServerUpgradeHandler.UpgradeEvent upgradeEvent =
                     (HttpServerUpgradeHandler.UpgradeEvent) evt;
+
             onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0, true);
         }
         super.userEventTriggered(ctx, evt);
@@ -52,7 +57,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        cause.printStackTrace();
+        log.error(cause.getMessage());
         ctx.close();
     }
 

@@ -23,6 +23,7 @@ import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.cmd.SetupCmd;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -32,7 +33,6 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.HTTP2;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -45,19 +45,10 @@ public class GatewayCmdUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
     private static Config config;
-    private static HTTP2 http2;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
     private static boolean created;
     private static PrintStream outStream = System.err;
-
-    public static HTTP2 getHttp2() {
-        return http2;
-    }
-
-    public static void setHttp2(HTTP2 http2) {
-        GatewayCmdUtils.http2 = http2;
-    }
 
     public static Config getConfig() {
         return config;
@@ -73,70 +64,6 @@ public class GatewayCmdUtils {
 
     public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
         GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
-    }
-
-    /**
-     * create HTTP2 hidden file
-     */
-    public static void createHTTP2File(String projectName) throws IOException {
-
-        String tempDirPath = getProjectTempFolderLocation(projectName);
-        createFolderIfNotExist(tempDirPath);
-
-        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
-        File http2File = new File(tempHTTP2FileLocation);
-        if (!http2File.exists()) {
-            created = http2File.createNewFile();
-            if (created) {
-                logger.trace("Temporary HTTP2 file: {} created. ", tempHTTP2FileLocation);
-            } else {
-                logger.error("Failed to create temporary HTTP2 file: {} ", tempHTTP2FileLocation);
-                throw new CLIInternalException("Error occurred while creating the temporary HTTP file");
-            }
-        }
-
-    }
-
-    /**
-     * Get the location of the hidden HTTP2 file(.http2)
-     */
-    private static String getTemporaryHttp2FileLocation(String projectName) {
-        return getProjectTempFolderLocation(projectName) + File.separator
-                + GatewayCliConstants.TEMP_HTTP2_FILE;
-    }
-
-    /**
-     * Change the property value of HTTP2
-     */
-    public static void changeToHttp2(String filename, String key, String value) throws IOException {
-        final File tmpFile = new File(filename + ".tmp");
-        final File file = new File(filename);
-        PrintWriter pw = new PrintWriter(tmpFile);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        boolean found = false;
-        final String toAdd = key + '=' + value;
-        for (String line; (line = br.readLine()) != null; ) {
-            if (line.startsWith(key + '=')) {
-                line = toAdd;
-                found = true;
-            }
-            pw.println(line);
-        }
-        if (!found)
-            pw.println(toAdd);
-        br.close();
-        pw.close();
-        tmpFile.renameTo(file);
-    }
-
-    /**
-     * Check for the existence of HTTP2 file
-     */
-    public static boolean checkHttp2File(String projectName) {
-
-        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
-        File http2File = new File(tempHTTP2FileLocation);
-        return http2File.exists();
     }
 
     /**
@@ -358,8 +285,8 @@ public class GatewayCmdUtils {
     public static void createProjectGWDistribution(String projectName) throws IOException {
         createTargetGatewayDistStructure(projectName);
 
-        String distPath = getTargetDistPath(projectName);
-        String gwDistPath = getTargetGatewayDistPath(projectName);
+        String distPath = getTargetDistPath(projectName);//target/disribution
+        String gwDistPath = getTargetGatewayDistPath(projectName);//target/distribution/micro-gw-projname
         copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
                 + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
         copyTargetDistBinScripts(projectName);
@@ -369,46 +296,21 @@ public class GatewayCmdUtils {
         copyFilesToSources(
                 GatewayCmdUtils.getConfigFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE,
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                        + GatewayCliConstants.GW_DIST_CONF_FILE);
+                        + GatewayCliConstants.GW_DIST_CONF_FILE);//target/distribution/micro-gw-projname/conf/micro-gw.conf
+        //target/micro-gw-projname/conf/micro-gw.conf
 
-        /**if the http2 file exists, call the function to change the value of the http2 property*/
-        boolean http2FileExists = checkHttp2File(projectName);
 
-        outStream.println("http2FileExists : " + http2FileExists);
-        if (http2FileExists) {
-            changePropertyOfHttp2(gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                    + GatewayCliConstants.GW_DIST_CONF_FILE, "true");
-        }
-
-        String targetPath = getProjectTargetDirectoryPath(projectName);
-        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
+        String targetPath = getProjectTargetDirectoryPath(projectName);//target
+        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;//micro-gw-projname.zip
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
+        //target/distribution, target/micro-gw-projname.zip
+
 
         // clean the target folder while keeping the distribution zip file
         cleanFolder(targetPath, ArrayUtils.add(GatewayCliConstants.PROJECTS_TARGET_DELETE_FILES,
                 projectName + GatewayCliConstants.EXTENSION_BALX));
-
-        // delete the http2 temporary file
-        String tempHTTP2FileLocation = getTemporaryHttp2FileLocation(projectName);
-        File http2File = new File(tempHTTP2FileLocation);
-        if (http2File.delete()) {
-            logger.trace("Deleting file: {}", http2File);
-        }
     }
-
-    /**
-     * determines the value of http2 property as true or false
-     */
-    public static void changePropertyOfHttp2(String fileName, String value) {
-        try {
-            GatewayCmdUtils.changeToHttp2(fileName, GatewayCliConstants.HTTP2_ENABLED, value);
-        } catch (IOException e) {
-            logger.error("Failed to change http2 Property ", e);
-            throw new CLIInternalException("Error occurred while changing the http2 property value");
-        }
-    }
-
 
     /**
      * Creates the distribution structure for the project name

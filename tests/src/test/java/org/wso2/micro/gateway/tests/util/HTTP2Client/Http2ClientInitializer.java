@@ -21,6 +21,8 @@ import io.netty.handler.codec.http2.InboundHttp2ToHttpAdapterBuilder;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import static io.netty.handler.logging.LogLevel.INFO;
 
@@ -29,6 +31,7 @@ import static io.netty.handler.logging.LogLevel.INFO;
  */
 public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
 
+    private static final Log log = LogFactory.getLog(Http2ClientInitializer.class);
     private static final Http2FrameLogger logger = new Http2FrameLogger(INFO, Http2ClientInitializer.class);
 
     private final SslContext sslCtx;
@@ -138,7 +141,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     private static class UserEventLogger extends ChannelInboundHandlerAdapter {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-            System.out.println("User Event Triggered: " + evt);
+            log.info("User Event Triggered: " + evt);
             ctx.fireUserEventTriggered(evt);
         }
     }
