@@ -328,6 +328,10 @@
 
 @final string PATH_SEPERATOR = "/";
 
+//http2 constants
+@Description { value: "HTTP2 related constants"}
+@final public string HTTP2_INSTANCE_ID = "http2";
+@final public string HTTP2_PROPERTY = "http2Enable";
 
 // logging keys
 @final string KEY_GW_LISTNER = "APIGatewayListener";

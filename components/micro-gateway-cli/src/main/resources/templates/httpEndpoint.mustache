@@ -1,4 +1,4 @@
 endpoint http:Client {{qualifiedServiceName}}_{{type}} {
     url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{type}}.endpoint.0", "{{inline.endpointConfig.list.0.url}}")
-    {{>caching}}{{>basicAuth}}
+    {{>http2}}{{>caching}}{{>basicAuth}}
 };

@@ -23,7 +23,7 @@ public type AnalyticsRequestFilter object {
     public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
-        //Filter only is analytics is enabled.
+        //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
             if (request.hasHeader(HOST_HEADER_NAME)) {
