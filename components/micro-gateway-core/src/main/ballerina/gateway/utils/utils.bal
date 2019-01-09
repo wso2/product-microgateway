@@ -494,9 +494,3 @@ public function decodeValueToBase10(string value) returns string {
     }
     return decodedValue;
 }
-
-@Description { value: "Retrieve Url after encoding the obtained key to base64 format" }
-public function retrieveUrl(string keyPrefix, string keySuffix, string default) returns string {
-    string base64EncodedKey = encodeValueToBase64(keyPrefix) + keySuffix;
-    return retrieveConfig(base64EncodedKey, default);
-}

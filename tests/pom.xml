@@ -208,6 +208,8 @@
                             </run>
                         </image>
                     </images>
+                    <skip>${maven.test.skip}</skip>
+                    <skip>${skipTests}</skip>
                 </configuration>
             </plugin>
             <plugin>
@@ -283,6 +285,7 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

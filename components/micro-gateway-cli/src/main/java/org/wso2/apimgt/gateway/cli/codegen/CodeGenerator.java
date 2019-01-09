@@ -36,15 +36,18 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
  */
 public class CodeGenerator {
+    private static PrintStream outStream = System.out;
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -63,6 +66,7 @@ public class CodeGenerator {
                 .getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
         for (ExtendedAPI api : apis) {
+            outStream.println("ID for API " + api.getName() + " : " + api.getId());
             parser = new SwaggerParser();
             swagger = parser.parse(api.getApiDefinition());
             definitionContext = new BallerinaService().buildContext(swagger, api);
@@ -111,6 +115,9 @@ public class CodeGenerator {
         parser = new SwaggerParser();
         swagger = parser.parse(apiDef);
         ExtendedAPI api = new ExtendedAPI();
+        String apiId = UUID.randomUUID().toString();
+        api.setId(apiId);
+        outStream.println("ID for API " + api.getName() + " : " + apiId);
         api.setName(swagger.getInfo().getTitle());
         api.setVersion(swagger.getInfo().getVersion());
         api.setContext(swagger.getBasePath());

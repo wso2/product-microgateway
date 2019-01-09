@@ -166,6 +166,12 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         init(projectName, toolkitConfigPath, deploymentConfigPath);
 
+        //set etcd requirement
+        Etcd etcd = new Etcd();
+        etcd.setEtcdEnabled(isEtcdEnabled);
+        GatewayCmdUtils.setEtcd(etcd);
+        logger.debug("Etcd is enabled : " + isEtcdEnabled);
+
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
 
@@ -348,6 +354,9 @@ public class SetupCmd implements GatewayLauncherCmd {
                     apis.add(api);
                 }
             }
+//            for (ExtendedAPI api : apis) {
+//                outStream.println("ID for API " + api.getName() + " : " + api.getId());
+//            }
             if (apis == null || (apis != null && apis.isEmpty())) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
@@ -363,11 +372,6 @@ public class SetupCmd implements GatewayLauncherCmd {
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
             List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
             logger.info(String.valueOf(clientCertificates));
-
-            //set etcd requirement
-            Etcd etcd = new Etcd();
-            etcd.setEtcdEnabled(isEtcdEnabled);
-            GatewayCmdUtils.setEtcd(etcd);
 
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             CodeGenerator codeGenerator = new CodeGenerator();
