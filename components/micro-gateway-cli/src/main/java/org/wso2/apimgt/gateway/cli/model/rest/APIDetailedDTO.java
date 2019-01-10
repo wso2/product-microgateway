@@ -17,7 +17,6 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;

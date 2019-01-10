@@ -18,11 +18,7 @@
 package org.wso2.micro.gateway.tests.common;
 
 import com.google.gson.Gson;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpsConfigurator;
-import com.sun.net.httpserver.HttpsParameters;
-import com.sun.net.httpserver.HttpsServer;
+import com.sun.net.httpserver.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -34,6 +30,10 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
+import javax.net.ssl.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,14 +46,6 @@ import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManagerFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Mock http server for key-manager and APIM rest api endpoints

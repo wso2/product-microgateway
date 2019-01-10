@@ -17,14 +17,11 @@
  */
 package org.wso2.apimgt.gateway.cli.rest;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.util.List;
 

@@ -1,19 +1,17 @@
 /*
- * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.wso2.micro.gateway.tests.util.HTTP2Client;
@@ -34,8 +32,10 @@ import io.netty.util.CharsetUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
+
 import javax.net.ssl.SSLException;
 import java.util.concurrent.TimeUnit;
+
 import static io.netty.buffer.Unpooled.wrappedBuffer;
 import static io.netty.handler.codec.http.HttpMethod.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -50,7 +50,7 @@ public final class Http2ClientRequest extends BaseTestCase {
     private static final Log log = LogFactory.getLog(Http2ClientRequest.class);
 
     static final String HOST = System.getProperty("host", "127.0.0.1");
-    static final String URL = System.getProperty("url", "/pizzashack/1.0.0/menu");//https://localhost:9595/pizzashack/1.0.0/menu
+    static final String URL = System.getProperty("url", "/pizzashack/1.0.0/menu");
     static final String URLDATA = System.getProperty("url2data", "test data!");
     static boolean SSL = System.getProperty("ssl") != null;
     static int PORT;
@@ -65,7 +65,6 @@ public final class Http2ClientRequest extends BaseTestCase {
     public static void main(String[] args) throws Exception {
         Http2ClientRequest http2ClientRequest = new Http2ClientRequest(SSL = false, PORT = 9590, token = " ");
         http2ClientRequest.start();
-
     }
 
     public void start() throws SSLException {
@@ -73,7 +72,6 @@ public final class Http2ClientRequest extends BaseTestCase {
         final SslContext sslCtx;
 
         // setSSlSystemProperties();
-
         if (SSL) {
             log.info("Configuring SSL");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
@@ -124,12 +122,10 @@ public final class Http2ClientRequest extends BaseTestCase {
             AsciiString hostName = new AsciiString(HOST + ':' + PORT);
 
             log.info(HOST + "\n" + PORT);
-
             log.info("Sending request(s)...");
 
             if (URL != null) {
                 // Create a simple GET request.
-
                 log.info("\nCreate a simple GET request");
 
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
@@ -144,37 +140,37 @@ public final class Http2ClientRequest extends BaseTestCase {
             if (false) {
                 // Create a simple POST request with a body.
                 log.info("Create a simple POST request with a body");
-                FullHttpRequest request2 = new DefaultFullHttpRequest(HTTP_1_1, POST, URL,
+                FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, POST, URL,
                         wrappedBuffer(URLDATA.getBytes(CharsetUtil.UTF_8)));
-                request2.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
-                request2.headers().add(HttpHeaderNames.HOST, hostName);
-                request2.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-                request2.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-                request2.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-                responseHandler.put(streamId, channel.write(request2), channel.newPromise());
+                request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
+                request.headers().add(HttpHeaderNames.HOST, hostName);
+                request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
+                responseHandler.put(streamId, channel.write(request), channel.newPromise());
             }
             if (false) {
                 // Create a simple OPTIONS request.
                 log.info("Create a simple OPTIONS request with a body");
-                FullHttpRequest request3 = new DefaultFullHttpRequest(HTTP_1_1, OPTIONS, URL);
-                request3.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
-                request3.headers().add(HttpHeaderNames.HOST, hostName);
-                request3.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-                request3.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-                request3.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-                responseHandler.put(streamId, channel.write(request3), channel.newPromise());
+                FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, OPTIONS, URL);
+                request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
+                request.headers().add(HttpHeaderNames.HOST, hostName);
+                request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
+                responseHandler.put(streamId, channel.write(request), channel.newPromise());
                 streamId += 2;
             }
             if (false) {
                 // Create a simple HEAD request.
                 log.info("Create a simple HEAD request");
-                FullHttpRequest request4 = new DefaultFullHttpRequest(HTTP_1_1, HEAD, URL);
-                request4.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
-                request4.headers().add(HttpHeaderNames.HOST, hostName);
-                request4.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-                request4.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-                request4.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-                responseHandler.put(streamId, channel.write(request4), channel.newPromise());
+                FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, HEAD, URL);
+                request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
+                request.headers().add(HttpHeaderNames.HOST, hostName);
+                request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+                request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
+                responseHandler.put(streamId, channel.write(request), channel.newPromise());
                 streamId += 2;
             }
             log.info("flushing the channel");

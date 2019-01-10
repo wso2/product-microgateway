@@ -16,11 +16,7 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Info;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
+import io.swagger.models.*;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
@@ -30,12 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 
-import java.util.AbstractMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Wrapper for {@link Swagger}.

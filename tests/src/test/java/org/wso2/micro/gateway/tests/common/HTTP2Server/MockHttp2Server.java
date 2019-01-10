@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.micro.gateway.tests.common.HTTP2Server;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -13,14 +28,12 @@ import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
 public final class MockHttp2Server extends Thread {
     private static final Log log = LogFactory.getLog(MockHttp2Server.class);
     static boolean SSL;
-    //static final boolean SSL = true;
 
     static int PORT = Integer.parseInt(System.getProperty("port", SSL ? "8443" : "8080"));
 
@@ -30,21 +43,18 @@ public final class MockHttp2Server extends Thread {
     }
 
     public static void main(String[] args) throws Exception {
-
         MockHttp2Server mockHttp2Server = new MockHttp2Server(PORT, SSL = false);
         mockHttp2Server.start();
     }
 
 
     public void run() {
-
         // Configure SSL
         SslContext sslCtx = null;
         log.info("SSL: " + SSL);
         log.info("PORT: " + PORT);
 
         if (SSL) {
-
             log.info("configuring ssl");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
             SelfSignedCertificate ssc = null;

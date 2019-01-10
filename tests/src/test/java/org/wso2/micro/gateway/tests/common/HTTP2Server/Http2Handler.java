@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.micro.gateway.tests.common.HTTP2Server;
 
 import io.netty.buffer.ByteBuf;
@@ -8,7 +23,6 @@ import io.netty.handler.codec.http2.*;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import static io.netty.buffer.Unpooled.copiedBuffer;
 import static io.netty.buffer.Unpooled.unreleasableBuffer;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -17,12 +31,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
  * HTTP/2.0 handler that responds with a "HTTP/2.0 connection"
  */
 public final class Http2Handler extends Http2ConnectionHandler implements Http2FrameListener {
-
     static final ByteBuf RESPONSE_BYTES = unreleasableBuffer(copiedBuffer("HTTP/2.0 connection", CharsetUtil.UTF_8));
     private static final Log log = LogFactory.getLog(Http2Handler.class);
 
-    Http2Handler(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
-                 Http2Settings initialSettings) {
+    Http2Handler(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder, Http2Settings initialSettings) {
         super(decoder, encoder, initialSettings);
     }
 
@@ -46,9 +58,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     public void userEventTriggered
     (ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof HttpServerUpgradeHandler.UpgradeEvent) {
-            HttpServerUpgradeHandler.UpgradeEvent upgradeEvent =
-                    (HttpServerUpgradeHandler.UpgradeEvent) evt;
-
+            HttpServerUpgradeHandler.UpgradeEvent upgradeEvent = (HttpServerUpgradeHandler.UpgradeEvent) evt;
             onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0, true);
         }
         super.userEventTriggered(ctx, evt);
@@ -69,7 +79,6 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
         Http2Headers headers = new DefaultHttp2Headers().status(OK.codeAsText());
         encoder().writeHeaders(ctx, streamId, headers, 0, false, ctx.newPromise());
         encoder().writeData(ctx, streamId, payload, 0, true, ctx.newPromise());
-
         // no need to call flush as channelReadComplete(...) will take care of it.
     }
 
@@ -83,8 +92,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     }
 
     @Override
-    public void onHeadersRead(ChannelHandlerContext ctx, int streamId,
-                              Http2Headers headers, int padding, boolean endOfStream) {
+    public void onHeadersRead(ChannelHandlerContext ctx, int streamId, Http2Headers headers, int padding, boolean endOfStream) {
         if (endOfStream) {
             ByteBuf content = ctx.alloc().buffer();
             content.writeBytes(RESPONSE_BYTES.duplicate());
@@ -100,8 +108,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     }
 
     @Override
-    public void onPriorityRead(ChannelHandlerContext ctx, int streamId, int streamDependency,
-                               short weight, boolean exclusive) {
+    public void onPriorityRead(ChannelHandlerContext ctx, int streamId, int streamDependency, short weight, boolean exclusive) {
     }
 
     @Override

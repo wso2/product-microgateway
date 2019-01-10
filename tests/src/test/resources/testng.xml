@@ -38,6 +38,9 @@
             <class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.CookieAuthTestCase"/>
         </classes>
+        <!--<classes>-->
+            <!--<class name="org.wso2.micro.gateway.tests.services.HTTP2TestCase"/>-->
+        <!--</classes>-->
     </test>
 
 

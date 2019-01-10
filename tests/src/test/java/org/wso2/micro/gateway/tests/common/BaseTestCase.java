@@ -19,9 +19,7 @@ package org.wso2.micro.gateway.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.testng.Assert;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
@@ -40,8 +38,8 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.concurrent.TimeUnit;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base test class for CLI based tests

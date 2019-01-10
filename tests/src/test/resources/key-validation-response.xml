@@ -1,12 +1,9 @@
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
     <soapenv:Body>
         <ns:validateKeyResponse xmlns:ns="http://org.apache.axis2/xsd">
-            <ns:return xmlns:ax2129="http://keymgt.apimgt.carbon.wso2.org/xsd"
-                       xmlns:ax2131="http://api.apimgt.carbon.wso2.org/xsd"
-                       xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd"
-                       xmlns:ax2135="http://model.api.apimgt.carbon.wso2.org/xsd"
-                       xmlns:ax2136="http://dto.api.apimgt.carbon.wso2.org/xsd"
-                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ax2133:APIKeyValidationInfoDTO">
+            <ns:return
+                    xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ax2133:APIKeyValidationInfoDTO">
                 <ax2133:apiName>$APINAME</ax2133:apiName>
                 <ax2133:apiPublisher>admin</ax2133:apiPublisher>
                 <ax2133:apiTier xsi:nil="true" />

@@ -36,13 +36,12 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-
 import java.io.*;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
-import java.util.Properties;
 import java.security.SecureRandom;
+import java.util.Properties;
 
 
 /**

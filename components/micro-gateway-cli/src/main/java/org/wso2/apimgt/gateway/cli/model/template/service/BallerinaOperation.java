@@ -22,11 +22,7 @@ import io.swagger.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.

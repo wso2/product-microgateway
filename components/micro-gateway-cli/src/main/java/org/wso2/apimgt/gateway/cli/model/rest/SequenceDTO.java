@@ -16,6 +16,7 @@
 package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.NotNull;
 
 public class SequenceDTO {
