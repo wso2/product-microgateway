@@ -39,7 +39,7 @@ public type AuthnFilter object {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if (checkAuthentication != "require"){
+        if (checkAuthentication != "require") {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
@@ -72,7 +72,7 @@ public type AuthnFilter object {
         http:AuthHandlerRegistry registry;
         http:AuthProvider[] authProviders = getAuthProviders();
         foreach authProvidersId in authProvidersIds{
-            if (authProvidersId == "oauth2"){
+            if (authProvidersId == AUTH_SCHEME_OAUTH2){
                 //check whether Oauth2 is enabled in service files.
                 isOauth2Enabled = true;
             }
@@ -121,7 +121,7 @@ public type AuthnFilter object {
                 return false;
             }
             string providerId;
-            if (!isCookie){
+            if (!isCookie) {
                 providerId = getAuthenticationProviderType(authHeader);
             } else {
                 providerId = getAuthenticationProviderTypeWithCookie(authHeader);
@@ -142,7 +142,7 @@ public type AuthnFilter object {
                     printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
                             + " with default the auth header:" + AUTH_HEADER);
                 }
-
+                //JWT token validation accepted as a Cookie
                 if (request.hasHeader(COOKIE_HEADER)) {
                     CookieBasedAuth cookie = new CookieBasedAuth ();
                     boolean isCookieAuthed = cookie.isCookieAuthed(request);
@@ -169,7 +169,7 @@ public type AuthnFilter object {
                 }
             } else if (providerId == AUTH_SCHEME_OAUTH2) {
                 if (isOauth2Enabled) {
-                    if (isCookie){
+                    if (isCookie) {
                         extractedToken = result;
                     } else {
                         extractedToken = extractAccessToken(request, authHeaderName);

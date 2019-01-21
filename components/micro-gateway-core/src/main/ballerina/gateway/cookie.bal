@@ -31,7 +31,6 @@ public type CookieBasedAuth object {
     @Param { value: "request: Request instance" }
     @Return { value: "FilterResult:Validation of cookies in request" }
     public function processRequest( http:Request request) returns string|error {
-        boolean isAuthorized;
 
         //get required cookie as config value
         string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
@@ -39,7 +38,7 @@ public type CookieBasedAuth object {
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
         string[] cookies = authHead.trim().split(";");
-        foreach cookie in cookies{
+        foreach cookie in cookies {
             string converted = cookie.replaceFirst("=", "::");
             string[] splitedStrings = converted.trim().split("::");
             string sessionId = splitedStrings[1];
@@ -54,7 +53,6 @@ public type CookieBasedAuth object {
     @Param { value: "request: Request instance" }
     @Return { value: "FilterResult:Check whether Validation of cookies in request is authenticated" }
     public function isCookieAuthed( http:Request request) returns boolean {
-        boolean isAuthorized;
 
         //get required cookie as config value
         string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
@@ -62,7 +60,7 @@ public type CookieBasedAuth object {
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
         string[] cookies = authHead.trim().split(";");
-        foreach cookie in cookies{
+        foreach cookie in cookies {
             string converted = cookie.replaceFirst("=", "::");
             string[] splitedStrings = converted.trim().split("::");
             string sessionId = splitedStrings[1];
@@ -72,4 +70,5 @@ public type CookieBasedAuth object {
         }
         return false;
     }
+
 };
