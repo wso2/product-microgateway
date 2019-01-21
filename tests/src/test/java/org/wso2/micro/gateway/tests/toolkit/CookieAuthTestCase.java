@@ -154,5 +154,4 @@ public class CookieAuthTestCase extends BaseTestCase {
         //Stop all the mock servers
         super.finalize();
     }
-
 }

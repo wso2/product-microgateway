@@ -70,5 +70,4 @@ public type CookieBasedAuth object {
         }
         return false;
     }
-
 };
