@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -23,7 +23,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.CLIExecutor;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;

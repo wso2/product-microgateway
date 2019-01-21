@@ -39,7 +39,7 @@ public type AuthnFilter object {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if (checkAuthentication != "require"){
+        if (checkAuthentication != "require") {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
@@ -70,13 +70,13 @@ public type AuthnFilter object {
         //Create auth handler chain with providerIds in service file
         http:AuthHandlerRegistry registry;
         http:AuthProvider[] authProviders = getAuthProviders();
-        foreach i in authProvidersIds{
-            if (i == "oauth2"){
+        foreach i in authProvidersIds {
+            if (i == AUTH_SCHEME_OAUTH2) {
                 //check whether Oauth2 is enabled in service files.
                 isOauth2Enabled = true;
             }
             foreach k in authProviders  {
-                if (k.id == i){
+                if (k.id == i) {
                     registry.add(k.id, createAuthHandler(k));
                 }
             }
@@ -95,7 +95,7 @@ public type AuthnFilter object {
             //check for the header of the request and choose the path
             if (request.hasHeader(authHeaderName)) {
                 authHeader = request.getHeader(authHeaderName);
-            } else if (request.hasHeader(COOKIE_HEADER)){
+            } else if (request.hasHeader(COOKIE_HEADER)) {
                 //Authentiction with HTTP cookies
                 isCookie = config:contains(COOKIE_HEADER);
                 if (isCookie) {
@@ -120,7 +120,7 @@ public type AuthnFilter object {
                 return false;
             }
             string providerId;
-            if (!isCookie){
+            if (!isCookie) {
                 providerId = getAuthenticationProviderType(authHeader);
             } else {
                 providerId = getAuthenticationProviderTypeWithCookie(authHeader);
@@ -167,9 +167,9 @@ public type AuthnFilter object {
                     sendErrorResponse(listener, request, untaint context);
                     return false;
                 }
-            } else if (providerId == AUTH_SCHEME_OAUTH2){
-                if (isOauth2Enabled){
-                    if (isCookie){
+            } else if (providerId == AUTH_SCHEME_OAUTH2) {
+                if (isOauth2Enabled) {
+                    if (isCookie) {
                         extractedToken = result;
                     } else {
                         extractedToken = extractAccessToken(request, authHeaderName);
@@ -355,5 +355,6 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         request.removeHeader(TEMP_AUTH_HEADER);
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
+
 }
 

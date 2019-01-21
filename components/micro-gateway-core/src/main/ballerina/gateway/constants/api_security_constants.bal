@@ -112,7 +112,6 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = INVALID_SCOPE_MESSAGE;
     } else if (errorCode == API_AUTH_INVALID_BASICAUTH_CREDENTIALS) {
         errorMessage = API_AUTH_INVALID_BASICAUTH_CREDENTIALS_MESSAGE;
-
     } else if (errorCode == API_AUTH_BASICAUTH_INVALID_FORMAT) {
         errorMessage = API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE;
     } else if (errorCode == API_AUTH_INVALID_COOKIE) {
