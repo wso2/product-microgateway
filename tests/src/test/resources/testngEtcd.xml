@@ -17,22 +17,16 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Micro-GW-Test-Suite1">
+<suite name="Micro-GW-ServiceDiscovery-Test-Suite">
     <listeners>
         <!--Disabled since there are no any pre configured apis -->
         <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
         <listener class-name="org.wso2.micro.gateway.tests.listener.TestNGListener"/>
     </listeners>
 
-    <!-- Below tests should run sequentially since it will use same port in each test -->
-
-
-    <test name="micro-gw-services1" preserve-order="true" parallel="false">
+    <test name="micro-gw-serviceDiscovery" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.micro.gateway.tests.serviceDiscovery.EtcdSupportTestCase"/>
         </classes>
     </test>
-
-
-
 </suite>

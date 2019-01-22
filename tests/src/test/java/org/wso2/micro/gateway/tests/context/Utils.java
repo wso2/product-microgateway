@@ -326,16 +326,4 @@ public class Utils {
             Assert.fail("thread sleep interrupted!");
         }
     }
-
-//    private void delay(int delayTime){
-//        long startTime = System.currentTimeMillis();
-//        for (int count = 0; ;count++) {
-//            long now = System.currentTimeMillis();
-//            if(now - startTime >= delayTime)
-//                break;
-//            // Do nothing
-//        }
-//    }
-
 }
-

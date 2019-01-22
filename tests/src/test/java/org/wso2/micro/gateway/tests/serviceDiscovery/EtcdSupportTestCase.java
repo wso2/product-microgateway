@@ -1,23 +1,22 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 package org.wso2.micro.gateway.tests.serviceDiscovery;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -33,13 +32,10 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.EtcdClient;
-import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class EtcdSupportTestCase extends BaseTestCase {
     private String jwtTokenProd, jwtTokenSand, balPath, configPath;
@@ -114,7 +110,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generatePassingFlag(label, project, "etcd-enable");
+        cliExecutor.generatePassingFlag(label, project, "--enable-etcd");
 
         balPath = CLIExecutor.getInstance().getLabelBalx(project);
         configPath = getClass().getClassLoader()
@@ -126,7 +122,43 @@ public class EtcdSupportTestCase extends BaseTestCase {
         initializeEtcdServer();
     }
 
-    private void initializeEtcdServer() throws Exception{
+    private void encodeValuesToBase64() throws Exception {
+        String pizzaShackProdEndpoint = "https://localhost:9443/echo/prod";
+        String pizzaShackProdNewEndpoint = "https://localhost:9443/echo/newprod";
+        String pizzaShackSandEndpoint = "https://localhost:9443/echo/sand";
+        base64EncodedPizzaShackProdKey = Utils.encodeValueToBase64(pizzaShackProdEtcdKey);
+        base64EncodedPizzaShackSandKey = Utils.encodeValueToBase64(pizzaShackSandEtcdKey);
+        base64EncodedPizzaShackProdValue = Utils.encodeValueToBase64(pizzaShackProdEndpoint);
+        base64EncodedPizzaShackSandValue = Utils.encodeValueToBase64(pizzaShackSandEndpoint);
+        base64EncodedPizzaShackProdNewValue = Utils.encodeValueToBase64(pizzaShackProdNewEndpoint);
+        base64EncodedPizzaShackSandNewValue = Utils.encodeValueToBase64(pizzaShackSandNewEndpoint);
+    }
+
+    private void prepareConfigValues() {
+        String apiEndpointSuffix = "endpoint_0";
+        String etcdKeySuffix = "etcdKey";
+        String prodUrlType = "prod";
+        String sandUrlType = "sand";
+        String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
+        pizzaShackEndpointSandConfigValue = apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
+        pizzaShackProdConfigValue = apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
+        pizzaShackSandConfigValue = apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
+    }
+
+    private void prepareCLIParameters() {
+        String etcdUsernameConfigValue = "etcdusername";
+        String etcdPasswordConfigValue = "etcdpassword";
+        String etcdTimerConfigValue = "etcdtimer";
+        String etcdTimer = "1000";
+        etcdUsernameParameter = etcdUsernameConfigValue + "=" + etcdusername;
+        etcdPasswordParameter = etcdPasswordConfigValue + "=" + etcdpassword;
+        pizzaShackProdParameter = pizzaShackProdConfigValue + "=" + pizzaShackProdEtcdKey;
+        pizzaShackSandParameter = pizzaShackSandConfigValue + "=" + pizzaShackSandEtcdKey;
+        etcdTimerParameter = etcdTimerConfigValue + "=" + etcdTimer;
+        overridingEndpointParameter = pizzaShackEndpointSandConfigValue + "=" + pizzaShackSandNewEndpoint;
+    }
+
+    private void initializeEtcdServer() throws Exception {
         String etcdUrl;
         String etcdrole = "root";
         String etcd_host = System.getenv("ETCD_HOST");
@@ -153,42 +185,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
         //add pizzashackprod and corresponding url to etcd. The key and value should be encoded in base64 format
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdValue);
-    }
-
-    private void encodeValuesToBase64() throws Exception{
-        String pizzaShackProdEndpoint = "https://localhost:9443/echo/prod";
-        String pizzaShackProdNewEndpoint = "https://localhost:9443/echo/newprod";
-        String pizzaShackSandEndpoint = "https://localhost:9443/echo/sand";
-        base64EncodedPizzaShackProdKey = Utils.encodeValueToBase64(pizzaShackProdEtcdKey);
-        base64EncodedPizzaShackSandKey = Utils.encodeValueToBase64(pizzaShackSandEtcdKey);
-        base64EncodedPizzaShackProdValue = Utils.encodeValueToBase64(pizzaShackProdEndpoint);
-        base64EncodedPizzaShackSandValue = Utils.encodeValueToBase64(pizzaShackSandEndpoint);
-        base64EncodedPizzaShackProdNewValue = Utils.encodeValueToBase64(pizzaShackProdNewEndpoint);
-        base64EncodedPizzaShackSandNewValue = Utils.encodeValueToBase64(pizzaShackSandNewEndpoint);
-    }
-
-    private void prepareConfigValues(){
-        String apiEndpointSuffix = "endpoint_0";
-        String etcdKeySuffix = "etcdKey";
-        String prodUrlType = "prod";
-        String sandUrlType = "sand";
-        String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
-        pizzaShackEndpointSandConfigValue = apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
-        pizzaShackProdConfigValue = apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
-        pizzaShackSandConfigValue = apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
-    }
-
-    private void prepareCLIParameters(){
-        String etcdUsernameConfigValue = "etcdusername";
-        String etcdPasswordConfigValue = "etcdpassword";
-        String etcdTimerConfigValue = "etcdtimer";
-        String etcdTimer = "1000";
-        etcdUsernameParameter = etcdUsernameConfigValue + "=" + etcdusername;
-        etcdPasswordParameter = etcdPasswordConfigValue + "=" + etcdpassword;
-        pizzaShackProdParameter = pizzaShackProdConfigValue + "=" + pizzaShackProdEtcdKey;
-        pizzaShackSandParameter = pizzaShackSandConfigValue + "=" + pizzaShackSandEtcdKey;
-        etcdTimerParameter = etcdTimerConfigValue + "=" + etcdTimer;
-        overridingEndpointParameter = pizzaShackEndpointSandConfigValue + "=" + pizzaShackSandNewEndpoint;
     }
 
     @Test(description = "Test Etcd Support Providing all correct arguments")

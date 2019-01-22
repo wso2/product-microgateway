@@ -197,7 +197,7 @@
                                     <exec>
                                         <arg>/usr/local/bin/etcd</arg>
                                         <arg>--advertise-client-urls</arg>
-                                        <arg>http://127.0.0.10:2379</arg>
+                                        <arg>http://127.0.0.1:2379</arg>
                                         <arg>--listen-client-urls</arg>
                                         <arg>http://0.0.0.0:2379</arg>
                                     </exec>
@@ -208,10 +208,10 @@
                             </run>
                         </image>
                     </images>
-                    <skip>${maven.test.skip}</skip>
-                    <skip>${skipTests}</skip>
+                    <skip>${skipITs}</skip>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -234,7 +234,7 @@
                 </executions>
                 <configuration>
                     <environmentVariables>
-                        <ETCD_HOST>127.0.0.10</ETCD_HOST>
+                        <ETCD_HOST>127.0.0.1</ETCD_HOST>
                         <PORT>2379</PORT>
                     </environmentVariables>
                     <systemPropertyVariables>
@@ -251,6 +251,7 @@
                     </suiteXmlFiles>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -268,6 +269,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -285,10 +287,16 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
-                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <skipTests>${maven.test.skip}</skipTests>
+        <skipITs>${skipTests}</skipITs>
+    </properties>
+
 
 </project>
