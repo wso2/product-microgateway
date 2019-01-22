@@ -36,6 +36,7 @@
             <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithBasicAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.toolkit.CookieAuthTestCase"/>
         </classes>
     </test>
 

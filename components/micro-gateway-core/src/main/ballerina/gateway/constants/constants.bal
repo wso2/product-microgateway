@@ -47,6 +47,8 @@
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
 @Description { value: "authorization header " }
 @final public string AUTHORIZATION_HEADER = "Authorization";
+@Description { value: "Cookie header " }
+@final public string COOKIE_HEADER = "Cookie";
 @Description { value: "Content type header " }
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description { value: "Form url encoded" }
