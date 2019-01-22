@@ -72,6 +72,18 @@
 @final public string API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION =
 "Make sure you have given the credentials in correct format with \":\" character";
 
+@final public string API_AUTH_INVALID_COOKIE_STRING = "900913";
+@final public int API_AUTH_INVALID_COOKIE = 900913;
+@final public string API_AUTH_INVALID_COOKIE_STRING_MESSAGE = "Invalid Cookie is Provided";
+@final public string API_AUTH_INVALID_COOKIE_STRING_DESCRIPTION =
+"Make sure you have given the valid cookie at the Server startup";
+
+@final public string API_AUTH_NO_COOKIE_PROVIDED_STRING = "900914";
+@final public int API_AUTH_NO_COOKIE_PROVIDED = 900914;
+@final public string API_AUTH_NO_COOKIE_PROVIDED_STRING_MESSAGE = "No Cookies are provided at Server startup.";
+@final public string API_AUTH_NO_COOKIE_PROVIDED_STRING_DESCRIPTION =
+"Make sure you have given the authorized cookie at the server startup";
+
 @final public string DESCRIPTION_SEPARATOR = ". ";
 
 public function getAuthenticationFailureMessage(int errorCode) returns string {
@@ -102,6 +114,10 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = API_AUTH_INVALID_BASICAUTH_CREDENTIALS_MESSAGE;
     } else if (errorCode == API_AUTH_BASICAUTH_INVALID_FORMAT) {
         errorMessage = API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_MESSAGE;
+    } else if (errorCode == API_AUTH_INVALID_COOKIE) {
+        errorMessage = API_AUTH_INVALID_COOKIE_STRING_MESSAGE;
+    } else if (errorCode == API_AUTH_NO_COOKIE_PROVIDED) {
+        errorMessage = API_AUTH_NO_COOKIE_PROVIDED_STRING_MESSAGE;
     } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
@@ -124,6 +140,10 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION;
     } else if (API_AUTH_BASICAUTH_INVALID_FORMAT == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_BASICAUTH_INVALID_FORMAT_STRING_DESCRIPTION;
+    } else if (API_AUTH_INVALID_COOKIE == errorCode) {
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_COOKIE_STRING_DESCRIPTION;
+    } else if (API_AUTH_NO_COOKIE_PROVIDED == errorCode) {
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_NO_COOKIE_PROVIDED_STRING_DESCRIPTION;
     } else {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_GENERAL_ERROR_MESSAGE;
     }

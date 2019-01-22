@@ -47,12 +47,16 @@
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
 @Description { value: "authorization header " }
 @final public string AUTHORIZATION_HEADER = "Authorization";
+@Description { value: "Cookie header " }
+@final public string COOKIE_HEADER = "Cookie";
 @Description { value: "Content type header " }
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description { value: "Form url encoded" }
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 @Description { value: "Application JSON type" }
 @final public string APPLICATION_JSON = "application/json";
+@Description { value: "Cookie is not matched " }
+@final public string INVALID_COOKIE = "Cookie is Invalid";
 
 @Description { value: "X-Forward-For Header " }
 @final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
@@ -205,10 +209,6 @@
 @final public string FILE_UPLOAD_TASK = "task.uploadFiles";
 @Description { value: "Destination" }
 @final public string DESTINATION = "destination";
-
-
-
-
 
 // config constants
 @Description { value: "Key manager related configs" }

@@ -39,7 +39,7 @@ public type AuthnFilter object {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if (checkAuthentication != "require"){
+        if (checkAuthentication != "require") {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
@@ -71,14 +71,14 @@ public type AuthnFilter object {
         //Create auth handler chain with providerIds in service file
         http:AuthHandlerRegistry registry;
         http:AuthProvider[] authProviders = getAuthProviders();
-        foreach i in authProvidersIds{
-            if (i == "oauth2"){
+        foreach authProvidersId in authProvidersIds{
+            if (authProvidersId == AUTH_SCHEME_OAUTH2){
                 //check whether Oauth2 is enabled in service files.
                 isOauth2Enabled = true;
             }
-            foreach k in authProviders  {
-                if (k.id == i){
-                    registry.add(k.id, createAuthHandler(k));
+            foreach authProvider in authProviders  {
+                if (authProvider.id == authProvidersId){
+                    registry.add(authProvider.id, createAuthHandler(authProvider));
                 }
             }
         }
@@ -88,17 +88,44 @@ public type AuthnFilter object {
         boolean isAuthorized;
         printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
         if (isSecured) {
+            boolean isCookie = false;
             string authHeader;
+            string|error result;
+            string|error extractedToken;
             string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceType));
+            //check for the header of the request and choose the path
             if (request.hasHeader(authHeaderName)) {
                 authHeader = request.getHeader(authHeaderName);
+            } else if (request.hasHeader(COOKIE_HEADER)){
+                //Authentiction with HTTP cookies
+                isCookie = config:contains(COOKIE_HEADER);
+                if (isCookie) {
+                    CookieBasedAuth cookieBasedAuth = new CookieBasedAuth ();
+                    result = cookieBasedAuth.processRequest(request);
+                    match result {
+                        string outputString => {
+                            authHeader = outputString;
+                        }
+                        error => {}
+                    }
+                } else {
+                    log:printError("No Cookies are provided at Server startup");
+                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
+                    sendErrorResponse(listener, request, untaint context);
+                    return false;
+                }
             } else {
                 log:printError("No authorization header was provided");
                 setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                 sendErrorResponse(listener, request, untaint context);
                 return false;
             }
-            string providerId = getAuthenticationProviderType(authHeader);
+            string providerId;
+            if (!isCookie) {
+                providerId = getAuthenticationProviderType(authHeader);
+            } else {
+                providerId = getAuthenticationProviderTypeWithCookie(authHeader);
+            }
             // if auth providers are there, use those to authenticate
             if (providerId == AUTH_SCHEME_JWT) {
                 printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId);
@@ -114,6 +141,17 @@ public type AuthnFilter object {
                     request.setHeader(AUTH_HEADER, authHeader);
                     printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
                             + " with default the auth header:" + AUTH_HEADER);
+                }
+                //JWT token validation accepted as a Cookie
+                if (request.hasHeader(COOKIE_HEADER)) {
+                    CookieBasedAuth cookie = new CookieBasedAuth ();
+                    boolean isCookieAuthed = cookie.isCookieAuthed(request);
+                    if (isCookieAuthed) {
+                        string convertedHeader = AUTH_SCHEME_BEARER + " " + authHeader;
+                        request.setHeader(AUTH_HEADER, convertedHeader);
+                        printDebug(KEY_AUTHN_FILTER, "Replace the custom auth header : " + authHeaderName
+                                + " with default the auth header:" + AUTH_HEADER);
+                    }
                 }
 
                 try {
@@ -131,7 +169,12 @@ public type AuthnFilter object {
                 }
             } else if (providerId == AUTH_SCHEME_OAUTH2) {
                 if (isOauth2Enabled) {
-                    match extractAccessToken(request, authHeaderName) {
+                    if (isCookie) {
+                        extractedToken = result;
+                    } else {
+                        extractedToken = extractAccessToken(request, authHeaderName);
+                    }
+                    match extractedToken {
                         string token => {
                             runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
                             printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
@@ -204,10 +247,17 @@ public type AuthnFilter object {
                             }
                         }
                         error err => {
-                            log:printError(err.message, err = err);
-                            setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                            sendErrorResponse(listener, request, untaint context);
-                            return false;
+                            if (isCookie) {
+                                log:printError(err.message, err = err);
+                                setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
+                                sendErrorResponse(listener, request, untaint context);
+                                return false;
+                            } else {
+                                log:printError(err.message, err = err);
+                                setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                                sendErrorResponse(listener, request, untaint context);
+                                return false;
+                            }
                         }
                     }
                 } else {
@@ -282,6 +332,15 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
     if (authHeader.contains(AUTH_SCHEME_BASIC)){
         return AUTHN_SCHEME_BASIC;
     } else if (authHeader.contains(AUTH_SCHEME_BEARER) && authHeader.contains(".")) {
+        return AUTH_SCHEME_JWT;
+    } else {
+        return AUTH_SCHEME_OAUTH2;
+    }
+}
+
+
+function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
+    if (authHeader.contains(".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
