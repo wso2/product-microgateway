@@ -130,7 +130,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     private String security;
 
     @Parameter(names = { "-etcd", "--etcd-enable" }, hidden = true, arity = 0)
-    private boolean isEtcd;
+    private boolean isEtcdEnabled;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -184,6 +184,12 @@ public class SetupCmd implements GatewayLauncherCmd {
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
         init(projectName, toolkitConfigPath, deploymentConfigPath);
+
+        //set etcd requirement
+        Etcd etcd = new Etcd();
+        etcd.setEtcdEnabled(isEtcdEnabled);
+        GatewayCmdUtils.setEtcd(etcd);
+        logger.debug("Etcd is enabled : " + isEtcdEnabled);
 
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
@@ -351,11 +357,6 @@ public class SetupCmd implements GatewayLauncherCmd {
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
         List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
         logger.info(String.valueOf(clientCertificates));
-
-        //set etcd requirement
-        Etcd etcd = new Etcd();
-        etcd.setEtcdEnabled(isEtcd);
-        GatewayCmdUtils.setEtcd(etcd);
 
         ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
         CodeGenerator codeGenerator = new CodeGenerator();
