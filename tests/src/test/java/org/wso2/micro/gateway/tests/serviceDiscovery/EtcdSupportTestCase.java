@@ -34,6 +34,7 @@ import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.EtcdClient;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
@@ -65,6 +66,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String base64EncodedPizzaShackSandValue;
     private String base64EncodedPizzaShackProdNewValue;
     private String base64EncodedPizzaShackSandNewValue;
+    private String servicePath = "/pizzashack/1.0.0/menu";
     private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101505\", \"message\":\"Runtime Error\", \"description\":\"URL defined at etcd for key pizzashackprod is invalid\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
@@ -197,16 +199,9 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -216,21 +211,14 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //change the prod endpoint url at etcd node
         String token = etcdClient.authenticate();
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
+        retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -240,21 +228,14 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //sandbox key is not present at etcd. So invoke the sandbox endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenSand, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
 
         //add a new value to the relevant sandbox key in etcd
         String token = etcdClient.authenticate();
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackSandKey, base64EncodedPizzaShackSandNewValue);
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the sandbox endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_NEW_RESPONSE, 200);
+        retryPolicy(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_NEW_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -263,15 +244,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
-        //add a sleep to check whether the periodic task has been stopped since no etcd keys were provided
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -283,7 +256,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -294,7 +268,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -304,7 +279,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -314,22 +290,14 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test sand endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_NEW_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenSand, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.SAND_ENDPOINT_NEW_RESPONSE, 200);
 
         //change the sand endpoint url at etcd node
         String token = etcdClient.authenticate();
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackSandKey, base64EncodedPizzaShackSandValue);
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the prod endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
-
+        retryPolicy(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -343,16 +311,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String invalidUrlValue = "abcd";
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackProdKey, Utils.encodeValueToBase64(invalidUrlValue));
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the prod endpoint
-        invoke(jwtTokenProd, INVALID_URL_AT_ETCD_RESPONSE, 500);
-
+        retryPolicy(jwtTokenProd, INVALID_URL_AT_ETCD_RESPONSE, 500);
         microGWServer.stopServer(false);
     }
 
@@ -367,20 +326,13 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //change the prod endpoint url at etcd node
         etcdClient.addKeyValuePair(base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
+        retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
@@ -395,32 +347,30 @@ public class EtcdSupportTestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
+        Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //change the prod endpoint url at etcd node
         etcdClient.addKeyValuePair(base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
-        //add a sleep to make sure the periodic task capture the new endpoint url
-        try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
-        //test the prod endpoint
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
+        retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
         microGWServer.stopServer(false);
     }
 
-    private void invoke(String token, String responseData, int responseCode) throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    private void retryPolicy(String token, String responseData, int responseCode) throws Exception {
+        boolean testPassed = false;
+        for(int retries = 0; retries < 5; retries++){
+            Utils.delay(1000);
+            HttpResponse response = Utils.invokeApi(token, getServiceURLHttp(servicePath));
+            if(response.getData().equals(responseData) && response.getResponseCode() == responseCode){
+                testPassed = true;
+                break;
+            }
+        }
+
+        if(!testPassed){
+            Assert.fail();
+        }
     }
 
     @AfterMethod
