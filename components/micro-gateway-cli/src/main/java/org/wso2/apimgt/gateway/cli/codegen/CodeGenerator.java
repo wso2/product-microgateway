@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ import java.util.List;
  * This class generates Ballerina Services/Clients for a provided OAS definition.
  */
 public class CodeGenerator {
+    private static PrintStream outStream = System.out;
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -62,6 +64,7 @@ public class CodeGenerator {
         for (int apiCount = 0; apiCount < apis.size(); apiCount++) {
             parser = new SwaggerParser();
             APIInfoDTO api = apis.get(apiCount);
+            outStream.println("ID for API " + api.getName() + " : " + api.getId());
             swagger = parser.parse(swaggerDefs.get(apiCount));
             definitionContext = new BallerinaService().buildContext(swagger, api);
             genFiles.add(generateService(definitionContext));

@@ -93,7 +93,8 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         string etcdKeyConfigValue;
         boolean|error hasUrlChanged;
         http:ClientEndpointConfig newConfig;
-        boolean reinitFailed = false;{{/if}}
+        boolean reinitFailed = false;
+        string apiId = "{{api.id}}";{{/if}}
         {{#endpointConfig.0}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{inline.endpointConfig.list.0.url}}";

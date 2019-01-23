@@ -70,6 +70,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101505\", \"message\":\"Runtime Error\", \"description\":\"URL defined at etcd for key pizzashackprod is invalid\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
+    private String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
 
     @BeforeClass
     public void start() throws Exception {
@@ -156,8 +157,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
     }
 
     private void encodeValuesToBase64() throws Exception{
-        String pizzaShackEndpointProdPrefix = "PizzaShackAPI_1.0.0_Production";
-        String pizzaShackEndpointSandPrefix = "PizzaShackAPI_1.0.0_Sandbox";
         String pizzaShackProdEndpoint = "https://localhost:9443/echo/prod";
         String pizzaShackProdNewEndpoint = "https://localhost:9443/echo/newprod";
         String pizzaShackSandEndpoint = "https://localhost:9443/echo/sand";
@@ -167,16 +166,16 @@ public class EtcdSupportTestCase extends BaseTestCase {
         base64EncodedPizzaShackSandValue = Utils.encodeValueToBase64(pizzaShackSandEndpoint);
         base64EncodedPizzaShackProdNewValue = Utils.encodeValueToBase64(pizzaShackProdNewEndpoint);
         base64EncodedPizzaShackSandNewValue = Utils.encodeValueToBase64(pizzaShackSandNewEndpoint);
-        base64EncodedpizzaShackEndpointProdPrefix = Utils.encodeValueToBase64(pizzaShackEndpointProdPrefix);
-        base64EncodedpizzaShackEndpointSandPrefix = Utils.encodeValueToBase64(pizzaShackEndpointSandPrefix);
     }
 
     private void prepareConfigValues(){
         String apiEndpointSuffix = "endpoint_0";
         String etcdKeySuffix = "etcdKey";
-        pizzaShackEndpointSandConfigValue = base64EncodedpizzaShackEndpointSandPrefix + "_" + apiEndpointSuffix;
-        pizzaShackProdConfigValue = base64EncodedpizzaShackEndpointProdPrefix + "_" + etcdKeySuffix;
-        pizzaShackSandConfigValue = base64EncodedpizzaShackEndpointSandPrefix + "_" + etcdKeySuffix;
+        String prodUrlType = "Production";
+        String sandUrlType = "Sandbox";
+        pizzaShackEndpointSandConfigValue = apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
+        pizzaShackProdConfigValue = apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
+        pizzaShackSandConfigValue = apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
     }
 
     private void prepareCLIParameters(){

@@ -169,6 +169,8 @@
                             </run>
                         </image>
                     </images>
+                    <skip>${maven.test.skip}</skip>
+                    <skip>${skipTests}</skip>
                 </configuration>
             </plugin>
             <plugin>
