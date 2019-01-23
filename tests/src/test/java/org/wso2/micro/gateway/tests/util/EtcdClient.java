@@ -21,7 +21,6 @@ package org.wso2.micro.gateway.tests.util;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class EtcdClient {
     }
 
 
-    public void createUser(String username, String password) throws Exception{
+    public void createUser(String username, String password) throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
 
@@ -55,7 +54,7 @@ public class EtcdClient {
                 doPost(etcdUrl + EtcdUserBasePath + "/add", payload.toString(), headers);
     }
 
-    public void createRole(String rolename) throws Exception{
+    public void createRole(String rolename) throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
 
@@ -65,7 +64,7 @@ public class EtcdClient {
                 .doPost(etcdUrl + EtcdRoleBasePath + "/add", payload.toString(), headers);
     }
 
-    public void addRoleToUser(String user, String role) throws Exception{
+    public void addRoleToUser(String user, String role) throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
 
@@ -124,7 +123,7 @@ public class EtcdClient {
                 .doPost(etcdUrl + EtcdKVBasePath + "/delete", payload.toString(), headers);
     }
 
-    public void enableAuthentication() throws Exception{
+    public void enableAuthentication() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
 
@@ -133,7 +132,7 @@ public class EtcdClient {
                 .doPost(etcdUrl + EtcdAuthBasePath + "/enable", payload.toString(), headers);
     }
 
-    public void disableAuthentication(String token) throws Exception{
+    public void disableAuthentication(String token) throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);
         JSONObject payload = new JSONObject();
