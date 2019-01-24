@@ -33,12 +33,12 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +69,7 @@ public class CodeGenerator {
             swagger = parser.parse(api.getApiDefinition());
             definitionContext = new BallerinaService().buildContext(swagger, api);
             // we need to generate the bal service for default versioned apis as well
-            if(definitionContext.getApi().getIsDefaultVersion()) {
+            if (definitionContext.getApi().getIsDefaultVersion()) {
                 // without building the definitionContext again we use the same context to build default version as
                 // well. Hence setting the default version as false to generate the api with base path having version.
                 definitionContext.getApi().setIsDefaultVersion(false);
@@ -87,18 +87,16 @@ public class CodeGenerator {
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-
-
     }
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      *
-     * @param projectName   name of the project being set up
-     * @param apiDef        api definition string
-     * @param endpointDef   endpoint definition string
-     * @param overwrite     whether existing files overwrite or not
+     * @param projectName name of the project being set up
+     * @param apiDef      api definition string
+     * @param endpointDef endpoint definition string
+     * @param overwrite   whether existing files overwrite or not
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
@@ -178,7 +176,7 @@ public class CodeGenerator {
     /**
      * Retrieve generated source content as a String value.
      *
-     * @param endpoints       context to be used by template engine
+     * @param endpoints    context to be used by template engine
      * @param templateDir  templates directory
      * @param templateName name of the template to be used for this code generation
      * @return String with populated template
@@ -190,5 +188,42 @@ public class CodeGenerator {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
         return template.apply(context);
+    }
+
+    /**
+     * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
+     * Generated source will be written to a ballerina package at {@code outPath}
+     * <p>Method can be user for generating Ballerina mock services and clients</p>
+     *
+     * @throws IOException                  when file operations fail
+     * @throws BallerinaServiceGenException when code generator fails
+     */
+    public void generateGrpc(String projectName, String apiDef, String endpointDef, boolean overwrite)
+            throws IOException, BallerinaServiceGenException {
+        BallerinaService definitionContext;
+        String projectSrcPath = GatewayCmdUtils
+                .getProjectSrcDirectoryPath(projectName);
+        String projectGrpcPath = GatewayCmdUtils.getProjectGrpcDirectoryPath();
+        List<GenSrcFile> genFiles = new ArrayList<>();
+        File dir = new File(projectGrpcPath);
+        File[] files = dir.listFiles();
+        genFiles.add(generateCommonEndpoints());
+        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
+                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
+                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+        for (File file : dir.listFiles()) {
+            String filePath = file.getAbsolutePath();
+            String fileName = file.getName();
+            FileSystem fileSys = FileSystems.getDefault();
+            Path source = fileSys.getPath(filePath);
+            Path destination = fileSys.getPath(projectSrcPath + File.separator + fileName);
+            Files.move(source , destination, StandardCopyOption.REPLACE_EXISTING);
+        }
+        File temp = new File(GatewayCmdUtils.getProjectGrpcSoloDirectoryPath());
+        boolean k =dir.delete();
+        boolean m = temp.delete();
+        System.out.println(k);
+        System.out.println(m);
     }
 }
