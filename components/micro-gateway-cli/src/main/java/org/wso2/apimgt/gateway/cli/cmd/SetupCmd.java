@@ -54,6 +54,7 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +98,9 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     @Parameter(names = {"-oa", "--openapi"}, hidden = true)
     private String openApi;
+
+    @Parameter(names = {"-g", "--grpc"}, hidden = true)
+    private String grpc;
 
     @Parameter(names = {"-e", "--endpoint"}, hidden = true)
     private String endpoint;
@@ -150,6 +154,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
+        boolean isGRPC = StringUtils.isNotEmpty(grpc);
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
@@ -198,6 +203,38 @@ public class SetupCmd implements GatewayLauncherCmd {
                             "\"},\"endpoint_type\":\"http\"}";
                 }
                 codeGenerator.generate(projectName, api, endpointConfig, true);
+                //Initializing the ballerina project and creating .bal folder.
+                logger.debug("Creating source artifacts");
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                        new ArrayList<>(), null);
+            } catch (IOException | BallerinaServiceGenException e) {
+                logger.error("Error while generating ballerina source.", e);
+                throw new CLIInternalException("Error while generating ballerina source.");
+            }
+            outStream.println("Setting up project " + projectName + " is successful.");
+
+        } else if (isGRPC) {
+            outStream.println("Loading ProtoBuff Api Specification from Path: " + grpc);
+            GRPCUtils grpcUtils = new GRPCUtils(grpc);
+            grpcUtils.execute();
+            String api = grpcUtils.readApi(grpc);
+            logger.debug("Successfully read the api definition file");
+            CodeGenerator codeGenerator = new CodeGenerator();
+            try {
+                if (StringUtils.isEmpty(endpointConfig)) {
+                    if (StringUtils.isEmpty(endpoint)) {
+                        /*
+                         * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                         * the user
+                         */
+                        if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
+                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                        }
+                    }
+                    endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
+                            "\"},\"endpoint_type\":\"http\"}";
+                }
+                codeGenerator.generateGrpc(projectName, api, endpointConfig, true);
                 //Initializing the ballerina project and creating .bal folder.
                 logger.debug("Creating source artifacts");
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
