@@ -148,7 +148,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         }
     }
 
-    @Test(description = "mutual SSL is filed due to bad certificate")
+    @Test(description = "mutual SSL is failed due to bad certificate")
     public void mutualSSLfail() throws Exception {
 
         String trustStorePath = getClass().getClassLoader()

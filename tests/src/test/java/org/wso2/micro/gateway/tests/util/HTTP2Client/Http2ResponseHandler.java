@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.micro.gateway.tests.util.HTTP2Client;
 
 import io.netty.buffer.ByteBuf;
@@ -32,9 +50,9 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
     /**
      * Create an association between an anticipated response stream id and a {@link io.netty.channel.ChannelPromise}
      *
-     * @param streamId The stream for which a response is expected
+     * @param streamId    The stream for which a response is expected
      * @param writeFuture A future that represent the request write operation
-     * @param promise The promise object that will be used to wait/notify events
+     * @param promise     The promise object that will be used to wait/notify events
      * @return The previous object associated with {@code streamId}
      * @see Http2ResponseHandler#awaitResponses(long, java.util.concurrent.TimeUnit)
      */
@@ -46,7 +64,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
      * Wait (sequentially) for a time duration for each anticipated response
      *
      * @param timeout Value of time to wait for each response
-     * @param unit Units associated with {@code timeout}
+     * @param unit    Units associated with {@code timeout}
      * @see Http2ResponseHandler#put(int, io.netty.channel.ChannelFuture, io.netty.channel.ChannelPromise)
      */
     public void awaitResponses(long timeout, TimeUnit unit) {
@@ -92,7 +110,6 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
                 content.readBytes(arr);
                 log.info(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
             }
-
             entry.getValue().setSuccess();
         }
     }

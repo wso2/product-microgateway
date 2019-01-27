@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.micro.gateway.tests.services;
 
 import org.apache.commons.logging.Log;
@@ -7,24 +25,21 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.*;
-import org.wso2.micro.gateway.tests.common.HTTP2Server.MockHttp2Server;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HTTP2Client.Http2ClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
+
 import java.io.File;
+
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTP_PORT;
 
-public class HTTP2TestCase extends BaseTestCase {
+public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
 
-    protected final static int MOCK_HTTP2_SERVER_PORT = 8443;
-    protected final static int MOCK_HTTP2_SECURE_SERVER_PORT = 8080;
-    private static final Log log = LogFactory.getLog(HTTP2TestCase.class);
-    protected MockHttp2Server mockHttp2Server;
-    protected MockHttp2Server mockHttp2SecureServer;
+    private static final Log log = LogFactory.getLog(HTTP2RequestsWithHTTP2BackEndTestCase.class);
     protected Http2ClientRequest http2ClientRequest;
     private String jwtTokenProd;
 
@@ -37,7 +52,7 @@ public class HTTP2TestCase extends BaseTestCase {
         API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
-        api.setEndpoint("http://localhost:8443"); //   https://localhost:9443/echo/http2 (micro-gw server)
+        api.setEndpoint(getMockServiceURLHttp("/echo"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -82,43 +97,21 @@ public class HTTP2TestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
     }
 
-
-    @Test(description = "Test API invocation with an HTTP/2.0 request via insecure connection")
-    public void testHTTP2ForInsecureConnection() throws Exception {
-
-        //http2 server is started with ssl disabled
-        boolean isOpen = Utils.isPortOpen(MOCK_HTTP2_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_HTTP2_SERVER_PORT + " already in use.");
-        mockHttp2Server = new MockHttp2Server(MOCK_HTTP2_SERVER_PORT, false);
-        mockHttp2Server.start();
-
-        //http2 client is initialized with ssl disabled
+    @Test(description = "Test API invocation with an HTTP/2.0 request via insecure connection sending to HTTP/1.1 BE")
+    public void testHTTP2RequestsViaInsecureConnectionWithHTTP1BE() throws Exception {
         http2ClientRequest = new Http2ClientRequest(false, GATEWAY_LISTENER_HTTP_PORT, jwtTokenProd);
         http2ClientRequest.start();
-
-
     }
 
-    @Test(description = "Test API invocation with an HTTP/2.0 request via secure connection")
-    public void testHTTP2ForSecureConnection() throws Exception {
-
-        //http2 server is started with ssl enabled
-        boolean isOpen = Utils.isPortOpen(MOCK_HTTP2_SECURE_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_HTTP2_SECURE_SERVER_PORT + " already in use.");
-        mockHttp2SecureServer = new MockHttp2Server(MOCK_HTTP2_SECURE_SERVER_PORT, true);
-        mockHttp2SecureServer.start();
-
-        //http2 client is initialized with ssl enabled
+    @Test(description = "Test API invocation with an HTTP/2.0 request via secure connection sending to HTTP/1.1 BE")
+    public void testHTTP2RequestsViaSecureConnectionWithHTTP1BE() throws Exception {
         http2ClientRequest = new Http2ClientRequest(true, GATEWAY_LISTENER_HTTPS_PORT, jwtTokenProd);
         http2ClientRequest.start();
-
     }
-
 
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
         super.finalize();
-
     }
 }
