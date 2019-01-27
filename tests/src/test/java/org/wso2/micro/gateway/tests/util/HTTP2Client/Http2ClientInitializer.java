@@ -50,7 +50,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     @Override
-    public void initChannel(SocketChannel ch) throws Exception {
+    public void initChannel(SocketChannel ch) {
         final Http2Connection connection = new DefaultHttp2Connection(false);
         connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
                 .frameListener(new DelegatingDecompressorFrameListener(
@@ -121,11 +121,22 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     /**
+     * Class that logs any User Events triggered on this channel.
+     */
+    private static class UserEventLogger extends ChannelInboundHandlerAdapter {
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+            log.info("User Event Triggered: " + evt);
+            ctx.fireUserEventTriggered(evt);
+        }
+    }
+
+    /**
      * A handler that triggers the cleartext upgrade to HTTP/2 by sending an initial HTTP request.
      */
     private final class UpgradeRequestHandler extends ChannelInboundHandlerAdapter {
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        public void channelActive(ChannelHandlerContext ctx) {
             DefaultFullHttpRequest upgradeRequest =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
             ctx.writeAndFlush(upgradeRequest);
@@ -136,17 +147,6 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
             ctx.pipeline().remove(this);
 
             configureEndOfPipeline(ctx.pipeline());
-        }
-    }
-
-    /**
-     * Class that logs any User Events triggered on this channel.
-     */
-    private static class UserEventLogger extends ChannelInboundHandlerAdapter {
-        @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-            log.info("User Event Triggered: " + evt);
-            ctx.fireUserEventTriggered(evt);
         }
     }
 }

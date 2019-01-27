@@ -31,7 +31,6 @@ import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.micro.gateway.tests.common.BaseTestCase;
 
 import javax.net.ssl.SSLException;
 import java.util.concurrent.TimeUnit;
@@ -45,20 +44,19 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * logged. When run from the command-line, sends a single HEADERS frame to the server and gets back
  * a response.
  */
-public final class Http2ClientRequest extends BaseTestCase {
-
-    private static final Log log = LogFactory.getLog(Http2ClientRequest.class);
+public final class Http2ClientRequest {
 
     static final String HOST = System.getProperty("host", "127.0.0.1");
     static final String URL = System.getProperty("url", "/pizzashack/1.0.0/menu");
     static final String URLDATA = System.getProperty("url2data", "test data!");
+    private static final Log log = LogFactory.getLog(Http2ClientRequest.class);
     static boolean SSL = System.getProperty("ssl") != null;
     static int PORT;
     static String token;
 
     public Http2ClientRequest(boolean ssl, int port, String token) {
-        SSL = ssl;
-        PORT = port;
+        Http2ClientRequest.SSL = ssl;
+        Http2ClientRequest.PORT = port;
         Http2ClientRequest.token = token;
     }
 
@@ -68,10 +66,9 @@ public final class Http2ClientRequest extends BaseTestCase {
     }
 
     public void start() throws SSLException {
-        // Configure SSL.
+
         final SslContext sslCtx;
 
-        // setSSlSystemProperties();
         if (SSL) {
             log.info("Configuring SSL");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
@@ -98,7 +95,8 @@ public final class Http2ClientRequest extends BaseTestCase {
         Http2ClientInitializer initializer = new Http2ClientInitializer(sslCtx, Integer.MAX_VALUE);
 
         try {
-            // Configure the client.
+
+            log.info("Configure the client");
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
             b.channel(NioSocketChannel.class);
@@ -106,26 +104,24 @@ public final class Http2ClientRequest extends BaseTestCase {
             b.remoteAddress(HOST, PORT);
             b.handler(initializer);
 
-            // Start the client
+            log.info("Start the client");
             Channel channel = b.connect().syncUninterruptibly().channel();
             log.info("Connected to [" + HOST + ':' + PORT + ']');
 
-            // Wait for the HTTP/2 upgrade to occur
-            Http2SettingsHandler http2SettingsHandler = initializer.settingsHandler();
-
-            http2SettingsHandler.awaitSettings(5, TimeUnit.SECONDS);
             log.info("Wait for the HTTP/2 upgrade to occur");
+            Http2SettingsHandler http2SettingsHandler = initializer.settingsHandler();
+            http2SettingsHandler.awaitSettings(5, TimeUnit.SECONDS);
 
             Http2ResponseHandler responseHandler = initializer.responseHandler();
             int streamId = 3;
+
             HttpScheme scheme = SSL ? HttpScheme.HTTPS : HttpScheme.HTTP;
             AsciiString hostName = new AsciiString(HOST + ':' + PORT);
 
-            log.info(HOST + "\n" + PORT);
             log.info("Sending request(s)...");
 
             if (URL != null) {
-                // Create a simple GET request.
+
                 log.info("\nCreate a simple GET request");
 
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
@@ -178,7 +174,7 @@ public final class Http2ClientRequest extends BaseTestCase {
             responseHandler.awaitResponses(5, TimeUnit.SECONDS);
             log.info("Finished HTTP/2 request(s)");
 
-            // Wait until the connection is closed.
+            log.info("Wait until the connection is closed");
             channel.close().syncUninterruptibly();
         } catch (Exception e) {
             log.error("An Exception occurred " + e);

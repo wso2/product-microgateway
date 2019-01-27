@@ -23,6 +23,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -30,18 +31,18 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
- * HTTP/1.1 handler that responds with a "HTTP/1.1 connection"
+ * HTTP/1.1 handler that responds with an "HTTP/1.1 connection"
  */
 public class Http1Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private final String establishApproach;
     private static final Log log = LogFactory.getLog(Http1Handler.class);
+    private final String establishApproach;
 
     public Http1Handler(String establishApproach) {
         this.establishApproach = checkNotNull(establishApproach, "establishApproach");
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
         if (HttpUtil.is100ContinueExpected(req)) {
             ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
         }
@@ -64,7 +65,7 @@ public class Http1Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 

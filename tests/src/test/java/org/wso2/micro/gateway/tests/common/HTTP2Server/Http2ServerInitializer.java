@@ -33,8 +33,6 @@ import org.apache.commons.logging.LogFactory;
 public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final Log log = LogFactory.getLog(Http2ServerInitializer.class);
-    private final SslContext sslCtx;
-    private final int maxHttpContentLength;
 
     private static final HttpServerUpgradeHandler.UpgradeCodecFactory upgradeCodecFactory = protocol -> {
         if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
@@ -43,6 +41,9 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
             return null;
         }
     };
+
+    private final SslContext sslCtx;
+    private final int maxHttpContentLength;
 
     public Http2ServerInitializer(SslContext sslCtx) {
         this(sslCtx, 16 * 1024);
@@ -97,6 +98,8 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
                 ChannelHandlerContext thisCtx = pipeline.context(this);
 
                 pipeline.addAfter(thisCtx.name(), null, new Http1Handler("Direct. No Upgrade Attempted"));
+
+
                 pipeline.replace(this, null, new HttpObjectAggregator(maxHttpContentLength));
 
                 ctx.fireChannelRead(ReferenceCountUtil.retain(msg));

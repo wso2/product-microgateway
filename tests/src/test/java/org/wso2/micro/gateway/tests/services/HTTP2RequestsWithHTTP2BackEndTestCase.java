@@ -15,6 +15,10 @@
  */
 package org.wso2.micro.gateway.tests.services;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpScheme;
+import io.netty.handler.codec.http2.HttpConversionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -28,22 +32,23 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HTTP2Client.Http2ClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTP_PORT;
 
-public class HTTP2TestCase extends BaseTestCase {
+public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
 
     protected final static int MOCK_HTTP2_SERVER_PORT = 8443;
-    protected final static int MOCK_HTTP2_SECURE_SERVER_PORT = 8080;
-    private static final Log log = LogFactory.getLog(HTTP2TestCase.class);
+    private static final Log log = LogFactory.getLog(HTTP2RequestsWithHTTP2BackEndTestCase.class);
     protected MockHttp2Server mockHttp2Server;
-    protected MockHttp2Server mockHttp2SecureServer;
     protected Http2ClientRequest http2ClientRequest;
     private String jwtTokenProd;
 
@@ -71,7 +76,7 @@ public class HTTP2TestCase extends BaseTestCase {
         endPoint_endpointConfigDTO_prod.setEndpointType(EndPoint_endpointConfigDTO.EndpointTypeEnum.SINGLE);
         List<EndpointConfigDTO> api_endpointConfigDTOS_prod = new ArrayList<>();
         EndpointConfigDTO endpointConfigDTO_prod = new EndpointConfigDTO();
-        endpointConfigDTO_prod.setUrl("http://localhost:8443");
+        endpointConfigDTO_prod.setUrl("https://localhost:8443");
         endpointConfigDTO_prod.setTimeout("1000");
         api_endpointConfigDTOS_prod.add(endpointConfigDTO_prod);
         endPoint_endpointConfigDTO_prod.setList(api_endpointConfigDTOS_prod);
@@ -91,7 +96,7 @@ public class HTTP2TestCase extends BaseTestCase {
         endPoint_endpointConfigDTO_sand.setEndpointType(EndPoint_endpointConfigDTO.EndpointTypeEnum.SINGLE);
         List<EndpointConfigDTO> api_endpointConfigDTOS_sand = new ArrayList<>();
         EndpointConfigDTO endpointConfigDTO_sand = new EndpointConfigDTO();
-        endpointConfigDTO_sand.setUrl("http://localhost:8443");
+        endpointConfigDTO_sand.setUrl("https://localhost:8443");
         endpointConfigDTO_sand.setTimeout("1000");
         api_endpointConfigDTOS_sand.add(endpointConfigDTO_sand);
         endPoint_endpointConfigDTO_sand.setList(api_endpointConfigDTOS_sand);
@@ -144,45 +149,54 @@ public class HTTP2TestCase extends BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+
+        boolean isOpen2 = Utils.isPortOpen(MOCK_HTTP2_SERVER_PORT);
+        Assert.assertFalse(isOpen2, "Port: " + MOCK_HTTP2_SERVER_PORT + " already in use.");
+        mockHttp2Server = new MockHttp2Server(MOCK_HTTP2_SERVER_PORT, true);
+        mockHttp2Server.start();
     }
 
-
-    @Test(description = "Test API invocation with an HTTP/2.0 request via insecure connection")
-    public void testHTTP2ForInsecureConnection() throws Exception {
-
-        //http2 server is started with ssl disabled
-        boolean isOpen = Utils.isPortOpen(MOCK_HTTP2_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_HTTP2_SERVER_PORT + " already in use.");
-        mockHttp2Server = new MockHttp2Server(MOCK_HTTP2_SERVER_PORT, false);
-        mockHttp2Server.start();
-
-        //http2 client is initialized with ssl disabled
+    @Test(description = "Test API invocation with an HTTP/2.0 request via insecure connection sending to HTTP/2.0 BE")
+    public void testHTTP2RequestsViaInsecureConnectionWithHTTP2BE() throws Exception {
         http2ClientRequest = new Http2ClientRequest(false, GATEWAY_LISTENER_HTTP_PORT, jwtTokenProd);
         http2ClientRequest.start();
-
-
     }
 
-    @Test(description = "Test API invocation with an HTTP/2.0 request via secure connection")
-    public void testHTTP2ForSecureConnection() throws Exception {
-
-        //http2 server is started with ssl enabled
-        boolean isOpen = Utils.isPortOpen(MOCK_HTTP2_SECURE_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_HTTP2_SECURE_SERVER_PORT + " already in use.");
-        mockHttp2SecureServer = new MockHttp2Server(MOCK_HTTP2_SECURE_SERVER_PORT, true);
-        mockHttp2SecureServer.start();
-
-        //http2 client is initialized with ssl enabled
+    @Test(description = "Test API invocation with an HTTP/2.0 request via secure connection sending to HTTP/2.0 BE")
+    public void testHTTP2RequestsViaSecureConnectionWithHTTP2BE() throws Exception {
         http2ClientRequest = new Http2ClientRequest(true, GATEWAY_LISTENER_HTTPS_PORT, jwtTokenProd);
         http2ClientRequest.start();
-
     }
 
+    @Test(description = "Test API invocation with an HTTP/1.1 request via insecure connection sending to HTTP/2.0 BE")
+    public void testHTTP1RequestsViaInsecureConnectionWithHTTP2BE() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(HttpHeaderNames.HOST.toString(), "127.0.0.1:9590");
+        headers.put(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text().toString(), HttpScheme.HTTP.toString());
+        headers.put(HttpHeaderNames.ACCEPT_ENCODING.toString(), HttpHeaderValues.GZIP.toString());
+        headers.put(HttpHeaderNames.ACCEPT_ENCODING.toString(), HttpHeaderValues.DEFLATE.toString());
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        log.info("Response: " + response.getResponseMessage() + " , " + response.getResponseCode());
+    }
+
+    @Test(description = "Test API invocation with an HTTP/1.1 request via secure connection sending to HTTP/2.0 BE")
+    public void testHTTP1RequestsViaSecureConnectionWithHTTP2BE() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(HttpHeaderNames.HOST.toString(), "127.0.0.1:9595");
+        headers.put(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text().toString(), HttpScheme.HTTP.toString());
+        headers.put(HttpHeaderNames.ACCEPT_ENCODING.toString(), HttpHeaderValues.GZIP.toString());
+        headers.put(HttpHeaderNames.ACCEPT_ENCODING.toString(), HttpHeaderValues.DEFLATE.toString());
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        log.info("Response: " + response.getResponseMessage() + " , " + response.getResponseCode());
+    }
 
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
         super.finalize();
-
     }
 }

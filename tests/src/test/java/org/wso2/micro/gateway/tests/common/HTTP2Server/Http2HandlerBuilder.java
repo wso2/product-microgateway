@@ -23,6 +23,7 @@ public final class Http2HandlerBuilder
         extends AbstractHttp2ConnectionHandlerBuilder<Http2Handler, Http2HandlerBuilder> {
 
     private static final Http2FrameLogger logger = new Http2FrameLogger(INFO, Http2Handler.class);
+
     public Http2HandlerBuilder() {
         frameLogger(logger);
     }
