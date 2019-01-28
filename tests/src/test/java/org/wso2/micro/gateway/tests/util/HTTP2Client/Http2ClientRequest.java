@@ -190,7 +190,7 @@ public final class Http2ClientRequest {
             log.info("Wait until the connection is closed");
             channel.close().syncUninterruptibly();
         } catch (Exception e) {
-            log.error("An Exception occurred " + e);
+            log.error("An Exception occurred ", e);
         } finally {
             workerGroup.shutdownGracefully();
         }

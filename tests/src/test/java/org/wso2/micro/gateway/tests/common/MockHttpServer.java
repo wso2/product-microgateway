@@ -90,7 +90,7 @@ public class MockHttpServer extends Thread {
                                 .getDefaultSSLParameters();
                         params.setSSLParameters(defaultSSLParameters);
                     } catch (Exception ex) {
-                        log.error("Failed to create HTTPS port");
+                        log.error("Failed to create HTTPS port ", ex);
                     }
                 }
             });

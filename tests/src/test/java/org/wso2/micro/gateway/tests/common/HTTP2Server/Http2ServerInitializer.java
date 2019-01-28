@@ -93,7 +93,7 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast(cleartextHttp2ServerUpgradeHandler);
         p.addLast(new SimpleChannelInboundHandler<HttpMessage>() {
             @Override
-            protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) throws Exception {
+            protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) {
                 // If this handler is hit then no upgrade has been attempted and the client is just talking HTTP.
 
                 log.error("Directly talking: " + msg.protocolVersion() + " (no upgrade was attempted)");
@@ -102,10 +102,7 @@ public class Http2ServerInitializer extends ChannelInitializer<SocketChannel> {
                 ChannelHandlerContext thisCtx = pipeline.context(this);
 
                 pipeline.addAfter(thisCtx.name(), null, new Http1Handler("Direct. No Upgrade Attempted"));
-
-
                 pipeline.replace(this, null, new HttpObjectAggregator(maxHttpContentLength));
-
                 ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
             }
         });

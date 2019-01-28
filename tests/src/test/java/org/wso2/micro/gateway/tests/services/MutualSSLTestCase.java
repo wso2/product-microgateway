@@ -148,7 +148,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         } catch (UnknownHostException e) {
             log.error("An UnknownHostException occurred: ", e);
         } catch (IOException e) {
-            log.error("An IOException occurred: " + e);
+            log.error("An IOException occurred: ", e);
 
         }
     }

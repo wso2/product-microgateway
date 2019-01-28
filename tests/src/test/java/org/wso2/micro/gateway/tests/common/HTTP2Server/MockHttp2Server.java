@@ -53,7 +53,6 @@ public final class MockHttp2Server extends Thread {
         mockHttp2Server.start();
     }
 
-
     public void run() {
 
         SslContext sslCtx = null;
@@ -87,7 +86,7 @@ public final class MockHttp2Server extends Thread {
                         .build();
                 log.info("Certificate added successfully");
             } catch (SSLException e) {
-                log.error("An SSLException occurred " + e);
+                log.error("An SSLException occurred ", e);
             }
         } else {
             sslCtx = null;
@@ -108,7 +107,7 @@ public final class MockHttp2Server extends Thread {
             ch.closeFuture().sync();
 
         } catch (InterruptedException e) {
-            log.error("An InterruptedException occurred" + e);
+            log.error("An InterruptedException occurred", e);
         } finally {
             group.shutdownGracefully();
         }
