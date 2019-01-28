@@ -80,7 +80,7 @@ public class Http1Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error(cause.getMessage());
+        log.error("An Exception occurred ", cause);
         ctx.close();
     }
 }

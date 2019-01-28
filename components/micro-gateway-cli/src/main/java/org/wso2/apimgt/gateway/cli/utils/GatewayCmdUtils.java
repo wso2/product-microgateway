@@ -41,7 +41,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -290,8 +289,8 @@ public class GatewayCmdUtils {
     public static void createProjectGWDistribution(String projectName) throws IOException {
         createTargetGatewayDistStructure(projectName);
 
-        String distPath = getTargetDistPath(projectName);//target/disribution
-        String gwDistPath = getTargetGatewayDistPath(projectName);//target/distribution/micro-gw-projname
+        String distPath = getTargetDistPath(projectName);
+        String gwDistPath = getTargetGatewayDistPath(projectName);
         copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
                 + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
         copyTargetDistBinScripts(projectName);
@@ -301,16 +300,12 @@ public class GatewayCmdUtils {
         copyFilesToSources(
                 GatewayCmdUtils.getConfigFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE,
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                        + GatewayCliConstants.GW_DIST_CONF_FILE);//target/distribution/micro-gw-projname/conf/micro-gw.conf
-        //target/micro-gw-projname/conf/micro-gw.conf
-
+                        + GatewayCliConstants.GW_DIST_CONF_FILE);
 
         String targetPath = getProjectTargetDirectoryPath(projectName);//target
         String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;//micro-gw-projname.zip
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
-        //target/distribution, target/micro-gw-projname.zip
-
 
         // clean the target folder while keeping the distribution zip file
         cleanFolder(targetPath, ArrayUtils.add(GatewayCliConstants.PROJECTS_TARGET_DELETE_FILES,

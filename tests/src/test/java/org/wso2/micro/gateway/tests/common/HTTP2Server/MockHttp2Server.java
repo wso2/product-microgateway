@@ -55,7 +55,6 @@ public final class MockHttp2Server extends Thread {
         mockHttp2Server.start();
     }
 
-
     public void run() {
 
         SslContext sslCtx = null;

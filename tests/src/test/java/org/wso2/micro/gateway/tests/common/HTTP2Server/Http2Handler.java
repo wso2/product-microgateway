@@ -86,7 +86,7 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        log.error(cause.getMessage());
+        log.error("An Exception occurred ", cause);
         ctx.close();
     }
 
