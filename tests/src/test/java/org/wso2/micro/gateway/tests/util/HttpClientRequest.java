@@ -209,7 +209,7 @@ public class HttpClientRequest {
             }
         } catch (IOException ex) {
             if (conn.getErrorStream() == null) {
-                log.error("An IOException occurred" + ex);
+                log.error("An IOException occurred", ex);
                 return null;
             }
             rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()

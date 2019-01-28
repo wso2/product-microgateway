@@ -62,7 +62,7 @@ public final class Http2ClientRequest {
     static final String URL = System.getProperty("url", "/pizzashack/1.0.0/menu");
     static final String URLDATA = System.getProperty("url2data", "test data!");
     private static final Log log = LogFactory.getLog(Http2ClientRequest.class);
-    static boolean SSL = System.getProperty("ssl") != null;
+    static boolean SSL;
     static int PORT;
     static String token;
 
@@ -82,7 +82,7 @@ public final class Http2ClientRequest {
         final SslContext sslCtx;
 
         if (SSL) {
-            log.info("Configuring SSL");
+            log.debug("Configuring SSL");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
             sslCtx = SslContextBuilder.forClient()
                     .sslProvider(provider)
@@ -108,7 +108,7 @@ public final class Http2ClientRequest {
 
         try {
 
-            log.info("Configure the client");
+            log.debug("Configure the client");
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
             b.channel(NioSocketChannel.class);
@@ -116,11 +116,11 @@ public final class Http2ClientRequest {
             b.remoteAddress(HOST, PORT);
             b.handler(initializer);
 
-            log.info("Start the client");
+            log.debug("Start the client");
             Channel channel = b.connect().syncUninterruptibly().channel();
             log.info("Connected to [" + HOST + ':' + PORT + ']');
 
-            log.info("Wait for the HTTP/2 upgrade to occur");
+            log.debug("Wait for the HTTP/2 upgrade to occur");
             Http2SettingsHandler http2SettingsHandler = initializer.settingsHandler();
             http2SettingsHandler.awaitSettings(5, TimeUnit.SECONDS);
 
@@ -130,11 +130,11 @@ public final class Http2ClientRequest {
             HttpScheme scheme = SSL ? HttpScheme.HTTPS : HttpScheme.HTTP;
             AsciiString hostName = new AsciiString(HOST + ':' + PORT);
 
-            log.info("Sending request(s)...");
+            log.debug("Sending request(s)");
 
             if (URL != null) {
 
-                log.info("\nCreate a simple GET request");
+                log.debug("Create a simple GET request");
 
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
                 request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
@@ -147,7 +147,7 @@ public final class Http2ClientRequest {
             }
             if (false) {
                 // Create a simple POST request with a body.
-                log.info("Create a simple POST request with a body");
+                log.debug("Create a simple POST request with a body");
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, POST, URL,
                         wrappedBuffer(URLDATA.getBytes(CharsetUtil.UTF_8)));
                 request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
@@ -159,7 +159,7 @@ public final class Http2ClientRequest {
             }
             if (false) {
                 // Create a simple OPTIONS request.
-                log.info("Create a simple OPTIONS request with a body");
+                log.debug("Create a simple OPTIONS request with a body");
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, OPTIONS, URL);
                 request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
                 request.headers().add(HttpHeaderNames.HOST, hostName);
@@ -171,7 +171,7 @@ public final class Http2ClientRequest {
             }
             if (false) {
                 // Create a simple HEAD request.
-                log.info("Create a simple HEAD request");
+                log.debug("Create a simple HEAD request");
                 FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, HEAD, URL);
                 request.headers().add(HttpHeaderNames.AUTHORIZATION, "Bearer " + token);
                 request.headers().add(HttpHeaderNames.HOST, hostName);
@@ -181,12 +181,12 @@ public final class Http2ClientRequest {
                 responseHandler.put(streamId, channel.write(request), channel.newPromise());
                 streamId += 2;
             }
-            log.info("flushing the channel");
+            log.debug("flushing the channel");
             channel.flush();
             responseHandler.awaitResponses(5, TimeUnit.SECONDS);
-            log.info("Finished HTTP/2 request(s)");
+            log.debug("Finished HTTP/2 request(s)");
 
-            log.info("Wait until the connection is closed");
+            log.debug("Wait until the connection is closed");
             channel.close().syncUninterruptibly();
         } catch (Exception e) {
             log.error("An Exception occurred " + e);

@@ -63,8 +63,8 @@ public final class MockHttp2Server extends Thread {
         File key = new File(getClass().getClassLoader()
                 .getResource("keyStores" + File.separator + "key.pem").getPath());
 
-        log.info("SSL: " + SSL);
-        log.info("PORT: " + PORT);
+        log.debug("SSL: " + SSL);
+        log.debug("PORT: " + PORT);
 
         if (SSL) {
 
