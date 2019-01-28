@@ -132,8 +132,8 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     initializeAnalytics();
 
-    //Change the version of http2
-    if(getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {
+    //Change the httpVersion
+    if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {
         config.httpVersion = "2.0";
         io:println("httpVersion = " + config.httpVersion);
     }
