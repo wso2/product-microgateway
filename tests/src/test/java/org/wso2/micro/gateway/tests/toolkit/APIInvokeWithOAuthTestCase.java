@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.tests.toolkit;
 
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

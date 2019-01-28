@@ -23,7 +23,6 @@ import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.cmd.SetupCmd;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -34,7 +33,15 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -47,8 +54,6 @@ public class GatewayCmdUtils {
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
-    private static boolean created;
-    private static PrintStream outStream = System.err;
 
     public static Config getConfig() {
         return config;
