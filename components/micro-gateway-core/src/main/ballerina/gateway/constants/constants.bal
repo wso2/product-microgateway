@@ -134,6 +134,8 @@
 @final public string THROTTLE_FILTER = "THROTTLE_FILTER";
 @final public string ANALYTICS_FILTER = "ANALYTICS_FILTER";
 @final public string MUTUAL_SSL_FILTER = "MUTUAL_SSL_FILTER";
+@final public string VALIDATION_FILTER = "VALIDATION_FILTER";
+
 
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 @final public string KEY_TYPE_ATTR = "KEY_TYPE";
@@ -195,6 +197,8 @@
 @final public string SECURITY_LATENCY_AUTHZ_RESPONSE = "SECURITY_LATENCY_AUTHZ_RESPONSE";
 @Description { value: "Time spent on the subscription filter" }
 @final public string SECURITY_LATENCY_SUBS = "SECURITY_LATENCY_SUBS";
+@Description { value: "Time spent on the validation filter" }
+@final public string SECURITY_LATENCY_VALIDATION = "SECURITY_LATENCY_VALIDATION";
 @Description { value: "HTTP Method" }
 @final public string METHOD = "METHOD";
 @Description { value: "Time stamp before sending to backend" }
@@ -209,6 +213,66 @@
 @final public string FILE_UPLOAD_TASK = "task.uploadFiles";
 @Description { value: "Destination" }
 @final public string DESTINATION = "destination";
+
+
+
+//validation_filter related constatnts
+@Description { value: "Paths" }
+@final public string PATHS = "paths";
+@Description { value: "Parameters" }
+@final public string PARAMETERS = "parameters";
+@Description { value: "Reference" }
+@final public string REFERENCE = "$ref";
+@Description { value: "Responses" }
+@final public string RESPONSES = "responses";
+@Description { value: "Schema" }
+@final public string SCHEMA = "schema";
+@Description { value: "Items" }
+@final public string ITEMS = "items";
+@Description { value: "Type" }
+@final public string TYPE = "type";
+@Description { value: "Array" }
+@final public string ARRAY = "array";
+@Description { value: "String" }
+@final public string STRING = "string";
+@Description { value: "Integer" }
+@final public string INTEGER = "integer";
+@Description { value: "Number" }
+@final public string NUMBER = "number";
+@Description { value: "Object" }
+@final public string OBJECT = "object";
+@Description { value: "Null" }
+@final public string NULL = "null";
+@Description { value: "Boolean" }
+@final public string BOOLEAN = "boolean";
+@Description { value: "Json" }
+@final public string JSON = "json";
+@Description { value: "Date" }
+@final public string DATE = "date";
+@Description { value: "Date-time" }
+@final public string DATE_TIME = "date-time";
+@Description { value: "Integer 32" }
+@final public string INT_32 = "int32";
+@Description { value: "Integer 64" }
+@final public string INT_64 = "int64";
+@Description { value: "Reference for models in swagger 2.0" }
+@final public string DEFINITIONS = "#/definitions/";
+@Description { value: "Reference for models in swagger 3.0" }
+@final public string COMPONENTS_SCHEMAS = "#/components/schemas/";
+@Description { value: "Format of the date" }
+@final public string YYYY_MM_DD = "yyyy-MM-dd";
+@Description { value: "Discriminator" }
+@final public string DISCRIMINATOR = "discriminator";
+@Description { value: "Swagger file suffix" }
+@final public string SWAGGER = "_swagger";
+@Description { value: "Seperator" }
+@final public string SEPERATOR = ".";
+@Description { value: "Relative path for the src folder" }
+@final public string BASEPATH = "../../../src/";
+
+
+
+
 
 // config constants
 @Description { value: "Key manager related configs" }
@@ -297,6 +361,16 @@
 @final public string JWT_HEADER = "header";
 @final public string EXPECT_HEADER = "Expect";
 
+@Description { value: "validation  related configs" }
+@final public string VALIDATION_CONFIG_INSTANCE_ID = "validationConfig";
+@Description { value: "Request validation enabled or not" }
+@final public string REQUEST_VALIDATION_ENABLED = "enableRequestValidation";
+@Description { value: "Response validation enabled or not" }
+@final public string RESPONSE_VALIDATION_ENABLED = "enableResponseValidation";
+@Description { value: "Absoulute path to swagger" }
+@final public string SWAGGER_ABSOLUTE_PATH = "absolutePathToSwagger";
+
+
 // end of config constants
 
 @Description { value: "Is Throttled" }
@@ -311,13 +385,16 @@
 @final string THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
 
 @final string INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured";
-
+@final string UNPROCESSABLE_ENTITY_MESSAGE = "Unable to process the entity";
+@final public  string UNPROCESSABLE_ENTITY_DESCRIPTION = "Unable to process the given entity. Please check whether the provided entity is correct.";
 
 // http codes
 @final public int INTERNAL_SERVER_ERROR = 500;
 @final public int FORBIDDEN = 403;
 @final public int UNAUTHORIZED = 401;
 @final public int THROTTLED_OUT = 429;
+@final public int UNPROCESSABLE_ENTITY = 422;
+
 
 // end of http codes
 
@@ -333,6 +410,7 @@
 @final string KEY_THROTTLE_FILTER = "ThrottleFilter";
 @final string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
 @final string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
+@final string KEY_VALIDATION_FILTER = "ValidationFilter";
 @final string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 @final string KEY_THROTTLE_UTIL = "ThrottleUtil";
 @final string KEY_GW_CACHE = "GatewayCache";

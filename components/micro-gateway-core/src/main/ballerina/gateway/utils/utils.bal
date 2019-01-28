@@ -318,6 +318,10 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
         errorCode == API_AUTH_FORBIDDEN ||
         errorCode == INVALID_SCOPE) {
         status = FORBIDDEN;
+    } else if(errorCode == INVALID_ENTITY) {
+        status = UNPROCESSABLE_ENTITY;
+    } else if(errorCode == INVALID_RESPONSE) {
+        status = INTERNAL_SERVER_ERROR;
     } else {
         status = UNAUTHORIZED;
 

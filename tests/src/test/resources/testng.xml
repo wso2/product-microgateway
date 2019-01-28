@@ -38,7 +38,10 @@
             <class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.OASAPIInvokeTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.CookieAuthTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.toolkit.ValidationTestCase"/>
         </classes>
     </test>
+
+
 
 </suite>

@@ -15,8 +15,12 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.JsonSyntaxException;
 import io.swagger.annotations.ApiModel;
+import io.swagger.util.Json;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean isDefaultVersion = null;
+    private Json apiSwagger = null;
 
     public enum TypeEnum {
         HTTP, WS, SOAPTOREST,
@@ -417,7 +422,25 @@ public class APIDetailedDTO extends APIInfoDTO {
         return corsConfiguration;
     }
 
+    public JsonObject getApiSwagger() {
+        String swagger = getApiDefinition();
+        JsonParser parser = new JsonParser();
+        JsonObject jsonSwagger;
+        try {
+            jsonSwagger = parser.parse(swagger).getAsJsonObject();
+        } catch (JsonSyntaxException e) {
+            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject");
+        }
+        return jsonSwagger;
+    }
+
+    public void setApiSwagger(Json apiSwagger) {
+        this.apiSwagger = apiSwagger;
+    }
+
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
     }
+
+
 }

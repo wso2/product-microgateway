@@ -23,9 +23,11 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import jnr.ffi.Struct;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
@@ -77,6 +79,7 @@ public class CodeGenerator {
             }
 
             genFiles.add(generateService(definitionContext));
+            genFiles.add(generateSwagger(definitionContext));
 
         }
         genFiles.add(generateCommonEndpoints());
@@ -87,7 +90,6 @@ public class CodeGenerator {
 
 
     }
-
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
@@ -159,6 +161,13 @@ public class CodeGenerator {
     }
 
 
+    private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
+        String concatTitle = context.getName();
+        String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
+        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+                GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
     /**
      * Retrieve generated source content as a String value.
      *
