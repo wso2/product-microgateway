@@ -21,7 +21,6 @@ import io.swagger.models.Info;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
@@ -91,34 +90,6 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         return null;
     }
 
-    /**
-     * Populate path models into iterable structure.
-     * This method will also add an operationId to each operation,
-     * if operationId not provided in swagger definition
-     *
-     * @param swagger {@code OpenAPI} definition object with schema definition
-     * @throws BallerinaServiceGenException when context building fails
-     */
-    private void setPaths(Swagger swagger) throws BallerinaServiceGenException {
-        if (swagger.getPaths() == null) {
-            return;
-        }
-
-        this.paths = new LinkedHashSet<>();
-        Map<String, Path> pathList = swagger.getPaths();
-        for (Map.Entry<String, Path> path : pathList.entrySet()) {
-            BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
-            balPath.getOperations().forEach(operation -> {
-                if (operation.getValue().getOperationId() == null) {
-                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
-                    operation.getValue().setOperationId(operationId);
-                }
-            });
-            paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
-        }
-    }
-
     public BallerinaService srcPackage(String srcPackage) {
         if (srcPackage != null) {
             this.srcPackage = srcPackage.replaceFirst("\\.", "/");
@@ -157,9 +128,36 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         return paths;
     }
 
+    /**
+     * Populate path models into iterable structure.
+     * This method will also add an operationId to each operation,
+     * if operationId not provided in swagger definition
+     *
+     * @param swagger {@code OpenAPI} definition object with schema definition
+     * @throws BallerinaServiceGenException when context building fails
+     */
+    private void setPaths(Swagger swagger) throws BallerinaServiceGenException {
+        if (swagger.getPaths() == null) {
+            return;
+        }
+
+        this.paths = new LinkedHashSet<>();
+        Map<String, Path> pathList = swagger.getPaths();
+        for (Map.Entry<String, Path> path : pathList.entrySet()) {
+            BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
+            balPath.getOperations().forEach(operation -> {
+                if (operation.getValue().getOperationId() == null) {
+                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
+                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                    operation.getValue().setOperationId(operationId);
+                }
+            });
+            paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
+        }
+    }
 
     private String replaceAllNonAlphaNumeric(String value) {
-        return value.replaceAll("[^a-zA-Z0-9]+","_");
+        return value.replaceAll("[^a-zA-Z0-9]+", "_");
     }
 
     public String getName() {

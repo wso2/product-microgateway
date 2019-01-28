@@ -42,11 +42,12 @@ import java.util.Map;
 public class HttpClientRequest {
 
     private static final Log log = LogFactory.getLog(HttpClientRequest.class);
+
     /**
      * Sends an HTTP GET request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers - http request header map
+     * @param headers    - http request header map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the GET request
      */
@@ -71,7 +72,7 @@ public class HttpClientRequest {
      *
      * @param endpoint - rest endpoint
      * @param postBody - message payload
-     * @param headers http request headers map
+     * @param headers  http request headers map
      * @return - HttpResponse from end point
      * @throws IOException If an error occurs while sending the GET request
      */
@@ -103,7 +104,7 @@ public class HttpClientRequest {
      * Sends an HTTP OPTIONS request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers http request headers map
+     * @param headers    http request headers map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the OPTIONS request
      */
@@ -126,7 +127,7 @@ public class HttpClientRequest {
      * Sends an HTTP HEAD request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers - http request header map
+     * @param headers    - http request header map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the HEAD request
      */
