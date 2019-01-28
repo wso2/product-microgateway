@@ -61,12 +61,12 @@ public final class MockHttp2Server extends Thread {
         File key = new File(getClass().getClassLoader()
                 .getResource("keyStores" + File.separator + "key.pem").getPath());
 
-        log.info("SSL: " + SSL);
-        log.info("PORT: " + PORT);
+        log.debug("SSL: " + SSL);
+        log.debug("PORT: " + PORT);
 
         if (SSL) {
 
-            log.info("Configuring ssl");
+            log.debug("Configuring ssl");
             SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
 
             try {
@@ -92,7 +92,7 @@ public final class MockHttp2Server extends Thread {
             sslCtx = null;
         }
 
-        log.info("Configure the server");
+        log.debug("Configure the server");
         EventLoopGroup group = new NioEventLoopGroup();
 
         try {

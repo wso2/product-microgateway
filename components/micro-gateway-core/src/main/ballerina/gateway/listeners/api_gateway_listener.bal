@@ -135,7 +135,7 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {
         config.httpVersion = "2.0";
-        io:println("httpVersion = " + config.httpVersion);
+        log:printDebug("httpVersion = " + config.httpVersion);
     }
 }
 

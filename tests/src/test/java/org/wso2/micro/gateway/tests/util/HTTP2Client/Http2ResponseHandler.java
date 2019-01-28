@@ -83,7 +83,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
             if (!promise.isSuccess()) {
                 throw new RuntimeException(promise.cause());
             }
-            log.info("Stream id: " + entry.getKey() + " received");
+            log.debug("Stream id: " + entry.getKey() + " received");
             itr.remove();
         }
     }
@@ -106,7 +106,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
                 int contentLength = content.readableBytes();
                 byte[] arr = new byte[contentLength];
                 content.readBytes(arr);
-                log.info(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
+                log.debug(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
             }
             entry.getValue().setSuccess();
         }
