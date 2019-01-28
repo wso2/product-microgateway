@@ -56,6 +56,7 @@ public class CodeGenerator {
      */
     public void generate(String projectName, List<ExtendedAPI> apis, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
+
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
@@ -67,7 +68,7 @@ public class CodeGenerator {
             swagger = parser.parse(api.getApiDefinition());
             definitionContext = new BallerinaService().buildContext(swagger, api);
             // we need to generate the bal service for default versioned apis as well
-            if(definitionContext.getApi().getIsDefaultVersion()) {
+            if (definitionContext.getApi().getIsDefaultVersion()) {
                 // without building the definitionContext again we use the same context to build default version as
                 // well. Hence setting the default version as false to generate the api with base path having version.
                 definitionContext.getApi().setIsDefaultVersion(false);
@@ -84,8 +85,6 @@ public class CodeGenerator {
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-
-
     }
 
     /**
@@ -93,15 +92,16 @@ public class CodeGenerator {
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      *
-     * @param projectName   name of the project being set up
-     * @param apiDef        api definition string
-     * @param endpointDef   endpoint definition string
-     * @param overwrite     whether existing files overwrite or not
+     * @param projectName         name of the project being set up
+     * @param apiDefinitions      api definitions
+     * @param endpointDefinitions endpoint definitions
+     * @param overwrite           whether existing files overwrite or not
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, String apiDef, String endpointDef, boolean overwrite)
+    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
+
         BallerinaService definitionContext;
         SwaggerParser parser;
         Swagger swagger;
@@ -109,17 +109,18 @@ public class CodeGenerator {
         List<GenSrcFile> genFiles = new ArrayList<>();
 
         parser = new SwaggerParser();
-        swagger = parser.parse(apiDef);
-        ExtendedAPI api = new ExtendedAPI();
-        api.setName(swagger.getInfo().getTitle());
-        api.setVersion(swagger.getInfo().getVersion());
-        api.setContext(swagger.getBasePath());
-        api.setEndpointConfig(endpointDef);
-        api.setTransport(Arrays.asList("http", "https"));
-        OpenApiCodegenUtils.setAdditionalConfigs(api);
-        definitionContext = new BallerinaService().buildContext(swagger, api);
-        genFiles.add(generateService(definitionContext));
-
+        for (int i = 0; i < apiDefinitions.length; i++) {
+            swagger = parser.parse(apiDefinitions[i]);
+            ExtendedAPI api = new ExtendedAPI();
+            api.setName(swagger.getInfo().getTitle());
+            api.setVersion(swagger.getInfo().getVersion());
+            api.setContext(swagger.getBasePath());
+            api.setEndpointConfig(endpointDefinitions[i]);
+            api.setTransport(Arrays.asList("http", "https"));
+            OpenApiCodegenUtils.setAdditionalConfigs(api);
+            definitionContext = new BallerinaService().buildContext(swagger, api);
+            genFiles.add(generateService(definitionContext));
+        }
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
@@ -137,6 +138,7 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateService(BallerinaService context) throws IOException {
+
         String concatTitle = context.getQualifiedServiceName();
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
@@ -151,6 +153,7 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateCommonEndpoints() throws IOException {
+
         String srcFile = GeneratorConstants.LISTENERS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
         String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
@@ -158,17 +161,17 @@ public class CodeGenerator {
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
-
     /**
      * Retrieve generated source content as a String value.
      *
-     * @param endpoints       context to be used by template engine
+     * @param endpoints    context to be used by template engine
      * @param templateDir  templates directory
      * @param templateName name of the template to be used for this code generation
      * @return String with populated template
      * @throws IOException when template population fails
      */
     private String getContent(Object endpoints, String templateDir, String templateName) throws IOException {
+
         Template template = CodegenUtils.compileTemplate(templateDir, templateName);
         Context context = Context.newBuilder(endpoints)
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
