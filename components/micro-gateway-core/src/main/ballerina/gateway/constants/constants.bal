@@ -327,7 +327,9 @@
 //http2 constants
 @Description { value: "HTTP2 related constants"}
 @final public string HTTP2_INSTANCE_ID = "http2";
-@final public string HTTP2_PROPERTY = "Enable";
+@final public string HTTP2_PROPERTY = "enable";
+@final public string HTTP2 = "2.0";
+@final public string HTTP11 = "1.1";
 
 
 // logging keys
