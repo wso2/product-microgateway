@@ -197,7 +197,6 @@ public class CodeGenerator {
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
-     *
      * @param projectName name of the project being set up
      * @param apiDef      api definition string
      * @param overwrite   whether existing files overwrite or not
