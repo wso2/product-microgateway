@@ -2,8 +2,6 @@ import wso2/gateway;
 import ballerina/http;
 import ballerina/log;
 
-
-
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 

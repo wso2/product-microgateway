@@ -34,7 +34,7 @@ public class EtcdClient {
     private String EtcdUserBasePath = EtcdAuthBasePath + "/user";
     private String EtcdRoleBasePath = EtcdAuthBasePath + "/role";
 
-    public EtcdClient(String host, String port){
+    public EtcdClient(String host, String port) {
         etcdUrl = "http://" + host + ":" + port;
     }
 
