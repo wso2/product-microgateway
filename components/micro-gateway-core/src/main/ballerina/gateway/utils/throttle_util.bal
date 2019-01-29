@@ -19,19 +19,49 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/log;
 
+map blockConditions;
 map throttleDataMap;
 public stream<RequestStreamDTO> requestStream;
 public stream<GlobalThrottleStreamDTO> globalThrottleStream;
 public boolean isStreamsInitialized;
 future ftr = start initializeThrottleSubscription();
 
+boolean blockConditionExist;
+boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
+    GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
+
+public function isBlockConditionExist(string key) returns (boolean) {
+    return blockConditions.hasKey(key);
+}
+public function isAnyBlockConditionExist() returns (boolean) {
+    return blockConditionExist;
+}
+public function putBlockCondition(map m) {
+    string condition = <string>m[BLOCKING_CONDITION_KEY];
+    string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
+    string conditionState = <string>m[BLOCKING_CONDITION_STATE];
+    if (conditionState == TRUE){
+        blockConditionExist = true;
+        blockConditions[conditionValue] = conditionValue;
+    } else {
+        _ = blockConditions.remove(conditionValue);
+        if (lengthof blockConditions.keys() == 0){
+            blockConditionExist = false;
+        }
+    }
+}
+
+//check whether throttle event is in the local map(request is throttled or not)
 public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
-    if (isThrottled) {
+    if (isThrottled){
         int currentTime = time:currentTime().time;
         GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
         int timeStamp = dto.expiryTimeStamp;
         boolean stopOnQuota = dto.stopOnQuota;
+        if (enabledGlobalTMEventPublishing == true){
+            stopOnQuota = true;
+        }
         if (timeStamp >= currentTime) {
             return (isThrottled, stopOnQuota);
         } else {
@@ -42,19 +72,35 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
     return (isThrottled, false);
 }
 
-public function publishNonThrottleEvent(RequestStreamDTO request) {
-    requestStream.publish(request);
-    printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
+
+public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
+
+    //Publish throttle event to traffic manager
+    if (enabledGlobalTMEventPublishing == true){
+        publishThrottleEventToTrafficManager(throttleEvent);
+        printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the traffic manager.");
+    }
+    //Publish throttle event to internal policies
+    else {
+        requestStream.publish(throttleEvent);
+        printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
+    }
+
 }
+
 function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
 }
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
-    printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey + ",isThrottled:"
-        + throttleEvent.isThrottled + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp);
+    printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey +
+            ",isThrottled:"
+            + throttleEvent.isThrottled + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp);
     if (throttleEvent.isThrottled){
         throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
+    }
+    else {
+        _ = throttleDataMap.remove(throttleEvent.throttleKey);
     }
 }
 
@@ -78,4 +124,12 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
     eventDTO.correlationData = "null";
     eventDTO.payloadData = getThrottlePayloadData(dto);
     return eventDTO;
+}
+
+
+public function putThrottleData(GlobalThrottleStreamDTO throttleEvent) {
+    throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
+}
+public function removeThrottleData(string key) {
+    _ = throttleDataMap.remove(key);
 }

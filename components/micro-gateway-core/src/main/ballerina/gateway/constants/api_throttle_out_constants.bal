@@ -19,6 +19,11 @@
 @final public int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
 @final public int INTERNAL_ERROR_CODE = 900808;
 @final public int INTERNAL_ERROR_CODE_POLICY_NOT_FOUND = 900809;
+@final public int BLOCKING_ERROR_CODE = 900805;
 
 @final public string THROTTLE_OUT_MESSAGE = "Message throttled out";
 @final public string THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";
+@final public string BLOCKING_MESSAGE = "Message blocked";
+@final public string BLOCKING_DESCRIPTION = "You have been blocked from accesing the resource";
+
+

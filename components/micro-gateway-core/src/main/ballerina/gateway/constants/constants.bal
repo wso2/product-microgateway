@@ -270,8 +270,6 @@
 // config constants
 @Description { value: "Key manager related configs" }
 @final public string KM_CONF_INSTANCE_ID = "keyManager";
-@Description { value: "Throttling related configs" }
-@final public string THROTTLE_CONF_INSTANCE_ID = "Throttling";
 @Description { value: "Key manager server URL parameter" }
 @final public string KM_SERVER_URL = "serverUrl";
 @Description { value: "Key manager oauth2 endpoint contexs" }
@@ -362,6 +360,23 @@
 @final public string RESPONSE_VALIDATION_ENABLED = "enableResponseValidation";
 @Description { value: "Absoulute path to swagger" }
 @final public string SWAGGER_ABSOLUTE_PATH = "absolutePathToSwagger";
+
+@Description { value: "Throttling related configs" }
+@final public string THROTTLE_CONF_INSTANCE_ID = "throttlingConfig";
+@Description { value: "Throttling global TM enabled or not " }
+@final public string GLOBAL_TM_EVENT_PUBLISH_ENABLED = "enabledGlobalTMEventPublishing";
+@Description { value: "jms Connection initial context factory " }
+@final public string JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "jmsConnectioninitialContextFactory";
+@Description { value: "jms Connection provider Url " }
+@final public string JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";
+@Description { value: "jms Connection username " }
+@final public string JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
+@Description { value: "jms Connection password " }
+@final public string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
+@Description { value: "Throttling TM Endpoint Url " }
+@final public string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
+@Description { value: "Throttling TM Endpoint Url base64 header " }
+@final public string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 
 // end of config constants
 

@@ -18,6 +18,8 @@
 package org.wso2.micro.gateway.tests.common;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -35,6 +37,8 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -74,6 +78,7 @@ public class MockHttpServer extends Thread {
     private String DCRRestAPIBasePath = "/client-registration/v0.14";
     private String PubRestAPIBasePath = "/api/am/publisher/v0.14";
     private String AdminRestAPIBasePath = "/api/am/admin/v0.14";
+    private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
     public final static String ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE = "[{\"description\":\"Grilled white chicken, " +
@@ -106,6 +111,7 @@ public class MockHttpServer extends Thread {
             " \"message\":\"Unprocessable entity\", \"description\":\"[\\\"44 is not the type, string\\\"]\"}}";
     public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, " +
             "\"message\":\"Unprocessable entity\", \"description\":\"[\\\"name is a required field\\\"]\"}}";
+    int count = 0;
 
     public static void main(String[] args) {
 
@@ -177,6 +183,29 @@ public class MockHttpServer extends Thread {
 
                     byte[] response = ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE.toString().getBytes();
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext(TMRestAPIBasePath + "/throttleEventReceiver", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    String jsonRequest = IOUtils.toString(exchange.getRequestBody());
+                    if (count == 9 || count == 19 || count == 29 || count == 39 || count == 49) {
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonRequest);
+                        JMSPublisher jmsPublisher = new JMSPublisher();
+
+                        try {
+                            jmsPublisher.getJson(jsonObject);
+                        } catch (JMSException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        } catch (NamingException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        }
+                    }
+                    count++;
+                    byte[] response = jsonRequest.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
