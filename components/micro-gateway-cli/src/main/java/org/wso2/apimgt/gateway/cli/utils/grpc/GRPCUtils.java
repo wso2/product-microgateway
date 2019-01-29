@@ -44,8 +44,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.*;
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.*;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.delete;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.saveFile;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.grantPermission;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.NEW_LINE_CHARACTER;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.META_LOCATION;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.TEMP_GOOGLE_DIRECTORY;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.EMPTY_STRING;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTOC_PLUGIN_EXE_URL_SUFFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTOC_PLUGIN_EXE_PREFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.TEMP_PROTOBUF_DIRECTORY;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.TEMP_COMPILER_DIRECTORY;
+
 /**
  * This class represents the "gRPC utils" functions and it holds functions to generate root descriptors.
  */
