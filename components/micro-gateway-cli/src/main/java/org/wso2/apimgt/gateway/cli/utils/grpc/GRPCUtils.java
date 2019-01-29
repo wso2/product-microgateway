@@ -28,7 +28,14 @@ import org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenToolException;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.DescriptorsGenerator;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.OSDetector;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
