@@ -308,7 +308,7 @@ public class Utils {
      * @param responseData The data which is expected as the response
      * @param responseCode The response code which is expected
      */
-    public static void assertResult(HttpResponse response, String responseData, int responseCode){
+    public static void assertResult(HttpResponse response, String responseData, int responseCode) {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
@@ -319,10 +319,10 @@ public class Utils {
      *
      * @param delayTime The time in milliseconds for the program to be delayed.
      */
-    public static void delay(int delayTime){
+    public static void delay(int delayTime) {
         try {
             Thread.sleep(delayTime);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }

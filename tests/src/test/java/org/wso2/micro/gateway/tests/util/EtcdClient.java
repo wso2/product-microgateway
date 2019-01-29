@@ -34,14 +34,13 @@ public class EtcdClient {
     private String EtcdUserBasePath = EtcdAuthBasePath + "/user";
     private String EtcdRoleBasePath = EtcdAuthBasePath + "/role";
 
-    public EtcdClient(String host, String port){
+    public EtcdClient(String host, String port) {
         etcdUrl = "http://" + host + ":" + port;
     }
 
     public String getEtcdUrl() {
         return etcdUrl;
     }
-
 
     public void createUser(String username, String password) throws Exception {
         Map<String, String> headers = new HashMap<>();

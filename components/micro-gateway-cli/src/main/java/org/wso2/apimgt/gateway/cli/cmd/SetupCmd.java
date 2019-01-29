@@ -354,9 +354,6 @@ public class SetupCmd implements GatewayLauncherCmd {
                     apis.add(api);
                 }
             }
-//            for (ExtendedAPI api : apis) {
-//                outStream.println("ID for API " + api.getName() + " : " + api.getId());
-//            }
             if (apis == null || (apis != null && apis.isEmpty())) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);

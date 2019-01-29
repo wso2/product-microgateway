@@ -1,18 +1,17 @@
-etcdKeyConfigValue = apiId + "_prod_etcdKey";
-                    etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished){
+etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
+                    if (etcdKey != "" && gateway:etcdConnectionEstablished) {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
+                        match hasUrlChanged {
                             boolean matchUrlChanged => reinitRequired = matchUrlChanged;
                             error err => log:printError("Error in checking for Re-initialization", err = err);
                         }
-                        if(reinitRequired){
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                        if (reinitRequired) {
+                            newConfig = { url : <string>gateway:etcdUrls[etcdKey] };
                             destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            try{
+                            try {
                                 {{qualifiedServiceName}}_prod.init(newConfig);
                                 gateway:urlChanged[etcdKey] = false;
-                            }catch(error err){
+                            } catch (error err) {
                                 reinitFailed = true;
                                 gateway:urlChanged[etcdKey] = true;
 
@@ -33,7 +32,7 @@ etcdKeyConfigValue = apiId + "_prod_etcdKey";
                         }
                     }
 
-                    if(!reinitFailed){
+                    if (!reinitFailed) {
                         clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                         runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                     }

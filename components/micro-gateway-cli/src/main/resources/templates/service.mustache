@@ -91,6 +91,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
                     {{>prodEndpointReinit}}
                 {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
@@ -99,6 +100,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 } else {
                     destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
                 {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_sand_etcdKey";
                     {{>sandEndpointReinit}}
                 {{else}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
@@ -110,6 +112,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
                 {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
                     {{>prodEndpointReinit}}
                 {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
@@ -132,6 +135,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
             {{#if etcd.etcdEnabled}}
+                etcdKeyConfigValue = apiId + "_sand_etcdKey";
                 {{>sandEndpointReinit}}
             {{else}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);

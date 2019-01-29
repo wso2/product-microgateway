@@ -354,23 +354,23 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     private void retryPolicy(String token, String responseData, int responseCode) throws Exception {
         boolean testPassed = false;
-        for(int retries = 0; retries < 5; retries++){
+        for (int retries = 0; retries < 5; retries++) {
             Utils.delay(1000);
             HttpResponse response = Utils.invokeApi(token, getServiceURLHttp(servicePath));
-            if(response.getData().equals(responseData) && response.getResponseCode() == responseCode){
+            if (response.getData().equals(responseData) && response.getResponseCode() == responseCode) {
                 testPassed = true;
                 break;
             }
         }
 
-        if(!testPassed){
+        if (!testPassed) {
             Assert.fail();
         }
     }
 
     @AfterMethod
     public void etcdInitialState() throws Exception {
-        if(!etcdAuthenticationEnabled) {
+        if (!etcdAuthenticationEnabled) {
             etcdClient.enableAuthentication();
         }
         String token = etcdClient.authenticate();
