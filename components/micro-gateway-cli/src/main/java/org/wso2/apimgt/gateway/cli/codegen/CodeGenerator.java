@@ -205,6 +205,9 @@ public class CodeGenerator {
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      *
+     * @param projectName name of the project being set up
+     * @param apiDef      api definition string
+     * @param overwrite   whether existing files overwrite or not
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
