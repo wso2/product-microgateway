@@ -124,11 +124,11 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = API_AUTH_INVALID_COOKIE_STRING_MESSAGE;
     } else if (errorCode == API_AUTH_NO_COOKIE_PROVIDED) {
         errorMessage = API_AUTH_NO_COOKIE_PROVIDED_STRING_MESSAGE;
-    } else if(errorCode == INVALID_ENTITY) {
+    } else if (errorCode == INVALID_ENTITY) {
         errorMessage = INVALID_ENTITY_MESSAGE;
-    } else if(errorCode == INVALID_RESPONSE) {
+    } else if (errorCode == INVALID_RESPONSE) {
         errorMessage = INVALID_RESPONSE_MESSAGE;
-    }else {
+    } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
     return errorMessage;

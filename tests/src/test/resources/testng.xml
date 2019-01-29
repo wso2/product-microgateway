@@ -41,7 +41,4 @@
             <class name="org.wso2.micro.gateway.tests.toolkit.ValidationTestCase"/>
         </classes>
     </test>
-
-
-
 </suite>

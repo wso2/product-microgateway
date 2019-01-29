@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.CLIExecutor;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
@@ -37,6 +41,7 @@ import java.util.Map;
 
 public class ValidationTestCase extends BaseTestCase {
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd, prodEndpoint, sandEndpoint;
+
     @BeforeClass
     public void start() throws Exception {
         String label = "apimTestLabel";
@@ -96,12 +101,12 @@ public class ValidationTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project,security);
+        cliExecutor.generate(label, project, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "validation.conf").getPath();
-        String[] args = { "--config", configPath };
+        String[] args = {"--config", configPath};
         microGWServer.startMicroGwServer(balPath, args);
     }
 
@@ -123,13 +128,15 @@ public class ValidationTestCase extends BaseTestCase {
         invokeInvalidResponse(jwtTokenSand, MockHttpServer.ERROR_MESSAGE_FOR_INVALID_RESPONSE, 500);
     }
 
-    private void invokeValidRequestAndValidResponse(String token, String responseData, int responseCode) throws Exception {
+    private void invokeValidRequestAndValidResponse(String token, String responseData, int responseCode) throws
+            Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.ACCEPT.toString(), "application/json");
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.ECHO_ENDPOINT_RESPONSE, headers);
+                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.ECHO_ENDPOINT_RESPONSE,
+                        headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
@@ -141,7 +148,8 @@ public class ValidationTestCase extends BaseTestCase {
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.INVALID_POSTBODY, headers);
+                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.INVALID_POSTBODY,
+                        headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
@@ -151,7 +159,7 @@ public class ValidationTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.ACCEPT.toString(), "application/json");
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-       org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);

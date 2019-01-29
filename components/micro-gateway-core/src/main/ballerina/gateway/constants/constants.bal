@@ -136,7 +136,6 @@
 @final public string MUTUAL_SSL_FILTER = "MUTUAL_SSL_FILTER";
 @final public string VALIDATION_FILTER = "VALIDATION_FILTER";
 
-
 @final public string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 @final public string KEY_TYPE_ATTR = "KEY_TYPE";
 @final public string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
@@ -214,8 +213,6 @@
 @Description { value: "Destination" }
 @final public string DESTINATION = "destination";
 
-
-
 //validation_filter related constatnts
 @Description { value: "Paths" }
 @final public string PATHS = "paths";
@@ -269,10 +266,6 @@
 @final public string SEPERATOR = ".";
 @Description { value: "Relative path for the src folder" }
 @final public string BASEPATH = "../../../src/";
-
-
-
-
 
 // config constants
 @Description { value: "Key manager related configs" }
@@ -370,7 +363,6 @@
 @Description { value: "Absoulute path to swagger" }
 @final public string SWAGGER_ABSOLUTE_PATH = "absolutePathToSwagger";
 
-
 // end of config constants
 
 @Description { value: "Is Throttled" }
@@ -394,7 +386,6 @@
 @final public int UNAUTHORIZED = 401;
 @final public int THROTTLED_OUT = 429;
 @final public int UNPROCESSABLE_ENTITY = 422;
-
 
 // end of http codes
 

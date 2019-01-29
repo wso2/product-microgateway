@@ -429,7 +429,7 @@ public class APIDetailedDTO extends APIInfoDTO {
         try {
             jsonSwagger = parser.parse(swagger).getAsJsonObject();
         } catch (JsonSyntaxException e) {
-            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject");
+            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject", e);
         }
         return jsonSwagger;
     }
@@ -441,6 +441,4 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
     }
-
-
 }

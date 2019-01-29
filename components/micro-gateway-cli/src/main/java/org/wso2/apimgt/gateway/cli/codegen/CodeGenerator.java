@@ -160,7 +160,13 @@ public class CodeGenerator {
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
-
+    /**
+     * Generate swagger files
+     *
+     * @param context model context to be used by the templates
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
     private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
         String concatTitle = context.getName();
         String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
@@ -168,6 +174,7 @@ public class CodeGenerator {
                 GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
+
     /**
      * Retrieve generated source content as a String value.
      *
