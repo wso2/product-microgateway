@@ -40,12 +40,12 @@ public function putBlockCondition(map m) {
     string condition = <string>m[BLOCKING_CONDITION_KEY];
     string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
     string conditionState = <string>m[BLOCKING_CONDITION_STATE];
-    if (conditionState == TRUE){
+    if (conditionState == TRUE) {
         blockConditionExist = true;
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if (lengthof blockConditions.keys() == 0){
+        if (lengthof blockConditions.keys() == 0) {
             blockConditionExist = false;
         }
     }
@@ -54,12 +54,12 @@ public function putBlockCondition(map m) {
 //check whether throttle event is in the local map(request is throttled or not)
 public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
-    if (isThrottled){
+    if (isThrottled) {
         int currentTime = time:currentTime().time;
         GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
         int timeStamp = dto.expiryTimeStamp;
         boolean stopOnQuota = dto.stopOnQuota;
-        if (enabledGlobalTMEventPublishing == true){
+        if (enabledGlobalTMEventPublishing == true) {
             stopOnQuota = true;
         }
         if (timeStamp >= currentTime) {
@@ -72,11 +72,9 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
     return (isThrottled, false);
 }
 
-
 public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
-
     //Publish throttle event to traffic manager
-    if (enabledGlobalTMEventPublishing == true){
+    if (enabledGlobalTMEventPublishing == true) {
         publishThrottleEventToTrafficManager(throttleEvent);
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the traffic manager.");
     }
@@ -85,7 +83,6 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
         requestStream.publish(throttleEvent);
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
     }
-
 }
 
 function initializeThrottleSubscription() {
@@ -125,7 +122,6 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
     eventDTO.payloadData = getThrottlePayloadData(dto);
     return eventDTO;
 }
-
 
 public function putThrottleData(GlobalThrottleStreamDTO throttleEvent) {
     throttleDataMap[throttleEvent.throttleKey] = throttleEvent;

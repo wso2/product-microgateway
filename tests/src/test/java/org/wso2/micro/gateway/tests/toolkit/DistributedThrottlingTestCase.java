@@ -22,7 +22,12 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.JMSPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.CLIExecutor;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
@@ -35,7 +40,6 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class DistributedThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
@@ -63,7 +67,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         String[] args1 = {"--config", configPath1};
         microGWServer.startMicroGwServer(balPath, args1);
     }
-
 
     @BeforeClass
     private void start() throws Exception {
@@ -122,7 +125,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         jwtToken2 = getJWT(api, application2, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         continueOnQuotaToken = getJWT(api, application3, subPolicyContinueOnLimit.getPolicyName(),
                 TestConstant.KEY_TYPE_PRODUCTION, 3600);
-
 
         KeyValidationInfo info = new KeyValidationInfo();
         info.setApi(api);
@@ -259,9 +261,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         mockHttpServer.stopIt();
         microGWServer.stopServer(false);
         MockAPIPublisher.getInstance().clear();
-        //jmsPublisher.stopMessageBroker();
-
-
     }
 
     @AfterClass

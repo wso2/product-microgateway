@@ -21,16 +21,20 @@ import com.google.gson.JsonObject;
 import io.ballerina.messaging.broker.EmbeddedBroker;
 import org.wso2.micro.gateway.tests.util.ClientHelper;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Session;
+import javax.jms.Topic;
+import javax.jms.MapMessage;
+import javax.jms.MessageProducer;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Date;
 
-
 /**
  * JMS publisher to publish throttled data to throttleData
  */
-
 public class JMSPublisher {
     public static EmbeddedBroker broker = new EmbeddedBroker();
 
@@ -39,7 +43,6 @@ public class JMSPublisher {
     }
 
     public void getJson(JsonObject jsonObject) throws JMSException, NamingException {
-
         String appKey = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData").get("appKey").getAsString();
         String subscriptionKey = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData")
                 .get("subscriptionKey").getAsString();
@@ -49,7 +52,6 @@ public class JMSPublisher {
         String subscriptionTier = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData").
                 get("subscriptionTier").getAsString();
 
-
         if (appTier.equals("10MinAppPolicy")) {
             publishMessage(appKey);
         } else if (subscriptionTier.equals("10MinSubPolicy") || subscriptionTier.equals("Unauthenticated")) {
@@ -58,7 +60,6 @@ public class JMSPublisher {
     }
 
     public void publishMessage(String msg) throws NamingException, JMSException {
-
         String topicName = "throttleData";
         InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
                 "localhost", "5672")
@@ -66,35 +67,21 @@ public class JMSPublisher {
                 .build();
         ConnectionFactory connectionFactory
                 = (ConnectionFactory) initialContext.lookup(ClientHelper.CONNECTION_FACTORY);
-
         Connection connection = connectionFactory.createConnection();
-
         connection.start();
 
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         Topic topic = (Topic) initialContext.lookup(topicName);
-
-
         MessageProducer producer = session.createProducer(topic);
-        MapMessage mapMessage = session.createMapMessage();
 
+        MapMessage mapMessage = session.createMapMessage();
         mapMessage.setString("throttleKey", msg);
         Date date = new Date();
-
         long time = date.getTime() + 1000;
         mapMessage.setLong("expiryTimeStamp", time);
-
         mapMessage.setBoolean("isThrottled", true);
         producer.send(mapMessage);
 
         connection.close();
     }
-
-
 }
-
-
-
-
-
-

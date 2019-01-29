@@ -60,7 +60,7 @@ service<jms:Consumer> jmsListener bind subscriberEndpoint {
                     globalThrottleStreamDtoTM.isThrottled = check <boolean>m[IS_THROTTLED];
                     globalThrottleStreamDtoTM.expiryTimeStamp = check <int>m[EXPIRY_TIMESTAMP];
 
-                    if (globalThrottleStreamDtoTM.isThrottled == true){
+                    if (globalThrottleStreamDtoTM.isThrottled == true) {
                         putThrottleData(globalThrottleStreamDtoTM);
                     } else {
                         removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
@@ -68,7 +68,6 @@ service<jms:Consumer> jmsListener bind subscriberEndpoint {
                     //Blocking decisions going to a separate map
                 } else if (m.hasKey(BLOCKING_CONDITION_KEY)){
                     putBlockCondition(m);
-
                 }
             }
             error e => log:printError("Error occurred while reading message", err = e);
