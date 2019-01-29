@@ -20,7 +20,6 @@ package org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen;
 
 /**
  * Thrown to indicate that the requested field type is not supported.
- *
  */
 public class BalGenToolException extends RuntimeException {
 
@@ -36,8 +35,8 @@ public class BalGenToolException extends RuntimeException {
     /**
      * Constructs a new exception with the specified detail message and cause.
      *
-     * @param  message the detail message
-     * @param  cause the cause
+     * @param message the detail message
+     * @param cause   the cause
      */
     public BalGenToolException(String message, Throwable cause) {
         super(message, cause);
@@ -46,7 +45,7 @@ public class BalGenToolException extends RuntimeException {
     /**
      * Constructs a new exception with the specified cause.
      *
-     * @param  cause the cause
+     * @param cause the cause
      */
     public BalGenToolException(Throwable cause) {
         super(cause);
