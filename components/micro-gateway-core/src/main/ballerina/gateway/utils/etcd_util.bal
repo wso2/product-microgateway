@@ -39,8 +39,7 @@ string etcdKVBasePath = "/v3alpha/kv";
 string etcdAuthBasePath = "/v3alpha/auth";
 
 @Description {value:"Setting up etcd timer task"}
-public function initiateEtcdTimerTask()
-{
+public function initiateEtcdTimerTask() {
     printDebug(KEY_ETCD_UTIL, "initiateEtcdTimerTask Called");
     int etcdTriggerTime = config:getAsInt("etcdtimer", default = DEFAULT_ETCD_TRIGGER_TIME);
     (function() returns error?) onTriggerFunction = etcdTimerTask;
@@ -56,7 +55,6 @@ public function etcdTimerTask() returns error? {
     if (etcdUrls.count() > 0) {
         printDebug(KEY_ETCD_UTIL, "etcdurl map values - start");
         foreach key, value in etcdUrls {
-
             string currentUrl = <string>value;
             string fetchedUrl = etcdLookup(<string>key);
 
@@ -124,8 +122,7 @@ public function establishEtcdConnection() {
     if (etcdurl != "") {
         printDebug(KEY_ETCD_UTIL, "etcdurl CLI parameter has been provided");
         etcdAuthenticate();
-    }
-    else {
+    } else {
         printError(KEY_ETCD_UTIL, "etcdurl CLI parameter has not been provided");
         etcdConnectionEstablished = false;
     }
@@ -189,7 +186,7 @@ public function etcdAuthenticate() {
     string username = retrieveConfig("etcdusername", "");
     string password = retrieveConfig("etcdpassword", "");
 
-    if(username == "" && password == ""){
+    if (username == "" && password == "") {
         printDebug(KEY_ETCD_UTIL, "etcdusername and etcdpassword CLI parameters has not been provided");
         credentialsProvided = false;
     } else {
@@ -206,7 +203,7 @@ public function etcdAuthenticate() {
             var msg = resp.getJsonPayload();
             match msg {
                 json jsonPayload => {
-                    if(jsonPayload.token!= null){
+                    if (jsonPayload.token != null) {
                         printDebug(KEY_ETCD_UTIL, "etcd has responded with a token");
                         var token = <string>jsonPayload.token;
                         match token {
@@ -221,20 +218,20 @@ public function etcdAuthenticate() {
                             }
                         }
                     }
-                    if(jsonPayload.error!=null){
+                    if (jsonPayload.error != null) {
                         printDebug(KEY_ETCD_UTIL, "etcd has responded with an error");
                         var authenticationError = <string>jsonPayload.error;
                         match authenticationError {
                             string value => {
-                                if(value.contains("authentication is not enabled")){
+                                if (value.contains("authentication is not enabled")) {
                                     printDebug(KEY_ETCD_UTIL, "etcd authentication is not enabled");
                                     etcdAuthenticationEnabled = false;
                                     etcdConnectionEstablished = true;
-                                    if(credentialsProvided){
+                                    if (credentialsProvided) {
                                         printInfo(KEY_ETCD_UTIL, value);
                                     }
                                 }
-                                if(value.contains("authentication failed, invalid user ID or password")){
+                                if (value.contains("authentication failed, invalid user ID or password")) {
                                     etcdConnectionEstablished = false;
                                     printError(KEY_ETCD_UTIL, value);
                                 }

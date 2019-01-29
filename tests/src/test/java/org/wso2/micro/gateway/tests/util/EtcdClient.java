@@ -42,7 +42,6 @@ public class EtcdClient {
         return etcdUrl;
     }
 
-
     public void createUser(String username, String password) throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), TestConstant.CONTENT_TYPE_TEXT_PLAIN);

@@ -1,18 +1,17 @@
-etcdKeyConfigValue = apiId + "_Production_etcdKey";
-                    etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
-                    if(etcdKey != "" && gateway:etcdConnectionEstablished){
+etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
+                    if (etcdKey != "" && gateway:etcdConnectionEstablished) {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged{
+                        match hasUrlChanged {
                             boolean matchUrlChanged => reinitRequired = matchUrlChanged;
                             error err => log:printError("Error in checking for Re-initialization", err = err);
                         }
-                        if(reinitRequired){
-                            newConfig = {url:<string>gateway:etcdUrls[etcdKey]};
+                        if (reinitRequired) {
+                            newConfig = { url : <string>gateway:etcdUrls[etcdKey] };
                             destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            try{
+                            try {
                                 {{qualifiedServiceName}}_Production.init(newConfig);
                                 gateway:urlChanged[etcdKey] = false;
-                            }catch(error err){
+                            } catch (error err) {
                                 reinitFailed = true;
                                 gateway:urlChanged[etcdKey] = true;
 
@@ -25,6 +24,7 @@ etcdKeyConfigValue = apiId + "_Production_etcdKey";
                                         "description": "URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid"
                                     }
                                 };
+
                                 runtime:getInvocationContext().attributes["error_code"] = "101505";
                                 res.setPayload(payload);
                                 clientResponse = res;
@@ -33,7 +33,7 @@ etcdKeyConfigValue = apiId + "_Production_etcdKey";
                         }
                     }
 
-                    if(!reinitFailed){
+                    if (!reinitFailed) {
                         clientResponse = {{qualifiedServiceName}}_Production->forward(urlPostfix, req);
                         runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                     }
