@@ -86,6 +86,12 @@
 
 @final public string DESCRIPTION_SEPARATOR = ". ";
 
+@final public  int INVALID_ENTITY = 900915;
+@final public  string INVALID_ENTITY_MESSAGE = "Unprocessable entity";
+
+@final public  int INVALID_RESPONSE = 900916;
+@final public  string INVALID_RESPONSE_MESSAGE = "Unprocessable entity";
+
 public function getAuthenticationFailureMessage(int errorCode) returns string {
     string errorMessage;
     if (errorCode == API_AUTH_ACCESS_TOKEN_EXPIRED) {
@@ -118,6 +124,10 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = API_AUTH_INVALID_COOKIE_STRING_MESSAGE;
     } else if (errorCode == API_AUTH_NO_COOKIE_PROVIDED) {
         errorMessage = API_AUTH_NO_COOKIE_PROVIDED_STRING_MESSAGE;
+    } else if (errorCode == INVALID_ENTITY) {
+        errorMessage = INVALID_ENTITY_MESSAGE;
+    } else if (errorCode == INVALID_RESPONSE) {
+        errorMessage = INVALID_RESPONSE_MESSAGE;
     } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
