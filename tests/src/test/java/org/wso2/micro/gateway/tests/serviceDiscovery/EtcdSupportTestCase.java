@@ -46,8 +46,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String etcdUsernameParameter;
     private String etcdPasswordParameter;
     private String pizzaShackEndpointSandConfigValue;
-    private String base64EncodedpizzaShackEndpointProdPrefix;
-    private String base64EncodedpizzaShackEndpointSandPrefix;
     private String pizzaShackProdConfigValue;
     private String pizzaShackProdEtcdKey = "pizzashackprod";
     private String pizzaShackProdParameter;
@@ -67,7 +65,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101505\", \"message\":\"Runtime Error\", \"description\":\"URL defined at etcd for key pizzashackprod is invalid\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
-    private String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
 
     @BeforeClass
     public void start() throws Exception {
@@ -141,6 +138,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String etcdKeySuffix = "etcdKey";
         String prodUrlType = "Production";
         String sandUrlType = "Sandbox";
+        String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
         pizzaShackEndpointSandConfigValue = apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
         pizzaShackProdConfigValue = apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
         pizzaShackSandConfigValue = apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
@@ -355,23 +353,23 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     private void retryPolicy(String token, String responseData, int responseCode) throws Exception {
         boolean testPassed = false;
-        for(int retries = 0; retries < 5; retries++){
+        for (int retries = 0; retries < 5; retries++) {
             Utils.delay(1000);
             HttpResponse response = Utils.invokeApi(token, getServiceURLHttp(servicePath));
-            if(response.getData().equals(responseData) && response.getResponseCode() == responseCode){
+            if (response.getData().equals(responseData) && response.getResponseCode() == responseCode) {
                 testPassed = true;
                 break;
             }
         }
 
-        if(!testPassed){
+        if (!testPassed) {
             Assert.fail();
         }
     }
 
     @AfterMethod
     public void etcdInitialState() throws Exception {
-        if(!etcdAuthenticationEnabled) {
+        if (!etcdAuthenticationEnabled) {
             etcdClient.enableAuthentication();
         }
         String token = etcdClient.authenticate();

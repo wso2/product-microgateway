@@ -99,6 +99,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{inline.endpointConfig.list.0.url}}";
                 {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_Production_etcdKey";
                     {{>prodEndpointReinit}}
                 {{else}}
                     clientResponse = {{qualifiedServiceName}}_Production->forward(urlPostfix, req);
@@ -110,6 +111,7 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 else {
                     destination_attribute = "{{inline.endpointConfig.list.0.url}}";
                 {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_Sandbox_etcdKey";
                     {{>sandEndpointReinit}}
                 {{else}}
                     clientResponse = {{qualifiedServiceName}}_Sandbox->forward(urlPostfix, req);
