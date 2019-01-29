@@ -208,7 +208,7 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generateGrpc(String projectName, String apiDef, String endpointDef, boolean overwrite)
+    public void generateGrpc(String projectName, String apiDef, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         String projectSrcPath = GatewayCmdUtils
@@ -219,21 +219,22 @@ public class CodeGenerator {
         File[] files = dir.listFiles();
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
+
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+
         for (File file : dir.listFiles()) {
             String filePath = file.getAbsolutePath();
             String fileName = file.getName();
             FileSystem fileSys = FileSystems.getDefault();
             Path source = fileSys.getPath(filePath);
             Path destination = fileSys.getPath(projectSrcPath + File.separator + fileName);
-            Files.move(source , destination, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
         }
+
         File temp = new File(GatewayCmdUtils.getProjectGrpcSoloDirectoryPath());
-        boolean k =dir.delete();
-        boolean m = temp.delete();
-        System.out.println(k);
-        System.out.println(m);
+        dir.delete();
+        temp.delete();
     }
 }

@@ -231,10 +231,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                         }
                     }
-                    endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
-                            "\"},\"endpoint_type\":\"http\"}";
                 }
-                codeGenerator.generateGrpc(projectName, api, endpointConfig, true);
+                codeGenerator.generateGrpc(projectName, api, true);
                 //Initializing the ballerina project and creating .bal folder.
                 logger.debug("Creating source artifacts");
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,

@@ -31,6 +31,7 @@ import org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.OSDetector;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ import java.util.Locale;
 
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.*;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.*;
-
+/**
+ * This class represents the "gRPC utils" functions and it holds functions to generate root descriptors.
+ */
 public class GRPCUtils {
 
     private final String protoPath;
@@ -55,19 +58,26 @@ public class GRPCUtils {
     private String protocVersion = "3.4.0";
 
     public void execute() {
-        if (protoPath == null || !protoPath.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
-            String errorMessage = "Invalid proto file path. Please input valid proto file location.";
+        //if the file location is empty this error will throw
+        if (protoPath == null ) {
+            String errorMessage = "Invalid proto file path. Please provide valid proto file location.";
             outStream.println(errorMessage);
             throw new BalGenToolException(errorMessage);
         }
-
+        //if the file type is not .proto file type, then this error will throw
+        if (!protoPath.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
+            String errorMessage = "Invalid file type. Please provide valid proto type file.";
+            outStream.println(errorMessage);
+            throw new BalGenToolException(errorMessage);
+        }
+        //if the file can not be read this error will throw
         if (!Files.isReadable(Paths.get(protoPath))) {
             String errorMessage = "Provided service proto file is not readable. Please input valid proto file " +
                     "location.";
             outStream.println(errorMessage);
             throw new BalGenToolException(errorMessage);
         }
-
+        //Download protoc executor
         try {
             downloadProtocexe();
         } catch (BalGenToolException e) {
@@ -78,17 +88,15 @@ public class GRPCUtils {
         File descFile = createTempDirectory();
         StringBuilder msg = new StringBuilder();
         outStream.println("Initializing the gateway proxy code generation.");
-
         byte[] root;
         List<byte[]> dependant;
-
         try {
             ClassLoader classLoader = this.getClass().getClassLoader();
             List<String> protoFiles = readProperties(classLoader);
             for (String file : protoFiles) {
                 try {
                     exportResource(file, classLoader);
-                } catch (Exception e) {
+                } catch (BalGenToolException|BalGenerationException e) {
                     msg.append("Error extracting resource file ").append(file).append(NEW_LINE_CHARACTER);
                     outStream.println(msg.toString());
                     LOG.error("Error exacting resource file " + file, e);
@@ -200,13 +208,10 @@ public class GRPCUtils {
         if (!metadataHome.exists() && !metadataHome.mkdir()) {
             throw new IllegalStateException("Couldn't create dir: " + metadataHome);
         }
-
         File googleHome = new File(TEMP_GOOGLE_DIRECTORY);
         createTempDirectory(googleHome);
-
         File protobufHome = new File(googleHome, TEMP_PROTOBUF_DIRECTORY);
         createTempDirectory(protobufHome);
-
         File compilerHome = new File(protobufHome, TEMP_COMPILER_DIRECTORY);
         createTempDirectory(compilerHome);
 
