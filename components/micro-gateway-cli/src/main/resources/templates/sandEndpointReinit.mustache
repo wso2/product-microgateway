@@ -19,12 +19,12 @@ etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
                                 res.statusCode = 500;
                                 json payload = {
                                     "fault": {
-                                        "code": "101505",
+                                        "code": "101503",
                                         "message": "Runtime Error",
-                                        "description": "URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid"
+                                        "description": "Error connecting to the back end"
                                     }
                                 };
-                                runtime:getInvocationContext().attributes["error_code"] = "101505";
+                                runtime:getInvocationContext().attributes["error_code"] = "101503";
                                 res.setPayload(payload);
                                 clientResponse = res;
                                 log:printError("URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid");

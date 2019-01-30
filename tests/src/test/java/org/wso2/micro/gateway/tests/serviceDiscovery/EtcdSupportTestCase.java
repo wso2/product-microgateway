@@ -27,6 +27,7 @@ import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.JMSPublisher;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
@@ -61,7 +62,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String base64EncodedPizzaShackProdNewValue;
     private String base64EncodedPizzaShackSandNewValue;
     private String servicePath = "/pizzashack/1.0.0/menu";
-    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101505\", \"message\":\"Runtime Error\", \"description\":\"URL defined at etcd for key pizzashackprod is invalid\"}}";
+    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101503\", \"message\":\"Runtime Error\", \"description\":\"Error connecting to the back end\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
 
@@ -97,6 +98,9 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
+
+        JMSPublisher jmsPublisher = new JMSPublisher();
+        jmsPublisher.startMessageBroker();
 
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
