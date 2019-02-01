@@ -35,7 +35,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.*;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.DESC_SUFFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.EMPTY_STRING;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 
 /**
@@ -193,7 +195,7 @@ public class BalFileGenerationUtils {
     }
 
     /**
-     * Sae generated intermediate files.
+     * Save generated intermediate files.
      *
      * @param url  file URL
      * @param file destination file location
@@ -205,8 +207,6 @@ public class BalFileGenerationUtils {
             while ((length = in.read(buffer)) > -1) {
                 fos.write(buffer, 0, length);
             }
-            fos.close();
-            in.close();
         } catch (IOException e) {
             throw new BalGenToolException("Error saving file '" + file + "'.", e);
         }
