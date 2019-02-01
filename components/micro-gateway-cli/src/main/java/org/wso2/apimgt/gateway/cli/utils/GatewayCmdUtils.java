@@ -35,7 +35,6 @@ import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.BufferedReader;
