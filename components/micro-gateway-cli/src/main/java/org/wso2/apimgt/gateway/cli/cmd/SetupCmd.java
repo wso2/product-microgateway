@@ -30,9 +30,20 @@ import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.config.Client;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
+import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Token;
+import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -125,6 +136,8 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
+    @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
+    private boolean isEtcdEnabled;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -152,6 +165,12 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
 
         init(projectName, toolkitConfigPath, deploymentConfigPath);
+
+        //set etcd requirement
+        Etcd etcd = new Etcd();
+        etcd.setEtcdEnabled(isEtcdEnabled);
+        GatewayCmdUtils.setEtcd(etcd);
+        logger.debug("Etcd is enabled : " + isEtcdEnabled);
 
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;

@@ -472,3 +472,25 @@ public function checkExpectHeaderPresent(http:Request request) {
 
     }
 }
+
+@Description { value: "Encode a given value to base64 format" }
+public function encodeValueToBase64(string value) returns string {
+    string encodedValue;
+    var result = value.base64Encode(charset = "utf-8");
+    match result {
+        string matchedResult => encodedValue = matchedResult;
+        error err => printError(KEY_UTILS, err.message);
+    }
+    return encodedValue;
+}
+
+@Description { value: "Decode a given base64value to base10 format" }
+public function decodeValueToBase10(string value) returns string {
+    string decodedValue;
+    var result = value.base64Decode(charset = "utf-8");
+    match result {
+        string matchedResult => decodedValue = untaint matchedResult;
+        error err => printError(KEY_UTILS, err.message);
+    }
+    return decodedValue;
+}

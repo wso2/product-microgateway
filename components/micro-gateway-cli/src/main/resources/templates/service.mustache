@@ -7,6 +7,7 @@ import ballerina/time;
 
 import wso2/gateway;
 
+
 {{#equals endpointConfig.endpointType "http"}}
 {{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
@@ -76,21 +77,47 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
         http:Response|error clientResponse;
+        string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
+        {{#if etcd.etcdEnabled}}boolean reinitRequired;
+        string etcdKey;
+        string etcdKeyConfigValue;
+        boolean|error hasUrlChanged;
+        http:ClientEndpointConfig newConfig;
+        boolean reinitFailed = false;
+        string apiId = "{{api.id}}";{{/if}}
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
+                    {{>prodEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 } else {
+                    destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_sand_etcdKey";
+                    {{>sandEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
+                    {{>prodEndpointReinit}}
+                {{else}}
                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 } else {
                     http:Response res = new;
                     res.statusCode = 403;
@@ -106,8 +133,14 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+            {{#if etcd.etcdEnabled}}
+                etcdKeyConfigValue = apiId + "_sand_etcdKey";
+                {{>sandEndpointReinit}}
+            {{else}}
                 clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                runtime:getInvocationContext().attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+            {{/if}}
             } else {
                 http:Response res = new;
                 res.statusCode = 403;
@@ -139,6 +172,10 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
                 if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
                     errorCode = 101504;
                     errorDescription = "Connection timed out";
+                }
+                if(errorMessage.contains("Malformed URL")) {
+                    errorCode = 101505;
+                    errorDescription = <string>err.description;
                 }
                 runtime:getInvocationContext().attributes["error_response"] = err;
                 runtime:getInvocationContext().attributes["error_response_code"] = errorCode;

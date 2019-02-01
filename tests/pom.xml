@@ -167,6 +167,92 @@
         </extensions>
         <plugins>
             <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>start-docker-for-etcd</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-docker-for-etcd</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                            <goal>remove</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>mgw-etcd</alias>
+                            <name>quay.io/coreos/etcd:latest</name>
+                            <run>
+                                <namingStrategy>alias</namingStrategy>
+                                <cmd>
+                                    <exec>
+                                        <arg>/usr/local/bin/etcd</arg>
+                                        <arg>--advertise-client-urls</arg>
+                                        <arg>http://127.0.0.1:2379</arg>
+                                        <arg>--listen-client-urls</arg>
+                                        <arg>http://0.0.0.0:2379</arg>
+                                    </exec>
+                                </cmd>
+                                <ports>
+                                    <port>2379:2379</port>
+                                </ports>
+                            </run>
+                        </image>
+                    </images>
+                    <skip>${skipITs}</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+                <executions>
+                    <execution>
+                        <id>integration-test-for-etcd</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify-for-etcd</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <environmentVariables>
+                        <ETCD_HOST>127.0.0.1</ETCD_HOST>
+                        <PORT>2379</PORT>
+                    </environmentVariables>
+                    <systemPropertyVariables>
+                        <server.zip>
+                            ${basedir}/../distribution/target/wso2am-micro-gw-${project.version}.zip
+                        </server.zip>
+                        <project.build.directory>${project.build.directory}</project.build.directory>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+                        <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
+                        <javax.net.ssl.trustStorePassword>ballerina</javax.net.ssl.trustStorePassword>
+                    </systemPropertyVariables>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testngEtcd.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -205,6 +291,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <skipTests>${maven.test.skip}</skipTests>
+        <skipITs>${skipTests}</skipITs>
+    </properties>
 
 
 </project>
