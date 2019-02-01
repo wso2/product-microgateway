@@ -70,6 +70,10 @@ public final class Http2Handler extends Http2ConnectionHandler implements Http2F
     /**
      * Handles the cleartext HTTP upgrade event. If an upgrade occurred, sends a simple response via HTTP/2
      * on stream 1 (the stream specifically reserved for cleartext HTTP upgrade).
+     *
+     * @param ctx - Context of the ChannelHandler
+     * @param evt - HTTP upgrade event
+     * @throws java.lang.Exception If an error occurs while upgrading the event
      */
     @Override
     public void userEventTriggered
