@@ -35,13 +35,14 @@ import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -83,7 +84,7 @@ public class GatewayCmdUtils {
     /**
      * Read file as string
      *
-     * @param path to the file
+     * @param path       to the file
      * @param inResource whether file is in resources directory of jar or not
      * @return file content
      * @throws IOException if file read went wrong
@@ -198,8 +199,7 @@ public class GatewayCmdUtils {
         String currentDirProp = System.getProperty(GatewayCliConstants.SYS_PROP_CURRENT_DIR);
         if (currentDirProp != null) {
             return currentDirProp;
-        }
-        else {
+        } else {
             return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
         }
     }
@@ -262,7 +262,7 @@ public class GatewayCmdUtils {
 
     /**
      * Get temp folder location
-     * 
+     *
      * @param projectName name of the project
      * @return temp folder location
      */
@@ -294,7 +294,7 @@ public class GatewayCmdUtils {
     /**
      * Create a micro gateway distribution for the provided project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException erro while creating micro gateway distribution
      */
     public static void createProjectGWDistribution(String projectName) throws IOException {
@@ -326,7 +326,7 @@ public class GatewayCmdUtils {
     /**
      * Creates the distribution structure for the project name
      *
-     * @param projectName   name of the label
+     * @param projectName name of the label
      */
     private static void createTargetGatewayDistStructure(String projectName) {
         //path : {projectName}/target
@@ -384,7 +384,7 @@ public class GatewayCmdUtils {
     /**
      * Saves the resource hash content to the CLI temp folder
      *
-     * @param content resource hash content
+     * @param content     resource hash content
      * @param projectName name of the project
      * @throws IOException error while saving resource hash content
      */
@@ -409,13 +409,13 @@ public class GatewayCmdUtils {
 
     /**
      * Validate the list of main args and returns the first element as the project name
-     * 
+     *
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
-    public static String getProjectName (List<String> mainArgs) {
+    public static String getProjectName(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
-            throw new CLIRuntimeException("Only one argument accepted as the project name, " 
+            throw new CLIRuntimeException("Only one argument accepted as the project name, "
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
@@ -424,7 +424,7 @@ public class GatewayCmdUtils {
 
     /**
      * Get resource hash holder file path
-     * 
+     *
      * @param projectName name of the project
      * @return resource hash holder file path
      */
@@ -436,7 +436,7 @@ public class GatewayCmdUtils {
     /**
      * Get the distribution path for a given project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @return distribution path for a given project name
      */
     private static String getTargetDistPath(String projectName) {
@@ -446,7 +446,7 @@ public class GatewayCmdUtils {
     /**
      * Get the gateway distribution path for a given project name
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @return gateway distribution path for a given project name
      */
     private static String getTargetGatewayDistPath(String projectName) {
@@ -456,7 +456,7 @@ public class GatewayCmdUtils {
     /**
      * Copies shell scripts to the distribution location
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException error while coping scripts
      */
     private static void copyTargetDistBinScripts(String projectName) throws IOException {
@@ -466,19 +466,19 @@ public class GatewayCmdUtils {
 
         String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
         linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File shPathFile = new File(binDir+GatewayCliConstants.GW_DIST_SH);
+        File shPathFile = new File(binDir + GatewayCliConstants.GW_DIST_SH);
         saveScript(linuxShContent, shPathFile);
 
         String winBatContent = readFileAsString(GatewayCliConstants.GW_DIST_BAT_PATH, true);
         winBatContent = winBatContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File batPathFile = new File(binDir+GatewayCliConstants.GW_DIST_BAT);
+        File batPathFile = new File(binDir + GatewayCliConstants.GW_DIST_BAT);
         saveScript(winBatContent, batPathFile);
     }
 
     /**
      * Copies balx binaries to the distribution location
      *
-     * @param projectName   name of the project
+     * @param projectName name of the project
      * @throws IOException error while coping balx files
      */
     private static void copyTargetDistBalx(String projectName) throws IOException {
@@ -547,6 +547,27 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /grpc_service/client of a given project in the current working directory
+     *
+     * @return path to the /grpc_service/client of a given project in the current working directory
+     */
+    public static String getProjectGrpcDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME + File.separator +
+                GatewayCliConstants.PROJECTS_GRPC_CLIENT_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /grpc_service of a given project in the current working directory
+     *
+     * @return path to the /grpc_service of a given project in the current working directory
+     */
+    public static String getProjectGrpcSoloDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME;
+    }
+
+    /**
      * Returns path to the /target of a given project in the current working directory
      *
      * @param projectName name of the project
@@ -584,9 +605,9 @@ public class GatewayCmdUtils {
     /**
      * Cleans the given folder by deleting a set of specified files
      *
-     * @param targetPath    path of folder to clean
-     * @param delete          files to delete
-     * @throws IOException  error while cleaning the folder
+     * @param targetPath path of folder to clean
+     * @param delete     files to delete
+     * @throws IOException error while cleaning the folder
      */
     private static void cleanFolder(String targetPath, String... delete) throws IOException {
         File targetFolder = new File(targetPath);
@@ -697,7 +718,7 @@ public class GatewayCmdUtils {
      * Write content to a specified file
      *
      * @param content content to be written
-     * @param file file object initialized with path
+     * @param file    file object initialized with path
      * @throws IOException error while writing content to file
      */
     private static void writeContent(String content, File file) throws IOException {
@@ -715,7 +736,7 @@ public class GatewayCmdUtils {
     /**
      * Creates file if not exist
      *
-     * @param path folder path
+     * @param path     folder path
      * @param fileName name of the file
      */
     private static void createFileIfNotExist(String path, String fileName) {
@@ -738,16 +759,16 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath', 
-     *  it will be taken as the deployment configuration. Otherwise, a default configuration will be copied. 
+     * Create initial deployment configuration file. If external file is provided using 'deploymentConfPath',
+     * it will be taken as the deployment configuration. Otherwise, a default configuration will be copied.
      *
-     * @param projectName project name
+     * @param projectName        project name
      * @param deploymentConfPath path to deployment config
      * @throws IOException if file create went wrong
      */
     public static void createDeploymentConfig(String projectName, String deploymentConfPath)
             throws IOException {
-        
+
         String depConfig = getProjectConfigDirPath(projectName) + File.separator
                 + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
         File file = new File(depConfig);
@@ -814,6 +835,7 @@ public class GatewayCmdUtils {
 
     /**
      * Replace backslashes `\` in windows path string with forward slashes `/`
+     *
      * @param path Location of a resource (file or directory)
      * @return {String} File path with unix style file separator
      */
@@ -823,8 +845,9 @@ public class GatewayCmdUtils {
 
     /**
      * Create script file in the given path with the given content
+     *
      * @param content Content needs to be added to the script file
-     * @param path File object containing the path to save the script
+     * @param path    File object containing the path to save the script
      */
     private static void saveScript(String content, File path) throws IOException {
         try (FileWriter writer = new FileWriter(path)) {
@@ -838,9 +861,10 @@ public class GatewayCmdUtils {
             }
         }
     }
-    
+
     /**
      * Delete project folder
+     *
      * @param projectPath project path
      */
     public static void deleteProject(String projectPath) {
