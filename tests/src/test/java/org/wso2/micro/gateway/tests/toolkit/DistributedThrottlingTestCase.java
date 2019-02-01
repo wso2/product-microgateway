@@ -23,7 +23,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.JMSPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
@@ -45,7 +44,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
-    JMSPublisher jmsPublisher = new JMSPublisher();
 
     protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
@@ -70,7 +68,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
 
     @BeforeClass
     private void start() throws Exception {
-        jmsPublisher.startMessageBroker();
         String label = "apimTestLabel";
         String project = "apimTestProject";
         //set security schemas
