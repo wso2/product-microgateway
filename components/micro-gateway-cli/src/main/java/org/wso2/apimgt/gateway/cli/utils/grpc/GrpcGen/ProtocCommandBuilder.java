@@ -18,8 +18,11 @@
 package org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen;
 
 
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.*;
-
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.DESC_PATH_PLACEHOLDER;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_FOLDER_PLACEHOLDER;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_PATH_PLACEHOLDER;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.EXE_PATH_PLACEHOLDER;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.SPACE_CHARACTER;
 /**
  * This class is used to build the protoc compiler command to generate descriptor.
  */

@@ -32,14 +32,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.*;
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.*;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.generateDescriptor;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.getDescriptorPath;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.resolveProtoFloderPath;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.createMetaFolder;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.META_LOCATION;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.DESC_SUFFIX;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.GOOGLE_STANDARD_LIB;
 
 /**
  * Class for generate file descriptors for proto files.
  */
 public class DescriptorsGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(DescriptorsGenerator.class);
+    private static final CharSequence EMPTY_STRING = "";
 
     public static List<byte[]> generateDependentDescriptor(String parentDescPath, String parentProtoPath,
                                                            List<byte[]> list,
