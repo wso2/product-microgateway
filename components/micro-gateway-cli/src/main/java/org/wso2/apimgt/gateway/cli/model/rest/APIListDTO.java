@@ -16,7 +16,6 @@
 package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 
 import java.util.ArrayList;

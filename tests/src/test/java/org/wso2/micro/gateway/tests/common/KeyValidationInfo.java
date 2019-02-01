@@ -18,7 +18,6 @@
 package org.wso2.micro.gateway.tests.common;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 
 /**

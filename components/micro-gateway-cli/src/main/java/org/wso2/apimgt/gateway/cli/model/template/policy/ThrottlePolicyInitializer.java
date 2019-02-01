@@ -18,8 +18,8 @@
 package org.wso2.apimgt.gateway.cli.model.template.policy;
 
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 
 import java.util.ArrayList;
 import java.util.List;

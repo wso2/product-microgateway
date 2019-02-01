@@ -28,25 +28,27 @@ import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * APIM Publisher mock class
  */
 public class MockAPIPublisher {
     private static final Logger log = LoggerFactory.getLogger(MockAPIPublisher.class);
-    private Map<String, List<APIDTO>> apis;
-    private Map<String, KeyValidationInfo> tokenInfo;
-
-    private Map<String, IntrospectInfo> introspectInfo;
     private static MockAPIPublisher instance;
     private static List<SubscriptionPolicy> subscriptionPolicies;
     private static List<ApplicationPolicy> applicationPolicies;
+    private Map<String, List<APIDTO>> apis;
+    private Map<String, KeyValidationInfo> tokenInfo;
+    private Map<String, IntrospectInfo> introspectInfo;
+
+    public MockAPIPublisher() {
+        apis = new HashMap<>();
+        tokenInfo = new HashMap<>();
+        introspectInfo = new HashMap<>();
+        subscriptionPolicies = new ArrayList<>();
+        applicationPolicies = new ArrayList<>();
+    }
 
     public static MockAPIPublisher getInstance() {
         if (instance == null) {
@@ -55,12 +57,12 @@ public class MockAPIPublisher {
         return instance;
     }
 
-    public MockAPIPublisher() {
-        apis = new HashMap<>();
-        tokenInfo = new HashMap<>();
-        introspectInfo = new HashMap<>();
-        subscriptionPolicies = new ArrayList<>();
-        applicationPolicies = new ArrayList<>();
+    public static List<SubscriptionPolicy> getSubscriptionPolicies() {
+        return subscriptionPolicies;
+    }
+
+    public static List<ApplicationPolicy> getApplicationPolicies() {
+        return applicationPolicies;
     }
 
     public void addApi(String label, APIDTO api) {
@@ -106,11 +108,20 @@ public class MockAPIPublisher {
                     .toString(new FileInputStream(getClass().getClassLoader().getResource("api-json.json").getPath()));
             String restResponse = IOUtils.toString(
                     new FileInputStream(getClass().getClassLoader().getResource("api-response.json").getPath()));
+            String endpointJson = IOUtils
+                    .toString(new FileInputStream(getClass().getClassLoader().getResource("endpoint.json").getPath()));
             JSONObject response = new JSONObject(restResponse);
             response.put("count", filterd.size());
             JSONArray arr = new JSONArray();
             for (APIDTO api : filterd) {
-                arr.put(new JSONObject(apiJson));
+                JSONObject jsonObject = new JSONObject(apiJson);
+
+                if (api.getEndpoint().size() > 0) {
+                    String url = api.getEndpoint().get(0).getInline().getEndpointConfig().getList().get(0).getUrl();
+                    String endpointConfig = endpointJson.replace("serviceUrl", url);
+                    jsonObject.put("endpoint", new JSONArray(endpointConfig));
+                }
+                arr.put(jsonObject);
             }
             response.put("list", arr);
             return response.toString();
@@ -181,16 +192,8 @@ public class MockAPIPublisher {
         subscriptionPolicies.add(subscriptionPolicy);
     }
 
-    public static List<SubscriptionPolicy> getSubscriptionPolicies() {
-        return subscriptionPolicies;
-    }
-
     public void addApplicationPolicy(ApplicationPolicy applicationPolicy) {
         applicationPolicies.add(applicationPolicy);
-    }
-
-    public static List<ApplicationPolicy> getApplicationPolicies() {
-        return applicationPolicies;
     }
 
     public Map<String, IntrospectInfo> getIntrospectInfo() {

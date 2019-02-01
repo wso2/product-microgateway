@@ -1,7 +1,8 @@
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
    <soapenv:Body>
       <ns:validateKeyResponse xmlns:ns="http://org.apache.axis2/xsd">
-         <ns:return xsi:type="ax2133:APIKeyValidationInfoDTO" xmlns:ax2135="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2136="http://dto.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2131="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <ns:return xsi:type="ax2133:APIKeyValidationInfoDTO" xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ax2133:apiName xsi:nil="true"/>
             <ax2133:apiPublisher xsi:nil="true"/>
             <ax2133:apiTier xsi:nil="true"/>

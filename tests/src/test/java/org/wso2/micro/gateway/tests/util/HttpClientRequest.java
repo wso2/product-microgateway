@@ -18,6 +18,9 @@
 
 package org.wso2.micro.gateway.tests.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,6 +48,8 @@ public class HttpClientRequest {
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the GET request
      */
+    private static final Log log = LogFactory.getLog(HttpClientRequest.class);
+
     public static HttpResponse doGet(String requestUrl, Map<String, String> headers)
             throws IOException {
         return executeRequestWithoutRequestBody(TestConstant.HTTP_METHOD_GET, requestUrl, headers);
@@ -66,7 +71,7 @@ public class HttpClientRequest {
      *
      * @param endpoint - rest endpoint
      * @param postBody - message payload
-     * @param headers http request headers map
+     * @param headers  http request headers map
      * @return - HttpResponse from end point
      * @throws IOException If an error occurs while sending the GET request
      */
@@ -98,7 +103,7 @@ public class HttpClientRequest {
      * Sends an HTTP OPTIONS request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers http request headers map
+     * @param headers    http request headers map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the OPTIONS request
      */
@@ -121,7 +126,7 @@ public class HttpClientRequest {
      * Sends an HTTP HEAD request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers - http request header map
+     * @param headers    - http request header map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the HEAD request
      */
@@ -203,7 +208,7 @@ public class HttpClientRequest {
             }
         } catch (IOException ex) {
             if (conn.getErrorStream() == null) {
-                ex.printStackTrace();
+                log.error("An IOException occurred ", ex);
                 return null;
             }
             rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()

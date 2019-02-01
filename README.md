@@ -58,7 +58,7 @@ The "micro-gw setup" command is used to initialize a project with artifacts requ
 distribution. During the setup phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve the
 details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
 
-If the project already exists a warning will be prompted requesting permission to override existing source.
+If the project already exists, a warning will be prompted requesting permission to override existing source.
 
 Execute `micro-gw help setup` to get more detailed information regarding the setup command.
 
@@ -122,7 +122,7 @@ micro-gw-pizzashack-project
 
 #### How to run the microgateway distribution
 
-One the **setup, build** commands are executed, a micro gateway distribution will be created under target folder.
+Once the **setup, build** commands are executed, a micro gateway distribution will be created under target folder.
 
 ```
 ../pizzashack-project/target$ ls
