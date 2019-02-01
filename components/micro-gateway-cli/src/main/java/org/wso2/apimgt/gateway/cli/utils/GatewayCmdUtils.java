@@ -73,12 +73,12 @@ public class GatewayCmdUtils {
         config = configFromFile;
     }
 
-    public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
-        GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
-    }
-
     public static CodeGenerationContext getCodeGenerationContext() {
         return codeGenerationContext;
+    }
+
+    public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
+        GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
     }
 
     /**
@@ -153,7 +153,7 @@ public class GatewayCmdUtils {
         if (s == null) {
             return null;
         }
-        char c[] = s.toCharArray();
+        char[] c = s.toCharArray();
         c[0] = Character.toLowerCase(c[0]);
         return new String(c);
     }
@@ -295,7 +295,7 @@ public class GatewayCmdUtils {
      * Create a micro gateway distribution for the provided project name
      *
      * @param projectName name of the project
-     * @throws IOException erro while creating micro gateway distribution
+     * @throws IOException error while creating micro gateway distribution
      */
     public static void createProjectGWDistribution(String projectName) throws IOException {
         createTargetGatewayDistStructure(projectName);
@@ -313,8 +313,8 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        String targetPath = getProjectTargetDirectoryPath(projectName);
-        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
+        String targetPath = getProjectTargetDirectoryPath(projectName);//target
+        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;//micro-gw-projname.zip
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
 
@@ -617,7 +617,7 @@ public class GatewayCmdUtils {
             return;
         }
         //Get all files from source directory
-        String files[] = targetFolder.list();
+        String[] files = targetFolder.list();
         if (files == null) {
             logger.warn("Nothing to delete. Target folder {} is empty.", targetPath);
             return;
@@ -670,7 +670,7 @@ public class GatewayCmdUtils {
             }
 
             //Get all files from source directory
-            String files[] = sourceFolder.list();
+            String[] files = sourceFolder.list();
 
             if (files != null) {
                 //Iterate over all files and copy them to destinationFolder one by one

@@ -64,6 +64,7 @@ public class MockAPIPublisher {
 
         try {
             api = populateJson(api);
+
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

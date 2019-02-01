@@ -26,8 +26,8 @@ import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
@@ -35,7 +35,6 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,7 +104,7 @@ public class CookieAuthTestCase extends BaseTestCase {
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String cookie = "Cookie="+jwtTokenProd;
+        String cookie = "Cookie=" + jwtTokenProd;
         String[] args = {"--config", configPath, "-e", cookie};
         microGWServer.startMicroGwServer(balPath, args);
     }
@@ -139,6 +138,7 @@ public class CookieAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
+
     private void invokeFail(String token, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
