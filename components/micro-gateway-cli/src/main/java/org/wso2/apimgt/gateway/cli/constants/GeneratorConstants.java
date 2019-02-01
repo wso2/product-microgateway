@@ -23,11 +23,14 @@ import java.io.File;
 public class GeneratorConstants {
 
     public static final String SERVICE_TEMPLATE_NAME = "service";
+    public static final String GENERATESWAGGER_TEMPLATE_NAME = "generateSwagger";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String LISTENERS_TEMPLATE_NAME = "listeners";
     public static final String LISTENERS = "listeners";
     public static final String BALLERINA_EXTENSION = ".bal";
+    public static final String JSON_EXTENSION = ".json";
     public static final String THROTTLE_POLICY_INIT_TEMPLATE_NAME = "policy_init";
+    public static final String SWAGGER_FILE_SUFFIX = "_swagger";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";

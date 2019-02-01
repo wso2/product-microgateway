@@ -27,6 +27,8 @@ gateway:SubscriptionFilter subscriptionFilter = new;
 map deployedPolicies = getDeployedPolicies();
 // Throttling filter
 gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
+// Validation filter
+gateway:ValidationFilter validationFilter = new;
 // Analytics filter
 gateway:AnalyticsRequestFilter analyticsFilter = new();
 // Extension filter
@@ -37,15 +39,16 @@ ExtensionFilter extensionFilter;
 {{>kubernetesService}}
 endpoint gateway:APIGatewaySecureListener apiSecureListener {
     port:9095{{>http2}},
-{{>mutualSSL}}
-filters:[ mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter,
-analyticsFilter, extensionFilter]
+    {{>mutualSSL}}
+    filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+    extensionFilter]
 };
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
 endpoint gateway:APIGatewayListener apiListener {
     port:9090{{>http2}},
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter]
+    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+    extensionFilter]
 };
 

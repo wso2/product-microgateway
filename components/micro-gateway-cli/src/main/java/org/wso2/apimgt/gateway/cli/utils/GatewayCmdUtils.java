@@ -33,14 +33,16 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,6 +55,15 @@ public class GatewayCmdUtils {
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
+    private static Etcd etcd;
+
+    public static Etcd getEtcd() {
+        return etcd;
+    }
+
+    public static void setEtcd(Etcd etcd) {
+        GatewayCmdUtils.etcd = etcd;
+    }
 
     public static Config getConfig() {
         return config;
@@ -533,6 +544,27 @@ public class GatewayCmdUtils {
     public static String getProjectSrcDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /grpc_service/client of a given project in the current working directory
+     *
+     * @return path to the /grpc_service/client of a given project in the current working directory
+     */
+    public static String getProjectGrpcDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME + File.separator +
+                GatewayCliConstants.PROJECTS_GRPC_CLIENT_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /grpc_service of a given project in the current working directory
+     *
+     * @return path to the /grpc_service of a given project in the current working directory
+     */
+    public static String getProjectGrpcSoloDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME;
     }
 
     /**

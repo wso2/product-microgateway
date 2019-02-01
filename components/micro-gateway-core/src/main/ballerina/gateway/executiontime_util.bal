@@ -64,5 +64,8 @@ function getSecurityLatency(http:FilterContext context) returns int {
     if (context.attributes.hasKey(SECURITY_LATENCY_SUBS)) {
         latency += check <int>context.attributes[SECURITY_LATENCY_SUBS];
     }
+    if (context.attributes.hasKey(SECURITY_LATENCY_VALIDATION)) {
+        latency += check <int>context.attributes[SECURITY_LATENCY_VALIDATION];
+    }
     return latency;
 }

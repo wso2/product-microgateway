@@ -293,6 +293,26 @@
                 <artifactId>lib-creator</artifactId>
                 <version>${ballerina.platform.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jms_1.1_spec</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.andes.wso2</groupId>
+                <artifactId>andes-client</artifactId>
+                <version>3.2.47</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ballerina.messaging</groupId>
+                <artifactId>broker-launcher</artifactId>
+                <version>0.970.5</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -365,6 +385,7 @@
 
     <properties>
         <ballerina.platform.version>0.981.1</ballerina.platform.version>
+        <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>2.5.2</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
         <shade.plugin.version>2.4.3</shade.plugin.version>
@@ -395,7 +416,7 @@
         <toml.parser.version>0.7.2</toml.parser.version>
         <os.maven.plugin.version>1.5.0.Final</os.maven.plugin.version>
         <netty-tcnative-boringssl-static.version>2.0.7.Final</netty-tcnative-boringssl-static.version>
-        <slf4j.version>1.7.22</slf4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <netty.version>4.1.19.Final</netty.version>
         <org.snakeyaml.version>1.16.0.wso2v1</org.snakeyaml.version>
         <apache.mina.core>2.0.16</apache.mina.core>

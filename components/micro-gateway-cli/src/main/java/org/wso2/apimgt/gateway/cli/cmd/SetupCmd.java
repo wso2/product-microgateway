@@ -43,6 +43,8 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -53,6 +55,7 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +67,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 /**
  * This class represents the "setup" command and it holds arguments and flags specified by the user.
@@ -135,6 +141,8 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
+    @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
+    private boolean isEtcdEnabled;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -147,6 +155,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
+        boolean isGRPC = false;
+        String grpc = null;
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
@@ -163,6 +173,12 @@ public class SetupCmd implements GatewayLauncherCmd {
 
         init(projectName, toolkitConfigPath, deploymentConfigPath);
 
+        //set etcd requirement
+        Etcd etcd = new Etcd();
+        etcd.setEtcdEnabled(isEtcdEnabled);
+        GatewayCmdUtils.setEtcd(etcd);
+        logger.debug("Etcd is enabled : " + isEtcdEnabled);
+
         Config config = GatewayCmdUtils.getConfig();
         boolean isOverwriteRequired = false;
 
@@ -172,32 +188,65 @@ public class SetupCmd implements GatewayLauncherCmd {
         if (isOpenApi) {
             outStream.println("Loading Open Api Specification from Path: " + openApi);
             String api = OpenApiCodegenUtils.readApi(openApi);
-            logger.debug("Successfully read the api definition file");
-            CodeGenerator codeGenerator = new CodeGenerator();
-            try {
-                if (StringUtils.isEmpty(endpointConfig)) {
-                    if (StringUtils.isEmpty(endpoint)) {
-                        /*
-                         * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
-                         * the user
-                         */
-                        if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
-                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+
+            if (openApi.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
+                grpc = openApi;
+                outStream.println("Loading ProtoBuff Api Specification from Path: " + grpc);
+                GRPCUtils grpcUtils = new GRPCUtils(grpc);
+                grpcUtils.execute();
+                logger.debug("Successfully read the api definition file");
+                CodeGenerator codeGenerator = new CodeGenerator();
+                try {
+                    if (StringUtils.isEmpty(endpointConfig)) {
+                        if (StringUtils.isEmpty(endpoint)) {
+                            /*
+                             * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                             * the user
+                             */
+                            if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
+                                throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                            }
                         }
                     }
-                    endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
-                            "\"},\"endpoint_type\":\"http\"}";
+                    codeGenerator.generateGrpc(projectName, api, true);
+                    //Initializing the ballerina project and creating .bal folder.
+                    logger.debug("Creating source artifacts");
+                    InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                            new ArrayList<>(), null);
+                } catch (IOException | BallerinaServiceGenException e) {
+                    logger.error("Error while generating ballerina source.", e);
+                    throw new CLIInternalException("Error while generating ballerina source.");
                 }
-                codeGenerator.generate(projectName, api, endpointConfig, true);
-                //Initializing the ballerina project and creating .bal folder.
-                logger.debug("Creating source artifacts");
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
-                        new ArrayList<>(), null);
-            } catch (IOException | BallerinaServiceGenException e) {
-                logger.error("Error while generating ballerina source.", e);
-                throw new CLIInternalException("Error while generating ballerina source.");
+                outStream.println("Setting up project " + projectName + " is successful.");
+            } else {
+                logger.debug("Successfully read the api definition file");
+                CodeGenerator codeGenerator = new CodeGenerator();
+                try {
+                    if (StringUtils.isEmpty(endpointConfig)) {
+                        if (StringUtils.isEmpty(endpoint)) {
+                            /*
+                             * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                             * the user
+                             */
+                            if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
+                                throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                            }
+                        }
+                        endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
+                                "\"},\"endpoint_type\":\"http\"}";
+                    }
+                    codeGenerator.generate(projectName, api, endpointConfig, true);
+                    //Initializing the ballerina project and creating .bal folder.
+                    logger.debug("Creating source artifacts");
+                    InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                            new ArrayList<>(), null);
+                } catch (IOException | BallerinaServiceGenException e) {
+                    logger.error("Error while generating ballerina source.", e);
+                    throw new CLIInternalException("Error while generating ballerina source.");
+                }
+                outStream.println("Setting up project " + projectName + " is successful.");
             }
-            outStream.println("Setting up project " + projectName + " is successful.");
+
         } else {
 
             validateAPIGetRequestParams(label, apiName, version);

@@ -1,6 +1,8 @@
 package org.wso2.micro.gateway.tests.common;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,6 +20,8 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -57,8 +61,42 @@ public class MockHttpServer extends Thread {
     private String DCRRestAPIBasePath = "/client-registration/v0.14";
     private String PubRestAPIBasePath = "/api/am/publisher/v0.14";
     private String AdminRestAPIBasePath = "/api/am/admin/v0.14";
+    private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
+    public final static String PROD_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-production\"}";
+    public final static String SAND_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-sandbox\"}";
+    public final static String ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE = "[{\"description\":\"Grilled white chicken, " +
+            "hickory-smoked bacon and fresh sliced onions in barbeque sauce\", \"price\":\"25.99\"," +
+            " \"icon\":\"/images/6.png\"}, {\"name\":\"Chicken Parmesan\", \"description\":\"Grilled chicken, fresh " +
+            "tomatoes, feta and mozzarella cheese\", \"price\":\"17.99\", \"icon\":\"/images/1.png\"}, " +
+            "{\"name\":\"Chilly Chicken Cordon Bleu\", \"description\":\"Spinash Alfredo sauce topped with grilled " +
+            "chicken, ham, onions and mozzarella\", \"price\":\"15.99\", \"icon\":\"/images/10.png\"}, " +
+            "{\"name\":\"Double Bacon 6Cheese\", \"description\":\"Hickory-smoked bacon, Julienne cut Canadian bacon," +
+            " Parmesan, mozzarella, Romano, Asiago and and Fontina cheese\", \"price\":\"19.99\", " +
+            "\"icon\":\"/images/9.png\"}, {\"name\":\"Garden Fresh\", \"description\":\"Slices onions and green " +
+            "peppers, gourmet mushrooms, black olives and ripe Roma tomatoes\", \"price\":\"19.99\", " +
+            "\"icon\":\"/images/3.png\"}, {\"name\":\"Grilled Chicken Club\", \"description\":\"Grilled white " +
+            "chicken, hickory-smoked bacon and fresh sliced onions topped with Roma tomatoes\", \"price\":\"27.99\"," +
+            " \"icon\":\"/images/8.png\"}, {\"name\":\"Hawaiian BBQ Chicken\", \"description\":\"Grilled" +
+            " white chicken, hickory-smoked bacon, barbeque sauce topped with sweet pine-apple\", \"price\":\"26.99\"," +
+            " \"icon\":\"/images/7.png\"}, {\"name\":\"Spicy Italian\", \"description\":\"Pepperoni and a double" +
+            " portion of spicy Italian sausage\", \"price\":\"17.99\", \"icon\":\"/images/2.png\"}, " +
+            "{\"name\":\"Spinach Alfredo\", \"description\":\"Rich and creamy blend of spinach and garlic Parmesan " +
+            "with Alfredo sauce\", \"price\":\"28.99\", \"icon\":\"/images/5.png\"}, {\"name\":\"Tuscan Six Cheese\"," +
+            " \"description\":\"Six cheese blend of mozzarella, Parmesan, Romano, Asiago and Fontina\"," +
+            " \"price\":\"14.99\", \"icon\":\"/images/4.png\"}]";
+    public final static String ECHO_ENDPOINT_RESPONSE = "{\"customerName\":\"string\", \"delivered\":true, " +
+            "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
+            " \"orderId\":\"string\"}";
+    public final static String INVALID_POSTBODY = "{\"customerName\":\"string\", \"delivered\":true, " +
+            "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
+            " \"orderId\":44}";
+    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915," +
+            " \"message\":\"Unprocessable entity\", \"description\":\"[\\\"44 is not the type, string\\\"]\"}}";
+    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, " +
+            "\"message\":\"Unprocessable entity\", \"description\":\"[\\\"name is a required field\\\"]\"}}";
+    int count = 0;
 
     public static void main(String[] args) {
 
@@ -119,6 +157,40 @@ public class MockHttpServer extends Thread {
 
                     String payload = IOUtils.toString(exchange.getRequestBody());
                     byte[] response = payload.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/invalidResponse", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext(TMRestAPIBasePath + "/throttleEventReceiver", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    String jsonRequest = IOUtils.toString(exchange.getRequestBody());
+                    if (count == 9 || count == 19 || count == 29 || count == 39 || count == 49) {
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonRequest);
+                        JMSPublisher jmsPublisher = new JMSPublisher();
+
+                        try {
+                            jmsPublisher.getJson(jsonObject);
+                        } catch (JMSException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        } catch (NamingException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        }
+                    }
+                    count++;
+                    byte[] response = jsonRequest.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
@@ -133,10 +205,28 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
+            httpServer.createContext("/echo/newprod", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = PROD_ENDPOINT_NEW_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
             httpServer.createContext("/echo/sand", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     byte[] response = SAND_ENDPOINT_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/newsand", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = SAND_ENDPOINT_NEW_RESPONSE.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
@@ -247,9 +337,7 @@ public class MockHttpServer extends Thread {
             });
             httpServer.start();
             KMServerUrl = "http://localhost:" + KMServerPort;
-        } catch (IOException e)
-
-        {
+        } catch (IOException e) {
             log.error("Error occurred while setting up mock server", e);
         } catch (Exception e) {
             log.error("Error occurred while setting up mock server", e);
