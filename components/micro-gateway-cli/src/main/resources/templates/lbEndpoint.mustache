@@ -1,6 +1,6 @@
 endpoint http:LoadBalanceClient {{qualifiedServiceName}}_{{endpointUrlType}} {
     targets: [
-    {{#endpoints}}    {url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{endpointUrlType}}.endpoint.{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
+    {{#endpoints}}    {url: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
     {{/unless}}{{/endpoints}}
     ],
     algorithm: http:ROUND_ROBIN{{>caching}}{{>basicAuth}}
