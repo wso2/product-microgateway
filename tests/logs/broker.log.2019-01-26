@@ -1,8 +1,0 @@
-[2019-01-26 11:24:19,954] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Test is working properly
-[2019-01-26 11:24:19,962] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  {"type": "sandbox"}
-[2019-01-26 11:24:19,962] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Received {"type": "sandbox"}
-[2019-01-26 11:24:20,234] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Test is working properly
-[2019-01-26 13:30:24,887] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Test is working properly
-[2019-01-26 13:30:24,910] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  {"type": "sandbox"}
-[2019-01-26 13:30:24,911] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Received {"type": "sandbox"}
-[2019-01-26 13:30:25,093] INFO {org.wso2.micro.gateway.tests.services.MutualSSLTestCase} -  Test is working properly
