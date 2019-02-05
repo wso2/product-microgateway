@@ -20,6 +20,9 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
@@ -37,6 +40,7 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.APIConfig;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
@@ -58,6 +62,8 @@ import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -109,6 +115,9 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-ec", "--endpointConfig"}, hidden = true)
     private String endpointConfig;
 
+    @Parameter(names = {"-ms", "--multi-swag"}, hidden = true)
+    private String multipleSwagger;
+
     @Parameter(names = {"-t", "--truststore"}, hidden = true)
     private String trustStoreLocation;
 
@@ -155,6 +164,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         String clientID;
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
+        boolean isMultiSwag = StringUtils.isNotEmpty(multipleSwagger);
         boolean isGRPC = false;
         String grpc = null;
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
@@ -183,9 +193,51 @@ public class SetupCmd implements GatewayLauncherCmd {
         boolean isOverwriteRequired = false;
 
         /*
+         * If user requires multiple endpoint support
+         */
+        if (isMultiSwag) {
+            try (InputStream fileStream = new FileInputStream(multipleSwagger)) {
+                ObjectMapper mapper = new ObjectMapper();
+                APIConfig[] apiDefinitions = mapper.readValue(fileStream, APIConfig[].class);
+                String[] apiList = new String[apiDefinitions.length];
+                String[] endpointConfList = new String[apiDefinitions.length];
+                for (int i = 0; i < apiDefinitions.length; i++) {
+                    APIConfig apiDefinition = apiDefinitions[i];
+                    String swaggerPath = apiDefinition.getSwaggerPath();
+                    String swaggerHost = apiDefinition.getEndpoint();
+                    outStream.println("Loading Open Api Specification from Path: " + swaggerPath);
+                    String api = OpenApiCodegenUtils.readApi(swaggerPath);
+                    logger.debug("Successfully read the api definition file");
+                    String endpointConf = "{\"production_endpoints\":{\"url\":\"" + swaggerHost.trim() +
+                            "\"},\"endpoint_type\":\"http\"}";
+                    apiList[i] = api;
+                    endpointConfList[i] = endpointConf;
+                }
+                CodeGenerator codeGenerator = new CodeGenerator();
+                codeGenerator.generate(projectName, apiList, endpointConfList, true);
+                //Initializing the ballerina project and creating .bal folder.
+                logger.debug("Creating source artifacts");
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                        new ArrayList<>(), null);
+            } catch (JsonParseException e) {
+                logger.error("Error while parsing JSON", e);
+                throw GatewayCmdUtils.createUsageException("Error while parsing JSON");
+            } catch (JsonMappingException e) {
+                logger.error("Error while mapping JSON", e);
+                throw GatewayCmdUtils.createUsageException("Error while mapping JSON");
+            } catch (IOException e) {
+                logger.error("API config File not found or accessible", e);
+                throw GatewayCmdUtils.createUsageException("API config File not found or accessible");
+            } catch (BallerinaServiceGenException e) {
+                logger.error("Error while generating ballerina source.", e);
+                throw new CLIInternalException("Error while generating ballerina source.");
+            }
+            outStream.println("Setting up project " + projectName + " is successful.");
+        }
+        /*
          * If api is created via an api definition, the setup flow is altered
          */
-        if (isOpenApi) {
+        else if (isOpenApi) {
             outStream.println("Loading Open Api Specification from Path: " + openApi);
             String api = OpenApiCodegenUtils.readApi(openApi);
 
@@ -235,7 +287,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                         endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
                                 "\"},\"endpoint_type\":\"http\"}";
                     }
-                    codeGenerator.generate(projectName, api, endpointConfig, true);
+                    codeGenerator.generate(projectName, new String[]{api}, new String[]{endpointConfig}, true);
                     //Initializing the ballerina project and creating .bal folder.
                     logger.debug("Creating source artifacts");
                     InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,

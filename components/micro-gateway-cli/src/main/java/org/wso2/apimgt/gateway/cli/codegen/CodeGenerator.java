@@ -23,9 +23,11 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import jnr.ffi.Struct;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
@@ -95,19 +97,20 @@ public class CodeGenerator {
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
     }
+
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      *
-     * @param projectName name of the project being set up
-     * @param apiDef      api definition string
-     * @param endpointDef endpoint definition string
-     * @param overwrite   whether existing files overwrite or not
+     * @param projectName         name of the project being set up
+     * @param apiDefinitions      api definitions
+     * @param endpointDefinitions endpoint definitions
+     * @param overwrite           whether existing files overwrite or not
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, String apiDef, String endpointDef, boolean overwrite)
+    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
@@ -116,20 +119,21 @@ public class CodeGenerator {
         List<GenSrcFile> genFiles = new ArrayList<>();
 
         parser = new SwaggerParser();
-        swagger = parser.parse(apiDef);
-        ExtendedAPI api = new ExtendedAPI();
-        String apiId = UUID.randomUUID().toString();
-        api.setId(apiId);
-        outStream.println("ID for API " + api.getName() + " : " + apiId);
-        api.setName(swagger.getInfo().getTitle());
-        api.setVersion(swagger.getInfo().getVersion());
-        api.setContext(swagger.getBasePath());
-        api.setEndpointConfig(endpointDef);
-        api.setTransport(Arrays.asList("http", "https"));
-        OpenApiCodegenUtils.setAdditionalConfigs(api);
-        definitionContext = new BallerinaService().buildContext(swagger, api);
-        genFiles.add(generateService(definitionContext));
-
+        for (int i = 0; i < apiDefinitions.length; i++) {
+            swagger = parser.parse(apiDefinitions[i]);
+            ExtendedAPI api = new ExtendedAPI();
+            String apiId = UUID.randomUUID().toString();
+            api.setId(apiId);
+            outStream.println("ID for API " + api.getName() + " : " + apiId);
+            api.setName(swagger.getInfo().getTitle());
+            api.setVersion(swagger.getInfo().getVersion());
+            api.setContext(swagger.getBasePath());
+            api.setEndpointConfig(endpointDefinitions[i]);
+            api.setTransport(Arrays.asList("http", "https"));
+            OpenApiCodegenUtils.setAdditionalConfigs(api);
+            definitionContext = new BallerinaService().buildContext(swagger, api);
+            genFiles.add(generateService(definitionContext));
+        }
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator

@@ -42,13 +42,6 @@
             <classifier>ballerina-binary-repo</classifier>
         </dependency>
         <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-jms</artifactId>
-            <version>${ballerina.platform.version}</version>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
