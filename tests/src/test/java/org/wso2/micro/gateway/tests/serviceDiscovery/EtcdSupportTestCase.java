@@ -62,7 +62,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String base64EncodedPizzaShackProdNewValue;
     private String base64EncodedPizzaShackSandNewValue;
     private String servicePath = "/pizzashack/1.0.0/menu";
-    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101505\", \"message\":\"Runtime Error\", \"description\":\"URL defined at etcd for key pizzashackprod is invalid\"}}";
+    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101503\", \"message\":\"Runtime Error\", \"description\":\"Error connecting to the back end\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
 
