@@ -82,6 +82,7 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
  */
 @Parameters(commandNames = "setup", commandDescription = "setup information")
 public class SetupCmd implements GatewayLauncherCmd {
+
     private static final Logger logger = LoggerFactory.getLogger(SetupCmd.class);
     private static PrintStream outStream = System.out;
 
@@ -150,7 +151,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
-    @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
+    @Parameter(names = {"-etcd", "--enable-etcd"}, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
 
     private String publisherEndpoint;
@@ -201,10 +202,12 @@ public class SetupCmd implements GatewayLauncherCmd {
                 APIConfig[] apiDefinitions = mapper.readValue(fileStream, APIConfig[].class);
                 String[] apiList = new String[apiDefinitions.length];
                 String[] endpointConfList = new String[apiDefinitions.length];
+                boolean[] defaultAPIList = new boolean[apiDefinitions.length];
                 for (int i = 0; i < apiDefinitions.length; i++) {
                     APIConfig apiDefinition = apiDefinitions[i];
                     String swaggerPath = apiDefinition.getSwaggerPath();
                     String swaggerHost = apiDefinition.getEndpoint();
+                    boolean isDefaultAPI = apiDefinition.isDefaultAPI();
                     outStream.println("Loading Open Api Specification from Path: " + swaggerPath);
                     String api = OpenApiCodegenUtils.readApi(swaggerPath);
                     logger.debug("Successfully read the api definition file");
@@ -212,9 +215,10 @@ public class SetupCmd implements GatewayLauncherCmd {
                             "\"},\"endpoint_type\":\"http\"}";
                     apiList[i] = api;
                     endpointConfList[i] = endpointConf;
+                    defaultAPIList[i] = isDefaultAPI;
                 }
                 CodeGenerator codeGenerator = new CodeGenerator();
-                codeGenerator.generate(projectName, apiList, endpointConfList, true);
+                codeGenerator.generate(projectName, apiList, endpointConfList, defaultAPIList, true);
                 //Initializing the ballerina project and creating .bal folder.
                 logger.debug("Creating source artifacts");
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
@@ -287,7 +291,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                         endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
                                 "\"},\"endpoint_type\":\"http\"}";
                     }
-                    codeGenerator.generate(projectName, new String[]{api}, new String[]{endpointConfig}, true);
+                    codeGenerator.generate(projectName, new String[]{api}, new String[]{endpointConfig}, new boolean[]{false}, true);
                     //Initializing the ballerina project and creating .bal folder.
                     logger.debug("Creating source artifacts");
                     InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,

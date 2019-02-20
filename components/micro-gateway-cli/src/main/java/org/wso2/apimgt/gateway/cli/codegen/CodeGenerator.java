@@ -54,6 +54,7 @@ import java.util.UUID;
  * This class generates Ballerina Services/Clients for a provided OAS definition.
  */
 public class CodeGenerator {
+
     private static PrintStream outStream = System.out;
 
     /**
@@ -110,7 +111,7 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean overwrite)
+    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean[] defaultAPI, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
@@ -132,6 +133,11 @@ public class CodeGenerator {
             api.setTransport(Arrays.asList("http", "https"));
             OpenApiCodegenUtils.setAdditionalConfigs(api);
             definitionContext = new BallerinaService().buildContext(swagger, api);
+            if (defaultAPI[i]) {
+                definitionContext.getApi().setIsDefaultVersion(false);
+                genFiles.add(generateService(definitionContext));
+                definitionContext.getApi().setIsDefaultVersion(true);
+            }
             genFiles.add(generateService(definitionContext));
         }
         genFiles.add(generateCommonEndpoints());
@@ -208,6 +214,7 @@ public class CodeGenerator {
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
+     *
      * @param projectName name of the project being set up
      * @param apiDef      api definition string
      * @param overwrite   whether existing files overwrite or not
