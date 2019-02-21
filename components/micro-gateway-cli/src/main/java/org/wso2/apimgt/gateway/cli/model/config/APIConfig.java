@@ -19,7 +19,7 @@ public class APIConfig {
 
     private String swaggerPath;
     private String endpoint;
-    private boolean defaultAPI;
+    private boolean isDefaultAPI;
 
     public String getSwaggerPath() {
         return swaggerPath;
@@ -38,10 +38,10 @@ public class APIConfig {
     }
 
     public boolean isDefaultAPI() {
-        return defaultAPI;
+        return isDefaultAPI;
     }
 
     public void setDefaultAPI(boolean defaultAPI) {
-        this.defaultAPI = defaultAPI;
+        this.isDefaultAPI = defaultAPI;
     }
 }

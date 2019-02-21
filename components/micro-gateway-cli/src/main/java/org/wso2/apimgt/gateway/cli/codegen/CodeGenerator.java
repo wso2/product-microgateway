@@ -111,7 +111,7 @@ public class CodeGenerator {
      * @throws IOException                  when file operations fail
      * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean[] defaultAPI, boolean overwrite)
+    public void generate(String projectName, String[] apiDefinitions, String[] endpointDefinitions, boolean[] defaultAPIs, boolean overwrite)
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         SwaggerParser parser;
@@ -133,7 +133,7 @@ public class CodeGenerator {
             api.setTransport(Arrays.asList("http", "https"));
             OpenApiCodegenUtils.setAdditionalConfigs(api);
             definitionContext = new BallerinaService().buildContext(swagger, api);
-            if (defaultAPI[i]) {
+            if (defaultAPIs[i]) {
                 definitionContext.getApi().setIsDefaultVersion(false);
                 genFiles.add(generateService(definitionContext));
                 definitionContext.getApi().setIsDefaultVersion(true);
