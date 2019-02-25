@@ -18,12 +18,13 @@ import ballerina/io;
 import ballerina/http;
 import ballerina/config;
 
-endpoint http:Client etcdEndpoint {
-    url: retrieveConfig("etcdurl", "http://127.0.0.1:2379"),
-    secureSocket: {
-        trustStore: {
-            path:  config:getAsString("jwtTokenConfig.trustStore.path"),
-            password: config:getAsString("jwtTokenConfig.trustStore.password")
+http:Client etcdEndpoint = new (
+    retrieveConfig("etcdurl", "http://127.0.0.1:2379"), config = {
+        secureSocket: {
+            trustStore: {
+                path: config:getAsString("jwtTokenConfig.trustStore.path"),
+                password: config:getAsString("jwtTokenConfig.trustStore.password")
+            }
         }
     }
-};
+);

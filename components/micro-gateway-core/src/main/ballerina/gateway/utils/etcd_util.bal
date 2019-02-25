@@ -25,9 +25,9 @@ import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
 
-public map etcdUrls;
-public map urlChanged;
-map defaultUrls;
+public map<string> etcdUrls;
+public map<any> urlChanged;
+map<string> defaultUrls;
 string etcdToken;
 boolean etcdPeriodicQueryInitialized = false;
 public boolean etcdConnectionEstablished = false;
@@ -54,7 +54,7 @@ public function etcdTimerTask() returns error? {
     printDebug(KEY_ETCD_UTIL, "Etcd Periodic Query Initiated");
     if (etcdUrls.count() > 0) {
         printDebug(KEY_ETCD_UTIL, "etcdurl map values - start");
-        foreach key, value in etcdUrls {
+        foreach var (key, value) in etcdUrls {
             string currentUrl = <string>value;
             string fetchedUrl = etcdLookup(<string>key);
 
@@ -145,27 +145,26 @@ public function etcdLookup(string base10EncodedKey) returns string {
     }
 
     var response = etcdEndpoint->post(etcdKVBasePath + "/range", req);
-    match response {
-        http:Response resp => {
-            printDebug(KEY_ETCD_UTIL, "Http Response object obtained");
-            var msg = resp.getJsonPayload();
-            match msg {
-                json jsonPayload => {
-                    printDebug(KEY_ETCD_UTIL, "etcd responded with a payload");
-                    var payloadValue = <string>jsonPayload.kvs[0].value;
-                    match payloadValue {
-                        string matchedValue => base64EncodedValue = matchedValue;
-                        error err => valueNotFound = true;
-                    }
+    if(response is http:Response) {
+        printDebug(KEY_ETCD_UTIL, "Http Response object obtained");
+        var msg = response.getJsonPayload();
+        if(msg is json) {
+            printDebug(KEY_ETCD_UTIL, "etcd responded with a payload");
+            var payloadValue = <string>msg.kvs[0].value;
+                if(payloadValue is string) {
+                    base64EncodedValue = matchedValue;
                 }
-                error err => printError(KEY_ETCD_UTIL, err.message);
-            }
+                else {
+                    valueNotFound = true;
+                }
         }
-        error err => {
-            printDebug(KEY_ETCD_UTIL, "Error object obtained");
-            valueNotFound = true;
+        else {
             printError(KEY_ETCD_UTIL, err.message);
         }
+    } else {
+        printDebug(KEY_ETCD_UTIL, "Error object obtained");
+        valueNotFound = true;
+        printError(KEY_ETCD_UTIL, err.message);
     }
 
     if (valueNotFound) {
@@ -197,62 +196,53 @@ public function etcdAuthenticate() {
     req.setPayload({ "name": untaint username, "password": untaint password });
 
     var response = etcdEndpoint->post(etcdAuthBasePath + "/authenticate", req);
-    match response {
-        http:Response resp => {
-            printDebug(KEY_ETCD_UTIL, "Http Response object obtained");
-            var msg = resp.getJsonPayload();
-            match msg {
-                json jsonPayload => {
-                    if (jsonPayload.token != null) {
-                        printDebug(KEY_ETCD_UTIL, "etcd has responded with a token");
-                        var token = <string>jsonPayload.token;
-                        match token {
-                            string value => {
-                                etcdToken = untaint value;
-                                etcdConnectionEstablished = true;
-                                printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
-                            }
-                            error err => {
-                                etcdConnectionEstablished = false;
-                                printError(KEY_ETCD_UTIL, err.message);
-                            }
-                        }
-                    }
-                    if (jsonPayload.error != null) {
-                        printDebug(KEY_ETCD_UTIL, "etcd has responded with an error");
-                        var authenticationError = <string>jsonPayload.error;
-                        match authenticationError {
-                            string value => {
-                                if (value.contains("authentication is not enabled")) {
-                                    printDebug(KEY_ETCD_UTIL, "etcd authentication is not enabled");
-                                    etcdAuthenticationEnabled = false;
-                                    etcdConnectionEstablished = true;
-                                    if (credentialsProvided) {
-                                        printInfo(KEY_ETCD_UTIL, value);
-                                    }
-                                }
-                                if (value.contains("authentication failed, invalid user ID or password")) {
-                                    etcdConnectionEstablished = false;
-                                    printError(KEY_ETCD_UTIL, value);
-                                }
-                            }
-                            error err => {
-                                etcdConnectionEstablished = false;
-                                printError(KEY_ETCD_UTIL, err.message);
-                            }
-                        }
-                    }
+    if (response is http:Response ) {
+        printDebug(KEY_ETCD_UTIL, "Http Response object obtained");
+        json|error msg = response.getJsonPayload();
+        if(msg is json)  {
+            json payload = msg;
+            if (payload.token != null) {
+                printDebug(KEY_ETCD_UTIL, "etcd has responded with a token");
+                var token = <string>payload.token;
+                if(token is string) {
+                    etcdToken = untaint token;
+                    etcdConnectionEstablished = true;
+                    printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
                 }
-                error err => {
+                else {
                     etcdConnectionEstablished = false;
-                    printError(KEY_ETCD_UTIL, err.message);
+                    printError(KEY_ETCD_UTIL, payload.message);
                 }
             }
-        }
-        error err => {
-            printDebug(KEY_ETCD_UTIL, "Error object obtained");
+            if (payload["error"] != null) {
+                printDebug(KEY_ETCD_UTIL, "etcd has responded with an error");
+                var authenticationError = <string>payload["error"];
+                if(authenticationError is string) {
+                    if (authenticationError.contains("authentication is not enabled")) {
+                        printDebug(KEY_ETCD_UTIL, "etcd authentication is not enabled");
+                        etcdAuthenticationEnabled = false;
+                        etcdConnectionEstablished = true;
+                        if (credentialsProvided) {
+                            printInfo(KEY_ETCD_UTIL, authenticationError);
+                        }
+                    }
+                    if (authenticationError.contains("authentication failed, invalid user ID or password")) {
+                        etcdConnectionEstablished = false;
+                        printError(KEY_ETCD_UTIL, authenticationError);
+                    }
+                } else {
+                    etcdConnectionEstablished = false;
+                    printError(KEY_ETCD_UTIL, authenticationError.message);
+                }
+            }
+        } else {
             etcdConnectionEstablished = false;
-            printError(KEY_ETCD_UTIL, err.message);
+            printError(KEY_ETCD_UTIL, msg.message);
         }
+    } else {
+        printDebug(KEY_ETCD_UTIL, "Error object obtained");
+        etcdConnectionEstablished = false;
+        printError(KEY_ETCD_UTIL, response.message);
     }
 }
+

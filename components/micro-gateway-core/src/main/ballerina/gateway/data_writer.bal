@@ -17,10 +17,10 @@
 import ballerina/io;
 import ballerina/http;
 
-@final
-public string KVT = "-KS-";
-public string EVS = "-ES-";
-public string OBJ = "-OS-";
+
+public const string KVT = "-KS-";
+public const string EVS = "-ES-";
+public const string OBJ = "-OS-";
 
 int initializingTime = 0;
 int rotatingTime = 0;
@@ -60,26 +60,19 @@ function getEventData(EventDTO dto) returns string {
 
 function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
-    io:ByteChannel channel = io:openFile(fileLocation + API_USAGE_FILE, io:APPEND);
-    io:CharacterChannel charChannel = new(channel, "UTF-8");
+    io:WritableCharacterChannel charChannel = new(fileLocation + API_USAGE_FILE, "UTF-8");
     try {
-        match charChannel.write(getEventData(eventDTO), 0) {
-            int numberOfCharsWritten => {
-                printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
-            }
-            error err => {
-                throw err;
-            }
+        if(charChannel.write(getEventData(eventDTO), 0) is error ) {
+            throw err;
+        } else  {
+            printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
         }
     } finally {
-        match charChannel.close() {
-            error sourceCloseError => {
-                printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
-                        + sourceCloseError.message);
-            }
-            () => {
-                printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
-            }
+        if(charChannel.close() is error) {
+            printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
+                    + sourceCloseError.message);
+        } else {
+            printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
         }
     }
 }

@@ -20,36 +20,24 @@ import ballerina/cache;
 import ballerina/config;
 import ballerina/time;
 
-@Description { value: "Representation of the Throttle filter" }
-@Field { value: "filterRequest: request filter method which attempts to throttle the request" }
-@Field { value: "filterRequest: response filter method (not used this scenario)" }
 public type ThrottleFilter object {
 
-    public map deployedPolicies;
+    public map<string> deployedPolicies = new;
 
 
-    public new(deployedPolicies) {}
-
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
 
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        boolean result = doFilterRequest(listener, request, context);
+        boolean result = doFilterRequest(caller, request, context);
         setLatency(startingTime, context, THROTTLE_LATENCY);
         return result;
 
     }
 
-    @Description { value: "Filter function implementation which tries to throttle the request" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: Throttle result to indicate if the request can proceed or not" }
-    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                   boolean
     {
         worker requestFlow{
@@ -61,18 +49,18 @@ public type ThrottleFilter object {
             boolean isThrottled = false;
             boolean stopOnQuota;
             string apiContext = getContext(context);
-            string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+            string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
             apiVersion;
             boolean isSecured = check <boolean>context.attributes[IS_SECURED];
             context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
             context.attributes[IS_THROTTLE_OUT] = false;
 
-            AuthenticationContext keyvalidationResult;
+            AuthenticationContext keyvalidationResult = new;
             if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-                if (isRequestBlocked(listener, request, context)){
+                if (isRequestBlocked(caller, request, context)){
                     setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
                         BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(caller, request, context);
                     return false;
                 }
                 printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
@@ -87,7 +75,7 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
                         INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                         INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(caller, request, context);
                     return false;
                 }
                 printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
@@ -101,7 +89,7 @@ public type ThrottleFilter object {
                         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                         setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                        sendErrorResponse(listener, request, context);
+                        sendErrorResponse(caller, request, context);
                         return false;
                     } else {
                         // set properties in order to publish into analytics for billing
@@ -118,7 +106,7 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
                         INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                         INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(caller, request, context);
                     return false;
                 }
                 printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
@@ -128,7 +116,7 @@ public type ThrottleFilter object {
                     context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
                     setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
                         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(caller, request, context);
                     return false;
                 } else {
                     printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
@@ -146,7 +134,7 @@ public type ThrottleFilter object {
                     setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
                         INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                         INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                    sendErrorResponse(listener, request, context);
+                    sendErrorResponse(caller, request, context);
                     return false;
                 }
                 (isThrottled, stopOnQuota) = isUnauthenticateLevelThrottled(context);
@@ -159,7 +147,7 @@ public type ThrottleFilter object {
                         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                         setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                        sendErrorResponse(listener, request, context);
+                        sendErrorResponse(caller, request, context);
                         return false;
                     } else {
                         // set properties in order to publish into analytics for billing
@@ -181,7 +169,7 @@ public type ThrottleFilter object {
                 printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
                     INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                sendErrorResponse(listener, request, context);
+                sendErrorResponse(caller, request, context);
                 return false;
             }
 
@@ -195,7 +183,7 @@ public type ThrottleFilter object {
         worker throttleEventFlow{
             printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
             RequestStreamDTO throttleEvent;
-            throttleEvent <- requestFlow;
+            throttleEvent = <- requestFlow;
             publishNonThrottleEvent(throttleEvent);
         }
     }
@@ -220,7 +208,7 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
         return (false, false);
     }
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext(context) + ":"
-        + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+        + getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
     return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
@@ -239,15 +227,15 @@ function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boo
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string throttleKey = clientIp + ":" + getContext(context) + ":" + getAPIDetailsFromServiceAnnotation(
                                                                           reflect:getServiceAnnotations(context.
-                                                                              serviceType)).apiVersion;
+                                                                              serviceRef)).apiVersion;
     return isRequestThrottled(throttleKey);
 }
-function isRequestBlocked(http:Listener listener, http:Request request, http:FilterContext context) returns (boolean) {
+function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context) returns (boolean) {
     AuthenticationContext keyvalidationResult = check <AuthenticationContext>context
     .attributes[AUTHENTICATION_CONTEXT];
     string apiLevelBlockingKey = getContext(context);
     string apiTenantDomain = getTenantDomain(context);
-    string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request, listener);
+    string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request, caller);
     string appLevelBlockingKey = keyvalidationResult.subscriber + ":" + keyvalidationResult.applicationName;
     if (isAnyBlockConditionExist() && (isBlockConditionExist(apiLevelBlockingKey) ||
             isBlockConditionExist(ipLevelBlockingKey) || isBlockConditionExist(appLevelBlockingKey)) ||
@@ -260,9 +248,9 @@ function isRequestBlocked(http:Listener listener, http:Request request, http:Fil
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
              returns (RequestStreamDTO) {
-    RequestStreamDTO requestStreamDto;
+    RequestStreamDTO requestStreamDto = new;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations
-        (context.serviceType)).apiVersion;
+        (context.serviceRef)).apiVersion;
     requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDto.apiKey = getContext(context) + ":" + apiVersion;
     requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
@@ -272,8 +260,8 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.apiTier = keyValidationDto.apiTier;
     requestStreamDto.subscriptionTier = keyValidationDto.tier;
     requestStreamDto.resourceKey = getContext(context) + "/" + getAPIDetailsFromServiceAnnotation(reflect:
-            getServiceAnnotations(context.serviceType)).apiVersion;
-    TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
+            getServiceAnnotations(context.serviceRef)).apiVersion;
+    TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceRef,
             context.resourceName));
     requestStreamDto.resourceTier = tier.policy;
     requestStreamDto.userId = keyValidationDto.username;

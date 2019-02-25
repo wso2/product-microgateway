@@ -42,16 +42,16 @@ string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGG
 
 public type ValidationFilter object {
 
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext filterContext)
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
-        boolean result = doFilterRequest(listener, request, filterContext);
+        boolean result = doFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
-    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext filterContext)
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         if (enableRequestValidation) {
             //getting the payload of the request
@@ -69,7 +69,7 @@ public type ValidationFilter object {
             requestMethod = request.method.toLower();
             //getting the path hit by the request
             requestPath = getResourceConfigAnnotation
-            (reflect:getResourceAnnotations(filterContext.serviceType, filterContext.resourceName)).path;
+            (reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
             //getting the name of the model hit by the request
             if (swagger.components.schemas != null) {//In swagger 3.0 models are defined under the components.schemas
                 models = swagger.components.schemas;
@@ -78,11 +78,11 @@ public type ValidationFilter object {
                 models = swagger.definitions;
                 //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
                 //request
-                foreach i in pathKeys {
+                foreach var i in pathKeys {
                     if (requestPath == i) {
                         json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
                         //go through each item in parameters array and find the schema property
-                        foreach k in parameters {
+                        foreach var k in parameters {
                             if (k[SCHEMA] != null) {
                                 if (k[SCHEMA][REFERENCE] != null)  {
                                     //getting the reference to the model
@@ -103,24 +103,21 @@ public type ValidationFilter object {
                 }
             }
             //payload can be of type json or error
-            match payload {
-                json jsonPayload => {
-                    //do the validation if only there is a payload and a model available
-                    if (model != null && jsonPayload != null)  {
-                        //validate the payload against the model and return the result
-                        var finalResult = validate(modelName, jsonPayload, model, models);
-                        if (!finalResult.valid) {
-                            //setting the error message to the context
-                            setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
-                            filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
-                            //sending the error response to the client
-                            sendErrorResponse(listener, request, filterContext);
-                            return false;//avoid sending the invalid request to the backend by returning false.
-                        }
+            if(payload is json) {
+                //do the validation if only there is a payload and a model available
+                if (model != null && payload != null)  {
+                    //validate the payload against the model and return the result
+                    var finalResult = validate(modelName, payload, model, models);
+                    if (!finalResult.valid) {
+                        //setting the error message to the context
+                        setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
+                        filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
+                        //sending the error response to the client
+                        sendErrorResponse(caller, request, filterContext);
+                        return false;//avoid sending the invalid request to the backend by returning false.
                     }
                 }
-                error errorPayload => {}
-            }
+            } else {}
         }
         return true;
     }
@@ -147,7 +144,7 @@ public type ValidationFilter object {
                 models = swagger.components.schemas;
             } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
                 models = swagger.definitions;
-                foreach i in pathKeys {
+                foreach var i in pathKeys {
                     if (requestPath == i) {
                         string modelReference;
                         if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
@@ -195,13 +192,12 @@ public type ValidationFilter object {
 
             }
             //payload can be of type json or error
-            match payload {
-                json jsonPayload => {
+                if(payload is json) {
                     //do the validation if only thre is a payload and a model available. prevent validating error
                     //responses sent from the filterRequest if the request is invalid.
-                    if (model != null && jsonPayload != null && jsonPayload.fault == null) {
+                    if (model != null && payload != null && payload.fault == null) {
                         //validate the payload against the model and return the result
-                        var finalResult = validate(modelName, jsonPayload, model, models);
+                        var finalResult = validate(modelName, payload, model, models);
                         if (!finalResult.valid) {
                             //setting the error message to the context
                             setErrorMessageToFilterContext(context, INVALID_RESPONSE);
@@ -226,8 +222,8 @@ public type ValidationFilter object {
                         }
                     }
                 }
-                error errorPayload => {}
-            }
+                else {}
+
         }
         return true;
     }

@@ -25,37 +25,26 @@ import ballerina/io;
 import ballerina/reflect;
 
 // MutualSSL filter
-@Description { value: "Representation of the MutualSSL filter" }
 public type MutualSSLFilter object {
 
-    public json trottleTiers;
-    public new(trottleTiers) {}
+    public json trottleTiers = new;
 
-    @Param { value: "listener: Listner endpoint" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: MTSL result to indicate which folw is selected for request to proceed" }
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        boolean result = doFilterRequest(listener, request, context);
+        boolean result = doFilterRequest(caller, request, context);
         return result;
     }
 
-    @Description { value: "representation of Dofilter Request" }
-    @Param { value: "listener: Listner endpoint" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: MTSL result to indicate which folw is selected for request to proceed" }
-    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context)
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
         boolean isAuthenticated = false;
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         if (checkAuthentication == "require") {
             // get  config for this resource
-            AuthenticationContext authenticationContext;
+            AuthenticationContext authenticationContext = new;
             boolean isSecured = true;
             printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 

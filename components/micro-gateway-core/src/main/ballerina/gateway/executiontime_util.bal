@@ -19,7 +19,7 @@ import ballerina/io;
 import ballerina/http;
 
 function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
-    ExecutionTimeDTO executionTimeDTO;
+    ExecutionTimeDTO executionTimeDTO = new;
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
@@ -27,11 +27,11 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
         executionTimeDTO.keyType = authContext.keyType;
     } else {
         executionTimeDTO.provider = getAPIDetailsFromServiceAnnotation(
-                                        reflect:getServiceAnnotations(context.serviceType)).publisher;
+                                        reflect:getServiceAnnotations(context.serviceRef)).publisher;
         executionTimeDTO.keyType = PRODUCTION_KEY_TYPE;
     }
     executionTimeDTO.apiName = getApiName(context);
-    executionTimeDTO.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType))
+    executionTimeDTO.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef))
     .apiVersion;
     executionTimeDTO.tenantDomain = getTenantDomain(context);
     executionTimeDTO.context = getContext(context);

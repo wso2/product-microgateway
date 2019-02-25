@@ -14,21 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-@Description {value:"Configuration used for resource level tier annotation"}
-@Field {value:"policy: Rate limit speicified for the particular resource"}
 public type TierConfiguration record {
     string policy;
 
 };
 
-@Description {value:"Resource level tier annotation"}
 public annotation <resource> RateLimit TierConfiguration;
 
-@Description {value:"Configuration used for api version annotation"}
-@Field {value:"name: Name of the API"}
-@Field {value:"apiVersion: version specified for the API"}
-@Field {value:"publisher: provider of the API"}
-@Field {value:"authorizationHeader: authorization header specified for the API"}
 public type APIConfiguration record {
     string apiVersion;
     string name;
@@ -37,7 +29,6 @@ public type APIConfiguration record {
 
 };
 
-@Description {value:"API related details annotation"}
 public annotation <service> API APIConfiguration;
 
 

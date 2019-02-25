@@ -20,7 +20,7 @@ import ballerina/time;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
         //Filter only if analytics is enabled.
@@ -31,7 +31,7 @@ public type AnalyticsRequestFilter object {
             } else {
                 context.attributes[HOSTNAME_PROPERTY] = "localhost";
             }
-            context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
+            context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }
         return true;
@@ -83,15 +83,13 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
-    match runtime:getInvocationContext().attributes[ERROR_RESPONSE] {
-        () => {
-            printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
-            doFilterResponseData(response, context);
-        }
-        any code => {
-            printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-            error err = <error>code;
-            doFilterFault(context, err);
-        }
+    var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
+    if (code is ()) {
+        printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
+        doFilterResponseData(response, context);
+    } else {
+        printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+        error err = <error>code;
+        doFilterFault(context, err);
     }
 }

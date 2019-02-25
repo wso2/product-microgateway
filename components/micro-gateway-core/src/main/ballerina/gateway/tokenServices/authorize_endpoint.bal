@@ -19,25 +19,24 @@ import ballerina/http;
 @http:ServiceConfig {
     basePath:"/authorize"
 }
-service<http:Service> authorizeService bind tokenListenerEndpoint {
+service authorizeService on tokenListenerEndpoint {
 
     @http:ResourceConfig {
         path: "/*"
     }
-    authorizeResource(endpoint caller, http:Request req) {
+    resource function authorizeResource(http:Caller caller, http:Request req) {
         checkExpectHeaderPresent(req);
         var response = keyValidationEndpoint->forward(getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, "/oauth2") +
                 untaint req.rawPath, req);
-        match response {
-            http:Response httpResponse => {
-                _ = caller->respond(httpResponse);
-            }
-            error err => {
-                http:Response errorResponse = new;
-                json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
-                errorResponse.setJsonPayload(errMsg);
-                _ = caller->respond(errorResponse);
-            }
+        if(response is http:Response)   {
+            _ = caller->respond(response);
         }
+        else  {
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
+        }
+
     }
 }

@@ -19,14 +19,14 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/log;
 
-map blockConditions;
-map throttleDataMap;
+map<string> blockConditions;
+map<any> throttleDataMap;
 public stream<RequestStreamDTO> requestStream;
 public stream<GlobalThrottleStreamDTO> globalThrottleStream;
 public boolean isStreamsInitialized;
-future ftr = start initializeThrottleSubscription();
+future<()> ftr = start initializeThrottleSubscription();
 
-boolean blockConditionExist;
+boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
     GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
@@ -36,7 +36,7 @@ public function isBlockConditionExist(string key) returns (boolean) {
 public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
 }
-public function putBlockCondition(map m) {
+public function putBlockCondition(map<any> m) {
     string condition = <string>m[BLOCKING_CONDITION_KEY];
     string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
     string conditionState = <string>m[BLOCKING_CONDITION_STATE];
@@ -45,7 +45,7 @@ public function putBlockCondition(map m) {
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if (lengthof blockConditions.keys() == 0) {
+        if ( blockConditions.keys() != null &&  blockConditions.keys().length()== 0) {
             blockConditionExist = false;
         }
     }
@@ -114,7 +114,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
 }
 
 public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO {
-    EventDTO eventDTO;
+    EventDTO eventDTO = new;
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getThrottleMetaData(dto);

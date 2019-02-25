@@ -31,7 +31,7 @@ function searchFilesToUpload() returns (error?) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
     internal:Path ex = new(fileLocation);
     internal:Path[] pathList = check ex.list();
-    foreach pathEntry in pathList {
+    foreach var pathEntry in pathList {
         string fileName = pathEntry.getName();
         if (fileName.contains(ZIP_EXTENSION)) {
             http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
@@ -42,7 +42,7 @@ function searchFilesToUpload() returns (error?) {
             } else {
                 printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
             }
-            cnt++;
+            cnt=cnt +1;
         }
     }
     if (cnt == 0) {
@@ -59,7 +59,7 @@ function informError(error e) {
 
 function timerTask() {
     task:Timer? timer;
-    map vals = getConfigMapValue(ANALYTICS);
+    map<int> vals = getConfigMapValue(ANALYTICS);
     boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];

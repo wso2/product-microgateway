@@ -24,78 +24,68 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 import ballerina/crypto;
+import ballerina/encoding;
 
-@Description { value: "Representation of the BasicAuth logic" }
 public type BasicAuthUtils object {
 
-    public http:AuthnHandlerChain authnHandlerChain;
-    public new(authnHandlerChain) {}
+    http:AuthHandlerRegistry registry = new;
+    http:AuthnHandlerChain authnHandlerChain = new(registry);
 
-    @Description { value: "representation of Basic auth validation" }
-    @Param { value: "listener: Listner endpoint" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult:BasicAuth result to indicate which folw is selected for request to proceed" }
-    public function processRequest(http:Listener listener, http:Request request, http:FilterContext context)
+    public function processRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
 
         boolean isAuthenticated;
         //API authentication info
-        AuthenticationContext authenticationContext;
+        AuthenticationContext authenticationContext = new;
         boolean isAuthorized;
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string authHead = request.getHeader(AUTHORIZATION_HEADER);
         string[] headers = authHead.trim().split("\\s* \\s*");
         string encodedCredentials = headers[1];
-        var decodedCredentials = encodedCredentials.base64Decode();
+        var decodedCredentials = encoding:decodeBase64(encodedCredentials.toByteArray("UTF-8"));
         //Extract username and password from the request
         string userName;
         string passWord;
-        match decodedCredentials {
-            string decoded => {
-                if (!decoded.contains(":")) {
-                    setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
-                    sendErrorResponse(listener, request, untaint context);
-                    return false;
-                }
-                string[] decodedCred = decoded.trim().split(":");
-                userName = decodedCred[0];
-                if (lengthof decodedCred < 2) {
-                    int status;
-                    if (context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
-                        status = UNAUTHORIZED;
-                        context.attributes[HTTP_STATUS_CODE] = status;
-                    }
-                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                    sendErrorResponse(listener, request, untaint context);
-                    return false;
-                }
-                passWord = decodedCred[1];
+        if(decodedCredentials is string){
+            if (!decodedCredentials.contains(":")) {
+                setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
+                sendErrorResponse(caller, request, untaint context);
+                return false;
             }
-            error => {
+            string[] decodedCred = decodedCredentials.trim().split(":");
+            userName = decodedCred[0];
+            if (decodedCred.length() < 2) {
                 int status;
-                if (context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
+                if (<int>context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
                     status = UNAUTHORIZED;
                     context.attributes[HTTP_STATUS_CODE] = status;
                 }
                 setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(listener, request, untaint context);
+                sendErrorResponse(caller, request, untaint context);
                 return false;
             }
+            passWord = decodedCred[1];
+        } else {
+            int status;
+            if (<int>context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
+                status = UNAUTHORIZED;
+                context.attributes[HTTP_STATUS_CODE] = status;
+            }
+            setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+            sendErrorResponse(caller, request, untaint context);
+            return false;
         }
 
         //Hashing mechanism
-        string hashedPass = crypto:hash(passWord, crypto:SHA1);
+        string hashedPass = crypto:hashSha1(passWord.toByteArray("UTF-8"));
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        match credentials.base64Encode() {
-            string encodedVal => {
-                hashedRequest = "Basic " + encodedVal;
-            }
-            error err => {
-                throw err;
-            }
+        var encodedVal = encoding:encodeBase64(credentials.toByteArray("UTF-8"));
+        if(encodedVal is string) {
+            hashedRequest = "Basic " + encodedVal;
+        } else {
+            throw err;
         }
         request.setHeader(AUTHORIZATION_HEADER, hashedRequest);
 
@@ -105,7 +95,7 @@ public type BasicAuthUtils object {
             printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
             if (isAuthorized == false) {
                 setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(listener, request, untaint context);
+                sendErrorResponse(caller, request, untaint context);
                 return false;
             }
         } catch (error err) {
@@ -114,7 +104,7 @@ public type BasicAuthUtils object {
             printError(KEY_AUTHN_FILTER,
                 "Error occurred while authenticating via Basic authentication credentials");
             setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            sendErrorResponse(listener, request, untaint context);
+            sendErrorResponse(caller, request, untaint context);
             return false;
         }
 

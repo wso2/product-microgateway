@@ -23,73 +23,36 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 
-@Description { value: "Representation of an API gateway secure listener" }
-@Field { value: "apiGatewayListener: API Gateway listener instance" }
 public type APIGatewaySecureListener object {
-    public APIGatewayListener apiGatewayListener;
+    public APIGatewayListener apiGatewayListener = new;
 
-    new() {
-        apiGatewayListener = new;
+    public function __init(EndpointConfiguration config) {
+        self.init(EndpointConfiguration);
     }
 
+
+    public function __start() returns error? {
+        return self.apiGatewayListener.start();
+    }
+
+    public function __stop() returns error? {
+        return self.apiGatewayListener.stop();
+    }
+
+    public function __attach(service s, map<any> annotationData) returns error? {
+        return self.apiGatewayListener.register(s, annotationData);
+    }
     public function init(EndpointConfiguration config);
 
-    @Description { value: "Gets called when the endpoint is being initialize during package init time" }
-    @Return { value: "Error occured during initialization" }
-    public function initEndpoint() returns (error);
-
-    @Description { value:
-    "Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-    @Param { value: "serviceType: The type of the service to be registered" }
-    public function register(typedesc serviceType);
-
-    @Description { value: "Starts the registered service" }
-    public function start();
-
-    @Description { value: "Returns the connector that client code uses" }
-    @Return { value: "The connector that client code uses" }
-    public function getCallerActions() returns (http:Connection);
-
-    @Description { value: "Stops the registered service" }
-    public function stop();
 };
 
 
-function APIGatewaySecureListener::init(EndpointConfiguration config) {
+public function APIGatewaySecureListener.init(EndpointConfiguration config) {
     initiateGatewaySecureConfigurations(config);
     self.apiGatewayListener.init(config);
 
 }
 
-@Description { value: "Gets called when the endpoint is being initialize during package init time" }
-@Return { value: "Error occured during initialization" }
-function APIGatewaySecureListener::initEndpoint() returns (error) {
-    return self.apiGatewayListener.initEndpoint();
-}
-
-@Description { value:
-"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-@Param { value: "ep: The endpoint to which the service should be registered to" }
-@Param { value: "serviceType: The type of the service to be registered" }
-function APIGatewaySecureListener::register(typedesc serviceType) {
-    self.apiGatewayListener.register(serviceType);
-}
-
-@Description { value: "Starts the registered service" }
-function APIGatewaySecureListener::start() {
-    self.apiGatewayListener.start();
-}
-
-@Description { value: "Returns the connector that client code uses" }
-@Return { value: "The connector that client code uses" }
-function APIGatewaySecureListener::getCallerActions() returns (http:Connection) {
-    return self.apiGatewayListener.getCallerActions();
-}
-
-@Description { value: "Stops the registered service" }
-function APIGatewaySecureListener::stop() {
-    self.apiGatewayListener.stop();
-}
 
 function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
     config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
