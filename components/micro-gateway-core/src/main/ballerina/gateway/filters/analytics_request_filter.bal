@@ -83,13 +83,14 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
+    // TODO: refactor the logic. error does not belong to type any
     var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
     if (code is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
-    } else {
-        printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-        error err = <error>code;
-        doFilterFault(context, err);
     }
+    // } else if(code is error) {
+    //     printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+    //     doFilterFault(context, code);
+    // }
 }

@@ -36,24 +36,27 @@ public type BasicAuthUtils object {
 
         boolean isAuthenticated;
         //API authentication info
-        AuthenticationContext authenticationContext = new;
+        AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string authHead = request.getHeader(AUTHORIZATION_HEADER);
         string[] headers = authHead.trim().split("\\s* \\s*");
         string encodedCredentials = headers[1];
-        var decodedCredentials = encoding:decodeBase64(encodedCredentials.toByteArray("UTF-8"));
+        byte[]|error decodedCredentials =  encoding:decodeBase64(encodedCredentials);
         //Extract username and password from the request
         string userName;
         string passWord;
-        if(decodedCredentials is string){
-            if (!decodedCredentials.contains(":")) {
+        if(decodedCredentials is byte[]){
+        string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
+
+
+            if (!decodedCredentialsString.contains(":")) {
                 setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
                 sendErrorResponse(caller, request, untaint context);
                 return false;
             }
-            string[] decodedCred = decodedCredentials.trim().split(":");
+            string[] decodedCred = decodedCredentialsString.trim().split(":");
             userName = decodedCred[0];
             if (decodedCred.length() < 2) {
                 int status;
@@ -78,32 +81,18 @@ public type BasicAuthUtils object {
         }
 
         //Hashing mechanism
-        string hashedPass = crypto:hashSha1(passWord.toByteArray("UTF-8"));
+        string hashedPass = encoding:byteArrayToString(crypto:hashSha1(passWord.toByteArray("UTF-8")));
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        var encodedVal = encoding:encodeBase64(credentials.toByteArray("UTF-8"));
-        if(encodedVal is string) {
-            hashedRequest = "Basic " + encodedVal;
-        } else {
-            throw err;
-        }
+        string encodedVal = encoding:encodeBase64(credentials.toByteArray("UTF-8"));
+        hashedRequest = "Basic " + encodedVal;
         request.setHeader(AUTHORIZATION_HEADER, hashedRequest);
 
-        try {
-            printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-            isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
-            printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
-            if (isAuthorized == false) {
-                setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(caller, request, untaint context);
-                return false;
-            }
-        } catch (error err) {
-            // todo: need to properly handle this exception. Currently this is a generic exception catching.
-            // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
-            printError(KEY_AUTHN_FILTER,
-                "Error occurred while authenticating via Basic authentication credentials");
-            setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+        printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
+        isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
+        printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
+        if (!isAuthorized) {
+            setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
             sendErrorResponse(caller, request, untaint context);
             return false;
         }

@@ -82,7 +82,7 @@ public type AuthnFilter object {
         }
         http:AuthnHandlerChain authnHandlerChain = new(registry);
         //APIKeyValidationDto apiKeyValidationInfoDto;
-        AuthenticationContext authenticationContext = new;
+        AuthenticationContext authenticationContext = {};
         boolean isAuthorized = false;
         printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
         if (isSecured) {
@@ -175,7 +175,7 @@ public type AuthnFilter object {
                             authHeaderName);
                     var apiKeyValidationDto = self.oauthnHandler.handle(request);
                     if (apiKeyValidationDto is APIKeyValidationDto){
-                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                    isAuthorized = boolean.convert(apiKeyValidationDto.authorized);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
                             isAuthorized);
                     if (isAuthorized) {
@@ -198,8 +198,8 @@ public type AuthnFilter object {
                         authenticationContext.apiTier = apiKeyValidationDto.apiTier;
                         authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
                         subscriberTenantDomain;
-                        authenticationContext.spikeArrestLimit = check <int>apiKeyValidationDto.
-                        spikeArrestLimit;
+                        authenticationContext.spikeArrestLimit = check int.convert(apiKeyValidationDto.
+                        spikeArrestLimit);
                         authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
                         authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.
                         stopOnQuotaReach;
@@ -344,4 +344,3 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
 }
-

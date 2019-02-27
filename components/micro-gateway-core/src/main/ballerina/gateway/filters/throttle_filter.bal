@@ -40,7 +40,12 @@ public type ThrottleFilter object {
     public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                   boolean
     {
-        worker requestFlow{
+        worker throttleEventFlow{
+            printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
+            RequestStreamDTO throttleEvent;
+            throttleEvent = <- default;
+            publishNonThrottleEvent(throttleEvent);
+        }
             printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
             //Throttle Tiers
             string applicationLevelTier;
@@ -178,14 +183,9 @@ public type ThrottleFilter object {
             throttleEvent -> throttleEventFlow;
             printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
             return true;
-        }
 
-        worker throttleEventFlow{
-            printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
-            RequestStreamDTO throttleEvent;
-            throttleEvent = <- requestFlow;
-            publishNonThrottleEvent(throttleEvent);
-        }
+
+
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
