@@ -29,7 +29,7 @@ public function getFaultPayloadData(FaultDTO dto) returns string {
 }
 
 public function getEventFromFaultData(FaultDTO dto) returns EventDTO {
-    EventDTO eventDTO = new;
+    EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.fault:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getFaultMetaData(dto);

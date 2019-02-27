@@ -17,71 +17,71 @@
 //TODO : change the proper varaible types(ex: authorized should be boolean)
 
 public type APIKeyValidationDto record {
-    string apiName ;
-    string apiPublisher ;
-    string apiTier ;
-    string applicationId ;
-    string applicationName ;
-    string applicationTier ;
-    string authorized;
-    string authorizedDomains ;
-    string consumerKey ;
-    string contentAware;
-    string endUserName ;
-    string endUserToken ;
-    string issuedTime;
-    string spikeArrestLimit;
-    string spikeArrestUnit ;
-    string stopOnQuotaReach;
-    string subscriber ;
-    string subscriberTenantDomain ;
-    string throttlingDataList ;
-    string tier ;
-    string keyType ;
-    string userType ;
-    string validationStatus;
-    string validityPeriod;
+    string apiName="";
+    string apiPublisher="";
+    string apiTier="";
+    string applicationId="";
+    string applicationName="";
+    string applicationTier="";
+    string authorized="";
+    string authorizedDomains="";
+    string consumerKey="";
+    string contentAware="";
+    string endUserName="";
+    string endUserToken="";
+    string issuedTime="";
+    string spikeArrestLimit="";
+    string spikeArrestUnit="";
+    string stopOnQuotaReach="";
+    string subscriber="";
+    string subscriberTenantDomain="";
+    string throttlingDataList="";
+    string tier="";
+    string keyType="";
+    string userType="";
+    string validationStatus="";
+    string validityPeriod="";
 };
 
 public type APIRequestMetaDataDto record {
-    string context;
-    string apiVersion;
-    string accessToken;
-    string requiredAuthenticationLevel;
-    string clientDomain;
-    string matchingResource;
-    string httpVerb;
+    string context="";
+    string apiVersion="";
+    string accessToken="";
+    string requiredAuthenticationLevel="";
+    string clientDomain="";
+    string matchingResource="";
+    string httpVerb="";
 };
 
 public type AuthenticationContext record {
-    boolean authenticated;
-    string username;
-    string applicationTier;
-    string tier;
-    string apiTier;
-    boolean isContentAwareTierPresent;
-    string apiKey;
-    string keyType;
-    string callerToken;
-    string applicationId;
-    string applicationName;
-    string consumerKey;
-    string subscriber;
-    string[] throttlingDataList;
-    int spikeArrestLimit;
-    string subscriberTenantDomain;
-    string spikeArrestUnit;
-    boolean stopOnQuotaReach;
-    string apiPublisher;
+    boolean authenticated=false;
+    string username="";
+    string applicationTier="";
+    string tier="";
+    string apiTier="";
+    boolean isContentAwareTierPresent=false;
+    string apiKey="";
+    string keyType="";
+    string callerToken="";
+    string applicationId="";
+    string applicationName="";
+    string consumerKey="";
+    string subscriber="";
+    string[] throttlingDataList="";
+    int spikeArrestLimit=0;
+    string subscriberTenantDomain="";
+    string spikeArrestUnit="";
+    boolean stopOnQuotaReach=false;
+    string apiPublisher="";
 };
 
 public type KeyManagerConf record {
-   string serverUrl;
-   Credentials credentials;
+   string serverUrl="";
+   Credentials credentials?;
 };
 
 public type Credentials record {
-   string username;
-   string password;
+   string username="";
+   string password="";
 };
 

@@ -19,10 +19,10 @@ import ballerina/io;
 import ballerina/http;
 
 function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
-    ExecutionTimeDTO executionTimeDTO = new;
-    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
+    ExecutionTimeDTO executionTimeDTO = {};
+    boolean isSecured =  <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+        AuthenticationContext authContext =  <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         executionTimeDTO.provider = authContext.apiPublisher;
         executionTimeDTO.keyType = authContext.keyType;
     } else {
@@ -39,12 +39,12 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
 
     executionTimeDTO.securityLatency = getSecurityLatency(context);
     executionTimeDTO.eventTime = getCurrentTime();
-    executionTimeDTO.throttlingLatency = check <int>context.attributes[THROTTLE_LATENCY];
+    executionTimeDTO.throttlingLatency =  <int>context.attributes[THROTTLE_LATENCY];
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
     executionTimeDTO.responseMediationLatency = 0;
-    int timeRequestOut = check <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
-    int timeResponseIn = check <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
+    int timeRequestOut =  <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
+    int timeResponseIn =  <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
     executionTimeDTO.backEndLatency = timeResponseIn - timeRequestOut;
 
     return executionTimeDTO;
@@ -53,19 +53,19 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
 function getSecurityLatency(http:FilterContext context) returns int {
     int latency = 0;
     if (context.attributes.hasKey(SECURITY_LATENCY_AUTHN)) {
-        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHN];
+        latency +=  <int>context.attributes[SECURITY_LATENCY_AUTHN];
     }
     if (context.attributes.hasKey(SECURITY_LATENCY_AUTHZ)) {
-        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHZ];
+        latency +=  <int>context.attributes[SECURITY_LATENCY_AUTHZ];
     }
     if (context.attributes.hasKey(SECURITY_LATENCY_AUTHZ_RESPONSE)) {
-        latency += check <int>context.attributes[SECURITY_LATENCY_AUTHZ_RESPONSE];
+        latency +=  <int>context.attributes[SECURITY_LATENCY_AUTHZ_RESPONSE];
     }
     if (context.attributes.hasKey(SECURITY_LATENCY_SUBS)) {
-        latency += check <int>context.attributes[SECURITY_LATENCY_SUBS];
+        latency +=  <int>context.attributes[SECURITY_LATENCY_SUBS];
     }
     if (context.attributes.hasKey(SECURITY_LATENCY_VALIDATION)) {
-        latency += check <int>context.attributes[SECURITY_LATENCY_VALIDATION];
+        latency +=  <int>context.attributes[SECURITY_LATENCY_VALIDATION];
     }
     return latency;
 }

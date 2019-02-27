@@ -43,7 +43,7 @@ public type CookieBasedAuth object {
                 return sessionId;
             }
         }
-        error notFound = { message: "No Authorized cookie is found" };
+        error notFound = error("No Authorized cookie is found");
         return notFound;
     }
 
