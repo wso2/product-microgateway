@@ -62,7 +62,7 @@ function getMetaDataForRequestResponseExecutionData(RequestResponseExecutionDTO 
 function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
                                                                                                                    EventDTO
 {
-    EventDTO eventDTO;
+    EventDTO eventDTO = new;
     eventDTO.streamId = "org.wso2.apimgt.statistics.request:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getMetaDataForRequestResponseExecutionData(requestResponseExecutionDTO);
@@ -74,7 +74,7 @@ function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDT
 function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
                                                                                                            RequestResponseExecutionDTO
 {
-    RequestResponseExecutionDTO requestResponseExecutionDTO;
+    RequestResponseExecutionDTO requestResponseExecutionDTO = new;
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
@@ -103,14 +103,12 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
 
     var res = response.cacheControl.noCache;
-    match res {
-        boolean val => {
-            requestResponseExecutionDTO.cacheHit = val;
-        }
-        () => {
-            //todo: cacheHit does not gives boolean
-        }
+    if(res is boolean) {
+        requestResponseExecutionDTO.cacheHit = res;
+    } else {
+        //todo: cacheHit does not gives boolean
     }
+
     requestResponseExecutionDTO.apiHostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
         HOSTNAME_PROPERTY]);
     //todo: Response size is yet to be decided

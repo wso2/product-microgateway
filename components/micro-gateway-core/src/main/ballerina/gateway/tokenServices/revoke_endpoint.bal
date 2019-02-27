@@ -19,25 +19,23 @@ import ballerina/http;
 @http:ServiceConfig {
     basePath:"/revoke"
 }
-service<http:Service> revokeService bind tokenListenerEndpoint {
+service revokeService on tokenListenerEndpoint {
 
     @http:ResourceConfig {
         path: "/*"
     }
-    revokeResource(endpoint caller, http:Request req) {
+    resource function revokeResource(http:Caller caller, http:Request req) {
         checkExpectHeaderPresent(req);
         var response = keyValidationEndpoint->forward(getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, "/oauth2") +
                 untaint req.rawPath, req);
-        match response {
-            http:Response httpResponse => {
-                _ = caller->respond(httpResponse);
-            }
-            error err => {
-                http:Response errorResponse = new;
-                json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
-                errorResponse.setJsonPayload(errMsg);
-                _ = caller->respond(errorResponse);
-            }
+        if(response is http:Response) {
+            _ = caller->respond(response);
+        } else {
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
         }
+
     }
 }

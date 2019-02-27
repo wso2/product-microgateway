@@ -42,37 +42,35 @@ jms:Session jmsSession = new(jmsConnection, {
     });
 
 // Initialize a Topic subscriber using the created session.
-endpoint jms:TopicSubscriber subscriberEndpoint {
-    session: jmsSession,
-    topicPattern: "throttleData"
-};
+jms:TopicSubscriber subscriberEndpoint = new(jmsSession, topicPattern = "throttleData");
 
 // Bind the created consumer(subscriber endpoint) to the listener service.
-service<jms:Consumer> jmsListener bind subscriberEndpoint {
-    onMessage(endpoint subscriber, jms:Message message) {
-        match (message.getMapMessageContent()) {
-            map m => {
-                log:printDebug("ThrottleMessage Received");
-                //Throttling decisions made by TM going to throttleDataMap
-                if (m.hasKey(THROTTLE_KEY)) {
-                    GlobalThrottleStreamDTO globalThrottleStreamDtoTM;
-                    globalThrottleStreamDtoTM.throttleKey = <string>m[THROTTLE_KEY];
-                    globalThrottleStreamDtoTM.isThrottled = check <boolean>m[IS_THROTTLED];
-                    globalThrottleStreamDtoTM.expiryTimeStamp = check <int>m[EXPIRY_TIMESTAMP];
+service jmsListener on subscriberEndpoint {
+    resource function onMessage(jms:TopicSubscriberCaller consumer, jms:Message message) {
+        var m = message.getMapMessageContent();
+        if(m is map<any>) {
+            log:printDebug("ThrottleMessage Received");
+            //Throttling decisions made by TM going to throttleDataMap
+            if (m.hasKey(THROTTLE_KEY)) {
+                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = new;
+                globalThrottleStreamDtoTM.throttleKey = <string>m[THROTTLE_KEY];
+                globalThrottleStreamDtoTM.isThrottled = check <boolean>m[IS_THROTTLED];
+                globalThrottleStreamDtoTM.expiryTimeStamp = check <int>m[EXPIRY_TIMESTAMP];
 
-                    if (globalThrottleStreamDtoTM.isThrottled == true) {
-                        putThrottleData(globalThrottleStreamDtoTM);
-                    } else {
-                        removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
-                    }
-                    //Blocking decisions going to a separate map
-                } else if (m.hasKey(BLOCKING_CONDITION_KEY)){
-                    putBlockCondition(m);
+                if (globalThrottleStreamDtoTM.isThrottled == true) {
+                    putThrottleData(globalThrottleStreamDtoTM);
+                } else {
+                    removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
                 }
+                //Blocking decisions going to a separate map
+            } else if (m.hasKey(BLOCKING_CONDITION_KEY)){
+                putBlockCondition(m);
             }
-            error e => log:printError("Error occurred while reading message", err = e);
+        } else {
+            log:printError("Error occurred while reading message", err = m);
         }
     }
+
 }
 
 

@@ -26,15 +26,12 @@ import ballerina/reflect;
 
 // Authentication filter
 
-@Description { value: "Representation of the Authentication filter" }
-@Field { value: "filterRequest: request filter method which attempts to authenticated the request" }
 public type AuthnFilter object {
 
-    public OAuthnAuthenticator oauthnHandler;//Handles the oauth2 authentication;
+    public OAuthnAuthenticator oauthnHandler = new;//Handles the oauth2 authentication;
     public boolean isOauth2Enabled = false;
 
-    @Description { value: "filterRequest: Request filter function" }
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context)
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
@@ -43,7 +40,7 @@ public type AuthnFilter object {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest(listener, request, context);
+            boolean result = doFilterRequest(caller, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
         } else {
@@ -53,15 +50,14 @@ public type AuthnFilter object {
 
     }
 
-    @Description { value: "filterRequest: Request filter function" }
-    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context)
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
         runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
         printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
 
-        context.attributes[REMOTE_ADDRESS] = getClientIp(request, listener);
+        context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
         context.attributes[FILTER_FAILED] = false;
-        runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR] = context.serviceType;
+        runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR] = context.serviceRef;
         runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
         // get auth config for this resource
         boolean authenticated;
@@ -69,30 +65,32 @@ public type AuthnFilter object {
         var (isSecured, authProvidersIds) = getResourceAuthConfig(context);
         context.attributes[IS_SECURED] = isSecured;
         //Create auth handler chain with providerIds in service file
-        http:AuthHandlerRegistry registry;
+        http:AuthHandlerRegistry registry = new;
         http:AuthProvider[] authProviders = getAuthProviders();
-        foreach authProvidersId in authProvidersIds{
-            if (authProvidersId == AUTH_SCHEME_OAUTH2){
-                //check whether Oauth2 is enabled in service files.
-                isOauth2Enabled = true;
-            }
-            foreach authProvider in authProviders  {
-                if (authProvider.id == authProvidersId){
-                    registry.add(authProvider.id, createAuthHandler(authProvider));
-                }
-            }
+        foreach var authProvidersId in
+        authProvidersIds{
+        if (authProvidersId == AUTH_SCHEME_OAUTH2){
+            //check whether Oauth2 is enabled in service files.
+            self.isOauth2Enabled = true;
+        }
+        foreach var authProvider in
+        authProviders  {
+        if (authProvider.id == authProvidersId){
+            registry.add(authProvider.id, createAuthHandler(authProvider));
+        }
+        }
         }
         http:AuthnHandlerChain authnHandlerChain = new(registry);
         //APIKeyValidationDto apiKeyValidationInfoDto;
-        AuthenticationContext authenticationContext;
-        boolean isAuthorized;
+        AuthenticationContext authenticationContext = new;
+        boolean isAuthorized = false;
         printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
         if (isSecured) {
             boolean isCookie = false;
             string authHeader;
             string|error result;
             string|error extractedToken;
-            string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceType));
+            string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceRef));
             //check for the header of the request and choose the path
             if (request.hasHeader(authHeaderName)) {
                 authHeader = request.getHeader(authHeaderName);
@@ -102,22 +100,19 @@ public type AuthnFilter object {
                 if (isCookie) {
                     CookieBasedAuth cookieBasedAuth = new CookieBasedAuth ();
                     result = cookieBasedAuth.processRequest(request);
-                    match result {
-                        string outputString => {
-                            authHeader = outputString;
-                        }
-                        error => {}
-                    }
+                    if (result is string) {
+                    authHeader = result;
+                    } else {}
                 } else {
                     log:printError("No Cookies are provided at Server startup");
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
-                    sendErrorResponse(listener, request, untaint context);
+                    sendErrorResponse(caller, request, untaint context);
                     return false;
                 }
             } else {
                 log:printError("No authorization header was provided");
                 setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                sendErrorResponse(listener, request, untaint context);
+                sendErrorResponse(caller, request, untaint context);
                 return false;
             }
             string providerId;
@@ -164,123 +159,121 @@ public type AuthnFilter object {
                     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
                     printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-                    sendErrorResponse(listener, request, untaint context);
+                    sendErrorResponse(caller, request, untaint context);
                     return false;
                 }
             } else if (providerId == AUTH_SCHEME_OAUTH2) {
-                if (isOauth2Enabled) {
+                if (self.isOauth2Enabled) {
                     if (isCookie) {
                         extractedToken = result;
                     } else {
                         extractedToken = extractAccessToken(request, authHeaderName);
                     }
-                    match extractedToken {
-                        string token => {
-                            runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = token;
-                            printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
-                                    authHeaderName);
-                            match self.oauthnHandler.handle(request) {
-                                APIKeyValidationDto apiKeyValidationDto => {
-                                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
-                                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
-                                            isAuthorized);
-                                    if (isAuthorized) {
-                                        authenticationContext.authenticated = true;
-                                        authenticationContext.tier = apiKeyValidationDto.tier;
-                                        authenticationContext.apiKey = token;
-                                        if (apiKeyValidationDto.endUserName != "") {
-                                            authenticationContext.username = apiKeyValidationDto.endUserName;
-                                        } else {
-                                            authenticationContext.username = END_USER_ANONYMOUS;
-                                        }
-                                        authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
-                                        authenticationContext.keyType = apiKeyValidationDto.keyType;
-                                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
-                                        authenticationContext.applicationId = apiKeyValidationDto.applicationId;
-                                        authenticationContext.applicationName = apiKeyValidationDto.applicationName;
-                                        authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
-                                        authenticationContext.subscriber = apiKeyValidationDto.subscriber;
-                                        authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
-                                        authenticationContext.apiTier = apiKeyValidationDto.apiTier;
-                                        authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
-                                        subscriberTenantDomain;
-                                        authenticationContext.spikeArrestLimit = check <int>apiKeyValidationDto.
-                                        spikeArrestLimit;
-                                        authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                                        authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.
-                                        stopOnQuotaReach;
-                                        authenticationContext.isContentAwareTierPresent = <boolean>apiKeyValidationDto
-                                        .contentAware;
-                                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
-                                                callerToken);
-                                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken
-                                        != null) {
-                                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
-                                                JWT_HEADER_NAME);
-                                            request.setHeader(jwtheaderName, authenticationContext.callerToken);
-                                        }
-                                        checkAndRemoveAuthHeaders(request, authHeaderName);
-                                        context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-
-                                        // setting keytype to invocationContext
-                                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
-                                        .keyType;
-                                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
-                                        authContext.scheme = AUTH_SCHEME_OAUTH2;
-                                        authContext.authToken = token;
-                                    } else {
-                                        int status = check <int>apiKeyValidationDto.validationStatus;
-                                        printDebug(KEY_AUTHN_FILTER,
-                                                "Authentication handler returned with validation status : " +
-                                                status);
-                                        setErrorMessageToFilterContext(context, status);
-                                        sendErrorResponse(listener, request, untaint context);
-                                        return false;
-                                    }
-                                }
-                                error err => {
-                                    log:printError(err.message, err = err);
-                                    setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                                    sendErrorResponse(listener, request, untaint context);
-                                    return false;
-                                }
-                            }
+                    if (extractedToken is string){
+                    runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = extractedToken;
+                    printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
+                            authHeaderName);
+                    var apiKeyValidationDto = self.oauthnHandler.handle(request);
+                    if (apiKeyValidationDto is APIKeyValidationDto){
+                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
+                            isAuthorized);
+                    if (isAuthorized) {
+                        authenticationContext.authenticated = true;
+                        authenticationContext.tier = apiKeyValidationDto.tier;
+                        authenticationContext.apiKey = extractedToken;
+                        if (apiKeyValidationDto.endUserName != "") {
+                            authenticationContext.username = apiKeyValidationDto.endUserName;
+                        } else {
+                            authenticationContext.username = END_USER_ANONYMOUS;
                         }
-                        error err => {
-                            if (isCookie) {
-                                log:printError(err.message, err = err);
-                                setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
-                                sendErrorResponse(listener, request, untaint context);
-                                return false;
-                            } else {
-                                log:printError(err.message, err = err);
-                                setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                                sendErrorResponse(listener, request, untaint context);
-                                return false;
-                            }
+                        authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
+                        authenticationContext.keyType = apiKeyValidationDto.keyType;
+                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
+                        authenticationContext.applicationId = apiKeyValidationDto.applicationId;
+                        authenticationContext.applicationName = apiKeyValidationDto.applicationName;
+                        authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
+                        authenticationContext.subscriber = apiKeyValidationDto.subscriber;
+                        authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
+                        authenticationContext.apiTier = apiKeyValidationDto.apiTier;
+                        authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
+                        subscriberTenantDomain;
+                        authenticationContext.spikeArrestLimit = check <int>apiKeyValidationDto.
+                        spikeArrestLimit;
+                        authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
+                        authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.
+                        stopOnQuotaReach;
+                        authenticationContext.isContentAwareTierPresent = <boolean>apiKeyValidationDto
+                        .contentAware;
+                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
+                                callerToken);
+                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken
+                        != null) {
+                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
+                                JWT_HEADER_NAME);
+                            request.setHeader(jwtheaderName, authenticationContext.callerToken);
+                        }
+                        checkAndRemoveAuthHeaders(request, authHeaderName);
+                        context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+
+                        // setting keytype to invocationContext
+                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
+                        .keyType;
+                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
+                        authContext.scheme = AUTH_SCHEME_OAUTH2;
+                        authContext.authToken = extractedToken;
+                    } else {
+                        int status = check <int>apiKeyValidationDto.validationStatus;
+                        printDebug(KEY_AUTHN_FILTER,
+                                "Authentication handler returned with validation status : " +
+                                status);
+                        setErrorMessageToFilterContext(context, status);
+                        sendErrorResponse(caller, request, untaint context);
+                        return false;
+                    }
+                    } else {
+                        log:printError(apiKeyValidationDto.message, err = apiKeyValidationDto);
+                        setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+                        sendErrorResponse(caller, request, untaint context);
+                        return false;
+                    }
+
+                    }
+                    else {
+                        if (isCookie) {
+                            log:printError(extractedToken.message, err = extractedToken);
+                            setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
+                            sendErrorResponse(caller, request, untaint context);
+                            return false;
+                        } else {
+                            log:printError(extractedToken.message, err = extractedToken);
+                            setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                            sendErrorResponse(caller, request, untaint context);
+                            return false;
                         }
                     }
+
                 } else {
                     setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                    sendErrorResponse(listener, request, untaint context);
+                    sendErrorResponse(caller, request, untaint context);
                     return false;
                 }
             } else if (providerId == AUTHN_SCHEME_BASIC) {
                 //Basic auth valiadation
                 BasicAuthUtils basicAuthentication = new BasicAuthUtils (authnHandlerChain);
-                boolean isValidated = basicAuthentication.processRequest(listener, request, context);
+                boolean isValidated = basicAuthentication.processRequest(caller, request, context);
                 return isValidated;
-            }
 
-        } else {
-            // not secured, no need to authenticate
-            return true;
+            } else {
+                // not secured, no need to authenticate
+                return true;
+            }
+            if (!isAuthorized) {
+                setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+                sendErrorResponse(caller, request, untaint context);
+            }
+            return isAuthorized;
         }
-        if (!isAuthorized) {
-            setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            sendErrorResponse(listener, request, untaint context);
-        }
-        return isAuthorized;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -289,19 +282,16 @@ public type AuthnFilter object {
 };
 
 
-@Description { value: "Checks if the resource is secured" }
-@Param { value: "context: FilterContext object" }
-@Return { value: "boolean, string[]: tuple of whether the resource is secured and the list of auth provider ids " }
 function getResourceAuthConfig(http:FilterContext context) returns (boolean, string[]) {
     boolean resourceSecured;
     string[] authProviderIds = [];
     // get authn details from the resource level
     http:ListenerAuthConfig? resourceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
         RESOURCE_ANN_NAME,
-        reflect:getResourceAnnotations(context.serviceType, context.resourceName));
+        reflect:getResourceAnnotations(context.serviceRef, context.resourceName));
     http:ListenerAuthConfig? serviceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
         SERVICE_ANN_NAME,
-        reflect:getServiceAnnotations(context.serviceType));
+        reflect:getServiceAnnotations(context.serviceRef));
     // check if authentication is enabled
     resourceSecured = isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further
@@ -309,20 +299,15 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
         return (resourceSecured, authProviderIds);
     }
     // check if auth providers are given at resource level
-    match resourceLevelAuthAnn.authProviders {
-        string[] providers => {
-            authProviderIds = providers;
-        }
-        () => {
-            // no auth providers found in resource level, try in rest level
-            match serviceLevelAuthAnn.authProviders {
-                string[] providers => {
-                    authProviderIds = providers;
-                }
-                () => {
-                    // no auth providers found
-                }
-            }
+    var providers = resourceLevelAuthAnn.authProviders;
+    if(providers is string[]) {
+        authProviderIds = providers;
+    } else {
+        // no auth providers found in resource level, try in rest level
+        if(serviceLevelAuthAnn.authProviders is string[]) {
+            authProviderIds = serviceLevelAuthAnn.authProviders;
+        } else {
+            // no auth providers found
         }
     }
     return (resourceSecured, authProviderIds);

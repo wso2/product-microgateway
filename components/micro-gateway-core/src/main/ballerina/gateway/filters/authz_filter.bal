@@ -26,22 +26,13 @@ import ballerina/reflect;
 
 // authorization filter which wraps the ballerina in built authorization filter.
 
-@Description { value: "Representation of the Authorization filter" }
-@Field { value: "filterRequest: request filter method which attempts to authorize the request" }
-@Field { value: "filterRequest: response filter method (not used this scenario)" }
 public type OAuthzFilter object {
 
-    public http:AuthzFilter authzFilter;
+    public http:AuthzFilter authzFilter = new;
 
-    public new(authzFilter) {
-    }
 
-    @Description { value: "Filter function implementation which tries to authorize the request" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
+                                                                                                            boolean
     {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
@@ -50,7 +41,7 @@ public type OAuthzFilter object {
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest(listener, request, context);
+            boolean result = doFilterRequest(caller, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
         } else {
@@ -59,8 +50,8 @@ public type OAuthzFilter object {
         }
     }
 
-    public function doFilterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                  boolean
+    public function doFilterRequest(http:Listener caller, http:Request request, http:FilterContext context) returns
+                                                                                                                boolean
     {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
         string authScheme = runtime:getInvocationContext().authContext.scheme;
@@ -68,11 +59,13 @@ public type OAuthzFilter object {
         // scope validation is done in authn filter for oauth2, hence we only need to
         //validate scopes if auth scheme is jwt.
         if (authScheme == AUTH_SCHEME_JWT){
-            result = self.authzFilter.filterRequest(listener, request, context);
+            result = self.authzFilter.filterRequest(caller, request, context);
         }
         printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result);
         return result;
     }
+
+};
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
@@ -85,25 +78,16 @@ public type OAuthzFilter object {
         // In authorization filter we have specifically set the error payload since we are using ballerina in built
         // authzFilter
         if (response.statusCode == FORBIDDEN) {
-            match runtime:getInvocationContext().attributes[ERROR_CODE] {
-                () => {
-                    match context.attributes[ERROR_CODE] {
-                        () => {
-                            setAuthorizationFailureMessage(response, context);
-                        }
-                        any code => {// no need to set error codes
-                        }
-                    }
-                }
-                any code => {// no need to set error codes
-
+            if(runtime:getInvocationContext().attributes[ERROR_CODE] is ()) {
+                if(context.attributes[ERROR_CODE] is ()) {
+                    setAuthorizationFailureMessage(response, context);
                 }
             }
 
         }
         return true;
     }
-};
+
 
 function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
     string errorDescription = INVALID_SCOPE_MESSAGE;

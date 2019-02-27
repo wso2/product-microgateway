@@ -22,9 +22,7 @@ stream<string> filesToUpload;
 
 
 function multipartSender(string location, string file, string username, string password) returns http:Response {
-    endpoint http:Client clientEP {
-        url: uploadingUrl
-    };
+    http:Client clientEP = new(uploadingUrl);
     mime:Entity filePart = new;
     filePart.setFileAsEntityBody(location + file);
     filePart.setContentDisposition(getContentDispositionForFormData(file));
@@ -37,19 +35,18 @@ function multipartSender(string location, string file, string username, string p
     request.setBodyParts(bodyParts);
     var returnResponse = clientEP->post("", request);
 
-    match returnResponse {
-        error err => {
+        if(returnResponse is error) {
             http:Response response = new;
             string errorMessage = "Error occurred while sending multipart request: SC " + 500;
             response.setPayload(errorMessage);
             response.statusCode = 500;
-            printFullError(KEY_UPLOAD_TASK, err);
+            printFullError(KEY_UPLOAD_TASK, returnResponse);
             return response;
         }
-        http:Response returnResult => {
-            return returnResult;
+        else  {
+            return returnResponse;
         }
-    }
+
 }
 
 
@@ -64,12 +61,11 @@ function getContentDispositionForFormData(string partName)
 
 function getBasicAuthHeaderValue(string username, string password) returns string {
     string credentials = username + ":" + password;
-    match credentials.base64Encode() {
-        string encodedVal => {
-            return "Basic " + encodedVal;
-        }
-        error err => {
-            throw err;
-        }
+    var encodedVal = credentials.base64Encode();
+    if(encodedVal is string)  {
+        return "Basic " + encodedVal;
+    }
+    else {
+        throw err;
     }
 }

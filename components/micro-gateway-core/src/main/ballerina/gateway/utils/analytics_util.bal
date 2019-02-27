@@ -19,7 +19,7 @@ boolean configsRead = false;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
-    ThrottleAnalyticsEventDTO eventDto;
+    ThrottleAnalyticsEventDTO eventDto = new;
     string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
@@ -60,7 +60,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
 
 function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
     boolean isSecured = check <boolean>context.attributes[IS_SECURED];
-    FaultDTO eventDto;
+    FaultDTO eventDto = new;
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
     json metaInfo = {};
@@ -103,7 +103,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
 
 
 function getAnalyticsEnableConfig() {
-    map vals = getConfigMapValue(ANALYTICS);
+    map<any> vals = getConfigMapValue(ANALYTICS);
     isAnalyticsEnabled = check <boolean>vals[ENABLE];
     rotatingTime =  check <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
@@ -118,8 +118,8 @@ function initializeAnalytics() {
         if (isAnalyticsEnabled) {
             initStreamPublisher();
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-            future uploadTask = start timerTask();
-            future rotateTask = start rotatingTask();
+            future<()> uploadTask = start timerTask();
+            future<()> rotateTask = start rotatingTask();
         } else {
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
         }

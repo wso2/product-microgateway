@@ -18,26 +18,25 @@ public type Result object {
     string modelName;
 };
 
-public function close(io:CharacterChannel characterChannel) {
-    characterChannel.close() but {
-        error e =>
+function closeRc(io:ReadableCharacterChannel rc) {
+    var result = rc.close();
+    if (result is error){
         log:printError("Error occurred while closing character stream",
-            err = e)
-    };
+        err = result);
+    }
 }
 
-public function read(string path) returns json {
-    io:ByteChannel byteChannel = io:openFile(path, io:READ);
-    io:CharacterChannel ch = new io:CharacterChannel(byteChannel, "UTF8");
-    match ch.readJson() {
-        json result => {
-            close(ch);
-            return result;
-        }
-        error err => {
-            close(ch);
-            throw err;
-        }
+
+function read(string path) returns json {
+    io:ReadableByteChannel rbc = io:openReadableFile(path);
+    io:ReadableCharacterChannel rch = new(rbc, "UTF8");
+    var result = rch.readJson();
+    if (result is error) {
+        closeRc(rch);
+        throw result;
+    } else {
+        closeRc(rch);
+        return result;
     }
 }
 
@@ -129,7 +128,7 @@ public function validateMinMaxLength(string name, json value, json minLength, js
         return validateMinLength(name, newValue, min);
     }
     //if there is both minLength and maxLength peroperties, validate them
-    if (lengthof newValue < min || lengthof newValue > max) {
+    if (newValue.length() < min || newValue.length() > max) {
         if (min <= 1){
             err = { message: name + " cannot be blank and cannot be longer than " + maxLength.toString() +
                 " characters long" };
@@ -144,7 +143,7 @@ public function validateMinMaxLength(string name, json value, json minLength, js
 //validate maxLength of a string
 public function validateMaxLength(string name, string value, int maxLength) returns (boolean|error) {
     if (maxLength > 0){
-        if (lengthof value > maxLength){
+        if (value.length() > maxLength){
             error err = { message: name + " must be no more than " + <string>maxLength + " characters long" };
             return err;
         }
@@ -155,7 +154,7 @@ public function validateMaxLength(string name, string value, int maxLength) retu
 public function validateMinLength(string name, string value, int minLength) returns (boolean|error) {
     error err;
     if (minLength > 0){
-        if (lengthof value < minLength){
+        if (value.length() < minLength){
             if (minLength == 1){
                 err = { message: name + " cannot be blank" };
                 return err;
@@ -173,7 +172,7 @@ public function validatePattern(string name, json value, json pattern) returns (
         return true;
     }
     string regex = pattern.toString();
-    int length = lengthof regex;
+    int length = regex.length();
     //substring the pattern in order to get rid of "^" and "$" symbols
     string newRegex = regex.substring(1, length);
     string stringValue = value.toString();
@@ -199,38 +198,36 @@ public function validateMinMaxValue(string name, int|float value, json minValue,
         return validateMaxValue(name, value, max, exclusiveMax);
     }
     //if there is both minimum and maximum properties do the validation
-    match value {
-        int intValue => {
-            if (!exclusiveMin && !exclusiveMax && (intValue < min || intValue > max)) {
-                err = { message: name + " must be at least " + <string>min + " and no more than " + <string>max };
-                return err;
-            } else if (exclusiveMin && exclusiveMax && (intValue <= min || intValue >= max)){
-                err = { message: name + " must be greater than " + <string>min + " and less than " + <string>max };
-                return err;
-            } else if (exclusiveMin && (intValue <= min || intValue > max)){
-                err = { message: name + " must be greater than " + <string>min + " and no more than " + <string>max
-                };
-                return err;
-            } else if (exclusiveMax && (intValue >= max || intValue < min)){
-                err = { message: name + " must be at least " + <string>min + " and less than " + <string>max };
-                return err;
-            }
+    if(value is int) {
+        if (!exclusiveMin && !exclusiveMax && (value < min || value > max)) {
+            err = { message: name + " must be at least " + <string>min + " and no more than " + <string>max };
+            return err;
+        } else if (exclusiveMin && exclusiveMax && (value <= min || value >= max)){
+            err = { message: name + " must be greater than " + <string>min + " and less than " + <string>max };
+            return err;
+        } else if (exclusiveMin && (value <= min || value > max)){
+            err = { message: name + " must be greater than " + <string>min + " and no more than " + <string>max
+            };
+            return err;
+        } else if (exclusiveMax && (value >= max || value < min)){
+            err = { message: name + " must be at least " + <string>min + " and less than " + <string>max };
+            return err;
         }
-        float floatValue => {
-            if (!exclusiveMin && !exclusiveMax && (floatValue < min || floatValue > max)) {
-                err = { message: name + " must be at least " + <string>min + " and no more than " + <string>max };
-                return err;
-            } else if (exclusiveMin && exclusiveMax && (floatValue <= min || floatValue >= max)){
-                err = { message: name + " must be greater than " + <string>min + " and less than " + <string>max };
-                return err;
-            } else if (exclusiveMin && (floatValue <= min || floatValue > max)){
-                err = { message: name + " must be greater than " + <string>min + " and no more than " + <string>max
-                };
-                return err;
-            } else if (exclusiveMax && (floatValue >= max || floatValue < min)){
-                err = { message: name + " must be at least " + <string>min + " and less than " + <string>max };
-                return err;
-            }
+    }
+    else if (value is float) {
+        if (!exclusiveMin && !exclusiveMax && (value < min || value > max)) {
+            err = { message: name + " must be at least " + <string>min + " and no more than " + <string>max };
+            return err;
+        } else if (exclusiveMin && exclusiveMax && (value <= min || value >= max)){
+            err = { message: name + " must be greater than " + <string>min + " and less than " + <string>max };
+            return err;
+        } else if (exclusiveMin && (value <= min || value > max)){
+            err = { message: name + " must be greater than " + <string>min + " and no more than " + <string>max
+            };
+            return err;
+        } else if (exclusiveMax && (value >= max || value < min)){
+            err = { message: name + " must be at least " + <string>min + " and less than " + <string>max };
+            return err;
         }
     }
 
@@ -241,25 +238,23 @@ public function validateMinValue(string name, int|float value, int minValue, boo
             error) {
     error err;
     //value can be of type integer or float
-    match value {
-        int intValue => {
-            if (!exclusiveMin && intValue < minValue) {//if there is no exclusiveMinimum property
-                err = { message: name + " must be at least " + <string>minValue };
-                return err;
-            } else if (exclusiveMin && intValue <= minValue) {//if there is exclusiveMinimum property
-                err = { message: name + " must be greater than " + <string>minValue };
-                return err;
-            }
+    if(value is int) {
+        if (!exclusiveMin && value < minValue) {//if there is no exclusiveMinimum property
+            err = { message: name + " must be at least " + <string>minValue };
+            return err;
+        } else if (exclusiveMin && value <= minValue) {//if there is exclusiveMinimum property
+            err = { message: name + " must be greater than " + <string>minValue };
+            return err;
         }
+    }
 
-        float floatValue => {
-            if (!exclusiveMin && floatValue < minValue) {//if there is no exclusiveMinimum property
-                err = { message: name + " must be at least " + <string>minValue };
-                return err;
-            } else if (exclusiveMin && floatValue <= minValue) {//if there is exclusiveMinimum property
-                err = { message: name + " must be greater than " + <string>minValue };
-                return err;
-            }
+    else if(value is float) {
+        if (!exclusiveMin && value < minValue) {//if there is no exclusiveMinimum property
+            err = { message: name + " must be at least " + <string>minValue };
+            return err;
+        } else if (exclusiveMin && value <= minValue) {//if there is exclusiveMinimum property
+            err = { message: name + " must be greater than " + <string>minValue };
+            return err;
         }
     }
     return true;
@@ -269,24 +264,22 @@ public function validateMaxValue(string name, int|float value, int maxValue, boo
             error) {
     error err;
     //value can be of type integer or float
-    match value {
-        int intValue => {
-            if (!exclusiveMax && intValue > maxValue) {//if there is no exclusiveMinimum property
-                err = { message: name + " must not be more than " + <string>maxValue };
-                return err;
-            } else if (exclusiveMax && intValue >= maxValue) {//if there is exclusiveMinimum property
-                err = { message: name + " must be less than " + <string>maxValue };
-                return err;
-            }
+    if(value is int) {
+        if (!exclusiveMax && value > maxValue) {//if there is no exclusiveMinimum property
+            err = { message: name + " must not be more than " + <string>maxValue };
+            return err;
+        } else if (exclusiveMax && value >= maxValue) {//if there is exclusiveMinimum property
+            err = { message: name + " must be less than " + <string>maxValue };
+            return err;
         }
-        float floatValue => {
-            if (!exclusiveMax && floatValue > maxValue) {//if there is no exclusiveMinimum property
-                err = { message: name + " must not be more than " + <string>maxValue };
-                return err;
-            } else if (exclusiveMax && floatValue >= maxValue) {//if there is exclusiveMinimum property
-                err = { message: name + " must be less than " + <string>maxValue };
-                return err;
-            }
+    }
+    else if(value is float) {
+        if (!exclusiveMax && value > maxValue) {//if there is no exclusiveMinimum property
+            err = { message: name + " must not be more than " + <string>maxValue };
+            return err;
+        } else if (exclusiveMax && value >= maxValue) {//if there is exclusiveMinimum property
+            err = { message: name + " must be less than " + <string>maxValue };
+            return err;
         }
     }
     return true;
@@ -298,7 +291,7 @@ public function validateEnums(string name, json value, json enums) returns (bool
         return true;
     }
     //iterate througth the enum and check whether the value is matching with any item in the enum
-    foreach index in enums {
+    foreach var index in enums {
         if (value == index) {
             return true;
         }
@@ -309,12 +302,9 @@ public function validateEnums(string name, json value, json enums) returns (bool
 }
 //put the incoming errors to the errors array
 public function processError(error[] errors, boolean|error err) {
-    match err {
-        boolean notError => {}
-        error newError => {
-            errors[errorItem] = newError;
-            errorItem++;
-        }
+    if(err is error) {
+        errors[errorItem] = err;
+        errorItem = errorItem +1;
     }
 }
 //if there is allOf/discriminator property, create a new model by merging all referenced models
@@ -327,7 +317,7 @@ public function mergeModels(json target, json swaggerModel, json swaggerModels) 
 public function getMergedModel(json model, json models) returns (json) {
     if (model.allOf != null) {
         json merged;
-        foreach item in model.allOf {
+        foreach var item in model.allOf {
             if (item[REFERENCE] != null) {
                 var modelReference = models[replaceModelPrefix(item[REFERENCE].toString())];
                 //if there is allOf property defined in the referenced model, again call the getMergedModel method
@@ -374,7 +364,7 @@ public function getReferencedModel(json model, json models) returns (json) {
     json outModel = model;
     if (model.properties != null) {
         var keys = model.properties.getKeys();
-        foreach key in keys {
+        foreach var key in keys {
             var item = outModel.properties[key];
             //if there is a reference get the referenced model
             if (item != null && item[REFERENCE] != null) {
@@ -398,7 +388,7 @@ public function getReferencedModel(json model, json models) returns (json) {
 }
 //merge details of a source model to another given model
 public function merge(json target, json source) returns (json) {
-    foreach key in source.getKeys() {
+    foreach var key in source.getKeys() {
         var sourceProperty = source[key];
         if (target[key] == null) {//if there are no such property in the target add it
             target[key] = sourceProperty;
@@ -406,7 +396,7 @@ public function merge(json target, json source) returns (json) {
             //if there is a value available for this property in the source model, check whether there are any
             //exceptional keys inside that property
             if (sourceProperty.getKeys() != null) {
-                foreach proprtyKey in sourceProperty.getKeys(){
+                foreach var proprtyKey in sourceProperty.getKeys(){
                     if (target[key][proprtyKey] == null) {
                         target[key][proprtyKey] = sourceProperty[proprtyKey];
 
@@ -421,31 +411,28 @@ public function merge(json target, json source) returns (json) {
 //creating a return object
 public function createReturnObject(error[]|error err, string modelName) returns (Result) {
     Result result = new();
-    match err {
-        error singleError => {
-            if (singleError.message == "") {
-                result.valid = true;
-                result.errorCount = 0;
-            } else {
-                result.valid = false;
-                result.errorCount = 1;
-                result.resultErr[0] = singleError;
-            }
+    if(err is error) {
+        if (err.message == "") {
+            result.valid = true;
+            result.errorCount = 0;
+        } else {
+            result.valid = false;
+            result.errorCount = 1;
+            result.resultErr[0] = err;
         }
-        error[] errorArray => {
-            if (lengthof errorArray == 0) {
-                result.valid = true;
-                result.errorCount = 0;
-            } else {
-                result.valid = false;
-                result.errorCount = lengthof errorArray;
-                result.resultErr = errorArray;
+    } else if(err is error[]) {
+        if (err.length() == 0) {
+            result.valid = true;
+            result.errorCount = 0;
+        } else {
+            result.valid = false;
+            result.errorCount = err.length();
+            result.resultErr = err;
 
-                int index = 0;
-                foreach item in errorArray {
-                    result.getErrorMessages[index] = item.message;
-                    index++;
-                }
+            int index = 0;
+            foreach var item in err {
+                result.getErrorMessages[index] = item.message;
+                index = index +1;
             }
         }
     }
@@ -466,7 +453,7 @@ public function validateValue(string key, json field, json value, json models) r
             }
         }
         error[] valueErrors = valueValidator(key, value, field);
-        if (lengthof valueErrors > 0) {
+        if (valueErrors.length() > 0) {
             return createReturnObject(valueErrors, " ");
         }
     }
@@ -551,19 +538,19 @@ public function validateArray(string name, json value, json field, json models) 
         var fieldType = field[ITEMS][TYPE];
         error[] firstErrorArray;
         //loop each item in the array and validate them
-        foreach item in value {
+        foreach var item in value {
             json newVal = item;
             var valueErrors = validateValue(name + <string>countItems, field[ITEMS], newVal, models);
             if (valueErrors != null && !valueErrors.valid && valueErrors.errorCount > 0) {
                 //if there are any errors add them to the firstErrorArray
-                foreach y in valueErrors.resultErr {
+                foreach var y in valueErrors.resultErr {
                     firstErrorArray[j] = y;
-                    j++;
+                    j = j + 1;
                 }
-                countItems++;//count the number of items in the array
+                countItems = countItems + 1;//count the number of items in the array
             }
         }
-        if (lengthof firstErrorArray > 0) {
+        if (firstErrorArray.length() > 0) {
             return createReturnObject(firstErrorArray, "Array of " + fieldType.toString() + " (" + name + ")");
         }
         arrayType = fieldType.toString();
@@ -577,19 +564,19 @@ public function validateArray(string name, json value, json field, json models) 
             error[] secondErrorArray;
             int k = 0;
             //loop each item in the array and validate them against the referenced model
-            foreach item in value {
+            foreach var item in value {
                 json newVal = item;
                 var validationErrors = validate(name, newVal, model, models);
                 if (validationErrors != null && !validationErrors.valid && validationErrors.errorCount > 0) {
                     //if there are any errors add them to the secondErrorArray
-                    foreach x in validationErrors.resultErr {
+                    foreach var x in validationErrors.resultErr {
                         secondErrorArray[k] = x;
-                        k++;
+                        k = k + 1;
                     }
                 }
-                countItems++;//count the number of items in the array
+                countItems = countItems + 1;//count the number of items in the array
             }
-            if (lengthof secondErrorArray > 0) {
+            if (secondErrorArray.length() > 0) {
                 return createReturnObject(secondErrorArray, "Array of " + field[ITEMS][REFERENCE].toString() + " ("
                         + name + ")");
             }
@@ -603,7 +590,7 @@ public function validateArray(string name, json value, json field, json models) 
         error err = { message: "Array requires at least " + minItems + " item(s) and has " + countItems +
             " item(s)." };
         thirdErrorArray[i] = err;
-        i++;
+        i = i + 1;
         return createReturnObject(thirdErrorArray, "Array of " + arrayType + " (" + name + ")");
     }
     //if the items in the array is greater than maxItems send an error
@@ -611,7 +598,7 @@ public function validateArray(string name, json value, json field, json models) 
         error err = { message: "Array requires no more than " + maxItems + " item(s) and has " + countItems +
             " item(s)." };
         thirdErrorArray[i] = err;
-        i++;
+        i = i + 1;
         return createReturnObject(thirdErrorArray, "Array of " + arrayType + " (" + name + ")");
     }
     result.valid = true;
@@ -701,13 +688,11 @@ public function isNumberType(json value, string format) returns (boolean) {
 public function isExpectedType(json value, string expectedType) returns (boolean) {
     string typeof;
 
-    match value {
-        int => {typeof = INTEGER;}
-        float => {typeof = NUMBER;}
-        string => {typeof = STRING;}
-        boolean => {typeof = BOOLEAN;}
-        json => {typeof = JSON;}
-    }
+    if(value is int) {typeof = INTEGER;}
+    else if (value is float) {typeof = NUMBER;}
+    else if(value is string) {typeof = STRING;}
+    else if (value is boolean) {typeof = BOOLEAN;}
+    else if(value is json) {typeof = JSON;}
     return expectedType == typeof;
 }
 
@@ -725,35 +710,35 @@ public function validateSpecification(string name, json target, json model, json
         //validate the primitive type
         var singleValueErrors = validateValue(name, model, target, models);
         if (singleValueErrors.valid == false && singleValueErrors.errorCount != 0) {
-            foreach i in singleValueErrors.resultErr {
+            foreach var i in singleValueErrors.resultErr {
                 errorArray[j] = i;
-                j++;
+                j = j + 1;
             }
         }
     } else {//if there are properties, it means it is a model
         if (typeOf(target) != ARRAY) {
             errorArray = validateProperties(target, model, models);
-            if (model.discriminator != null && lengthof errorArray >= 1) {
+            if (model.discriminator != null && errorArray.length() >= 1) {
                 //if the parent model have the discriminator property but the discriminated model doesn't contain
                 //that property
-                if (lengthof errorArray == 1 && errorArray[0].message == "Target property " + model.discriminator.
+                if (errorArray.length() == 1 && errorArray[0].message == "Target property " + model.discriminator.
                 propertyName.toString() + " is not in the model") {
                     // remove discriminator if it is the only error.
                     errorArray = [];
                 } else {
                     error[] tempErrors = errorArray;
                     errorArray = [];
-                    foreach item in tempErrors{
+                    foreach var item in tempErrors{
                         if (item.message != "Target property " + model.discriminator.propertyName.toString() +
                             " is not in the model") {
                             errorArray[j] = item;
-                            j++;
+                            j = j + 1;
                         }
                     }
                 }
             }
             //get values given in the target object for each property defined in the model and validate them
-            foreach key in properties.getKeys() {
+            foreach var key in properties.getKeys() {
                 var field = properties[key];
                 //getting the values for the properties defined in the model
                 var value = target[key];
@@ -761,17 +746,17 @@ public function validateSpecification(string name, json target, json model, json
                 if (value != null) {
                     var valueErrors = validateValue(key, field, value, models);
                     if (!valueErrors.valid && valueErrors.errorCount > 0) {
-                        foreach t in valueErrors.resultErr {
+                        foreach var t in valueErrors.resultErr {
                             errorArray[j] = t;
-                            j++;
+                            j = j + 1;
                         }
                     }
                 }
             }
         } else {
-            foreach item in target {
+            foreach var item in target {
                 errorArray = validateProperties(item, model, models);
-                foreach key in properties.getKeys() {
+                foreach var key in properties.getKeys() {
                     var field = properties[key];
                     //getting the values for the properties defined in the model
                     var value = item[key];
@@ -779,9 +764,9 @@ public function validateSpecification(string name, json target, json model, json
                     if (value != null) {
                         var valueErrors = validateValue(key, field, value, models);
                         if (!valueErrors.valid && valueErrors.errorCount > 0) {
-                            foreach t in valueErrors.resultErr {
+                            foreach var t in valueErrors.resultErr {
                                 errorArray[j] = t;
-                                j++;
+                                j = j + 1;
                             }
                         }
                     }
@@ -794,14 +779,12 @@ public function validateSpecification(string name, json target, json model, json
 //return the type of the target object
 public function typeOf(json target) returns (string) {
     string typeof;
-    match target {
-        int => typeof = INTEGER;
-        float => typeof = NUMBER;
-        string => typeof = STRING;
-        boolean => typeof = BOOLEAN;
-        json[] => typeof = ARRAY;
-        json => typeof = OBJECT;
-    }
+    if(target is int) {typeof = INTEGER;}
+    else if (target is float) {typeof = NUMBER;}
+    else if(target is string) {typeof = STRING;}
+    else if (target is boolean) {typeof = BOOLEAN;}
+    else if(target is json) {typeof = OBJECT;}
+    else if(target is json[]) {typeof = ARRAY;}
     return typeof;
 }
 
@@ -832,15 +815,15 @@ public function validate(string name, json target, json swaggerModel, json swagg
     //if there is allOf/discriminator properties, create a new model by merging all referenced models
     json model = mergeModels(target, swaggerModel, swaggerModels);
     //validating required fields
-    if (model.required != null && lengthof model.required > 0) {
+    if (model.required != null && model.required.length() > 0) {
         error[] requireFieldErrors;
         requireFieldErrors = validateRequiredFields(target, model.required, model.properties);
-        if (lengthof requireFieldErrors > 0) {
+        if (requireFieldErrors.length() > 0) {
             return createReturnObject(requireFieldErrors, " ");
         }
     }
     var validationErrors = validateSpecification(name, target, model, swaggerModels);
-    if (validationErrors != null && lengthof validationErrors > 0) {
+    if (validationErrors != null && validationErrors.length() > 0) {
         return createReturnObject(validationErrors, model.id.toString());
     }
     return createReturnObject(err, " ");
@@ -848,34 +831,34 @@ public function validate(string name, json target, json swaggerModel, json swagg
 //validate required fields
 public function validateRequiredFields(json target, json fields, json modelFields) returns (error[]) {
     int j = 0;
-    error[] errorArray;
+    error[] errorArray =[];
     //required field should be an array, if not send an error
     if (typeOf(fields) != ARRAY) {
         error err = { message: "fields must be an array of required fields" };
         errorArray[j] = err;
-        j++;
+        j = j + 1;
         return errorArray;
     }
     int i = 0;
     //go through each item in the required array and check whether the target object includes all of those required
     //fields
-    while (i < lengthof fields) {
+    while (i < fields.length()) {
         var property = fields[i].toString();
         //if the target object is an array check whether each item includes required fields
         if (typeOf(target) == ARRAY) {
-            foreach item in target {
+            foreach var item in target {
                 if (item[property] == null || modelFields[property] == null) {
                     error err = { message: property + " is a required field" };
                     errorArray[j] = err;
-                    j++;
+                    j = j + 1;
                 }
             }
         } else if (target[property] == null || modelFields[property] == null) {
             error err = { message: property + " is a required field" };
             errorArray[j] = err;
-            j++;
+            j = j + 1;
         }
-        i++;
+        i = i + 1;
     }
     return errorArray;
 }
@@ -889,11 +872,11 @@ public function validateProperties(json target, json model, json models) returns
     var referenceModel = dereferenceModel(target, model, models);
     //if the properties provided in the target object is not defined in the model, send an error
     if (targetKeys != null) {
-        foreach key in targetKeys{
+        foreach var key in targetKeys{
             if (referenceModel.properties[key] == null) {
                 error err = { message: "Target property " + key + " is not in the model" };
                 errorArray[i] = err;
-                i++;
+                i = i + 1;
             }
         }
     }

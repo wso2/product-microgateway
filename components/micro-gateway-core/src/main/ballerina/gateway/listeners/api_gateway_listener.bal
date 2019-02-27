@@ -24,67 +24,55 @@ import ballerina/time;
 import ballerina/io;
 
 
-@Description { value: "Representation of an API gateway listener" }
-@Field { value: "config: EndpointConfiguration instance" }
-@Field { value: "httpListener: HTTP Listener instance" }
 public type APIGatewayListener object {
+    *AbstractListener;
+
     public EndpointConfiguration config;
-    public http:Listener httpListener;
+    public http:Listener httpListener = new;
 
 
-    new() {
-        httpListener = new;
+    public function __init(EndpointConfiguration config) {
+        self.init(EndpointConfiguration);
     }
+
+
+    public function __start() returns error? {
+        return self.start();
+    }
+
+    public function __stop() returns error? {
+        return self.stop();
+    }
+
+    public function __attach(service s, map<any> annotationData) returns error? {
+        return self.register(s, annotationData);
+    }
+
+    extern function register(service s, map<any> annotationData) returns error?;
+
+    extern function start() returns error?;
+
+    extern function stop() returns error?;
 
     public function init(EndpointConfiguration endpointConfig);
 
-    @Description { value: "Gets called when the endpoint is being initialize during package init time" }
-    @Return { value: "Error occured during initialization" }
-    public function initEndpoint() returns (error);
-
-    @Description { value:
-    "Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-    @Param { value: "ep: The endpoint to which the service should be registered to" }
-    @Param { value: "serviceType: The type of the service to be registered" }
-    public function register(typedesc serviceType);
-
-    @Description { value: "Starts the registered service" }
-    public function start();
-
-    @Description { value: "Returns the connector that client code uses" }
-    @Return { value: "The connector that client code uses" }
-    public function getCallerActions() returns (http:Connection);
-
-    @Description { value: "Stops the registered service" }
-    public function stop();
 };
 
-@Description { value: "Configuration for secure HTTP service endpoint" }
-@Field { value: "host: Host of the service" }
-@Field { value: "port: Port number of the service" }
-@Field { value: "keepAlive: The keepAlive behaviour of the connection for a particular port" }
-@Field { value: "transferEncoding: The types of encoding applied to the response" }
-@Field { value: "chunking: The chunking behaviour of the response" }
-@Field { value: "secureSocket: The SSL configurations for the service endpoint" }
-@Field { value: "httpVersion: Highest HTTP version supported" }
-@Field { value: "requestLimits: Request validation limits configuration" }
-@Field { value: "filters: Filters to be applied to the request before dispatched to the actual resource" }
-@Field { value: "authProviders: The array of AuthProviders which are used to authenticate the users" }
 public type EndpointConfiguration record {
-    string host,
-    int port = 9090,
-    http:KeepAlive keepAlive = "AUTO",
-    http:ServiceSecureSocket? secureSocket,
-    string httpVersion = "1.1",
-    http:RequestLimits? requestLimits,
-    http:Filter[] filters,
-    int timeoutMillis = DEFAULT_LISTENER_TIMEOUT,
-    http:AuthProvider[]? authProviders,
-    boolean isSecured,
+    string host;
+    int port = 9090;
+    http:KeepAlive keepAlive = "AUTO";
+    http:ServiceSecureSocket? secureSocket;
+    string httpVersion = "1.1";
+    http:RequestLimits? requestLimits;
+    http:Filter[] filters;
+    int timeoutMillis = DEFAULT_LISTENER_TIMEOUT;
+    http:AuthProvider[]? authProviders;
+    boolean isSecured;
 };
 
 
-function APIGatewayListener::init(EndpointConfiguration endpointConfig) {
+public function APIGatewayListener.init(EndpointConfiguration endpointConfig) {
     initiateGatewayConfigurations(endpointConfig);
     printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + endpointConfig.port);
     self.httpListener.init(endpointConfig);
@@ -109,8 +97,9 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
-        jwtConfig.trustStoreFilePath = authProvider.trustStore.path but {() => ""};
-        jwtConfig.trustStorePassword = authProvider.trustStore.password but {() => ""};
+        jwtConfig.trustStoreFilePath = authProvider.trustStore.path is string ? authProvider.trustStore.path : "";
+        jwtConfig.trustStorePassword = authProvider.trustStore.password is string ? authProvider.trustStore.password :
+        "";
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
         return <http:HttpAuthnHandler>jwtAuthnHandler;
@@ -210,40 +199,3 @@ function intitateKeyManagerConfigurations() {
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }
-
-
-@Description { value:
-"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-@Param { value: "ep: The endpoint to which the service should be registered to" }
-@Param { value: "serviceType: The type of the service to be registered" }
-function APIGatewayListener::register(typedesc serviceType) {
-    self.httpListener.register(serviceType);
-}
-
-@Description { value: "Gets called when the endpoint is being initialize during package init time" }
-@Return { value: "Error occured during initialization" }
-function APIGatewayListener::initEndpoint() returns (error) {
-    return self.httpListener.initEndpoint();
-}
-
-@Description { value: "Starts the registered service" }
-function APIGatewayListener::start() {
-    self.httpListener.start();
-}
-
-@Description { value: "Returns the connector that client code uses" }
-@Return { value: "The connector that client code uses" }
-function APIGatewayListener::getCallerActions() returns (http:Connection) {
-    return self.httpListener.getCallerActions();
-}
-
-@Description { value: "Stops the registered service" }
-function APIGatewayListener::stop() {
-    self.httpListener.stop();
-}
-
-
-
-
-
-
