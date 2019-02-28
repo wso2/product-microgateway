@@ -222,6 +222,7 @@
  public const string JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";
  public const string JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
  public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
+ public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
  public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 
 // end of config constants

@@ -54,7 +54,7 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     };
 
     http:Request clientRequest = new;
-    string encodedBasicAuthHeader = check throttleEndpointbase64Header.base64Encode();
+    string encodedBasicAuthHeader = encoding:encodeBase64(throttleEndpointbase64Header.toByteArray("UTF-8"));
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
 
@@ -65,11 +65,8 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     if(response is http:Response) {
         log:printDebug("\nStatus Code: " + response.statusCode);
     }
-    else {
-        log:printError(response.message, err = response);
+    else if(response is error){
+        log:printError(response.reason(), err = response);
     }
 
 }
-
-
-

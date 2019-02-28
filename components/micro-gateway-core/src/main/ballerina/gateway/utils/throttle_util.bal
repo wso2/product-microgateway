@@ -21,9 +21,9 @@ import ballerina/log;
 
 map<string> blockConditions;
 map<any> throttleDataMap;
-public stream<RequestStreamDTO> requestStream;
-public stream<GlobalThrottleStreamDTO> globalThrottleStream;
-public boolean isStreamsInitialized;
+public stream<RequestStreamDTO> requestStream = ();
+public stream<GlobalThrottleStreamDTO> globalThrottleStream = ();
+public boolean isStreamsInitialized = false;
 future<()> ftr = start initializeThrottleSubscription();
 
 boolean blockConditionExist = false;
@@ -45,7 +45,7 @@ public function putBlockCondition(map<any> m) {
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if ( blockConditions.keys() != null &&  blockConditions.keys().length()== 0) {
+        if ( blockConditions.keys() != () &&  blockConditions.keys().length()== 0) {
             blockConditionExist = false;
         }
     }
@@ -56,7 +56,7 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
         int currentTime = time:currentTime().time;
-        GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
+        GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         int timeStamp = dto.expiryTimeStamp;
         boolean stopOnQuota = dto.stopOnQuota;
         if (enabledGlobalTMEventPublishing == true) {
@@ -85,7 +85,7 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     }
 }
 
-function initializeThrottleSubscription() {
+public function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
 }

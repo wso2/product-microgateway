@@ -42,7 +42,7 @@ jms:Session jmsSession = new(jmsConnection, {
     });
 
 // Initialize a Topic subscriber using the created session.
-jms:TopicSubscriber subscriberEndpoint = new(jmsSession, topicPattern = "throttleData");
+listener jms:TopicSubscriber subscriberEndpoint = new(jmsSession, topicPattern = "throttleData");
 
 // Bind the created consumer(subscriber endpoint) to the listener service.
 service jmsListener on subscriberEndpoint {
@@ -52,10 +52,10 @@ service jmsListener on subscriberEndpoint {
             log:printDebug("ThrottleMessage Received");
             //Throttling decisions made by TM going to throttleDataMap
             if (m.hasKey(THROTTLE_KEY)) {
-                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = new;
+                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {};
                 globalThrottleStreamDtoTM.throttleKey = <string>m[THROTTLE_KEY];
-                globalThrottleStreamDtoTM.isThrottled = check <boolean>m[IS_THROTTLED];
-                globalThrottleStreamDtoTM.expiryTimeStamp = check <int>m[EXPIRY_TIMESTAMP];
+                globalThrottleStreamDtoTM.isThrottled = <boolean>m[IS_THROTTLED];
+                globalThrottleStreamDtoTM.expiryTimeStamp = <int>m[EXPIRY_TIMESTAMP];
 
                 if (globalThrottleStreamDtoTM.isThrottled == true) {
                     putThrottleData(globalThrottleStreamDtoTM);
@@ -72,5 +72,3 @@ service jmsListener on subscriberEndpoint {
     }
 
 }
-
-
