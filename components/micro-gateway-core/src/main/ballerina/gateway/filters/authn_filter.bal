@@ -274,6 +274,7 @@ public type AuthnFilter object {
             }
             return isAuthorized;
         }
+        return ();
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {

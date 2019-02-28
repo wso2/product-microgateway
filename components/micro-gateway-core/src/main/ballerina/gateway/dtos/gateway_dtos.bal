@@ -67,7 +67,7 @@ public type AuthenticationContext record {
     string applicationName="";
     string consumerKey="";
     string subscriber="";
-    string[] throttlingDataList="";
+    string[] throttlingDataList?;
     int spikeArrestLimit=0;
     string subscriberTenantDomain="";
     string spikeArrestUnit="";

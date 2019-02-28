@@ -35,7 +35,7 @@ http:Client keyValidationEndpoint = new (
             }
 );
 
-http:Listener tokenListenerEndpoint = new (
+listener http:Listener tokenListenerEndpoint = new (
     getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096), config = {
         host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "localhost"),
         secureSocket: {
@@ -48,4 +48,3 @@ http:Listener tokenListenerEndpoint = new (
         }
     }
 );
-
