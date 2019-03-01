@@ -18,9 +18,10 @@ boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
-    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
-    ThrottleAnalyticsEventDTO eventDto = new;
-    string apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
+    ThrottleAnalyticsEventDTO eventDto = {};
+    var api_Version = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
+    string apiVersion = (api_Version is string) ? api_Version : "";
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
@@ -35,7 +36,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     eventDto.hostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
         HOSTNAME_PROPERTY]);
     if (isSecured) {
-        AuthenticationContext authContext = check <AuthenticationContext>context
+        AuthenticationContext authContext = <AuthenticationContext>context
         .attributes[AUTHENTICATION_CONTEXT];
         metaInfo.keyType = authContext.keyType;
         eventDto.userName = authContext.username;
@@ -46,8 +47,8 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
-        eventDto.apiCreator = getAPIDetailsFromServiceAnnotation(
-                                    reflect:getServiceAnnotations(context.serviceType)).publisher;
+        var api_Creator = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        eventDto.apiCreator = (api_Creator is string) ? api_Creator : "";
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
@@ -59,26 +60,28 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
 }
 
 function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
-    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
-    FaultDTO eventDto = new;
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
+    FaultDTO eventDto = {};
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
     json metaInfo = {};
     eventDto.apiContext = getContext(context);
-    eventDto.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+    var api_Version = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
     apiVersion;
+    eventDto.apiVersion = (api_Version is string) ? api_Version : "";
     eventDto.apiName = getApiName(context);
-    eventDto.resourcePath = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceType,
+    var resource_Path = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceRef,
             context.resourceName)).path;
+    eventDto.resourcePath = (resource_Path is string) ? resource_Path : "";
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
-    eventDto.errorCode = check <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
-    eventDto.errorMessage = err.message;
+    eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
+    eventDto.errorMessage = err.reason();
     eventDto.faultTime = currentTimeMills;
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+        AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         metaInfo.keyType = authContext.keyType;
         eventDto.consumerKey = authContext.consumerKey;
         eventDto.apiCreator = authContext.apiPublisher;
@@ -89,8 +92,9 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        eventDto.apiCreator = getAPIDetailsFromServiceAnnotation(
-                                    reflect:getServiceAnnotations(context.serviceType)).publisher;
+        var api_Creater = getAPIDetailsFromServiceAnnotation(
+                                    reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        eventDto.apiCreator = (api_Creater is string) ? api_Creater : "";
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
@@ -104,8 +108,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
 
 function getAnalyticsEnableConfig() {
     map<any> vals = getConfigMapValue(ANALYTICS);
-    isAnalyticsEnabled = check <boolean>vals[ENABLE];
-    rotatingTime =  check <int> vals[ROTATING_TIME];
+    isAnalyticsEnabled = <boolean>vals[ENABLE];
+    rotatingTime =  <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
     configsRead = true;
     printDebug(KEY_UTILS, "Analytics configuration values read");
