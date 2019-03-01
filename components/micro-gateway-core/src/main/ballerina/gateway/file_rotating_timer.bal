@@ -37,19 +37,20 @@ function sendFileRotatingEvent() returns error? {
         }
         return;
     } else {
-        error er = {message: "No files present to rotate."};
+        error er = error("No files present to rotate.");
         return er;
     }
 }
 
 function errorOnRotating(error e) {
-    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.message);
+    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.reason());
 }
 
 function rotatingTask() {
     task:Timer? rotatinTimer;
     map<any> vals = getConfigMapValue(ANALYTICS);
-    int timeSpan =  check <int> vals[ROTATING_TIME];
+    // Todo: handle error if it returns one.
+    int timeSpan =  <int> vals[ROTATING_TIME];
     (function() returns error?) onTriggerFunction = sendFileRotatingEvent;
     function(error) onErrorFunction = errorOnRotating;
     rotatinTimer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = timeSpan + 5000);
