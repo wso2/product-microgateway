@@ -25,7 +25,7 @@ etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
                                     }
                                 };
 
-                                runtime:getInvocationContext().attributes["error_code"] = "101505";
+                                runtime:getInvocationContext().attributes["error_code"] = "101503";
                                 res.setPayload(payload);
                                 clientResponse = res;
                                 log:printError("URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid");
