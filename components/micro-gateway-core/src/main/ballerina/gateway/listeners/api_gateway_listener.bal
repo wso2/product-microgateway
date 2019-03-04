@@ -23,60 +23,47 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 
-
 public type APIGatewayListener object {
     *AbstractListener;
 
-    public EndpointConfiguration config;
-    public http:Listener httpListener = new;
+    public http:Listener httpListener;
 
 
-    public function __init(EndpointConfiguration config) {
-        self.init(EndpointConfiguration);
+    public function __init(http:ServiceEndpointConfiguration config) {
+        int port = 9090;
+        if((config.secureSocket is ())){
+            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
+        } else {
+            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
+        }
+        self.init(port,config);
+
+        self.httpListener = new(port, config = config);
     }
 
 
     public function __start() returns error? {
-        return self.start();
+        return self.httpListener.__start();
     }
 
     public function __stop() returns error? {
-        return self.stop();
+        return self.httpListener.__stop();
     }
 
     public function __attach(service s, map<any> annotationData) returns error? {
-        return self.register(s, annotationData);
+        return self.httpListener.__attach(s, annotationData);
     }
 
-    extern function register(service s, map<any> annotationData) returns error?;
+    public function init(int port,http:ServiceEndpointConfiguration config);
 
-    extern function start() returns error?;
-
-    extern function stop() returns error?;
-
-    public function init(EndpointConfiguration endpointConfig);
 
 };
 
-public type EndpointConfiguration record {
-    string host;
-    int port = 9090;
-    http:KeepAlive keepAlive = "AUTO";
-    http:ServiceSecureSocket? secureSocket;
-    string httpVersion = "1.1";
-    http:RequestLimits? requestLimits;
-    http:Filter[] filters;
-    int timeoutMillis = DEFAULT_LISTENER_TIMEOUT;
-    http:AuthProvider[]? authProviders;
-    boolean isSecured;
-};
+public function APIGatewayListener.init(int port, http:ServiceEndpointConfiguration config) {
 
-
-public function APIGatewayListener.init(EndpointConfiguration endpointConfig) {
-    initiateGatewayConfigurations(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + endpointConfig.port);
-    self.httpListener.init(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + endpointConfig.port);
+    initiateGatewayConfigurations(config);
+    printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
+    printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
 }
 
 public function createAuthHandler(http:AuthProvider authProvider) returns http:HttpAuthnHandler {
@@ -84,36 +71,33 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         auth:AuthStoreProvider authStoreProvider;
         if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
             auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-            authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
+            authStoreProvider = configAuthStoreProvider;
         } else {
             // other auth providers are unsupported yet
-            error e = { message: "Invalid auth provider: " + authProvider.authStoreProvider };
-            throw e;
+            string errMessage = "Invalid auth provider: " + <string>authProvider.authStoreProvider;
+            error e = error("Invalid auth provider: " + authProvider.authStoreProvider);
+            panic e;
         }
         http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
-        return <http:HttpAuthnHandler>basicAuthHandler;
+        return basicAuthHandler;
     } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
-        jwtConfig.trustStoreFilePath = authProvider.trustStore.path is string ? authProvider.trustStore.path : "";
-        jwtConfig.trustStorePassword = authProvider.trustStore.password is string ? authProvider.trustStore.password :
-        "";
+        jwtConfig.trustStoreFilePath = authProvider.trustStore.path  ?: "";
+        jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
-        return <http:HttpAuthnHandler>jwtAuthnHandler;
+        return jwtAuthnHandler;
     } else {
         // TODO: create other HttpAuthnHandlers
-        error e = { message: "Invalid auth scheme: " + authProvider.scheme };
-        throw e;
+        error e = error( "Invalid auth scheme: " + authProvider.scheme);
+        panic e;
     }
 }
 
-function initiateGatewayConfigurations(EndpointConfiguration config) {
-    if (!config.isSecured) {
-        config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
-    }
+public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     intitateKeyManagerConfigurations();
@@ -176,23 +160,28 @@ public function getJWTAuthProvider() returns http:AuthProvider[] {
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {
-    cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
+    cache:Cache positiveAuthzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
+        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
+                                                                                                  CACHING_ID,
+                                                                                                  TOKEN_CACHE_EVICTION_FACTOR
+                                                                                                  , 0.25));
+    cache:Cache negativeAuthzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
         capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
                                                                                                   CACHING_ID,
                                                                                                   TOKEN_CACHE_EVICTION_FACTOR
                                                                                                   , 0.25));
 
     auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
-    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
+    auth:AuthStoreProvider authStoreProvider = configAuthStoreProvider;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, positiveAuthzCache, negativeAuthzCache);
     http:AuthzFilter authzFilter = new(authzHandler);
     OAuthzFilter authzFilterWrapper = new(authzFilter);
     return authzFilterWrapper;
 }
 
 function intitateKeyManagerConfigurations() {
-    KeyManagerConf keyManagerConf;
-    Credentials credentials;
+    KeyManagerConf keyManagerConf = {};
+    Credentials credentials = {};
     keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
     credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, "username", "admin");
     credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, "password", "admin");

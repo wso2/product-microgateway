@@ -24,38 +24,39 @@ import ballerina/time;
 import ballerina/io;
 
 public type APIGatewaySecureListener object {
-    public APIGatewayListener apiGatewayListener = new;
+    *AbstractListener;
+    public APIGatewayListener apiGatewayListener;
 
-    public function __init(EndpointConfiguration config) {
-        self.init(EndpointConfiguration);
+    public function __init(http:ServiceEndpointConfiguration config) {
+        self.init(config);
+        self.apiGatewayListener = new(config);
     }
 
 
     public function __start() returns error? {
-        return self.apiGatewayListener.start();
+        return self.apiGatewayListener.__start();
     }
 
     public function __stop() returns error? {
-        return self.apiGatewayListener.stop();
+        return self.apiGatewayListener.__stop();
     }
 
     public function __attach(service s, map<any> annotationData) returns error? {
-        return self.apiGatewayListener.register(s, annotationData);
+        return self.apiGatewayListener.__attach(s, annotationData);
     }
-    public function init(EndpointConfiguration config);
+    public function init(http:ServiceEndpointConfiguration config);
 
 };
 
 
-public function APIGatewaySecureListener.init(EndpointConfiguration config) {
+public function APIGatewaySecureListener.init(http:ServiceEndpointConfiguration config) {
     initiateGatewaySecureConfigurations(config);
-    self.apiGatewayListener.init(config);
+    self.apiGatewayListener.__init(config);
 
 }
 
 
-function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
-    config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
+function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration config) {
     string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
         "${ballerina.home}/bre/security/ballerinaKeystore.p12");
     string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
@@ -93,6 +94,4 @@ function initiateGatewaySecureConfigurations(EndpointConfiguration config) {
     http:ServiceSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
         sslVerifyClient: sslVerifyClient };
     config.secureSocket = secureSocket;
-    config.isSecured = true;
-
 }

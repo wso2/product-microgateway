@@ -27,24 +27,21 @@ import ballerina/reflect;
 // MutualSSL filter
 public type MutualSSLFilter object {
 
-    public json trottleTiers = new;
+    public json trottleTiers = {};
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
-    {
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        boolean result = doFilterRequest(caller, request, context);
+        boolean result = self.doFilterRequest(caller, request, context);
         return result;
     }
 
-    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
-                        returns boolean {
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         boolean isAuthenticated = false;
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         if (checkAuthentication == "require") {
             // get  config for this resource
-            AuthenticationContext authenticationContext = new;
+            AuthenticationContext authenticationContext = {};
             boolean isSecured = true;
             printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 

@@ -20,9 +20,7 @@ import ballerina/time;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
-    {
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -35,15 +33,14 @@ public type AnalyticsRequestFilter object {
             doFilterRequest(request, context);
         }
         return true;
-
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
 
         if (isAnalyticsEnabled) {
-            boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+            boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
-                boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
+                boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
                     ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticsDTO(context);
                     eventStream.publish(getEventFromThrottleData(eventDto));
