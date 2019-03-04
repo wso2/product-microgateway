@@ -32,7 +32,7 @@ public type AuthnFilter object {
     public boolean isOauth2Enabled = false;
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
-                        returns boolean {
+                        returns boolean|error {
 
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
@@ -40,7 +40,7 @@ public type AuthnFilter object {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest(caller, request, context);
+            boolean|error result = self.doFilterRequest(caller, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
         } else {
@@ -51,7 +51,7 @@ public type AuthnFilter object {
     }
 
     public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
-                        returns boolean {
+                        returns boolean|error {
         runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
         printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
 
@@ -76,6 +76,7 @@ public type AuthnFilter object {
         foreach var authProvider in
         authProviders  {
         if (authProvider.id == authProvidersId){
+            // TODO: Create the createAuthHandler function
             registry.add(authProvider.id, createAuthHandler(authProvider));
         }
         }
@@ -87,9 +88,9 @@ public type AuthnFilter object {
         printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
         if (isSecured) {
             boolean isCookie = false;
-            string authHeader;
-            string|error result;
-            string|error extractedToken;
+            string authHeader = "";
+            string|error result = "";
+            string|error extractedToken = "";
             string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceRef));
             //check for the header of the request and choose the path
             if (request.hasHeader(authHeaderName)) {
@@ -149,19 +150,20 @@ public type AuthnFilter object {
                     }
                 }
 
-                try {
+                // try {
                     printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
                     isAuthorized = authnHandlerChain.handle(request);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
                     checkAndRemoveAuthHeaders(request, authHeaderName);
-                } catch (error err) {
-                    // todo: need to properly handle this exception. Currently this is a generic exception catching.
-                    // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
-                    printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
-                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-                    sendErrorResponse(caller, request, untaint context);
-                    return false;
-                }
+                // } catch (error err) {
+                //     // todo: need to properly handle this exception. Currently this is a generic exception catching.
+                //     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
+                //     printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
+                //     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
+                //     sendErrorResponse(caller, request, untaint context);
+                //     return false;
+                // }
+                
             } else if (providerId == AUTH_SCHEME_OAUTH2) {
                 if (self.isOauth2Enabled) {
                     if (isCookie) {
@@ -201,16 +203,14 @@ public type AuthnFilter object {
                         authenticationContext.spikeArrestLimit = check int.convert(apiKeyValidationDto.
                         spikeArrestLimit);
                         authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                        authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.
-                        stopOnQuotaReach;
-                        authenticationContext.isContentAwareTierPresent = <boolean>apiKeyValidationDto
-                        .contentAware;
+                        authenticationContext.stopOnQuotaReach = boolean.convert(apiKeyValidationDto.
+                        stopOnQuotaReach);
+                        authenticationContext.isContentAwareTierPresent = boolean.convert(apiKeyValidationDto
+                        .contentAware);
                         printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
                                 callerToken);
-                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken
-                        != null) {
-                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER,
-                                JWT_HEADER_NAME);
+                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken != "") {
+                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
                             request.setHeader(jwtheaderName, authenticationContext.callerToken);
                         }
                         checkAndRemoveAuthHeaders(request, authHeaderName);
@@ -219,11 +219,11 @@ public type AuthnFilter object {
                         // setting keytype to invocationContext
                         runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
                         .keyType;
-                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
+                        runtime:AuthenticationContext authContext = runtime:getInvocationContext().authenticationContext;
                         authContext.scheme = AUTH_SCHEME_OAUTH2;
                         authContext.authToken = extractedToken;
                     } else {
-                        int status = check <int>apiKeyValidationDto.validationStatus;
+                        int status = check int.convert(apiKeyValidationDto.validationStatus);
                         printDebug(KEY_AUTHN_FILTER,
                                 "Authentication handler returned with validation status : " +
                                 status);
@@ -232,7 +232,7 @@ public type AuthnFilter object {
                         return false;
                     }
                     } else {
-                        log:printError(apiKeyValidationDto.message, err = apiKeyValidationDto);
+                        log:printError(<string>apiKeyValidationDto.detail().message, err = apiKeyValidationDto);
                         setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
                         sendErrorResponse(caller, request, untaint context);
                         return false;
@@ -241,12 +241,12 @@ public type AuthnFilter object {
                     }
                     else {
                         if (isCookie) {
-                            log:printError(extractedToken.message, err = extractedToken);
+                            log:printError(<string>extractedToken.detail().message, err = extractedToken);
                             setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
                             sendErrorResponse(caller, request, untaint context);
                             return false;
                         } else {
-                            log:printError(extractedToken.message, err = extractedToken);
+                            log:printError(<string>extractedToken.detail().message, err = extractedToken);
                             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                             sendErrorResponse(caller, request, untaint context);
                             return false;
@@ -260,7 +260,7 @@ public type AuthnFilter object {
                 }
             } else if (providerId == AUTHN_SCHEME_BASIC) {
                 //Basic auth valiadation
-                BasicAuthUtils basicAuthentication = new BasicAuthUtils (authnHandlerChain);
+                BasicAuthUtils basicAuthentication = new();
                 boolean isValidated = basicAuthentication.processRequest(caller, request, context);
                 return isValidated;
 
@@ -274,7 +274,7 @@ public type AuthnFilter object {
             }
             return isAuthorized;
         }
-        return ();
+        return isAuthorized;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -306,7 +306,13 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
     } else {
         // no auth providers found in resource level, try in rest level
         if(serviceLevelAuthAnn.authProviders is string[]) {
-            authProviderIds = serviceLevelAuthAnn.authProviders;
+            string[]? sss = serviceLevelAuthAnn.authProviders;
+            if (sss is string[]) {
+                authProviderIds = sss;
+            } else {
+                // no auth providers found
+            }
+            
         } else {
             // no auth providers found
         }
@@ -344,4 +350,10 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         request.removeHeader(TEMP_AUTH_HEADER);
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
+}
+
+function getAuthProviders() returns http:AuthProvider[] {
+    // TODO: Fix the function body
+    http:AuthProvider[] authProviders = [];
+    return authProviders;
 }

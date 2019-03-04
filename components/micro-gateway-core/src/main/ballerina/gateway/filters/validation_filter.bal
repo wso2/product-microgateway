@@ -27,11 +27,11 @@ import ballerina/reflect;
 import ballerina/internal;
 
 public int errorItem = 0;
-public string requestPath;
-public string requestMethod;
+public string? requestPath = "";
+public string requestMethod = "";
 public boolean isType = false;
-public string[] pathKeys;
-public string pathType;
+public string[] pathKeys = [];
+public string pathType = "";
 
 boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, REQUEST_VALIDATION_ENABLED, false
 );
@@ -43,33 +43,32 @@ string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGG
 public type ValidationFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
-                        returns boolean {
+                        returns boolean|error {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
-        boolean result = doFilterRequest(caller, request, filterContext);
+        boolean result = check self.doFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
     public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
-                        returns boolean {
+                        returns boolean|error {
         if (enableRequestValidation) {
             //getting the payload of the request
             var payload = request.getJsonPayload();
             isType = false;
-            typedesc serviceType = check <typedesc>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-            APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
+            service serviceReference = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
+            APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceReference));
             json swagger = read(swaggerAbsolutePath);
-            json model;
-            json models;
-            string modelName;
+            json model = {};
+            json models = {};
+            string modelName = "";
             //getting all the keys defined under the paths in the swagger
             pathKeys = untaint swagger[PATHS].getKeys();
             //getting the method of the request
             requestMethod = request.method.toLower();
             //getting the path hit by the request
-            requestPath = getResourceConfigAnnotation
-            (reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
+            requestPath = getResourceConfigAnnotation(reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
             //getting the name of the model hit by the request
             if (swagger.components.schemas != null) {//In swagger 3.0 models are defined under the components.schemas
                 models = swagger.components.schemas;
@@ -82,26 +81,29 @@ public type ValidationFilter object {
                     if (requestPath == i) {
                         json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
                         //go through each item in parameters array and find the schema property
-                        foreach var k in parameters {
-                            if (k[SCHEMA] != null) {
-                                if (k[SCHEMA][REFERENCE] != null)  {
-                                    //getting the reference to the model
-                                    string modelReference = k[SCHEMA][REFERENCE].toString();
-                                    //getting the model name
-                                    modelName = untaint replaceModelPrefix(modelReference);
-                                    //check whether there is a model available from the asigned model name
-                                    if (models[modelName] != null) {
-                                        model = models[modelName];
-                                    }
-                                } else {
-                                    //getting inline model
-                                    model = k[SCHEMA];
-                                }
-                            }
+                        foreach var (key, val) in check map<json>.convert(parameters) {
+                            // Todo: Fix the Loop
+
+                            // if (v != null) {
+                            //     if (k[SCHEMA][REFERENCE] != null)  {
+                            //         //getting the reference to the model
+                            //         string modelReference = k[SCHEMA][REFERENCE].toString();
+                            //         //getting the model name
+                            //         modelName = untaint replaceModelPrefix(modelReference);
+                            //         //check whether there is a model available from the asigned model name
+                            //         if (models[modelName] != null) {
+                            //             model = models[modelName];
+                            //         }
+                            //     } else {
+                            //         //getting inline model
+                            //         model = k[SCHEMA];
+                            //     }
+                            // }
                         }
                     }
                 }
             }
+
             //payload can be of type json or error
             if(payload is json) {
                 //do the validation if only there is a payload and a model available
@@ -133,13 +135,13 @@ public type ValidationFilter object {
         if (enableResponseValidation) {
             //getting the payload of the response
             var payload = response.getJsonPayload();
-            typedesc serviceType = check <typedesc>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-            APIConfiguration apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
+            service serviceType = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
+            APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
             json swagger = read(swaggerAbsolutePath);
-            json model;
-            json models;
-            string modelName;
-            string responseStatusCode = <string>response.statusCode;
+            json model = {};
+            json models = {};
+            string modelName = "";
+            string responseStatusCode = string.convert(response.statusCode);
             if (swagger.components.schemas != null){//getting the schemas from a swagger 3.0 version file
                 models = swagger.components.schemas;
             } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
@@ -203,10 +205,10 @@ public type ValidationFilter object {
                             setErrorMessageToFilterContext(context, INVALID_RESPONSE);
                             context.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
                             //getting attributes from the context
-                            int statusCode = check <int>context.attributes[HTTP_STATUS_CODE];
+                            int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
                             string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
                             string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
-                            int errorCode = check <int>context.attributes[ERROR_CODE];
+                            int errorCode = <int>context.attributes[ERROR_CODE];
                             //changing the response
                             response.statusCode = statusCode;
                             response.setContentType(APPLICATION_JSON);
@@ -228,4 +230,3 @@ public type ValidationFilter object {
         return true;
     }
 };
-
