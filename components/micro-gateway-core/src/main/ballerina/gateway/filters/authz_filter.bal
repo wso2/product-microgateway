@@ -30,6 +30,9 @@ public type OAuthzFilter object {
 
     public http:AuthzFilter authzFilter = new;
 
+    public function __init(http:AuthzFilter authzFilter) {
+        self.authzFilter = authzFilter;
+    }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                             boolean
@@ -101,5 +104,3 @@ function setAuthorizationFailureMessage(http:Response response, http:FilterConte
     } };
     response.setJsonPayload(payload);
 }
-
-
