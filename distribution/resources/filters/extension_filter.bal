@@ -23,7 +23,7 @@ import ballerina/system;
 import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
-import wso2/gateway
+import wso2/gateway;
 
 // Extension filter used to send custom error messages and to do customizations.
 # Represents the extension filter, which used to customize and extend the request and response handling
