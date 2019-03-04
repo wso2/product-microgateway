@@ -393,7 +393,7 @@ public function merge(json target, json source) returns (json) {
         } else {
             //if there is a value available for this property in the source model, check whether there are any
             //exceptional keys inside that property
-            if (sourceProperty.getKeys().length()>0) {
+            if (sourceProperty.getKeys().length() > 0) {
                 foreach var proprtyKey in sourceProperty.getKeys(){
                     if (target[key][proprtyKey] == null) {
                         target[key][proprtyKey] = sourceProperty[proprtyKey];
@@ -463,7 +463,7 @@ public function validateType(string name, json value, json field, json models) r
     Result result = new();
     //getting type defined in the model/field
     string expectedType = field[TYPE].toString();
-    if (expectedType.length()>0) {//if the field doesn't have a type it may have a reference to another model
+    if (expectedType.length() > 0) {//if the field doesn't have a type it may have a reference to another model
         if (models != null && field[REFERENCE] != null) {
             //getting the reference to another model and replace it to the referenced model name
             string fieldReference = replaceModelPrefix(field[REFERENCE].toString());
@@ -563,7 +563,7 @@ public function validateArray(string name, json value, json field, json models) 
             error[] secondErrorArray;
             int k = 0;
             //loop each item in the array and validate them against the referenced model
-            foreach var (q,r) in mapValue {
+            foreach var (q, r) in mapValue {
                 json newVal = r;
                 var validationErrors = validate(name, newVal, model, models);
                 if (validationErrors != null && !validationErrors.valid && validationErrors.errorCount > 0) {
@@ -628,11 +628,10 @@ public function validateExpectedType(string expectedType, json value, string for
 public function isStringType(json value, string format) returns (boolean) {
     string stringValue = value.toString();
     if (isExpectedType(value, STRING)) {
-        if (format.length()>0) {
+        if (format.length() > 0) {
             return true;
         } else if (format == DATE || format == DATE_TIME) {
             boolean state = true;
-           
             time:Time | error time1 = trap time:parse(stringValue, YYYY_MM_DD);
                 if (time1 is time:Time) {
                   return state;
@@ -652,7 +651,7 @@ public function isIntegerType(json value, string format) returns (boolean) {
     if (!isExpectedType(value, INTEGER)) {
         return false;
     }
-    if (format.length()>0) {
+    if (format.length() > 0) {
         return true;
     } else if (format == INT_32) {//if the value is of int32 format, validate it
         var int32Max = math:pow(2.0, 31.0) - 1;
@@ -755,7 +754,7 @@ public function validateSpecification(string name, json target, json model, json
                 }
             }
         } else {
-            foreach var(k,v) in mapValue {
+            foreach var(k, v) in mapValue {
                 errorArray = validateProperties(v, model, models);
                 foreach var key in properties.getKeys() {
                     var field = properties[key];
@@ -848,7 +847,7 @@ public function validateRequiredFields(json target, json fields, json modelField
         var property = fields[i].toString();
         //if the target object is an array check whether each item includes required fields
         if (typeOf(target) == ARRAY) {
-            foreach var(k,v) in mapValue {
+            foreach var(k, v) in mapValue {
               if (v[property] == null || modelFields[property] == null) {
                 error err = error(property + " is a required field");
                 errorArray[j] = err;
@@ -873,7 +872,7 @@ public function validateProperties(json target, json model, json models) returns
     //get all details in referenced models and merge them into a one model
     var referenceModel = dereferenceModel(target, model, models);
     //if the properties provided in the target object is not defined in the model, send an error
-    if (targetKeys.length()>0) {
+    if (targetKeys.length() > 0) {
         foreach var key in targetKeys{
             if (referenceModel.properties[key] == null) {
                 error err = error("Target property " + key + " is not in the model");
