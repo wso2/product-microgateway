@@ -21,55 +21,65 @@ import ballerina/math;
 import ballerina/runtime;
 import ballerina/log;
 
-string uploadingUrl;
-string analyticsUsername;
-string analyticsPassword;
+string uploadingUrl = "";
+string analyticsUsername = "";
+string analyticsPassword = "";
 
 
 function searchFilesToUpload() returns (error?) {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
     internal:Path ex = new(fileLocation);
-    internal:Path[] pathList = check ex.list();
-    foreach var pathEntry in pathList {
-        string fileName = pathEntry.getName();
-        if (fileName.contains(ZIP_EXTENSION)) {
-            http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
-                analyticsUsername, analyticsPassword);
-            if (response.statusCode == 201) {
-                printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
-                var result = pathEntry.delete();
-            } else {
-                printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
+    
+    internal:Path[]|error pathList = ex.list();
+
+    if(pathList is error){
+        printError(KEY_UPLOAD_TASK, "Error occured in getting path lists");
+        return pathList;
+    }else{
+        foreach var pathEntry in pathList {
+            string fileName = pathEntry.getName();
+            if (fileName.contains(ZIP_EXTENSION)) {
+                http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
+                    analyticsUsername, analyticsPassword);
+                if (response.statusCode == 201) {
+                    printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
+                    var result = pathEntry.delete();
+                } else {
+                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
+                }
+                cnt=cnt +1;
             }
-            cnt=cnt +1;
         }
-    }
-    if (cnt == 0) {
-        error er = { message: "No files present to upload." };
-        return er;
-    } else {
-        return ();
+        if (cnt == 0) {
+            error er = error("No files present to upload.");
+            return er;
+        } else {
+            return ();
+        }
     }
 }
 
+
 function informError(error e) {
-    printDebug(KEY_UPLOAD_TASK, "Files not present for upload:" + e.message);
+    printDebug(KEY_UPLOAD_TASK, "Files not present for upload:" + e.reason());
 }
 
 function timerTask() {
     task:Timer? timer;
-    map<int> vals = getConfigMapValue(ANALYTICS);
-    boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
+    map<any> vals= getConfigMapValue(ANALYTICS);
+    boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
-        int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
+        int|error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
         (function() returns error?) onTriggerFunction = searchFilesToUpload;
         function(error) onErrorFunction = informError;
-        timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
-        timer.start();
+        if(timeSpan is int){
+            timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);
+            timer.start();
+        }
     } else {
         printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
     }

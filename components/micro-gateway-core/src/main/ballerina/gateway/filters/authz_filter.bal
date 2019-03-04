@@ -28,7 +28,7 @@ import ballerina/reflect;
 
 public type OAuthzFilter object {
 
-    public http:AuthzFilter authzFilter = new;
+    public http:AuthzFilter authzFilter;
 
     public function __init(http:AuthzFilter authzFilter) {
         self.authzFilter = authzFilter;
@@ -44,7 +44,7 @@ public type OAuthzFilter object {
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest(caller, request, context);
+            boolean result = self.doFilterRequest(caller, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
         } else {
@@ -53,7 +53,7 @@ public type OAuthzFilter object {
         }
     }
 
-    public function doFilterRequest(http:Listener caller, http:Request request, http:FilterContext context) returns
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
@@ -92,7 +92,7 @@ public type OAuthzFilter object {
     }
 
 
-function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
+public function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
     string errorDescription = INVALID_SCOPE_MESSAGE;
     string errorMesssage = INVALID_SCOPE_MESSAGE;
     int errorCode = INVALID_SCOPE;

@@ -18,7 +18,7 @@ import ballerina/log;
 import ballerina/io;
 import ballerina/http;
 
-function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
+public function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
     ExecutionTimeDTO executionTimeDTO = {};
     boolean isSecured =  <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
@@ -50,7 +50,7 @@ function generateExecutionTimeEvent(http:FilterContext context) returns Executio
     return executionTimeDTO;
 }
 
-function getSecurityLatency(http:FilterContext context) returns int {
+public function getSecurityLatency(http:FilterContext context) returns int {
     int latency = 0;
     if (context.attributes.hasKey(SECURITY_LATENCY_AUTHN)) {
         latency +=  <int>context.attributes[SECURITY_LATENCY_AUTHN];

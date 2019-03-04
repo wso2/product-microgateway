@@ -21,7 +21,7 @@ import ballerina/mime;
 stream<string> filesToUpload;
 
 
-function multipartSender(string location, string file, string username, string password) returns http:Response {
+public function multipartSender(string location, string file, string username, string password) returns http:Response {
     http:Client clientEP = new(uploadingUrl);
     mime:Entity filePart = new;
     filePart.setFileAsEntityBody(location + file);
@@ -50,7 +50,7 @@ function multipartSender(string location, string file, string username, string p
 }
 
 
-function getContentDispositionForFormData(string partName)
+public function getContentDispositionForFormData(string partName)
              returns (mime:ContentDisposition) {
     mime:ContentDisposition contentDisposition = new;
     contentDisposition.name = "file";
@@ -59,13 +59,8 @@ function getContentDispositionForFormData(string partName)
     return contentDisposition;
 }
 
-function getBasicAuthHeaderValue(string username, string password) returns string {
+public function getBasicAuthHeaderValue(string username, string password) returns string {
     string credentials = username + ":" + password;
-    var encodedVal = credentials.base64Encode();
-    if(encodedVal is string)  {
-        return "Basic " + encodedVal;
-    }
-    else {
-        throw err;
-    }
+    string encodedVal = encodeValueToBase64(credentials);
+    return "Basic " + encodedVal;  
 }

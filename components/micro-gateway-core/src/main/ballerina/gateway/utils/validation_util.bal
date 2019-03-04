@@ -26,7 +26,6 @@ function closeRc(io:ReadableCharacterChannel rc) {
     }
 }
 
-
 function read(string path) returns json {
     io:ReadableByteChannel rbc = io:openReadableFile(path);
     io:ReadableCharacterChannel rch = new(rbc, "UTF8");
@@ -69,8 +68,7 @@ public function valueValidator(string key, json value, json field) returns (erro
             int intValue = <int>value;
             //if minimum/maximum properties are defined for the integer do the validation
             if (field.minimum != null || field.maximum != null) {
-                processError(errors, validateMinMaxValue(key, intValue, field.minimum, field.maximum, false, false))
-                ;
+                processError(errors, validateMinMaxValue(key, intValue, field.minimum, field.maximum, false, false));
             }
             if (field.exclusiveMinimum != null || field.exclusiveMaximum != null) {
                 boolean exclusiveMin = false;
@@ -392,7 +390,6 @@ public function merge(json target, json source) returns (json) {
         } else {
             //if there is a value available for this property in the source model, check whether there are any
             //exceptional keys inside that property
-            if (sourceProperty.getKeys(). != ()) {
             if (sourceProperty.getKeys().length() > 0) {
                 foreach var proprtyKey in sourceProperty.getKeys(){
                     if (target[key][proprtyKey] == null) {
@@ -402,7 +399,6 @@ public function merge(json target, json source) returns (json) {
                 }
             }
          }
-        }
     }
     return target;
 }
@@ -435,14 +431,9 @@ public function createReturnObject(error?[]|error err, string modelName) returns
             }
         }
     }
-    if (modelName != ()) {
     if (modelName.length() > 0) {
         result.modelName = modelName;
     }
-   } else {
-       error err = error(" Nillable model Name found ");
-       return createReturnObject(err, " ");
-   }
     return result;
 }
 //validating values
@@ -704,7 +695,7 @@ public function isExpectedType(json value, string expectedType) returns (boolean
     else if (value is float) {typeof = NUMBER;}
     else if(value is string) {typeof = STRING;}
     else if (value is boolean) {typeof = BOOLEAN;}
-    else if(value is json) {typeof = JSON;}
+    else { typeof = JSON;}
     return expectedType == typeof;
 }
 
@@ -796,8 +787,8 @@ public function typeOf(json target) returns (string) {
     else if (target is float) {typeof = NUMBER;}
     else if(target is string) {typeof = STRING;}
     else if (target is boolean) {typeof = BOOLEAN;}
-    else if(target is json) {typeof = OBJECT;}
     else if(target is json[]) {typeof = ARRAY;}
+    else { typeof = OBJECT;}
     return typeof;
 }
 
@@ -882,23 +873,18 @@ public function validateProperties(json target, json model, json models) returns
     error?[] errorArray = [];
     int i = 0;
     if (target!= ()) {
-    var targetKeys = target.getKeys();
-    
+    var targetKeys = target.getKeys();  
     //get all details in referenced models and merge them into a one model
     var referenceModel = dereferenceModel(target, model, models);
     //if the properties provided in the target object is not defined in the model, send an error
-     if (targetKeys != ()) {
-      if (targetKeys.length() > 0) {
-        foreach var key in targetKeys{
+       foreach var key in targetKeys {
             if (referenceModel.properties[key] == null) {
                 error err = error("Target property " + key + " is not in the model");
                 errorArray[i] = err;
                 i = i + 1;
             }
         }
-      }
      }
-    }
     return errorArray;
 }
 //replace model references to the model name
