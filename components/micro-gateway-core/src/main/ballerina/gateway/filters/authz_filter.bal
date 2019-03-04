@@ -28,11 +28,11 @@ import ballerina/reflect;
 
 public type OAuthzFilter object {
 
-    auth:AuthStoreProvider authStoreProvider = new;
-    cache:Cache pauthzCache = new;
-    cache:Cache nauthzCache = new;
-    http:HttpAuthzHandler authzHandler = new(authStoreProvider, pauthzCache, nauthzCache);
-    public http:AuthzFilter authzFilter = new(authzHandler);
+    public http:AuthzFilter authzFilter;
+
+    public function __init(http:AuthzFilter authzFilter) {
+        self.authzFilter = authzFilter;
+    }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                             boolean
@@ -104,5 +104,3 @@ public function setAuthorizationFailureMessage(http:Response response, http:Filt
     } };
     response.setJsonPayload(payload);
 }
-
-
