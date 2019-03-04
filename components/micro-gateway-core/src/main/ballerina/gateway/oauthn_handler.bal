@@ -22,6 +22,7 @@ import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
+import ballerina/encoding;
 
 // Authentication handler
 
@@ -37,14 +38,17 @@ public type OAuthnAuthenticator object {
 };
 
 public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolean) {
+    string | error authHeaderResult = trap req.getHeader(AUTH_HEADER);
     string authHeader;
-    try {
-        authHeader = req.getHeader(AUTH_HEADER);
-    } catch (error e) {
-        printDebug(KEY_OAUTH_PROVIDER, "Error in retrieving header " + AUTH_HEADER + ": " + e.message);
+    
+    if (authHeaderResult is error) {
+        printDebug(KEY_OAUTH_PROVIDER, "Error in retrieving header " + AUTH_HEADER + ": " + authHeaderResult.reason());
         return false;
+    } else {
+        authHeader = <string> authHeaderResult;
     }
-    if (authHeader != null && authHeader.hasPrefix(AUTH_SCHEME_BEARER)) {
+
+    if (authHeader.length() > 0 && authHeader.hasPrefix(AUTH_SCHEME_BEARER)) {
         string[] authHeaderComponents = authHeader.split(" ");
         if (authHeaderComponents.length() == 2) {
             return true;
@@ -55,13 +59,12 @@ public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolea
 
 public function OAuthnAuthenticator.handle (http:Request req)
                                    returns (APIKeyValidationDto| error) {
-    APIKeyValidationDto apiKeyValidationDto;
-    try {
-        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
-        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
-    } catch (error err) {
-        log:printError("Error occurred while getting key validation information for the access token", err = err);
-        return err;
+    
+    APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
+    APIKeyValidationDto | error apiKeyValidationDto = trap self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
+    if (apiKeyValidationDto is error) {
+        log:printError("Error occurred while getting key validation information for the access token", err = apiKeyValidationDto);
+        return apiKeyValidationDto;
     }
     return apiKeyValidationDto;
 }
@@ -113,9 +116,9 @@ public function OAuthAuthProvider.authenticate (APIRequestMetaDataDto apiRequest
                         printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
                         return apiKeyValidationDtoFromcache;
                     }
-                authorized = <boolean>apiKeyValidationDtoFromcache.authorized;
-                apiKeyValidationDto = apiKeyValidationDtoFromcache;
-                printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
+                    authorized = boolean.convert(apiKeyValidationDtoFromcache.authorized);
+                    apiKeyValidationDto = apiKeyValidationDtoFromcache;
+                    printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
                 } else {
                     printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache."
                     + " Calling the key validation service.");
@@ -142,35 +145,33 @@ public function OAuthAuthProvider.authenticate (APIRequestMetaDataDto apiRequest
     }
     if (authorized) {
         // set username
-        runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
-
+        runtime:getInvocationContext().principal.username = apiKeyValidationDto.endUserName;
     }
     return apiKeyValidationDto;
 }
 
 public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
             APIKeyValidationDto) {
-    APIKeyValidationDto apiKeyValidationDto = new;
+    APIKeyValidationDto apiKeyValidationDto = {};
     string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized = false;
     json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
     printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationInfoJson.toString());
-    var authorizeValue = <string>keyValidationInfoJson.authorized;
+    var authorizeValue = keyValidationInfoJson.authorized;
     if(authorizeValue is string) {
-        boolean auth = <boolean>authorizeValue;
+        boolean auth = boolean.convert(authorizeValue);
         printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
         if (auth) {
-            var dto = <APIKeyValidationDto>keyValidationInfoJson ;
+            var dto = APIKeyValidationDto.convert(keyValidationInfoJson);
             if(dto is APIKeyValidationDto){
                 apiKeyValidationDto = dto;
                 // specifically setting the key type since type is a keyword in ballerina.
-                apiKeyValidationDto.keyType = check <string>keyValidationInfoJson["type"];
+                apiKeyValidationDto.keyType = <string>keyValidationInfoJson["type"];
                 printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
             } else {
-                log:printError(
-                    "Error while converting key validation response json to type APIKeyValidationDto"
-                    , err = err);
-                throw err;
+                string errorMessage = "Error while converting key validation response json to type APIKeyValidationDto";
+                log:printError(errorMessage);
+                panic error(errorMessage);
             }
 
             authorized = auth;
@@ -181,28 +182,28 @@ public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiR
             }
         } else {
             apiKeyValidationDto.authorized = "false";
-            apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson.validationStatus;
+            apiKeyValidationDto.validationStatus = <string>keyValidationInfoJson.validationStatus;
             if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                 self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
             }
         }
     } else {
-        log:printError("Error occurred while converting the authorized value from the key validation response to a
-                        string value", err = err);
-        throw err;
+        string errorMessage = "Error occurred while converting the authorized value from the key validation response to a
+                        string value";
+        log:printError(errorMessage);
+        panic error(errorMessage);
     }
 
     return (authorized, apiKeyValidationDto);
 
 }
 
-public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto)
-                                       returns (json) {
-    try {
+public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto) returns (json) {
+    
         string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
             getGatewayConfInstance().getKeyManagerConf().credentials.password;
-        string encodedBasicAuthHeader = check base64Header.base64Encode();
-
+        string encodedBasicAuthHeader = encodeValueToBase64(base64Header);
+        
         http:Request keyValidationRequest = new;
         http:Response keyValidationResponse = new;
         xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
@@ -230,7 +231,7 @@ public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequ
         keyValidationRequest.setHeader("SOAPAction", "urn:validateKey");
         time:Time time = time:currentTime();
         int startTimeMills = time.time;
-        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
+        var result = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
         time = time:currentTime();
         int endTimeMills = time.time;
         printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
@@ -238,25 +239,22 @@ public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequ
         if(result is error) {
             log:printError("Error occurred while reading the key validation response",err =result);
             return {};
-        } else if(result is http:Response) {
-            keyValidationResponse = prod;
+        } else {
+            keyValidationResponse = result;
         }
         xml responsepayload;
+        json payloadJson = {};
         var responseXml =  keyValidationResponse.getXmlPayload();
-        if(responseXml is err) {
+        if(responseXml is error) {
             log:printError("Error occurred while getting the key validation service XML response payload ",err=responseXml);
             return {};
         }
         if(responseXml is xml){
             responsepayload = responseXml;
             printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responsepayload.getTextValue());
+            payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
+            payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
         }
-        json payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
-        payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
-        return(payloadJson);
-
-    } catch (error err) {
-        log:printError("Error occurred while validating the token",err =err);
-        return {};
-    }
+        
+        return payloadJson;
 }
