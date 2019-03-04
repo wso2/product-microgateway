@@ -820,14 +820,14 @@ public function validate(string name, json target, json swaggerModel, json swagg
     json model = mergeModels(target, swaggerModel, swaggerModels);
     //validating required fields
     if (model.required != null && model.required.length() > 0) {
-        error ?[] requireFieldErrors = [];
+        error?[] requireFieldErrors = [];
         requireFieldErrors = validateRequiredFields(target, model.required, model.properties);
         if (requireFieldErrors.length() > 0) {
             return createReturnObject(requireFieldErrors, " ");
         }
     }
     var validationErrors = validateSpecification(name, target, model, swaggerModels);
-    if (validationErrors.length() > 0 && validationErrors.length() > 0) {
+    if (validationErrors.length() > 0) {
         return createReturnObject(validationErrors, model.id.toString());
     }
     return createReturnObject(err, " ");
