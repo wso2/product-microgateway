@@ -434,7 +434,7 @@ public function createReturnObject(error[]|error err, string modelName) returns 
             }
         }
     }
-    if (modelName.length()>0) {
+    if (modelName.length() > 0) {
         result.modelName = modelName;
     }
     return result;
