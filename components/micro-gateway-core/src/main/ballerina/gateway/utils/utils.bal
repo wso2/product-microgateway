@@ -453,14 +453,14 @@ public function printFullError(string key, error message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.reason()), err = message);
 }
 
-function setLatency(int starting, http:FilterContext context, string latencyType) {
+public function setLatency(int starting, http:FilterContext context, string latencyType) {
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
     printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
 }
 
 # Check MESSAGE_ID in context and set if it is not
-function checkOrSetMessageID(http:FilterContext context) {
+public function checkOrSetMessageID(http:FilterContext context) {
     if (!context.attributes.hasKey(MESSAGE_ID)) {
         context.attributes[MESSAGE_ID] = system:uuid();
     }

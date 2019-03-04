@@ -51,7 +51,7 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
     context.attributes[REQUEST_TIME_PROPERTY] = currentTimeMills;
 }
 
-function getEventData(EventDTO dto) returns string {
+public function getEventData(EventDTO dto) returns string {
     string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp + EVS +
         "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
         "payLoadData" + KVT + dto.payloadData + "\n";
@@ -72,7 +72,7 @@ function writeEventToFile(EventDTO eventDTO) {
 
 }
 
-function closeWC(io:WritableCharacterChannel charChannel) {
+public function closeWC(io:WritableCharacterChannel charChannel) {
     var result = charChannel.close();
     if(result is error){
             printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
