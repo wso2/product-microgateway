@@ -13,7 +13,7 @@ import ballerina/internal;
 public type Result object {
     boolean valid = false;
     int errorCount = 0;
-    error ?[] resultErr = [];
+    error?[] resultErr = [];
     string[] getErrorMessages = [];
     string modelName = "";
 };
