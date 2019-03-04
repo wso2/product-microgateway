@@ -20,7 +20,7 @@ import ballerina/http;
 import ballerina/runtime;
 
 
-function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
+public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
     string output =
         requestResponseExecutionDTO.applicationConsumerKey + OBJ +
         requestResponseExecutionDTO.applicationName + OBJ + requestResponseExecutionDTO.applicationId + OBJ +
@@ -54,7 +54,7 @@ function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO reque
     return output;
 }
 
-function getMetaDataForRequestResponseExecutionData(RequestResponseExecutionDTO dto) returns string {
+public function getMetaDataForRequestResponseExecutionData(RequestResponseExecutionDTO dto) returns string {
     json metaData = { "clientType": dto.metaClientType, "correlationID": dto.correlationId };
     return metaData.toString();
 }
@@ -62,7 +62,7 @@ function getMetaDataForRequestResponseExecutionData(RequestResponseExecutionDTO 
 function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
                                                                                                                    EventDTO
 {
-    EventDTO eventDTO = new;
+    EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.request:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getMetaDataForRequestResponseExecutionData(requestResponseExecutionDTO);
@@ -71,13 +71,13 @@ function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDT
     return eventDTO;
 }
 
-function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
+public function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
                                                                                                            RequestResponseExecutionDTO
 {
-    RequestResponseExecutionDTO requestResponseExecutionDTO = new;
-    boolean isSecured = check <boolean>context.attributes[IS_SECURED];
+    RequestResponseExecutionDTO requestResponseExecutionDTO = {};
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+        AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         requestResponseExecutionDTO.apiCreator = authContext.apiPublisher;
         requestResponseExecutionDTO.metaClientType = authContext.keyType;
         requestResponseExecutionDTO.applicationConsumerKey = authContext.consumerKey;
@@ -86,8 +86,8 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-        requestResponseExecutionDTO.apiCreator = getAPIDetailsFromServiceAnnotation(
-                                                     reflect:getServiceAnnotations(context.serviceType)).publisher;
+        requestResponseExecutionDTO.apiCreator = <string>getAPIDetailsFromServiceAnnotation(
+                                                     reflect:getServiceAnnotations(context.serviceRef)).publisher;
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
@@ -96,8 +96,8 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
         requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
-    requestResponseExecutionDTO.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.
-            serviceType)).
+    requestResponseExecutionDTO.apiVersion = <string>getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.
+            serviceRef)).
     apiVersion;
     requestResponseExecutionDTO.apiContext = getContext(context);
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
@@ -114,15 +114,15 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
     //todo: Response size is yet to be decided
     requestResponseExecutionDTO.responseSize = 0;
     requestResponseExecutionDTO.responseCode = response.statusCode;
-    requestResponseExecutionDTO.apiResourcePath = getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
-    requestResponseExecutionDTO.apiResourceTemplate = getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(context.serviceType, context.resourceName)).path;
+    requestResponseExecutionDTO.apiResourcePath = <string>getResourceConfigAnnotation
+    (reflect:getResourceAnnotations(context.serviceRef, context.resourceName)).path;
+    requestResponseExecutionDTO.apiResourceTemplate = <string>getResourceConfigAnnotation
+    (reflect:getResourceAnnotations(context.serviceRef, context.resourceName)).path;
     //request method
     requestResponseExecutionDTO.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
-    int initTime = check <int>context.attributes[REQUEST_TIME];
-    int timeRequestOut = check <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
-    int timeResponseIn = check <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
+    int initTime = <int>context.attributes[REQUEST_TIME];
+    int timeRequestOut = <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
+    int timeResponseIn = <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
     requestResponseExecutionDTO.serviceTime = timeRequestOut - initTime;
     requestResponseExecutionDTO.backendTime = timeResponseIn - timeRequestOut;
     requestResponseExecutionDTO.responseTime = timeResponseIn - initTime;
@@ -135,11 +135,11 @@ function generateRequestResponseExecutionDataEvent(http:Response response, http:
     requestResponseExecutionDTO.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
     requestResponseExecutionDTO.apiTier = <string>context.attributes[API_TIER_PROPERTY];
 
-    requestResponseExecutionDTO.throttledOut = check <boolean>context.attributes[CONTINUE_ON_TROTTLE_PROPERTY];
+    requestResponseExecutionDTO.throttledOut = <boolean>context.attributes[CONTINUE_ON_TROTTLE_PROPERTY];
 
     requestResponseExecutionDTO.userAgent = <string>context.attributes[USER_AGENT_PROPERTY];
     requestResponseExecutionDTO.userIp = <string>context.attributes[USER_IP_PROPERTY];
-    requestResponseExecutionDTO.requestTimestamp = check <int>context.attributes[REQUEST_TIME_PROPERTY];
+    requestResponseExecutionDTO.requestTimestamp = <int>context.attributes[REQUEST_TIME_PROPERTY];
     requestResponseExecutionDTO.gatewayType = GATEWAY_TYPE;
     requestResponseExecutionDTO.label = GATEWAY_TYPE;
 

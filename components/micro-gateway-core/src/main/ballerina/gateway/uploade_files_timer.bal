@@ -21,7 +21,7 @@ import ballerina/math;
 import ballerina/runtime;
 import ballerina/log;
 
-string uploadingUrl;
+string uploadingUrl= "";
 string analyticsUsername;
 string analyticsPassword;
 
@@ -60,12 +60,12 @@ function informError(error e) {
 function timerTask() {
     task:Timer? timer;
     map<int> vals = getConfigMapValue(ANALYTICS);
-    boolean uploadFiles = check <boolean>vals[FILE_UPLOAD_TASK];
+    boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
-        int timeSpan = check <int>vals[UPLOADING_TIME_SPAN];
+        int timeSpan = <int>vals[UPLOADING_TIME_SPAN];
         (function() returns error?) onTriggerFunction = searchFilesToUpload;
         function(error) onErrorFunction = informError;
         timer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = 5000);

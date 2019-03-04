@@ -28,8 +28,11 @@ import ballerina/reflect;
 
 public type OAuthzFilter object {
 
-    public http:AuthzFilter authzFilter = new;
-
+    auth:AuthStoreProvider authStoreProvider = new;
+    cache:Cache pauthzCache = new;
+    cache:Cache nauthzCache = new;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, pauthzCache, nauthzCache);
+    public http:AuthzFilter authzFilter = new(authzHandler);
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                             boolean
@@ -41,7 +44,7 @@ public type OAuthzFilter object {
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
-            boolean result = doFilterRequest(caller, request, context);
+            boolean result = self.doFilterRequest(caller, request, context);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
         } else {
@@ -50,7 +53,7 @@ public type OAuthzFilter object {
         }
     }
 
-    public function doFilterRequest(http:Listener caller, http:Request request, http:FilterContext context) returns
+    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                                 boolean
     {
         printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
@@ -89,7 +92,7 @@ public type OAuthzFilter object {
     }
 
 
-function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
+public function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
     string errorDescription = INVALID_SCOPE_MESSAGE;
     string errorMesssage = INVALID_SCOPE_MESSAGE;
     int errorCode = INVALID_SCOPE;

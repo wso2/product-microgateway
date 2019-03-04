@@ -96,8 +96,8 @@ public function valueValidator(string key, json value, json field) returns (erro
                     ));
             }
             if (field.exclusiveMinimum != null || field.exclusiveMaximum != null) {
-                boolean exclusiveMin = check <boolean>field.exclusiveMinimum;
-                boolean exclusiveMax = check <boolean>field.exclusiveMaximum;
+                boolean exclusiveMin = check<boolean>field.exclusiveMinimum;
+                boolean exclusiveMax = check<boolean>field.exclusiveMaximum;
                 //validate minimum/maximum with exclusiveMinimum/exclusiveMaximum properties
                 if (field.minimum != null || field.maximum != null) {
                     processError(errors, validateMinMaxValue(key, floatValue, field.minimum, field.maximum,
