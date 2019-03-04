@@ -40,7 +40,7 @@ public type OAuthnAuthenticator object {
 public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolean) {
     string | error authHeaderResult = trap req.getHeader(AUTH_HEADER);
     string authHeader;
-    
+
     if (authHeaderResult is error) {
         printDebug(KEY_OAUTH_PROVIDER, "Error in retrieving header " + AUTH_HEADER + ": " + authHeaderResult.reason());
         return false;
@@ -59,7 +59,7 @@ public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolea
 
 public function OAuthnAuthenticator.handle (http:Request req)
                                    returns (APIKeyValidationDto| error) {
-    
+
     APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
     APIKeyValidationDto | error apiKeyValidationDto = trap self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
     if (apiKeyValidationDto is error) {
@@ -145,7 +145,7 @@ public function OAuthAuthProvider.authenticate (APIRequestMetaDataDto apiRequest
     }
     if (authorized) {
         // set username
-        runtime:getInvocationContext().principal.username = apiKeyValidationDto.endUserName;
+        runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
     }
     return apiKeyValidationDto;
 }
@@ -199,11 +199,11 @@ public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiR
 }
 
 public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto) returns (json) {
-    
+
         string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
             getGatewayConfInstance().getKeyManagerConf().credentials.password;
         string encodedBasicAuthHeader = encodeValueToBase64(base64Header);
-        
+
         http:Request keyValidationRequest = new;
         http:Response keyValidationResponse = new;
         xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
@@ -255,6 +255,6 @@ public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequ
             payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
             payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
         }
-        
+
         return payloadJson;
 }

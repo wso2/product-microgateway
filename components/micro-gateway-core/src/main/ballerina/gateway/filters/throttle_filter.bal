@@ -33,13 +33,6 @@ public type ThrottleFilter object {
 
     // TODO: need to refactor this function.
     public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        worker throttleEventFlow {
-            printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
-            RequestStreamDTO throttleEvent;
-            throttleEvent = <- default;
-            publishNonThrottleEvent(throttleEvent);
-        }
-
         printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
         //Throttle Tiers
         string applicationLevelTier;
@@ -174,7 +167,7 @@ public type ThrottleFilter object {
 
         //Publish throttle event to another worker flow to publish to internal policies or traffic manager
         RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
-        throttleEvent -> throttleEventFlow;
+        future<()> publishedEvent = start asyncPublishEvent(throttleEvent);
         printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
         return true;
     }
@@ -183,6 +176,11 @@ public type ThrottleFilter object {
         return true;
     }
 };
+
+function asyncPublishEvent(RequestStreamDTO throttleEvent) {
+    printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
+    publishNonThrottleEvent(throttleEvent);
+}
 
 function setThrottleErrorMessageToContext(http:FilterContext context, int statusCode, int errorCode, string
     errorMessage, string errorDescription) {
@@ -262,7 +260,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     }
     requestStreamDto.userId = keyValidationDto.username;
     requestStreamDto.apiContext = getContext(context);
-    if (apiVersion is string) { 
+    if (apiVersion is string) {
         requestStreamDto.apiVersion = apiVersion;
     }
     requestStreamDto.appTenant = keyValidationDto.subscriberTenantDomain;
