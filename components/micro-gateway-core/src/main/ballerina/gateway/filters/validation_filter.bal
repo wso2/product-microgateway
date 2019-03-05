@@ -43,190 +43,191 @@ string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGG
 public type ValidationFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
-                        returns boolean|error {
+                        returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
-        boolean result = check self.doFilterRequest(caller, request, filterContext);
+        boolean result =  doValidationFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
-    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
-                        returns boolean|error {
-        if (enableRequestValidation) {
-            //getting the payload of the request
-            var payload = request.getJsonPayload();
-            isType = false;
-            service serviceReference = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-            APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceReference));
-            json swagger = read(swaggerAbsolutePath);
-            json model = {};
-            json models = {};
-            string modelName = "";
-            //getting all the keys defined under the paths in the swagger
-            pathKeys = untaint swagger[PATHS].getKeys();
-            //getting the method of the request
-            requestMethod = request.method.toLower();
-            //getting the path hit by the request
-            requestPath = getResourceConfigAnnotation(reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
-            //getting the name of the model hit by the request
-            if (swagger.components.schemas != null) {//In swagger 3.0 models are defined under the components.schemas
-                models = swagger.components.schemas;
-            } else if (swagger.definitions != null) {//In swagger 2.0 models are defined under the definitions
-                //getting all models defined in the schema
-                models = swagger.definitions;
-                //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
-                //request
-                foreach var i in pathKeys {
-                    if (requestPath == i) {
-                        json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
-                        //go through each item in parameters array and find the schema property
-                        foreach var (key, val) in check map<json>.convert(parameters) {
-                            // Todo: Fix the Loop
-
-                            // if (v != null) {
-                            //     if (k[SCHEMA][REFERENCE] != null)  {
-                            //         //getting the reference to the model
-                            //         string modelReference = k[SCHEMA][REFERENCE].toString();
-                            //         //getting the model name
-                            //         modelName = untaint replaceModelPrefix(modelReference);
-                            //         //check whether there is a model available from the asigned model name
-                            //         if (models[modelName] != null) {
-                            //             model = models[modelName];
-                            //         }
-                            //     } else {
-                            //         //getting inline model
-                            //         model = k[SCHEMA];
-                            //     }
-                            // }
-                        }
-                    }
-                }
-            }
-
-            //payload can be of type json or error
-            if(payload is json) {
-                //do the validation if only there is a payload and a model available
-                if (model != null && payload != null)  {
-                    //validate the payload against the model and return the result
-                    var finalResult = validate(modelName, payload, model, models);
-                    if (!finalResult.valid) {
-                        //setting the error message to the context
-                        setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
-                        filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
-                        //sending the error response to the client
-                        sendErrorResponse(caller, request, filterContext);
-                        return false;//avoid sending the invalid request to the backend by returning false.
-                    }
-                }
-            } else {}
-        }
-        return true;
-    }
-
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
-        boolean result = doFilterResponse(response, context);
+        boolean result = doValidationFilterResponse(response, context);
         setLatency(startingTime, context, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
-    public function doFilterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if (enableResponseValidation) {
-            //getting the payload of the response
-            var payload = response.getJsonPayload();
-            service serviceType = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-            APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
-            json swagger = read(swaggerAbsolutePath);
-            json model = {};
-            json models = {};
-            string modelName = "";
-            string responseStatusCode = string.convert(response.statusCode);
-            if (swagger.components.schemas != null){//getting the schemas from a swagger 3.0 version file
-                models = swagger.components.schemas;
-            } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
-                models = swagger.definitions;
-                foreach var i in pathKeys {
-                    if (requestPath == i) {
-                        string modelReference;
-                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null)
-                            {
-                                if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
-                                REFERENCE] != null) {
-                                    //getting referenced model
-                                    modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                                    SCHEMA][ITEMS][REFERENCE].toString();
-                                    modelName = replaceModelPrefix(modelReference);
-                                    if (models[modelName] != null) {
-                                        model = models[modelName];
-                                    }
-                                } else {
-                                    //getting inline model defined under the items
-                                    model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][
-                                    ITEMS];
+};
+
+function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
+             returns boolean {
+    if (enableRequestValidation) {
+        //getting the payload of the request
+        var payload = request.getJsonPayload();
+        isType = false;
+        service serviceReference = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
+        APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceReference));
+        json swagger = read(swaggerAbsolutePath);
+        json model = {};
+        json models = {};
+        string modelName = "";
+        //getting all the keys defined under the paths in the swagger
+        pathKeys = untaint swagger[PATHS].getKeys();
+        //getting the method of the request
+        requestMethod = request.method.toLower();
+        //getting the path hit by the request
+        requestPath = getResourceConfigAnnotation(reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
+        //getting the name of the model hit by the request
+        if (swagger.components.schemas != null) {//In swagger 3.0 models are defined under the components.schemas
+            models = swagger.components.schemas;
+        } else if (swagger.definitions != null) {//In swagger 2.0 models are defined under the definitions
+            //getting all models defined in the schema
+            models = swagger.definitions;
+            //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
+            //request
+            foreach var i in pathKeys {
+                if (requestPath == i) {
+                    json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
+                    //go through each item in parameters array and find the schema property
+                    // Todo: Fix the Loop
+                    //foreach var k in parameters {
+
+                    // if (v != null) {
+                    //     if (k[SCHEMA][REFERENCE] != null)  {
+                    //         //getting the reference to the model
+                    //         string modelReference = k[SCHEMA][REFERENCE].toString();
+                    //         //getting the model name
+                    //         modelName = untaint replaceModelPrefix(modelReference);
+                    //         //check whether there is a model available from the asigned model name
+                    //         if (models[modelName] != null) {
+                    //             model = models[modelName];
+                    //         }
+                    //     } else {
+                    //         //getting inline model
+                    //         model = k[SCHEMA];
+                    //     }
+                    // }
+                    //}
+                }
+            }
+        }
+
+        //payload can be of type json or error
+        if(payload is json) {
+            //do the validation if only there is a payload and a model available
+            if (model != null && payload != null)  {
+                //validate the payload against the model and return the result
+                var finalResult = validate(modelName, payload, model, models);
+                if (!finalResult.valid) {
+                    //setting the error message to the context
+                    setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
+                    filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
+                    //sending the error response to the client
+                    sendErrorResponse(caller, request, filterContext);
+                    return false;//avoid sending the invalid request to the backend by returning false.
+                }
+            }
+        } else {}
+    }
+    return true;
+}
+
+public function doValidationFilterResponse(http:Response response, http:FilterContext context) returns boolean {
+    if (enableResponseValidation) {
+        //getting the payload of the response
+        var payload = response.getJsonPayload();
+        service serviceType = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
+        APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
+        json swagger = read(swaggerAbsolutePath);
+        json model = {};
+        json models = {};
+        string modelName = "";
+        string responseStatusCode = string.convert(response.statusCode);
+        if (swagger.components.schemas != null){//getting the schemas from a swagger 3.0 version file
+            models = swagger.components.schemas;
+        } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
+            models = swagger.definitions;
+            foreach var i in pathKeys {
+                if (requestPath == i) {
+                    string modelReference;
+                    if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
+                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null)
+                        {
+                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
+                            REFERENCE] != null) {
+                                //getting referenced model
+                                modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                                SCHEMA][ITEMS][REFERENCE].toString();
+                                modelName = replaceModelPrefix(modelReference);
+                                if (models[modelName] != null) {
+                                    model = models[modelName];
                                 }
                             } else {
-                                if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
-                                [REFERENCE] != null) {
-                                    //getting referenced model
-                                    modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                                    SCHEMA]
-                                    [REFERENCE].toString();
-                                    modelName = replaceModelPrefix(modelReference);
-                                    if (models[modelName] != null) {
-                                        model = models[modelName];
-                                    }
-                                } else {
-                                    //getting inline model defined under the schema
-                                    model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA];
+                                //getting inline model defined under the items
+                                model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][
+                                ITEMS];
+                            }
+                        } else {
+                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
+                            [REFERENCE] != null) {
+                                //getting referenced model
+                                modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                                SCHEMA]
+                                [REFERENCE].toString();
+                                modelName = replaceModelPrefix(modelReference);
+                                if (models[modelName] != null) {
+                                    model = models[modelName];
                                 }
+                            } else {
+                                //getting inline model defined under the schema
+                                model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA];
                             }
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
-                                isType = true;
-                                pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                                SCHEMA][
-                                TYPE].toString();
-                            }
+                        }
+                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
+                            isType = true;
+                            pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                            SCHEMA][
+                            TYPE].toString();
                         }
                     }
                 }
-
             }
-            //payload can be of type json or error
-                if(payload is json) {
-                    //do the validation if only thre is a payload and a model available. prevent validating error
-                    //responses sent from the filterRequest if the request is invalid.
-                    if (model != null && payload != null && payload.fault == null) {
-                        //validate the payload against the model and return the result
-                        var finalResult = validate(modelName, payload, model, models);
-                        if (!finalResult.valid) {
-                            //setting the error message to the context
-                            setErrorMessageToFilterContext(context, INVALID_RESPONSE);
-                            context.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
-                            //getting attributes from the context
-                            int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
-                            string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
-                            string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
-                            int errorCode = <int>context.attributes[ERROR_CODE];
-                            //changing the response
-                            response.statusCode = statusCode;
-                            response.setContentType(APPLICATION_JSON);
-                            //creating a new payload which is having the error message
-                            json newPayload = { fault: {
-                                code: errorCode,
-                                message: errorMesssage,
-                                description: errorDescription
-                            } };
-                            //setting the new payload to the response
-                            response.setJsonPayload(untaint newPayload);
-                            return true;//send the changed response(error response) to the user
-                        }
-                    }
-                }
-                else {}
 
         }
-        return true;
+        //payload can be of type json or error
+        if(payload is json) {
+            //do the validation if only thre is a payload and a model available. prevent validating error
+            //responses sent from the filterRequest if the request is invalid.
+            if (model != null && payload != null && payload.fault == null) {
+                //validate the payload against the model and return the result
+                var finalResult = validate(modelName, payload, model, models);
+                if (!finalResult.valid) {
+                    //setting the error message to the context
+                    setErrorMessageToFilterContext(context, INVALID_RESPONSE);
+                    context.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
+                    //getting attributes from the context
+                    int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
+                    string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
+                    string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
+                    int errorCode = <int>context.attributes[ERROR_CODE];
+                    //changing the response
+                    response.statusCode = statusCode;
+                    response.setContentType(APPLICATION_JSON);
+                    //creating a new payload which is having the error message
+                    json newPayload = { fault: {
+                        code: errorCode,
+                        message: errorMesssage,
+                        description: errorDescription
+                    } };
+                    //setting the new payload to the response
+                    response.setJsonPayload(untaint newPayload);
+                    return true;//send the changed response(error response) to the user
+                }
+            }
+        }
+        else {}
+
     }
-};
+    return true;
+}

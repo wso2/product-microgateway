@@ -43,7 +43,7 @@ public type ExtensionFilter object {
         var failed =  context.attributes[gateway:FILTER_FAILED];
         if (failed is boolean) {
             if (failed) {
-                int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
+                int statusCode = <int>context.attributes[gateway:HTTP_STATUS_CODE];
                 if(statusCode == gateway:UNAUTHORIZED) {
                     setAuthenticationErrorResponse(response, context );
                 } else if (statusCode ==  gateway:FORBIDDEN) {
@@ -61,7 +61,7 @@ public type ExtensionFilter object {
             //Nothing to handle
             return true;
         }
-
+        return true;
     }
 
 };

@@ -24,7 +24,7 @@ gateway:AuthnFilter authnFilter = new;
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
-map<string> deployedPolicies = getDeployedPolicies();
+map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
 gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 // Validation filter
@@ -32,7 +32,7 @@ gateway:ValidationFilter validationFilter = new;
 // Analytics filter
 gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
-ExtensionFilter extensionFilter;
+ExtensionFilter extensionFilter = new;
 
 http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
