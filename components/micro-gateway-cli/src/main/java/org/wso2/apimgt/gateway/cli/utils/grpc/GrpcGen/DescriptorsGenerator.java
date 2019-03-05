@@ -29,13 +29,17 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.generateDescriptor;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.getDescriptorPath;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.isWindows;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.resolveProtoFloderPath;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.createMetaFolder;
+import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.resolveProtoFolderPath;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.META_LOCATION;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.DESC_SUFFIX;
@@ -46,77 +50,59 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
  */
 public class DescriptorsGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(DescriptorsGenerator.class);
+    public static final String TMP_DIRECTORY_PATH = System.getProperty("java.io.tmpdir");
     private static final CharSequence EMPTY_STRING = "";
 
-    public static List<byte[]> generateDependentDescriptor(String parentDescPath, String parentProtoPath,
-                                                           List<byte[]> list,
-                                                           String exePath, ClassLoader classLoader) {
-
-        File initialFile = new File(parentDescPath);
+    public static Set<byte[]> generateDependentDescriptor(String exePath, String rootProtoPath, String
+            rootDescriptorPath) {
+        Set<byte[]> dependentDescSet = new HashSet<>();
+        File tempDir = new File(TMP_DIRECTORY_PATH);
+        File initialFile = new File(rootDescriptorPath);
         try (InputStream targetStream = new FileInputStream(initialFile)) {
             DescriptorProtos.FileDescriptorSet descSet = DescriptorProtos.FileDescriptorSet.parseFrom(targetStream);
-            for (String depPath : descSet.getFile(0).getDependencyList()) {
-                if (System.getProperty("os.name")
-                        .toLowerCase(Locale.ENGLISH).startsWith("windows")) {
-                    depPath = depPath.replaceAll("/", "\\\\");
+            for (String dependentFilePath : descSet.getFile(0).getDependencyList()) {
+                if (isWindows()) {
+                    dependentFilePath = dependentFilePath.replaceAll("/", "\\\\");
                 }
-                String path = BalGenerationConstants.META_DEPENDENCY_LOCATION + depPath.substring(
-                        depPath.lastIndexOf(BalGenerationConstants.FILE_SEPARATOR)
-                        , depPath.length()).replace(PROTO_SUFFIX, EMPTY_STRING) + DESC_SUFFIX;
-                createMetaFolder(path);
+                // desc file path: desc_gen/dependencies + <filename>.desc
+                String relativeDescFilepath = BalGenerationConstants.META_DEPENDENCY_LOCATION + dependentFilePath
+                        .substring(dependentFilePath.lastIndexOf(BalGenerationConstants.FILE_SEPARATOR),
+                                dependentFilePath.length()).replace(PROTO_SUFFIX, DESC_SUFFIX);
+
+                File dependentDescFile = new File(tempDir, relativeDescFilepath);
+                boolean isDirectoryCreated = dependentDescFile.getParentFile().mkdirs();
+                if (!isDirectoryCreated) {
+                    LOG.debug("Parent directories didn't create for the file '" + relativeDescFilepath);
+                }
+                //Derive proto file path of the dependent library.
                 String protoPath;
-                if (!depPath.contains(GOOGLE_STANDARD_LIB)) {
-                    protoPath = new File(new File(resolveProtoFloderPath(parentProtoPath)).toURI().getPath()
-                            + depPath).toURI().getPath();
+                String protoFolderPath;
+                if (!dependentFilePath.contains(GOOGLE_STANDARD_LIB)) {
+                    protoPath = new File(resolveProtoFolderPath(rootProtoPath), dependentFilePath).getAbsolutePath();
+                    protoFolderPath = resolveProtoFolderPath(rootProtoPath);
                 } else {
-                    //Get file from resources folder
-                    File dependentDesc = new File(META_LOCATION, depPath);
-                    File parentFile = dependentDesc.getParentFile();
-                    if (!parentFile.exists() && !parentFile.mkdirs()) {
-                        throw new IllegalStateException("Couldn't create directory " + dependentDesc);
-                    }
-                    try (InputStream initialStream = new FileInputStream(new File(depPath));
-                         OutputStream outStream = new FileOutputStream(dependentDesc)) {
-                        byte[] buffer = new byte[initialStream.available()];
-                        int read = initialStream.read(buffer);
-                        if (read == -1) {
-                            throw new IllegalStateException("Couldn't read input stream of 'google/protobuf'" +
-                                    " resource: ");
-                        }
-                        outStream.write(buffer);
-                        outStream.close();
-                        protoPath = dependentDesc.getAbsolutePath();
-                    } catch (IOException e) {
-                        throw new BalGenToolException("Error reading resource file '" + depPath + "'", e);
-                    }
+                    protoPath = new File(tempDir, dependentFilePath).getAbsolutePath();
+                    protoFolderPath = tempDir.getAbsolutePath();
                 }
 
-                String command = new ProtocCommandBuilder(exePath, protoPath, resolveProtoFloderPath(protoPath)
-                        , new File(getDescriptorPath(depPath)).getAbsolutePath()).build();
+                String command = new ProtocCommandBuilder(exePath, protoPath, protoFolderPath, dependentDescFile
+                        .getAbsolutePath()).build();
                 generateDescriptor(command);
-                File childFile = new File(path);
+                File childFile = new File(tempDir, relativeDescFilepath);
                 try (InputStream childStream = new FileInputStream(childFile)) {
                     DescriptorProtos.FileDescriptorSet childDescSet = DescriptorProtos.FileDescriptorSet
                             .parseFrom(childStream);
                     if (childDescSet.getFile(0).getDependencyCount() != 0) {
-                        List<byte[]> newList = new ArrayList<>();
-                        generateDependentDescriptor(path, protoPath, newList,
-                                exePath, classLoader);
-                    } else {
-                        initialFile = new File(path);
-                        try (InputStream dependentStream = new FileInputStream(initialFile)) {
-                            DescriptorProtos.FileDescriptorSet set = DescriptorProtos.FileDescriptorSet
-                                    .parseFrom(dependentStream);
-                            byte[] dependentDesc = set.getFile(0).toByteArray();
-                            if (dependentDesc.length == 0) {
-                                throw new BalGenerationException("Error occurred at generating dependent proto " +
-                                        "descriptor for dependent proto '" + parentProtoPath + "'.");
-                            }
-                            list.add(dependentDesc);
-                        } catch (IOException e) {
-                            throw new BalGenToolException("Error reading dependent descriptor.", e);
-                        }
+                        Set<byte[]> childList = generateDependentDescriptor(exePath, rootProtoPath, childFile
+                                .getAbsolutePath());
+                        dependentDescSet.addAll(childList);
                     }
+                    byte[] dependentDesc = childDescSet.getFile(0).toByteArray();
+                    if (dependentDesc.length == 0) {
+                        throw new BalGenerationException("Error occurred at generating dependent proto " +
+                                "descriptor for dependent proto '" + relativeDescFilepath + "'.");
+                    }
+                    dependentDescSet.add(dependentDesc);
                 } catch (IOException e) {
                     throw new BalGenToolException("Error extracting dependent bal.", e);
                 }
@@ -124,6 +110,6 @@ public class DescriptorsGenerator {
         } catch (IOException e) {
             throw new BalGenToolException("Error parsing descriptor file " + initialFile, e);
         }
-        return list;
+        return dependentDescSet;
     }
 }

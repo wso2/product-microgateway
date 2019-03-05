@@ -25,22 +25,25 @@ import ballerina/io;
 import ballerina/reflect;
 import wso2/gateway;
 
-// Extension filter used to send custom error messages and to do customizations.
+
 # Represents the extension filter, which used to customize and extend the request and response handling
+#
+#
 public type ExtensionFilter object {
 
     # Request filter function
-    # intercepts the request flow
-    # +return- boolean value 
-    public function filterRequest (http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+    #
+    # + return - Whether the filter has passed or not
+    public function filterRequest (http:Caller caller, http:Request request, http:FilterContext context) returns
+                                                                                                         boolean {
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        var failed = context.attributes[gateway:FILTER_FAILED] ;
-        if(failed is boolean){
+        var failed =  context.attributes[gateway:FILTER_FAILED];
+        if (failed is boolean) {
             if (failed) {
-                int statusCode = <int>context.attributes[gateway:HTTP_STATUS_CODE];
+                int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
                 if(statusCode == gateway:UNAUTHORIZED) {
                     setAuthenticationErrorResponse(response, context );
                 } else if (statusCode ==  gateway:FORBIDDEN) {
@@ -54,18 +57,18 @@ public type ExtensionFilter object {
                 return true;
                 //return gateway:createFilterResult(false, statusCode, errorMessage);
             }
-        }else{
+        } else {
             //Nothing to handle
             return true;
         }
 
-        return true;
     }
 
 };
 
-#This method can be used to send custom error message in an authentication failure
-public function setAuthenticationErrorResponse(http:Response response, http:FilterContext context) {
+# This method can be used to send custom error message in an authentication failure
+#
+function setAuthenticationErrorResponse(http:Response response, http:FilterContext context) {
     //Un comment the following code and set the proper error messages
 
     // int statusCode = <int>context.attributes[gateway:HTTP_STATUS_CODE];
@@ -82,18 +85,20 @@ public function setAuthenticationErrorResponse(http:Response response, http:Filt
     // response.setJsonPayload(payload);
 }
 
-#This method can be used to send custom error message in an authorization failure
-public function setAuthorizationErrorResponse(http:Response response, http:FilterContext context) {
+# This method can be used to send custom error message in an authorization failure
+#
+function setAuthorizationErrorResponse(http:Response response, http:FilterContext context) {
 
 }
 
-#This method can be used to send custom error message when message throttled out
-public function setThrottleFailureResponse(http:Response response, http:FilterContext context) {
+# This method can be used to send custom error message when message throttled out
+#
+function setThrottleFailureResponse(http:Response response, http:FilterContext context) {
 
 }
 
-#This method can be used to send custom general error message
-public function setGenericErrorResponse(http:Response response, http:FilterContext context) {
+# This method can be used to send custom general error message
+#
+function setGenericErrorResponse(http:Response response, http:FilterContext context) {
 
 }
-

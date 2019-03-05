@@ -15,7 +15,7 @@
 // under the License.
 
 public function getDecodedJWTPayload(string encodedJWTPayload) returns (json|error) {
-    string jwtPayload = check urlDecode(encodedJWTPayload).base64Decode();
+    string jwtPayload = encoding:byteArrayToString(check encoding:decodeBase64(urlDecode(encodedJWTPayload)));
     json jwtPayloadJson = {};
 
     var result = internal:parseJson(jwtPayload);
@@ -38,7 +38,7 @@ public function getEncodedJWTPayload(string jwtToken) returns (string)|error {
     string[] jwtPayload = jwtToken.split("\\.");
     if (jwtPayload.length() != 3) {
         log:printDebug("Invalid JWT token :" + jwtToken);
-        error err = {message:"Invalid JWT token"};
+        error err = error("Invalid JWT token");
         return err;
     }
     return jwtPayload[1];

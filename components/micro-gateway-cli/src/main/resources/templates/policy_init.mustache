@@ -2,7 +2,7 @@ import ballerina/log;
 import ballerina/runtime;
 import wso2/gateway;
 
-future ftr = start initThrottlePolicies();
+future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
     while (true) {
@@ -12,11 +12,11 @@ function initThrottlePolicies() {
         }
     }
 {{#policyInitNames}}
-    future {{.}}Ftr = start {{.}}();
+    future<()> {{.}}Ftr = start {{.}}();
 {{/policyInitNames}}
     log:printDebug("Throttle policies initialized.");
 }
 
-function getDeployedPolicies() returns map {
+function getDeployedPolicies() returns map<string> {
     return { {{#policyNames}}"{{.}}":true{{#unless @last}},{{/unless}}{{/policyNames}} };
 }
