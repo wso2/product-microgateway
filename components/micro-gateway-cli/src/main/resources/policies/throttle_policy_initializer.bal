@@ -29,6 +29,6 @@ function initThrottlePolicies() {
     log:printDebug("Throttle policies initialized.");
 }
 
-function getDeployedPolicies() returns map<string> {
+function getDeployedPolicies() returns map<boolean> {
     return { "50PerMin":true,"20PerMin":true,"10PerMin":true,"Gold":true,"Silver":true,"Bronze":true,"Unauthenticated":true };
 }

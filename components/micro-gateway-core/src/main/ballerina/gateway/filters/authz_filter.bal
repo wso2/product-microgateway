@@ -44,7 +44,15 @@ public type OAuthzFilter object {
             //Setting UUID
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
-            boolean result = self.doFilterRequest(caller, request, context);
+            printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
+            string authScheme = runtime:getInvocationContext().authContext.scheme;
+            boolean result = true;
+            // scope validation is done in authn filter for oauth2, hence we only need to
+            //validate scopes if auth scheme is jwt.
+            if (authScheme == AUTH_SCHEME_JWT){
+                result = self.authzFilter.filterRequest(caller, request, context);
+            }
+            printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
         } else {
@@ -53,43 +61,30 @@ public type OAuthzFilter object {
         }
     }
 
-    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
-    {
-        printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
-        string authScheme = runtime:getInvocationContext().authContext.scheme;
-        boolean result = true;
-        // scope validation is done in authn filter for oauth2, hence we only need to
-        //validate scopes if auth scheme is jwt.
-        if (authScheme == AUTH_SCHEME_JWT){
-            result = self.authzFilter.filterRequest(caller, request, context);
-        }
-        printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result);
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        int startingTime = getCurrentTime();
+        boolean result = doAuthzFilterResponse(response, context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ_RESPONSE);
         return result;
     }
 
 };
 
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        int startingTime = getCurrentTime();
-        boolean result = doFilterResponse(response, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ_RESPONSE);
-        return result;
-    }
 
-    public function doFilterResponse(http:Response response, http:FilterContext context) returns boolean {
-        // In authorization filter we have specifically set the error payload since we are using ballerina in built
-        // authzFilter
-        if (response.statusCode == FORBIDDEN) {
-            if(runtime:getInvocationContext().attributes[ERROR_CODE] is ()) {
-                if(context.attributes[ERROR_CODE] is ()) {
-                    setAuthorizationFailureMessage(response, context);
-                }
+
+public function doAuthzFilterResponse(http:Response response, http:FilterContext context) returns boolean {
+    // In authorization filter we have specifically set the error payload since we are using ballerina in built
+    // authzFilter
+    if (response.statusCode == FORBIDDEN) {
+        if(runtime:getInvocationContext().attributes[ERROR_CODE] is ()) {
+            if(context.attributes[ERROR_CODE] is ()) {
+                setAuthorizationFailureMessage(response, context);
             }
-
         }
-        return true;
+
     }
+    return true;
+}
 
 
 public function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
