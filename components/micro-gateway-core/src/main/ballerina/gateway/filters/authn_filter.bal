@@ -163,7 +163,7 @@ public type AuthnFilter object {
                 //     sendErrorResponse(caller, request, untaint context);
                 //     return false;
                 // }
-                
+
             } else if (providerId == AUTH_SCHEME_OAUTH2) {
                 if (self.isOauth2Enabled) {
                     if (isCookie) {
@@ -219,7 +219,7 @@ public type AuthnFilter object {
                         // setting keytype to invocationContext
                         runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
                         .keyType;
-                        runtime:AuthenticationContext authContext = runtime:getInvocationContext().authenticationContext;
+                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
                         authContext.scheme = AUTH_SCHEME_OAUTH2;
                         authContext.authToken = extractedToken;
                     } else {
@@ -312,7 +312,7 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
             } else {
                 // no auth providers found
             }
-            
+
         } else {
             // no auth providers found
         }
@@ -350,10 +350,4 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         request.removeHeader(TEMP_AUTH_HEADER);
         printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
-}
-
-function getAuthProviders() returns http:AuthProvider[] {
-    // TODO: Fix the function body
-    http:AuthProvider[] authProviders = [];
-    return authProviders;
 }

@@ -16,39 +16,41 @@ import ballerina/log;
 
 
 //Get mutualSSL filter
-gateway: MutualSSLFilter  mtslFilter= new(ClientCerts);
+gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
-gateway:AuthnFilter authnFilter = new();
+gateway:AuthnFilter authnFilter = new;
 // Subscription validation filter
 // Authorization filter
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
-map deployedPolicies = getDeployedPolicies();
+map<string> deployedPolicies = getDeployedPolicies();
 // Throttling filter
 gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 // Validation filter
 gateway:ValidationFilter validationFilter = new;
 // Analytics filter
-gateway:AnalyticsRequestFilter analyticsFilter = new();
+gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
 ExtensionFilter extensionFilter;
+
+http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http2}},
+                                                                           {{>mutualSSL}}
+                                                                           filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                           extensionFilter]
+                                                                       };
 
 {{>docker}}
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
-endpoint gateway:APIGatewaySecureListener apiSecureListener {
-    port:9095{{>http2}},
-    {{>mutualSSL}}
-    filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
-    extensionFilter]
-};
+listener gateway:APIGatewaySecureListener apiSecureListener = new(secureServiceEndpointConfiguration);
+
+http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
+                                                                     filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                     extensionFilter]
+                                                                 };
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
-endpoint gateway:APIGatewayListener apiListener {
-    port:9090{{>http2}},
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
-    extensionFilter]
-};
+listener gateway:APIGatewayListener apiListener = new(serviceEndpointConfiguration);
 

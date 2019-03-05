@@ -19,10 +19,10 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/log;
 
-map<string> blockConditions;
-map<any> throttleDataMap;
-public stream<RequestStreamDTO> requestStream = ();
-public stream<GlobalThrottleStreamDTO> globalThrottleStream = ();
+map<string> blockConditions = {};
+map<any> throttleDataMap = {};
+public stream<RequestStreamDTO> requestStream = new;
+public stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 public boolean isStreamsInitialized = false;
 future<()> ftr = start initializeThrottleSubscription();
 
@@ -45,7 +45,7 @@ public function putBlockCondition(map<any> m) {
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if ( blockConditions.keys() != () &&  blockConditions.keys().length()== 0) {
+        if (blockConditions.keys().length()== 0) {
             blockConditionExist = false;
         }
     }
@@ -114,7 +114,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
 }
 
 public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO {
-    EventDTO eventDTO = new;
+    EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getThrottleMetaData(dto);
