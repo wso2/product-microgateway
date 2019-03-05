@@ -1,4 +1,4 @@
-endpoint http:LoadBalanceClient {{qualifiedServiceName}}_{{endpointUrlType}} {
+http:LoadBalanceClient {{qualifiedServiceName}}_{{endpointUrlType}} {
     targets: [
     {{#endpoints}}    {url: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
     {{/unless}}{{/endpoints}}

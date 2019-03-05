@@ -2,7 +2,7 @@ import ballerina/log;
 import ballerina/runtime;
 import wso2/gateway;
 
-future ftr = start initThrottlePolicies();
+future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
     while (true) {
@@ -12,23 +12,23 @@ function initThrottlePolicies() {
         }
     }
 
-    future initApplication50PerMinPolicyFtr = start initApplication50PerMinPolicy();
+    future<()> initApplication50PerMinPolicyFtr = start initApplication50PerMinPolicy();
 
-    future initApplication20PerMinPolicyFtr = start initApplication20PerMinPolicy();
+    future<()> initApplication20PerMinPolicyFtr = start initApplication20PerMinPolicy();
 
-    future initApplication10PerMinPolicyFtr = start initApplication10PerMinPolicy();
+    future<()> initApplication10PerMinPolicyFtr = start initApplication10PerMinPolicy();
 
-    future initSubscriptionGoldPolicyFtr = start initSubscriptionGoldPolicy();
+    future<()> initSubscriptionGoldPolicyFtr = start initSubscriptionGoldPolicy();
 
-    future initSubscriptionSilverPolicyFtr = start initSubscriptionSilverPolicy();
+    future<()> initSubscriptionSilverPolicyFtr = start initSubscriptionSilverPolicy();
 
-    future initSubscriptionBronzePolicyFtr = start initSubscriptionBronzePolicy();
+    future<()> initSubscriptionBronzePolicyFtr = start initSubscriptionBronzePolicy();
 
-    future initSubscriptionUnauthenticatedPolicyFtr = start initSubscriptionUnauthenticatedPolicy();
+    future<()> initSubscriptionUnauthenticatedPolicyFtr = start initSubscriptionUnauthenticatedPolicy();
 
     log:printDebug("Throttle policies initialized.");
 }
 
-function getDeployedPolicies() returns map {
+function getDeployedPolicies() returns map<string> {
     return { "50PerMin":true,"20PerMin":true,"10PerMin":true,"Gold":true,"Silver":true,"Bronze":true,"Unauthenticated":true };
 }

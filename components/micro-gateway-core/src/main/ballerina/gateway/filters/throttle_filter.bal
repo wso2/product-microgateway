@@ -23,6 +23,10 @@ import ballerina/time;
 public type ThrottleFilter object {
     public map<string> deployedPolicies = {};
 
+    public function __init(map<string> deployedPolicies) {
+        self.deployedPolicies = deployedPolicies;
+    }
+
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);

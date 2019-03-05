@@ -25,48 +25,49 @@ import ballerina/io;
 import ballerina/reflect;
 import wso2/gateway;
 
-// Extension filter used to send custom error messages and to do customizations.
-@Description { value: "Represents the extension filter, which used to customize and extend the request and response
-                handling" }
-@Field {value:"filterRequest: intercepts the request flow"}
+
+# Represents the extension filter, which used to customize and extend the request and response handling
+#
+#
 public type ExtensionFilter object {
 
-    @Description {value:"filterRequest: Request filter function"}
-    public function filterRequest (http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean {
+    # Request filter function
+    #
+    # + return - Whether the filter has passed or not
+    public function filterRequest (http:Caller caller, http:Request request, http:FilterContext context) returns
+                                                                                                         boolean {
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        match <boolean> context.attributes[gateway:FILTER_FAILED] {
-            boolean failed => {
-                if (failed) {
-                    int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
-                    if(statusCode == gateway:UNAUTHORIZED) {
-                        setAuthenticationErrorResponse(response, context );
-                    } else if (statusCode ==  gateway:FORBIDDEN) {
-                        setAuthorizationErrorResponse(response, context );
-                    } else if (statusCode ==  gateway:THROTTLED_OUT){
-                        setThrottleFailureResponse(response, context );
-                    } else {
-                        setGenericErrorResponse(response, context );
-                    }
-
-                    return true;
-                    //return gateway:createFilterResult(false, statusCode, errorMessage);
+        var failed =  context.attributes[gateway:FILTER_FAILED];
+        if (failed is boolean) {
+            if (failed) {
+                int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
+                if(statusCode == gateway:UNAUTHORIZED) {
+                    setAuthenticationErrorResponse(response, context );
+                } else if (statusCode ==  gateway:FORBIDDEN) {
+                    setAuthorizationErrorResponse(response, context );
+                } else if (statusCode ==  gateway:THROTTLED_OUT){
+                    setThrottleFailureResponse(response, context );
+                } else {
+                    setGenericErrorResponse(response, context );
                 }
-            } error err => {
+
+                return true;
+                //return gateway:createFilterResult(false, statusCode, errorMessage);
+            }
+        } else {
             //Nothing to handle
             return true;
-            }
         }
 
-        return true;
     }
 
 };
 
-@Description {value:"This method can be used to send custom error message in an authentication failure"}
+# This method can be used to send custom error message in an authentication failure
+#
 function setAuthenticationErrorResponse(http:Response response, http:FilterContext context) {
     //Un comment the following code and set the proper error messages
 
@@ -84,18 +85,20 @@ function setAuthenticationErrorResponse(http:Response response, http:FilterConte
     //response.setJsonPayload(payload);
 }
 
-@Description {value:"This method can be used to send custom error message in an authorization failure"}
+# This method can be used to send custom error message in an authorization failure
+#
 function setAuthorizationErrorResponse(http:Response response, http:FilterContext context) {
 
 }
 
-@Description {value:"This method can be used to send custom error message when message throttled out"}
+# This method can be used to send custom error message when message throttled out
+#
 function setThrottleFailureResponse(http:Response response, http:FilterContext context) {
 
 }
 
-@Description {value:"This method can be used to send custom general error message "}
+# This method can be used to send custom general error message
+#
 function setGenericErrorResponse(http:Response response, http:FilterContext context) {
 
 }
-
