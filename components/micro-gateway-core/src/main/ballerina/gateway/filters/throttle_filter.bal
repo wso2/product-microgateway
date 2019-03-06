@@ -21,165 +21,168 @@ import ballerina/config;
 import ballerina/time;
 
 public type ThrottleFilter object {
-    public map<string> deployedPolicies = {};
+    public map<boolean> deployedPolicies = {};
 
-    public function __init(map<string> deployedPolicies) {
+    public function __init(map<boolean> deployedPolicies) {
         self.deployedPolicies = deployedPolicies;
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        boolean result = self.doFilterRequest(caller, request, context);
+        boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
         return result;
     }
 
-    // TODO: need to refactor this function.
-    public function doFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
-        //Throttle Tiers
-        string applicationLevelTier;
-        string subscriptionLevelTier;
-        //Throttled decisions
-        boolean isThrottled = false;
-        boolean stopOnQuota;
-        string apiContext = getContext(context);
-        string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
-        apiVersion;
-        boolean isSecured = <boolean>context.attributes[IS_SECURED];
-            context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
-            context.attributes[IS_THROTTLE_OUT] = false;
 
-        AuthenticationContext keyvalidationResult = {};
-        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-            if (isRequestBlocked(caller, request, context)) {
-                setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
-                BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
-                sendErrorResponse(caller, request, context);
-                return false;
-            }
-            printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
-            keyvalidationResult = <AuthenticationContext>context.attributes[
-                AUTHENTICATION_CONTEXT];
-            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.
-            tier
-            + "' exist.");
-            if (keyvalidationResult.tier != UNLIMITED_TIER && !self.deployedPolicies.hasKey(keyvalidationResult.tier)) {
-                printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyvalidationResult.tier
-                + "' is not exist.");
-                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                sendErrorResponse(caller, request, context);
-                return false;
-            }
-            printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
-            (isThrottled, stopOnQuota) =         isSubscriptionLevelThrottled(context, keyvalidationResult);
-            printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
-            + isThrottled + ", stopOnQuota:" + stopOnQuota);
-            if (isThrottled) {
-                if (stopOnQuota) {
-                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out responses.");
-                        context.attributes[IS_THROTTLE_OUT] = true;
-                        context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
-                    setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
-                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                    sendErrorResponse(caller, request, context);
-                    return false;
-                } else {
-                        // set properties in order to publish into analytics for billing
-                        context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
-                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota is set to false.");
-                }
-            }
-            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
-            + keyvalidationResult.applicationTier + "' exist.");
-            if (keyvalidationResult.applicationTier != UNLIMITED_TIER &&
-                    !self.deployedPolicies.hasKey(keyvalidationResult.applicationTier)) {
-                printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
-                + keyvalidationResult.applicationTier + "' is not exist.");
-                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                sendErrorResponse(caller, request, context);
-                return false;
-            }
-            printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
-            if (isApplicationLevelThrottled(keyvalidationResult)) {
-                printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
-                    context.attributes[IS_THROTTLE_OUT] = true;
-                    context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
-                setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
-                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                sendErrorResponse(caller, request, context);
-                return false;
-            } else {
-                printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
-            }
-        } else if (!isSecured) {
-            printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
-                // setting keytype to invocationContext
-                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
-
-            printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
-            + "' exist.");
-            if (!self.deployedPolicies.hasKey(UNAUTHENTICATED_TIER)) {
-                printDebug(KEY_THROTTLE_FILTER, "Unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
-                + "' is not exist.");
-                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-                sendErrorResponse(caller, request, context);
-                return false;
-            }
-            (isThrottled, stopOnQuota) =         isUnauthenticateLevelThrottled(context);
-            printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
-            + isThrottled + ", stopOnQuota:" + stopOnQuota);
-            if (isThrottled) {
-                if (stopOnQuota) {
-                    printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
-                        context.attributes[IS_THROTTLE_OUT] = true;
-                        context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
-                    setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
-                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                    sendErrorResponse(caller, request, context);
-                    return false;
-                } else {
-                        // set properties in order to publish into analytics for billing
-                        context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
-                    printDebug(KEY_THROTTLE_FILTER, "Proceeding(2nd) since stopOnQuota is set to false.");
-                }
-            }
-            string clientIp = <string>context.attributes[REMOTE_ADDRESS];
-            keyvalidationResult.authenticated = true;
-            keyvalidationResult.tier = UNAUTHENTICATED_TIER;
-            keyvalidationResult.stopOnQuotaReach = true;
-            keyvalidationResult.apiKey = clientIp;
-            keyvalidationResult.username = END_USER_ANONYMOUS;
-            keyvalidationResult.applicationId = clientIp;
-            keyvalidationResult.keyType = PRODUCTION_KEY_TYPE;
-                // setting keytype to invocationContext
-                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
-        } else {
-            printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
-            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
-            INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-            sendErrorResponse(caller, request, context);
-            return false;
-        }
-
-        //Publish throttle event to another worker flow to publish to internal policies or traffic manager
-        RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
-        future<()> publishedEvent = start asyncPublishEvent(throttleEvent);
-        printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
-        return true;
-    }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
 };
+
+// TODO: need to refactor this function.
+function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context,map<boolean>
+    deployedPolicies) returns boolean {
+    printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
+    //Throttle Tiers
+    string applicationLevelTier;
+    string subscriptionLevelTier;
+    //Throttled decisions
+    boolean isThrottled = false;
+    boolean stopOnQuota;
+    string apiContext = getContext(context);
+    string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
+    apiVersion;
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
+    context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
+    context.attributes[IS_THROTTLE_OUT] = false;
+
+    AuthenticationContext keyvalidationResult = {};
+    if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        if (isRequestBlocked(caller, request, context)) {
+            setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
+                BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+        printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
+        keyvalidationResult = <AuthenticationContext>context.attributes[
+        AUTHENTICATION_CONTEXT];
+        printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.
+                tier
+                + "' exist.");
+        if (keyvalidationResult.tier != UNLIMITED_TIER && !deployedPolicies.hasKey(keyvalidationResult.tier)) {
+            printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyvalidationResult.tier
+                    + "' is not exist.");
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
+                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+        printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
+        (isThrottled, stopOnQuota) =         isSubscriptionLevelThrottled(context, keyvalidationResult);
+        printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
+                + isThrottled + ", stopOnQuota:" + stopOnQuota);
+        if (isThrottled) {
+            if (stopOnQuota) {
+                printDebug(KEY_THROTTLE_FILTER, "Sending throttled out responses.");
+                context.attributes[IS_THROTTLE_OUT] = true;
+                context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
+                setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                sendErrorResponse(caller, request, context);
+                return false;
+            } else {
+                // set properties in order to publish into analytics for billing
+                context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
+                printDebug(KEY_THROTTLE_FILTER, "Proceeding(1st) since stopOnQuota is set to false.");
+            }
+        }
+        printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
+                + keyvalidationResult.applicationTier + "' exist.");
+        if (keyvalidationResult.applicationTier != UNLIMITED_TIER &&
+            !deployedPolicies.hasKey(keyvalidationResult.applicationTier)) {
+            printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
+                    + keyvalidationResult.applicationTier + "' is not exist.");
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
+                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+        printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
+        if (isApplicationLevelThrottled(keyvalidationResult)) {
+            printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
+            context.attributes[IS_THROTTLE_OUT] = true;
+            context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
+            setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
+                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            sendErrorResponse(caller, request, context);
+            return false;
+        } else {
+            printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
+        }
+    } else if (!isSecured) {
+        printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
+        // setting keytype to invocationContext
+        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
+
+        printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
+                + "' exist.");
+        if (!deployedPolicies.hasKey(UNAUTHENTICATED_TIER)) {
+            printDebug(KEY_THROTTLE_FILTER, "Unauthenticate throttle policy '" + UNAUTHENTICATED_TIER
+                    + "' is not exist.");
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
+                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+        (isThrottled, stopOnQuota) =         isUnauthenticateLevelThrottled(context);
+        printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
+                + isThrottled + ", stopOnQuota:" + stopOnQuota);
+        if (isThrottled) {
+            if (stopOnQuota) {
+                printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
+                context.attributes[IS_THROTTLE_OUT] = true;
+                context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
+                setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                sendErrorResponse(caller, request, context);
+                return false;
+            } else {
+                // set properties in order to publish into analytics for billing
+                context.attributes[ALLOWED_ON_QUOTA_REACHED] = true;
+                printDebug(KEY_THROTTLE_FILTER, "Proceeding(2nd) since stopOnQuota is set to false.");
+            }
+        }
+        string clientIp = <string>context.attributes[REMOTE_ADDRESS];
+        keyvalidationResult.authenticated = true;
+        keyvalidationResult.tier = UNAUTHENTICATED_TIER;
+        keyvalidationResult.stopOnQuotaReach = true;
+        keyvalidationResult.apiKey = clientIp;
+        keyvalidationResult.username = END_USER_ANONYMOUS;
+        keyvalidationResult.applicationId = clientIp;
+        keyvalidationResult.keyType = PRODUCTION_KEY_TYPE;
+        // setting keytype to invocationContext
+        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
+    } else {
+        printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
+        setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
+            INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+        sendErrorResponse(caller, request, context);
+        return false;
+    }
+
+    //Publish throttle event to another worker flow to publish to internal policies or traffic manager
+    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyvalidationResult);
+    future<()> publishedEvent = start asyncPublishEvent(throttleEvent);
+    printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
+    return true;
+}
 
 function asyncPublishEvent(RequestStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
