@@ -51,7 +51,7 @@ public type APIGatewaySecureListener object {
 
 public function APIGatewaySecureListener.init(http:ServiceEndpointConfiguration config) {
     initiateGatewaySecureConfigurations(config);
-    self.apiGatewayListener.__init(config);
+
 
 }
 
