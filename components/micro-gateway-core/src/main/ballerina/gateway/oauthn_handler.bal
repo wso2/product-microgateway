@@ -32,8 +32,7 @@ public type OAuthnAuthenticator object {
 
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req)
-    returns (APIKeyValidationDto| error);
+    public function handle (http:Request req,http:FilterContext context) returns (APIKeyValidationDto| error);
 
 };
 
@@ -57,10 +56,10 @@ public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolea
     return false;
 }
 
-public function OAuthnAuthenticator.handle (http:Request req)
+public function OAuthnAuthenticator.handle (http:Request req, http:FilterContext context)
                                    returns (APIKeyValidationDto| error) {
 
-    APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
+    APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
     APIKeyValidationDto | error apiKeyValidationDto = trap self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
     if (apiKeyValidationDto is error) {
         log:printError("Error occurred while getting key validation information for the access token", err = apiKeyValidationDto);

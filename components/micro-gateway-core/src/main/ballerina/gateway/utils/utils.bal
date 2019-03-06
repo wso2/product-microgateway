@@ -62,7 +62,7 @@ public function getAuthAnnotation(string annotationPackage, string annotationNam
     }
     reflect:annotationData|() authAnn = ();
     foreach var ann in annData {
-        if (ann.name == annotationName && ann.pkgName == annotationPackage) {
+        if (ann.name == annotationName && ann.moduleName == annotationPackage) {
             authAnn = ann;
             break;
         }
@@ -94,7 +94,7 @@ public function getResourceConfigAnnotation(reflect:annotationData[] annData)
     }
     reflect:annotationData|() authAnn = ();
     foreach var ann in annData {
-        if (ann.name == RESOURCE_ANN_NAME && ann.pkgName == ANN_PACKAGE) {
+        if (ann.name == RESOURCE_ANN_NAME && ann.moduleName == ANN_PACKAGE) {
             authAnn = ann;
             break;
         }
@@ -119,7 +119,7 @@ public function getResourceLevelTier(reflect:annotationData[] annData)
     }
     reflect:annotationData|() tierAnn = ();
     foreach var ann in annData {
-        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.pkgName == RESOURCE_TIER_ANN_PACKAGE) {
+        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.moduleName == RESOURCE_TIER_ANN_PACKAGE) {
             tierAnn = ann;
             break;
         }
@@ -144,7 +144,7 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
     }
     reflect:annotationData|() authAnn = ();
     foreach var ann in annData {
-        if (ann.name == SERVICE_ANN_NAME && ann.pkgName == ANN_PACKAGE) {
+        if (ann.name == SERVICE_ANN_NAME && ann.moduleName == ANN_PACKAGE) {
             authAnn = ann;
             break;
         }
@@ -161,15 +161,14 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 # Retrieve the key validation request dto from filter context
 #
 # + return - api key validation request dto
-public function getKeyValidationRequestObject() returns APIRequestMetaDataDto {
+public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    service serviceType =  <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations(serviceType));
-    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(serviceType, <string>runtime:
-            getInvocationContext().attributes[RESOURCE_NAME_ATTR]));
+    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
+        (context.serviceRef));
+    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(reflect:getResourceAnnotations
+        (context.serviceRef, context.resourceName));
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
+    APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef));
     string apiVersion = <string>apiConfig.apiVersion;
     apiKeyValidationRequest.apiVersion = apiVersion;
     if (!apiContext.contains(apiVersion)){
@@ -199,7 +198,7 @@ public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annD
     }
     reflect:annotationData|() apiAnn = ();
     foreach var ann in annData {
-        if (ann.name == API_ANN_NAME && ann.pkgName == GATEWAY_ANN_PACKAGE) {
+        if (ann.name == API_ANN_NAME && ann.moduleName == GATEWAY_ANN_PACKAGE) {
             apiAnn = ann;
             break;
         }
@@ -420,11 +419,15 @@ public function mask(string text) returns string {
 #
 # + return - The UUID of current context
 public function getMessageId() returns string {
-    string messageId = <string>runtime:getInvocationContext().attributes[MESSAGE_ID];
-    if (messageId == "") {
-        return "-";
+    any messageId = runtime:getInvocationContext().attributes[MESSAGE_ID];
+    if(messageId is string) {
+        if (messageId == "") {
+            return "-";
+        } else {
+            return messageId;
+        }
     } else {
-        return messageId;
+        return "-";
     }
 }
 

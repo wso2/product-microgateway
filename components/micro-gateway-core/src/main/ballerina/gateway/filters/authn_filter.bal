@@ -28,6 +28,14 @@ import ballerina/reflect;
 
 public type AuthnFilter object {
 
+    public OAuthnAuthenticator oauthAuthenticator;
+    public http:AuthnHandlerChain authnHandlerChain;
+
+    public function __init(OAuthnAuthenticator oauthAuthenticator, http:AuthnHandlerChain authnHandlerChain) {
+        self.oauthAuthenticator = oauthAuthenticator;
+        self.authnHandlerChain = authnHandlerChain;
+    }
+
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
 
@@ -37,7 +45,7 @@ public type AuthnFilter object {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
-            boolean result = doAuthnFilterRequest(caller, request, context);
+            boolean result = doAuthnFilterRequest(caller, request, context, self.oauthAuthenticator, self.authnHandlerChain);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
         } else {
@@ -52,7 +60,8 @@ public type AuthnFilter object {
     }
 };
 
-function doAuthnFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
+function doAuthnFilterRequest(http:Caller caller, http:Request request, http:FilterContext context, OAuthnAuthenticator
+    oauthnHandler,       http:AuthnHandlerChain authnHandlerChain)
              returns boolean {
     boolean isOauth2Enabled = false;
     runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
@@ -64,28 +73,8 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
     // get auth config for this resource
     boolean authenticated;
-    APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
     var (isSecured, authProvidersIds) = getResourceAuthConfig(context);
     context.attributes[IS_SECURED] = isSecured;
-    //Create auth handler chain with providerIds in service file
-    http:AuthHandlerRegistry registry = new;
-    http:AuthProvider[] authProviders = getAuthProviders();
-    foreach var authProvidersId in
-    authProvidersIds{
-        if (authProvidersId == AUTH_SCHEME_OAUTH2){
-            //check whether Oauth2 is enabled in service files.
-            isOauth2Enabled = true;
-        }
-        foreach var authProvider in
-        authProviders  {
-            if (authProvider.id == authProvidersId){
-                // TODO: Create the createAuthHandler function
-                registry.add(authProvider.id, createAuthHandler(authProvider));
-            }
-        }
-    }
-    http:AuthnHandlerChain authnHandlerChain = new(registry);
-    //APIKeyValidationDto apiKeyValidationInfoDto;
     AuthenticationContext authenticationContext = {};
     boolean isAuthorized = false;
     printDebug(KEY_AUTHN_FILTER, "Resource secured: " + isSecured);
@@ -168,100 +157,93 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
             // }
 
         } else if (providerId == AUTH_SCHEME_OAUTH2) {
-            if (isOauth2Enabled) {
-                if (isCookie) {
-                    extractedToken = result;
-                } else {
-                    extractedToken = extractAccessToken(request, authHeaderName);
-                }
-                if (extractedToken is string){
-                    runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = extractedToken;
-                    printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
-                            authHeaderName);
-                    OAuthnAuthenticator oauthnHandler = new;//Handles the oauth2 authentication;
-                    var apiKeyValidationDto = oauthnHandler.handle(request);
-                    if (apiKeyValidationDto is APIKeyValidationDto){
-                        isAuthorized = boolean.convert(apiKeyValidationDto.authorized);
-                        printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
-                                isAuthorized);
-                        if (isAuthorized) {
-                            authenticationContext.authenticated = true;
-                            authenticationContext.tier = apiKeyValidationDto.tier;
-                            authenticationContext.apiKey = extractedToken;
-                            if (apiKeyValidationDto.endUserName != "") {
-                                authenticationContext.username = apiKeyValidationDto.endUserName;
-                            } else {
-                                authenticationContext.username = END_USER_ANONYMOUS;
-                            }
-                            authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
-                            authenticationContext.keyType = apiKeyValidationDto.keyType;
-                            authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
-                            authenticationContext.applicationId = apiKeyValidationDto.applicationId;
-                            authenticationContext.applicationName = apiKeyValidationDto.applicationName;
-                            authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
-                            authenticationContext.subscriber = apiKeyValidationDto.subscriber;
-                            authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
-                            authenticationContext.apiTier = apiKeyValidationDto.apiTier;
-                            authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
-                            subscriberTenantDomain;
-                            int|error spikeArrestLimit = int.convert(apiKeyValidationDto.spikeArrestLimit);
-                            authenticationContext.spikeArrestLimit =  (spikeArrestLimit is int)?spikeArrestLimit:0;
-                            authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                            authenticationContext.stopOnQuotaReach = boolean.convert(apiKeyValidationDto.
-                                stopOnQuotaReach);
-                            authenticationContext.isContentAwareTierPresent = boolean.convert(apiKeyValidationDto
-                                .contentAware);
-                            printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
-                                    callerToken);
-                            if (authenticationContext.callerToken != "" && authenticationContext.callerToken != "") {
-                                string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
-                                request.setHeader(jwtheaderName, authenticationContext.callerToken);
-                            }
-                            checkAndRemoveAuthHeaders(request, authHeaderName);
-                            context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-
-                            // setting keytype to invocationContext
-                            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
-                            .keyType;
-                            runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
-                            authContext.scheme = AUTH_SCHEME_OAUTH2;
-                            authContext.authToken = extractedToken;
-                        } else {
-                            int|error status = int.convert(apiKeyValidationDto.validationStatus);
-                            int errorStatus = (status is int)?status:INTERNAL_SERVER_ERROR;
-                            printDebug(KEY_AUTHN_FILTER,
-                                    "Authentication handler returned with validation status : " + errorStatus);
-                            setErrorMessageToFilterContext(context, errorStatus);
-                            sendErrorResponse(caller, request, untaint context);
-                            return false;
-                        }
-                    } else {
-                        log:printError(<string>apiKeyValidationDto.detail().message, err = apiKeyValidationDto);
-                        setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                        sendErrorResponse(caller, request, untaint context);
-                        return false;
-                    }
-
-                }
-                else {
-                    if (isCookie) {
-                        log:printError(<string>extractedToken.detail().message, err = extractedToken);
-                        setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
-                        sendErrorResponse(caller, request, untaint context);
-                        return false;
-                    } else {
-                        log:printError(<string>extractedToken.detail().message, err = extractedToken);
-                        setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                        sendErrorResponse(caller, request, untaint context);
-                        return false;
-                    }
-                }
-
+            if (isCookie) {
+                extractedToken = result;
             } else {
-                setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                sendErrorResponse(caller, request, untaint context);
-                return false;
+                extractedToken = extractAccessToken(request, authHeaderName);
             }
+            if (extractedToken is string){
+                runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = extractedToken;
+                printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
+                        authHeaderName);
+                var apiKeyValidationDto = oauthnHandler.handle(request, context);
+                if (apiKeyValidationDto is APIKeyValidationDto){
+                    isAuthorized = boolean.convert(apiKeyValidationDto.authorized);
+                    printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
+                            isAuthorized);
+                    if (isAuthorized) {
+                        authenticationContext.authenticated = true;
+                        authenticationContext.tier = apiKeyValidationDto.tier;
+                        authenticationContext.apiKey = extractedToken;
+                        if (apiKeyValidationDto.endUserName != "") {
+                            authenticationContext.username = apiKeyValidationDto.endUserName;
+                        } else {
+                            authenticationContext.username = END_USER_ANONYMOUS;
+                        }
+                        authenticationContext.apiPublisher = apiKeyValidationDto.apiPublisher;
+                        authenticationContext.keyType = apiKeyValidationDto.keyType;
+                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
+                        authenticationContext.applicationId = apiKeyValidationDto.applicationId;
+                        authenticationContext.applicationName = apiKeyValidationDto.applicationName;
+                        authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
+                        authenticationContext.subscriber = apiKeyValidationDto.subscriber;
+                        authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
+                        authenticationContext.apiTier = apiKeyValidationDto.apiTier;
+                        authenticationContext.subscriberTenantDomain = apiKeyValidationDto.
+                        subscriberTenantDomain;
+                        int|error spikeArrestLimit = int.convert(apiKeyValidationDto.spikeArrestLimit);
+                        authenticationContext.spikeArrestLimit =  (spikeArrestLimit is int)?spikeArrestLimit:0;
+                        authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
+                        authenticationContext.stopOnQuotaReach = boolean.convert(apiKeyValidationDto.
+                            stopOnQuotaReach);
+                        authenticationContext.isContentAwareTierPresent = boolean.convert(apiKeyValidationDto
+                            .contentAware);
+                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + authenticationContext.
+                                callerToken);
+                        if (authenticationContext.callerToken != "" && authenticationContext.callerToken != "") {
+                            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
+                            request.setHeader(jwtheaderName, authenticationContext.callerToken);
+                        }
+                        checkAndRemoveAuthHeaders(request, authHeaderName);
+                        context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+
+                        // setting keytype to invocationContext
+                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
+                        .keyType;
+                        runtime:AuthContext authContext = runtime:getInvocationContext().authContext;
+                        authContext.scheme = AUTH_SCHEME_OAUTH2;
+                        authContext.authToken = extractedToken;
+                    } else {
+                        int|error status = int.convert(apiKeyValidationDto.validationStatus);
+                        int errorStatus = (status is int)?status:INTERNAL_SERVER_ERROR;
+                        printDebug(KEY_AUTHN_FILTER,
+                                "Authentication handler returned with validation status : " + errorStatus);
+                        setErrorMessageToFilterContext(context, errorStatus);
+                        sendErrorResponse(caller, request, untaint context);
+                        return false;
+                    }
+                } else {
+                    log:printError(<string>apiKeyValidationDto.detail().message, err = apiKeyValidationDto);
+                    setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+                    sendErrorResponse(caller, request, untaint context);
+                    return false;
+                }
+
+            }
+            else {
+                if (isCookie) {
+                    log:printError(<string>extractedToken.detail().message, err = extractedToken);
+                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
+                    sendErrorResponse(caller, request, untaint context);
+                    return false;
+                } else {
+                    log:printError(<string>extractedToken.detail().message, err = extractedToken);
+                    setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                    sendErrorResponse(caller, request, untaint context);
+                    return false;
+                }
+            }
+
         } else if (providerId == AUTHN_SCHEME_BASIC) {
             //Basic auth valiadation
             BasicAuthUtils basicAuthentication = new();
