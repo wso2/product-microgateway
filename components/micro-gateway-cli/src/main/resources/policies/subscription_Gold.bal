@@ -3,29 +3,30 @@ import ballerina/runtime;
 import ballerina/http;
 import ballerina/log;
 import wso2/gateway;
+import wso2/throttler;
 
 function initSubscriptionGoldPolicy() {
     stream<gateway:GlobalThrottleStreamDTO> resultStream;
     stream<gateway:EligibilityStreamDTO> eligibilityStream;
     forever {
         from gateway:requestStream
-        select messageID, (subscriptionTier == "Gold") as isEligible, subscriptionKey as throttleKey
+        select gateway:requestStream.messageID, (gateway:requestStream.subscriptionTier == "Gold") as isEligible, gateway:requestStream.subscriptionKey as throttleKey
         => (gateway:EligibilityStreamDTO[] counts) {
             eligibilityStream.publish(counts);
         }
 
         from eligibilityStream
-        throttler:timeBatch(60000, 0)
-        where isEligible == true
-        select throttleKey, count(messageID) >= 5000 as isThrottled, true as stopOnQuota, expiryTimeStamp
-        group by throttleKey
+        throttler:timeBatch([60000, 0])
+        where eligibilityStream.isEligible == true
+        select eligibilityStream.throttleKey, eligibilityStream.messageID.length() >= 5000 as isThrottled, true as stopOnQuota, 0 as expiryTimeStamp
+        group by eligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             resultStream.publish(counts);
         }
 
         from resultStream
-        throttler:emitOnStateChange(throttleKey, isThrottled)
-        select throttleKey, isThrottled, stopOnQuota, expiryTimeStamp
+        throttler:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
+        select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             gateway:globalThrottleStream.publish(counts);
         }
