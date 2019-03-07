@@ -161,18 +161,9 @@ public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiR
         boolean auth = boolean.convert(authorizeValue);
         printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
         if (auth) {
-            var dto = APIKeyValidationDto.convert(keyValidationInfoJson);
-            if(dto is APIKeyValidationDto){
-                apiKeyValidationDto = dto;
-                // specifically setting the key type since type is a keyword in ballerina.
-                apiKeyValidationDto.keyType = <string>keyValidationInfoJson["type"];
-                printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
-            } else {
-                string errorMessage = "Error while converting key validation response json to type APIKeyValidationDto";
-                log:printError(errorMessage);
-                panic error(errorMessage);
-            }
-
+            //TODO: check whether to convert xml directly to the DTO. No need for xml to json conversion;
+            apiKeyValidationDto = convertJsonToKeyValidationObject(keyValidationInfoJson);
+            printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
             authorized = auth;
             if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                 string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
@@ -256,4 +247,37 @@ public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequ
         }
 
         return payloadJson;
+}
+
+function convertJsonToKeyValidationObject(json keyValidationInfoJson) returns APIKeyValidationDto {
+     APIKeyValidationDto apiKeyValidationDto = {};
+     apiKeyValidationDto.apiName=getStringValueOnly(keyValidationInfoJson.apiName);
+     apiKeyValidationDto.apiPublisher=getStringValueOnly(keyValidationInfoJson.apiPublisher);
+     apiKeyValidationDto.apiTier=getStringValueOnly(keyValidationInfoJson.apiTier);
+     apiKeyValidationDto.applicationId=getStringValueOnly(keyValidationInfoJson.applicationId);
+     apiKeyValidationDto.applicationName=getStringValueOnly(keyValidationInfoJson.applicationName);
+     apiKeyValidationDto.applicationTier=getStringValueOnly(keyValidationInfoJson.applicationTier);
+     apiKeyValidationDto.authorized=getStringValueOnly(keyValidationInfoJson.authorized);
+     apiKeyValidationDto.authorizedDomains=getStringValueOnly(keyValidationInfoJson.authorizedDomains);
+     apiKeyValidationDto.consumerKey=getStringValueOnly(keyValidationInfoJson.consumerKey);
+     apiKeyValidationDto.contentAware=getStringValueOnly(keyValidationInfoJson.contentAware);
+     apiKeyValidationDto.endUserName=getStringValueOnly(keyValidationInfoJson.endUserName);
+     apiKeyValidationDto.endUserToken=getStringValueOnly(keyValidationInfoJson.endUserToken);
+     apiKeyValidationDto.issuedTime=getStringValueOnly(keyValidationInfoJson.issuedTime);
+     apiKeyValidationDto.spikeArrestLimit=getStringValueOnly(keyValidationInfoJson.spikeArrestLimit);
+     apiKeyValidationDto.spikeArrestUnit=getStringValueOnly(keyValidationInfoJson.spikeArrestUnit);
+     apiKeyValidationDto.stopOnQuotaReach=getStringValueOnly(keyValidationInfoJson.stopOnQuotaReach);
+     apiKeyValidationDto.subscriber=getStringValueOnly(keyValidationInfoJson.subscriber);
+     apiKeyValidationDto.subscriberTenantDomain=getStringValueOnly(keyValidationInfoJson.subscriberTenantDomain);
+     apiKeyValidationDto.throttlingDataList=getStringValueOnly(keyValidationInfoJson.throttlingDataList);
+     apiKeyValidationDto.tier=getStringValueOnly(keyValidationInfoJson.tier);
+     apiKeyValidationDto.keyType=getStringValueOnly(keyValidationInfoJson["type"]);
+     apiKeyValidationDto.userType=getStringValueOnly(keyValidationInfoJson.userType);
+     apiKeyValidationDto.validationStatus=getStringValueOnly(keyValidationInfoJson.validationStatus);
+     apiKeyValidationDto.validityPeriod=getStringValueOnly(keyValidationInfoJson.validityPeriod);
+     return apiKeyValidationDto;
+}
+
+function getStringValueOnly(any value) returns (string) {
+    return (value is string)? value : "";
 }
