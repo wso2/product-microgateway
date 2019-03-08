@@ -57,7 +57,7 @@ import java.util.Map;
 /**
  * Throttle stream processor class
  */
-@Extension(name = "timeBatch", namespace = "throttler", description =
+@Extension(name = "timeBatch", namespace = "gateway/throttler", description =
         "A batch (tumbling) time window that holds events that arrive during window.time periods, "
                 + "and gets updated for each window.time.", parameters = {
         @Parameter(name = "window.time", description = "The batch time period for which the window should hold events.",
