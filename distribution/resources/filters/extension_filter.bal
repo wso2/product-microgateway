@@ -71,18 +71,18 @@ public type ExtensionFilter object {
 function setAuthenticationErrorResponse(http:Response response, http:FilterContext context) {
     //Un comment the following code and set the proper error messages
 
-    //int statusCode = check <int>context.attributes[gateway:HTTP_STATUS_CODE];
-    //string errorDescription = <string>context.attributes[gateway:ERROR_DESCRIPTION];
-    //string errorMesssage = <string>context.attributes[gateway:ERROR_MESSAGE];
-    //int errorCode = check <int>context.attributes[gateway:ERROR_CODE];
-    //response.statusCode = statusCode;
-    //response.setContentType(gateway:APPLICATION_JSON);
-    //json payload = {fault : {
+    // int statusCode = <int>context.attributes[gateway:HTTP_STATUS_CODE];
+    // string errorDescription = <string>context.attributes[gateway:ERROR_DESCRIPTION];
+    // string errorMesssage = <string>context.attributes[gateway:ERROR_MESSAGE];
+    // int errorCode = <int>context.attributes[gateway:ERROR_CODE];
+    // response.statusCode = statusCode;
+    // response.setContentType(gateway:APPLICATION_JSON);
+    // json payload = {fault : {
     //    code : errorCode,
     //    message : errorMesssage,
     //    description : errorDescription
-    //}};
-    //response.setJsonPayload(payload);
+    // }};
+    // response.setJsonPayload(payload);
 }
 
 # This method can be used to send custom error message in an authorization failure

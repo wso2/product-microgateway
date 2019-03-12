@@ -5,29 +5,53 @@ import ballerina/log;
 import wso2/gateway;
 
 function initApplication20PerMinPolicy() {
-    stream<gateway:GlobalThrottleStreamDTO> resultStream;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream;
+    stream<gateway:IntermediateStream> intermediateStream = new;
+    stream<gateway:GlobalThrottleStreamDTO> resultStream = new;
+    stream<gateway:EligibilityStreamDTO> eligibilityStream = new;
     forever {
         from gateway:requestStream
-        select messageID, (appTier == "20PerMin") as isEligible, appKey as throttleKey
+        select gateway:requestStream.messageID, (gateway:requestStream.appTier == "20PerMin") as isEligible, gateway:requestStream.appKey as throttleKey
         => (gateway:EligibilityStreamDTO[] counts) {
-            eligibilityStream.publish(counts);
+            foreach var c in counts{
+                eligibilityStream.publish(c);
+            }
         }
 
         from eligibilityStream
-        throttler:timeBatch(60000, 0)
-        where isEligible == true
-        select throttleKey, count(messageID) >= 20 as isThrottled, true as stopOnQuota, expiryTimeStamp
-        group by throttleKey
+        window gateway:timeBatch(60000, 0)
+        where eligibilityStream.isEligible == true
+        select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
+        group by eligibilityStream.throttleKey
+        => (gateway:IntermediateStream[] counts) {
+            foreach var c in counts{
+                intermediateStream.publish(c);
+            }
+        }
+
+        from intermediateStream
+        select intermediateStream.throttleKey, getThrottleValue20(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
+        group by eligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            resultStream.publish(counts);
+            foreach var c in counts{
+                resultStream.publish(c);
+            }
         }
 
         from resultStream
-        throttler:emitOnStateChange(throttleKey, isThrottled)
-        select throttleKey, isThrottled, stopOnQuota, expiryTimeStamp
+        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
+        select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            gateway:globalThrottleStream.publish(counts);
+            foreach var c in counts{
+                gateway:globalThrottleStream.publish(c);
+            }
         }
+    }
+}
+
+function getThrottleValue20(int eventCount) returns boolean{
+    if(eventCount>=20){
+        return true;
+    }else{
+        return false;
     }
 }

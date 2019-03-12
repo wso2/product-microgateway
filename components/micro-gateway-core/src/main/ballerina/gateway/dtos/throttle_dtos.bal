@@ -64,3 +64,10 @@ public type ThrottleAnalyticsEventDTO record {
     int throttledTime=0;
     string hostname="";
 };
+
+public type IntermediateStream record{
+    string throttleKey ="";
+    int eventCount=0;
+    boolean stopOnQuota=false;
+    int expiryTimeStamp=0;
+};
