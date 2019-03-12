@@ -18,7 +18,7 @@ function initApplication10PerMinPolicy() {
         }
 
         from eligibilityStream
-        gateway:timeBatch([60000, 0])
+        window gateway:timeBatch(60000, 0)
         where eligibilityStream.isEligible == true
         select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
         group by eligibilityStream.throttleKey
@@ -38,7 +38,7 @@ function initApplication10PerMinPolicy() {
         }
 
         from resultStream
-        gateway:emitOnStateChange([resultStream.throttleKey, resultStream.isThrottled])
+        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
         select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{

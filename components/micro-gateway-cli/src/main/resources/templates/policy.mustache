@@ -18,7 +18,7 @@ function {{funcName}}() {
         }
 
             from eligibilityStream
-            gateway:timeBatch([{{unitTime}}, 0])
+            window gateway:timeBatch({{unitTime}}, 0)
             where eligibilityStream.isEligible == true
             select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
             group by eligibilityStream.throttleKey
@@ -38,7 +38,7 @@ function {{funcName}}() {
             }
 
         from resultStream
-        gateway:emitOnStateChange([resultStream.throttleKey, resultStream.isThrottled])
+        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
         select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
         foreach var c in counts{

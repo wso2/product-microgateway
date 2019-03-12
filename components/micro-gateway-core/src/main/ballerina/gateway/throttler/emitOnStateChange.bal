@@ -16,17 +16,21 @@
 
 import ballerina/streams;
 import ballerina/time;
+import ballerina/io;
 
 public type EmitOnStateChange object {
+    *streams:Window;
 
-    public string|error key = "";
+    public string key = "";
     public boolean|error isThrottled = false;
     public any[] stateParameters= [];
-    public map<any> throttleStateMap = {};
+    public map<boolean> throttleStateMap = {};
 
-    public function (streams:StreamEvent?[])? nextProcessPointer;
+    public function (streams:StreamEvent[])? nextProcessPointer;
 
-    public function __init(function(streams:StreamEvent?[])? nextProcessPointer, any[] stateParameters) {
+    public function __init(function(streams:StreamEvent[])? nextProcessPointer, any[] stateParameters) {
+
+        io:println("starting init");
 
         self.nextProcessPointer = nextProcessPointer;
         self.stateParameters = stateParameters;
@@ -38,18 +42,15 @@ public type EmitOnStateChange object {
             error err = error("Must have only 2 parameters");
             panic err;
         } else {
-            self.key = <string>stateParameters[0];
-            if (self.key is error || self.isThrottled is error){
+            string|error keys = <string>stateParameters[0];
+            if (keys is error){
                 error err = error("Key should be a string");
                 panic err;
+            }else{
+                self.key= keys;
             }
 
-            self.isThrottled = <boolean>stateParameters[1];
 
-            if (self.isThrottled is error){
-                error err = error("Value should be boolean");
-                panic err;
-            }
         }
     }
 
@@ -63,28 +64,35 @@ public type EmitOnStateChange object {
     }
 
 
-    public function process(streams:StreamEvent?[] streamEvents) {
+    public function process(streams:StreamEvent[] streamEvents) {
 
-        streams:StreamEvent?[] streamEventsCopy = [];
+        streams:StreamEvent[] streamEventsCopy = [];
 
         foreach var event in streamEvents {
             streams:StreamEvent streamEvent = <streams:StreamEvent>event;
 
-            boolean currentThrottleState = <boolean>event.data.isThrottled;
 
-            string newKey = <string>event.data.key;
+            boolean currentThrottleState = <boolean>event.data["inputStreamTimeBatchTest1.isThrottled"];
 
-            boolean lastThrottleState = <boolean>self.throttleStateMap.newKey;
-
-            if(currentThrottleState== lastThrottleState && !currentThrottleState){
-                //
+            string newKey = <string>event.data["inputStreamTimeBatchTest1.throttleKey"];
 
 
-            }else {
+            boolean? prevThrottleState = self.throttleStateMap[newKey];
+
+
+            if(prevThrottleState is boolean){
+                if(prevThrottleState != currentThrottleState){
+                    self.throttleStateMap[newKey] = currentThrottleState;
+                    //emit
+                    streamEventsCopy[streamEventsCopy.length()] = event;
+                }
+
+            }else{
                 self.throttleStateMap[newKey] = currentThrottleState;
+                //emit
                 streamEventsCopy[streamEventsCopy.length()] = event;
-
             }
+
 
 
         }
@@ -98,8 +106,9 @@ public type EmitOnStateChange object {
 
 };
 
-public function emitOnStateChange(any[] stateParameters, function (streams:StreamEvent?[])? nextProcessPointer = ())
-                    returns EmitOnStateChange {
-    EmitOnStateChange stateChangeProcessor = new(nextProcessPointer, stateParameters);
-    return stateChangeProcessor;
+public function emitOnStateChange(any[] stateParameters, function (streams:StreamEvent[])? nextProcessPointer = ())
+                    returns streams:Window {
+
+    EmitOnStateChange stateChangeProcessor1 = new(nextProcessPointer, stateParameters);
+    return stateChangeProcessor1;
 }
