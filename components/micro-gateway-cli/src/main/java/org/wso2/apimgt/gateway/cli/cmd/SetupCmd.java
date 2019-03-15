@@ -106,7 +106,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-e", "--endpoint"}, hidden = true)
     private String endpoint;
 
-    @Parameter(names = {"-ec", "--endpointConfig"}, hidden = true)
+    @Parameter(names = {"-ec", "--endpoint-config"}, hidden = true)
     private String endpointConfig;
 
     @Parameter(names = {"-t", "--truststore"}, hidden = true)
