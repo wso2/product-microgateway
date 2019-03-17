@@ -5,12 +5,10 @@ import wso2/gateway;
 future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
-    while (true) {
-        if(gateway:isStreamsInitialized == true) {
-            log:printDebug("Throttle streams initialized.");
-            break;
-        }
-    }
+    future<()> throttleInitFuture = gateway:getInitThrottleSubscriptionFuture();
+    wait throttleInitFuture;
+    log:printDebug("Throttle streams initialized.");
+
 {{#policyInitNames}}
     future<()> {{.}}Ftr = start {{.}}();
 {{/policyInitNames}}
