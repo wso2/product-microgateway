@@ -224,7 +224,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
-        error e = error("foo");
+        error e = error("Error while converting time stamps to integer when retrieved from cache");
         panic e;
     }
     if(validityPeriod is int && issuedTime is int) {
@@ -438,12 +438,14 @@ public function printError(string key, string message) {
 
 # Add a debug log with provided key (class) and message ID
 public function printDebug(string key, string message) {
-    log:printDebug(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+    log:printDebug(function() returns string {
+            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 
 # Add a trace log with provided key (class) and message ID
 public function printTrace(string key, string message) {
-    log:printTrace(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+    log:printTrace(function() returns string {
+            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 
 # Add a info log with provided key (class) and message ID
