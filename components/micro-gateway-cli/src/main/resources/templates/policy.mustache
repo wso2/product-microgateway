@@ -29,7 +29,7 @@ function {{funcName}}() {
             }
 
             from intermediateStream
-            select intermediateStream.throttleKey, getThrottleValue{{count}}(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
+            select intermediateStream.throttleKey, getThrottleValue{{funcName}}(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
             group by eligibilityStream.throttleKey
             => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{
@@ -48,7 +48,7 @@ function {{funcName}}() {
     }
 }
 
-            function getThrottleValue{{count}}(int eventCount) returns boolean{
+            function getThrottleValue{{funcName}}(int eventCount) returns boolean{
             if(eventCount>= {{count}}){
             return true;
             }else{
