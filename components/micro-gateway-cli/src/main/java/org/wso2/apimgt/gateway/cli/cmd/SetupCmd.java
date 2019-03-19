@@ -125,7 +125,6 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
     private String registrationEndpoint;
     private String tokenEndpoint;
 
-
     private String clientSecret;
     private boolean isOverwriteRequired;
 
@@ -549,6 +548,13 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
         isEndPointsNeeded = StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
                 .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint);
 
+        isBaseURLNeeded =
+                publisherEndpoint.contains("{baseURL}") || adminEndpoint.contains("{baseURL}") || registrationEndpoint
+                        .contains("{baseURL}") || tokenEndpoint.contains("{baseURL}") || isEndPointsNeeded;
+
+        isRestVersionNeeded = publisherEndpoint.contains("{restVersion}") || adminEndpoint.contains("{restVersion}")
+                || registrationEndpoint.contains("{restVersion}") || isEndPointsNeeded;
+
         //set endpoints format if endpoint(s) is empty
         if (isEndPointsNeeded) {
             if (StringUtils.isEmpty(publisherEndpoint)) {
@@ -564,13 +570,6 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
                 tokenEndpoint = RESTServiceConstants.CONFIG_TOKEN_ENDPOINT;
             }
         }
-
-        isBaseURLNeeded =
-                publisherEndpoint.contains("{baseURL}") || adminEndpoint.contains("{baseURL}") || registrationEndpoint
-                        .contains("{baseURL}") || tokenEndpoint.contains("{baseURL}") || isEndPointsNeeded;
-
-        isRestVersionNeeded = publisherEndpoint.contains("{restVersion}") || adminEndpoint.contains("{restVersion}")
-                || registrationEndpoint.contains("{restVersion}") || isEndPointsNeeded;
 
         //set base URL
         if (isBaseURLNeeded) {
