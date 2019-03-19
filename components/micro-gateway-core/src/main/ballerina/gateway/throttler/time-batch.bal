@@ -30,7 +30,7 @@ public type TimeBatch object {
 
 
 
-    public function __init(function(streams:StreamEvent[])? nextProcessPointer, any[] windowParameters) {
+    public function __init(function (streams:StreamEvent[])? nextProcessPointer, any[] windowParameters) {
         self.scheduler = new(function (streams:StreamEvent[] events) {
                 self.process(events);
             });
@@ -43,10 +43,10 @@ public type TimeBatch object {
 
     public function initParameters(any[] windowParameters) {
         if (windowParameters.length() == 1) {
-            self.timeInMilliSeconds = <int> windowParameters[0];
+            self.timeInMilliSeconds = <int>windowParameters[0];
         } else if (windowParameters.length() == 2) {
             self.timeInMilliSeconds = <int>windowParameters[0];
-            self.startTime = <int> windowParameters[1];
+            self.startTime = <int>windowParameters[1];
         } else {
             error err = error("Can not have more than 2 parameters");
             panic err;
@@ -55,7 +55,7 @@ public type TimeBatch object {
 
     public function process(streams:StreamEvent[] streamEvents) {
 
-        streams:StreamEvent[] streamEventsCopy=[];
+        streams:StreamEvent[] streamEventsCopy = [];
 
         lock {
             if (self.expiredEventTime == -1) {
@@ -81,7 +81,6 @@ public type TimeBatch object {
             }
 
 
-
             foreach var event in streamEvents {
                 streams:StreamEvent streamEvent = <streams:StreamEvent>event;
                 if (streamEvent.eventType != streams:CURRENT) {
@@ -97,8 +96,8 @@ public type TimeBatch object {
 
 
             foreach var event in streamEvents {
-                if(event.eventType != streams:TIMER){
-                    streamEventsCopy[streamEventsCopy.length()]= event;
+                if (event.eventType != streams:TIMER) {
+                    streamEventsCopy[streamEventsCopy.length()] = event;
                 }
             }
 
@@ -140,6 +139,6 @@ public type TimeBatch object {
 
 public function timeBatch(any[] windowParameters, function (streams:StreamEvent[])? nextProcessPointer = ())
                     returns streams:Window {
-    TimeBatch timeBatchProcessor = new (nextProcessPointer, windowParameters);
+    TimeBatch timeBatchProcessor = new(nextProcessPointer, windowParameters);
     return timeBatchProcessor;
 }
