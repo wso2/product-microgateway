@@ -16,19 +16,14 @@
 
 import ballerina/http;
 import ballerina/log;
-import ballerina/auth;
-import ballerina/cache;
 import ballerina/config;
-import ballerina/runtime;
-import ballerina/time;
-import ballerina/io;
 
 public type APIGatewaySecureListener object {
     *AbstractListener;
-    public APIGatewayListener apiGatewayListener;
+    APIGatewayListener apiGatewayListener;
 
     public function __init(http:ServiceEndpointConfiguration config) {
-        self.init(config);
+        initiateGatewaySecureConfigurations(config);
         self.apiGatewayListener = new(config);
     }
 
@@ -44,16 +39,8 @@ public type APIGatewaySecureListener object {
     public function __attach(service s, map<any> annotationData) returns error? {
         return self.apiGatewayListener.__attach(s, annotationData);
     }
-    public function init(http:ServiceEndpointConfiguration config);
 
 };
-
-
-public function APIGatewaySecureListener.init(http:ServiceEndpointConfiguration config) {
-    initiateGatewaySecureConfigurations(config);
-
-
-}
 
 
 function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration config) {
@@ -67,31 +54,32 @@ function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration c
         TRSUT_STORE_PASSWORD, "ballerina");
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
         MTSL_CONF_PROTOCOL_NAME, "TLS");
-    string[] protocolVersions = ["TLSv1.2", "TLSv1.1"];
-    string[] ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
-    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"
+    string defaultProtocolVersions = "TLSv1.2,TLSv1.1";
+    string defaultCiphers = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
     ,
-    "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"
+    TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
     ,
-    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", " TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA",
-    "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA", " TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-    "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-    , "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256",
-    "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256",
-    "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", " TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"
-    , "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA", "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA", "SSL_RSA_WITH_3DES_EDE_CBC_SHA",
-    "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA", " TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA", "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
-    "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA", " TLS_EMPTY_RENEGOTIATION_INFO_SCSV"];
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,
+    TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    , TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+    TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256
+    , TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,
+    TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+    SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
-    string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID,
-        MTSL_CONF_SSLVERIFYCLIENT, "");
-
+    string[] protocolVersions = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
+    defaultProtocolVersions).split(",");
+    string[] ciphers = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers).split(",");
+    string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
     http:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
     http:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
     http:Protocols protocol = { name: protocolName, versions: protocolVersions };
     http:ServiceSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
-        sslVerifyClient: sslVerifyClient };
+        sslVerifyClient: sslVerifyClient, ciphers: ciphers };
     config.secureSocket = secureSocket;
 }

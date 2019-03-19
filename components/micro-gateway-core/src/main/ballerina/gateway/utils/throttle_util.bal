@@ -88,6 +88,11 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
 public function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
+    printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
+}
+
+public function getInitThrottleSubscriptionFuture() returns future<()>{
+    return ftr;
 }
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey +
