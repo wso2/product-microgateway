@@ -25,12 +25,12 @@ public type EmitOnStateChange object {
     public boolean|error isThrottled = false;
     public any[] stateParameters= [];
     public map<boolean> throttleStateMap = {};
+    public string streamName = "";
 
     public function (streams:StreamEvent[])? nextProcessPointer;
 
     public function __init(function(streams:StreamEvent[])? nextProcessPointer, any[] stateParameters) {
 
-        io:println("starting init");
 
         self.nextProcessPointer = nextProcessPointer;
         self.stateParameters = stateParameters;
@@ -38,8 +38,8 @@ public type EmitOnStateChange object {
     }
 
     public function initParameters(any[] stateParameters) {
-        if (stateParameters.length() != 2) {
-            error err = error("Must have only 2 parameters");
+        if (stateParameters.length() != 3) {
+            error err = error("Must have only 3 parameters");
             panic err;
         } else {
             string|error keys = <string>stateParameters[0];
@@ -48,6 +48,13 @@ public type EmitOnStateChange object {
                 panic err;
             }else{
                 self.key= keys;
+            }
+            string|error streamName = <string>stateParameters[2];
+            if (streamName is error){
+                error err = error("Stream name should be a string");
+                panic err;
+            }else{
+                self.streamName= streamName;
             }
 
 
@@ -72,16 +79,16 @@ public type EmitOnStateChange object {
             streams:StreamEvent streamEvent = <streams:StreamEvent>event;
 
 
-            boolean currentThrottleState = <boolean>event.data["inputStreamTimeBatchTest1.isThrottled"];
+            boolean currentThrottleState = <boolean>event.data[self.streamName+".isThrottled"];
 
-            string newKey = <string>event.data["inputStreamTimeBatchTest1.throttleKey"];
+            string newKey = <string>event.data[self.streamName+".throttleKey"];
 
 
             boolean? prevThrottleState = self.throttleStateMap[newKey];
 
 
             if(prevThrottleState is boolean){
-                if(prevThrottleState != currentThrottleState){
+                if(prevThrottleState != currentThrottleState || currentThrottleState){
                     self.throttleStateMap[newKey] = currentThrottleState;
                     //emit
                     streamEventsCopy[streamEventsCopy.length()] = event;

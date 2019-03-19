@@ -4,51 +4,65 @@ import ballerina/http;
 import ballerina/log;
 import wso2/gateway;
 
+stream<gateway:IntermediateStream> sSilverintermediateStream = new;
+stream<gateway:GlobalThrottleStreamDTO> sSilverresultStream = new;
+stream<gateway:EligibilityStreamDTO> sSilvereligibilityStream = new;
+stream<gateway:RequestStreamDTO> sSilverreqCopy= gateway:requestStream;
+stream<gateway:GlobalThrottleStreamDTO> sSilverglobalThrotCopy = gateway:globalThrottleStream;
+
 function initSubscriptionSilverPolicy() {
-    stream<gateway:GlobalThrottleStreamDTO> resultStream=new;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream=new;
+
     forever {
-        from gateway:requestStream
-        select gateway:requestStream.messageID, (gateway:requestStream.subscriptionTier == "Silver") as isEligible, gateway:requestStream.subscriptionKey as throttleKey
+        from sSilverreqCopy
+        select sSilverreqCopy.messageID as messageID, (sSilverreqCopy.subscriptionTier == "Silver") as isEligible, sSilverreqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-        foreach var c in counts {
-            eligibilityStream.publish(c);
-        }
-        }
 
-        from eligibilityStream
-        window gateway:timeBatch(60000, 0)
-        where eligibilityStream.isEligible == true
-        select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
-        group by eligibilityStream.throttleKey
-        => (IntermediateStream[] counts) {
             foreach var c in counts{
-                intermediateStream.publish(c);
+
+                sSilvereligibilityStream.publish(c);
             }
         }
 
-        from intermediateStream
-        select intermediateStream.throttleKey, getThrottleValue2000(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
-        group by eligibilityStream.throttleKey
+
+        from sSilvereligibilityStream
+        window gateway:timeBatch(60000,0)
+        where sSilvereligibilityStream.isEligible == true
+        select sSilvereligibilityStream.throttleKey as throttleKey, count() as eventCount, true as stopOnQuota, sSilvereligibilityStream.expiryTimestamp as expiryTimeStamp
+        group by sSilvereligibilityStream.throttleKey
+        => (gateway:IntermediateStream[] counts) {
+
+            foreach var c in counts{
+
+                sSilverintermediateStream.publish(c);
+            }
+        }
+
+        from sSilverintermediateStream
+        select sSilverintermediateStream.throttleKey, getThrottleValuesSilver(sSilverintermediateStream.eventCount) as isThrottled, sSilverintermediateStream.stopOnQuota, sSilverintermediateStream.expiryTimeStamp
+        group by sSilvereligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{
-                resultStream.publish(c);
+
+                sSilverresultStream.publish(c);
             }
         }
 
-        from resultStream
-        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
-        select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
+        from sSilverresultStream
+        window gateway:emitOnStateChange(sSilverresultStream.throttleKey, sSilverresultStream.isThrottled, "sSilverresultStream")
+        select sSilverresultStream.throttleKey as throttleKey, sSilverresultStream.isThrottled, sSilverresultStream.stopOnQuota, sSilverresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{
-                gateway:globalThrottleStream.publish(c);
+
+                sSilverglobalThrotCopy.publish(c);
+
             }
         }
+
     }
 }
 
-function getThrottleValue2000(int eventCount) returns boolean{
-    if(eventCount>=2000){
+function getThrottleValuesSilver(int eventCount) returns boolean{
+    if(eventCount>= 2000){
         return true;
     }else{
         return false;

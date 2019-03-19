@@ -28,6 +28,8 @@ public type TimeBatch object {
     public any[] windowParameters;
     public function (streams:StreamEvent[])? nextProcessPointer;
 
+
+
     public function __init(function(streams:StreamEvent[])? nextProcessPointer, any[] windowParameters) {
         self.scheduler = new(function (streams:StreamEvent[] events) {
                 self.process(events);
@@ -52,6 +54,9 @@ public type TimeBatch object {
     }
 
     public function process(streams:StreamEvent[] streamEvents) {
+
+        streams:StreamEvent[] streamEventsCopy=[];
+
         lock {
             if (self.expiredEventTime == -1) {
                 int currentTime = time:currentTime().time;
@@ -66,36 +71,55 @@ public type TimeBatch object {
             int currentTime = time:currentTime().time;
             boolean sendEvents;
             if (currentTime >= self.expiredEventTime) {
+
                 self.expiredEventTime += self.timeInMilliSeconds;
+
                 self.scheduler.notifyAt(self.expiredEventTime);
                 sendEvents = true;
             } else {
                 sendEvents = false;
             }
 
+
+
             foreach var event in streamEvents {
                 streams:StreamEvent streamEvent = <streams:StreamEvent>event;
                 if (streamEvent.eventType != streams:CURRENT) {
                     continue;
                 }
+
                 streamEvent.addAttribute(self.attrExpiredTimestamp, self.expiredEventTime);
                 streams:StreamEvent clonedEvent = streamEvent.copy();
                 clonedEvent.eventType = streams:EXPIRED;
                 self.expiredEventQueue.addLast(clonedEvent);
+
             }
+
+
+            foreach var event in streamEvents {
+                if(event.eventType != streams:TIMER){
+                    streamEventsCopy[streamEventsCopy.length()]= event;
+                }
+            }
+
 
             if (sendEvents) {
                 self.expiredEventQueue.resetToFront();
                 while (self.expiredEventQueue.hasNext()) {
+
                     streams:StreamEvent streamEvent = streams:getStreamEvent(self.expiredEventQueue.next());
-                    streamEvents[streamEvents.length()] = streamEvent;
+                    streamEventsCopy[streamEventsCopy.length()] = streamEvent;
                 }
+
                 self.expiredEventQueue.clear();
+
+
             }
         }
 
-        if (streamEvents.length() > 0) {
-            self.nextProcessPointer.call(streamEvents);
+        if (streamEventsCopy.length() > 0) {
+
+            self.nextProcessPointer.call(streamEventsCopy);
         }
     }
 

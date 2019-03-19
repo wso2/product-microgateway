@@ -4,52 +4,65 @@ import ballerina/http;
 import ballerina/log;
 import wso2/gateway;
 
+stream<gateway:IntermediateStream> sBronzeintermediateStream = new;
+stream<gateway:GlobalThrottleStreamDTO> sBronzeresultStream = new;
+stream<gateway:EligibilityStreamDTO> sBronzeeligibilityStream = new;
+stream<gateway:RequestStreamDTO> sBronzereqCopy= gateway:requestStream;
+stream<gateway:GlobalThrottleStreamDTO> sBronzeglobalThrotCopy = gateway:globalThrottleStream;
+
 function initSubscriptionBronzePolicy() {
-    stream<gateway:GlobalThrottleStreamDTO> resultStream=new;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream=new;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream = new
+
     forever {
-        from gateway:requestStream
-        select gateway:requestStream.messageID, (gateway:requestStream.subscriptionTier == "Bronze") as isEligible, gateway:requestStream.subscriptionKey as throttleKey
+        from sBronzereqCopy
+        select sBronzereqCopy.messageID as messageID, (sBronzereqCopy.subscriptionTier == "Bronze") as isEligible, sBronzereqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-        foreach var c in counts {
-            eligibilityStream.publish(c);
-        }
-        }
 
-        from eligibilityStream
-        window gateway:timeBatch(60000, 0)
-        where eligibilityStream.isEligible == true
-        select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
-        group by eligibilityStream.throttleKey
-        => (IntermediateStream[] counts) {
             foreach var c in counts{
-                intermediateStream.publish(c);
+
+                sBronzeeligibilityStream.publish(c);
             }
         }
 
-        from intermediateStream
-        select intermediateStream.throttleKey, getThrottleValue1000(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
-        group by eligibilityStream.throttleKey
+
+        from sBronzeeligibilityStream
+        window gateway:timeBatch(60000,0)
+        where sBronzeeligibilityStream.isEligible == true
+        select sBronzeeligibilityStream.throttleKey as throttleKey, count() as eventCount, true as stopOnQuota, sBronzeeligibilityStream.expiryTimestamp as expiryTimeStamp
+        group by sBronzeeligibilityStream.throttleKey
+        => (gateway:IntermediateStream[] counts) {
+
+            foreach var c in counts{
+
+                sBronzeintermediateStream.publish(c);
+            }
+        }
+
+        from sBronzeintermediateStream
+        select sBronzeintermediateStream.throttleKey, getThrottleValuesBronze(sBronzeintermediateStream.eventCount) as isThrottled, sBronzeintermediateStream.stopOnQuota, sBronzeintermediateStream.expiryTimeStamp
+        group by sBronzeeligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{
-                resultStream.publish(c);
+
+                sBronzeresultStream.publish(c);
             }
         }
 
-        from resultStream
-        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
-        select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
+        from sBronzeresultStream
+        window gateway:emitOnStateChange(sBronzeresultStream.throttleKey, sBronzeresultStream.isThrottled, "sBronzeresultStream")
+        select sBronzeresultStream.throttleKey as throttleKey, sBronzeresultStream.isThrottled, sBronzeresultStream.stopOnQuota, sBronzeresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts{
-                gateway:globalThrottleStream.publish(c);
+
+                sBronzeglobalThrotCopy.publish(c);
+
             }
         }
+
     }
 }
 
-function getThrottleValue1000(int eventCount) returns boolean{
-    if(eventCount>=1000){
+function getThrottleValuesBronze(int eventCount) returns boolean{
+    if(eventCount>= 1000){
         return true;
     }else{
         return false;
