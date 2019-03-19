@@ -17,9 +17,7 @@ function initSubscriptionUnauthenticatedPolicy() {
         select sUnauthenticatedreqCopy.messageID as messageID, (sUnauthenticatedreqCopy.subscriptionTier ==
         "Unauthenticated") as isEligible, sUnauthenticatedreqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-
             foreach var c in counts {
-
                 sUnauthenticatedeligibilityStream.publish(c);
             }
         }
@@ -32,9 +30,7 @@ function initSubscriptionUnauthenticatedPolicy() {
         sUnauthenticatedeligibilityStream.expiryTimestamp as expiryTimeStamp
         group by sUnauthenticatedeligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-
             foreach var c in counts {
-
                 sUnauthenticatedintermediateStream.publish(c);
             }
         }
@@ -46,7 +42,6 @@ function initSubscriptionUnauthenticatedPolicy() {
         group by sUnauthenticatedeligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sUnauthenticatedresultStream.publish(c);
             }
         }
@@ -58,9 +53,7 @@ function initSubscriptionUnauthenticatedPolicy() {
         sUnauthenticatedresultStream.stopOnQuota, sUnauthenticatedresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sUnauthenticatedglobalThrotCopy.publish(c);
-
             }
         }
 

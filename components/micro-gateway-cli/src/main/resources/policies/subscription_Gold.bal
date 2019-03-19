@@ -17,9 +17,7 @@ function initSubscriptionGoldPolicy() {
         select sGoldreqCopy.messageID as messageID, (sGoldreqCopy.subscriptionTier == "Gold") as isEligible,
         sGoldreqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-
             foreach var c in counts {
-
                 sGoldeligibilityStream.publish(c);
             }
         }
@@ -32,9 +30,7 @@ function initSubscriptionGoldPolicy() {
         sGoldeligibilityStream.expiryTimestamp as expiryTimeStamp
         group by sGoldeligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-
             foreach var c in counts {
-
                 sGoldintermediateStream.publish(c);
             }
         }
@@ -45,7 +41,6 @@ function initSubscriptionGoldPolicy() {
         group by sGoldeligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sGoldresultStream.publish(c);
             }
         }
@@ -57,9 +52,7 @@ function initSubscriptionGoldPolicy() {
         stopOnQuota, sGoldresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sGoldglobalThrotCopy.publish(c);
-
             }
         }
 

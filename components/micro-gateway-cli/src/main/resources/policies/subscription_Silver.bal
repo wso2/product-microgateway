@@ -17,9 +17,7 @@ function initSubscriptionSilverPolicy() {
         select sSilverreqCopy.messageID as messageID, (sSilverreqCopy.subscriptionTier == "Silver") as isEligible,
         sSilverreqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-
             foreach var c in counts {
-
                 sSilvereligibilityStream.publish(c);
             }
         }
@@ -32,9 +30,7 @@ function initSubscriptionSilverPolicy() {
         sSilvereligibilityStream.expiryTimestamp as expiryTimeStamp
         group by sSilvereligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-
             foreach var c in counts {
-
                 sSilverintermediateStream.publish(c);
             }
         }
@@ -45,7 +41,6 @@ function initSubscriptionSilverPolicy() {
         group by sSilvereligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sSilverresultStream.publish(c);
             }
         }
@@ -57,9 +52,7 @@ function initSubscriptionSilverPolicy() {
         stopOnQuota, sSilverresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
             foreach var c in counts {
-
                 sSilverglobalThrotCopy.publish(c);
-
             }
         }
 
