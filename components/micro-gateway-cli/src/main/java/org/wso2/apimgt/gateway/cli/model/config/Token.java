@@ -23,6 +23,8 @@ import java.io.File;
 
 public class Token {
 
+    private String baseURL;
+    private String restVersion;
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -50,7 +52,6 @@ public class Token {
         }
         return absoluteTrustoreLocation;
     }
-
 
     public void setTrustStoreLocation(String trustStoreLocation) {
         this.trustStoreLocation = trustStoreLocation;
@@ -118,5 +119,21 @@ public class Token {
 
     public void setAdminEndpoint(String adminEndpoint) {
         this.adminEndpoint = adminEndpoint;
+    }
+
+    public String getRestVersion() {
+        return restVersion;
+    }
+
+    public void setRestVersion(String restVersion) {
+        this.restVersion = restVersion;
+    }
+
+    public String getBaseURL() {
+        return baseURL;
+    }
+
+    public void setBaseURL(String baseURL) {
+        this.baseURL = baseURL;
     }
 }

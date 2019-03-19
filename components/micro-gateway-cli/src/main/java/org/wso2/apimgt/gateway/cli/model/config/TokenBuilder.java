@@ -72,6 +72,16 @@ public class TokenBuilder {
         return this;
     }
 
+    public TokenBuilder setRestVersion(String restVersion) {
+        this.token.setRestVersion(restVersion);
+        return this;
+    }
+
+    public TokenBuilder setBaseURL(String baseURL) {
+        this.token.setBaseURL(baseURL);
+        return this;
+    }
+
     public Token build() {
         return token;
     }

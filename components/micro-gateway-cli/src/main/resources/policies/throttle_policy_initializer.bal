@@ -5,9 +5,13 @@ import wso2/gateway;
 future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
-    while (true) {
-        if(gateway:isStreamsInitialized == true) {
-            log:printDebug("Throttle streams initialized.");
+
+    private boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
+
+    if(!globalThrottlingEnabled){
+        while (true) {
+            if (gateway:isStreamsInitialized == true) {
+                log:printDebug("Throttle streams initialized.");
             break;
         }
     }
@@ -27,6 +31,7 @@ function initThrottlePolicies() {
     future<()> initSubscriptionUnauthenticatedPolicyFtr = start initSubscriptionUnauthenticatedPolicy();
 
     log:printDebug("Throttle policies initialized.");
+    }
 }
 
 function getDeployedPolicies() returns map<boolean> {
