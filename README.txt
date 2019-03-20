@@ -1,17 +1,16 @@
 WSO2 API Manager Microgateway
 ===============================
 
-The Microgateway provides the capability to create specialized
-gateway distribution (Microgateway distributions) where only a single
-API or a group of APIs are included. Once a Microgateway distribution is
-started, it will start serving those specific API(s) right away.
+Allows for the creation of specialized "Microgateway" gateway distributions where only
+a single API or a group of APIs are included. Right away, a Microgateway
+distribution will start serving those specific API(s).
 
-In summary, a Microgateway is a specialized form of the WSO2 API Gateway
-with characteristics below:
+A Microgateway is a specialized form of the WSO2 API Gateway
+with the following characteristics:
 
-1.  Its ability to execute in isolation without mandatory connections to
+1.  The ability to execute in isolation without mandatory connections to
     other components (Key Manager, Traffic Manager, Anayltics).
-2.  Ability to host a subset of APIs of choice (defined on the API
+2.  The ability to host a subset of APIs of choice (defined on the API
     Publisher) instead of all.
 3.  Immutability - The gateway runtime is immutable. If APIs or Policies
     change after the Microgateway has been built, a rebuild process is
