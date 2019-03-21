@@ -28,20 +28,21 @@ import ballerina/reflect;
 
 public type AuthnFilter object {
 
+    // public variables in order to satisfy filter interface
     public OAuthnAuthenticator oauthAuthenticator;
     public http:AuthnHandlerChain authnHandlerChain;
+    public string authRequired;
 
     public function __init(OAuthnAuthenticator oauthAuthenticator, http:AuthnHandlerChain authnHandlerChain) {
         self.oauthAuthenticator = oauthAuthenticator;
         self.authnHandlerChain = authnHandlerChain;
+        self.authRequired = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
-
-        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         //Setting UUID
-        if (checkAuthentication != "require") {
+        if (self.authRequired != REQUIRE) {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
@@ -95,17 +96,22 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                 result = cookieBasedAuth.processRequest(request);
                 if (result is string) {
                     authHeader = result;
-                } else {}
+                } else {
+                    log:printError("No authorization header or cookie was provided");
+                    setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+                    sendErrorResponse(caller, request,  context);
+                    return false;
+                }
             } else {
                 log:printError("No Cookies are provided at Server startup");
                 setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
-                sendErrorResponse(caller, request, untaint context);
+                sendErrorResponse(caller, request,  context);
                 return false;
             }
         } else {
             log:printError("No authorization header was provided");
             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-            sendErrorResponse(caller, request, untaint context);
+            sendErrorResponse(caller, request,  context);
             return false;
         }
         string providerId;

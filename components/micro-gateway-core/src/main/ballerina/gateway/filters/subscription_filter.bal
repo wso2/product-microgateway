@@ -70,31 +70,21 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
                 int l = subscribedAPIList.length();
                 if (l == 0){
                     authenticationContext.authenticated = true;
-                    authenticationContext.tier = "Unauthenticated";
                     authenticationContext.apiKey = jwtToken;
                     authenticationContext.username = decodedPayload.sub.toString();
                     if (decodedPayload.application.id != null) {
                         authenticationContext.applicationId = decodedPayload.application.id.toString();
-                    } else {
-                        authenticationContext.applicationId = "__unknown__";
                     }
                     if (decodedPayload.application.name != null) {
                         authenticationContext.applicationName = decodedPayload.application.name.toString
                         ();
-                    } else {
-                        authenticationContext.applicationName = "__unknown__";
                     }
                     if (decodedPayload.application.tier != null) {
                         authenticationContext.applicationTier = decodedPayload.application.tier.toString
                         ();
-                    } else {
-                        authenticationContext.applicationTier = "Unlimited";
                     }
                     authenticationContext.subscriber = decodedPayload.application.owner.toString();
                     authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
-                    authenticationContext.apiTier = "Unlimited";
-                    authenticationContext.apiPublisher = "__unknown__";
-                    authenticationContext.subscriberTenantDomain = "__unknown__";
                     authenticationContext.keyType = decodedPayload.keytype.toString();
                     runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.
                     keyType;
@@ -139,20 +129,9 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
                 }
             } else {
                 authenticationContext.authenticated = true;
-                authenticationContext.tier = "Unauthenticated";
                 authenticationContext.apiKey = jwtToken;
                 authenticationContext.username = decodedPayload.sub.toString();
-                authenticationContext.applicationId = "__unknown__";
-                authenticationContext.applicationName = "__unknown__";
-                authenticationContext.applicationTier = "Unlimited";
-                authenticationContext.subscriber = "__unknown__";
-                authenticationContext.consumerKey = "__unknown__";
-                authenticationContext.apiTier = "Unlimited";
-                authenticationContext.apiPublisher = "__unknown__";
-                authenticationContext.subscriberTenantDomain = "__unknown__";
-                authenticationContext.keyType = "__unknown__";
-                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType
-                ;
+                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                 filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                 return true;
             }
