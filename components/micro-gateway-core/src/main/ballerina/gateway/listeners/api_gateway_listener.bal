@@ -36,9 +36,11 @@ public type APIGatewayListener object {
         } else {
             port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
         }
-        self.init(port,config);
 
+        initiateGatewayConfigurations(config);
+        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
         self.httpListener = new(port, config = config);
+        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
     }
 
 
@@ -54,17 +56,9 @@ public type APIGatewayListener object {
         return self.httpListener.__attach(s, annotationData);
     }
 
-    public function init(int port,http:ServiceEndpointConfiguration config);
 
 
 };
-
-public function APIGatewayListener.init(int port, http:ServiceEndpointConfiguration config) {
-
-    initiateGatewayConfigurations(config);
-    printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
-    printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
-}
 
 public function createAuthHandler(http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
@@ -100,7 +94,7 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
 public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
-    intitateKeyManagerConfigurations();
+    initiateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
@@ -160,16 +154,13 @@ public function getJWTAuthProvider() returns http:AuthProvider[] {
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {
-    cache:Cache positiveAuthzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
-        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
-                                                                                                  CACHING_ID,
-                                                                                                  TOKEN_CACHE_EVICTION_FACTOR
-                                                                                                  , 0.25));
-    cache:Cache negativeAuthzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
-        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
-                                                                                                  CACHING_ID,
-                                                                                                  TOKEN_CACHE_EVICTION_FACTOR
-                                                                                                  , 0.25));
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    cache:Cache positiveAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
+        capacity = cacheSize, evictionFactor = evictionFactor);
+    cache:Cache negativeAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
+        capacity = cacheSize, evictionFactor = evictionFactor);
 
     auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
     auth:AuthStoreProvider authStoreProvider = configAuthStoreProvider;
@@ -179,12 +170,12 @@ public function getDefaultAuthorizationFilter() returns OAuthzFilter {
     return authzFilterWrapper;
 }
 
-function intitateKeyManagerConfigurations() {
+function initiateKeyManagerConfigurations() {
     KeyManagerConf keyManagerConf = {};
     Credentials credentials = {};
     keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
-    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, "username", "admin");
-    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, "password", "admin");
+    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin");
+    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }
