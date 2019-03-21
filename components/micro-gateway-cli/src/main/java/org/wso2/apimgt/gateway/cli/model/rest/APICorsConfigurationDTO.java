@@ -15,6 +15,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -25,6 +26,7 @@ import java.util.List;
 /**
  * CORS configuration for the APIDetailedDTO\n
  **/
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class APICorsConfigurationDTO  {
 
   private List<String> accessControlAllowOrigins = new ArrayList<String>();
