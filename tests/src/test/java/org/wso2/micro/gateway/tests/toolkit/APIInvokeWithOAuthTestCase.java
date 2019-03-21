@@ -135,31 +135,31 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
-    @Test(description = "Test API invocation with Basic Auth")
-    public void testApiInvokeFailWithBasicAuth() throws Exception {
-        //Valid Credentials
-        String originalInput = "generalUser1:password";
-        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
-
-        //test endpoint
-        invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-    }
-
-    private void invokeBasic(String token, int responseCode) throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
-    }
+//    @Test(description = "Test API invocation with Basic Auth")
+//    public void testApiInvokeFailWithBasicAuth() throws Exception {
+//        //Valid Credentials
+//        String originalInput = "generalUser1:password";
+//        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
+//
+//        //test endpoint
+//        invokeBasic(basicAuthToken, 401);
+//
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException ex) {
+//            Assert.fail("thread sleep interrupted!");
+//        }
+//    }
+//
+//    private void invokeBasic(String token, int responseCode) throws Exception {
+//        Map<String, String> headers = new HashMap<>();
+//        //test endpoint with token
+//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
+//        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+//                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+//        Assert.assertNotNull(response);
+//        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+//    }
 
     @AfterClass
     public void stop() throws Exception {

@@ -166,75 +166,75 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     }
 
 
-    @Test(description = "Test subscription throttling with a JWT token")
-    public void testSubscriptionThrottling() throws Exception {
-        responseCode = invokeAndAssert2(jwtToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
-        responseCode = invokeAndAssert2(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
-    }
+//    @Test(description = "Test subscription throttling with a JWT token")
+//    public void testSubscriptionThrottling() throws Exception {
+//        responseCode = invokeAndAssert2(jwtToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
+//        responseCode = invokeAndAssert2(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
+//    }
 
-    @Test(description = "Test application throttling with a JWT token")
-    public void testApplicationThrottlingWithJwtToken() throws Exception {
-        responseCode = invokeAndAssert2(jwtToken2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
-    }
+//    @Test(description = "Test application throttling with a JWT token")
+//    public void testApplicationThrottlingWithJwtToken() throws Exception {
+//        responseCode = invokeAndAssert2(jwtToken2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
+//    }
 
-    @Test(description = "Test application throttling with oauth2 token")
-    public void testApplicationThrottlingWithOauth2Token() throws Exception {
-        responseCode = invokeAndAssert2(token2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
-    }
+//    @Test(description = "Test application throttling with oauth2 token")
+//    public void testApplicationThrottlingWithOauth2Token() throws Exception {
+//        responseCode = invokeAndAssert2(token2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
+//    }
 
-    @Test(description = "Test throttling with non auth mode")
-    public void testApplicationThrottlingInNonAuthMode() throws Exception {
-        responseCode = invokeAndAssert2(null, getServiceURLHttp("/pizzashack/1.0.0/noauth"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
-    }
+//    @Test(description = "Test throttling with non auth mode")
+//    public void testApplicationThrottlingInNonAuthMode() throws Exception {
+//        responseCode = invokeAndAssert2(null, getServiceURLHttp("/pizzashack/1.0.0/noauth"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
+//    }
 
-    @Test(description = "test subscription policy with stop on quota is false")
-    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
-        responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
-    }
+//    @Test(description = "test subscription policy with stop on quota is false")
+//    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
+//        responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+//    }
 
-    @Test(description = "test throttling with non exist subscription policy")
-    public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyJWT);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in JWT.");
-
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyToken);
-        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in oauth.");
-    }
-
-    @Test(description = "test throttling with non exist application policy")
-    public void testThrottlingWithNonExistApplicationPolicy() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyJWT);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in JWT.");
-
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyToken);
-        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in oauth.");
-    }
+//    @Test(description = "test throttling with non exist subscription policy")
+//    public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyJWT);
+//        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+//                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+//        Assert.assertNotNull(response);
+//        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
+//        Assert.assertTrue(response.getData().contains("\"code\":900809"),
+//                "Error response should have errorcode 900809 in JWT.");
+//
+//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyToken);
+//        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+//        Assert.assertNotNull(response);
+//        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
+//        Assert.assertTrue(response.getData().contains("\"code\":900809"),
+//                "Error response should have errorcode 900809 in oauth.");
+//    }
+//
+//    @Test(description = "test throttling with non exist application policy")
+//    public void testThrottlingWithNonExistApplicationPolicy() throws Exception {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyJWT);
+//        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+//                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+//        Assert.assertNotNull(response);
+//        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
+//        Assert.assertTrue(response.getData().contains("\"code\":900809"),
+//                "Error response should have errorcode 900809 in JWT.");
+//
+//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyToken);
+//        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+//        Assert.assertNotNull(response);
+//        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
+//        Assert.assertTrue(response.getData().contains("\"code\":900809"),
+//                "Error response should have errorcode 900809 in oauth.");
+//    }
 
     public int invokeAndAssert2(String token, String url) throws Exception {
         Map<String, String> headers = new HashMap<>();
