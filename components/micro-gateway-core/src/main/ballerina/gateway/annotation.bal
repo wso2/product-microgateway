@@ -25,7 +25,7 @@ public type APIConfiguration record {
     string apiVersion;
     string name;
     string publisher;
-    string authorizationHeader="";
+    string authorizationHeader?;
 
 };
 

@@ -29,20 +29,20 @@
     <test name="micro-gw-services" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.micro.gateway.tests.services.AuthenticationFailureTestCase" />
-            <class name="org.wso2.micro.gateway.tests.services.MutualSSLTestCase" />
-            <class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP1BackEndTestCase" />
-            <class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP2BackEndTestCase" />
-            <class name="org.wso2.micro.gateway.tests.services.PreRequisites" />
+            <!--<class name="org.wso2.micro.gateway.tests.services.MutualSSLTestCase" />-->
+            <!--<class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP1BackEndTestCase" />-->
+            <!--<class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP2BackEndTestCase" />-->
+            <!--<class name="org.wso2.micro.gateway.tests.services.PreRequisites" />-->
         </classes>
     </test>
 
     <test name="micro-gw-toolkit" preserve-order="true" parallel="false">
         <classes>
             <!-- DistributedThrottlingTestCase should be the first since it starts message broker -->
-            <class name="org.wso2.micro.gateway.tests.toolkit.DistributedThrottlingTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuth2andBasicAuthTestCase"/>
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.DistributedThrottlingTestCase"/>-->
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuth2andBasicAuthTestCase"/>-->
             <!--<class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithBasicAuthTestCase"/>-->
-            <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuthTestCase"/>
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuthTestCase"/>-->
 
             <!--<class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>-->
             <!--<class name="org.wso2.micro.gateway.tests.toolkit.OASAPIInvokeTestCase"/>-->

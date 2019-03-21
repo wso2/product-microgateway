@@ -45,6 +45,7 @@ public type EligibilityStreamDTO record {
     string messageID="";
     boolean isEligible=false;
     string throttleKey="";
+    int expiryTimestamp?;
 };
 
 public type ThrottleAnalyticsEventDTO record {

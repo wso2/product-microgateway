@@ -15,9 +15,11 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class APIInfoDTO {
 
     private String id = null;

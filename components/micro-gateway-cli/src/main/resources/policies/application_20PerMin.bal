@@ -4,54 +4,65 @@ import ballerina/http;
 import ballerina/log;
 import wso2/gateway;
 
+stream<gateway:IntermediateStream> s20PerMinintermediateStream = new;
+stream<gateway:GlobalThrottleStreamDTO> s20PerMinresultStream = new;
+stream<gateway:EligibilityStreamDTO> s20PerMineligibilityStream = new;
+stream<gateway:RequestStreamDTO> s20PerMinreqCopy = gateway:requestStream;
+stream<gateway:GlobalThrottleStreamDTO> s20PerMinglobalThrotCopy = gateway:globalThrottleStream;
+
 function initApplication20PerMinPolicy() {
-    stream<gateway:IntermediateStream> intermediateStream = new;
-    stream<gateway:GlobalThrottleStreamDTO> resultStream = new;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream = new;
+
     forever {
-        from gateway:requestStream
-        select gateway:requestStream.messageID, (gateway:requestStream.appTier == "20PerMin") as isEligible, gateway:requestStream.appKey as throttleKey
+        from s20PerMinreqCopy
+        select s20PerMinreqCopy.messageID as messageID, (s20PerMinreqCopy.appTier == "20PerMin") as isEligible,
+        s20PerMinreqCopy.appKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-            foreach var c in counts{
-                eligibilityStream.publish(c);
+            foreach var c in counts {
+                s20PerMineligibilityStream.publish(c);
             }
         }
 
-        from eligibilityStream
+
+        from s20PerMineligibilityStream
         window gateway:timeBatch(60000, 0)
-        where eligibilityStream.isEligible == true
-        select eligibilityStream.throttleKey, count() as eventCount, true as stopOnQuota, 0 as expiryTimeStamp
-        group by eligibilityStream.throttleKey
+        where s20PerMineligibilityStream.isEligible == true
+        select s20PerMineligibilityStream.throttleKey as throttleKey, count() as eventCount, true as stopOnQuota,
+        s20PerMineligibilityStream.expiryTimestamp as expiryTimeStamp
+        group by s20PerMineligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-            foreach var c in counts{
-                intermediateStream.publish(c);
+            foreach var c in counts {
+                s20PerMinintermediateStream.publish(c);
             }
         }
 
-        from intermediateStream
-        select intermediateStream.throttleKey, getThrottleValue20(intermediateStream.eventCount) as isThrottled, intermediateStream.stopOnQuota, intermediateStream.expiryTimeStamp
-        group by eligibilityStream.throttleKey
+        from s20PerMinintermediateStream
+        select s20PerMinintermediateStream.throttleKey, getThrottleValues20PerMin(s20PerMinintermediateStream.eventCount
+        ) as isThrottled, s20PerMinintermediateStream.stopOnQuota, s20PerMinintermediateStream.expiryTimeStamp
+        group by s20PerMineligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
-                resultStream.publish(c);
+            foreach var c in counts {
+                s20PerMinresultStream.publish(c);
             }
         }
 
-        from resultStream
-        window gateway:emitOnStateChange(resultStream.throttleKey, resultStream.isThrottled)
-        select resultStream.throttleKey, resultStream.isThrottled, resultStream.stopOnQuota, resultStream.expiryTimeStamp
+        from s20PerMinresultStream
+        window gateway:emitOnStateChange(s20PerMinresultStream.throttleKey, s20PerMinresultStream.isThrottled,
+            "s20PerMinresultStream")
+        select s20PerMinresultStream.throttleKey as throttleKey, s20PerMinresultStream.isThrottled,
+        s20PerMinresultStream.stopOnQuota, s20PerMinresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
-                gateway:globalThrottleStream.publish(c);
+            foreach var c in counts {
+                s20PerMinglobalThrotCopy.publish(c);
             }
         }
+
     }
 }
 
-function getThrottleValue20(int eventCount) returns boolean{
-    if(eventCount>=20){
+function getThrottleValues20PerMin(int eventCount) returns boolean {
+    if (eventCount >= 20) {
         return true;
-    }else{
+    } else {
         return false;
     }
 }

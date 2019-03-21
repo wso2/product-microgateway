@@ -19,43 +19,27 @@ import ballerina/log;
 import ballerina/io;
 import ballerina/config;
 import ballerina/jms;
+import ballerina/http;
 
-string jmsConnectioninitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID,
-    JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
-    "bmbInitialContextFactory");
+string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID,
+    JMS_CONNECTION_INITIAL_CONTEXT_FACTORY, "bmbInitialContextFactory");
 string jmsConnectionProviderUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PROVIDER_URL,
     "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
 string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, "");
 string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, "");
 
-// Initialize a JMS connection with the provider.
-jms:Connection jmsConnection = new({
-        initialContextFactory: jmsConnectioninitialContextFactory,
-        providerUrl: jmsConnectionProviderUrl,
-        username: jmsConnectionUsername,
-        password: jmsConnectionPassword
-    });
-
-// Initialize a JMS session on top of the created connection.
-jms:Session jmsSession = new(jmsConnection, {
-        acknowledgementMode: "AUTO_ACKNOWLEDGE"
-    });
-
-// Initialize a Topic subscriber using the created session.
-listener jms:TopicSubscriber subscriberEndpoint = new(jmsSession, topicPattern = "throttleData");
-
-// Bind the created consumer(subscriber endpoint) to the listener service.
-service jmsListener on subscriberEndpoint {
+service jmsListener =
+service {
     resource function onMessage(jms:TopicSubscriberCaller consumer, jms:Message message) {
-        var m = message.getMapMessageContent();
-        if(m is map<any>) {
+        map<any>|error m = message.getMapMessageContent();
+        if (m is map<any>) {
             log:printDebug("ThrottleMessage Received");
             //Throttling decisions made by TM going to throttleDataMap
             if (m.hasKey(THROTTLE_KEY)) {
-                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {};
-                globalThrottleStreamDtoTM.throttleKey = <string>m[THROTTLE_KEY];
-                globalThrottleStreamDtoTM.isThrottled = <boolean>m[IS_THROTTLED];
-                globalThrottleStreamDtoTM.expiryTimeStamp = <int>m[EXPIRY_TIMESTAMP];
+                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
+                    throttleKey: <string>m[THROTTLE_KEY],
+                    isThrottled: <boolean>m[IS_THROTTLED],
+                    expiryTimeStamp: <int>m[EXPIRY_TIMESTAMP] };
 
                 if (globalThrottleStreamDtoTM.isThrottled == true) {
                     putThrottleData(globalThrottleStreamDtoTM);
@@ -70,5 +54,44 @@ service jmsListener on subscriberEndpoint {
             log:printError("Error occurred while reading message", err = m);
         }
     }
+};
 
+# `startSubscriberService` function create jms connection, jms session and jms topic subscriber.
+# It binds the subscriber endpoint and jms listener
+#
+# + return - jms:TopicSubscriber for global throttling event publishing
+public function startSubscriberService() returns jms:TopicSubscriber {
+    // Initialize a JMS connectiontion with the provider.
+    jms:Connection jmsConnection = new({
+            initialContextFactory: jmsConnectionInitialContextFactory,
+            providerUrl: jmsConnectionProviderUrl,
+            username: jmsConnectionUsername,
+            password: jmsConnectionPassword
+        });
+    // Initialize a JMS session on top of the created connection.
+    jms:Session jmsSession = new(jmsConnection, {
+            acknowledgementMode: "AUTO_ACKNOWLEDGE"
+        });
+
+    jms:TopicSubscriber subscriberEndpoint = new(jmsSession, topicPattern = "throttleData");
+    _ = subscriberEndpoint.__attach(jmsListener, {});
+    _ = subscriberEndpoint.__start();
+    return subscriberEndpoint;
 }
+
+# `initiateThrottlingJmsListener` function initialize jmslistener subscriber service if `enabledGlobalTMEventPublishing`
+# is enabled
+#
+# + return - boolean value of jmslistener started or not
+public function initiateThrottlingJmsListener() returns boolean {
+    enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
+        GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
+
+    if (enabledGlobalTMEventPublishing) {
+        jms:TopicSubscriber topicSubscriber = startSubscriberService();
+        log:printInfo("subscriber service for global throttling is started");
+        return true;
+    }
+    return false;
+}
+
