@@ -43,17 +43,14 @@ service {
 
                 if (globalThrottleStreamDtoTM.isThrottled == true) {
                     putThrottleData(globalThrottleStreamDtoTM);
-                }
-                else {
+                } else {
                     removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
                 }
                 //Blocking decisions going to a separate map
-            }
-            else if (m.hasKey(BLOCKING_CONDITION_KEY)){
+            } else if (m.hasKey(BLOCKING_CONDITION_KEY)){
                 putBlockCondition(m);
             }
-        }
-        else {
+        } else {
             log:printError("Error occurred while reading message", err = m);
         }
     }
@@ -66,7 +63,7 @@ service {
 public function startSubscriberService() returns jms:TopicSubscriber {
     // Initialize a JMS connectiontion with the provider.
     jms:Connection jmsConnection = new({
-            initialContextFactory:jmsConnectionInitialContextFactory,
+            initialContextFactory: jmsConnectionInitialContextFactory,
             providerUrl: jmsConnectionProviderUrl,
             username: jmsConnectionUsername,
             password: jmsConnectionPassword

@@ -81,5 +81,4 @@ public class TOMLConfigParser {
     private static <T> T parseString(String configFileContent, Class<T> type) {
         return new Toml().read(configFileContent).to(type);
     }
-
 }
