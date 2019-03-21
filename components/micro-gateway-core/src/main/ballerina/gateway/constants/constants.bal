@@ -35,6 +35,11 @@
  public const string CONTENT_TYPE_HEADER = "Content-Type";
  public const string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
  public const string APPLICATION_JSON = "application/json";
+ public const string TEXT_XML = "text/xml";
+ public const string SOAP_ACTION = "SOAPAction";
+ public const string VALIDATE_KEY_SOAP_ACTION = "urn:validateKey";
+ public const string KEY_VALIDATION_SERVICE_CONTEXT = "/services/APIKeyValidationService";
+ public const string UTF_8 = "UTF-8";
  public const string INVALID_COOKIE = "Cookie is Invalid";
 
  public const string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
@@ -63,6 +68,7 @@
  public const string ANY_AUTHENTICATION_LEVEL = "Any";
  public const string API_VERSION = "apiVersion";
  public const string USER_NAME_UNKNOWN = "Unknown";
+ public const string UNKNOWN_VALUE = "__unknown__";
 
  public const string FILTER_FAILED = "filter_failed";
  public const string REMOTE_ADDRESS = "remote_address";
@@ -106,6 +112,7 @@
  public const string USERNAME = "username";
  public const string PASSWORD = "password";
  public const string ENABLE = "enable";
+ public const string REQUIRE = "require";
 
 
 //Analytics filter related constants

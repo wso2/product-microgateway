@@ -14,41 +14,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//TODO : change the proper varaible types(ex: authorized should be boolean)
 
 public type APIKeyValidationDto record {
-    string apiName="";
-    string apiPublisher="";
-    string apiTier="";
-    string applicationId="";
-    string applicationName="";
-    string applicationTier="";
-    string authorized="";
-    string authorizedDomains="";
-    string consumerKey="";
-    string contentAware="";
-    string endUserName="";
-    string endUserToken="";
-    string issuedTime="";
-    string spikeArrestLimit="";
-    string spikeArrestUnit="";
-    string stopOnQuotaReach="";
-    string subscriber="";
-    string subscriberTenantDomain="";
-    string throttlingDataList="";
-    string tier="";
-    string keyType="";
-    string userType="";
+    string apiName?;
+    string apiPublisher?;
+    string apiTier?;
+    string applicationId?;
+    string applicationName?;
+    string applicationTier?;
+    boolean authorized = false;
+    string authorizedDomains?;
+    string consumerKey?;
+    string contentAware?;
+    string endUserName?;
+    string endUserToken?;
+    string issuedTime?;
+    string spikeArrestLimit?;
+    string spikeArrestUnit?;
+    string stopOnQuotaReach?;
+    string subscriber?;
+    string subscriberTenantDomain?;
+    string throttlingDataList?;
+    string tier?;
+    string keyType?;
+    string userType?;
     string validationStatus="";
-    string validityPeriod="";
+    string validityPeriod?;
 };
 
 public type APIRequestMetaDataDto record {
     string context="";
     string apiVersion="";
     string accessToken="";
-    string requiredAuthenticationLevel="";
-    string clientDomain="";
+    string requiredAuthenticationLevel=ANY_AUTHENTICATION_LEVEL;
+    string clientDomain="*";
     string matchingResource="";
     string httpVerb="";
 };
@@ -56,23 +55,23 @@ public type APIRequestMetaDataDto record {
 public type AuthenticationContext record {
     boolean authenticated=false;
     string username="";
-    string applicationTier="";
-    string tier="";
-    string apiTier="";
+    string applicationTier=UNLIMITED_TIER;
+    string tier=UNAUTHENTICATED_TIER;
+    string apiTier=UNLIMITED_TIER;
     boolean isContentAwareTierPresent=false;
     string apiKey="";
-    string keyType="";
-    string callerToken="";
-    string applicationId="";
-    string applicationName="";
-    string consumerKey="";
-    string subscriber="";
+    string keyType=PRODUCTION_KEY_TYPE;
+    string callerToken?;
+    string applicationId=UNKNOWN_VALUE;
+    string applicationName=UNKNOWN_VALUE;
+    string consumerKey=UNKNOWN_VALUE;
+    string subscriber=UNKNOWN_VALUE;
     string[] throttlingDataList?;
     int spikeArrestLimit=0;
-    string subscriberTenantDomain="";
+    string subscriberTenantDomain=UNKNOWN_VALUE;
     string spikeArrestUnit="";
     boolean stopOnQuotaReach=false;
-    string apiPublisher="";
+    string apiPublisher=UNKNOWN_VALUE;
 };
 
 public type KeyManagerConf record {

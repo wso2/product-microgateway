@@ -218,8 +218,8 @@ public function getTenantFromBasePath(string basePath) returns string {
 
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
-    int | error validityPeriod =  int.convert(apiKeyValidationDto.validityPeriod);
-    int | error issuedTime = int.convert(apiKeyValidationDto.issuedTime);
+    int|error validityPeriod =  int.convert(apiKeyValidationDto.validityPeriod);
+    int|error issuedTime = int.convert(apiKeyValidationDto.issuedTime);
     int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
@@ -335,12 +335,11 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
 
 # Default error response sender with json error response
 public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
-    int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
     string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
     http:Response response = new;
-    response.statusCode = statusCode;
+    response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
     json payload = { fault: {
         code: errorCode,
@@ -356,7 +355,11 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
 
 public function getAuthorizationHeader(reflect:annotationData[] annData) returns string {
     APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(annData);
-    string authHeader = <string>apiConfig.authorizationHeader;
+    string authHeader = "";
+    string? annotatedHeadeName = apiConfig["authorizationHeader"];
+    if(annotatedHeadeName is string) {
+        authHeader = annotatedHeadeName;
+    }
     if (authHeader == "") {
         authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
     }

@@ -5,10 +5,9 @@ import wso2/gateway;
 future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
-
     private boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
 
-    if(!globalThrottlingEnabled){
+    if (!globalThrottlingEnabled) {
         while (true) {
             if (gateway:isStreamsInitialized == true) {
                 log:printDebug("Throttle streams initialized.");
@@ -35,5 +34,6 @@ function initThrottlePolicies() {
 }
 
 function getDeployedPolicies() returns map<boolean> {
-    return { "50PerMin":true,"20PerMin":true,"10PerMin":true,"Gold":true,"Silver":true,"Bronze":true,"Unauthenticated":true };
+    return { "50PerMin":true,"20PerMin":true,"10PerMin":true,"Gold":true,"Silver":true,"Bronze":true,
+        "Unauthenticated":true };
 }
