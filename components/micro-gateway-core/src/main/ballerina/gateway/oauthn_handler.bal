@@ -26,6 +26,10 @@ import ballerina/encoding;
 
 // Authentication handler
 
+xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
+xmlns "http://org.apache.axis2/xsd" as xsd;
+xmlns "http://dto.impl.apimgt.carbon.wso2.org/xsd" as apim;
+
 public type OAuthnAuthenticator object {
     public string name= "oauth2";
     public OAuthAuthProvider oAuthAuthenticator = new;
@@ -78,12 +82,17 @@ function  getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {
 
 public type OAuthAuthProvider object {
     public APIGatewayCache gatewayCache= new;
+    string encodedBasicAuthHeader;
 
-
+    public function __init() {
+        string base64Header = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin") + ":" +
+            getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
+        self.encodedBasicAuthHeader = encoding:encodeBase64(base64Header.toByteArray(UTF_8));
+    }
 
     public function authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns (APIKeyValidationDto);
 
-    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (json);
+    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (xml | error);
 
     public function invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
                 APIKeyValidationDto);
@@ -111,11 +120,11 @@ public function OAuthAuthProvider.authenticate (APIRequestMetaDataDto apiRequest
                         self.gatewayCache.removeFromGatewayKeyValidationCache(cacheKey);
                         self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
                         self.gatewayCache.removeFromTokenCache(accessToken);
-                        apiKeyValidationDtoFromcache.authorized = "false";
+                        apiKeyValidationDtoFromcache.authorized = false;
                         printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
                         return apiKeyValidationDtoFromcache;
                     }
-                    authorized = boolean.convert(apiKeyValidationDtoFromcache.authorized);
+                    authorized = apiKeyValidationDtoFromcache.authorized;
                     apiKeyValidationDto = apiKeyValidationDtoFromcache;
                     printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
                 } else {
@@ -154,33 +163,32 @@ public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiR
     APIKeyValidationDto apiKeyValidationDto = {};
     string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized = false;
-    json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
-    printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationInfoJson.toString());
-    var authorizeValue = keyValidationInfoJson.authorized;
-    if(authorizeValue is string) {
+    xml|error keyValidationResponseXML = self.doKeyValidation(apiRequestMetaDataDto);
+    if (keyValidationResponseXML is xml) {
+        printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
+        xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:^"return"];
+        string authorizeValue = keyValidationInfoXML[apim:authorized].getTextValue();
         boolean auth = boolean.convert(authorizeValue);
         printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
         if (auth) {
-            //TODO: check whether to convert xml directly to the DTO. No need for xml to json conversion;
-            apiKeyValidationDto = convertJsonToKeyValidationObject(keyValidationInfoJson);
+            apiKeyValidationDto = convertXmlToKeyValidationObject(keyValidationInfoXML);
             printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
             authorized = auth;
-            if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+            if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                 string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
                 self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                 self.gatewayCache.addToTokenCache(accessToken, true);
             }
         } else {
-            apiKeyValidationDto.authorized = "false";
-            apiKeyValidationDto.validationStatus = <string>keyValidationInfoJson.validationStatus;
-            if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+            apiKeyValidationDto.authorized = false;
+            apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
+            if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
                 self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
             }
         }
-    } else {
-        string errorMessage = "Error occurred while converting the authorized value from the key validation response to a
-                        string value";
-        log:printError(errorMessage);
+    } else if(keyValidationResponseXML is error){
+        string errorMessage = "Error occurred while the key validation request";
+        log:printError(errorMessage, err=keyValidationResponseXML);
         panic error(errorMessage);
     }
 
@@ -188,96 +196,78 @@ public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiR
 
 }
 
-public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto) returns (json) {
+public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto) returns (xml|error) {
 
-        string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
-            getGatewayConfInstance().getKeyManagerConf().credentials.password;
-        string encodedBasicAuthHeader = encodeValueToBase64(base64Header);
+    http:Request keyValidationRequest = new;
+    http:Response keyValidationResponse = new;
+    xml soapEnvelope = xml `<soapenv:Envelope>
+                                <soapenv:Body>
+                                    <xsd:validateKey>
+                                        <xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>
+                                        <xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>
+                                        <xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>
+                                        <xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto.requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>
+                                        <xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>
+                                        <xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>
+                                        <xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>
+                                    </xsd:validateKey>
+                                </soapenv:Body>
+                            </soapenv:Envelope>`;
+    keyValidationRequest.setXmlPayload(soapEnvelope, contentType=TEXT_XML);
+    keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + self.encodedBasicAuthHeader);
+    keyValidationRequest.setHeader(SOAP_ACTION, VALIDATE_KEY_SOAP_ACTION);
+    time:Time time = time:currentTime();
+    int startTimeMills = time.time;
+    var result = keyValidationEndpoint -> post(KEY_VALIDATION_SERVICE_CONTEXT, keyValidationRequest);
+    time = time:currentTime();
+    int endTimeMills = time.time;
+    printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
+                startTimeMills) + "ms");
+    if(result is http:Response) {
+        keyValidationResponse = result;
+    } else if(result is error) {
+        string message = "Error occurred while reading the key validation response";
+        log:printError(message ,err =result);
+        return result;
+    }
+    var responseXml =  keyValidationResponse.getXmlPayload();
+    if(responseXml is xml) {
+        printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responseXml.getTextValue());
 
-        http:Request keyValidationRequest = new;
-        http:Response keyValidationResponse = new;
-        xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
-        xmlns "http://org.apache.axis2/xsd" as xsd;
-        xml contextXml = xml `<xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>`;
-        xml versionXml = xml `<xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>`;
-        xml tokenXml = xml `<xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>`;
-        xml authLevelXml = xml `<xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto
-        .requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>`;
-        xml clientDomainXml = xml `<xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>`;
-        xml resourceXml = xml `<xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>`;
-        xml httpVerbXml = xml `<xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>`;
-        xml soapBody = xml`<soapenv:Body></soapenv:Body>`;
-        xml validateXml = xml`<xsd:validateKey></xsd:validateKey>`;
-        xml requestValuesxml = contextXml + versionXml + tokenXml + authLevelXml + clientDomainXml + resourceXml +
-            httpVerbXml;
-        validateXml.setChildren(requestValuesxml);
-        soapBody.setChildren(validateXml);
-        xml soapEnvelope = xml `<soapenv:Envelope></soapenv:Envelope>`;
-        soapEnvelope.setChildren(soapBody);
-        keyValidationRequest.setXmlPayload(soapEnvelope);
-        keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, "text/xml");
-        keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
-                encodedBasicAuthHeader);
-        keyValidationRequest.setHeader("SOAPAction", "urn:validateKey");
-        time:Time time = time:currentTime();
-        int startTimeMills = time.time;
-        var result = keyValidationEndpoint -> post("/services/APIKeyValidationService", keyValidationRequest);
-        time = time:currentTime();
-        int endTimeMills = time.time;
-        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
-                    startTimeMills) + "ms");
-        if(result is error) {
-            log:printError("Error occurred while reading the key validation response",err =result);
-            return {};
-        } else {
-            keyValidationResponse = result;
-        }
-        xml responsepayload;
-        json payloadJson = {};
-        var responseXml =  keyValidationResponse.getXmlPayload();
-        if(responseXml is error) {
-            log:printError("Error occurred while getting the key validation service XML response payload ",err=responseXml);
-            return {};
-        }
-        if(responseXml is xml){
-            responsepayload = responseXml;
-            printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responsepayload.getTextValue());
-            payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
-            payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
-        }
+    } else if(responseXml is error){
+        string message = "Error occurred while getting the key validation service XML response payload";
+        log:printError(message,err=responseXml);
+    }
+    return responseXml;
 
-        return payloadJson;
 }
 
-function convertJsonToKeyValidationObject(json keyValidationInfoJson) returns APIKeyValidationDto {
+function convertXmlToKeyValidationObject(xml keyValidationInfoXML) returns APIKeyValidationDto {
      APIKeyValidationDto apiKeyValidationDto = {};
-     apiKeyValidationDto.apiName=getStringValueOnly(keyValidationInfoJson.apiName);
-     apiKeyValidationDto.apiPublisher=getStringValueOnly(keyValidationInfoJson.apiPublisher);
-     apiKeyValidationDto.apiTier=getStringValueOnly(keyValidationInfoJson.apiTier);
-     apiKeyValidationDto.applicationId=getStringValueOnly(keyValidationInfoJson.applicationId);
-     apiKeyValidationDto.applicationName=getStringValueOnly(keyValidationInfoJson.applicationName);
-     apiKeyValidationDto.applicationTier=getStringValueOnly(keyValidationInfoJson.applicationTier);
-     apiKeyValidationDto.authorized=getStringValueOnly(keyValidationInfoJson.authorized);
-     apiKeyValidationDto.authorizedDomains=getStringValueOnly(keyValidationInfoJson.authorizedDomains);
-     apiKeyValidationDto.consumerKey=getStringValueOnly(keyValidationInfoJson.consumerKey);
-     apiKeyValidationDto.contentAware=getStringValueOnly(keyValidationInfoJson.contentAware);
-     apiKeyValidationDto.endUserName=getStringValueOnly(keyValidationInfoJson.endUserName);
-     apiKeyValidationDto.endUserToken=getStringValueOnly(keyValidationInfoJson.endUserToken);
-     apiKeyValidationDto.issuedTime=getStringValueOnly(keyValidationInfoJson.issuedTime);
-     apiKeyValidationDto.spikeArrestLimit=getStringValueOnly(keyValidationInfoJson.spikeArrestLimit);
-     apiKeyValidationDto.spikeArrestUnit=getStringValueOnly(keyValidationInfoJson.spikeArrestUnit);
-     apiKeyValidationDto.stopOnQuotaReach=getStringValueOnly(keyValidationInfoJson.stopOnQuotaReach);
-     apiKeyValidationDto.subscriber=getStringValueOnly(keyValidationInfoJson.subscriber);
-     apiKeyValidationDto.subscriberTenantDomain=getStringValueOnly(keyValidationInfoJson.subscriberTenantDomain);
-     apiKeyValidationDto.throttlingDataList=getStringValueOnly(keyValidationInfoJson.throttlingDataList);
-     apiKeyValidationDto.tier=getStringValueOnly(keyValidationInfoJson.tier);
-     apiKeyValidationDto.keyType=getStringValueOnly(keyValidationInfoJson["type"]);
-     apiKeyValidationDto.userType=getStringValueOnly(keyValidationInfoJson.userType);
-     apiKeyValidationDto.validationStatus=getStringValueOnly(keyValidationInfoJson.validationStatus);
-     apiKeyValidationDto.validityPeriod=getStringValueOnly(keyValidationInfoJson.validityPeriod);
+     apiKeyValidationDto.apiName = keyValidationInfoXML[apim:apiName].getTextValue();
+     apiKeyValidationDto.apiPublisher = keyValidationInfoXML[apim:apiPublisher].getTextValue();
+     apiKeyValidationDto.apiTier = keyValidationInfoXML[apim:apiTier].getTextValue();
+     apiKeyValidationDto.applicationId = keyValidationInfoXML[apim:applicationId].getTextValue();
+     apiKeyValidationDto.applicationName = keyValidationInfoXML[apim:applicationName].getTextValue();
+     apiKeyValidationDto.applicationTier = keyValidationInfoXML[apim:applicationTier].getTextValue();
+     apiKeyValidationDto.authorized = boolean.convert(keyValidationInfoXML[apim:authorized].getTextValue());
+     apiKeyValidationDto.authorizedDomains = keyValidationInfoXML[apim:authorizedDomains].getTextValue();
+     apiKeyValidationDto.consumerKey = keyValidationInfoXML[apim:consumerKey].getTextValue();
+     apiKeyValidationDto.contentAware = keyValidationInfoXML[apim:contentAware].getTextValue();
+     apiKeyValidationDto.endUserName = keyValidationInfoXML[apim:endUserName].getTextValue();
+     apiKeyValidationDto.endUserToken = keyValidationInfoXML[apim:endUserToken].getTextValue();
+     apiKeyValidationDto.issuedTime = keyValidationInfoXML[apim:issuedTime].getTextValue();
+     apiKeyValidationDto.spikeArrestLimit = keyValidationInfoXML[apim:spikeArrestLimit].getTextValue();
+     apiKeyValidationDto.spikeArrestUnit = keyValidationInfoXML[apim:spikeArrestUnit].getTextValue();
+     apiKeyValidationDto.stopOnQuotaReach = keyValidationInfoXML[apim:stopOnQuotaReach].getTextValue();
+     apiKeyValidationDto.subscriber = keyValidationInfoXML[apim:subscriber].getTextValue();
+     apiKeyValidationDto.subscriberTenantDomain = keyValidationInfoXML[apim:subscriberTenantDomain].getTextValue();
+     apiKeyValidationDto.throttlingDataList = keyValidationInfoXML[apim:throttlingDataList].getTextValue();
+     apiKeyValidationDto.tier = keyValidationInfoXML[apim:tier].getTextValue();
+     apiKeyValidationDto.keyType = keyValidationInfoXML[apim:^"type"].getTextValue();
+     apiKeyValidationDto.userType = keyValidationInfoXML[apim:userType].getTextValue();
+     apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
+     apiKeyValidationDto.validityPeriod = keyValidationInfoXML[apim:validityPeriod].getTextValue();
      return apiKeyValidationDto;
 }
 
-function getStringValueOnly(any value) returns (string) {
-    return (value is string)? value : "";
-}
