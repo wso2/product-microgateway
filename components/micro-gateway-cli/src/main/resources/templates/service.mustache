@@ -38,7 +38,8 @@ import wso2/gateway;
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
-         allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}]
+         allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#api.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowMethods}}]
     }
     {{/api.corsConfiguration.corsConfigurationEnabled}}
 }
