@@ -72,13 +72,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
-    if (req.expects100Continue()) {
-        req.removeHeader("Expect");
-        var result = outboundEp->continue();
-        if (result is error) {
-        log:printError("Error sending response", err = result);
-        }
-    }
+        handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
     {{else}}
@@ -203,3 +197,13 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     }
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 }
+
+    function handleExpectHeaderFor{{cut qualifiedServiceName " "}} (http:Caller outboundEp, http:Request req ) {
+        if (req.expects100Continue()) {
+            req.removeHeader("Expect");
+            var result = outboundEp->continue();
+            if (result is error) {
+            log:printError("Error while sending 100 continue response", err = result);
+            }
+        }
+    }
