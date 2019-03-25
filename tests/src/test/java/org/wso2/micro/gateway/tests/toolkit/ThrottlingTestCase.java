@@ -166,11 +166,11 @@ public class ThrottlingTestCase extends BaseTestCase {
 //        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
 //    }
 
-    @Test(description = "test subscription policy with stop on quota is false")
-    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
-        responseCode = invokeAndAssert(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
-    }
+//    @Test(description = "test subscription policy with stop on quota is false")
+//    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
+//        responseCode = invokeAndAssert(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+//        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+//    }
 
     @Test(description = "test throttling with non exist subscription policy")
     public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
