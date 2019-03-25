@@ -18,25 +18,15 @@ import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
 import ballerina/config;
-import ballerina/runtime;
-import ballerina/system;
-import ballerina/time;
 import ballerina/io;
-import ballerina/reflect;
 
 // MutualSSL filter
 public type MutualSSLFilter object {
-    // public variable in order to satisfy filter interface
-    public string authRequired;
-
-    public function __init() {
-        self.authRequired = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
-    }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        if(self.authRequired == REQUIRE) {
+        if(request.mutualSslHandshake["status"] == PASSED) {
             return doMTSLFilterRequest(caller, request, context);
         }
         return true;
@@ -50,7 +40,7 @@ public type MutualSSLFilter object {
 };
 
 function doMTSLFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-    boolean isAuthenticated = false;
+    boolean isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
     boolean isSecured = true;
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
@@ -59,7 +49,6 @@ function doMTSLFilterRequest(http:Caller caller, http:Request request, http:Filt
     int startingTime = getCurrentTime();
     context.attributes[REQUEST_TIME] = startingTime;
     context.attributes[FILTER_FAILED] = false;
-    isAuthenticated = true;
     //Set authenticationContext data
     authenticationContext.authenticated = true;
     authenticationContext.username = USER_NAME_UNKNOWN;
