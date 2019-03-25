@@ -70,7 +70,7 @@ public class ThrottlingTestCase extends BaseTestCase {
 
         ApplicationPolicy applicationPolicy = new ApplicationPolicy();
         applicationPolicy.setPolicyName("10MinAppPolicy");
-        applicationPolicy.setRequestCount(10);
+        applicationPolicy.setRequestCount(5);
         pub.addApplicationPolicy(applicationPolicy);
 
         //Define 10req application
@@ -81,12 +81,12 @@ public class ThrottlingTestCase extends BaseTestCase {
 
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
         subscriptionPolicy.setPolicyName("10MinSubPolicy");
-        subscriptionPolicy.setRequestCount(10);
+        subscriptionPolicy.setRequestCount(5);
         pub.addSubscriptionPolicy(subscriptionPolicy);
 
         SubscriptionPolicy subPolicyContinueOnLimit = new SubscriptionPolicy();
         subPolicyContinueOnLimit.setPolicyName("allowOnLimitExceed");
-        subPolicyContinueOnLimit.setRequestCount(30);
+        subPolicyContinueOnLimit.setRequestCount(5);
         subPolicyContinueOnLimit.setStopOnQuotaReach(false);
         pub.addSubscriptionPolicy(subPolicyContinueOnLimit);
 
@@ -216,13 +216,12 @@ public class ThrottlingTestCase extends BaseTestCase {
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         }
 
-        int retry = 40;
+        int retry = 9;
         int responseCode = -1;
-        Thread.sleep(Long.valueOf(60000 - (LocalDateTime.now().getSecond()) * 1000));
         while (retry > 0) {
-            for (int i = 0; i < 40; i++) {
-                LocalDateTime.now();
+            for (int i = 0; i < 9; i++) {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+                Thread.sleep(1000);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
                 retry--;

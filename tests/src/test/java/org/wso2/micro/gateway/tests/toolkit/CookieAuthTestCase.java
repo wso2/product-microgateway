@@ -121,12 +121,12 @@ public class CookieAuthTestCase extends BaseTestCase {
         }
     }
 
-//    @Test(description = "Test API invocation with a invalid Cookie token")
-//    public void testApiInvokeFailWithCookie() throws Exception {
-//
-//        //test invoking with an expired Oauth token
-//        invokeFail(expiringJwtTokenProd, 401);
-//    }
+    @Test(description = "Test API invocation with a invalid Cookie token")
+    public void testApiInvokeFailWithCookie() throws Exception {
+
+        //test invoking with an expired Oauth token
+        invokeFail(expiringJwtTokenProd, 401);
+    }
 
     private void invokePass(String token, String responseData, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
@@ -139,15 +139,15 @@ public class CookieAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
-//    private void invokeFail(String token, int responseCode) throws Exception {
-//        Map<String, String> headers = new HashMap<>();
-//        //test endpoint with token
-//        headers.put(HttpHeaderNames.COOKIE.toString(), "JSONID=" + token);
-//        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-//                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-//        Assert.assertNotNull(response);
-//        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
-//    }
+    private void invokeFail(String token, int responseCode) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.COOKIE.toString(), "JSONID=" + token);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
 
     @AfterClass
     public void stop() throws Exception {
