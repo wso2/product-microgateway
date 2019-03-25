@@ -95,7 +95,7 @@ public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "http2-test.conf").getPath();
-        String[] args = {"--config", configPath};
+        String[] args = {"--config", configPath, "--experimental"};
         microGWServer.startMicroGwServer(balPath, args);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
