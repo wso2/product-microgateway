@@ -31,18 +31,16 @@ public type AuthnFilter object {
     // public variables in order to satisfy filter interface
     public OAuthnAuthenticator oauthAuthenticator;
     public http:AuthnHandlerChain authnHandlerChain;
-    public string authRequired;
 
     public function __init(OAuthnAuthenticator oauthAuthenticator, http:AuthnHandlerChain authnHandlerChain) {
         self.oauthAuthenticator = oauthAuthenticator;
         self.authnHandlerChain = authnHandlerChain;
-        self.authRequired = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
         //Setting UUID
-        if (self.authRequired != REQUIRE) {
+        if(request.mutualSslHandshake["status"] != PASSED) {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);

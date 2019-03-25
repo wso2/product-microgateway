@@ -69,6 +69,8 @@
  public const string API_VERSION = "apiVersion";
  public const string USER_NAME_UNKNOWN = "Unknown";
  public const string UNKNOWN_VALUE = "__unknown__";
+ public const string STATUS = "status";
+ public const string PASSED = "passed";
 
  public const string FILTER_FAILED = "filter_failed";
  public const string REMOTE_ADDRESS = "remote_address";
