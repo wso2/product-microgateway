@@ -72,7 +72,13 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
-    gateway:checkExpectHeaderPresent(req);
+    if (req.expects100Continue()) {
+        req.removeHeader("Expect");
+        var result = outboundEp->continue();
+        if (result is error) {
+        log:printError("Error sending response", err = result);
+        }
+    }
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
     {{else}}
