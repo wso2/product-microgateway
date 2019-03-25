@@ -30,7 +30,6 @@ forever {
     group by s{{name}}eligibilityStream.throttleKey
     => (gateway:IntermediateStream[] counts) {
     foreach var c in counts{
-    io:println("COunt-----------==========",c);
         s{{name}}intermediateStream.publish(c);
     }
     }
@@ -41,7 +40,6 @@ forever {
     group by s{{name}}eligibilityStream.throttleKey
     => (gateway:GlobalThrottleStreamDTO[] counts) {
     foreach var c in counts{
-     io:println("COunt-2222----------==========",c);
         s{{name}}resultStream.publish(c);
     }
     }
@@ -52,7 +50,6 @@ forever {
     s{{name}}resultStream.stopOnQuota, s{{name}}resultStream.expiryTimeStamp
     => (gateway:GlobalThrottleStreamDTO[] counts) {
     foreach var c in counts{
-    io:println("COunt-33333333---------==========",c);
         s{{name}}globalThrotCopy.publish(c);
     }
     }
