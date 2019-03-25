@@ -1,0 +1,10 @@
+
+public function main() {
+    {{#each this}}
+    string[] {{cut qualifiedServiceName " "}}_service = [{{#paths}}{{#value}}{{#operations}}{{#value}} "{{operationId}}"{{#unless @last}},{{/unless}}
+                                {{/value}}{{/operations}}{{/value}}{{#unless @last}},{{/unless}}{{/paths}}];
+    gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
+    {{/each}}
+
+    initThrottlePolicies();
+}
