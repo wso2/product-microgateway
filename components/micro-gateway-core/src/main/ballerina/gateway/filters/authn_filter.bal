@@ -82,7 +82,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         string authHeader = "";
         string|error result = "";
         string|error extractedToken = "";
-        string authHeaderName = getAuthorizationHeader(reflect:getServiceAnnotations(context.serviceRef));
+        string authHeaderName = getAuthorizationHeader(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
         //check for the header of the request and choose the path
         if (request.hasHeader(authHeaderName)) {
             authHeader = request.getHeader(authHeaderName);
@@ -272,11 +272,9 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
     string[] authProviderIds = [];
     // get authn details from the resource level
     http:ListenerAuthConfig? resourceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
-        RESOURCE_ANN_NAME,
-        reflect:getResourceAnnotations(context.serviceRef, context.resourceName));
+        RESOURCE_ANN_NAME,resourceAnnotationMap[context.resourceName] ?: []);
     http:ListenerAuthConfig? serviceLevelAuthAnn = getAuthAnnotation(ANN_PACKAGE,
-        SERVICE_ANN_NAME,
-        reflect:getServiceAnnotations(context.serviceRef));
+        SERVICE_ANN_NAME,serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
     // check if authentication is enabled
     resourceSecured = isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further

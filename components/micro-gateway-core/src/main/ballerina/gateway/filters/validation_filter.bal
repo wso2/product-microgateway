@@ -67,7 +67,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         var payload = request.getJsonPayload();
         isType = false;
         service serviceReference = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-        APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceReference));
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
         json swagger = read(swaggerAbsolutePath);
         json model = {};
         json models = {};
@@ -77,7 +77,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         //getting the method of the request
         requestMethod = request.method.toLower();
         //getting the path hit by the request
-        requestPath = getResourceConfigAnnotation(reflect:getResourceAnnotations(filterContext.serviceRef, filterContext.resourceName)).path;
+        requestPath = getResourceConfigAnnotation(resourceAnnotationMap[filterContext.resourceName] ?: []).path;
         //getting the name of the model hit by the request
         if (swagger.components.schemas != null) {//In swagger 3.0 models are defined under the components.schemas
             models = swagger.components.schemas;
@@ -138,7 +138,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
         //getting the payload of the response
         var payload = response.getJsonPayload();
         service serviceType = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
-        APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(serviceType));
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
         json swagger = read(swaggerAbsolutePath);
         json model = {};
         json models = {};

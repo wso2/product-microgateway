@@ -26,6 +26,22 @@ import ballerina/internal;
 import ballerina/system;
 import ballerina/encoding;
 
+public map<reflect:annotationData[]> resourceAnnotationMap = {};
+public map<reflect:annotationData[]> serviceAnnotationMap = {};
+public map<TierConfiguration?> resourceTierAnnotationMap = {};
+public map<APIConfiguration?> apiConfigAnnotationMap = {};
+
+
+public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
+    foreach string resourceFunction in resourceArray {
+        resourceAnnotationMap[resourceFunction] = reflect:getResourceAnnotations(s, resourceFunction);
+        resourceTierAnnotationMap[resourceFunction] = getResourceLevelTier(reflect:getResourceAnnotations
+            (s, resourceFunction));
+    }
+    serviceAnnotationMap[serviceName] = reflect:getServiceAnnotations(s);
+    apiConfigAnnotationMap[serviceName] = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
+}
+
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
     boolean isSecured = true;
@@ -163,12 +179,10 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 # + return - api key validation request dto
 public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
-        (context.serviceRef));
-    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(reflect:getResourceAnnotations
-        (context.serviceRef, context.resourceName));
+    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
+    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(resourceAnnotationMap[context.resourceName] ?: []);
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef));
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
     string apiVersion = <string>apiConfig.apiVersion;
     apiKeyValidationRequest.apiVersion = apiVersion;
     if (!apiContext.contains(apiVersion)){
@@ -189,6 +203,14 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
             + ", verb: " + apiKeyValidationRequest.httpVerb);
     return apiKeyValidationRequest;
 
+}
+
+# Retrieve the correct service name from service name that contains object reference(for ex; MyService$$service$0).
+# This method is a work around due to ballerina filter context returns wrong service name
+#
+# + return - service name
+public function getServiceName(string serviceObjectName) returns string {
+    return serviceObjectName.split("\\$")[0];
 }
 
 
@@ -241,8 +263,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     return false;
 }
 public function getContext(http:FilterContext context) returns (string) {
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
-        (context.serviceRef));
+    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
     return <string>httpServiceConfig.basePath;
 
 }

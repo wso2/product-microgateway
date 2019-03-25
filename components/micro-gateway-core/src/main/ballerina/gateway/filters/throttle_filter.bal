@@ -53,8 +53,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     boolean isThrottled = false;
     boolean stopOnQuota;
     string apiContext = getContext(context);
-    string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
-    apiVersion;
+    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
     context.attributes[IS_THROTTLE_OUT] = false;
@@ -204,7 +203,7 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
         return (false, false);
     }
 
-    string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
+    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext(context);
     if (apiVersion is string) {
         subscriptionLevelThrottleKey += ":" + apiVersion;
@@ -225,7 +224,7 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 
 function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean, boolean) {
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
-    string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
+    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     string throttleKey = clientIp + ":" + getContext(context);
     if (apiVersion is string) {
         throttleKey += ":" + apiVersion;
@@ -250,7 +249,7 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
     returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDto = {};
-    string? apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
+    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDto.apiKey = getContext(context);
     requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
@@ -259,8 +258,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.apiTier = keyValidationDto.apiTier;
     requestStreamDto.subscriptionTier = keyValidationDto.tier;
     requestStreamDto.resourceKey = getContext(context);
-    TierConfiguration? tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceRef,
-    context.resourceName));
+    TierConfiguration? tier = resourceTierAnnotationMap[context.resourceName];
     string? policy = tier.policy;
     if (policy is string) {
        requestStreamDto.resourceTier = policy;

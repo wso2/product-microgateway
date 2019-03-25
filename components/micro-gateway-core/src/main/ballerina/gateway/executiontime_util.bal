@@ -26,13 +26,11 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
         executionTimeDTO.provider = authContext.apiPublisher;
         executionTimeDTO.keyType = authContext.keyType;
     } else {
-        executionTimeDTO.provider = getAPIDetailsFromServiceAnnotation(
-                                        reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        executionTimeDTO.provider = apiConfigAnnotationMap[getServiceName(context.serviceName)].publisher;
         executionTimeDTO.keyType = PRODUCTION_KEY_TYPE;
     }
     executionTimeDTO.apiName = getApiName(context);
-    executionTimeDTO.apiVersion = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef))
-    .apiVersion;
+    executionTimeDTO.apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     executionTimeDTO.tenantDomain = getTenantDomain(context);
     executionTimeDTO.context = getContext(context);
     executionTimeDTO.correleationID = <string>context.attributes[MESSAGE_ID];

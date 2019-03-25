@@ -218,7 +218,7 @@ public class GatewayCmdUtils {
      *
      * @return resources file directory path
      */
-    private static String getResourceFolderLocation() {
+    public static String getResourceFolderLocation() {
         return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator
                 + GatewayCliConstants.GW_DIST_RESOURCES;
     }
