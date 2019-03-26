@@ -115,9 +115,9 @@ public function getAuthProviders() returns http:AuthProvider[] {
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         trustStore: {
-            path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH,
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
         }
     };
     http:AuthProvider basicAuthProvider = {
@@ -145,9 +145,9 @@ public function getJWTAuthProvider() returns http:AuthProvider[] {
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         trustStore: {
-            path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH,
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
         }
     };
     return [jwtAuthProvider];

@@ -48,9 +48,9 @@ function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration c
         "${ballerina.home}/bre/security/ballerinaKeystore.p12");
     string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
         LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina");
-    string trustStorePath = getConfigValue(JWT_INSTANCE_ID,
+    string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID,
         TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12");
-    string trustStorePassword = getConfigValue(JWT_CONFIG_INSTANCE_ID,
+    string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
         TRSUT_STORE_PASSWORD, "ballerina");
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
         MTSL_CONF_PROTOCOL_NAME, "TLS");

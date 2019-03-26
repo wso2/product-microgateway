@@ -20,7 +20,7 @@ boolean configsRead = false;
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
-    var api_Version = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).apiVersion;
+    var api_Version = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     string apiVersion = (api_Version is string) ? api_Version : "";
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
@@ -47,7 +47,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
-        var api_Creator = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        var api_Creator = apiConfigAnnotationMap[getServiceName(context.serviceName)].publisher;
         eventDto.apiCreator = (api_Creator is string) ? api_Creator : "";
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
@@ -66,12 +66,10 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     int currentTimeMills = time.time;
     json metaInfo = {};
     eventDto.apiContext = getContext(context);
-    var api_Version = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceRef)).
-    apiVersion;
+    var api_Version = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     eventDto.apiVersion = (api_Version is string) ? api_Version : "";
     eventDto.apiName = getApiName(context);
-    var resource_Path = getResourceConfigAnnotation(reflect:getResourceAnnotations(context.serviceRef,
-            context.resourceName)).path;
+    var resource_Path = getResourceConfigAnnotation(resourceAnnotationMap[context.resourceName] ?: []).path;
     eventDto.resourcePath = (resource_Path is string) ? resource_Path : "";
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
     eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
@@ -92,8 +90,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     } else {
         metaInfo.keyType = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        var api_Creater = getAPIDetailsFromServiceAnnotation(
-                                    reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        var api_Creater = apiConfigAnnotationMap[getServiceName(context.serviceName)].publisher;
         eventDto.apiCreator = (api_Creater is string) ? api_Creater : "";
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;

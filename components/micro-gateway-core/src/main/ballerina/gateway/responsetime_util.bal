@@ -86,8 +86,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-        requestResponseExecutionDTO.apiCreator = <string>getAPIDetailsFromServiceAnnotation(
-                                                     reflect:getServiceAnnotations(context.serviceRef)).publisher;
+        requestResponseExecutionDTO.apiCreator = <string>apiConfigAnnotationMap[getServiceName(context.serviceName)].publisher;
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
@@ -96,9 +95,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
-    requestResponseExecutionDTO.apiVersion = <string>getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(context.
-            serviceRef)).
-    apiVersion;
+    requestResponseExecutionDTO.apiVersion = <string>apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     requestResponseExecutionDTO.apiContext = getContext(context);
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
 
@@ -115,9 +112,9 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     requestResponseExecutionDTO.responseSize = 0;
     requestResponseExecutionDTO.responseCode = response.statusCode;
     requestResponseExecutionDTO.apiResourcePath = <string>getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(context.serviceRef, context.resourceName)).path;
+    (resourceAnnotationMap[context.resourceName] ?: []).path;
     requestResponseExecutionDTO.apiResourceTemplate = <string>getResourceConfigAnnotation
-    (reflect:getResourceAnnotations(context.serviceRef, context.resourceName)).path;
+    (resourceAnnotationMap[context.resourceName] ?: []).path;
     //request method
     requestResponseExecutionDTO.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
     int initTime = <int>context.attributes[REQUEST_TIME];

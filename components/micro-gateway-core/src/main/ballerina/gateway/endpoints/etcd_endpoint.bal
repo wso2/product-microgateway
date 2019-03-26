@@ -22,8 +22,9 @@ http:Client etcdEndpoint = new (
     retrieveConfig("etcdurl", "http://127.0.0.1:2379"), config = {
         secureSocket: {
             trustStore: {
-                path: config:getAsString("jwtTokenConfig.trustStore.path"),
-                password: config:getAsString("jwtTokenConfig.trustStore.password")
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                    "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
             }
         }
     }

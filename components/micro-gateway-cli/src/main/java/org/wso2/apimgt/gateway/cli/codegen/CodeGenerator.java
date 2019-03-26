@@ -70,6 +70,7 @@ public class CodeGenerator {
         String projectSrcPath = GatewayCmdUtils
                 .getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
+        List<BallerinaService> serviceList = new ArrayList<>();
         for (ExtendedAPI api : apis) {
             outStream.println("ID for API " + api.getName() + " : " + api.getId());
             parser = new SwaggerParser();
@@ -84,16 +85,18 @@ public class CodeGenerator {
                 definitionContext.getApi().setIsDefaultVersion(true);
                 definitionContext.setQualifiedServiceName(CodegenUtils.trim(api.getName()));
             }
-
+            serviceList.add(definitionContext);
             genFiles.add(generateService(definitionContext));
             genFiles.add(generateSwagger(definitionContext));
 
         }
+        genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+
     }
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -114,6 +117,7 @@ public class CodeGenerator {
         Swagger swagger;
         String projectSrcPath = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
+        List<BallerinaService> serviceList = new ArrayList<>();
 
         parser = new SwaggerParser();
         swagger = parser.parse(apiDef);
@@ -131,6 +135,8 @@ public class CodeGenerator {
         genFiles.add(generateService(definitionContext));
 
         genFiles.add(generateCommonEndpoints());
+        serviceList.add(definitionContext);
+        genFiles.add(generateMainBal(serviceList));
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
@@ -151,6 +157,20 @@ public class CodeGenerator {
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.SERVICE_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Generate code for Main ballerina file
+     *
+     * @param services list of model context to be used by the templates
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateMainBal(List<BallerinaService> services) throws IOException {
+        String srcFile = GeneratorConstants.MAIN_TEMPLATE_NAME + GeneratorConstants.BALLERINA_EXTENSION;
+        String mainContent = getContent(services, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+                GeneratorConstants.MAIN_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
