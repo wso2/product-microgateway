@@ -23,7 +23,7 @@ forever {
     }
 
     from s{{name}}eligibilityStream
-    window gateway:timeBatch({{unitTime}},0)
+    window gateway:timeBatch({{unitTime}})
     where s{{name}}eligibilityStream.isEligible == true
     select s{{name}}eligibilityStream.throttleKey as throttleKey, count() as eventCount, true as
     stopOnQuota, s{{name}}eligibilityStream.expiryTimestamp as expiryTimeStamp

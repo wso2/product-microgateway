@@ -64,7 +64,7 @@ public class CLIExecutor {
         homeDirectory = path + File.separator + project;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project};
+        String[] args2 = new String[]{"src", "-o", project,"--experimental"};
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 
@@ -102,7 +102,7 @@ public class CLIExecutor {
         homeDirectory = path + File.separator + project;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project};
+        String[] args2 = new String[]{"src", "-o", project, "--experimental"};
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 
@@ -139,7 +139,7 @@ public class CLIExecutor {
         homeDirectory = path + File.separator + project;
 
         String[] cmdArray = new String[] { "bash", balCommand, "build" };
-        String[] args2 = new String[] { "src", "-o", project };
+        String[] args2 = new String[] { "src", "-o", project, "--experimental" };
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 

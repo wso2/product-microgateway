@@ -24,7 +24,7 @@ function initSubscriptionUnauthenticatedPolicy() {
 
 
         from sUnauthenticatedeligibilityStream
-        window gateway:timeBatch(60000, 0)
+        window gateway:timeBatch(60000)
         where sUnauthenticatedeligibilityStream.isEligible == true
         select sUnauthenticatedeligibilityStream.throttleKey as throttleKey, count() as eventCount, true as stopOnQuota,
         sUnauthenticatedeligibilityStream.expiryTimestamp as expiryTimeStamp

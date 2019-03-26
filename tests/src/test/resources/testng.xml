@@ -41,12 +41,13 @@
             <!-- DistributedThrottlingTestCase should be the first since it starts message broker -->
             <class name="org.wso2.micro.gateway.tests.toolkit.DistributedThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuth2andBasicAuthTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithBasicAuthTestCase"/>
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithBasicAuthTestCase"/>-->
             <class name="org.wso2.micro.gateway.tests.toolkit.APIInvokeWithOAuthTestCase"/>
+
             <class name="org.wso2.micro.gateway.tests.toolkit.ThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.toolkit.OASAPIInvokeTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.toolkit.CookieAuthTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.toolkit.ValidationTestCase"/>
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.CookieAuthTestCase"/>-->
+            <!--<class name="org.wso2.micro.gateway.tests.toolkit.ValidationTestCase"/>-->
         </classes>
     </test>
 </suite>
