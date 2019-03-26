@@ -62,7 +62,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath1 = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "throttle-test-config.conf").getPath();
-        String[] args1 = {"--config", configPath1};
+        String[] args1 = {"--config", configPath1, "--experimental"};
         microGWServer.startMicroGwServer(balPath, args1);
     }
 
@@ -166,25 +166,25 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     }
 
 
-//    @Test(description = "Test subscription throttling with a JWT token")
-//    public void testSubscriptionThrottling() throws Exception {
-//        responseCode = invokeAndAssert2(jwtToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
-//        responseCode = invokeAndAssert2(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
-//    }
+    @Test(description = "Test subscription throttling with a JWT token")
+    public void testSubscriptionThrottling() throws Exception {
+        responseCode = invokeAndAssert2(jwtToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
+        responseCode = invokeAndAssert2(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
+    }
 
-//    @Test(description = "Test application throttling with a JWT token")
-//    public void testApplicationThrottlingWithJwtToken() throws Exception {
-//        responseCode = invokeAndAssert2(jwtToken2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
-//    }
-//
-//    @Test(description = "Test application throttling with oauth2 token")
-//    public void testApplicationThrottlingWithOauth2Token() throws Exception {
-//        responseCode = invokeAndAssert2(token2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
-//    }
+    @Test(description = "Test application throttling with a JWT token")
+    public void testApplicationThrottlingWithJwtToken() throws Exception {
+        responseCode = invokeAndAssert2(jwtToken2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
+    }
+
+    @Test(description = "Test application throttling with oauth2 token")
+    public void testApplicationThrottlingWithOauth2Token() throws Exception {
+        responseCode = invokeAndAssert2(token2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
+    }
 
 //    @Test(description = "Test throttling with non auth mode")
 //    public void testApplicationThrottlingInNonAuthMode() throws Exception {
@@ -192,11 +192,11 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
 //        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
 //    }
 
-//    @Test(description = "test subscription policy with stop on quota is false")
-//    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
-//        responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
-//    }
+    @Test(description = "test subscription policy with stop on quota is false")
+    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
+        responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+    }
 
     @Test(description = "test throttling with non exist subscription policy")
     public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
@@ -242,12 +242,11 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         if (token != null) {
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         }
-        int retry = 15;
+        int retry = 20;
         int responseCode = -1;
         while (retry > 0) {
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 20; i++) {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
-                Thread.sleep(1000);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
                 retry--;
