@@ -84,6 +84,11 @@
  public const string API_AUTH_NO_COOKIE_PROVIDED_STRING_DESCRIPTION =
 "Make sure you have given the authorized cookie at the server startup";
 
+ public const string API_AUTH_PROVIDER_INVALID_STRING = "900917";
+ public int API_AUTH_PROVIDER_INVALID = 900917;
+ public const string API_AUTH_PROVIDER_INVALID_MESSAGE = "Invalid Authentication scheme";
+ public const string API_AUTH_PROVIDER_INVALID_DESCRIPTION = "API can not be used with this authentication scheme";
+
  public const string DESCRIPTION_SEPARATOR = ". ";
 
  public  int INVALID_ENTITY = 900915;
@@ -128,6 +133,8 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = INVALID_ENTITY_MESSAGE;
     } else if (errorCode == INVALID_RESPONSE) {
         errorMessage = INVALID_RESPONSE_MESSAGE;
+    } else if (errorCode == API_AUTH_PROVIDER_INVALID) {
+        errorMessage = API_AUTH_PROVIDER_INVALID_MESSAGE;
     } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
@@ -154,6 +161,8 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_COOKIE_STRING_DESCRIPTION;
     } else if (API_AUTH_NO_COOKIE_PROVIDED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_NO_COOKIE_PROVIDED_STRING_DESCRIPTION;
+    } else if (API_AUTH_PROVIDER_INVALID == errorCode) {
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_PROVIDER_INVALID_DESCRIPTION;
     } else {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_GENERAL_ERROR_MESSAGE;
     }
