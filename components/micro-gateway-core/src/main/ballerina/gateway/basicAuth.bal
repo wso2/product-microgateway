@@ -28,8 +28,12 @@ import ballerina/encoding;
 
 public type BasicAuthUtils object {
 
-    http:AuthHandlerRegistry registry = new;
-    http:AuthnHandlerChain authnHandlerChain = new(registry);
+
+    http:AuthnHandlerChain authnHandlerChain;
+
+    public function __init(http:AuthnHandlerChain authnHandlerChain) {
+        self.authnHandlerChain = authnHandlerChain;
+    }
 
     public function processRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
@@ -58,34 +62,28 @@ public type BasicAuthUtils object {
             }
             string[] decodedCred = decodedCredentialsString.trim().split(":");
             userName = decodedCred[0];
+            printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
-                int status;
-                if (<int>context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
-                    status = UNAUTHORIZED;
-                    context.attributes[HTTP_STATUS_CODE] = status;
-                }
                 setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(caller, request, untaint context);
+                sendErrorResponse(caller, request, context);
                 return false;
             }
             passWord = decodedCred[1];
         } else {
-            int status;
-            if (<int>context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR) {
-                status = UNAUTHORIZED;
-                context.attributes[HTTP_STATUS_CODE] = status;
-            }
-            setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-            sendErrorResponse(caller, request, untaint context);
+            printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
+            setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+            sendErrorResponse(caller, request, context);
             return false;
         }
 
         //Hashing mechanism
-        string hashedPass = encoding:byteArrayToString(crypto:hashSha1(passWord.toByteArray("UTF-8")));
+        string hashedPass = encoding:encodeHex(crypto:hashSha1(passWord.toByteArray(UTF_8)));
+        printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        string encodedVal = encoding:encodeBase64(credentials.toByteArray("UTF-8"));
-        hashedRequest = "Basic " + encodedVal;
+        string encodedVal = encoding:encodeBase64(credentials.toByteArray(UTF_8));
+        printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
+        hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         request.setHeader(AUTHORIZATION_HEADER, hashedRequest);
 
         printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");

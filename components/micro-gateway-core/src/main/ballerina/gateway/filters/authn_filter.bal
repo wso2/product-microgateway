@@ -118,6 +118,18 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         } else {
             providerId = getAuthenticationProviderTypeWithCookie(authHeader);
         }
+        boolean canHandleAuthentication = false;
+        foreach string provider in authProvidersIds {
+            if(provider == providerId) {
+                canHandleAuthentication = true;
+            }
+        }
+
+        if(!canHandleAuthentication) {
+            setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
         // if auth providers are there, use those to authenticate
         if (providerId == AUTH_SCHEME_JWT) {
             printDebug(KEY_AUTHN_FILTER, "Non-OAuth token found. Calling the auth scheme : " + providerId);
@@ -148,7 +160,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
 
             // try {
             printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-            isAuthorized = authnHandlerChain.handle(request);
+            isAuthorized = authnHandlerChain.handleWithSpecificAuthnHandlers(authProvidersIds, request);
             printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
             checkAndRemoveAuthHeaders(request, authHeaderName);
             // } catch (error err) {
@@ -250,8 +262,9 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
 
         } else if (providerId == AUTHN_SCHEME_BASIC) {
             //Basic auth valiadation
-            BasicAuthUtils basicAuthentication = new();
-            boolean isValidated = basicAuthentication.processRequest(caller, request, context);
+            printDebug(KEY_AUTHN_FILTER, "Basic auth token found. Calling the auth scheme : " + providerId);
+            BasicAuthUtils basicAuthentication = new(authnHandlerChain);
+            boolean isValidated = basicAuthentication.processRequest(caller, request, untaint context);
             return isValidated;
 
         } else {
