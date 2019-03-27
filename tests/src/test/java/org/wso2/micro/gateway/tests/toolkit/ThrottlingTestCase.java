@@ -18,9 +18,6 @@
 package org.wso2.micro.gateway.tests.toolkit;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.commons.lang.time.FastDateFormat;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -35,10 +32,6 @@ import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,7 +79,7 @@ public class ThrottlingTestCase extends BaseTestCase {
 
         SubscriptionPolicy subPolicyContinueOnLimit = new SubscriptionPolicy();
         subPolicyContinueOnLimit.setPolicyName("allowOnLimitExceed");
-        subPolicyContinueOnLimit.setRequestCount(5);
+        subPolicyContinueOnLimit.setRequestCount(10);
         subPolicyContinueOnLimit.setStopOnQuotaReach(false);
         pub.addSubscriptionPolicy(subPolicyContinueOnLimit);
 
@@ -166,11 +159,11 @@ public class ThrottlingTestCase extends BaseTestCase {
 //        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
 //    }
 
-//    @Test(description = "test subscription policy with stop on quota is false")
-//    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
-//        responseCode = invokeAndAssert(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
-//        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
-//    }
+    @Test(description = "test subscription policy with stop on quota is false")
+    public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
+        responseCode = invokeAndAssert(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+    }
 
     @Test(description = "test throttling with non exist subscription policy")
     public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
