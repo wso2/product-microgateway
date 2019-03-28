@@ -23,7 +23,7 @@ forever {
     }
 
     from s{{name}}eligibilityStream
-    throttler:timeBatch({{unitTime}},0)
+    throttler:timeBatch({{unitTime}})
     where s{{name}}eligibilityStream.isEligible == true
     select s{{name}}eligibilityStream.throttleKey as throttleKey, count() as eventCount, {{stopOnQuotaReach}} as
     stopOnQuota, expiryTimeStamp

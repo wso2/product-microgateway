@@ -5,7 +5,7 @@ import wso2/gateway;
 future<()> ftr = start initThrottlePolicies();
 
 function initThrottlePolicies() {
-    private boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
+    boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
 
     if (!globalThrottlingEnabled) {
         while (true) {
