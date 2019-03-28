@@ -29,17 +29,10 @@ public type APIGatewayListener object {
     public http:Listener httpListener;
 
 
-    public function __init(http:ServiceEndpointConfiguration config) {
-        int port = 9090;
-        if((config.secureSocket is ())){
-            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
-        } else {
-            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
-        }
-
+    public function __init(int port, http:ServiceEndpointConfiguration config) {
         initiateGatewayConfigurations(config);
         printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
-        self.httpListener = new(port, config = config);
+        self.httpListener = new(getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port), config = config);
         printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
     }
 
