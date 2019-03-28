@@ -43,7 +43,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
 {{>docker}}
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
-listener gateway:APIGatewaySecureListener apiSecureListener = new(secureServiceEndpointConfiguration);
+listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
 http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                      filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
@@ -52,7 +52,7 @@ http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
-listener gateway:APIGatewayListener apiListener = new(serviceEndpointConfiguration);
+listener gateway:APIGatewayListener apiListener = new(9090, serviceEndpointConfiguration);
 
 
 function getAuthenticationFilter() returns gateway:AuthnFilter {
