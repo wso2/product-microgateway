@@ -30,11 +30,11 @@ public type APIGatewayListener object {
 
 
     public function __init(int port, http:ServiceEndpointConfiguration config) {
-        int port1 = port;
+        int port1 = 0;
         if ((config.secureSocket is ())) {
-            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
+            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
         } else {
-            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
+            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
         }
         initiateGatewayConfigurations(config);
         printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port1);
