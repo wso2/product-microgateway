@@ -227,4 +227,23 @@ public class BalFileGenerationUtils {
             LOG.debug("Failed to prowide execute permission to protoc executor.");
         }
     }
+
+    /**
+     * Resolve proto folder path from Proto file path.
+     *
+     * @param protoPath Proto file path
+     * @return Parent folder path of proto file.
+     */
+    public static String resolveProtoFolderPath(String protoPath) {
+        int idx = protoPath.lastIndexOf(BalGenerationConstants.FILE_SEPARATOR);
+        String protoFolderPath = EMPTY_STRING;
+        if (idx > 0) {
+            protoFolderPath = protoPath.substring(0, idx);
+        }
+        return protoFolderPath;
+    }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase(Locale.ENGLISH).startsWith("windows");
+    }
 }

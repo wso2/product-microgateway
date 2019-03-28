@@ -23,111 +23,78 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 
-
-@Description { value: "Representation of an API gateway listener" }
-@Field { value: "config: EndpointConfiguration instance" }
-@Field { value: "httpListener: HTTP Listener instance" }
 public type APIGatewayListener object {
-    public EndpointConfiguration config;
+    *AbstractListener;
+
     public http:Listener httpListener;
 
 
-    new() {
-        httpListener = new;
+    public function __init(http:ServiceEndpointConfiguration config) {
+        int port = 9090;
+        if((config.secureSocket is ())){
+            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
+        } else {
+            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
+        }
+
+        initiateGatewayConfigurations(config);
+        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
+        self.httpListener = new(port, config = config);
+        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
     }
 
-    public function init(EndpointConfiguration endpointConfig);
 
-    @Description { value: "Gets called when the endpoint is being initialize during package init time" }
-    @Return { value: "Error occured during initialization" }
-    public function initEndpoint() returns (error);
+    public function __start() returns error? {
+        return self.httpListener.__start();
+    }
 
-    @Description { value:
-    "Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-    @Param { value: "ep: The endpoint to which the service should be registered to" }
-    @Param { value: "serviceType: The type of the service to be registered" }
-    public function register(typedesc serviceType);
+    public function __stop() returns error? {
+        return self.httpListener.__stop();
+    }
 
-    @Description { value: "Starts the registered service" }
-    public function start();
+    public function __attach(service s, map<any> annotationData) returns error? {
+        return self.httpListener.__attach(s, annotationData);
+    }
 
-    @Description { value: "Returns the connector that client code uses" }
-    @Return { value: "The connector that client code uses" }
-    public function getCallerActions() returns (http:Connection);
 
-    @Description { value: "Stops the registered service" }
-    public function stop();
+
 };
-
-@Description { value: "Configuration for secure HTTP service endpoint" }
-@Field { value: "host: Host of the service" }
-@Field { value: "port: Port number of the service" }
-@Field { value: "keepAlive: The keepAlive behaviour of the connection for a particular port" }
-@Field { value: "transferEncoding: The types of encoding applied to the response" }
-@Field { value: "chunking: The chunking behaviour of the response" }
-@Field { value: "secureSocket: The SSL configurations for the service endpoint" }
-@Field { value: "httpVersion: Highest HTTP version supported" }
-@Field { value: "requestLimits: Request validation limits configuration" }
-@Field { value: "filters: Filters to be applied to the request before dispatched to the actual resource" }
-@Field { value: "authProviders: The array of AuthProviders which are used to authenticate the users" }
-public type EndpointConfiguration record {
-    string host,
-    int port = 9090,
-    http:KeepAlive keepAlive = "AUTO",
-    http:ServiceSecureSocket? secureSocket,
-    string httpVersion = "1.1",
-    http:RequestLimits? requestLimits,
-    http:Filter[] filters,
-    int timeoutMillis = DEFAULT_LISTENER_TIMEOUT,
-    http:AuthProvider[]? authProviders,
-    boolean isSecured,
-};
-
-
-function APIGatewayListener::init(EndpointConfiguration endpointConfig) {
-    initiateGatewayConfigurations(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + endpointConfig.port);
-    self.httpListener.init(endpointConfig);
-    printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + endpointConfig.port);
-}
 
 public function createAuthHandler(http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
         auth:AuthStoreProvider authStoreProvider;
         if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
             auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-            authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
+            authStoreProvider = configAuthStoreProvider;
         } else {
             // other auth providers are unsupported yet
-            error e = { message: "Invalid auth provider: " + authProvider.authStoreProvider };
-            throw e;
+            string errMessage = "Invalid auth provider: " + <string>authProvider.authStoreProvider;
+            error e = error("Invalid auth provider: " + authProvider.authStoreProvider);
+            panic e;
         }
         http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
-        return <http:HttpAuthnHandler>basicAuthHandler;
+        return basicAuthHandler;
     } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
-        jwtConfig.trustStoreFilePath = authProvider.trustStore.path but {() => ""};
-        jwtConfig.trustStorePassword = authProvider.trustStore.password but {() => ""};
+        jwtConfig.trustStoreFilePath = authProvider.trustStore.path  ?: "";
+        jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
-        return <http:HttpAuthnHandler>jwtAuthnHandler;
+        return jwtAuthnHandler;
     } else {
         // TODO: create other HttpAuthnHandlers
-        error e = { message: "Invalid auth scheme: " + authProvider.scheme };
-        throw e;
+        error e = error( "Invalid auth scheme: " + authProvider.scheme);
+        panic e;
     }
 }
 
-function initiateGatewayConfigurations(EndpointConfiguration config) {
-    if (!config.isSecured) {
-        config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
-    }
+public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
-    intitateKeyManagerConfigurations();
+    initiateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
@@ -148,9 +115,9 @@ public function getAuthProviders() returns http:AuthProvider[] {
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         trustStore: {
-            path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH,
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
         }
     };
     http:AuthProvider basicAuthProvider = {
@@ -178,72 +145,37 @@ public function getJWTAuthProvider() returns http:AuthProvider[] {
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         trustStore: {
-            path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH,
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
         }
     };
     return [jwtAuthProvider];
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {
-    cache:Cache authzCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
-        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100), evictionFactor = getConfigFloatValue(
-                                                                                                  CACHING_ID,
-                                                                                                  TOKEN_CACHE_EVICTION_FACTOR
-                                                                                                  , 0.25));
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    cache:Cache positiveAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
+        capacity = cacheSize, evictionFactor = evictionFactor);
+    cache:Cache negativeAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
+        capacity = cacheSize, evictionFactor = evictionFactor);
 
     auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
-    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
+    auth:AuthStoreProvider authStoreProvider = configAuthStoreProvider;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, positiveAuthzCache, negativeAuthzCache);
     http:AuthzFilter authzFilter = new(authzHandler);
     OAuthzFilter authzFilterWrapper = new(authzFilter);
     return authzFilterWrapper;
 }
 
-function intitateKeyManagerConfigurations() {
-    KeyManagerConf keyManagerConf;
-    Credentials credentials;
+function initiateKeyManagerConfigurations() {
+    KeyManagerConf keyManagerConf = {};
+    Credentials credentials = {};
     keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
-    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, "username", "admin");
-    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, "password", "admin");
+    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin");
+    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }
-
-
-@Description { value:
-"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization." }
-@Param { value: "ep: The endpoint to which the service should be registered to" }
-@Param { value: "serviceType: The type of the service to be registered" }
-function APIGatewayListener::register(typedesc serviceType) {
-    self.httpListener.register(serviceType);
-}
-
-@Description { value: "Gets called when the endpoint is being initialize during package init time" }
-@Return { value: "Error occured during initialization" }
-function APIGatewayListener::initEndpoint() returns (error) {
-    return self.httpListener.initEndpoint();
-}
-
-@Description { value: "Starts the registered service" }
-function APIGatewayListener::start() {
-    self.httpListener.start();
-}
-
-@Description { value: "Returns the connector that client code uses" }
-@Return { value: "The connector that client code uses" }
-function APIGatewayListener::getCallerActions() returns (http:Connection) {
-    return self.httpListener.getCallerActions();
-}
-
-@Description { value: "Stops the registered service" }
-function APIGatewayListener::stop() {
-    self.httpListener.stop();
-}
-
-
-
-
-
-

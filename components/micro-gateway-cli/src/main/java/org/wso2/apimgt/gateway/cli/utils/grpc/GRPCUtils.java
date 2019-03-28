@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.delete;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalFileGenerationUtils.saveFile;
@@ -73,6 +74,7 @@ public class GRPCUtils {
     private String balOutPath = "";
     private String exePath;
     private String protocVersion = "3.4.0";
+    private String mode = "stub";
 
     public void execute() {
         //if the file location is empty this error will throw
@@ -106,7 +108,7 @@ public class GRPCUtils {
         StringBuilder msg = new StringBuilder();
         outStream.println("Initializing the gateway proxy code generation.");
         byte[] root;
-        List<byte[]> dependant;
+        Set<byte[]> dependant;
         try {
             ClassLoader classLoader = this.getClass().getClassLoader();
             List<String> protoFiles = readProperties(classLoader);
@@ -126,8 +128,7 @@ public class GRPCUtils {
             }
 
             LOG.info("Successfully generated root descriptor.");
-            dependant = DescriptorsGenerator.generateDependentDescriptor
-                    (descFile.getAbsolutePath(), this.protoPath, new ArrayList<>(), exePath, classLoader);
+            dependant = DescriptorsGenerator.generateDependentDescriptor(exePath, new File(this.protoPath).getAbsolutePath(), descFile.getAbsolutePath());
             LOG.info("Successfully generated dependent descriptor.");
         } finally {
             //delete temporary meta files
@@ -139,12 +140,11 @@ public class GRPCUtils {
             BallerinaFileBuilder ballerinaFileBuilder;
             // By this user can generate stub at different location
             if (EMPTY_STRING.equals(balOutPath)) {
-                ballerinaFileBuilder = new BallerinaFileBuilder(dependant);
+                ballerinaFileBuilder = new BallerinaFileBuilder(root, dependant);
             } else {
-                ballerinaFileBuilder = new BallerinaFileBuilder(dependant, balOutPath);
+                ballerinaFileBuilder = new BallerinaFileBuilder(root, dependant, balOutPath);
             }
-            ballerinaFileBuilder.setRootDescriptor(root);
-            ballerinaFileBuilder.build();
+            ballerinaFileBuilder.build(this.mode);
         } catch (BalGenerationException e) {
             LOG.error("Error generating ballerina file.", e);
             msg.append("Error generating ballerina file.").append(NEW_LINE_CHARACTER);

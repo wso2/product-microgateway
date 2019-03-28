@@ -14,32 +14,47 @@
 // specific language governing permissions and limitations
 // under the License.
 
-endpoint http:Client conditionRetrievalEndpoint {
-    url: "https://localhost:9443",
-    retryConfig: {
-        interval: 3000,
-        count: 5,
-        backOffFactor: 0.5
-    }
-};
-endpoint http:Client keyValidationEndpoint {
-    url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
-    cache: { enabled: false },
-    secureSocket:{
-       verifyHostname:getConfigBooleanValue(KM_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
-    }
-};
+import ballerina/http;
 
-endpoint http:Listener tokenListenerEndpoint {
-    port:getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096),
-    host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost"),
-    secureSocket:{
-        keyStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+http:Client conditionRetrievalEndpoint = new (
+    "https://localhost:9443",config = {
+        retryConfig: {
+            interval: 3000,
+            count: 5,
+            backOffFactor: 0.5
         }
     }
-};
+);
+http:Client keyValidationEndpoint = new (
+    getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+    config =
+    {cache: { enabled: false },
+                secureSocket:{
+                verifyHostname:getConfigBooleanValue(KM_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+                }
+            }
+);
 
+http:Client analyticsFileUploadEndpoint = new (
+    getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
+    config =
+    {cache: { enabled: false },
+      secureSocket:{
+          verifyHostname:getConfigBooleanValue(ANALYTICS, ENABLE_HOSTNAME_VERIFICATION, true)
+      }
+    }
+);
+
+listener http:Listener tokenListenerEndpoint = new (
+    getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096), config = {
+        host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "localhost"),
+        secureSocket: {
+            keyStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
+                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                    LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+            }
+        }
+    }
+);

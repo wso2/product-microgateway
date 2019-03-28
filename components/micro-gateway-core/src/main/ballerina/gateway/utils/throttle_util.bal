@@ -19,14 +19,14 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/log;
 
-map blockConditions;
-map throttleDataMap;
-public stream<RequestStreamDTO> requestStream;
-public stream<GlobalThrottleStreamDTO> globalThrottleStream;
-public boolean isStreamsInitialized;
-future ftr = start initializeThrottleSubscription();
+map<string> blockConditions = {};
+map<any> throttleDataMap = {};
+public stream<RequestStreamDTO> requestStream = new;
+public stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
+public boolean isStreamsInitialized = false;
+future<()> ftr = start initializeThrottleSubscription();
 
-boolean blockConditionExist;
+boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
     GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
@@ -36,7 +36,7 @@ public function isBlockConditionExist(string key) returns (boolean) {
 public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
 }
-public function putBlockCondition(map m) {
+public function putBlockCondition(map<any> m) {
     string condition = <string>m[BLOCKING_CONDITION_KEY];
     string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
     string conditionState = <string>m[BLOCKING_CONDITION_STATE];
@@ -45,7 +45,7 @@ public function putBlockCondition(map m) {
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if (lengthof blockConditions.keys() == 0) {
+        if (blockConditions.keys().length()== 0) {
             blockConditionExist = false;
         }
     }
@@ -56,7 +56,7 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
         int currentTime = time:currentTime().time;
-        GlobalThrottleStreamDTO dto = check <GlobalThrottleStreamDTO>throttleDataMap[key];
+        GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         int timeStamp = dto.expiryTimeStamp;
         boolean stopOnQuota = dto.stopOnQuota;
         if (enabledGlobalTMEventPublishing == true) {
@@ -85,9 +85,14 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     }
 }
 
-function initializeThrottleSubscription() {
+public function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
+    printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
+}
+
+public function getInitThrottleSubscriptionFuture() returns future<()>{
+    return ftr;
 }
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey:" + throttleEvent.throttleKey +
@@ -114,7 +119,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
 }
 
 public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO {
-    EventDTO eventDTO;
+    EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getThrottleMetaData(dto);

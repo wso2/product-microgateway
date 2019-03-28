@@ -4,30 +4,64 @@ import ballerina/http;
 import ballerina/log;
 import wso2/gateway;
 
+stream<gateway:IntermediateStream> s{{name}}intermediateStream = new;
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}resultStream = new;
+stream<gateway:EligibilityStreamDTO> s{{name}}eligibilityStream = new;
+stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:requestStream;
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:globalThrottleStream;
+
 function {{funcName}}() {
-    stream<gateway:GlobalThrottleStreamDTO> resultStream;
-    stream<gateway:EligibilityStreamDTO> eligibilityStream;
-    forever {
-        from gateway:requestStream
-        select messageID, ({{tierType}} == "{{name}}") as isEligible, {{policyKey}} as throttleKey
-        => (gateway:EligibilityStreamDTO[] counts) {
-            eligibilityStream.publish(counts);
-        }
 
-        from eligibilityStream
-        throttler:timeBatch({{unitTime}}, 0)
-        where isEligible == true
-        select throttleKey, count(messageID) >= {{count}} as isThrottled, {{stopOnQuotaReach}} as stopOnQuota, expiryTimeStamp
-        group by throttleKey
-        => (gateway:GlobalThrottleStreamDTO[] counts) {
-            resultStream.publish(counts);
-        }
+forever {
+    from s{{name}}reqCopy
+    select s{{name}}reqCopy.messageID as messageID, (s{{name}}reqCopy.{{tierType}} == "{{name}}") as
+    isEligible, s{{name}}reqCopy.{{policyKey}} as throttleKey, 0 as expiryTimestamp
+    => (gateway:EligibilityStreamDTO[] counts) {
+    foreach var c in counts{
+        s{{name}}eligibilityStream.publish(c);
+    }
+    }
 
-        from resultStream
-        throttler:emitOnStateChange(throttleKey, isThrottled)
-        select throttleKey, isThrottled, stopOnQuota, expiryTimeStamp
-        => (gateway:GlobalThrottleStreamDTO[] counts) {
-            gateway:globalThrottleStream.publish(counts);
-        }
+    from s{{name}}eligibilityStream
+    window gateway:timeBatch({{unitTime}})
+    where s{{name}}eligibilityStream.isEligible == true
+    select s{{name}}eligibilityStream.throttleKey as throttleKey, count() as eventCount, true as
+    stopOnQuota, s{{name}}eligibilityStream.expiryTimestamp as expiryTimeStamp
+    group by s{{name}}eligibilityStream.throttleKey
+    => (gateway:IntermediateStream[] counts) {
+    foreach var c in counts{
+        s{{name}}intermediateStream.publish(c);
+    }
+    }
+
+    from s{{name}}intermediateStream
+    select s{{name}}intermediateStream.throttleKey, getThrottleValues{{name}}(s{{name}}intermediateStream.eventCount) as isThrottled,
+                    s{{name}}intermediateStream.stopOnQuota, s{{name}}intermediateStream.expiryTimeStamp
+    group by s{{name}}eligibilityStream.throttleKey
+    => (gateway:GlobalThrottleStreamDTO[] counts) {
+    foreach var c in counts{
+        s{{name}}resultStream.publish(c);
+    }
+    }
+
+    from s{{name}}resultStream
+    window gateway:emitOnStateChange(s{{name}}resultStream.throttleKey, s{{name}}resultStream.isThrottled, "s{{name}}resultStream")
+    select s{{name}}resultStream.throttleKey as throttleKey, s{{name}}resultStream.isThrottled,
+    s{{name}}resultStream.stopOnQuota, s{{name}}resultStream.expiryTimeStamp
+    => (gateway:GlobalThrottleStreamDTO[] counts) {
+    foreach var c in counts{
+        s{{name}}globalThrotCopy.publish(c);
+    }
+    }
+}
+}
+
+
+function getThrottleValues{{name}}(int eventCount) returns boolean{
+
+    if(eventCount>= {{count}}){
+        return true;
+    }else{
+        return false;
     }
 }

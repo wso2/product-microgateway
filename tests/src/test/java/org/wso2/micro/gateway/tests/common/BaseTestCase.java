@@ -68,7 +68,7 @@ public class BaseTestCase {
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath};
+        String[] args = {"--config", configPath, "--experimental"};
         microGWServer.startMicroGwServer(balPath, args);
     }
 
@@ -90,7 +90,7 @@ public class BaseTestCase {
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath};
+        String[] args = {"--config", configPath, "--experimental"};
         microGWServer.startMicroGwServer(balPath, args);
     }
 

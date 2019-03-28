@@ -26,7 +26,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>${basedir}/target/ballerina/ballerina-platform-${ballerina.platform.version}</directory>
+            <directory>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform</outputDirectory>
         </fileSet>
         <fileSet>
@@ -132,6 +132,7 @@
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
+                <include>com.beust:jcommander:jar</include>
             </includes>
         </dependencySet>
 

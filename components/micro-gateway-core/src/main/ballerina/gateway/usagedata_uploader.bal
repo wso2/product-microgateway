@@ -21,10 +21,7 @@ import ballerina/mime;
 stream<string> filesToUpload;
 
 
-function multipartSender(string location, string file, string username, string password) returns http:Response {
-    endpoint http:Client clientEP {
-        url: uploadingUrl
-    };
+public function multipartSender(string location, string file, string username, string password) returns http:Response {
     mime:Entity filePart = new;
     filePart.setFileAsEntityBody(location + file);
     filePart.setContentDisposition(getContentDispositionForFormData(file));
@@ -35,25 +32,24 @@ function multipartSender(string location, string file, string username, string p
     request.addHeader(FILE_NAME, file);
     request.addHeader(ACCEPT, APPLICATION_JSON);
     request.setBodyParts(bodyParts);
-    var returnResponse = clientEP->post("", request);
+    var returnResponse = analyticsFileUploadEndpoint->post("", request);
 
-    match returnResponse {
-        error err => {
+        if(returnResponse is error) {
             http:Response response = new;
             string errorMessage = "Error occurred while sending multipart request: SC " + 500;
             response.setPayload(errorMessage);
             response.statusCode = 500;
-            printFullError(KEY_UPLOAD_TASK, err);
+            printFullError(KEY_UPLOAD_TASK, returnResponse);
             return response;
         }
-        http:Response returnResult => {
-            return returnResult;
+        else  {
+            return returnResponse;
         }
-    }
+
 }
 
 
-function getContentDispositionForFormData(string partName)
+public function getContentDispositionForFormData(string partName)
              returns (mime:ContentDisposition) {
     mime:ContentDisposition contentDisposition = new;
     contentDisposition.name = "file";
@@ -62,14 +58,8 @@ function getContentDispositionForFormData(string partName)
     return contentDisposition;
 }
 
-function getBasicAuthHeaderValue(string username, string password) returns string {
+public function getBasicAuthHeaderValue(string username, string password) returns string {
     string credentials = username + ":" + password;
-    match credentials.base64Encode() {
-        string encodedVal => {
-            return "Basic " + encodedVal;
-        }
-        error err => {
-            throw err;
-        }
-    }
+    string encodedVal = encodeValueToBase64(credentials);
+    return "Basic " + encodedVal;  
 }

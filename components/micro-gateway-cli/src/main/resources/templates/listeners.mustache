@@ -16,39 +16,63 @@ import ballerina/log;
 
 
 //Get mutualSSL filter
-gateway: MutualSSLFilter  mtslFilter= new(ClientCerts);
+gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
-gateway:AuthnFilter authnFilter = new();
+gateway:AuthnFilter authnFilter = getAuthenticationFilter();
 // Subscription validation filter
 // Authorization filter
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
-map deployedPolicies = getDeployedPolicies();
+map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
 gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 // Validation filter
 gateway:ValidationFilter validationFilter = new;
 // Analytics filter
-gateway:AnalyticsRequestFilter analyticsFilter = new();
+gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
-ExtensionFilter extensionFilter;
+ExtensionFilter extensionFilter = new;
+
+http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http2}},
+                                                                           {{>mutualSSL}}
+                                                                           filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                           extensionFilter]
+                                                                       };
 
 {{>docker}}
 {{>secureKubernetesIngress}}
 {{>kubernetesService}}
-endpoint gateway:APIGatewaySecureListener apiSecureListener {
-    port:9095{{>http2}},
-    {{>mutualSSL}}
-    filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
-    extensionFilter]
-};
+listener gateway:APIGatewaySecureListener apiSecureListener = new(secureServiceEndpointConfiguration);
+
+http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
+                                                                     filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                     extensionFilter]
+                                                                 };
 
 {{>kubernetesIngress}}
 {{>kubernetesService}}
-endpoint gateway:APIGatewayListener apiListener {
-    port:9090{{>http2}},
-    filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
-    extensionFilter]
-};
+listener gateway:APIGatewayListener apiListener = new(serviceEndpointConfiguration);
+
+
+function getAuthenticationFilter() returns gateway:AuthnFilter {
+    http:AuthHandlerRegistry registry = new;
+    // Getting basic and JWT authentication providers
+    http:AuthProvider[] authProviders = gateway:getAuthProviders();
+    int i = 1;
+    foreach var provider in authProviders {
+        if ( provider.id.length() > 0) {
+            registry.add(provider.id, gateway:createAuthHandler(provider));
+        } else {
+            registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
+        }
+        i= i +1;
+    }
+    // Adding basic and JWT authentication providers to a the handler chain
+    http:AuthnHandlerChain authnHandlerChain = new(registry);
+    // OAuth authentication handler
+    gateway:OAuthnAuthenticator oauthAuthenticator = new;
+    // Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
+    return new gateway:AuthnFilter(oauthAuthenticator, authnHandlerChain);
+}
 

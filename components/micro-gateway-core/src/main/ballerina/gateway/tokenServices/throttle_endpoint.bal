@@ -23,9 +23,7 @@ string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
     "admin:admin");
 
-endpoint http:Client throttleEndpoint {
-    url: throttleEndpointUrl
-};
+http:Client throttleEndpoint = new(throttleEndpointUrl);
 
 public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEvent) {
 
@@ -56,7 +54,7 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     };
 
     http:Request clientRequest = new;
-    string encodedBasicAuthHeader = check throttleEndpointbase64Header.base64Encode();
+    string encodedBasicAuthHeader = encoding:encodeBase64(throttleEndpointbase64Header.toByteArray("UTF-8"));
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
 
@@ -64,15 +62,11 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
 
     var response = throttleEndpoint->post("/throttleEventReceiver", clientRequest);
 
-    match response {
-        http:Response resp => {
-            log:printDebug("\nStatus Code: " + resp.statusCode);
-        }
-        error err => {
-            log:printError(err.message, err = err);
-        }
+    if(response is http:Response) {
+        log:printDebug("\nStatus Code: " + response.statusCode);
     }
+    else if(response is error){
+        log:printError(response.reason(), err = response);
+    }
+
 }
-
-
-
