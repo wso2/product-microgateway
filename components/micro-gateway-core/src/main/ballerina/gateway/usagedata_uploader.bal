@@ -22,7 +22,6 @@ stream<string> filesToUpload;
 
 
 public function multipartSender(string location, string file, string username, string password) returns http:Response {
-    http:Client clientEP = new(uploadingUrl);
     mime:Entity filePart = new;
     filePart.setFileAsEntityBody(location + file);
     filePart.setContentDisposition(getContentDispositionForFormData(file));
@@ -33,7 +32,7 @@ public function multipartSender(string location, string file, string username, s
     request.addHeader(FILE_NAME, file);
     request.addHeader(ACCEPT, APPLICATION_JSON);
     request.setBodyParts(bodyParts);
-    var returnResponse = clientEP->post("", request);
+    var returnResponse = analyticsFileUploadEndpoint->post("", request);
 
         if(returnResponse is error) {
             http:Response response = new;

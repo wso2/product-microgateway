@@ -35,6 +35,16 @@ http:Client keyValidationEndpoint = new (
             }
 );
 
+http:Client analyticsFileUploadEndpoint = new (
+    getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
+    config =
+    {cache: { enabled: false },
+      secureSocket:{
+          verifyHostname:getConfigBooleanValue(ANALYTICS, ENABLE_HOSTNAME_VERIFICATION, true)
+      }
+    }
+);
+
 listener http:Listener tokenListenerEndpoint = new (
     getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096), config = {
         host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "localhost"),
