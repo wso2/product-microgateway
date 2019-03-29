@@ -374,7 +374,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>0.981.1</ballerina.platform.version>
+        <ballerina.platform.version>0.990.3</ballerina.platform.version>
         <carbon.apimgt.version>7.0.226</carbon.apimgt.version>
         <assembly.plugin.version>2.5.2</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
