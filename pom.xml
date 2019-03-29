@@ -401,7 +401,7 @@
         <jcommander.version>1.60</jcommander.version>
         <handlebars.version>4.0.6</handlebars.version>
         <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
-        <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
+        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
         <testng.version>6.13.1</testng.version>
         <toml.parser.version>0.7.2</toml.parser.version>
         <os.maven.plugin.version>1.5.0.Final</os.maven.plugin.version>
