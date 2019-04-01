@@ -19,10 +19,10 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.ballerinalang.config.cipher.AESCipherTool;
-import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
+import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -32,17 +32,16 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
-
-import java.io.File;
-import java.io.FileWriter;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -56,6 +55,7 @@ public class GatewayCmdUtils {
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
     private static Etcd etcd;
+    private static final String algorithm = "AES";
 
     public static Etcd getEtcd() {
         return etcd;
@@ -211,6 +211,15 @@ public class GatewayCmdUtils {
      */
     public static String getCLIHome() {
         return System.getProperty(GatewayCliConstants.CLI_HOME);
+    }
+
+    /**
+     * Get cli library location
+     *
+     * @return cli lib location
+     */
+    public static String getCLILibPath() {
+        return getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB;
     }
 
     /**

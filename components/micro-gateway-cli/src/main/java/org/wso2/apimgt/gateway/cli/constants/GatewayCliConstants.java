@@ -39,11 +39,17 @@ public class GatewayCliConstants {
     public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
+    public static final String CLI_REPO = "repo";
     public static final String CLI_CONF = "conf";
     public static final String CLI_RUNTIME = "runtime";
+    public static final String CLI_PLATFORM = "platform";
+    public static final String CLI_GATEWAY = "gateway";
+    public static final String CLI_BALO = "balo";
+    public static final String CLI_BRE = "bre";
     public static final String POLICY_DIR = "policies";
     public static final String EXTENSION_BALX = ".balx";
     public static final String EXTENSION_ZIP = ".zip";
+    public static final String EXTENSION_JAR = ".jar";
     public static final String GW_TARGET_DIST = "distribution";
     public static final String GW_DIST_PREFIX = "micro-gw-";
     public static final String GW_DIST_BIN = "bin";
