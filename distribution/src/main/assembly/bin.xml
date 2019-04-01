@@ -108,8 +108,6 @@
         <file>
             <source>${basedir}/resources/updates/product.txt</source>
             <outputDirectory>wso2am-micro-gw-${pom.version}/updates</outputDirectory>
-            <filtered>true</filtered>
-            <fileMode>644</fileMode>
         </file>
     </files>
 
