@@ -36,6 +36,7 @@ public class GatewayCliConstants {
     public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
+    public static final String LIB_HASH_HOLDER_FILE_NAME = "hashes";
     public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";

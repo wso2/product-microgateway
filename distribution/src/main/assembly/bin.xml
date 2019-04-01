@@ -38,6 +38,10 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${basedir}/resources/temp</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/temp</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}/resources/cli-conf</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/conf</outputDirectory>
         </fileSet>

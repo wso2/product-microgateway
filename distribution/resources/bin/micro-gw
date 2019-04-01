@@ -215,7 +215,7 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
-if [ "$IS_SETUP_COMMAND" = true ]; then
+if [ "$IS_SETUP_COMMAND" = true ] && [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
 for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
 do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j

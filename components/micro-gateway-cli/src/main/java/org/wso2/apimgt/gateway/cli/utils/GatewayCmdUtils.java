@@ -38,15 +38,19 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 public class GatewayCmdUtils {
 
@@ -440,6 +444,17 @@ public class GatewayCmdUtils {
     private static String getResourceHashHolderFileLocation(String projectName) {
         return getProjectTempFolderLocation(projectName) + File.separator
                 + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
+    }
+
+
+    /**
+     * Get library zip files hash holder file path with in the CLI tool
+     *
+     * @return library zip hash holder file path of the CLI tool
+     */
+    public static String getCLILibHashHolderFileLocation() {
+        return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME + File.separator + GatewayCliConstants
+                .LIB_HASH_HOLDER_FILE_NAME;
     }
 
     /**
@@ -894,6 +909,32 @@ public class GatewayCmdUtils {
         }
         if (!file.delete()) {
             throw new IOException();
+        }
+    }
+
+    /**
+     * Writes the map after serializing  to given path
+     *
+     * @param map      resource hash content
+*    * @param filePath file path the map should be written to
+     * @throws IOException error while saving resource hash content
+     */
+    public static void writeMapToFile(Map<String,String> map, String filePath) throws IOException {
+        try(FileOutputStream fos = new FileOutputStream(filePath); ObjectOutputStream obs = new
+                ObjectOutputStream(fos)){
+            obs.writeObject(map);
+        }
+    }
+
+    /**
+     * Read the deserialize file content to map
+     *
+     * @param filePath file path the map should be written to
+     * @throws IOException error while saving resource hash content
+     */
+    public static Map<String ,String> readFileToMap(String filePath) throws IOException, ClassNotFoundException {
+        try(FileInputStream fis = new FileInputStream(filePath);ObjectInputStream obi = new ObjectInputStream(fis)){
+            return (Map<String , String>) obi.readObject();
         }
     }
 }
