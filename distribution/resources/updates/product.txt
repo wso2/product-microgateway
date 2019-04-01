@@ -1,1 +1,1 @@
-${product.name}-${product.version}
+wso2am-micro-gw-2.6.0
