@@ -37,9 +37,13 @@
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
         </fileSet>
+        <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/temp</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/cli-conf</directory>
