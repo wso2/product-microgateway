@@ -48,6 +48,7 @@ if "%MICROGW_HOME%" == "" set MICROGW_HOME=%PRGDIR%..
 
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+if not exist "%MICROGW_HOME%\lib\platform" BALLERINA_HOME="$MICROGW_HOME/lib"
 set PATH=%PATH%;%BALLERINA_HOME%\bin\
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 
