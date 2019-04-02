@@ -40,8 +40,8 @@ set BALLERINA_HOME=%GWHOME%\runtime
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 
-rem Slurp the command line arguments. This loop allows for an unlimited number
-rem of arguments (up to the command line limit, anyway).
+REM Slurp the command line arguments. This loop allows for an unlimited number
+REM of arguments (up to the command line limit, anyway).
 :setupArgs
 	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
 	if ""%1""=="""" goto :callBallerina
@@ -67,7 +67,7 @@ goto end
 
 
 :callBallerina
-	rem ---------- Run balx with ballerina ----------------
+	REM ---------- Run balx with ballerina ----------------
 	REM Change the windows style `\` path separator to unix style `/path/to/file` for log file path
 	set "separator=/"
 	set log_path="%GWHOME%\logs\access_logs"
@@ -88,7 +88,7 @@ goto end
 		echo [%date% %time%] WARN: Can't find powershell in the system!
 		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
 		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
-		%GWHOME%\runtime\bin\ballerina run "%GWHOME%\exec\${label}.balx" -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
+		%GWHOME%\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%GWHOME%\exec\${label}.balx" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
 	) else (
 		REM Change Java heap Xmx and Xmx values
 		powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
@@ -106,10 +106,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run .\exec\${label}.balx -e api.usage.data.path=$Env:usage_data_path  -e b7a.http.accesslog.path=$Env:unix_style_path --config .\conf\micro-gw.conf *>&1 | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf .\exec\${label}.balx | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run .\exec\${label}.balx -e api.usage.data.path=$Env:usage_data_path -e b7a.http.accesslog.path=$Env:unix_style_path --config .\conf\micro-gw.conf *>&1 |  tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf .\exec\${label}.balx | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
