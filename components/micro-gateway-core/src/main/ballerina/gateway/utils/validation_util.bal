@@ -14,7 +14,7 @@ public type Result object {
     boolean valid = false;
     int errorCount = 0;
     error?[] resultErr = [];
-    string[] getErrorMessages = [];
+    string?[] getErrorMessages = [];
     string modelName = "";
 };
 
@@ -41,6 +41,7 @@ function read(string path) returns json {
 
 //validate all data types related attributes
 public function valueValidator(string key, json value, json field) returns (error?[]) {
+    io:println("------ValueValidator---------------------");
     error?[] errors = [];
     if (field[TYPE].toString() == STRING && field.format == null) {
         int min = 0;
@@ -106,6 +107,8 @@ public function valueValidator(string key, json value, json field) returns (erro
     }
     //if field contains a enum validate it
     if (field.enum != null)  {
+        io:println("---------Field--------", field);
+        io:println("--------Field- Enum-----------", field.enum);
         processError(errors, validateEnums(key, value, field.enum));
     }
     return errors;//return the array of errors
@@ -279,14 +282,14 @@ public function validateMaxValue(string name, int|float value, int maxValue, boo
 }
 //validate enums
 public function validateEnums(string name, json value, json enums) returns (boolean|error) {
-    map<json> mapEnums = <map<json>> map<json>.convert(enums);
+    json[] Enums = <json[]>enums;
     //if there is no value doesn't need to validate
     if (value == null) {
         return true;
     }
     //iterate througth the enum map and check whether the value is matching with any item in the enum
-    foreach var (k, v) in mapEnums {
-        if (value == v) {
+    foreach var k in Enums {
+        if (value == k) {
             return true;
         }
     }
@@ -414,25 +417,19 @@ public function createReturnObject(error?[]|error err, string modelName) returns
             result.valid = false;
             result.errorCount = 1;
             result.resultErr[0] = err;
-        }
-    } else if(err is error[]) {
-        if (err.length() == 0) {
-            result.valid = true;
-            result.errorCount = 0;
-        } else {
-            result.valid = false;
-            result.errorCount = err.length();
-            result.resultErr = err;
-
-            int index = 0;
-            foreach var item in err {
-                result.getErrorMessages[index] = item.reason();
-                index = index +1;
-            }
+       }
+    } else {
+        result.errorCount = err.length();
+        result.valid = false;
+        int index = 0;
+        foreach var item in err {
+            result.resultErr[index] = item;
+            index = index +1;
         }
     }
     if (modelName.length() > 0) {
         result.modelName = modelName;
+
     }
     return result;
 }
@@ -442,11 +439,9 @@ public function validateValue(string key, json field, json value, json models) r
     error?[] valueErrors = [];
     if (value != null) {
         //validate the type
-        var typeErrors = validateType(key, value, field, models);
-        if (typeErrors == ()) {
-            if (!typeErrors.valid && typeErrors.errorCount > 0) {
+        var typeErrors =  validateType(key, value, field, models);
+        if (!typeErrors.valid && typeErrors.errorCount > 0) {
                 return createReturnObject(typeErrors.resultErr, " ");
-            }
         }
         valueErrors = valueValidator(key, value, field);
         if (valueErrors is error[]) {
@@ -470,11 +465,10 @@ public function validateType(string name, json value, json field, json models) r
             string fieldReference = replaceModelPrefix(field[REFERENCE].toString());
             //validate the target object with the referenced model
             return validate(name, value, models[fieldReference], models);
-        } else {
-            return result;
         }
     } else {
         expectedType = expectedType.toLower();
+
     }
     //if expectedType is a object, validate the object
     if (expectedType == OBJECT) {
@@ -486,6 +480,7 @@ public function validateType(string name, json value, json field, json models) r
     }
     //get the format of the field
     string format = field.format.toString();
+    io:println("payload field format", format);
 
     if (format != NULL) {
         format = format.toLower();
@@ -493,7 +488,8 @@ public function validateType(string name, json value, json field, json models) r
 
     if (value == null) {//if there is no value, no point of validating
         return result;
-    } else if (validateExpectedType(expectedType, value, format)) {//validate value and format
+    } else if (validateExpectedType(expectedType, value, format)) {
+        //validate value and format
         result.valid = true;
         //if the field is of expected type then that value is valid
         return result;
@@ -501,10 +497,11 @@ public function validateType(string name, json value, json field, json models) r
         error err = error(value.toString() + " is not the type, " + expectedType);
         return createReturnObject(err, " ");
     }
-  } else { 
+  } else {
         error err = error(" There ano model/field found ");
         return createReturnObject(err, " ");
-  } 
+  }
+   //return result;
 }
 //validating an object
 public function validateObject(string name, json value, json field, json models) returns (Result) {
@@ -519,9 +516,9 @@ public function validateObject(string name, json value, json field, json models)
 }
 //validating an array
 public function validateArray(string name, json value, json field, json models) returns (Result) {
-    map<json> mapValue = <map<json>> map<json>.convert(value);
+    json[] mapValue = <json[]>value;
     Result result = new();
-    if (typeOf(value) != ARRAY) {//if the provided value is not an array send an error
+    if (<string>typeOf(value) != ARRAY) {//if the provided value is not an array send an error
         error err = error(value.toString() + " is not an array. An array is expected.");
         return createReturnObject(err, " ");
     }
@@ -541,7 +538,7 @@ public function validateArray(string name, json value, json field, json models) 
         var fieldType = field[ITEMS][TYPE];
         error?[] firstErrorArray = [];
         //loop each item in the array and validate them
-        foreach var (k,v) in mapValue {
+        foreach var v in mapValue {
             json newVal = v;
             var valueErrors = validateValue(name + string.convert(countItems), field[ITEMS], newVal, models);
             if (valueErrors != () && !valueErrors.valid && valueErrors.errorCount > 0) {
@@ -567,7 +564,7 @@ public function validateArray(string name, json value, json field, json models) 
             error?[] secondErrorArray = [];
             int k = 0;
             //loop each item in the array and validate them against the referenced model
-            foreach var (q, r) in mapValue {
+            foreach var r in mapValue {
                 json newVal = r;
                 var validationErrors = validate(name, newVal, model, models);
                 if (validationErrors != () && !validationErrors.valid && validationErrors.errorCount > 0) {
@@ -609,19 +606,28 @@ public function validateArray(string name, json value, json field, json models) 
 }
 //validating whether the provided value is of the expected type
 public function validateExpectedType(string expectedType, json value, string format) returns (boolean) {
-    if (expectedType == STRING){
+    io:println("--------validateExpectedType -------expectedtype",expectedType );
+    //any eType = expectedType;
+  //  io:println("--------validateExpectedType etype-------expectedtype",eType );
+    if (expectedType == "string") {
+        io:println("----------------------STRING ---------------------------");
         if (isStringType(value, format)) {
             return true;
         }
-    } else if (expectedType == BOOLEAN) {
+    } else if (expectedType == "boolean") {
+        io:println("----------------------BOOLEAN---------------------------");
+       // io:println("eType", eType);
         if (isExpectedType(value, expectedType)) {
             return true;
         }
-    } else if (expectedType == INTEGER) {
+    } else if (expectedType == "int") {
+        io:println("----------------------INT---------------------------");
         if (isIntegerType(value, format)) {
+            io:println("Integer------------");
             return true;
         }
-    } else if (expectedType == NUMBER) {
+    } else if (expectedType == "number") {
+        io:println("----------------------NUMBERRRRRR---------------------------");
         if (isNumberType(value, format)) {
             return true;
         }
@@ -631,18 +637,19 @@ public function validateExpectedType(string expectedType, json value, string for
 //validating whether the provided value is of string type
 public function isStringType(json value, string format) returns (boolean) {
     string stringValue = value.toString();
+    any formatAny = format;
     if (isExpectedType(value, STRING)) {
         if (format.length() > 0) {
             return true;
         } else if (format == DATE || format == DATE_TIME) {
             boolean state = true;
-            time:Time | error time1 = trap time:parse(stringValue, YYYY_MM_DD);
-                if (time1 is time:Time) {
-                  return state;
-                } else {
-                  state = false;
-                }
-                //parse the string value to check whether it is in the correct format
+            time:Time|error time1 = trap time:parse(stringValue, YYYY_MM_DD);
+            if (time1 is time:Time) {
+                return state;
+            } else {
+                state = false;
+            }
+            //parse the string value to check whether it is in the correct format
         } else {
             return true;
         }
@@ -652,6 +659,7 @@ public function isStringType(json value, string format) returns (boolean) {
 
 //validating whether the provided value is of integer type
 public function isIntegerType(json value, string format) returns (boolean) {
+
     if (!isExpectedType(value, INTEGER)) {
         return false;
     }
@@ -679,26 +687,45 @@ public function isIntegerType(json value, string format) returns (boolean) {
 }
 //validating whether the provided value is of number type
 public function isNumberType(json value, string format) returns (boolean) {
-    if (typeOf(value) == INTEGER) {
+    io:println("JSON is NumberType---------------",value);
+    if (typeOf(value)== INTEGER) {
+        io:println("json int ---------isNumberType========");
         return isIntegerType(value, format);
     } else if (typeOf(value) == NUMBER) {
+        io:println("json float ---------isNumberType========");
         return true;
     } else {
+        io:println("json int ---------false=======");
         return false;
     }
 }
 //return whether the type of the value is same as the expected type
 public function isExpectedType(json value, string expectedType) returns (boolean) {
+    io:println("expected type-----+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----", expectedType);
     string typeof = "";
 
-    if(value is int) {typeof = INTEGER;}
+    if(value is int) {
+        typeof = INTEGER;
+        io:println("typeof------(())))))))",typeof);
+        io:println("EXPECTED TYPE()()==============############",expectedType);
+    }
     else if (value is float) {typeof = NUMBER;}
-    else if(value is string) {typeof = STRING;}
-    else if (value is boolean) {typeof = BOOLEAN;}
-    else { typeof = JSON;}
-    return expectedType == typeof;
-}
+    else if(value is string) {
 
+        typeof = STRING;}
+    else if (value is boolean) {
+        io:println("boollllllllll");
+        typeof = BOOLEAN;}
+    else { typeof = JSON;}
+    if (expectedType == typeof) {
+        io:println("true");
+        return true;
+    } else {
+        io:println("false");
+        return false;
+    }
+
+}
 public function validateSpecification(string name, json target, json model, json models) returns (error?[]) {
     map<json> mapValue = <map<json>> map<json>.convert(target);
     //getting the properties defined in the model
@@ -720,7 +747,7 @@ public function validateSpecification(string name, json target, json model, json
             }
         }
     } else {//if there are properties, it means it is a model
-        if (typeOf(target) != ARRAY) {
+        if (<string>typeOf(target) != ARRAY) {
             errorArray = validateProperties(target, model, models);
             if (model.discriminator != null && errorArray.length() >= 1) {
                 //if the parent model have the discriminator property but the discriminated model doesn't contain
@@ -783,9 +810,16 @@ public function validateSpecification(string name, json target, json model, json
 //return the type of the target object
 public function typeOf(json target) returns (string) {
     string typeof = "";
-    if(target is int) {typeof = INTEGER;}
-    else if (target is float) {typeof = NUMBER;}
-    else if(target is string) {typeof = STRING;}
+    if(target is int) {
+        io:println("Type of ------INT------");
+        typeof = INTEGER;
+    }
+    else if (target is float) {
+        io:println("Type of ------float-----");
+        typeof = NUMBER;
+    }
+    else if(target is string) {typeof = STRING;
+    }
     else if (target is boolean) {typeof = BOOLEAN;}
     else if(target is json[]) {typeof = ARRAY;}
     else { typeof = OBJECT;}
@@ -812,8 +846,8 @@ public function validate(string name, json target, json swaggerModel, json swagg
         modelType = OBJECT;
     }
     //compare the type of the target and model
-    if (targetType != modelType) {
-        err = error("Unable to validate a model with a type: " + targetType + ", expected: " + modelType);
+    if (<string>targetType != modelType) {
+        err = error("Unable to validate a model with a type: " + <string>targetType + ", expected: " + modelType);
         return createReturnObject(err, " ");
     }
     //if there is allOf/discriminator properties, create a new model by merging all referenced models
@@ -834,11 +868,18 @@ public function validate(string name, json target, json swaggerModel, json swagg
 }
 //validate required fields
 public function validateRequiredFields(json target, json fields, json modelFields) returns (error?[]) {
-    map<json> mapValue = <map<json>> map<json>.convert(target);
+    map<json> mapValue;
+    if (target is json[]) {
+         json val = target[1];
+         mapValue = <map<json>> map<json>.convert(val);
+    } else {
+        mapValue = <map<json>> map<json>.convert(target);
+    }
+
     int j = 0;
     error?[] errorArray = [];
     //required field should be an array, if not send an error
-    if (typeOf(fields) != ARRAY) {
+    if (<string>typeOf(fields) != ARRAY) {
         error err = error("fields must be an array of required fields");
         errorArray[j] = err;
         j = j + 1;
@@ -850,7 +891,7 @@ public function validateRequiredFields(json target, json fields, json modelField
     while (i < fields.length()) {
         var property = fields[i].toString();
         //if the target object is an array check whether each item includes required fields
-        if (typeOf(target) == ARRAY) {
+        if (<string>typeOf(target) == ARRAY) {
             foreach var(k, v) in mapValue {
               if (v[property] == null || modelFields[property] == null) {
                 error err = error(property + " is a required field");

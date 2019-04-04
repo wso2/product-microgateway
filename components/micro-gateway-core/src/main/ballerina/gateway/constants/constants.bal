@@ -171,6 +171,7 @@
  public const string SWAGGER = "_swagger";
  public const string SEPERATOR = ".";
  public const string BASEPATH = "../../../src/";
+ public const string INT = "int";
 
 // config constants
  public const string KM_CONF_INSTANCE_ID = "keyManager";

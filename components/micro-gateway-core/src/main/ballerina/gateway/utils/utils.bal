@@ -315,6 +315,7 @@ public function getConfigValue(string instanceId, string property, string defaul
 }
 
 public function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
+
     return config:getAsInt(instanceId + "." + property, default = defaultValue);
 }
 

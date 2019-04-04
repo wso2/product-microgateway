@@ -92,10 +92,10 @@ public class MockHttpServer extends Thread {
     public final static String INVALID_POSTBODY = "{\"customerName\":\"string\", \"delivered\":true, " +
             "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
             " \"orderId\":44}";
-    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915," +
-            " \"message\":\"Unprocessable entity\", \"description\":\"[\\\"44 is not the type, string\\\"]\"}}";
-    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, " +
-            "\"message\":\"Unprocessable entity\", \"description\":\"[\\\"name is a required field\\\"]\"}}";
+    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, \"message\":" +
+            "\"Unprocessable entity\", \"description\":\"name is a required field\"}}";
+    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915, " +
+            "\"message\":\"Unprocessable entity\", \"description\":\"44 is not the type, string\"}}";
     int count = 0;
 
     public static void main(String[] args) {

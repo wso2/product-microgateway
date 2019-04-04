@@ -66,12 +66,12 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         //getting the payload of the request
         var payload = request.getJsonPayload();
         isType = false;
-        service serviceReference = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
         APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
         json swagger = read(swaggerAbsolutePath);
         json model = {};
         json models = {};
         string modelName = "";
+
         //getting all the keys defined under the paths in the swagger
         pathKeys = untaint swagger[PATHS].getKeys();
         //getting the method of the request
@@ -90,25 +90,25 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                 if (requestPath == i) {
                     json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
                     //go through each item in parameters array and find the schema property
-                    // Todo: Fix the Loop
-                    //foreach var k in parameters {
-
-                    // if (v != null) {
-                    //     if (k[SCHEMA][REFERENCE] != null)  {
-                    //         //getting the reference to the model
-                    //         string modelReference = k[SCHEMA][REFERENCE].toString();
-                    //         //getting the model name
-                    //         modelName = untaint replaceModelPrefix(modelReference);
-                    //         //check whether there is a model available from the asigned model name
-                    //         if (models[modelName] != null) {
-                    //             model = models[modelName];
-                    //         }
-                    //     } else {
-                    //         //getting inline model
-                    //         model = k[SCHEMA];
-                    //     }
-                    // }
-                    //}
+                    //go through each item in parameters array and find the schema property
+                    json[] para = <json[]>parameters;
+                    foreach var k in para {
+                        if (k[SCHEMA] != null) {
+                            if (k[SCHEMA][REFERENCE] != null)  {
+                                //getting the reference to the model
+                                string modelReference = k[SCHEMA][REFERENCE].toString();
+                                //getting the model name
+                                modelName = untaint replaceModelPrefix(modelReference);
+                                //check whether there is a model available from the assigned model name
+                                if (models[modelName] != null) {
+                                    model = models[modelName];
+                                }
+                            } else {
+                                //getting inline model
+                                model = k[SCHEMA];
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -118,11 +118,12 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
             //do the validation if only there is a payload and a model available
             if (model != null && payload != null)  {
                 //validate the payload against the model and return the result
-                var finalResult = validate(modelName, payload, model, models);
+                Result finalResult = validate(modelName, payload, model, models);
                 if (!finalResult.valid) {
                     //setting the error message to the context
                     setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
-                    filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
+                    error? err = finalResult.resultErr[0];
+                    filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.resultErr[0].reason();
                     //sending the error response to the client
                     sendErrorResponse(caller, request, filterContext);
                     return false;//avoid sending the invalid request to the backend by returning false.
@@ -137,7 +138,6 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
     if (enableResponseValidation) {
         //getting the payload of the response
         var payload = response.getJsonPayload();
-        service serviceType = <service>runtime:getInvocationContext().attributes[SERVICE_TYPE_ATTR];
         APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
         json swagger = read(swaggerAbsolutePath);
         json model = {};
@@ -197,15 +197,15 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
         }
         //payload can be of type json or error
         if(payload is json) {
-            //do the validation if only thre is a payload and a model available. prevent validating error
+            //do the validation if only there is a payload and a model available. prevent validating error
             //responses sent from the filterRequest if the request is invalid.
             if (model != null && payload != null && payload.fault == null) {
                 //validate the payload against the model and return the result
-                var finalResult = validate(modelName, payload, model, models);
+                Result finalResult = validate(modelName, payload, model, models);
                 if (!finalResult.valid) {
                     //setting the error message to the context
                     setErrorMessageToFilterContext(context, INVALID_RESPONSE);
-                    context.attributes[ERROR_DESCRIPTION] = untaint finalResult.getErrorMessages;
+                    context.attributes[ERROR_DESCRIPTION] = untaint finalResult.resultErr[0].reason();
                     //getting attributes from the context
                     int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
                     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
