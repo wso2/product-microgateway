@@ -23,7 +23,12 @@ string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
     "admin:admin");
 
-http:Client throttleEndpoint = new(throttleEndpointUrl);
+http:Client throttleEndpoint = new(throttleEndpointUrl, config =
+    {cache: { enabled: false },
+        secureSocket:{
+            verifyHostname:getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        }
+    });
 
 public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEvent) {
 
