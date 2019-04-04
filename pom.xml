@@ -386,7 +386,7 @@
     <properties>
         <ballerina.platform.version>0.990.3</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
-        <assembly.plugin.version>2.5.2</assembly.plugin.version>
+        <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
         <shade.plugin.version>2.4.3</shade.plugin.version>
         <processor.plugin.version>2.2.4</processor.plugin.version>
