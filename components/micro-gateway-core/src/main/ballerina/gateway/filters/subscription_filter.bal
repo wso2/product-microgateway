@@ -63,9 +63,12 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
         var decodedPayload = getDecodedJWTPayload(jwtPayload);
         if(decodedPayload is json) {
             printTrace(KEY_SUBSCRIPTION_FILTER, "Decoded JWT payload: " + decodedPayload.toString());
-            json subscribedAPIList = json.convert(decodedPayload.subscribedAPIs);
-            APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
-            if (subscribedAPIList != null){
+            json subscribedAPIList = {};
+            if (decodedPayload.subscribedAPIs != null){
+                printDebug(KEY_SUBSCRIPTION_FILTER, "subscribedAPIs claim found in the jwt");
+                subscribedAPIList = json.convert(decodedPayload.subscribedAPIs);
+                printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
+                APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
                 int l = subscribedAPIList.length();
                 if (l == 0){
                     authenticationContext.authenticated = true;

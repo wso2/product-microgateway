@@ -37,13 +37,14 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -54,6 +55,7 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.ZipUtils;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
@@ -168,7 +170,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
-
+        // Extracts the zipped ballerina platform and runtime
+        extractPlatformAndRuntime();
         init(projectName, toolkitConfigPath, deploymentConfigPath);
 
         //set etcd requirement
@@ -332,6 +335,7 @@ public class SetupCmd implements GatewayLauncherCmd {
 
             //set the trustStore
             System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+            System.setProperty("javax.net.ssl.trustStoreType", "pkcs12");
             System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
             System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
@@ -687,5 +691,45 @@ public class SetupCmd implements GatewayLauncherCmd {
         outStream.println(
                 "You are using REST version - " + restVersion + " of API Manager. (If you want to change this, go to "
                         + "<MICROGW_HOME>/conf/toolkit-config.toml)");
+    }
+
+    /**
+     * Extracts the platform and runtime and copy related jars and balos to extracted runtime and platform.
+     */
+    private void extractPlatformAndRuntime() {
+        try {
+            String libPath = GatewayCmdUtils.getCLILibPath();
+            String baloPath = GatewayCliConstants.CLI_GATEWAY + File.separator + GatewayCliConstants.CLI_BALO;
+            String breLibPath = GatewayCliConstants.CLI_BRE + File.separator + GatewayCliConstants.CLI_LIB;
+            String runtimeExtractedPath = libPath + File.separator + GatewayCliConstants.CLI_RUNTIME;
+            String platformExtractedPath =
+                    GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
+            if (!Files.exists(Paths.get(runtimeExtractedPath))) {
+                ZipUtils.unzip(runtimeExtractedPath + GatewayCliConstants.EXTENSION_ZIP, runtimeExtractedPath, false);
+                //copy balo to the runtime
+                GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
+                        runtimeExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
+                                + GatewayCliConstants.CLI_REPO);
+                //copy gateway jars to runtime
+                GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
+                        + GatewayCliConstants.CLI_RUNTIME, runtimeExtractedPath + File.separator + breLibPath);
+            }
+
+            if (!Files.exists(Paths.get(platformExtractedPath))) {
+                ZipUtils.unzip(platformExtractedPath + GatewayCliConstants.EXTENSION_ZIP, platformExtractedPath, true);
+                //copy balo to the platform
+                GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
+                        platformExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
+                                + GatewayCliConstants.CLI_REPO);
+                //copy gateway jars to platform
+                GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
+                        + GatewayCliConstants.CLI_PLATFORM, platformExtractedPath + File.separator + breLibPath);
+            }
+
+        } catch (IOException e) {
+            String message = "Error while unzipping platform and runtime while project setup";
+            logger.error(message, e);
+            throw new CLIInternalException(message);
+        }
     }
 }

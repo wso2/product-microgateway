@@ -19,10 +19,10 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.ballerinalang.config.cipher.AESCipherTool;
-import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
+import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -32,22 +32,25 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
-
-import java.io.File;
-import java.io.FileWriter;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 public class GatewayCmdUtils {
 
@@ -56,6 +59,7 @@ public class GatewayCmdUtils {
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
     private static Etcd etcd;
+    private static final String algorithm = "AES";
 
     public static Etcd getEtcd() {
         return etcd;
@@ -211,6 +215,15 @@ public class GatewayCmdUtils {
      */
     public static String getCLIHome() {
         return System.getProperty(GatewayCliConstants.CLI_HOME);
+    }
+
+    /**
+     * Get cli library location
+     *
+     * @return cli lib location
+     */
+    public static String getCLILibPath() {
+        return getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB;
     }
 
     /**
@@ -431,6 +444,17 @@ public class GatewayCmdUtils {
     private static String getResourceHashHolderFileLocation(String projectName) {
         return getProjectTempFolderLocation(projectName) + File.separator
                 + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
+    }
+
+
+    /**
+     * Get library zip files hash holder file path with in the CLI tool
+     *
+     * @return library zip hash holder file path of the CLI tool
+     */
+    public static String getCLILibHashHolderFileLocation() {
+        return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME + File.separator + GatewayCliConstants
+                .LIB_HASH_HOLDER_FILE_NAME;
     }
 
     /**
@@ -885,6 +909,32 @@ public class GatewayCmdUtils {
         }
         if (!file.delete()) {
             throw new IOException();
+        }
+    }
+
+    /**
+     * Writes the map after serializing  to given path
+     *
+     * @param map      resource hash content
+*    * @param filePath file path the map should be written to
+     * @throws IOException error while saving resource hash content
+     */
+    public static void writeMapToFile(Map<String,String> map, String filePath) throws IOException {
+        try(FileOutputStream fos = new FileOutputStream(filePath); ObjectOutputStream obs = new
+                ObjectOutputStream(fos)){
+            obs.writeObject(map);
+        }
+    }
+
+    /**
+     * Read the deserialize file content to map
+     *
+     * @param filePath file path the map should be written to
+     * @throws IOException error while saving resource hash content
+     */
+    public static Map<String ,String> readFileToMap(String filePath) throws IOException, ClassNotFoundException {
+        try(FileInputStream fis = new FileInputStream(filePath);ObjectInputStream obi = new ObjectInputStream(fis)){
+            return (Map<String , String>) obi.readObject();
         }
     }
 }
