@@ -71,7 +71,6 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         json model = {};
         json models = {};
         string modelName = "";
-
         //getting all the keys defined under the paths in the swagger
         pathKeys = untaint swagger[PATHS].getKeys();
         //getting the method of the request
@@ -122,7 +121,6 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                 if (!finalResult.valid) {
                     //setting the error message to the context
                     setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
-                    error? err = finalResult.resultErr[0];
                     filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.resultErr[0].reason();
                     //sending the error response to the client
                     sendErrorResponse(caller, request, filterContext);

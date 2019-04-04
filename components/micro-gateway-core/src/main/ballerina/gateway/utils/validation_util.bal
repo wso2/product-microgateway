@@ -20,9 +20,9 @@ public type Result object {
 
 function closeRc(io:ReadableCharacterChannel rc) {
     var result = rc.close();
-    if (result is error){
+    if (result is error) {
         log:printError("Error occurred while closing character stream",
-        err = result);
+            err = result);
     }
 }
 
@@ -41,7 +41,6 @@ function read(string path) returns json {
 
 //validate all data types related attributes
 public function valueValidator(string key, json value, json field) returns (error?[]) {
-    io:println("------ValueValidator---------------------");
     error?[] errors = [];
     if (field[TYPE].toString() == STRING && field.format == null) {
         int min = 0;
@@ -106,12 +105,11 @@ public function valueValidator(string key, json value, json field) returns (erro
         }
     }
     //if field contains a enum validate it
-    if (field.enum != null)  {
-        io:println("---------Field--------", field);
-        io:println("--------Field- Enum-----------", field.enum);
+    if (field.enum != null) {
         processError(errors, validateEnums(key, value, field.enum));
     }
-    return errors;//return the array of errors
+    return errors;
+    //return the array of errors
 }
 
 public function validateMinMaxLength(string name, json value, json minLength, json maxLength) returns (boolean|error) {
@@ -120,17 +118,17 @@ public function validateMinMaxLength(string name, json value, json minLength, js
     int max = <int>maxLength;
     string newValue = value.toString();
     //if there is no minLength/maxLength property return null error object
-    if (minLength == null && maxLength == null)  {
+    if (minLength == null && maxLength == null) {
         return err;
     } else if (minLength == null) {//if there is a maxLength validate it
         return validateMaxLength(name, newValue, max);
     } else if (maxLength == null) {//if there is a minLength validate it
         return validateMinLength(name, newValue, min);
     }
-    //if there is both minLength and maxLength peroperties, validate them
+    //if there is both minLength and maxLength properties, validate them
     if (newValue.length() < min || newValue.length() > max) {
-        if (min <= 1){
-         err = error(name + " cannot be blank and cannot be longer than " + maxLength.toString() +
+        if (min <= 1) {
+            err = error(name + " cannot be blank and cannot be longer than " + maxLength.toString() +
                 " characters long");
             return err;
         }
@@ -143,10 +141,10 @@ public function validateMinMaxLength(string name, json value, json minLength, js
 //validate maxLength of a string
 public function validateMaxLength(string name, string value, int maxLength) returns (boolean|error) {
     error err;
-    if (maxLength > 0){
-        if (value.length() > maxLength){
-        err = error(name + " must be no more than " + string.convert(maxLength) + " characters long");
-        return err;
+    if (maxLength > 0) {
+        if (value.length() > maxLength) {
+            err = error(name + " must be no more than " + string.convert(maxLength) + " characters long");
+            return err;
         }
     }
     return true;
@@ -155,8 +153,8 @@ public function validateMaxLength(string name, string value, int maxLength) retu
 public function validateMinLength(string name, string value, int minLength) returns (boolean|error) {
     error err;
     if (minLength > 0) {
-        if (value.length() < minLength){
-            if (minLength == 1){
+        if (value.length() < minLength) {
+            if (minLength == 1) {
                 err = error(name + " cannot be blank");
                 return err;
             }
@@ -187,7 +185,7 @@ public function validatePattern(string name, json value, json pattern) returns (
 }
 
 public function validateMinMaxValue(string name, int|float value, json minValue, json maxValue, boolean exclusiveMin
-    , boolean exclusiveMax) returns (boolean|error) {
+    ,                               boolean exclusiveMax) returns (boolean|error) {
     int min = <int>minValue;
     int max = <int>maxValue;
     error err;
@@ -199,15 +197,18 @@ public function validateMinMaxValue(string name, int|float value, json minValue,
         return validateMaxValue(name, value, max, exclusiveMax);
     }
     //if there is both minimum and maximum properties do the validation
-    if(value is int) {
+    if (value is int) {
         if (!exclusiveMin && !exclusiveMax && (value < min || value > max)) {
-            err = error(name + " must be at least " + string.convert(min) + " and no more than " + string.convert(max));
+            err = error(name + " must be at least " + string.convert(min) + " and no more than " +
+                string.convert(max));
             return err;
         } else if (exclusiveMin && exclusiveMax && (value <= min || value >= max)){
-            err = error(name + " must be greater than " + string.convert(min) + " and less than " + string.convert(max));
+            err = error(name + " must be greater than " + string.convert(min) + " and less than " +
+                string.convert(max));
             return err;
         } else if (exclusiveMin && (value <= min || value > max)){
-            err = error(name + " must be greater than " + string.convert(min) + " and no more than " + string.convert(max));
+            err = error(name + " must be greater than " + string.convert(min) + " and no more than "
+                + string.convert(max));
             return err;
         } else if (exclusiveMax && (value >= max || value < min)){
             err = error(name + " must be at least " + string.convert(min) + " and less than " + string.convert(max));
@@ -219,24 +220,26 @@ public function validateMinMaxValue(string name, int|float value, json minValue,
             err = error(name + " must be at least " + string.convert(min) + " and no more than " + string.convert(max));
             return err;
         } else if (exclusiveMin && exclusiveMax && (value <= min || value >= max)){
-            err = error(name + " must be greater than " + string.convert(min) + " and less than " + string.convert(max));
+            err = error(name + " must be greater than " + string.convert(min) + " and less than " +
+                string.convert(max));
             return err;
         } else if (exclusiveMin && (value <= min || value > max)){
-            err = error(name + " must be greater than " + string.convert(min) + " and no more than " + string.convert(max));
+            err = error(name + " must be greater than " + string.convert(min) +
+                " and no more than " + string.convert(max));
             return err;
         } else if (exclusiveMax && (value >= max || value < min)){
             err = error(name + " must be at least " + string.convert(min) + " and less than " + string.convert(max));
             return err;
         }
     }
-
     return true;
 }
 //validate the value with minimum and exclusiveMinimum properties
-public function validateMinValue(string name, int|float value, int minValue, boolean exclusiveMin) returns (boolean|error) {
+public function validateMinValue(string name, int|float value, int minValue, boolean exclusiveMin)
+                    returns (boolean|error) {
     error err;
     //value can be of type integer or float
-    if(value is int) {
+    if (value is int) {
         if (!exclusiveMin && value < minValue) {//if there is no exclusiveMinimum property
             err = error(name + " must be at least " + string.convert(minValue));
             return err;
@@ -245,7 +248,7 @@ public function validateMinValue(string name, int|float value, int minValue, boo
             return err;
         }
     }
-    else if(value is float) {
+    else if (value is float) {
         if (!exclusiveMin && value < minValue) {//if there is no exclusiveMinimum property
             err = error(name + " must be at least " + string.convert(minValue));
             return err;
@@ -257,10 +260,11 @@ public function validateMinValue(string name, int|float value, int minValue, boo
     return true;
 }
 //validate value with maximum and exclusiveMaximum property
-public function validateMaxValue(string name, int|float value, int maxValue, boolean exclusiveMax) returns (boolean|error) {
+public function validateMaxValue(string name, int|float value, int maxValue, boolean exclusiveMax)
+                    returns (boolean|error) {
     error err;
     //value can be of type integer or float
-    if(value is int) {
+    if (value is int) {
         if (!exclusiveMax && value > maxValue) {//if there is no exclusiveMinimum property
             err = error(name + " must not be more than " + string.convert(maxValue));
             return err;
@@ -269,7 +273,7 @@ public function validateMaxValue(string name, int|float value, int maxValue, boo
             return err;
         }
     }
-    else if(value is float) {
+    else if (value is float) {
         if (!exclusiveMax && value > maxValue) {//if there is no exclusiveMinimum property
             err = error(name + " must not be more than " + string.convert(maxValue));
             return err;
@@ -299,9 +303,9 @@ public function validateEnums(string name, json value, json enums) returns (bool
 }
 //put the incoming errors to the errors array
 public function processError(error?[] errors, boolean|error err) {
-    if(err is error) {
+    if (err is error) {
         errors[errorItem] = err;
-        errorItem = errorItem +1;
+        errorItem = errorItem + 1;
     }
 }
 //if there is allOf/discriminator property, create a new model by merging all referenced models
@@ -312,7 +316,7 @@ public function mergeModels(json target, json swaggerModel, json swaggerModels) 
 }
 //if there is allOf attribute, get the merged model
 public function getMergedModel(json model, json models) returns (json) {
-    map<json> mapModels = <map<json>> map<json>.convert(models);
+    map<json> mapModels = <map<json>>map<json>.convert(models);
     if (model.allOf != null) {
         json merged = ();
         foreach var (k, v) in mapModels {
@@ -394,14 +398,14 @@ public function merge(json target, json source) returns (json) {
             //if there is a value available for this property in the source model, check whether there are any
             //exceptional keys inside that property
             if (sourceProperty.getKeys().length() > 0) {
-                foreach var proprtyKey in sourceProperty.getKeys(){
+                foreach var proprtyKey in sourceProperty.getKeys() {
                     if (target[key][proprtyKey] == null) {
                         target[key][proprtyKey] = sourceProperty[proprtyKey];
 
                     }
                 }
             }
-         }
+        }
     }
     return target;
 }
@@ -409,7 +413,7 @@ public function merge(json target, json source) returns (json) {
 //creating a return object
 public function createReturnObject(error?[]|error err, string modelName) returns (Result) {
     Result result = new();
-    if(err is error) {
+    if (err is error) {
         if (err.reason() == "") {
             result.valid = true;
             result.errorCount = 0;
@@ -417,19 +421,18 @@ public function createReturnObject(error?[]|error err, string modelName) returns
             result.valid = false;
             result.errorCount = 1;
             result.resultErr[0] = err;
-       }
+        }
     } else {
         result.errorCount = err.length();
         result.valid = false;
         int index = 0;
         foreach var item in err {
             result.resultErr[index] = item;
-            index = index +1;
+            index = index + 1;
         }
     }
     if (modelName.length() > 0) {
         result.modelName = modelName;
-
     }
     return result;
 }
@@ -439,15 +442,15 @@ public function validateValue(string key, json field, json value, json models) r
     error?[] valueErrors = [];
     if (value != null) {
         //validate the type
-        var typeErrors =  validateType(key, value, field, models);
+        var typeErrors = validateType(key, value, field, models);
         if (!typeErrors.valid && typeErrors.errorCount > 0) {
-                return createReturnObject(typeErrors.resultErr, " ");
+            return createReturnObject(typeErrors.resultErr, " ");
         }
         valueErrors = valueValidator(key, value, field);
         if (valueErrors is error[]) {
             if (valueErrors.length() > 0) {
-            return createReturnObject(valueErrors, " ");
-        } 
+                return createReturnObject(valueErrors, " ");
+            }
         }
     }
     result.valid = true;
@@ -458,50 +461,46 @@ public function validateType(string name, json value, json field, json models) r
     Result result = new();
     //getting type defined in the model/field
     if (field[TYPE] != ()) {
-    string expectedType = field[TYPE].toString();
-    if (expectedType.length() > 0) {//if the field doesn't have a type it may have a reference to another model
-        if (models != null && field[REFERENCE] != null) {
-            //getting the reference to another model and replace it to the referenced model name
-            string fieldReference = replaceModelPrefix(field[REFERENCE].toString());
-            //validate the target object with the referenced model
-            return validate(name, value, models[fieldReference], models);
+        string expectedType = field[TYPE].toString();
+        if (expectedType.length() > 0) {//if the field doesn't have a type it may have a reference to another model
+            if (models != null && field[REFERENCE] != null) {
+                //getting the reference to another model and replace it to the referenced model name
+                string fieldReference = replaceModelPrefix(field[REFERENCE].toString());
+                //validate the target object with the referenced model
+                return validate(name, value, models[fieldReference], models);
+            }
+        } else {
+            expectedType = expectedType.toLower();
+        }
+        //if expectedType is a object, validate the object
+        if (expectedType == OBJECT) {
+            return validateObject(name, value, field, models);
+        }
+        //if expectedType is an array, validate the array
+        if (expectedType == ARRAY) {
+            return validateArray(name, value, field, models);
+        }
+        //get the format of the field
+        string format = field.format.toString();
+        if (format != NULL) {
+            format = format.toLower();
+        }
+        if (value == null) {//if there is no value, no point of validating
+            return result;
+        } else if (validateExpectedType(expectedType, value, format)) {
+            //validate value and format
+            result.valid = true;
+            //if the field is of expected type then that value is valid
+            return result;
+        } else {
+            error err = error(value.toString() + " is not the type, " + expectedType);
+            return createReturnObject(err, " ");
         }
     } else {
-        expectedType = expectedType.toLower();
-
-    }
-    //if expectedType is a object, validate the object
-    if (expectedType == OBJECT) {
-        return validateObject(name, value, field, models);
-    }
-    //if expectedType is an array, validate the array
-    if (expectedType == ARRAY) {
-        return validateArray(name, value, field, models);
-    }
-    //get the format of the field
-    string format = field.format.toString();
-    io:println("payload field format", format);
-
-    if (format != NULL) {
-        format = format.toLower();
-    }
-
-    if (value == null) {//if there is no value, no point of validating
-        return result;
-    } else if (validateExpectedType(expectedType, value, format)) {
-        //validate value and format
-        result.valid = true;
-        //if the field is of expected type then that value is valid
-        return result;
-    } else {
-        error err = error(value.toString() + " is not the type, " + expectedType);
-        return createReturnObject(err, " ");
-    }
-  } else {
         error err = error(" There ano model/field found ");
         return createReturnObject(err, " ");
-  }
-   //return result;
+    }
+    //return result;
 }
 //validating an object
 public function validateObject(string name, json value, json field, json models) returns (Result) {
@@ -606,28 +605,19 @@ public function validateArray(string name, json value, json field, json models) 
 }
 //validating whether the provided value is of the expected type
 public function validateExpectedType(string expectedType, json value, string format) returns (boolean) {
-    io:println("--------validateExpectedType -------expectedtype",expectedType );
-    //any eType = expectedType;
-  //  io:println("--------validateExpectedType etype-------expectedtype",eType );
-    if (expectedType == "string") {
-        io:println("----------------------STRING ---------------------------");
+    if (expectedType == STRING_TYPE) {
         if (isStringType(value, format)) {
             return true;
         }
-    } else if (expectedType == "boolean") {
-        io:println("----------------------BOOLEAN---------------------------");
-       // io:println("eType", eType);
+    } else if (expectedType == BOOLEAN) {
         if (isExpectedType(value, expectedType)) {
             return true;
         }
-    } else if (expectedType == "int") {
-        io:println("----------------------INT---------------------------");
+    } else if (expectedType == INT) {
         if (isIntegerType(value, format)) {
-            io:println("Integer------------");
             return true;
         }
-    } else if (expectedType == "number") {
-        io:println("----------------------NUMBERRRRRR---------------------------");
+    } else if (expectedType == NUMBER) {
         if (isNumberType(value, format)) {
             return true;
         }
@@ -659,7 +649,6 @@ public function isStringType(json value, string format) returns (boolean) {
 
 //validating whether the provided value is of integer type
 public function isIntegerType(json value, string format) returns (boolean) {
-
     if (!isExpectedType(value, INTEGER)) {
         return false;
     }
@@ -667,7 +656,7 @@ public function isIntegerType(json value, string format) returns (boolean) {
         return true;
     } else if (format == INT_32) {//if the value is of int32 format, validate it
         var int32Max = math:pow(2.0, 31.0) - 1;
-        int int32Value =  <int>value;
+        int int32Value = <int>value;
         //check whether the integer value is in the int32 value range
         if (int32Value >= - (int32Max + 1) && int32Value <= int32Max) {
             return true;
@@ -675,7 +664,7 @@ public function isIntegerType(json value, string format) returns (boolean) {
         return false;
     } else if (format == INT_64) {//if the value is of int64 format, validate it
         var int64Max = math:pow(2.0, 63.0) - 1;
-        int int64Value =  <int>value;
+        int int64Value = <int>value;
         //check whether the integer value is in the int64 value range
         if (int64Value >= - (int64Max + 1) && int64Value <= int64Max) {
             return true;
@@ -687,47 +676,31 @@ public function isIntegerType(json value, string format) returns (boolean) {
 }
 //validating whether the provided value is of number type
 public function isNumberType(json value, string format) returns (boolean) {
-    io:println("JSON is NumberType---------------",value);
-    if (typeOf(value)== INTEGER) {
-        io:println("json int ---------isNumberType========");
+    if (typeOf(value) == INTEGER) {
         return isIntegerType(value, format);
     } else if (typeOf(value) == NUMBER) {
-        io:println("json float ---------isNumberType========");
         return true;
     } else {
-        io:println("json int ---------false=======");
         return false;
     }
 }
 //return whether the type of the value is same as the expected type
 public function isExpectedType(json value, string expectedType) returns (boolean) {
-    io:println("expected type-----+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----", expectedType);
     string typeof = "";
-
-    if(value is int) {
-        typeof = INTEGER;
-        io:println("typeof------(())))))))",typeof);
-        io:println("EXPECTED TYPE()()==============############",expectedType);
-    }
+    if (value is int) {typeof = INTEGER;}
     else if (value is float) {typeof = NUMBER;}
-    else if(value is string) {
-
-        typeof = STRING;}
-    else if (value is boolean) {
-        io:println("boollllllllll");
-        typeof = BOOLEAN;}
+    else if (value is string) {typeof = STRING;}
+    else if (value is boolean) {typeof = BOOLEAN;}
     else { typeof = JSON;}
     if (expectedType == typeof) {
-        io:println("true");
         return true;
     } else {
-        io:println("false");
         return false;
     }
 
 }
 public function validateSpecification(string name, json target, json model, json models) returns (error?[]) {
-    map<json> mapValue = <map<json>> map<json>.convert(target);
+    map<json> mapValue = <map<json>>map<json>.convert(target);
     //getting the properties defined in the model
     var properties = model.properties;
     error?[] errorArray = [];
@@ -753,13 +726,13 @@ public function validateSpecification(string name, json target, json model, json
                 //if the parent model have the discriminator property but the discriminated model doesn't contain
                 //that property
                 if (errorArray.length() == 1 && errorArray[0].reason() == "Target property " + model.discriminator.
-                propertyName.toString() + " is not in the model") {
+                    propertyName.toString() + " is not in the model") {
                     // remove discriminator if it is the only error.
                     errorArray = [];
                 } else {
                     error?[] tempErrors = errorArray;
                     errorArray = [];
-                    foreach var item in tempErrors{
+                    foreach var item in tempErrors {
                         if (item.reason() != "Target property " + model.discriminator.propertyName.toString() +
                             " is not in the model") {
                             errorArray[j] = item;
@@ -785,7 +758,7 @@ public function validateSpecification(string name, json target, json model, json
                 }
             }
         } else {
-            foreach var(k, v) in mapValue {
+            foreach var (k, v) in mapValue {
                 errorArray = validateProperties(v, model, models);
                 foreach var key in properties.getKeys() {
                     var field = properties[key];
@@ -810,25 +783,23 @@ public function validateSpecification(string name, json target, json model, json
 //return the type of the target object
 public function typeOf(json target) returns (string) {
     string typeof = "";
-    if(target is int) {
-        io:println("Type of ------INT------");
+    if (target is int) {
         typeof = INTEGER;
     }
     else if (target is float) {
-        io:println("Type of ------float-----");
         typeof = NUMBER;
     }
-    else if(target is string) {typeof = STRING;
+    else if (target is string) {typeof = STRING;
     }
     else if (target is boolean) {typeof = BOOLEAN;}
-    else if(target is json[]) {typeof = ARRAY;}
+    else if (target is json[]) {typeof = ARRAY;}
     else { typeof = OBJECT;}
     return typeof;
 }
 
 public function validate(string name, json target, json swaggerModel, json swaggerModels) returns (Result) {
     error err = error("");
-    if (target == null)  {
+    if (target == null) {
         err = error("Unable to validate an undefined value of property: ");
         return createReturnObject(err, " ");
     }
@@ -869,15 +840,13 @@ public function validate(string name, json target, json swaggerModel, json swagg
 //validate required fields
 public function validateRequiredFields(json target, json fields, json modelFields) returns (error?[]) {
     map<json> mapValue;
-    if (target is json[]) {
-         json val = target[1];
-         mapValue = <map<json>> map<json>.convert(val);
-    } else {
-        mapValue = <map<json>> map<json>.convert(target);
-    }
-
     int j = 0;
     error?[] errorArray = [];
+
+    if (target is json[]) {
+        json arrayElement = target[1];
+        mapValue = <map<json>>map<json>.convert(arrayElement);
+    } else {mapValue = <map<json>>map<json>.convert(target);}
     //required field should be an array, if not send an error
     if (<string>typeOf(fields) != ARRAY) {
         error err = error("fields must be an array of required fields");
@@ -892,14 +861,14 @@ public function validateRequiredFields(json target, json fields, json modelField
         var property = fields[i].toString();
         //if the target object is an array check whether each item includes required fields
         if (<string>typeOf(target) == ARRAY) {
-            foreach var(k, v) in mapValue {
-              if (v[property] == null || modelFields[property] == null) {
-                error err = error(property + " is a required field");
-                errorArray[j] = err;
-                j = j + 1;
-              }
+            foreach var (k, v) in mapValue {
+                if (v[property] == null || modelFields[property] == null) {
+                    error err = error(property + " is a required field");
+                    errorArray[j] = err;
+                    j = j + 1;
+                }
             }
-         } else if (target[property] == null || modelFields[property] == null) {
+        } else if (target[property] == null || modelFields[property] == null) {
             error err = error(property + " is a required field");
             errorArray[j] = err;
             j = j + 1;
@@ -909,23 +878,23 @@ public function validateRequiredFields(json target, json fields, json modelField
     return errorArray;
 }
 
-//validating propertries in the JSON object against the properties of the models defined in the schema.
+//validating properties in the JSON object against the properties of the models defined in the schema.
 public function validateProperties(json target, json model, json models) returns (error?[]) {
     error?[] errorArray = [];
     int i = 0;
-    if (target!= ()) {
-    var targetKeys = target.getKeys();  
-    //get all details in referenced models and merge them into a one model
-    var referenceModel = dereferenceModel(target, model, models);
-    //if the properties provided in the target object is not defined in the model, send an error
-       foreach var key in targetKeys {
+    if (target != ()) {
+        var targetKeys = target.getKeys();
+        //get all details in referenced models and merge them into a one model
+        var referenceModel = dereferenceModel(target, model, models);
+        //if the properties provided in the target object is not defined in the model, send an error
+        foreach var key in targetKeys {
             if (referenceModel.properties[key] == null) {
                 error err = error("Target property " + key + " is not in the model");
                 errorArray[i] = err;
                 i = i + 1;
             }
         }
-     }
+    }
     return errorArray;
 }
 //replace model references to the model name

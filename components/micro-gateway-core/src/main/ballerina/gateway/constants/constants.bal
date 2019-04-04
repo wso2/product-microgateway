@@ -154,6 +154,7 @@
  public const string TYPE = "type";
  public const string ARRAY = "array";
  public const string STRING = "const string";
+ public const string STRING_TYPE = "string";
  public const string INTEGER = "integer";
  public const string NUMBER = "number";
  public const string OBJECT = "object";
