@@ -23,33 +23,23 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 public class ClientCertMetadataDTO {
 
     private String alias = null;
-
-
     private String apiId = null;
-
-
     private String tier = null;
-
     public String getAlias() {
         return alias;
     }
-
     public void setAlias(String alias) {
         this.alias = alias;
     }
-
     public String getApiId() {
         return apiId;
     }
-
     public void setApiId(String apiId) {
         this.apiId = apiId;
     }
-
     public String getTier() {
         return tier;
     }
-
     public void setTier(String tier) {
         this.tier = tier;
     }

@@ -40,16 +40,17 @@ import java.util.Map;
  * This class can be used to send http request.
  */
 public class HttpClientRequest {
+
+    private static final Log log = LogFactory.getLog(HttpClientRequest.class);
+
     /**
      * Sends an HTTP GET request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
-     * @param headers - http request header map
+     * @param headers    - http request header map
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the GET request
      */
-    private static final Log log = LogFactory.getLog(HttpClientRequest.class);
-
     public static HttpResponse doGet(String requestUrl, Map<String, String> headers)
             throws IOException {
         return executeRequestWithoutRequestBody(TestConstant.HTTP_METHOD_GET, requestUrl, headers);
@@ -208,7 +209,7 @@ public class HttpClientRequest {
             }
         } catch (IOException ex) {
             if (conn.getErrorStream() == null) {
-                log.error("An IOException occurred ", ex);
+                log.error("An IOException occurred", ex);
                 return null;
             }
             rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()

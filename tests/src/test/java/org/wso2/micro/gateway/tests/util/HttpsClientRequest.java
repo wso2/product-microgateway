@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.tests.util;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * This class can be used to send http request.

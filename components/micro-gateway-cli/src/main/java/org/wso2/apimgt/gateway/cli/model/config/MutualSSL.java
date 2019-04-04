@@ -17,10 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import com.google.gson.JsonArray;
 
 import java.util.List;
 
@@ -48,7 +48,6 @@ public class MutualSSL {
             element.addProperty(RESTServiceConstants.CERTIFICATE_TIER, tier);
             certificateData.add(element);
         }
-        // String certificateDetails= certificateData.toString();
         JsonArray certificateDetails = certificateData;
         return certificateDetails;
     }

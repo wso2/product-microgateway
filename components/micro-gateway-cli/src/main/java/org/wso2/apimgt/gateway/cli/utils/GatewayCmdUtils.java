@@ -33,14 +33,16 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,6 +55,15 @@ public class GatewayCmdUtils {
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
+    private static Etcd etcd;
+
+    public static Etcd getEtcd() {
+        return etcd;
+    }
+
+    public static void setEtcd(Etcd etcd) {
+        GatewayCmdUtils.etcd = etcd;
+    }
 
     public static Config getConfig() {
         return config;
@@ -207,7 +218,7 @@ public class GatewayCmdUtils {
      *
      * @return resources file directory path
      */
-    private static String getResourceFolderLocation() {
+    public static String getResourceFolderLocation() {
         return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator
                 + GatewayCliConstants.GW_DIST_RESOURCES;
     }
@@ -229,6 +240,15 @@ public class GatewayCmdUtils {
      */
     public static String getFiltersFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
+    }
+
+    /**
+     * Get policies folder location
+     *
+     * @return policies folder location
+     */
+    public static String getPoliciesFolderLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES;
     }
 
     /**
@@ -275,7 +295,7 @@ public class GatewayCmdUtils {
      * Create a micro gateway distribution for the provided project name
      *
      * @param projectName name of the project
-     * @throws IOException erro while creating micro gateway distribution
+     * @throws IOException error while creating micro gateway distribution
      */
     public static void createProjectGWDistribution(String projectName) throws IOException {
         createTargetGatewayDistStructure(projectName);
@@ -293,8 +313,8 @@ public class GatewayCmdUtils {
                 gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
                         + GatewayCliConstants.GW_DIST_CONF_FILE);
 
-        String targetPath = getProjectTargetDirectoryPath(projectName);
-        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;
+        String targetPath = getProjectTargetDirectoryPath(projectName);//target
+        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;//micro-gw-projname.zip
         //creating an archive of the distribution
         ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
 
@@ -527,6 +547,27 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /grpc_service/client of a given project in the current working directory
+     *
+     * @return path to the /grpc_service/client of a given project in the current working directory
+     */
+    public static String getProjectGrpcDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME + File.separator +
+                GatewayCliConstants.PROJECTS_GRPC_CLIENT_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /grpc_service of a given project in the current working directory
+     *
+     * @return path to the /grpc_service of a given project in the current working directory
+     */
+    public static String getProjectGrpcSoloDirectoryPath() {
+        return getUserDir() + File.separator
+                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME;
+    }
+
+    /**
      * Returns path to the /target of a given project in the current working directory
      *
      * @param projectName name of the project
@@ -544,7 +585,7 @@ public class GatewayCmdUtils {
      * @param destination destination location
      * @throws IOException error while copying folder to destination
      */
-    private static void copyFolder(String source, String destination) throws IOException {
+    public static void copyFolder(String source, String destination) throws IOException {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         copyFolder(sourceFolder, destinationFolder);
@@ -681,14 +722,8 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     private static void writeContent(String content, File file) throws IOException {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
+        try (FileWriter writer = new FileWriter(file)) {
             writer.write(content);
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
         }
     }
 
@@ -734,7 +769,7 @@ public class GatewayCmdUtils {
 
         if (deploymentConfPath == null) {
             if (!file.exists()) {
-                String defaultConfig = null;
+                String defaultConfig;
                 boolean created = file.createNewFile();
                 if (created) {
                     logger.debug("Deployment configuration file: {} created.", depConfig);

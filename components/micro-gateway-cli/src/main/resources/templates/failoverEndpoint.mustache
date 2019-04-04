@@ -1,6 +1,6 @@
-endpoint http:FailoverClient {{qualifiedServiceName}}_{{type}} {
+http:FailoverClient {{qualifiedServiceName}}_{{endpointUrlType}} = new({
     targets: [
-    {{#inline.endpointConfig.list}}    {url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{type}}.endpoint.{{@index}}", "{{url}}")}{{#unless @last}},
-    {{/unless}}{{/inline.endpointConfig.list}}
+    {{#endpoints}}    {url: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
+    {{/unless}}{{/endpoints}}
     ]{{>basicAuth}}
-};
+});

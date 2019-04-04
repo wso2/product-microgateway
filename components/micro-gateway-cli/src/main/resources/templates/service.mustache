@@ -7,28 +7,19 @@ import ballerina/time;
 
 import wso2/gateway;
 
-{{#if endpointConfig.0}}
-{{#equals endpointConfig.0.inline.endpointConfig.endpointType "SINGLE"}}
-{{#endpointConfig.0}}{{>httpEndpoint}}{{/endpointConfig.0}}
+
+{{#equals endpointConfig.endpointType "http"}}
+{{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
+{{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
-{{#equals endpointConfig.0.inline.endpointConfig.endpointType "LOAD_BALANCED"}}
-{{#endpointConfig.0}}{{>lbEndpoint}}{{/endpointConfig.0}}
+{{#equals endpointConfig.endpointType "load_balance"}}
+{{#endpointConfig.prodEndpoints}}{{>lbEndpoint}}{{/endpointConfig.prodEndpoints}}
+{{#endpointConfig.sandEndpoints}}{{>lbEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
-{{#equals endpointConfig.0.inline.endpointConfig.endpointType "FAIL_OVER"}}
-{{#endpointConfig.0}}{{>failoverEndpoint}}{{/endpointConfig.0}}
+{{#equals endpointConfig.endpointType "failover"}}
+{{#endpointConfig.prodFailoverEndpoints}}{{>failoverEndpoint}}{{/endpointConfig.prodFailoverEndpoints}}
+{{#endpointConfig.sandFailoverEndpoints}}{{>failoverEndpoint}}{{/endpointConfig.sandFailoverEndpoints}}
 {{/equals}}
-{{/if}}
-{{#if endpointConfig.1}}
-{{#equals endpointConfig.1.inline.endpointConfig.endpointType "SINGLE"}}
-{{#endpointConfig.1}}{{>httpEndpoint}}{{/endpointConfig.1}}
-{{/equals}}
-{{#equals endpointConfig.1.inline.endpointConfig.endpointType "LOAD_BALANCED"}}
-{{#endpointConfig.1}}{{>lbEndpoint}}{{/endpointConfig.1}}
-{{/equals}}
-{{#equals endpointConfig.1.inline.endpointConfig.endpointType "FAIL_OVER"}}
-{{#endpointConfig.1}}{{>failoverEndpoint}}{{/endpointConfig.1}}
-{{/equals}}
-{{/if}}
 
 {{>kubernetes}}
 
@@ -47,7 +38,8 @@ import wso2/gateway;
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
-         allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}]
+         allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#api.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowMethods}}]
     }
     {{/api.corsConfiguration.corsConfigurationEnabled}}
 }
@@ -58,7 +50,8 @@ import wso2/gateway;
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}}
 }
-service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},{{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
+service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
+{{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
 {{#paths}}{{#value}}{{#operations}}{{#value}}
 
     @http:ResourceConfig {
@@ -66,11 +59,11 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         path:"{{../../key}}",
         authConfig:{
     {{#if config.basicAuth.isOptional}}
-            authProviders:["basic","oauth2","jwt"]
+        authProviders:["basic","oauth2","jwt"]
     {{else if config.basicAuth.isRequired}}
-             authProviders:["basic"]
+        authProviders:["basic"]
     {{else}}
-             authProviders:["jwt","oauth2"]
+        authProviders:["jwt","oauth2"]
     {{/if}} {{#unless isSecured}},
             authentication:{enabled:false} {{/unless}} {{#if scope}},
             scopes: ["{{scope}}"] {{/if}}
@@ -78,60 +71,139 @@ service<http:Service> {{cut qualifiedServiceName " "}} bind {{#api.transport}}{{
         }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
-    {{operationId}} (endpoint outboundEp, http:Request req) {
-    gateway:checkExpectHeaderPresent(req);
+    resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
+        handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}","");
     {{else}}
     string urlPostfix = untaint req.rawPath.replace("{{api.context}}/{{api.version}}","");
     {{/if}}
         http:Response|error clientResponse;
+        string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#endpointConfig.0}}
-                if("PRODUCTION" == runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    clientResponse = {{qualifiedServiceName}}_Production->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{inline.endpointConfig.list.0.url}}";
+        {{#if etcd.etcdEnabled}}boolean reinitRequired;
+        string etcdKey;
+        string etcdKeyConfigValue;
+        boolean|error hasUrlChanged;
+        http:ClientEndpointConfig newConfig;
+        boolean reinitFailed = false;
+        string apiId = "{{api.id}}";{{/if}}
+        {{#endpointConfig.prodEndpoints}}
+            {{#endpointConfig.sandEndpoints}}
+                if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
+                    {{>prodEndpointReinit}}
+                {{else}}
+                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
+                } else {
+                    destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}nt
+                    etcdKeyConfigValue = apiId + "_sand_etcdKey";
+                    {{>sandEndpointReinit}}
+                {{else}}
+                    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
                 }
-        {{/endpointConfig.0}}
-        {{#endpointConfig.1}}
-                else {
-                    clientResponse = {{qualifiedServiceName}}_Sandbox->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = "{{inline.endpointConfig.list.0.url}}";
+            {{/endpointConfig.sandEndpoints}}
+            {{^endpointConfig.sandEndpoints}}
+                if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    destination_attribute = "{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}";
+                {{#if etcd.etcdEnabled}}
+                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
+                    {{>prodEndpointReinit}}
+                {{else}}
+                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
+                } else {
+                    http:Response res = new;
+                    res.statusCode = 403;
+                    json payload = {
+                        ERROR_CODE: "900901",
+                        ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
+                    };
+                    runtime:getInvocationContext().attributes["error_code"] = "900901";
+                    res.setPayload(payload);
+                    clientResponse = res;
                 }
-        {{/endpointConfig.1}}
+            {{/endpointConfig.sandEndpoints}}
+        {{/endpointConfig.prodEndpoints}}
+        {{^endpointConfig.prodEndpoints}}
+            if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                destination_attribute = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+            {{#if etcd.etcdEnabled}}
+                etcdKeyConfigValue = apiId + "_sand_etcdKey";
+                {{>sandEndpointReinit}}
+            {{else}}
+                clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+            {{/if}}
+            } else {
+                http:Response res = new;
+                res.statusCode = 403;
+                json payload = {
+                    ERROR_CODE: "900901",
+                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
+                };
+                runtime:getInvocationContext().attributes["error_code"] = "900901";
+                res.setPayload(payload);
+                clientResponse = res;
+            }
+        {{/endpointConfig.prodEndpoints}}
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 
-        match clientResponse {
 
-            http:Response res => {
-                outboundEp->respond(res) but { error e =>
-                log:printError("Error when sending response", err = e) };
+        if(clientResponse is http:Response) {
+            var outboundResult = outboundEp->respond(clientResponse);
+            if (outboundResult is error) {
+                log:printError("Error when sending response", err = outboundResult);
             }
+        }
 
-            error err => {
-                http:Response res = new;
-                res.statusCode = 500;
-                string errorMessage = err.message;
-                int errorCode = 101503;
-                string errorDescription = "Error connecting to the back end";
+        else {
+            http:Response res = new;
+            res.statusCode = 500;
+            string errorMessage = clientResponse.reason();
+            int errorCode = 101503;
+            string errorDescription = "Error connecting to the back end";
 
-                if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
-                    errorCode = 101504;
-                    errorDescription = "Connection timed out";
-                }
-                runtime:getInvocationContext().attributes["error_response"] = err;
-                runtime:getInvocationContext().attributes["error_response_code"] = errorCode;
-                json payload = {fault : {
-                    code : errorCode,
-                    message : "Runtime Error",
-                    description : errorDescription
-                }};
-                res.setPayload(payload);
-                log:printError("Error in client response", err = err);
-                outboundEp->respond(res) but { error e =>
-                log:printError("Error when sending response", err = e) };
+            if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
+                errorCode = 101504;
+                errorDescription = "Connection timed out";
+            }
+            if(errorMessage.contains("Malformed URL")) {
+                errorCode = 101505;
+                errorDescription = "Malformed URL";
+            }
+            // Todo: error is not type any -> runtime:getInvocationContext().attributes["error_response"] =  clientResponse;
+            runtime:getInvocationContext().attributes["error_response_code"] = errorCode;
+            json payload = {fault : {
+                code : errorCode,
+                message : "Runtime Error",
+                description : errorDescription
+            }};
+            res.setPayload(payload);
+            log:printError("Error in client response", err = clientResponse);
+            var outboundResult = outboundEp->respond(res);
+            if (outboundResult is error) {
+                log:printError("Error when sending response", err = outboundResult);
             }
         }
     }
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 }
+
+    function handleExpectHeaderFor{{cut qualifiedServiceName " "}} (http:Caller outboundEp, http:Request req ) {
+        if (req.expects100Continue()) {
+            req.removeHeader("Expect");
+            var result = outboundEp->continue();
+            if (result is error) {
+            log:printError("Error while sending 100 continue response", err = result);
+            }
+        }
+    }

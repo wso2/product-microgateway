@@ -22,8 +22,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
@@ -31,10 +34,8 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
-
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
@@ -43,9 +44,11 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        APIDTO api = new APIDTO();
+        API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -58,13 +61,14 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         //Register a production token with key validation info
-        IntrospectInfo info = new IntrospectInfo();
-        info.setActive(true);
-        info.setIat(System.currentTimeMillis());
-        info.setExp(System.currentTimeMillis() + 3600000);
-        info.setClientId(UUID.randomUUID().toString());
-        info.setUsername("admin");
-
+        KeyValidationInfo info = new KeyValidationInfo();
+        info.setApi(api);
+        info.setApplication(application);
+        info.setAuthorized(true);
+        info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
+        info.setSubscriptionTier("Unlimited");
+        //set security schemas
+        String security = "oauth2,basic";
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -80,8 +84,6 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //set security schemas
-        String security = "oauth2,basic";
         //generate apis with CLI and start the micro gateway server
         super.init(label, project, security);
     }
@@ -92,8 +94,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends BaseTestCase {
         invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         //test sand endpoint
-        //TODO: Re enable when token key type can be determined from the jwt.
-        //invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+        invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
     }
 
     @Test(description = "Test API invocation with a JWT token")

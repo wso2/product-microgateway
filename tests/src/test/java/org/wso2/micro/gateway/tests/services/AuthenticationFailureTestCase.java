@@ -24,10 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
@@ -49,9 +49,11 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        APIDTO api = new APIDTO();
+        API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -95,8 +97,7 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Message " + "content mismatched");
     }
 
-    //TODO : enable subscription test when subscription validation is available.
-    @Test(enabled = false, description = "Test with invalid scopes")
+    @Test(description = "Test with invalid scopes")
     public void testWithInvalidScopes() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidScopeToken);
@@ -108,8 +109,7 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
                 "Message content mismatched");
     }
 
-    //TODO : enable subscription test when scope validation is available.
-    @Test(enabled = false, description = "Test with invalid subscription")
+    @Test(description = "Test with invalid subscription")
     public void testWithInvalidSubscription() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidSubscriptionToken);

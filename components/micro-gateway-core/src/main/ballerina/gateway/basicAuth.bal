@@ -24,97 +24,74 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 import ballerina/crypto;
+import ballerina/encoding;
 
-@Description { value: "Representation of the BasicAuth logic" }
 public type BasicAuthUtils object {
 
-    public http:AuthnHandlerChain authnHandlerChain;
-    public new(authnHandlerChain) {}
 
-    @Description { value: "representation of Basic auth validation" }
-    @Param { value: "listener: Listner endpoint" }
-    @Param { value: "request: Request instance" }
-    @Param { value: "context: FilterContext instance" }
-    @Return { value: "FilterResult:BasicAuth result to indicate which folw is selected for request to proceed" }
-    public function processRequest(http:Listener listener, http:Request request, http:FilterContext context)
+    http:AuthnHandlerChain authnHandlerChain;
+
+    public function __init(http:AuthnHandlerChain authnHandlerChain) {
+        self.authnHandlerChain = authnHandlerChain;
+    }
+
+    public function processRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
 
         boolean isAuthenticated;
         //API authentication info
-        AuthenticationContext authenticationContext;
+        AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string authHead = request.getHeader(AUTHORIZATION_HEADER);
         string[] headers = authHead.trim().split("\\s* \\s*");
         string encodedCredentials = headers[1];
-        var decodedCredentials = encodedCredentials.base64Decode();
+        byte[]|error decodedCredentials =  encoding:decodeBase64(encodedCredentials);
         //Extract username and password from the request
         string userName;
         string passWord;
-        match decodedCredentials {
-            string decoded => {
-                if(!decoded.contains(":")){
-                    setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
-                    sendErrorResponse(listener, request, untaint context);
-                    return false;
-                }
-                string[] decodedCred = decoded.trim().split(":");
-                userName = decodedCred[0];
-                if(lengthof decodedCred < 2){
-                    int status;
-                    if(context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
-                        status = UNAUTHORIZED;
-                        context.attributes[HTTP_STATUS_CODE] = status;
-                    }
-                    setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                    sendErrorResponse(listener, request, untaint context);
-                    return false;
-                }
-                passWord = decodedCred[1];
-            }
-            error => {
-                int status;
-                if(context.attributes[HTTP_STATUS_CODE] == INTERNAL_SERVER_ERROR){
-                    status = UNAUTHORIZED;
-                    context.attributes[HTTP_STATUS_CODE] = status;
-                }
-                setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(listener, request, untaint context);
+        if(decodedCredentials is byte[]){
+        string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
+
+
+            if (!decodedCredentialsString.contains(":")) {
+                setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
+                sendErrorResponse(caller, request, untaint context);
                 return false;
             }
+            string[] decodedCred = decodedCredentialsString.trim().split(":");
+            userName = decodedCred[0];
+            printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
+            if (decodedCred.length() < 2) {
+                setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                sendErrorResponse(caller, request, context);
+                return false;
+            }
+            passWord = decodedCred[1];
+        } else {
+            printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
+            setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+            sendErrorResponse(caller, request, context);
+            return false;
         }
 
         //Hashing mechanism
-        string hashedPass = crypto:hash(passWord, crypto:SHA1);
+        string hashedPass = encoding:encodeHex(crypto:hashSha1(passWord.toByteArray(UTF_8)));
+        printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        match credentials.base64Encode() {
-            string encodedVal => {
-                hashedRequest = "Basic " + encodedVal;
-            }
-            error err => {
-                throw err;
-            }
-        }
+        string encodedVal = encoding:encodeBase64(credentials.toByteArray(UTF_8));
+        printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
+        hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         request.setHeader(AUTHORIZATION_HEADER, hashedRequest);
 
-        try {
-            printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
-            isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
-            printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
-            if (isAuthorized == false){
-                setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                sendErrorResponse(listener, request, untaint context);
-                return false;
-            }
-        } catch (error err) {
-            // todo: need to properly handle this exception. Currently this is a generic exception catching.
-            // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
-            printError(KEY_AUTHN_FILTER,
-                "Error occurred while authenticating via Basic authentication credentials");
-            setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            sendErrorResponse(listener, request, untaint context);
+        printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
+        isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
+        printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
+        if (!isAuthorized) {
+            setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+            sendErrorResponse(caller, request, untaint context);
             return false;
         }
 

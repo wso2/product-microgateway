@@ -22,55 +22,52 @@ import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
+import ballerina/encoding;
 
 // Authentication handler
 
-@Description {value:"Representation of OAuth2 Auth handler for HTTP traffic"}
-@Field {value:"oAuthAuthenticator: OAuthAuthProvider instance"}
-@Field {value:"name: Authentication handler name"}
+xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
+xmlns "http://org.apache.axis2/xsd" as xsd;
+xmlns "http://dto.impl.apimgt.carbon.wso2.org/xsd" as apim;
+
 public type OAuthnAuthenticator object {
     public string name= "oauth2";
     public OAuthAuthProvider oAuthAuthenticator = new;
 
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req)
-    returns (APIKeyValidationDto| error);
+    public function handle (http:Request req,http:FilterContext context) returns (APIKeyValidationDto| error);
 
 };
 
-@Description {value:"Intercepts a HTTP request for authentication"}
-@Param {value:"req: Request object"}
-@Return {value:"boolean: true if authentication is a success, else false"}
-function OAuthnAuthenticator::canHandle (http:Request req) returns (boolean) {
+public function OAuthnAuthenticator.canHandle (http:Request req) returns (boolean) {
+    string | error authHeaderResult = trap req.getHeader(AUTH_HEADER);
     string authHeader;
-    try {
-        authHeader = req.getHeader(AUTH_HEADER);
-    } catch (error e) {
-        printDebug(KEY_OAUTH_PROVIDER, "Error in retrieving header " + AUTH_HEADER + ": " + e.message);
+
+    if (authHeaderResult is error) {
+        printDebug(KEY_OAUTH_PROVIDER, "Error in retrieving header " + AUTH_HEADER + ": " + authHeaderResult.reason());
         return false;
+    } else {
+        authHeader = <string> authHeaderResult;
     }
-    if (authHeader != null && authHeader.hasPrefix(AUTH_SCHEME_BEARER)) {
+
+    if (authHeader.length() > 0 && authHeader.hasPrefix(AUTH_SCHEME_BEARER)) {
         string[] authHeaderComponents = authHeader.split(" ");
-        if (lengthof authHeaderComponents == 2) {
+        if (authHeaderComponents.length() == 2) {
             return true;
         }
     }
     return false;
 }
 
-@Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
-@Param {value:"req: Request object"}
-@Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-function OAuthnAuthenticator::handle (http:Request req)
+public function OAuthnAuthenticator.handle (http:Request req, http:FilterContext context)
                                    returns (APIKeyValidationDto| error) {
-    APIKeyValidationDto apiKeyValidationDto;
-    try {
-        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject();
-        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
-    } catch (error err) {
-        log:printError("Error occurred while getting key validation information for the access token", err = err);
-        return err;
+
+    APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
+    APIKeyValidationDto | error apiKeyValidationDto = trap self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
+    if (apiKeyValidationDto is error) {
+        log:printError("Error occurred while getting key validation information for the access token", err = apiKeyValidationDto);
+        return apiKeyValidationDto;
     }
     return apiKeyValidationDto;
 }
@@ -83,16 +80,19 @@ function  getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {
 
 
 
-@Description {value:"Represents a OAuth2 Authenticator"}
-@Field {value:"gatewayCache: Authentication cache object"}
 public type OAuthAuthProvider object {
-    public APIGatewayCache gatewayCache;
+    public APIGatewayCache gatewayCache= new;
+    string encodedBasicAuthHeader;
 
-
+    public function __init() {
+        string base64Header = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin") + ":" +
+            getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
+        self.encodedBasicAuthHeader = encoding:encodeBase64(base64Header.toByteArray(UTF_8));
+    }
 
     public function authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns (APIKeyValidationDto);
 
-    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (json);
+    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (xml | error);
 
     public function invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
                 APIKeyValidationDto);
@@ -100,10 +100,7 @@ public type OAuthAuthProvider object {
 };
 
 
-@Description {value:"Authenticate with a oauth2 token"}
-@Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
-@Return {value:"boolean: true if authentication is a success, else false"}
-function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
+public function OAuthAuthProvider.authenticate (APIRequestMetaDataDto apiRequestMetaDataDto) returns
               (APIKeyValidationDto) {
 
     printDebug(KEY_OAUTH_PROVIDER, "Authenticating request using the request metadata.");
@@ -113,47 +110,43 @@ function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDa
     APIKeyValidationDto apiKeyValidationDto;
     if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
         printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the gateway token cache.");
-        match self.gatewayCache.retrieveFromTokenCache(accessToken) {
-            boolean isTokenCached => {
+        var  isTokenCached = self.gatewayCache.retrieveFromTokenCache(accessToken);
+            if(isTokenCached is boolean) {
                 printDebug(KEY_OAUTH_PROVIDER, "Access token found in the token cache.");
-                match self.gatewayCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
-                    APIKeyValidationDto apiKeyValidationDtoFromcache => {
-                        if (isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
-                            self.gatewayCache.removeFromGatewayKeyValidationCache(cacheKey);
-                            self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
-                            self.gatewayCache.removeFromTokenCache(accessToken);
-                            apiKeyValidationDtoFromcache.authorized = "false";
-                            printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
-                            return apiKeyValidationDtoFromcache;
-                        }
-                        authorized = <boolean>apiKeyValidationDtoFromcache.authorized;
-                        apiKeyValidationDto = apiKeyValidationDtoFromcache;
-                        printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
+                var apiKeyValidationDtoFromcache = self.gatewayCache.authenticateFromGatewayKeyValidationCache
+                (cacheKey);
+                if(apiKeyValidationDtoFromcache is APIKeyValidationDto ) {
+                    if (isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
+                        self.gatewayCache.removeFromGatewayKeyValidationCache(cacheKey);
+                        self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
+                        self.gatewayCache.removeFromTokenCache(accessToken);
+                        apiKeyValidationDtoFromcache.authorized = false;
+                        printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
+                        return apiKeyValidationDtoFromcache;
                     }
-                    () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache."
-                        + " Calling the key validation service.");
-                        (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
-                    }
+                    authorized = apiKeyValidationDtoFromcache.authorized;
+                    apiKeyValidationDto = apiKeyValidationDtoFromcache;
+                    printDebug(KEY_OAUTH_PROVIDER, "Authorized value from the token cache: " + authorized);
+                } else {
+                    printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache."
+                    + " Calling the key validation service.");
+                    (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                 }
-            }
-            () => {
+            } else {
                 printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the gateway token cache.");
 
                 printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the invalid token cache.");
-                match self.gatewayCache.retrieveFromInvalidTokenCache(accessToken) {
-                    APIKeyValidationDto cacheAuthorizedValue => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token found in the invalid token cache.");
-                        return cacheAuthorizedValue;
-                    }
-                    () => {
-                        printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache." 
-                                + " Calling the key validation service.");
-                        (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
-                    }
+                var cacheAuthorizedValue = self.gatewayCache.retrieveFromInvalidTokenCache(accessToken);
+                if(cacheAuthorizedValue is APIKeyValidationDto) {
+                    printDebug(KEY_OAUTH_PROVIDER, "Access token found in the invalid token cache.");
+                    return cacheAuthorizedValue;
+                } else {
+                    printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the invalid token cache."
+                            + " Calling the key validation service.");
+                    (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
                 }
             }
-        }
+
     } else {
         printDebug(KEY_OAUTH_PROVIDER, "Gateway cache disabled. Calling the key validation service.");
         (authorized, apiKeyValidationDto) = self.invokeKeyValidation(apiRequestMetaDataDto);
@@ -161,94 +154,120 @@ function OAuthAuthProvider::authenticate (APIRequestMetaDataDto apiRequestMetaDa
     if (authorized) {
         // set username
         runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
-
     }
     return apiKeyValidationDto;
 }
 
-@Description {value:"Do a key validation request to Key Manager using the request metadata"}
-@Param {value:"apiRequestMetaDataDto: Object containig data to call the key validation service"}
-@Return {value:"boolean: true if authentication is a success, else false. APIKeyValidationDto: key validation response"}
-function OAuthAuthProvider::invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
+public function OAuthAuthProvider.invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (boolean,
             APIKeyValidationDto) {
-    APIKeyValidationDto apiKeyValidationDto;
+    APIKeyValidationDto apiKeyValidationDto = {};
     string accessToken = apiRequestMetaDataDto.accessToken;
     boolean authorized = false;
-    json keyValidationInfoJson = self.doKeyValidation(apiRequestMetaDataDto);
-    printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationInfoJson.toString());
-    string authorizeValue = keyValidationInfoJson.active.toString();
-            boolean auth = <boolean>authorizeValue;
-            printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
-            if (auth) {
-                apiKeyValidationDto.authorized = "true";
-                apiKeyValidationDto.consumerKey = keyValidationInfoJson.client_id.toString();
-                apiKeyValidationDto.endUserName = keyValidationInfoJson.username.toString();
-                apiKeyValidationDto.validityPeriod = keyValidationInfoJson.exp.toString();
-                apiKeyValidationDto.issuedTime = keyValidationInfoJson.iat.toString();
-                authorized = auth;
-                if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
-                    string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
-                    self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
-                    self.gatewayCache.addToTokenCache(accessToken, true);
-                }
-            } else {
-                apiKeyValidationDto.authorized = "false";
-                apiKeyValidationDto.validationStatus = API_AUTH_INVALID_CREDENTIALS_STRING;
-                if(getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
-                    self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
-                }
+    xml|error keyValidationResponseXML = self.doKeyValidation(apiRequestMetaDataDto);
+    if (keyValidationResponseXML is xml) {
+        printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
+        xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:^"return"];
+        string authorizeValue = keyValidationInfoXML[apim:authorized].getTextValue();
+        boolean auth = boolean.convert(authorizeValue);
+        printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth);
+        if (auth) {
+            apiKeyValidationDto = convertXmlToKeyValidationObject(keyValidationInfoXML);
+            printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
+            authorized = auth;
+            if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+                string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
+                self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
+                self.gatewayCache.addToTokenCache(accessToken, true);
             }
-
+        } else {
+            apiKeyValidationDto.authorized = false;
+            apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
+            if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+                self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
+            }
+        }
+    } else if(keyValidationResponseXML is error){
+        string errorMessage = "Error occurred while the key validation request";
+        log:printError(errorMessage, err=keyValidationResponseXML);
+        panic error(errorMessage);
+    }
 
     return (authorized, apiKeyValidationDto);
 
 }
 
-function OAuthAuthProvider::doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto)
-                                       returns (json) {
-    try {
-        string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
-            getGatewayConfInstance().getKeyManagerConf().credentials.password;
-        string encodedBasicAuthHeader = check base64Header.base64Encode();
+public function OAuthAuthProvider.doKeyValidation (APIRequestMetaDataDto apiRequestMetaDataDto) returns (xml|error) {
 
-        http:Request keyValidationRequest = new;
-        http:Response keyValidationResponse = new;
-        string payload  = "token=" + apiRequestMetaDataDto.accessToken;
-        keyValidationRequest.setTextPayload(payload);
-        keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, X_WWW_FORM_URLENCODED);
-        keyValidationRequest.setHeader(ACCEPT, APPLICATION_JSON);
-        time:Time time = time:currentTime();
-        int startTimeMills = time.time;
-        var result1 = keyValidationEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", keyValidationRequest);
-        time = time:currentTime();
-        int endTimeMills = time.time;
-        printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key introspect call : " + (endTimeMills -
-                    startTimeMills) + "ms");
-        match result1 {
-            error err => {
-                log:printError("Error occurred while reading the key validation response",err =err);
-                return {};
-            }
-            http:Response prod => {
-                keyValidationResponse = prod;
-            }
-        }
-        json responsepayload;
-        match keyValidationResponse.getJsonPayload() {
-            error err => {
-                log:printError("Error occurred while getting the key validation service JSON response payload ",
-                    err=err);
-                return {};
-            }
-            json responseJson => {
-                responsepayload = responseJson;
-                printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responsepayload.toString());
-            }
-        }
-        return responsepayload;
-
-    } catch (error err) {
-        log:printError("Error occurred while validating the token",err =err);
-        return {};
+    http:Request keyValidationRequest = new;
+    http:Response keyValidationResponse = new;
+    xml soapEnvelope = xml `<soapenv:Envelope>
+                                <soapenv:Body>
+                                    <xsd:validateKey>
+                                        <xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>
+                                        <xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>
+                                        <xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>
+                                        <xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto.requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>
+                                        <xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>
+                                        <xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>
+                                        <xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>
+                                    </xsd:validateKey>
+                                </soapenv:Body>
+                            </soapenv:Envelope>`;
+    keyValidationRequest.setXmlPayload(soapEnvelope, contentType=TEXT_XML);
+    keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + self.encodedBasicAuthHeader);
+    keyValidationRequest.setHeader(SOAP_ACTION, VALIDATE_KEY_SOAP_ACTION);
+    time:Time time = time:currentTime();
+    int startTimeMills = time.time;
+    var result = keyValidationEndpoint -> post(KEY_VALIDATION_SERVICE_CONTEXT, keyValidationRequest);
+    time = time:currentTime();
+    int endTimeMills = time.time;
+    printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + (endTimeMills -
+                startTimeMills) + "ms");
+    if(result is http:Response) {
+        keyValidationResponse = result;
+    } else if(result is error) {
+        string message = "Error occurred while reading the key validation response";
+        log:printError(message ,err =result);
+        return result;
     }
+    var responseXml =  keyValidationResponse.getXmlPayload();
+    if(responseXml is xml) {
+        printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responseXml.getTextValue());
+
+    } else if(responseXml is error){
+        string message = "Error occurred while getting the key validation service XML response payload";
+        log:printError(message,err=responseXml);
+    }
+    return responseXml;
+
 }
+
+function convertXmlToKeyValidationObject(xml keyValidationInfoXML) returns APIKeyValidationDto {
+     APIKeyValidationDto apiKeyValidationDto = {};
+     apiKeyValidationDto.apiName = keyValidationInfoXML[apim:apiName].getTextValue();
+     apiKeyValidationDto.apiPublisher = keyValidationInfoXML[apim:apiPublisher].getTextValue();
+     apiKeyValidationDto.apiTier = keyValidationInfoXML[apim:apiTier].getTextValue();
+     apiKeyValidationDto.applicationId = keyValidationInfoXML[apim:applicationId].getTextValue();
+     apiKeyValidationDto.applicationName = keyValidationInfoXML[apim:applicationName].getTextValue();
+     apiKeyValidationDto.applicationTier = keyValidationInfoXML[apim:applicationTier].getTextValue();
+     apiKeyValidationDto.authorized = boolean.convert(keyValidationInfoXML[apim:authorized].getTextValue());
+     apiKeyValidationDto.authorizedDomains = keyValidationInfoXML[apim:authorizedDomains].getTextValue();
+     apiKeyValidationDto.consumerKey = keyValidationInfoXML[apim:consumerKey].getTextValue();
+     apiKeyValidationDto.contentAware = keyValidationInfoXML[apim:contentAware].getTextValue();
+     apiKeyValidationDto.endUserName = keyValidationInfoXML[apim:endUserName].getTextValue();
+     apiKeyValidationDto.endUserToken = keyValidationInfoXML[apim:endUserToken].getTextValue();
+     apiKeyValidationDto.issuedTime = keyValidationInfoXML[apim:issuedTime].getTextValue();
+     apiKeyValidationDto.spikeArrestLimit = keyValidationInfoXML[apim:spikeArrestLimit].getTextValue();
+     apiKeyValidationDto.spikeArrestUnit = keyValidationInfoXML[apim:spikeArrestUnit].getTextValue();
+     apiKeyValidationDto.stopOnQuotaReach = keyValidationInfoXML[apim:stopOnQuotaReach].getTextValue();
+     apiKeyValidationDto.subscriber = keyValidationInfoXML[apim:subscriber].getTextValue();
+     apiKeyValidationDto.subscriberTenantDomain = keyValidationInfoXML[apim:subscriberTenantDomain].getTextValue();
+     apiKeyValidationDto.throttlingDataList = keyValidationInfoXML[apim:throttlingDataList].getTextValue();
+     apiKeyValidationDto.tier = keyValidationInfoXML[apim:tier].getTextValue();
+     apiKeyValidationDto.keyType = keyValidationInfoXML[apim:^"type"].getTextValue();
+     apiKeyValidationDto.userType = keyValidationInfoXML[apim:userType].getTextValue();
+     apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
+     apiKeyValidationDto.validityPeriod = keyValidationInfoXML[apim:validityPeriod].getTextValue();
+     return apiKeyValidationDto;
+}
+

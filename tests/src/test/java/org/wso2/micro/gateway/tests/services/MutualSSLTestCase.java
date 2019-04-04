@@ -24,11 +24,12 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 
@@ -48,11 +49,9 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Properties;
 
-
 /**
  * Testing the pizza_shack api rest for mutualSSL feature
  */
-
 public class MutualSSLTestCase extends BaseTestCase {
 
     private static final Log log = LogFactory.getLog(MutualSSLTestCase.class);
@@ -63,9 +62,11 @@ public class MutualSSLTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        APIDTO api = new APIDTO();
+        API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -74,6 +75,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         String security = "oauth2";
 
         CLIExecutor cliExecutor;
+        System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         microGWServer = ServerInstance.initMicroGwServer();
         String cliHome = microGWServer.getServerHome();
 
@@ -83,7 +85,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project,security);
+        cliExecutor.generate(label, project, security);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
@@ -91,9 +93,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         String[] args = {"--config", configPath};
         System.out.println("MTSL TEST CASE");
         microGWServer.startMicroGwServer(balPath, args);
-
     }
-
 
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
     public void mutualSSLEstablished() throws Exception {
@@ -148,12 +148,12 @@ public class MutualSSLTestCase extends BaseTestCase {
         } catch (UnknownHostException e) {
             log.error("An UnknownHostException occurred: ", e);
         } catch (IOException e) {
-            log.error("An IOException occurred: ", e);
+            log.error("An IOException occurred: " + e);
 
         }
     }
 
-    @Test(description = "mutual SSL is filed due to bad certificate")
+    @Test(description = "mutual SSL is failed due to bad certificate")
     public void mutualSSLfail() throws Exception {
 
         String trustStorePath = getClass().getClassLoader()

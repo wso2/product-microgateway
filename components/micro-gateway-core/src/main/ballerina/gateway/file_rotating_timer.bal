@@ -30,29 +30,27 @@ function sendFileRotatingEvent() returns error? {
 
     if (path.exists()) {
         var result = rotateFile(API_USAGE_FILE);
-        match result {
-            string name => {
-                printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
-            }
-            error err => {
-                printFullError(KEY_ROTATE_TASK, err);
-            }
+        if(result is string) {
+            printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
+        } else {
+            printFullError(KEY_ROTATE_TASK, result);
         }
-        return ();
+        return;
     } else {
-        error er = {message: "No files present to rotate."};
+        error er = error("No files present to rotate.");
         return er;
     }
 }
 
 function errorOnRotating(error e) {
-    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.message);
+    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.reason());
 }
 
 function rotatingTask() {
     task:Timer? rotatinTimer;
-    map vals = getConfigMapValue(ANALYTICS);
-    int timeSpan =  check <int> vals[ROTATING_TIME];
+    map<any> vals = getConfigMapValue(ANALYTICS);
+    // Todo: handle error if it returns one.
+    int timeSpan =  <int> vals[ROTATING_TIME];
     (function() returns error?) onTriggerFunction = sendFileRotatingEvent;
     function(error) onErrorFunction = errorOnRotating;
     rotatinTimer = new task:Timer(onTriggerFunction, onErrorFunction, timeSpan, delay = timeSpan + 5000);

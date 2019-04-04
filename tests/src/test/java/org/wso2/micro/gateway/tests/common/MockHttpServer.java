@@ -1,24 +1,14 @@
-/*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.wso2.micro.gateway.tests.common;
 
 import com.google.gson.Gson;
-import com.sun.net.httpserver.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import com.sun.net.httpserver.HttpsServer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -30,19 +20,31 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
-import javax.net.ssl.*;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -59,9 +61,48 @@ public class MockHttpServer extends Thread {
     private String DCRRestAPIBasePath = "/client-registration/v0.14";
     private String PubRestAPIBasePath = "/api/am/publisher/v0.14";
     private String AdminRestAPIBasePath = "/api/am/admin/v0.14";
+    private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
+    public final static String PROD_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-production\"}";
+    public final static String SAND_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-sandbox\"}";
+    public final static String ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE = "[{\"description\":\"Grilled white chicken, " +
+            "hickory-smoked bacon and fresh sliced onions in barbeque sauce\", \"price\":\"25.99\"," +
+            " \"icon\":\"/images/6.png\"}, {\"name\":\"Chicken Parmesan\", \"description\":\"Grilled chicken, fresh " +
+            "tomatoes, feta and mozzarella cheese\", \"price\":\"17.99\", \"icon\":\"/images/1.png\"}, " +
+            "{\"name\":\"Chilly Chicken Cordon Bleu\", \"description\":\"Spinash Alfredo sauce topped with grilled " +
+            "chicken, ham, onions and mozzarella\", \"price\":\"15.99\", \"icon\":\"/images/10.png\"}, " +
+            "{\"name\":\"Double Bacon 6Cheese\", \"description\":\"Hickory-smoked bacon, Julienne cut Canadian bacon," +
+            " Parmesan, mozzarella, Romano, Asiago and and Fontina cheese\", \"price\":\"19.99\", " +
+            "\"icon\":\"/images/9.png\"}, {\"name\":\"Garden Fresh\", \"description\":\"Slices onions and green " +
+            "peppers, gourmet mushrooms, black olives and ripe Roma tomatoes\", \"price\":\"19.99\", " +
+            "\"icon\":\"/images/3.png\"}, {\"name\":\"Grilled Chicken Club\", \"description\":\"Grilled white " +
+            "chicken, hickory-smoked bacon and fresh sliced onions topped with Roma tomatoes\", \"price\":\"27.99\"," +
+            " \"icon\":\"/images/8.png\"}, {\"name\":\"Hawaiian BBQ Chicken\", \"description\":\"Grilled" +
+            " white chicken, hickory-smoked bacon, barbeque sauce topped with sweet pine-apple\", \"price\":\"26.99\"," +
+            " \"icon\":\"/images/7.png\"}, {\"name\":\"Spicy Italian\", \"description\":\"Pepperoni and a double" +
+            " portion of spicy Italian sausage\", \"price\":\"17.99\", \"icon\":\"/images/2.png\"}, " +
+            "{\"name\":\"Spinach Alfredo\", \"description\":\"Rich and creamy blend of spinach and garlic Parmesan " +
+            "with Alfredo sauce\", \"price\":\"28.99\", \"icon\":\"/images/5.png\"}, {\"name\":\"Tuscan Six Cheese\"," +
+            " \"description\":\"Six cheese blend of mozzarella, Parmesan, Romano, Asiago and Fontina\"," +
+            " \"price\":\"14.99\", \"icon\":\"/images/4.png\"}]";
+    public final static String ECHO_ENDPOINT_RESPONSE = "{\"customerName\":\"string\", \"delivered\":true, " +
+            "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
+            " \"orderId\":\"string\"}";
+    public final static String INVALID_POSTBODY = "{\"customerName\":\"string\", \"delivered\":true, " +
+            "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
+            " \"orderId\":44}";
+    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915," +
+            " \"message\":\"Unprocessable entity\", \"description\":\"[\\\"44 is not the type, string\\\"]\"}}";
+    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, " +
+            "\"message\":\"Unprocessable entity\", \"description\":\"[\\\"name is a required field\\\"]\"}}";
+    int count = 0;
 
+    public static void main(String[] args) {
+
+        MockHttpServer mockHttpServer = new MockHttpServer(9443);
+        mockHttpServer.start();
+    }
 
     public MockHttpServer(int KMServerPort) {
 
@@ -90,7 +131,7 @@ public class MockHttpServer extends Thread {
                                 .getDefaultSSLParameters();
                         params.setSSLParameters(defaultSSLParameters);
                     } catch (Exception ex) {
-                        log.error("Failed to create HTTPS port ", ex);
+                        log.error("Failed to create HTTPS port");
                     }
                 }
             });
@@ -116,6 +157,40 @@ public class MockHttpServer extends Thread {
 
                     String payload = IOUtils.toString(exchange.getRequestBody());
                     byte[] response = payload.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext("/echo/invalidResponse", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE.toString().getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            httpServer.createContext(TMRestAPIBasePath + "/throttleEventReceiver", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+                    String jsonRequest = IOUtils.toString(exchange.getRequestBody());
+                    if (count == 9 || count == 19 || count == 29 || count == 39 || count == 49) {
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonRequest);
+                        JMSPublisher jmsPublisher = new JMSPublisher();
+
+                        try {
+                            jmsPublisher.getJson(jsonObject);
+                        } catch (JMSException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        } catch (NamingException e) {
+                            log.error("Error occurred while sending throttle event to TM", e);
+                        }
+                    }
+                    count++;
+                    byte[] response = jsonRequest.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
@@ -130,6 +205,15 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
+            httpServer.createContext("/echo/newprod", new HttpHandler() {
+                public void handle(HttpExchange exchange) throws IOException {
+
+                    byte[] response = PROD_ENDPOINT_NEW_RESPONSE.toString().getBytes();
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
             httpServer.createContext("/echo/sand", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
@@ -139,27 +223,10 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
-            httpServer.createContext("/api/identity/oauth2/introspect/v1.0/introspect", new HttpHandler() {
+            httpServer.createContext("/echo/newsand", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
-                    String requestBody = IOUtils.toString(exchange.getRequestBody());
-                    JSONObject payload = new JSONObject();
-                    String[] payloadParams = requestBody.split("=");
-                    if (payloadParams.length > 1 && MockAPIPublisher.getInstance().getIntrospectInfo()
-                            .containsKey(payloadParams[1])) {
-                        IntrospectInfo info = MockAPIPublisher.getInstance().getIntrospectInfo().get(payloadParams[1]);
-                        payload.put("active", info.isActive());
-                        payload.put("client_id", info.getClientId());
-                        payload.put("iat", info.getIat());
-                        payload.put("exp", info.getExp());
-                        payload.put("scope", info.getScopes());
-                        payload.put("username", info.getUsername());
 
-                    } else {
-                        payload.put("active", false);
-                    }
-
-                    byte[] response = payload.toString().getBytes();
-                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    byte[] response = SAND_ENDPOINT_NEW_RESPONSE.toString().getBytes();
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
@@ -183,31 +250,25 @@ public class MockHttpServer extends Thread {
             });
             httpServer.createContext(PubRestAPIBasePath + "/apis", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
-                    if(exchange.getRequestURI().getPath().contains("swagger")) {
-                        byte[] response = MockAPIPublisher.getInstance().getSwaggerResponseForAPI().getBytes();
+
+                    String query = parseParas(exchange.getRequestURI()).get("query");
+                    String[] paras = URLDecoder.decode(query, GatewayCliConstants.CHARSET_UTF8).split(" ");
+                    String label = null;
+                    for (String para : paras) {
+                        String[] searchQuery = para.split(":");
+                        if ("label".equalsIgnoreCase(searchQuery[0])) {
+                            label = searchQuery[1];
+                        }
+                    }
+
+                    if (!StringUtils.isEmpty(label)) {
+                        byte[] response = MockAPIPublisher.getInstance().getAPIResponseForLabel(label).getBytes();
                         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                         exchange.getResponseBody().write(response);
                         exchange.close();
                     } else {
-                        String query = parseParas(exchange.getRequestURI()).get("query");
-                        String[] paras = URLDecoder.decode(query, GatewayCliConstants.CHARSET_UTF8).split(" ");
-                        String label = null;
-                        for (String para : paras) {
-                            String[] searchQuery = para.split(":");
-                            if ("gatewayLabel".equalsIgnoreCase(searchQuery[0])) {
-                                label = searchQuery[1];
-                            }
-                        }
-
-                        if (!StringUtils.isEmpty(label)) {
-                            byte[] response = MockAPIPublisher.getInstance().getAPIResponseForLabel(label).getBytes();
-                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                            exchange.getResponseBody().write(response);
-                            exchange.close();
-                        } else {
-                            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-                            exchange.close();
-                        }
+                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                        exchange.close();
                     }
 
                 }
@@ -244,7 +305,7 @@ public class MockHttpServer extends Thread {
 
                 }
             });
-            httpServer.createContext(AdminRestAPIBasePath + "/policies/throttling/application", new HttpHandler() {
+            httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/application", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     String defaultPolicies = IOUtils.toString(new FileInputStream(
@@ -259,7 +320,7 @@ public class MockHttpServer extends Thread {
                     exchange.close();
                 }
             });
-            httpServer.createContext(AdminRestAPIBasePath + "/policies/throttling/subscription", new HttpHandler() {
+            httpServer.createContext(AdminRestAPIBasePath + "/throttling/policies/subscription", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     String defaultPolicies = IOUtils.toString(new FileInputStream(
@@ -276,9 +337,7 @@ public class MockHttpServer extends Thread {
             });
             httpServer.start();
             KMServerUrl = "http://localhost:" + KMServerPort;
-        } catch (IOException e)
-
-        {
+        } catch (IOException e) {
             log.error("Error occurred while setting up mock server", e);
         } catch (Exception e) {
             log.error("Error occurred while setting up mock server", e);
@@ -347,4 +406,3 @@ public class MockHttpServer extends Thread {
         return sslContext;
     }
 }
-

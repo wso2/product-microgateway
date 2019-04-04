@@ -19,7 +19,8 @@ package org.wso2.micro.gateway.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.testng.Assert;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
@@ -56,16 +57,40 @@ public class BaseTestCase {
         String cliHome = microGWServer.getServerHome();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        //Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
+        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
+        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project,security);
+        cliExecutor.generate(label, project, security);
+
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = { "--config", configPath };
+        String[] args = {"--config", configPath, "--experimental"};
+        microGWServer.startMicroGwServer(balPath, args);
+    }
+
+    protected void inits(String label, String project, String endpoint, String security) throws Exception {
+        CLIExecutor cliExecutor;
+
+        microGWServer = ServerInstance.initMicroGwServer();
+        String cliHome = microGWServer.getServerHome();
+
+        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
+        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
+        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
+        mockHttpServer.start();
+        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
+        cliExecutor = CLIExecutor.getInstance();
+        cliExecutor.setCliHome(cliHome);
+        cliExecutor.generateFromDefinition(label, project, endpoint, security);
+
+        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+        String[] args = {"--config", configPath, "--experimental"};
         microGWServer.startMicroGwServer(balPath, args);
     }
 
@@ -75,10 +100,10 @@ public class BaseTestCase {
         MockAPIPublisher.getInstance().clear();
     }
 
-    protected String getJWT(APIDTO api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
+    protected String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
             throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        subscribedApiDTO.setContext( api.getContext() + "/" + api.getVersion());
+        subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
         subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");

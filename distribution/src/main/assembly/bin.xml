@@ -26,7 +26,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>${basedir}/target/ballerina/ballerina-platform-${ballerina.platform.version}</directory>
+            <directory>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform</outputDirectory>
         </fileSet>
         <fileSet>
@@ -36,6 +36,10 @@
         <fileSet>
             <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/templates</directory>
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/templates</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/policies</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/policies</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
@@ -116,14 +120,6 @@
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/platform/bre/lib</outputDirectory>
-            <scope>runtime</scope>
-            <includes>
-                <include>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher:jar</include>
-                <include>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.admin:jar</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <outputDirectory>wso2am-micro-gw-${pom.version}/lib/runtime/bre/lib</outputDirectory>
             <scope>runtime</scope>
             <includes>
@@ -136,6 +132,7 @@
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
+                <include>com.beust:jcommander:jar</include>
             </includes>
         </dependencySet>
 

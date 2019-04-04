@@ -2,10 +2,12 @@
 httpRequestTimeout = 1000000
 
 [token]
-publisherEndpoint = ""
-adminEndpoint = ""
-registrationEndpoint = ""
-tokenEndpoint = ""
+baseURL = ""
+restVersion = "v0.14"
+publisherEndpoint = "{baseURL}/api/am/publisher/{restVersion}"
+adminEndpoint = "{baseURL}/api/am/admin/{restVersion}"
+registrationEndpoint = "{baseURL}/client-registration/{restVersion}/register"
+tokenEndpoint = "{baseURL}/oauth2/token"
 username = ""
 clientId = ""
 clientSecret = ""

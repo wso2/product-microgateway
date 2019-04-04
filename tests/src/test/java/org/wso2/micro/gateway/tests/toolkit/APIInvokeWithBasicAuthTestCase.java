@@ -22,8 +22,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
@@ -31,10 +34,8 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
-
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
@@ -43,9 +44,11 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        APIDTO api = new APIDTO();
+        API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
+        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
+        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label
@@ -58,12 +61,14 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         //Register a production token with key validation info
-        IntrospectInfo info = new IntrospectInfo();
-        info.setActive(true);
-        info.setIat(System.currentTimeMillis());
-        info.setExp(System.currentTimeMillis() + 3600000);
-        info.setClientId(UUID.randomUUID().toString());
-        info.setUsername("admin");
+        KeyValidationInfo info = new KeyValidationInfo();
+        info.setApi(api);
+        info.setApplication(application);
+        info.setAuthorized(true);
+        info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
+        info.setSubscriptionTier("Unlimited");
+        //set security schemas
+        String security = "basic";
 
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
@@ -80,20 +85,18 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //set security schemas
-        String security = "basic";
-        //generate apis with CLI and start the micro gateway server
+        //generate apis with CLI and start the micro gateway server only supports basic Auth
         super.init(label, project, security);
     }
 
     @Test(description = "Test API invocation with a JWT token")
     public void testApiInvokeFailWithJWT() throws Exception {
         //test  endpoint with jwt token
-        invoke(jwtTokenProd,401);
+        invoke(jwtTokenProd, 401);
 
         try {
             Thread.sleep(2000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
     }
@@ -116,14 +119,8 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
-
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
     }
+
     @Test(description = "Test API invocation with Basic Auth")
     public void testApiInvokeWithoutPassword() throws Exception {
         //Valid Credentials
@@ -132,13 +129,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
     }
 
     @Test(description = "Test API invocation with Basic Auth")
@@ -149,13 +139,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
     }
 
     @Test(description = "Test API invocation with Basic Auth")
@@ -166,13 +149,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
 
         //test endpoint
         invokeBasic(basicAuthToken, 401);
-
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
-        }
-
     }
 
     private void invokeBasic(String token, String responseData, int responseCode) throws Exception {
@@ -185,6 +161,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
+
     private void invokeBasic(String token, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
@@ -195,10 +172,10 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
-
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
         super.finalize();
     }
+
 }

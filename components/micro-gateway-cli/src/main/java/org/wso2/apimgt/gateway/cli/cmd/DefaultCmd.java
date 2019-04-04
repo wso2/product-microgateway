@@ -25,7 +25,7 @@ import com.beust.jcommander.Parameter;
  */
 public class DefaultCmd implements GatewayLauncherCmd {
 
-    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
+    @Parameter(names = { "--help", "-h", "?" }, hidden = true, description = "for more information")
     private boolean helpFlag;
 
     @SuppressWarnings("unused")

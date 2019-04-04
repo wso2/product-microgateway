@@ -30,23 +30,27 @@ public class RESTServiceConstants {
     public static final String LOAD_BALANCE = "load_balance";
     public static final String UNLIMITED = "Unlimited";
     public static final String AUTHORIZATION = "Authorization";
-    public static final String AUTH_HEADER = "AUTH_HEADER";
     public static final String BEARER = "Bearer";
     public static final String GET = "GET";
     public static final String APIS_GET_URI =
-            "apis?query=gatewayLabel:" + GatewayCliConstants.LABEL_PLACEHOLDER +
-                    "&expand=true";
+            "apis?query=label:" + GatewayCliConstants.LABEL_PLACEHOLDER + "%20status:PUBLISHED&expand=true&limit=500";
     public static final String API_GET_BY_NAME_VERSION_URI =
-            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%2Cversion:"
-                    + GatewayCliConstants.VERSION_PLACEHOLDER;
-    public static final String PUB_RESOURCE_PATH = "/api/am/publisher/v1.0/";
-    public static final String ADMIN_RESOURCE_PATH = "/api/am/admin/v1.0/";
-    public static final String DCR_RESOURCE_PATH = "/api/identity/oauth2/dcr/v1.0/register";
-    public static final String TOKEN_PATH = "/api/auth/oauth2/v1.0/token";
+            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
+                    + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
 
-    public static final String DEFAULT_HOST = "https://localhost:9443/";
+    public static final String CONFIG_REST_VERSION = "v0.14";
+    public static final String CONFIG_PUBLISHER_ENDPOINT = "{baseURL}/api/am/publisher/{restVersion}";
+    public static final String CONFIG_ADMIN_ENDPOINT = "{baseURL}/api/am/admin/{restVersion}";
+    public static final String CONFIG_REGISTRATION_ENDPOINT = "{baseURL}/client-registration/{restVersion}/register";
+    public static final String CONFIG_TOKEN_ENDPOINT = "{baseURL}/oauth2/token";
+    public static final String REST_VERSION_TAG = "{restVersion}";
+    public static final String BASE_URL_TAG = "{baseURL}";
+
+    public static final String DEFAULT_HOST = "https://localhost:9443";
     public static final String DEFAULT_TRUSTSTORE_PATH = "lib/platform/bre/security/ballerinaTruststore.p12";
     public static final String DEFAULT_TRUSTSTORE_PASS = "ballerina";
+    public static final String DEFAULT_KEYSTORE_PATH = "lib/platform/bre/security/ballerinaKeystore.p12";
+    public static final String DEFAULT_KEYSTORE_PASS = "ballerina";
 
     public static final String CERTIFICATE_ALIAS = "Alias";
     public static final String CERTIFICATE_TIER = "Tier";

@@ -17,14 +17,14 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 
 /**
  * Key validation info holder
  */
 public class KeyValidationInfo {
-    private APIDTO api;
+    private API api;
     private ApplicationDTO application;
     private boolean authorized;
     private String keyType;
@@ -60,11 +60,11 @@ public class KeyValidationInfo {
         this.keyType = keyType;
     }
 
-    public APIDTO getApi() {
+    public API getApi() {
         return api;
     }
 
-    public void setApi(APIDTO api) {
+    public void setApi(API api) {
         this.api = api;
     }
 

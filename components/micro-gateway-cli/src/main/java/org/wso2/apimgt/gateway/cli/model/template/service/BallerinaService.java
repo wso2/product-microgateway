@@ -24,11 +24,11 @@ import io.swagger.models.Tag;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -37,17 +37,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-
 /**
  * Wrapper for {@link Swagger}.
  * <p>This class can be used to push additional context variables for handlebars</p>
  */
 public class BallerinaService implements BallerinaSwaggerObject<BallerinaService, Swagger> {
     private String name;
-    private APIInfoDTO api;
+    private ExtendedAPI api;
     private ContainerConfig containerConfig;
     private Config config;
-    private List<API_endpointDTO> endpointConfig;
+    private EndpointConfig endpointConfig;
     private String srcPackage;
     private String modelPackage;
     private String qualifiedServiceName;
@@ -56,6 +55,7 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
     private Set<Map.Entry<String, String>> security = null;
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
+    private Etcd etcd;
 
     /**
      * Build a {@link BallerinaService} object from a {@link Swagger} object.
@@ -73,53 +73,24 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.tags = swagger.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
         this.config = GatewayCmdUtils.getConfig();
+        this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(swagger);
         return this;
     }
 
     @Override
-    public BallerinaService buildContext(Swagger definition, APIInfoDTO api) throws BallerinaServiceGenException {
+    public BallerinaService buildContext(Swagger definition, ExtendedAPI api) throws BallerinaServiceGenException {
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
-        if (api instanceof APIDTO) {
-            this.endpointConfig = ((APIDTO) api).getEndpoint();
-        }
+        this.endpointConfig = api.getEndpointConfigRepresentation();
         return buildContext(definition);
     }
 
     @Override
     public BallerinaService getDefaultValue() {
         return null;
-    }
-
-    /**
-     * Populate path models into iterable structure.
-     * This method will also add an operationId to each operation,
-     * if operationId not provided in swagger definition
-     *
-     * @param swagger {@code OpenAPI} definition object with schema definition
-     * @throws BallerinaServiceGenException when context building fails
-     */
-    private void setPaths(Swagger swagger) throws BallerinaServiceGenException {
-        if (swagger.getPaths() == null) {
-            return;
-        }
-
-        this.paths = new LinkedHashSet<>();
-        Map<String, Path> pathList = swagger.getPaths();
-        for (Map.Entry<String, Path> path : pathList.entrySet()) {
-            BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
-            balPath.getOperations().forEach(operation -> {
-                if (operation.getValue().getOperationId() == null) {
-                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
-                    operation.getValue().setOperationId(operationId);
-                }
-            });
-            paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
-        }
     }
 
     public BallerinaService srcPackage(String srcPackage) {
@@ -160,6 +131,33 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         return paths;
     }
 
+    /**
+     * Populate path models into iterable structure.
+     * This method will also add an operationId to each operation,
+     * if operationId not provided in swagger definition
+     *
+     * @param swagger {@code OpenAPI} definition object with schema definition
+     * @throws BallerinaServiceGenException when context building fails
+     */
+    private void setPaths(Swagger swagger) throws BallerinaServiceGenException {
+        if (swagger.getPaths() == null) {
+            return;
+        }
+
+        this.paths = new LinkedHashSet<>();
+        Map<String, Path> pathList = swagger.getPaths();
+        for (Map.Entry<String, Path> path : pathList.entrySet()) {
+            BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
+            balPath.getOperations().forEach(operation -> {
+                if (operation.getValue().getOperationId() == null) {
+                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
+                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                    operation.getValue().setOperationId(operationId);
+                }
+            });
+            paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
+        }
+    }
 
     private String replaceAllNonAlphaNumeric(String value) {
         return value.replaceAll("[^a-zA-Z0-9]+", "_");
@@ -173,20 +171,20 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.name = name;
     }
 
-    public APIInfoDTO getApi() {
-        return api;
-    }
-
-    public void setApi(APIDTO api) {
-        this.api = api;
-    }
-
-    public List<API_endpointDTO> getEndpointConfig() {
+    public EndpointConfig getEndpointConfig() {
         return endpointConfig;
     }
 
-    public void setEndpointConfig(List<API_endpointDTO> endpointConfig) {
+    public void setEndpointConfig(EndpointConfig endpointConfig) {
         this.endpointConfig = endpointConfig;
+    }
+
+    public ExtendedAPI getApi() {
+        return api;
+    }
+
+    public void setApi(ExtendedAPI api) {
+        this.api = api;
     }
 
     public String getQualifiedServiceName() {

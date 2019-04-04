@@ -15,8 +15,13 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.JsonSyntaxException;
 import io.swagger.annotations.ApiModel;
+import io.swagger.util.Json;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
@@ -24,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(description = "")
 public class APIDetailedDTO extends APIInfoDTO {
 
@@ -33,13 +39,13 @@ public class APIDetailedDTO extends APIInfoDTO {
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean isDefaultVersion = null;
+    private Json apiSwagger = null;
 
     public enum TypeEnum {
         HTTP, WS, SOAPTOREST,
     }
 
     ;
-
 
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
@@ -85,7 +91,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-
 
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
@@ -234,10 +239,9 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.authorizationHeader = authorizationHeader;
     }
 
-
     /**
-     * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\n
-     * it is not set OAuth2 will be set as the security for the current API.\n
+     * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both.
+     * If it is not set OAuth2 will be set as the security for the current API.\n
      **/
     @JsonProperty("apiSecurity")
     public String getApiSecurity() {
@@ -257,10 +261,9 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.maxTps = maxTps;
     }
 
-
     /**
-     * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR
-     * CONTROLLED.
+     * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE,
+     * RESTRICTED OR CONTROLLED.
      **/
     @JsonProperty("visibility")
     public VisibilityEnum getVisibility() {
@@ -283,7 +286,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setVisibleRoles(List<String> visibleRoles) {
         this.visibleRoles = visibleRoles;
     }
-
 
     @JsonProperty("visibleTenants")
     public List<String> getVisibleTenants() {
@@ -314,7 +316,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.endpointSecurity = endpointSecurity;
     }
 
-
     /**
      * Comma separated list of gateway environments.\n
      **/
@@ -326,7 +327,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setGatewayEnvironments(String gatewayEnvironments) {
         this.gatewayEnvironments = gatewayEnvironments;
     }
-
 
     /**
      * Labels of micro-gateway environments attached to the APIDetailedDTO.\n
@@ -340,7 +340,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.labels = labels;
     }
 
-
     @JsonProperty("sequences")
     public List<SequenceDTO> getSequences() {
         return sequences;
@@ -349,7 +348,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setSequences(List<SequenceDTO> sequences) {
         this.sequences = sequences;
     }
-
 
     /**
      * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
@@ -363,7 +361,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.subscriptionAvailability = subscriptionAvailability;
     }
 
-
     @JsonProperty("subscriptionAvailableTenants")
     public List<String> getSubscriptionAvailableTenants() {
         return subscriptionAvailableTenants;
@@ -372,7 +369,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
         this.subscriptionAvailableTenants = subscriptionAvailableTenants;
     }
-
 
     /**
      * Map of custom properties of APIDetailedDTO
@@ -401,7 +397,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.accessControl = accessControl;
     }
 
-
     /**
      * The user roles that are able to view/modify as APIDetailedDTO publisher or creator.
      **/
@@ -427,6 +422,22 @@ public class APIDetailedDTO extends APIInfoDTO {
     @JsonProperty("corsConfiguration")
     public APICorsConfigurationDTO getCorsConfiguration() {
         return corsConfiguration;
+    }
+
+    public JsonObject getApiSwagger() {
+        String swagger = getApiDefinition();
+        JsonParser parser = new JsonParser();
+        JsonObject jsonSwagger;
+        try {
+            jsonSwagger = parser.parse(swagger).getAsJsonObject();
+        } catch (JsonSyntaxException e) {
+            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject", e);
+        }
+        return jsonSwagger;
+    }
+
+    public void setApiSwagger(Json apiSwagger) {
+        this.apiSwagger = apiSwagger;
     }
 
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {

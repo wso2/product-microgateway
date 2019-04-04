@@ -20,9 +20,7 @@ import ballerina/time;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Listener listener, http:Request request, http:FilterContext context) returns
-                                                                                                                boolean
-    {
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -31,19 +29,18 @@ public type AnalyticsRequestFilter object {
             } else {
                 context.attributes[HOSTNAME_PROPERTY] = "localhost";
             }
-            context.attributes[PROTOCOL_PROPERTY] = listener.protocol;
+            context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }
         return true;
-
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
 
         if (isAnalyticsEnabled) {
-            boolean filterFailed = check <boolean>context.attributes[FILTER_FAILED];
+            boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
-                boolean isThrottleOut = check <boolean>context.attributes[IS_THROTTLE_OUT];
+                boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
                     ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticsDTO(context);
                     eventStream.publish(getEventFromThrottleData(eventDto));
@@ -83,15 +80,14 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
-    match runtime:getInvocationContext().attributes[ERROR_RESPONSE] {
-        () => {
-            printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
-            doFilterResponseData(response, context);
-        }
-        any code => {
-            printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-            error err = <error>code;
-            doFilterFault(context, err);
-        }
+    // TODO: refactor the logic. error does not belong to type any
+    var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
+    if (code is ()) {
+        printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
+        doFilterResponseData(response, context);
     }
+    // } else if(code is error) {
+    //     printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+    //     doFilterFault(context, code);
+    // }
 }

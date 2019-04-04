@@ -66,7 +66,7 @@ import java.util.Map;
  * insert into AlertStream;
  */
 
-@Extension(name = "emitOnStateChange", namespace = "throttler", description = "The logger stream processor logs the "
+@Extension(name = "emitOnStateChange", namespace = "gateway/throttler", description = "The logger stream processor logs the "
         + "message with or without event for the given log priority.", parameters = {
         @Parameter(name = "throttle.key", description = "The priority/type of this log message.", type = {
                 DataType.STRING }),

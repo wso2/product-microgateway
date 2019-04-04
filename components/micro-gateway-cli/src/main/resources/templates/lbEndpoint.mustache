@@ -1,7 +1,7 @@
-endpoint http:LoadBalanceClient {{qualifiedServiceName}}_{{type}} {
+http:LoadBalanceClient {{qualifiedServiceName}}_{{endpointUrlType}} = new({
     targets: [
-    {{#inline.endpointConfig.list}}    {url: gateway:retrieveConfig("{{api.name}}.{{api.version}}.{{type}}.endpoint.{{@index}}", "{{url}}")}{{#unless @last}},
-    {{/unless}}{{/inline.endpointConfig.list}}
-    ],
-    algorithm: http:ROUND_ROBIN{{>caching}}{{>basicAuth}}
-};
+    {{#endpoints}}    {url: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{#unless @last}},
+    {{/unless}}{{/endpoints}}
+    ]
+    {{>caching}}{{>basicAuth}}
+});

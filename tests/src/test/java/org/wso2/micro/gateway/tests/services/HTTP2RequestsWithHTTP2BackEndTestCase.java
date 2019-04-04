@@ -1,18 +1,21 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
+
 package org.wso2.micro.gateway.tests.services;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -25,14 +28,13 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointConfigDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfigDTO;
-import org.wso2.micro.gateway.tests.common.*;
+import org.wso2.micro.gateway.tests.common.BaseTestCase;
+import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.HTTP2Server.MockHttp2Server;
+import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
+import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
+import org.wso2.micro.gateway.tests.common.MockHttpServer;
+import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
@@ -41,9 +43,7 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
@@ -63,55 +63,10 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
         String project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        APIDTO api = new APIDTO();
+        API api = new API();
         api.setName("PizzaShackAPI");
         api.setContext("/pizzashack");
-
-        //set production ep
-        List<API_endpointDTO> api_endpointDTOS = new ArrayList<>();
-        API_endpointDTO prod = new API_endpointDTO();
-        prod.setType("Production");
-        EndPointDTO endPointDTO_prod = new EndPointDTO();
-        endPointDTO_prod.setName("Ep1");
-        endPointDTO_prod.setType("http");
-        EndPoint_endpointSecurityDTO endPoint_endpointSecurityDTO_prod = new EndPoint_endpointSecurityDTO();
-        endPoint_endpointSecurityDTO_prod.setEnabled(false);
-        endPointDTO_prod.setEndpointSecurity(endPoint_endpointSecurityDTO_prod);
-        EndPoint_endpointConfigDTO endPoint_endpointConfigDTO_prod = new EndPoint_endpointConfigDTO();
-        endPoint_endpointConfigDTO_prod.setEndpointType(EndPoint_endpointConfigDTO.EndpointTypeEnum.SINGLE);
-        List<EndpointConfigDTO> api_endpointConfigDTOS_prod = new ArrayList<>();
-        EndpointConfigDTO endpointConfigDTO_prod = new EndpointConfigDTO();
-        endpointConfigDTO_prod.setUrl("https://localhost:8443");
-        endpointConfigDTO_prod.setTimeout("1000");
-        api_endpointConfigDTOS_prod.add(endpointConfigDTO_prod);
-        endPoint_endpointConfigDTO_prod.setList(api_endpointConfigDTOS_prod);
-        endPointDTO_prod.setEndpointConfig(endPoint_endpointConfigDTO_prod);
-        prod.setInline(endPointDTO_prod);
-
-        //set sand ep
-        API_endpointDTO sand = new API_endpointDTO();
-        sand.setType("Sandbox");
-        EndPointDTO endPointDTO_sand = new EndPointDTO();
-        endPointDTO_sand.setName("Ep2");
-        endPointDTO_sand.setType("http");
-        EndPoint_endpointSecurityDTO endPoint_endpointSecurityDTO_sand = new EndPoint_endpointSecurityDTO();
-        endPoint_endpointSecurityDTO_sand.setEnabled(false);
-        endPointDTO_sand.setEndpointSecurity(endPoint_endpointSecurityDTO_sand);
-        EndPoint_endpointConfigDTO endPoint_endpointConfigDTO_sand = new EndPoint_endpointConfigDTO();
-        endPoint_endpointConfigDTO_sand.setEndpointType(EndPoint_endpointConfigDTO.EndpointTypeEnum.SINGLE);
-        List<EndpointConfigDTO> api_endpointConfigDTOS_sand = new ArrayList<>();
-        EndpointConfigDTO endpointConfigDTO_sand = new EndpointConfigDTO();
-        endpointConfigDTO_sand.setUrl("https://localhost:8443");
-        endpointConfigDTO_sand.setTimeout("1000");
-        api_endpointConfigDTOS_sand.add(endpointConfigDTO_sand);
-        endPoint_endpointConfigDTO_sand.setList(api_endpointConfigDTOS_sand);
-        endPointDTO_sand.setEndpointConfig(endPoint_endpointConfigDTO_sand);
-        sand.setInline(endPointDTO_sand);
-
-        api_endpointDTOS.add(0, prod);
-        api_endpointDTOS.add(1, sand);
-        api.setEndpoint(api_endpointDTOS);
-
+        api.setEndpoint("https://localhost:8443");
         api.setVersion("1.0.0");
         api.setProvider("admin");
         //Register API with label

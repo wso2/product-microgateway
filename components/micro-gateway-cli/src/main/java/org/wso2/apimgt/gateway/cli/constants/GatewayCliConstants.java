@@ -18,14 +18,16 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
 
 public class GatewayCliConstants {
     public static final String CONF_DIRECTORY_NAME = "conf";
     public static final String PROJECTS_SRC_DIRECTORY_NAME = "src";
+    public static final String PROJECTS_GRPC_SERVICE_DIRECTORY_NAME = "grpc_service";
+    public static final String PROJECTS_GRPC_CLIENT_DIRECTORY_NAME = "client";
     public static final String PROJECTS_LOGS_DIRECTORY_NAME = "logs";
     public static final String PROJECTS_API_USAGE_DIRECTORY_NAME = "api-usage-data";
     public static final String ACCESS_LOG_FILE = "access_logs";
@@ -48,6 +50,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_CONF = "conf";
     public static final String GW_DIST_RESOURCES = "resources";
     public static final String GW_DIST_FILTERS = "filters";
+    public static final String GW_DIST_POLICIES = "policies";
     public static final String GW_DIST_RUNTIME = "runtime";
     public static final String GW_DIST_EXEC = "exec";
     public static final String GW_DIST_SH = "gateway";

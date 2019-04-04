@@ -42,7 +42,7 @@ public class ResetCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = {"-c", "--config"}, hidden = true)
+    @Parameter(names = { "-c", "--config" }, hidden = true)
     private String configPath;
 
     public void execute() {
@@ -62,7 +62,8 @@ public class ResetCmd implements GatewayLauncherCmd {
         Client client = new Client();
         client.setHttpRequestTimeout(1000000);
         newConfig.setClient(client);
-        Token token = new TokenBuilder().setPublisherEndpoint(StringUtils.EMPTY).setAdminEndpoint(StringUtils.EMPTY)
+        Token token = new TokenBuilder().setBaseURL(StringUtils.EMPTY).setRestVersion(StringUtils.EMPTY)
+                .setPublisherEndpoint(StringUtils.EMPTY).setAdminEndpoint(StringUtils.EMPTY)
                 .setRegistrationEndpoint(StringUtils.EMPTY).setTokenEndpoint(StringUtils.EMPTY)
                 .setUsername(StringUtils.EMPTY).setClientId(StringUtils.EMPTY).setClientSecret(StringUtils.EMPTY)
                 .setTrustStoreLocation(StringUtils.EMPTY).setTrustStorePassword(StringUtils.EMPTY).build();

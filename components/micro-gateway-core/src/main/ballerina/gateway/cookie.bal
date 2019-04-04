@@ -25,12 +25,9 @@ import ballerina/io;
 import ballerina/reflect;
 
 
-@Description { value: "Representation of the Cookie Based authetication logic" }
 public type CookieBasedAuth object {
 
-    @Param { value: "request: Request instance" }
-    @Return { value: "FilterResult:Validation of cookies in request" }
-    public function processRequest(http:Request request) returns string|error {
+    public function processRequest( http:Request request) returns string|error {
 
         //get required cookie as config value
         string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
@@ -38,7 +35,7 @@ public type CookieBasedAuth object {
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
         string[] cookies = authHead.trim().split(";");
-        foreach cookie in cookies {
+        foreach var cookie in cookies {
             string converted = cookie.replaceFirst("=", "::");
             string[] splitedStrings = converted.trim().split("::");
             string sessionId = splitedStrings[1];
@@ -46,13 +43,11 @@ public type CookieBasedAuth object {
                 return sessionId;
             }
         }
-        error notFound = { message: "No Authorized cookie is found" };
+        error notFound = error("No Authorized cookie is found");
         return notFound;
     }
 
-    @Param { value: "request: Request instance" }
-    @Return { value: "FilterResult:Check whether Validation of cookies in request is authenticated" }
-    public function isCookieAuthed(http:Request request) returns boolean {
+    public function isCookieAuthed( http:Request request) returns boolean {
 
         //get required cookie as config value
         string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
@@ -60,7 +55,7 @@ public type CookieBasedAuth object {
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
         string[] cookies = authHead.trim().split(";");
-        foreach cookie in cookies {
+        foreach var cookie in cookies {
             string converted = cookie.replaceFirst("=", "::");
             string[] splitedStrings = converted.trim().split("::");
             string sessionId = splitedStrings[1];

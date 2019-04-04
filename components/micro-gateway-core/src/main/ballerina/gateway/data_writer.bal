@@ -17,29 +17,29 @@
 import ballerina/io;
 import ballerina/http;
 
-@final
-public string KVT = "-KS-";
-public string EVS = "-ES-";
-public string OBJ = "-OS-";
+
+public const string KVT = "-KS-";
+public const string EVS = "-ES-";
+public const string OBJ = "-OS-";
 
 int initializingTime = 0;
 int rotatingTime = 0;
 //streams associated with DTOs
-stream<EventDTO> eventStream;
+stream<EventDTO> eventStream = new;
 
 
 function setRequestAttributesToContext(http:Request request, http:FilterContext context) {
     //ready authentication context to get values
-    boolean isSecured =check <boolean>context.attributes[IS_SECURED];
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+        AuthenticationContext authContext =  <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         context.attributes[APPLICATION_OWNER_PROPERTY] = authContext.subscriber;
         context.attributes[API_TIER_PROPERTY] = authContext.apiTier;
         context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = !authContext.stopOnQuotaReach;
     } else {
         context.attributes[APPLICATION_OWNER_PROPERTY] = ANONYMOUS_APP_OWNER;
         context.attributes[API_TIER_PROPERTY] = UNAUTHENTICATED_TIER;
-        context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = check <boolean>context.attributes[ALLOWED_ON_QUOTA_REACHED];
+        context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = <boolean>context.attributes[ALLOWED_ON_QUOTA_REACHED];
     }
     context.attributes[USER_AGENT_PROPERTY] = request.userAgent;
     context.attributes[USER_IP_PROPERTY] = <string>context.attributes[REMOTE_ADDRESS];
@@ -51,7 +51,7 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
     context.attributes[REQUEST_TIME_PROPERTY] = currentTimeMills;
 }
 
-function getEventData(EventDTO dto) returns string {
+public function getEventData(EventDTO dto) returns string {
     string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp + EVS +
         "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
         "payLoadData" + KVT + dto.payloadData + "\n";
@@ -60,26 +60,24 @@ function getEventData(EventDTO dto) returns string {
 
 function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
-    io:ByteChannel channel = io:openFile(fileLocation + API_USAGE_FILE, io:APPEND);
-    io:CharacterChannel charChannel = new(channel, "UTF-8");
-    try {
-        match charChannel.write(getEventData(eventDTO), 0) {
-            int numberOfCharsWritten => {
-                printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
-            }
-            error err => {
-                throw err;
-            }
-        }
-    } finally {
-        match charChannel.close() {
-            error sourceCloseError => {
-                printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
-                        + sourceCloseError.message);
-            }
-            () => {
-                printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
-            }
-        }
+    io:WritableCharacterChannel charChannel = new(io:openWritableFile(fileLocation + API_USAGE_FILE), "UTF-8");
+    var result = charChannel.write(getEventData(eventDTO), 0);
+    if(result is error ) {
+        closeWC(charChannel);
+        panic result;
+    } else  {
+        closeWC(charChannel);
+        printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
+    }
+
+}
+
+public function closeWC(io:WritableCharacterChannel charChannel) {
+    var result = charChannel.close();
+    if(result is error){
+            printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
+                    + result.reason());
+    } else {
+        printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
     }
 }

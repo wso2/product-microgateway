@@ -38,7 +38,7 @@ import java.util.List;
 @Parameters(commandNames = "build", commandDescription = "micro gateway build information")
 public class BuildCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
-    private static PrintStream outStream = System.err;
+    private static PrintStream outStream = System.out;
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
@@ -61,6 +61,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         try {
             projectName = GatewayCmdUtils.getProjectName(mainArgs);
+            projectName = projectName.replaceAll("[\\/\\\\]", "");
             File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
             if (!projectLocation.exists()) {
                 throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -68,10 +69,8 @@ public class BuildCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.createProjectGWDistribution(projectName);
             outStream.println("Build successful for the project - " + projectName);
         } catch (IOException e) {
-            logger.error("Error occurred while creating the micro gateway distribution for the project {}.",
-                    projectName, e);
-            throw new CLIInternalException("Error occurred while creating the micro gateway distribution " +
-                    "for the project");
+            logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
+            throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
         }
     }
 
