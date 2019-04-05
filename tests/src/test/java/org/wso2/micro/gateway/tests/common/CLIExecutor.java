@@ -59,12 +59,16 @@ public class CLIExecutor {
                 config, "--security", security};
         main.main(args);
 
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
+
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
         homeDirectory = path + File.separator + project;
 
-        String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project,"--experimental"};
+        String[] cmdArray = new String[] { "bash", balCommand, "build" };
+        String[] args2 = new String[] { "src", "-o", project, "--experimental" };
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 
@@ -97,12 +101,16 @@ public class CLIExecutor {
                 "-oa", oasFilePath, "-e", endpoint, "--config", config, "--security", security};
         main.main(args);
 
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
+
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
         homeDirectory = path + File.separator + project;
 
-        String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project, "--experimental"};
+        String[] cmdArray = new String[] { "bash", balCommand, "build" };
+        String[] args2 = new String[] { "src", "-o", project, "--experimental" };
         String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
         Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
 
@@ -133,6 +141,10 @@ public class CLIExecutor {
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", "oauth2", additionalFlag };
         main.main(args);
+
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
