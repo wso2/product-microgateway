@@ -260,7 +260,6 @@
 
 // end of http codes
 
-
  const string PATH_SEPERATOR = "/";
 
 //http2 constants
