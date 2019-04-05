@@ -11,6 +11,8 @@ public class EndpointConfig {
 
     private EndpointListRouteDTO ProdEndpointList = null;
     private EndpointListRouteDTO sandboxEndpointList = null;
+    private String functionIn;
+    private String functionOut;
 
     @JsonProperty("prod")
     public EndpointListRouteDTO getProdEndpointList() {
@@ -28,5 +30,19 @@ public class EndpointConfig {
 
     public void setSandboxEndpointList(EndpointListRouteDTO sandboxEndpointList) {
         this.sandboxEndpointList = sandboxEndpointList;
+    }
+
+    @JsonProperty("functionIn")
+    public String getFunctionIn() { return functionIn; }
+
+    public void setFunctionIn(String functionIn) {
+        this.functionIn = functionIn; }
+
+    @JsonProperty("functionOut")
+    public String getFunctionOut() {
+        return functionOut; }
+
+    public void setFunctionOut(String functionOut) {
+        this.functionOut = functionOut;
     }
 }

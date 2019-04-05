@@ -165,11 +165,13 @@ public class RouteUtils {
         JsonNode basePathsNode = null;
         JsonNode globalEpsNode = null;
         JsonNode resourcesNode = null;
+        JsonNode globalFunctionNode = null;
 
         if(!rootNode.isNull()){
             basePathsNode = rootNode.get("basepaths");
             globalEpsNode = rootNode.get("global_endpoints");
             resourcesNode = rootNode.get("resources");
+            globalFunctionNode = rootNode.get("global_function");
         }
 
         if(basePathsNode == null){
@@ -185,6 +187,11 @@ public class RouteUtils {
         if(resourcesNode == null){
             resourcesNode = OBJECT_MAPPER_YAML.createObjectNode();
             ((ObjectNode) rootNode).set("resources", resourcesNode);
+        }
+
+        if(globalFunctionNode == null){
+            globalFunctionNode = OBJECT_MAPPER_YAML.createObjectNode();
+            ((ObjectNode) rootNode).set("global_function", globalFunctionNode);
         }
         return rootNode;
     }
@@ -203,6 +210,10 @@ public class RouteUtils {
 
     public static APIRouteEndpointConfig getGlobalEpConfig(String apiName, String apiVersion, String routesConfigPath){
         String apiId = HashUtils.generateAPIId(apiName, apiVersion);
+        return getGlobalEpConfig(apiId, routesConfigPath);
+    }
+
+    public static APIRouteEndpointConfig getGlobalEpConfig(String apiId, String routesConfigPath){
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
         JsonNode globalEpConfig = rootNode.get("global_endpoints").get(apiId);
         APIRouteEndpointConfig apiRouteEndpointConfig;
@@ -306,5 +317,35 @@ public class RouteUtils {
         }
 
         return endpointconfig;
+    }
+
+    public static void addFunction(String function, String type, String apiID, String routeConfigPath, String projectName){
+
+        APIRouteEndpointConfig api = RouteUtils.getGlobalEpConfig(apiID,GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+
+        if(type.equals("in")){
+            api.setFunctionIn(function);
+        }
+        else if(type.equals("out")){
+            api.setFunctionOut(function);
+        }
+        JsonNode jn = getRoutesConfig(routeConfigPath);
+        addAPIRouteEndpointConfigAsGlobalEp(jn,apiID,api);
+        writeRoutesConfig(jn,routeConfigPath);
+    }
+
+    public static void AddGlobalFunction(String routeConfigPath, String function, String type){
+        JsonNode rootNode = getRoutesConfig(routeConfigPath);
+        JsonNode jsonNode = rootNode.get("global_function");
+
+        if(type.equals("in")){
+            ((ObjectNode)jsonNode).put("mediationIn", function);
+        }
+        if(type.equals("out")){
+            ((ObjectNode)jsonNode).put("mediationOut", function);
+        }
+
+        writeRoutesConfig(rootNode,routeConfigPath);
+
     }
 }
