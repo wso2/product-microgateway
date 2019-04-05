@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.apimgt.gateway.cli.cmd;
 
 import com.beust.jcommander.JCommander;
@@ -17,31 +35,31 @@ import java.util.List;
 @Parameters(commandNames = "function", commandDescription = "add function")
 public class FunctionCmd implements GatewayLauncherCmd {
 
-    private static final Logger logger = LoggerFactory.getLogger(FunctionCmd.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FunctionCmd.class);
     private static PrintStream outStream = System.out;
 
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
 
-    @Parameter(names = {"-add", "--add function"}, hidden = true)
-    private Boolean addFunction = false;
+    @Parameter(names = {"-a", "--add"}, hidden = true)
+    private Boolean isAdd = false;
 
-    @Parameter(names = {"-update", "--update function"}, hidden = true)
-    private Boolean updateFunction = false;
+    @Parameter(names = {"-u", "--update"}, hidden = true)
+    private Boolean isUpdate = false;
 
-    @Parameter(names = {"-l", "--fileName"}, hidden = true)
+    @Parameter(names = {"-f", "--fileName"}, hidden = true)
     private String fileLocation;
 
-    @Parameter(names = {"-ai", "--api id"}, hidden = true)
+    @Parameter(names = {"-ai", "--api-id"}, hidden = true)
     private String apiID;
 
-    @Parameter(names = {"-ri", "--resource id"}, hidden = true)
+    @Parameter(names = {"-ri", "--resource-id"}, hidden = true)
     private String resourceID;
 
-    @Parameter(names = {"-in", "--function in"}, hidden = true)
+    @Parameter(names = {"-i", "--in"}, hidden = true)
     private String inFunction;
 
-    @Parameter(names = {"-out", "--function out"}, hidden = true)
+    @Parameter(names = {"-o", "--out"}, hidden = true)
     private String outFunction;
 
     @Override
@@ -59,31 +77,32 @@ public class FunctionCmd implements GatewayLauncherCmd {
             FileUtils.copyFileToDirectory(source, projectLocation);
             outStream.println("file copied");
         } catch (Exception e) {
-            logger.error("error occured while copying file:" + e);
+            LOGGER.error("error occured while copying file:" + e);
         }
 
-        if (addFunction || updateFunction) {
+        if (!isAdd) {
+            return;
+        }
 
-            if (inFunction != null) {
-                if (apiID != null) {
-                    //api level inFunction
-                    RouteUtils.addFunction(inFunction, "in", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
-                } else if (resourceID != null) {
-                    //add resource level inFunction
-                } else {
-                    //global level in function
-                    RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), inFunction, "in");
-                }
-            } else if (outFunction != null) {
-                //api level outFunction
-                if (apiID != null) {
-                    RouteUtils.addFunction(outFunction, "out", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
-                } else if (resourceID != null) {
-                    //add resource level outFunction
-                } else {
-                    //global level outFunction
-                    RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), outFunction, "out");
-                }
+        if (inFunction != null) {
+            if (apiID != null) {
+                //api level inFunction
+                RouteUtils.addFunction(inFunction, "in", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+            } else if (resourceID != null) {
+                //add resource level inFunction
+            } else {
+                //global level in function
+                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), inFunction, "in");
+            }
+        } else if (outFunction != null) {
+            //api level outFunction
+            if (apiID != null) {
+                RouteUtils.addFunction(outFunction, "out", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+            } else if (resourceID != null) {
+                //add resource level outFunction
+            } else {
+                //global level outFunction
+                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), outFunction, "out");
             }
         }
 

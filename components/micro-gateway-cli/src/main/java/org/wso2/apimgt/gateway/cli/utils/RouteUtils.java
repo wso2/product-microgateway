@@ -339,10 +339,10 @@ public class RouteUtils {
         JsonNode jsonNode = rootNode.get("global_function");
 
         if (type.equals("in")) {
-            ((ObjectNode) jsonNode).put("mediationIn", function);
+            ((ObjectNode) jsonNode).put("functionIn", function);
         }
         if (type.equals("out")) {
-            ((ObjectNode) jsonNode).put("mediationOut", function);
+            ((ObjectNode) jsonNode).put("functionOut", function);
         }
 
         writeRoutesConfig(rootNode, routeConfigPath);
