@@ -177,7 +177,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
             rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
         fi
         # build the ballerina source code for the label
-        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
+        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental
     popd > /dev/null
 fi
 
