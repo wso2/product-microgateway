@@ -24,7 +24,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
     private List<String> mainArgs;
 
     @Parameter(names = {"-add", "--add function"}, hidden = true)
-    private Boolean addFunction =false;
+    private Boolean addFunction = false;
 
     @Parameter(names = {"-update", "--update function"}, hidden = true)
     private Boolean updateFunction = false;
@@ -47,7 +47,6 @@ public class FunctionCmd implements GatewayLauncherCmd {
     @Override
     public void execute() {
 
-
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName) + "/src");
 
@@ -65,29 +64,26 @@ public class FunctionCmd implements GatewayLauncherCmd {
 
         if (addFunction || updateFunction) {
 
-
-            if(inFunction != null){
-                if(apiID != null){
+            if (inFunction != null) {
+                if (apiID != null) {
                     //api level inFunction
-                    RouteUtils.addFunction(inFunction,"in",apiID,GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),projectName); }
-                else if(resourceID != null){
+                    RouteUtils.addFunction(inFunction, "in", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                } else if (resourceID != null) {
                     //add resource level inFunction
+                } else {
+                    //global level in function
+                    RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), inFunction, "in");
                 }
-                else{
-                //global level in function
-                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),inFunction,"in"); }
-            }
-
-            else if(outFunction != null){
+            } else if (outFunction != null) {
                 //api level outFunction
-                if(apiID != null){
-                    RouteUtils.addFunction(outFunction,"out",apiID,GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),projectName);}
-                else if(resourceID != null){
+                if (apiID != null) {
+                    RouteUtils.addFunction(outFunction, "out", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                } else if (resourceID != null) {
                     //add resource level outFunction
+                } else {
+                    //global level outFunction
+                    RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), outFunction, "out");
                 }
-                else {
-                //global level outFunction
-                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),outFunction,"out"); }
             }
         }
 
@@ -95,12 +91,10 @@ public class FunctionCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-
-        return null;
+        return GatewayCliCommands.FUNCTION;
     }
 
     @Override
     public void setParentCmdParser(JCommander parentCmdParser) {
-
     }
 }

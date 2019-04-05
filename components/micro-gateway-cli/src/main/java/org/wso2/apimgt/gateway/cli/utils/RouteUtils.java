@@ -319,33 +319,33 @@ public class RouteUtils {
         return endpointconfig;
     }
 
-    public static void addFunction(String function, String type, String apiID, String routeConfigPath, String projectName){
+    public static void addFunction(String function, String type, String apiID, String routeConfigPath, String projectName) {
 
-        APIRouteEndpointConfig api = RouteUtils.getGlobalEpConfig(apiID,GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        APIRouteEndpointConfig api = RouteUtils.getGlobalEpConfig(apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
-        if(type.equals("in")){
+        if (type.equals("in")) {
             api.setFunctionIn(function);
-        }
-        else if(type.equals("out")){
+        } else if (type.equals("out")) {
             api.setFunctionOut(function);
         }
         JsonNode jn = getRoutesConfig(routeConfigPath);
-        addAPIRouteEndpointConfigAsGlobalEp(jn,apiID,api);
-        writeRoutesConfig(jn,routeConfigPath);
+        addAPIRouteEndpointConfigAsGlobalEp(jn, apiID, api);
+        writeRoutesConfig(jn, routeConfigPath);
     }
 
-    public static void AddGlobalFunction(String routeConfigPath, String function, String type){
+    public static void AddGlobalFunction(String routeConfigPath, String function, String type) {
+
         JsonNode rootNode = getRoutesConfig(routeConfigPath);
         JsonNode jsonNode = rootNode.get("global_function");
 
-        if(type.equals("in")){
-            ((ObjectNode)jsonNode).put("mediationIn", function);
+        if (type.equals("in")) {
+            ((ObjectNode) jsonNode).put("mediationIn", function);
         }
-        if(type.equals("out")){
-            ((ObjectNode)jsonNode).put("mediationOut", function);
+        if (type.equals("out")) {
+            ((ObjectNode) jsonNode).put("mediationOut", function);
         }
 
-        writeRoutesConfig(rootNode,routeConfigPath);
+        writeRoutesConfig(rootNode, routeConfigPath);
 
     }
 }

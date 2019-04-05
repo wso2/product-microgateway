@@ -33,14 +33,18 @@ public class EndpointConfig {
     }
 
     @JsonProperty("functionIn")
-    public String getFunctionIn() { return functionIn; }
+    public String getFunctionIn() {
+        return functionIn;
+    }
 
     public void setFunctionIn(String functionIn) {
-        this.functionIn = functionIn; }
+        this.functionIn = functionIn;
+    }
 
     @JsonProperty("functionOut")
     public String getFunctionOut() {
-        return functionOut; }
+        return functionOut;
+    }
 
     public void setFunctionOut(String functionOut) {
         this.functionOut = functionOut;
