@@ -26,17 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
-import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
-import org.wso2.apimgt.gateway.cli.exception.HashingException;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
@@ -53,9 +46,7 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.ZipUtils;
+import org.wso2.apimgt.gateway.cli.utils.*;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
@@ -107,7 +98,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-e", "--endpoint"}, hidden = true)
     private String endpoint;
 
-    @Parameter(names = {"-ec", "--endpointConfig"}, hidden = true)
+    @Parameter(names = {"-ec", "--endpoint-config"}, hidden = true)
     private String endpointConfig;
 
     @Parameter(names = {"-t", "--truststore"}, hidden = true)
@@ -139,8 +130,11 @@ public class SetupCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
 
-    @Parameter(names = {"-b", "--security"}, hidden = true)
+    @Parameter(names = {"-sec", "--security"}, hidden = true)
     private String security;
+
+    @Parameter(names = {"-b", "--basepath"}, hidden = true)
+    private String basepath;
 
     @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
@@ -204,7 +198,8 @@ public class SetupCmd implements GatewayLauncherCmd {
                              * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                              * the user
                              */
-                            if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
+                            if ((endpoint = promptForTextInput("Enter Endpoint URL: "))
+                                    .trim().isEmpty()) {
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                             }
                         }
@@ -219,32 +214,47 @@ public class SetupCmd implements GatewayLauncherCmd {
                     throw new CLIInternalException("Error while generating ballerina source.");
                 }
                 outStream.println("Setting up project " + projectName + " is successful.");
+
             } else {
+                //todo: validate the swagger file before start processing
                 logger.debug("Successfully read the api definition file");
-                CodeGenerator codeGenerator = new CodeGenerator();
-                try {
-                    if (StringUtils.isEmpty(endpointConfig)) {
-                        if (StringUtils.isEmpty(endpoint)) {
-                            /*
-                             * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
-                             * the user
-                             */
-                            if ((endpoint = promptForTextInput("Enter Endpoint URL: ")).trim().isEmpty()) {
-                                throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
-                            }
+                String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
+                String endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
+                if (StringUtils.isEmpty(endpointConfig)) {
+                    if (StringUtils.isEmpty(endpoint)) {
+                        /*
+                         * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                         * the user
+                         */
+                        if ((endpoint = promptForTextInput( "Enter Endpoint URL: "))
+                                .trim().isEmpty()) {
+                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                         }
-                        endpointConfig = "{\"production_endpoints\":{\"url\":\"" + endpoint.trim() +
-                                "\"},\"endpoint_type\":\"http\"}";
                     }
-                    codeGenerator.generate(projectName, api, endpointConfig, true);
-                    //Initializing the ballerina project and creating .bal folder.
-                    logger.debug("Creating source artifacts");
-                    InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
-                            new ArrayList<>(), null);
-                } catch (IOException | BallerinaServiceGenException e) {
-                    logger.error("Error while generating ballerina source.", e);
-                    throw new CLIInternalException("Error while generating ballerina source.");
+                    //todo: fix this in a proper way -> not working now
+                    endpointConfig = "{ \n" +
+                            "         \"prod\": {\n" +
+                            "            \"type\": \"load_balance\",\n" +
+                            "            \"endpoints\": [\n" +
+                            endpoint.trim() +
+                            "            ]\n" +
+                            "         }\n" +
+                            "      }";
                 }
+
+                if(StringUtils.isEmpty(basepath)){
+                    basepath = SwaggerUtils.getBasePathFromSwagger(apiDefPath);
+                    if(StringUtils.isEmpty(basepath)){
+                        if ((basepath = promptForTextInput( "Enter basepath: "))
+                                .trim().isEmpty()) {
+                            //todo: shall we allow the user to proceed with empty basepath
+                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
+                        }
+                    }
+                }
+                JsonProcessingUtils.saveSwaggerDefinitionForSingleAPI(projectName, apiDefPath);
+                RouteUtils.saveGlobalEpAndBasepath(apiDefPath,
+                        GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), basepath, endpointConfigString);
                 outStream.println("Setting up project " + projectName + " is successful.");
             }
 
@@ -256,7 +266,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             if (StringUtils.isEmpty(configuredUser)) {
                 if (StringUtils.isEmpty(username)) {
                     isOverwriteRequired = true;
-                    if ((username = promptForTextInput("Enter Username: ")).trim().isEmpty()) {
+                    if ((username = promptForTextInput("Enter Username: "))
+                            .trim().isEmpty()) {
                         throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                     }
                 }
@@ -266,10 +277,11 @@ public class SetupCmd implements GatewayLauncherCmd {
 
             //Setup password
             if (StringUtils.isEmpty(password)) {
-                if ((password = promptForPasswordInput("Enter Password for " + username + ": ")).trim().isEmpty()) {
+                if ((password = promptForPasswordInput("Enter Password for " +
+                        username + ": ")).trim().isEmpty()) {
                     if (StringUtils.isEmpty(password)) {
-                        password = promptForPasswordInput("Password can't be empty; enter password for "
-                                + username + ": ");
+                        password = promptForPasswordInput(
+                                "Password can't be empty; enter password for " + username + ": ");
                         if (password.trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
                         }
@@ -312,8 +324,8 @@ public class SetupCmd implements GatewayLauncherCmd {
             if (StringUtils.isEmpty(configuredTrustStorePass)) {
                 if (StringUtils.isEmpty(trustStorePassword)) {
                     isOverwriteRequired = true;
-                    if ((trustStorePassword = promptForPasswordInput("Enter Trust store password: " +
-                            "[ use default? ]")).trim()
+                    if ((trustStorePassword = promptForPasswordInput(
+                            "Enter Trust store password: " + "[ use default? ]")).trim()
                             .isEmpty()) {
                         trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
                     }
@@ -378,7 +390,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                     apis.add(api);
                 }
             }
-            if (apis == null || (apis.isEmpty())) {
+            if (apis == null || apis.isEmpty()) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
                 String errorMsg;
@@ -389,33 +401,18 @@ public class SetupCmd implements GatewayLauncherCmd {
                 }
                 throw new CLIRuntimeException(errorMsg);
             }
+
             List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
             List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
             List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
             logger.info(String.valueOf(clientCertificates));
 
-            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-            CodeGenerator codeGenerator = new CodeGenerator();
-            boolean changesDetected;
-            try {
-                policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
-                        + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
-                codeGenerator.generate(projectName, apis, true);
-                //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
-                        new ArrayList<>(), null);
-                try {
-                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies,
-                            applicationPolicies, projectName);
-                } catch (HashingException e) {
-                    logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
-                    throw new CLIInternalException(
-                            "Error while checking for changes of resources. Skipping no-change detection..");
-                }
-            } catch (IOException | BallerinaServiceGenException e) {
-                logger.error("Error while generating ballerina source.", e);
-                throw new CLIInternalException("Error while generating ballerina source.");
-            }
+            RouteUtils.saveGlobalEpAndBasepath(apis, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+            JsonProcessingUtils.saveApplicationThrottlePolicies(projectName, applicationPolicies);
+            JsonProcessingUtils.saveSubscriptionThrottlePolicies(projectName, subscriptionPolicies);
+            JsonProcessingUtils.saveClientCertMetadata(projectName, clientCertificates);
+            JsonProcessingUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+            //todo: check if the files has been changed using hash utils
 
             //if all the operations are success, write new config to file
             if (isOverwriteRequired) {
@@ -438,17 +435,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                 GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
             }
 
-            if (!changesDetected) {
-                outStream.println(
-                        "No changes received from the server since the previous setup."
-                                + " If you have already a built distribution, it can be reused.");
-            }
             outStream.println("Setting up project " + projectName + " is successful.");
-
-            //There should not be any logic after this system exit
-            if (!changesDetected) {
-                Runtime.getRuntime().exit(GatewayCliConstants.EXIT_CODE_NOT_MODIFIED);
-            }
         }
     }
 
@@ -548,6 +535,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         config.setBasicAuth(basicAuth);
     }
+
 
     /**
      * Set endpoints of publisher, admin, registration and token

@@ -33,6 +33,9 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
 import java.io.BufferedReader;
@@ -302,6 +305,39 @@ public class GatewayCmdUtils {
 
         String confDirPath = projectDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
         createFolderIfNotExist(confDirPath);
+
+        String apiFilesDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+        createFolderIfNotExist(apiFilesDirPath);
+
+        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.ROUTES_FILE);
+    }
+
+    /**
+     * Create API-Files Directory for a particular project
+     * @param projectName name of the project
+     * @param apiId md5 hash value for apiName:version
+     * @param apiDefinition swagger content as a JSON string
+     */
+    public static void createPerAPIFolderStructure(String projectName, String apiId, String apiDefinition){
+        String projectDir = getUserDir() + File.separator + projectName;
+
+        String apiFilesDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+
+        String apiDirPath = apiFilesDirPath + File.separator + apiId;
+        createFolderIfNotExist(apiDirPath);
+        createFileIfNotExist(apiDirPath, GatewayCliConstants.API_METADATA_FILE);
+
+        if (apiDefinition.isEmpty()){
+            throw new CLIInternalException("No swagger definition is provided to generate API");
+        }
+
+        try {
+            writeContent(apiDefinition, new File (apiDirPath + File.separator +
+                    GatewayCliConstants.API_SWAGGER));
+        } catch (IOException e) {
+            throw new CLIInternalException("Error while copying the swagger to the project directory");
+        }
+
     }
 
     /**
@@ -603,6 +639,61 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /API-Files of a given project in the current working directory
+     * @param projectName name of the project
+     * @return path to the /API-Files of a given project in the current working directory
+     */
+    public static String getProjectAPIFilesDirectoryPath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns the path to the swagger for a defined version of an API
+     * @param projectName name of the project
+     * @param apiId md5 hash value of apiName:apiVersion
+     * @return path to the swagger for a defined version of an API
+     */
+    public static String getProjectSwaggerFilePath(String projectName, String apiId){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
+                GatewayCliConstants.API_SWAGGER;
+    }
+
+    /**
+     * Returns the path to the application-throttle-policies.yaml for for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the application-throttle-policies.yaml for for a defined version of an API
+     */
+    public static String getProjectAppThrottlePoliciesFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.APPLICATION_THROTTLE_POLICIES_FILE;
+    }
+
+    /**
+     * Returns the path to the application-throttle-policies.yaml file for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the application-throttle-policies.yaml file for a defined version of an API
+     */
+    public static String getProjectSubscriptionThrottlePoliciesFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.SUBSCRIPTION_THROTTLE_POLICIES_FILE;
+    }
+
+    /**
+     * Returns the path to the client-cert-metadata.yaml for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
+    public static String getProjectClientCertMetadataFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.CLIENT_CERT_METADATA_FILE;
+    }
+
+    public static String getProjectRoutesConfFilePath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.ROUTES_FILE;
+    }
+
+    /**
      * This function recursively copy all the sub folder and files from source to destination file paths
      *
      * @param source      source location
@@ -745,10 +836,11 @@ public class GatewayCmdUtils {
      * @param file    file object initialized with path
      * @throws IOException error while writing content to file
      */
-    private static void writeContent(String content, File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        }
+    public static void writeContent(String content, File file) throws IOException {
+        FileWriter writer = null;
+        writer = new FileWriter(file);
+        writer.write(content);
+        writer.flush();
     }
 
     /**

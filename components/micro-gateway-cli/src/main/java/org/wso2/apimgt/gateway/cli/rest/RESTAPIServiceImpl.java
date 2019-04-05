@@ -27,17 +27,14 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
-import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.rest.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -185,7 +182,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
     private void setAdditionalConfigs(ExtendedAPI api) throws IOException {
         String endpointConfig = api.getEndpointConfig();
-        api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
+        //todo: remove the comment
+        //api.setEndpointConfigRepresentation((endpointConfig));
         // set default values from config if per api cors is not enabled
         Config config = GatewayCmdUtils.getConfig();
         if (config == null) {

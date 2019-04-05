@@ -16,9 +16,9 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Operation;
-import io.swagger.models.parameters.Parameter;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
@@ -32,7 +32,7 @@ import java.util.Optional;
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
  *
  */
-public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOperation, Operation> {
+public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOperation, Operation> {
 
     public static final String X_THROTTLING_TIER = "x-throttling-tier";
     public static final String X_SCOPE = "x-scope";
@@ -42,7 +42,7 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
     private String summary;
     private String description;
     private String resourceTier;
-    private ExternalDocs externalDocs;
+    private ExternalDocumentation externalDocs;
     private String operationId;
     private List<BallerinaParameter> parameters;
     private List<String> methods;
@@ -68,7 +68,7 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
-        Map<String, Object> extension =  operation.getVendorExtensions();
+        Map<String, Object> extension =  operation.getExtensions();
         Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
         resourceTier.ifPresent(value -> this.resourceTier = value.toString());
         Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
@@ -139,11 +139,11 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         return allMethods;
     }
 
-    public ExternalDocs getExternalDocs() {
+    public ExternalDocumentation getExternalDocs() {
         return externalDocs;
     }
 
-    public void setExternalDocs(ExternalDocs externalDocs) {
+    public void setExternalDocs(ExternalDocumentation externalDocs) {
         this.externalDocs = externalDocs;
     }
 

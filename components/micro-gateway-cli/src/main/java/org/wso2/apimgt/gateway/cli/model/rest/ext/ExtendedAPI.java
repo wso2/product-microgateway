@@ -15,17 +15,26 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
 
 public class ExtendedAPI extends APIDetailedDTO {
-    private EndpointConfig endpointConfigRepresentation = null;
+    private MgwEndpointConfigDTO endpointConfigRepresentation = null;
+    private String specificBasepath = null;
 
-    public EndpointConfig getEndpointConfigRepresentation() {
+    public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;
     }
 
-    public void setEndpointConfigRepresentation(EndpointConfig endpointConfigRepresentation) {
+    public void setEndpointConfigRepresentation(MgwEndpointConfigDTO endpointConfigRepresentation) {
         this.endpointConfigRepresentation = endpointConfigRepresentation;
+    }
+
+    public String getSpecificBasepath() {
+        return specificBasepath;
+    }
+
+    public void setSpecificBasepath(String specificBasepath) {
+        this.specificBasepath = specificBasepath;
     }
 }
