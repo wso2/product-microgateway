@@ -168,19 +168,6 @@ set -- "${ALL_ARGS[@]}"
 # take the first default argument as the project name
 CMD_PRO_NAME_VAL=$(echo ${DEFAULT_ARGS[0]}|sed 's#/##g')
 
-#execute build command
-if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
-    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
-    pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
-        # clean the content of target folder
-        if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
-            rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
-        fi
-        # build the ballerina source code for the label
-        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental
-    popd > /dev/null
-fi
-
 if [ "$CMD" = "--java.debug" ]; then
   if [ "$PORT" = "" ]; then
     echo "Please specify the debug port after the --java.debug option"
@@ -235,19 +222,65 @@ if $cygwin; then
   CLI_CLASSPATH=`cygpath --path --windows "$CLI_CLASSPATH"`
 fi
 
-# ----- Execute The Requested Command -----------------------------------------
+#execute build command
+if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
 
-$JAVACMD \
-	-Xms256m -Xmx1024m \
-	-XX:+HeapDumpOnOutOfMemoryError \
-	-XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-	$JAVA_OPTS \
-	-classpath "$CLI_CLASSPATH" \
-	-Djava.security.egd=file:/dev/./urandom \
-	-Dballerina.home=$BALLERINA_HOME \
-	-Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-	-Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-	-Dfile.encoding=UTF8 \
-	-Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-	-Dcli.home=$MICROGW_HOME \
-	org.wso2.apimgt.gateway.cli.cmd.Main "$@"
+  # ----- Execute The Requested Command -----------------------------------------
+
+  $JAVACMD \
+    -Xms256m -Xmx1024m \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -classpath "$CLI_CLASSPATH" \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dballerina.home=$BALLERINA_HOME \
+    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+    -Dfile.encoding=UTF8 \
+    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+    -Dcli.home=$MICROGW_HOME \
+    org.wso2.apimgt.gateway.cli.cmd.Main "$@"
+
+    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
+    pushd $MICRO_GW_LABEL_PROJECT_DIR > /dev/null
+        # clean the content of target folder
+        if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
+            rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
+        fi
+        # build the ballerina source code for the label
+        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental
+    popd > /dev/null
+
+    # ----- Execute The Requested Command -----------------------------------------
+
+  $JAVACMD \
+    -Xms256m -Xmx1024m \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -classpath "$CLI_CLASSPATH" \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dballerina.home=$BALLERINA_HOME \
+    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+    -Dfile.encoding=UTF8 \
+    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+    -Dcli.home=$MICROGW_HOME \
+    org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
+fi
+
+  $JAVACMD \
+    -Xms256m -Xmx1024m \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -classpath "$CLI_CLASSPATH" \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dballerina.home=$BALLERINA_HOME \
+    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+    -Dfile.encoding=UTF8 \
+    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+    -Dcli.home=$MICROGW_HOME \
+    org.wso2.apimgt.gateway.cli.cmd.Main "$@"
