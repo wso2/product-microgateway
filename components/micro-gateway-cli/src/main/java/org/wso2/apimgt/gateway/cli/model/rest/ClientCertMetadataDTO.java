@@ -17,6 +17,8 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * This class represents the certificate information DTO.
  */
@@ -25,21 +27,30 @@ public class ClientCertMetadataDTO {
     private String alias = null;
     private String apiId = null;
     private String tier = null;
+
+    @JsonProperty("alias")
     public String getAlias() {
         return alias;
     }
+
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
+    @JsonProperty("apiId")
     public String getApiId() {
         return apiId;
     }
+
     public void setApiId(String apiId) {
         this.apiId = apiId;
     }
+
+    @JsonProperty("tier")
     public String getTier() {
         return tier;
     }
+
     public void setTier(String tier) {
         this.tier = tier;
     }

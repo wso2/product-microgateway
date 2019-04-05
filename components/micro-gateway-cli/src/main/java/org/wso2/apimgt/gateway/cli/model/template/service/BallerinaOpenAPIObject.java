@@ -26,7 +26,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
  * @param <C> Ballerina wrapper type that is being implemented
  * @param <D> Swagger parser model type
  */
-public interface BallerinaSwaggerObject<C, D> {
+public interface BallerinaOpenAPIObject<C, D> {
     /**
      * Build the Ballerina context model {@code C} for Open APIDetailedDTO definition/component in {@code D}.
      *

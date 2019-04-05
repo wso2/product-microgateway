@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.HashingConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -243,6 +244,20 @@ public class HashUtils {
         return sb.toString();
     }
 
-
-
+    /**
+     * Get the MD5 hash for an API for the usage in routes configuration and maintaining folder structure.
+     *
+     * @param apiName API name
+     * @param version API version
+     * @return md5 hash value for concatenated string (apiName:version)
+     * @throws HashingException
+     */
+    public static String generateAPIId(String apiName, String version){
+        String concatString = apiName + ":" + version;
+        try{
+            return getMD5Hex(concatString);
+        } catch (HashingException e){
+            throw new CLIInternalException("Error while generating md5 hash for API");
+        }
+    }
 }

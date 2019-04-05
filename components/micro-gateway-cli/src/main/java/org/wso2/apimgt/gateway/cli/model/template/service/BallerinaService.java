@@ -16,15 +16,17 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Info;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
+
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
@@ -38,53 +40,56 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Wrapper for {@link Swagger}.
+ * Wrapper for {@link OpenAPI}.
  * <p>This class can be used to push additional context variables for handlebars</p>
  */
-public class BallerinaService implements BallerinaSwaggerObject<BallerinaService, Swagger> {
+public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService, OpenAPI> {
     private String name;
     private ExtendedAPI api;
     private ContainerConfig containerConfig;
     private Config config;
-    private EndpointConfig endpointConfig;
+    private MgwEndpointConfigDTO endpointConfig;
     private String srcPackage;
     private String modelPackage;
     private String qualifiedServiceName;
     private Info info = null;
-    private ExternalDocs externalDocs = null;
+    private ExternalDocumentation externalDocs = null;
     private Set<Map.Entry<String, String>> security = null;
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private Etcd etcd;
+    private String basepath;
 
     /**
-     * Build a {@link BallerinaService} object from a {@link Swagger} object.
+     * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
      * All non iterable objects using handlebars library is converted into
      * supported iterable object types.
      *
-     * @param swagger {@link Swagger} type object to be converted
+     * @param openAPI {@link OpenAPI} type object to be converted
      * @return Converted {@link BallerinaService} object
      * @throws BallerinaServiceGenException when OpenAPI to BallerinaService parsing failed
      */
     @Override
-    public BallerinaService buildContext(Swagger swagger) throws BallerinaServiceGenException {
-        this.info = swagger.getInfo();
-        this.externalDocs = swagger.getExternalDocs();
-        this.tags = swagger.getTags();
+    public BallerinaService buildContext(OpenAPI openAPI) throws BallerinaServiceGenException {
+        this.info = openAPI.getInfo();
+        this.externalDocs = openAPI.getExternalDocs();
+        this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
         this.config = GatewayCmdUtils.getConfig();
         this.etcd = GatewayCmdUtils.getEtcd();
-        setPaths(swagger);
+        setPaths(openAPI);
         return this;
     }
 
     @Override
-    public BallerinaService buildContext(Swagger definition, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaService buildContext(OpenAPI definition, ExtendedAPI api) throws BallerinaServiceGenException {
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
+        this.setBasepath(api.getSpecificBasepath());
+
         return buildContext(definition);
     }
 
@@ -134,19 +139,20 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
     /**
      * Populate path models into iterable structure.
      * This method will also add an operationId to each operation,
-     * if operationId not provided in swagger definition
+     * if operationId not provided in openAPI definition
      *
-     * @param swagger {@code OpenAPI} definition object with schema definition
+     * @param openAPI {@code OpenAPI} definition object with schema definition
      * @throws BallerinaServiceGenException when context building fails
      */
-    private void setPaths(Swagger swagger) throws BallerinaServiceGenException {
-        if (swagger.getPaths() == null) {
+    private void setPaths(OpenAPI openAPI) throws BallerinaServiceGenException {
+        //todo: remove comment
+        if (openAPI.getPaths() == null) {
             return;
         }
 
         this.paths = new LinkedHashSet<>();
-        Map<String, Path> pathList = swagger.getPaths();
-        for (Map.Entry<String, Path> path : pathList.entrySet()) {
+        Paths pathList = openAPI.getPaths();
+        for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             balPath.getOperations().forEach(operation -> {
                 if (operation.getValue().getOperationId() == null) {
@@ -171,11 +177,11 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
         this.name = name;
     }
 
-    public EndpointConfig getEndpointConfig() {
+    public MgwEndpointConfigDTO getEndpointConfig() {
         return endpointConfig;
     }
 
-    public void setEndpointConfig(EndpointConfig endpointConfig) {
+    public void setEndpointConfig(MgwEndpointConfigDTO endpointConfig) {
         this.endpointConfig = endpointConfig;
     }
 
@@ -209,5 +215,13 @@ public class BallerinaService implements BallerinaSwaggerObject<BallerinaService
 
     public void setConfig(Config config) {
         this.config = config;
+    }
+
+    public String getBasepath() {
+        return basepath;
+    }
+
+    public void setBasepath(String basepath) {
+        this.basepath = basepath;
     }
 }
