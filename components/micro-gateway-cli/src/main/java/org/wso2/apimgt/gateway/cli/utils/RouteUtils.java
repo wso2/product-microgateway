@@ -189,8 +189,8 @@ public class RouteUtils {
         return rootNode;
     }
 
-    public static String[] getBasePath(String apiName, String apiVersion, String routesConfigPath){
-        String apiId = HashUtils.generateAPIId(apiName, apiVersion);
+    public static String[] getBasePath(String apiId, String routesConfigPath){
+
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
         ArrayNode arrayNode = (ArrayNode) rootNode.get("basepaths").get(apiId);
 
@@ -201,8 +201,7 @@ public class RouteUtils {
         return new String[] {arrayNode.get(0).asText()};
     }
 
-    public static APIRouteEndpointConfig getGlobalEpConfig(String apiName, String apiVersion, String routesConfigPath){
-        String apiId = HashUtils.generateAPIId(apiName, apiVersion);
+    public static APIRouteEndpointConfig getGlobalEpConfig(String apiId, String routesConfigPath){
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
         JsonNode globalEpConfig = rootNode.get("global_endpoints").get(apiId);
         APIRouteEndpointConfig apiRouteEndpointConfig;

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
@@ -75,7 +76,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.externalDocs = openAPI.getExternalDocs();
         this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        this.config = GatewayCmdUtils.getConfig();
+        Config config = GatewayCmdUtils.getConfig();
+        setSecuritySchemas(api.getApiSecurity());
+        this.config = config;
         this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(openAPI);
         return this;
@@ -223,5 +226,31 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     public void setBasepath(String basepath) {
         this.basepath = basepath;
+    }
+
+    private void setSecuritySchemas(String schemas) {
+        Config config = GatewayCmdUtils.getConfig();
+        BasicAuth basicAuth = new BasicAuth();
+        boolean basic = false;
+        boolean oauth2 = false;
+        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+        for (String s : schemasArray) {
+            if (s.equalsIgnoreCase("basic")) {
+                basic = true;
+            } else if (s.equalsIgnoreCase("oauth2")) {
+                oauth2 = true;
+            }
+        }
+        if (basic && oauth2) {
+            basicAuth.setOptional(true);
+            basicAuth.setRequired(false);
+        } else if (basic) {
+            basicAuth.setRequired(true);
+            basicAuth.setOptional(false);
+        } else if (oauth2) {
+            basicAuth.setOptional(false);
+            basicAuth.setRequired(false);
+        }
+        config.setBasicAuth(basicAuth);
     }
 }

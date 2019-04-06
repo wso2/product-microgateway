@@ -32,9 +32,11 @@ import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.JsonProcessingUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,7 +154,7 @@ public class BuildCmd implements GatewayLauncherCmd {
     }
 
     //todo: implement this method properly
-    private static void init(String projectName, String configPath) {
+    private void init(String projectName, String configPath) {
         try {
 
             Path configurationFile = Paths.get(configPath);

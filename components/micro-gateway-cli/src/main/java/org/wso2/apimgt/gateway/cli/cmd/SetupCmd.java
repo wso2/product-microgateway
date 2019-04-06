@@ -177,6 +177,11 @@ public class SetupCmd implements GatewayLauncherCmd {
         Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
+        //Security Schemas settings
+        if (StringUtils.isEmpty(security)) {
+            security = "oauth2";
+        }
+
         /*
          * If api is created via an api definition, the setup flow is altered
          */
@@ -219,7 +224,7 @@ public class SetupCmd implements GatewayLauncherCmd {
                 //todo: validate the swagger file before start processing
                 logger.debug("Successfully read the api definition file");
                 String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
-                String endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
+                String endpointConfigString;
                 if (StringUtils.isEmpty(endpointConfig)) {
                     if (StringUtils.isEmpty(endpoint)) {
                         /*
@@ -232,14 +237,10 @@ public class SetupCmd implements GatewayLauncherCmd {
                         }
                     }
                     //todo: fix this in a proper way -> not working now
-                    endpointConfig = "{ \n" +
-                            "         \"prod\": {\n" +
-                            "            \"type\": \"load_balance\",\n" +
-                            "            \"endpoints\": [\n" +
-                            endpoint.trim() +
-                            "            ]\n" +
-                            "         }\n" +
-                            "      }";
+                    endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
+                            "\"]}}";
+                } else {
+                    endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
                 }
 
                 if(StringUtils.isEmpty(basepath)){
@@ -252,9 +253,20 @@ public class SetupCmd implements GatewayLauncherCmd {
                         }
                     }
                 }
-                JsonProcessingUtils.saveSwaggerDefinitionForSingleAPI(projectName, apiDefPath);
+                String apiId = SwaggerUtils.generateAPIdForSwagger(apiDefPath);
+                GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
+                GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
+                JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
                 RouteUtils.saveGlobalEpAndBasepath(apiDefPath,
                         GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), basepath, endpointConfigString);
+
+                //todo: remove this and handle properly ???
+                try {
+                    GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), GatewayCmdUtils.getProjectSrcDirectoryPath(projectName)
+                            + File.separator + GatewayCliConstants.GW_DIST_POLICIES);
+                } catch (IOException e) {
+                    throw new CLIRuntimeException("cannot read source directory");
+                }
                 outStream.println("Setting up project " + projectName + " is successful.");
             }
 
@@ -351,12 +363,6 @@ public class SetupCmd implements GatewayLauncherCmd {
             System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
             System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
-            //Security Schemas settings
-            if (StringUtils.isEmpty(security)) {
-                security = "oauth2";
-            }
-            setSecuritySchemas(security);
-
             OAuthService manager = new OAuthServiceImpl();
             clientID = config.getToken().getClientId();
             String encryptedSecret = config.getToken().getClientSecret();
@@ -411,7 +417,10 @@ public class SetupCmd implements GatewayLauncherCmd {
             JsonProcessingUtils.saveApplicationThrottlePolicies(projectName, applicationPolicies);
             JsonProcessingUtils.saveSubscriptionThrottlePolicies(projectName, subscriptionPolicies);
             JsonProcessingUtils.saveClientCertMetadata(projectName, clientCertificates);
-            JsonProcessingUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+
+            //todo: fix here, per api structure is created inside this method
+            GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+            JsonProcessingUtils.saveAPIMetadataForMultipleAPIs(projectName, apis, security);
             //todo: check if the files has been changed using hash utils
 
             //if all the operations are success, write new config to file
@@ -509,33 +518,6 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }
-
-    private void setSecuritySchemas(String schemas) {
-        Config config = GatewayCmdUtils.getConfig();
-        BasicAuth basicAuth = new BasicAuth();
-        boolean basic = false;
-        boolean oauth2 = false;
-        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-        for (String s : schemasArray) {
-            if (s.equalsIgnoreCase("basic")) {
-                basic = true;
-            } else if (s.equalsIgnoreCase("oauth2")) {
-                oauth2 = true;
-            }
-        }
-        if (basic && oauth2) {
-            basicAuth.setOptional(true);
-            basicAuth.setRequired(false);
-        } else if (basic) {
-            basicAuth.setRequired(true);
-            basicAuth.setOptional(false);
-        } else if (oauth2) {
-            basicAuth.setOptional(false);
-            basicAuth.setRequired(false);
-        }
-        config.setBasicAuth(basicAuth);
-    }
-
 
     /**
      * Set endpoints of publisher, admin, registration and token

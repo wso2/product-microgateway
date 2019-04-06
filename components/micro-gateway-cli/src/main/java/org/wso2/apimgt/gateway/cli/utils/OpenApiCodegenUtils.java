@@ -18,6 +18,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointDTO;
 import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointListDTO;
@@ -49,14 +50,17 @@ public class OpenApiCodegenUtils {
         return responseStr;
     }
 
+    //todo: move this to some other class
     public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
+        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( api.getName(), api.getVersion(),
+                convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId,
                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)));
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
-        api.setSpecificBasepath(RouteUtils.getBasePath(api.getName(), api.getVersion(),
+        api.setSpecificBasepath(RouteUtils.getBasePath(apiId,
                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)) [0]);
+        api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
     }
 
     private static MgwEndpointConfigDTO convertRouteToMgwServiceMap(EndpointConfig routeEndpointConfig){
