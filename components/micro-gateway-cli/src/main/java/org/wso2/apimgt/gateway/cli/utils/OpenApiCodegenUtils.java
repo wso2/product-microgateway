@@ -61,6 +61,7 @@ public class OpenApiCodegenUtils {
         api.setSpecificBasepath(RouteUtils.getBasePath(apiId,
                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)) [0]);
         api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
+        api.setCorsConfiguration(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getCorsConfigurationDTO());
     }
 
     private static MgwEndpointConfigDTO convertRouteToMgwServiceMap(EndpointConfig routeEndpointConfig){
