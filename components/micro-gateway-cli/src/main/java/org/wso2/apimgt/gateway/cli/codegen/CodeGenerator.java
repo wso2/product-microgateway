@@ -28,6 +28,7 @@ import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
@@ -160,9 +161,10 @@ public class CodeGenerator {
                     BallerinaService definitionContext;
                     OpenApiCodegenUtils.setAdditionalConfigs(projectName, api);
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
+                    String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
 
                     try {
-                        String[] basepaths = RouteUtils.getBasePath(api.getName(), api.getVersion(),
+                        String[] basepaths = RouteUtils.getBasePath(apiId,
                                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
@@ -175,7 +177,6 @@ public class CodeGenerator {
                             genFiles.add(generateService(definitionContext));
                         }
 
-                        genFiles.add(generateCommonEndpoints());
                         serviceList.add(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code",e);
@@ -184,12 +185,11 @@ public class CodeGenerator {
                     }
                 });
         genFiles.add(generateMainBal(serviceList));
+        genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-        GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), projectSrcPath
-                + File.separator + GatewayCliConstants.GW_DIST_POLICIES);
 
     }
 

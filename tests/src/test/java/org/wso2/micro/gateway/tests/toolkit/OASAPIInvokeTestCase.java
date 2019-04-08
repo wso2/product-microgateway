@@ -52,10 +52,12 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
         //set security schemas
+        //todo: change this?
         String security = "oauth2";
+        String basepath = api.getContext() + "/" + api.getVersion();
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.inits(label, project, api.getProdEndpoint(), security);
+        super.inits(label, project, api.getProdEndpoint(), security, basepath);
     }
 
     @Test(description = "Test API invocation with a JWT token")

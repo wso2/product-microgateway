@@ -21,7 +21,6 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.ballerinalang.launcher.Main;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,6 @@ import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.*;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
@@ -97,7 +95,6 @@ public class BuildCmd implements GatewayLauncherCmd {
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
-//                balCodeGeneration(projectName);
 
 //todo:
 //                try {
@@ -152,7 +149,7 @@ public class BuildCmd implements GatewayLauncherCmd {
     }
 
     //todo: implement this method properly
-    private static void init(String projectName, String configPath) {
+    private void init(String projectName, String configPath) {
         try {
 
             Path configurationFile = Paths.get(configPath);
