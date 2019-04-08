@@ -14,8 +14,7 @@ function initSubscriptionUnauthenticatedPolicy() {
 
     forever {
         from sUnauthenticatedreqCopy
-        select sUnauthenticatedreqCopy.messageID as messageID, (sUnauthenticatedreqCopy.subscriptionTier ==
-        "Unauthenticated") as
+        select sUnauthenticatedreqCopy.messageID as messageID, (sUnauthenticatedreqCopy.subscriptionTier == "Unauthenticated") as
         isEligible, sUnauthenticatedreqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
             foreach var c in counts {
