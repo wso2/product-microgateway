@@ -76,9 +76,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.externalDocs = openAPI.getExternalDocs();
         this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
+        //todo: fix this properly
         Config config = GatewayCmdUtils.getConfig();
         setSecuritySchemas(api.getApiSecurity());
         this.config = config;
+        //todo: fix this -> not working
         this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(openAPI);
         return this;

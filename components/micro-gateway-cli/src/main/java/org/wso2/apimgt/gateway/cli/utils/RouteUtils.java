@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.wso2.apimgt.gateway.cli.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.util.Json;
+import org.wso2.apimgt.gateway.cli.cmd.GatewayLauncherCmd;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -19,7 +37,10 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class RouteUtils {
     //todo: rename variable name
@@ -306,4 +327,25 @@ public class RouteUtils {
 
         return endpointconfig;
     }
+
+    public static List<String[]> listApis(String projectName){
+        JsonNode rootNode = getRoutesConfig(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        JsonNode basePathsNode = rootNode.get("basepaths");
+        Iterator<Map.Entry<String, JsonNode>> fields = basePathsNode.fields();
+        List<String[]> apis = new ArrayList<>();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            String key = field.getKey();
+            for(JsonNode value: field.getValue()){
+                String[] row = new String[4];
+                row[0] = key;
+                row[1] = rootNode.get("global_endpoints").get(key).get("name").asText();
+                row[2] = rootNode.get("global_endpoints").get(key).get("version").asText();
+                row[3] = value.asText();
+                apis.add(row);
+            }
+        }
+        return apis;
+    }
+
 }
