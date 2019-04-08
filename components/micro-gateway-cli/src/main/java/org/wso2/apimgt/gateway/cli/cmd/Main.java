@@ -53,7 +53,7 @@ public class Main {
             logger.error("micro-gw: Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
-            outStream.println("micro-gw: " + INTERNAL_ERROR_MESSAGE);
+            outStream.println("micro-gw: " + INTERNAL_ERROR_MESSAGE  + " - " + e.getMessage());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
