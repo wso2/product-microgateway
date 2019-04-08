@@ -21,6 +21,7 @@ import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.RequestCountLimitDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -120,12 +121,12 @@ public class ThrottlePolicy {
 
     public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
-        this.name = applicationPolicy.getPolicyName();
+        this.name = CodegenUtils.trim(applicationPolicy.getPolicyName());
         RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
         this.count = requestCountLimitDTO.getRequestCount();
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
-        this.funcName = GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
-                + GeneratorConstants.INIT_FUNC_SUFFIX;
+        this.funcName =
+                GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.APPLICATION_KEY;
         this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
         this.stopOnQuotaReach = true;
@@ -134,12 +135,12 @@ public class ThrottlePolicy {
 
     public ThrottlePolicy buildContext(SubscriptionThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
-        this.name = applicationPolicy.getPolicyName();
+        this.name = CodegenUtils.trim(applicationPolicy.getPolicyName());
         RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
         this.count = requestCountLimitDTO.getRequestCount();
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
-        this.funcName = GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + applicationPolicy.getPolicyName()
-                + GeneratorConstants.INIT_FUNC_SUFFIX;
+        this.funcName =
+                GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
         this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
         this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
         this.stopOnQuotaReach = applicationPolicy.getStopOnQuotaReach();
