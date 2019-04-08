@@ -7,7 +7,7 @@ import wso2/gateway;
 stream<gateway:IntermediateStream> s50PerMinintermediateStream = new;
 stream<gateway:GlobalThrottleStreamDTO> s50PerMinresultStream = new;
 stream<gateway:EligibilityStreamDTO> s50PerMineligibilityStream = new;
-stream<gateway:RequestStreamDTO> s50PerMinreqCopy= gateway:requestStream;
+stream<gateway:RequestStreamDTO> s50PerMinreqCopy = gateway:requestStream;
 stream<gateway:GlobalThrottleStreamDTO> s50PerMinglobalThrotCopy = gateway:globalThrottleStream;
 
 function initApplication50PerMinPolicy() {
@@ -17,7 +17,7 @@ function initApplication50PerMinPolicy() {
         select s50PerMinreqCopy.messageID as messageID, (s50PerMinreqCopy.appTier == "50PerMin") as
         isEligible, s50PerMinreqCopy.appKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s50PerMineligibilityStream.publish(c);
             }
         }
@@ -29,17 +29,17 @@ function initApplication50PerMinPolicy() {
         stopOnQuota, expiryTimeStamp
         group by s50PerMineligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s50PerMinintermediateStream.publish(c);
             }
         }
 
         from s50PerMinintermediateStream
-        select s50PerMinintermediateStream.throttleKey, s50PerMinintermediateStream.eventCount>= 50 as isThrottled,
+        select s50PerMinintermediateStream.throttleKey, s50PerMinintermediateStream.eventCount >= 50 as isThrottled,
         s50PerMinintermediateStream.stopOnQuota, s50PerMinintermediateStream.expiryTimeStamp
         group by s50PerMineligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s50PerMinresultStream.publish(c);
             }
         }
@@ -49,7 +49,7 @@ function initApplication50PerMinPolicy() {
         select s50PerMinresultStream.throttleKey as throttleKey, s50PerMinresultStream.isThrottled,
         s50PerMinresultStream.stopOnQuota, s50PerMinresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s50PerMinglobalThrotCopy.publish(c);
             }
         }

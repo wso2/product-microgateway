@@ -17,7 +17,7 @@ function initApplication10PerMinPolicy() {
         select s10PerMinreqCopy.messageID as messageID, (s10PerMinreqCopy.appTier == "10PerMin") as
         isEligible, s10PerMinreqCopy.appKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s10PerMineligibilityStream.publish(c);
             }
         }
@@ -49,7 +49,7 @@ function initApplication10PerMinPolicy() {
         select s10PerMinresultStream.throttleKey as throttleKey, s10PerMinresultStream.isThrottled,
         s10PerMinresultStream.stopOnQuota, s10PerMinresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 s10PerMinglobalThrotCopy.publish(c);
             }
         }

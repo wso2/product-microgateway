@@ -7,7 +7,7 @@ import wso2/gateway;
 stream<gateway:IntermediateStream> sBronzeintermediateStream = new;
 stream<gateway:GlobalThrottleStreamDTO> sBronzeresultStream = new;
 stream<gateway:EligibilityStreamDTO> sBronzeeligibilityStream = new;
-stream<gateway:RequestStreamDTO> sBronzereqCopy= gateway:requestStream;
+stream<gateway:RequestStreamDTO> sBronzereqCopy = gateway:requestStream;
 stream<gateway:GlobalThrottleStreamDTO> sBronzeglobalThrotCopy = gateway:globalThrottleStream;
 
 function initSubscriptionBronzePolicy() {
@@ -17,7 +17,7 @@ function initSubscriptionBronzePolicy() {
         select sBronzereqCopy.messageID as messageID, (sBronzereqCopy.subscriptionTier == "Bronze") as
         isEligible, sBronzereqCopy.subscriptionKey as throttleKey, 0 as expiryTimestamp
         => (gateway:EligibilityStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 sBronzeeligibilityStream.publish(c);
             }
         }
@@ -29,17 +29,17 @@ function initSubscriptionBronzePolicy() {
         stopOnQuota, expiryTimeStamp
         group by sBronzeeligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 sBronzeintermediateStream.publish(c);
             }
         }
 
         from sBronzeintermediateStream
-        select sBronzeintermediateStream.throttleKey, sBronzeintermediateStream.eventCount>= 1000 as isThrottled,
+        select sBronzeintermediateStream.throttleKey, sBronzeintermediateStream.eventCount >= 1000 as isThrottled,
         sBronzeintermediateStream.stopOnQuota, sBronzeintermediateStream.expiryTimeStamp
         group by sBronzeeligibilityStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 sBronzeresultStream.publish(c);
             }
         }
@@ -49,7 +49,7 @@ function initSubscriptionBronzePolicy() {
         select sBronzeresultStream.throttleKey as throttleKey, sBronzeresultStream.isThrottled,
         sBronzeresultStream.stopOnQuota, sBronzeresultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {
-            foreach var c in counts{
+            foreach var c in counts {
                 sBronzeglobalThrotCopy.publish(c);
             }
         }
