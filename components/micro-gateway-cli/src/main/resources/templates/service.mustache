@@ -12,6 +12,10 @@ import wso2/gateway;
 {{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
+{{#equals endpointConfig.endpointType "address"}}
+{{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
+{{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
+{{/equals}}
 {{#equals endpointConfig.endpointType "load_balance"}}
 {{#endpointConfig.prodEndpoints}}{{>lbEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{#endpointConfig.sandEndpoints}}{{>lbEndpoint}}{{/endpointConfig.sandEndpoints}}

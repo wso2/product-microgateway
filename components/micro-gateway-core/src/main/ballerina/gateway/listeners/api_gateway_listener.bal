@@ -75,11 +75,15 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         return basicAuthHandler;
     } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
         auth:JWTAuthProviderConfig jwtConfig = {};
+        jwtCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+                900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+            evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
         jwtConfig.trustStoreFilePath = authProvider.trustStore.path  ?: "";
         jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
+        jwtConfig.jwtCache = jwtCache;
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
         return jwtAuthnHandler;
