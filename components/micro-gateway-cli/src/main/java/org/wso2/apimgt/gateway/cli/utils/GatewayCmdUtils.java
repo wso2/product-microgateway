@@ -341,7 +341,7 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Save swagger definition for multiple APIs
+     * Save swagger definition for multiple APIs.
      * @param projectName project name
      * @param apis API object List
      */
