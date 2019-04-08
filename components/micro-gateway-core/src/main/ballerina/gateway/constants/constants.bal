@@ -154,6 +154,7 @@
  public const string TYPE = "type";
  public const string ARRAY = "array";
  public const string STRING = "const string";
+ public const string STRING_TYPE = "string";
  public const string INTEGER = "integer";
  public const string NUMBER = "number";
  public const string OBJECT = "object";
@@ -171,6 +172,7 @@
  public const string SWAGGER = "_swagger";
  public const string SEPERATOR = ".";
  public const string BASEPATH = "../../../src/";
+ public const string INT = "int";
 
 // config constants
  public const string KM_CONF_INSTANCE_ID = "keyManager";
@@ -257,7 +259,6 @@
  public int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
-
 
  const string PATH_SEPERATOR = "/";
 
