@@ -25,17 +25,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -52,6 +48,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +146,6 @@ public class AddCmd implements GatewayLauncherCmd{
         String grpc;
         String projectName;
         String[] typeAndProjectName = GatewayCmdUtils.getProjectNameAndType(mainArgs);
-        Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
         if(typeAndProjectName[0].equals("api")){
@@ -167,6 +164,12 @@ public class AddCmd implements GatewayLauncherCmd{
         if (StringUtils.isEmpty(security)) {
             security = "oauth2";
         }
+        if (StringUtils.isEmpty(toolkitConfigPath)) {
+            toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
+        }
+
+        init(projectName, toolkitConfigPath);
+        Config config = GatewayCmdUtils.getConfig();
 
         /*
          * If api is created via an api definition, the setup flow is altered
@@ -253,7 +256,6 @@ public class AddCmd implements GatewayLauncherCmd{
                     } catch (IOException e) {
                         throw new CLIRuntimeException("cannot read source directory");
                     }
-                    outStream.println("Setting up project " + projectName + " is successful.");
                 }
 
             } else {
@@ -435,6 +437,30 @@ public class AddCmd implements GatewayLauncherCmd{
         //todo: implement add route command
 
 
+    }
+
+    private static void init(String projectName, String configPath) {
+        try {
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+
+            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
+
+            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
+            codeGenerationContext.setProjectName(projectName);
+            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
     }
 
     @Override

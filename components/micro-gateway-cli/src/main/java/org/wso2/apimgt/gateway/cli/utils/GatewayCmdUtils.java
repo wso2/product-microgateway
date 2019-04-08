@@ -639,6 +639,10 @@ public class GatewayCmdUtils {
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
     }
 
+    public static String getProjectPolicyDirectoryPath(String projectName){
+        return getProjectSrcDirectoryPath(projectName) + File.separator + GatewayCliConstants.POLICY_DIR;
+    }
+
     /**
      * Returns path to the /grpc_service/client of a given project in the current working directory
      *
