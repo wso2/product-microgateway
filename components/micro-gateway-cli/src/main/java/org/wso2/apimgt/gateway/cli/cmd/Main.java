@@ -85,6 +85,7 @@ public class Main {
             helpCmd.setParentCmdParser(cmdParser);
 
             SetupCmd setupCmd = new SetupCmd();
+            setupCmd.setArgsForAddCmd(args);
             cmdParser.addCommand(GatewayCliCommands.SETUP, setupCmd);
             setupCmd.setParentCmdParser(cmdParser);
 
@@ -99,6 +100,10 @@ public class Main {
             ResetCmd resetCmd = new ResetCmd();
             cmdParser.addCommand(GatewayCliCommands.RESET, resetCmd);
             resetCmd.setParentCmdParser(cmdParser);
+
+            AddCmd  addCmd = new AddCmd();
+            cmdParser.addCommand(GatewayCliCommands.ADD, addCmd);
+            addCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);

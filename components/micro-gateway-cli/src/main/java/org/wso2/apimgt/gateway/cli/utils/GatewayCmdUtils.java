@@ -495,6 +495,15 @@ public class GatewayCmdUtils {
         }
     }
 
+    public static String[] getProjectNameAndType(List<String> mainArgs) {
+        if (mainArgs.size() != 2) {
+            throw new CLIRuntimeException("Only two arguments accepted as the [api/route] and project name , "
+                    + "but provided: " + String.join(",", mainArgs));
+        } else {
+            return new String[]{mainArgs.get(0), mainArgs.get(1)};
+        }
+    }
+
     /**
      * Get resource hash holder file path
      *
