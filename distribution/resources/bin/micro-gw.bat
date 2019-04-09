@@ -48,6 +48,7 @@ if "%MICROGW_HOME%" == "" set MICROGW_HOME=%PRGDIR%..
 
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+if not exist "%MICROGW_HOME%\lib\platform" BALLERINA_HOME="$MICROGW_HOME/lib"
 set PATH=%PATH%;%BALLERINA_HOME%\bin\
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 
@@ -127,7 +128,7 @@ goto :end
 			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
 			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
 			if exist "%TARGET_DIR%"  ( rmdir "%TARGET_DIR%" /s /q )
-			call ballerina build src -o %project_name:\=%.balx --experimental
+			call ballerina build src -o %project_name:\=%.balx --experimental --siddhiruntime
 		popd
 		if %verbose%==T echo [%date% %time%] DEBUG: Ballerina build completed
 		REM Check for a debug param by looping through the remaining args list

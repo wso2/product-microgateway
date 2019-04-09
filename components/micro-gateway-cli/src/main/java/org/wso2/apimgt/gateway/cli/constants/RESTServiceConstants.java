@@ -21,6 +21,7 @@ public class RESTServiceConstants {
 
     public static final String ENDPOINT_TYPE = "endpoint_type";
     public static final String HTTP = "http";
+    public static final String ADDRESS = "address";
     public static final String FAILOVER = "failover";
     public static final String PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String SANDBOX_ENDPOINTS = "sandbox_endpoints";

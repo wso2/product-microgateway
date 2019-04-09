@@ -29,18 +29,17 @@ public type APIGatewayListener object {
     public http:Listener httpListener;
 
 
-    public function __init(http:ServiceEndpointConfiguration config) {
-        int port = 9090;
-        if((config.secureSocket is ())){
-            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
+    public function __init(int port, http:ServiceEndpointConfiguration config) {
+        int port1 = 0;
+        if ((config.secureSocket is ())) {
+            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
         } else {
-            port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, 9095);
+            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
         }
-
         initiateGatewayConfigurations(config);
-        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port);
-        self.httpListener = new(port, config = config);
-        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port);
+        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port1);
+        self.httpListener = new(port1, config = config);
+        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port1);
     }
 
 
@@ -76,11 +75,15 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         return basicAuthHandler;
     } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
         auth:JWTAuthProviderConfig jwtConfig = {};
+        jwtCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+                900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+            evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
         jwtConfig.trustStoreFilePath = authProvider.trustStore.path  ?: "";
         jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
+        jwtConfig.jwtCache = jwtCache;
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
         return jwtAuthnHandler;

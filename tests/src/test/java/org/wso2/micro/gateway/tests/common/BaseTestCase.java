@@ -96,7 +96,7 @@ public class BaseTestCase {
 
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
-        microGWServer.stopServer(false);
+        microGWServer.stopServer(true);
         MockAPIPublisher.getInstance().clear();
     }
 

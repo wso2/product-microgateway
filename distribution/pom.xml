@@ -110,6 +110,40 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>micro-gateway-platform</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/platform_zip.xml</descriptor>
+                            </descriptors>
+                            <finalName>platform</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-runtime</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>
+                            </descriptors>
+                            <finalName>runtime</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>micro-gateway</id>
                         <phase>package</phase>
                         <goals>

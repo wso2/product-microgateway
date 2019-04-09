@@ -40,12 +40,12 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyL
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
 
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
@@ -309,7 +309,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         endpointConf.setEndpointType(endpointType);
 
         if (RESTServiceConstants.HTTP.equalsIgnoreCase(endpointType) || RESTServiceConstants.FAILOVER.
-                equalsIgnoreCase(endpointType)) {
+                equalsIgnoreCase(endpointType) || RESTServiceConstants.ADDRESS.equalsIgnoreCase(endpointType)) {
             JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
             if (prodEndpointNode != null) {
                 Endpoint prod = new Endpoint();
