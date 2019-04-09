@@ -31,7 +31,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 @Parameters(commandNames = "list", commandDescription = "list api/resources of the microgateway")
-public class ListCmd implements GatewayLauncherCmd{
+public class ListCmd implements GatewayLauncherCmd {
 
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
@@ -44,26 +44,24 @@ public class ListCmd implements GatewayLauncherCmd{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddCmd.class);
     private static PrintStream OUT_STREAM = System.out;
+
     @Override
     public void execute() {
         String[] typeAndProjectName = GatewayCmdUtils.getProjectNameAndType(mainArgs);
-        if(typeAndProjectName[0].equals("apis")){
+        if (typeAndProjectName[0].equals("apis")) {
             isListAPIsCmd = true;
             projectName = typeAndProjectName[1];
-        }
-        else if(typeAndProjectName[0].equals("resources")){
+        } else if (typeAndProjectName[0].equals("resources")) {
             isListAPIsCmd = false;
             projectName = typeAndProjectName[1];
-        }
-        else{
+        } else {
             throw new CLIRuntimeException("Argument cannot be identified : " + typeAndProjectName[0]);
         }
 
-        if(isListAPIsCmd){
+        if (isListAPIsCmd) {
             printAPIDetailsInTable(RouteUtils.listApis(projectName));
-        }
-        else{
-            if(apiId.isEmpty()){
+        } else {
+            if (apiId.isEmpty()) {
                 throw new RuntimeException("API Id is not provided by the user");
             }
             printResourceDetails(SwaggerUtils
@@ -72,30 +70,28 @@ public class ListCmd implements GatewayLauncherCmd{
 
     }
 
-    private void printAPIDetailsInTable(List<String[]> rows){
+    private void printAPIDetailsInTable(List<String[]> rows) {
         //todo: introduce constants
-        if(rows == null || rows.size() == 0){
+        if (rows == null || rows.size() == 0) {
             OUT_STREAM.println("\nNo APIs in the project");
-        }
-        else{
+        } else {
             String tableStructure = "%-33s%-20s%-10s%-80s\n";
             OUT_STREAM.format(tableStructure, "apiId", "title", "version", "basepath");
 
-            for(String[] row : rows){
+            for (String[] row : rows) {
                 OUT_STREAM.format(tableStructure, row[0], row[1], row[2], row[3]);
             }
         }
     }
 
-    private void printResourceDetails(List<String[]> rows){
-        if(rows == null || rows.size() == 0){
+    private void printResourceDetails(List<String[]> rows) {
+        if (rows == null || rows.size() == 0) {
             OUT_STREAM.println("\nNo resources available in the project");
-        }
-        else{
+        } else {
             String tableStructure = "%-33s%-60s%-10s\n";
             OUT_STREAM.format(tableStructure, "resourceId", "resource", "method");
 
-            for(String[] row: rows){
+            for (String[] row : rows) {
                 OUT_STREAM.format(tableStructure, row[0], row[1], row[2]);
             }
         }
