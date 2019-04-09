@@ -29,6 +29,7 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -76,7 +77,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
             File source = new File(fileLocation);
             FileUtils.copyFileToDirectory(source, projectLocation);
             outStream.println("file copied");
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.error("error occured while copying file:" + e);
         }
 

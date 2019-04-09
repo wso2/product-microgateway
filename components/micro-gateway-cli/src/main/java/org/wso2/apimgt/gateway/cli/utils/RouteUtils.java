@@ -27,6 +27,9 @@ public class RouteUtils {
     //todo: set routesConfigPath as class variable
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
 
+    private static final String IN = "in";
+    private static final String OUT = "out";
+
     public static void saveGlobalEpAndBasepath(String apiDefPath, String routesConfigPath, String basePath,
                                         String endpointConfigJson){
         String apiId = SwaggerUtils.generateAPIdForSwagger(apiDefPath);
@@ -338,10 +341,10 @@ public class RouteUtils {
         JsonNode rootNode = getRoutesConfig(routeConfigPath);
         JsonNode jsonNode = rootNode.get("global_function");
 
-        if (type.equals("in")) {
+        if (type.equals(IN)) {
             ((ObjectNode) jsonNode).put("functionIn", function);
         }
-        if (type.equals("out")) {
+        if (type.equals(OUT)) {
             ((ObjectNode) jsonNode).put("functionOut", function);
         }
 
