@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-@Parameters(commandNames = "function", commandDescription = "add function")
+@Parameters(commandNames = "function", commandDescription = "custom function manilpulation")
 public class FunctionCmd implements GatewayLauncherCmd {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FunctionCmd.class);
@@ -42,19 +42,19 @@ public class FunctionCmd implements GatewayLauncherCmd {
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
 
-    @Parameter(names = {"-a", "--add"}, hidden = true)
+    @Parameter(names = {"-A", "--add"}, hidden = true)
     private Boolean isAdd = false;
 
-    @Parameter(names = {"-u", "--update"}, hidden = true)
+    @Parameter(names = {"-U", "--update"}, hidden = true)
     private Boolean isUpdate = false;
 
-    @Parameter(names = {"-f", "--fileName"}, hidden = true)
+    @Parameter(names = {"-f", "--file"}, hidden = true)
     private String fileLocation;
 
-    @Parameter(names = {"-ai", "--api-id"}, hidden = true)
+    @Parameter(names = {"-a", "--api"}, hidden = true)
     private String apiID;
 
-    @Parameter(names = {"-ri", "--resource-id"}, hidden = true)
+    @Parameter(names = {"-r", "--resource"}, hidden = true)
     private String resourceID;
 
     @Parameter(names = {"-i", "--in"}, hidden = true)
@@ -67,7 +67,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
     public void execute() {
 
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
-        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName) + "/src");
+        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +"src");
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -88,7 +88,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
         if (inFunction != null) {
             if (apiID != null) {
                 //api level inFunction
-                RouteUtils.addFunction(inFunction, "in", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                RouteUtils.addFunction(inFunction, RouteUtils.IN, apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
             } else if (resourceID != null) {
                 //add resource level inFunction
             } else {
@@ -98,7 +98,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
         } else if (outFunction != null) {
             //api level outFunction
             if (apiID != null) {
-                RouteUtils.addFunction(outFunction, "out", apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                RouteUtils.addFunction(outFunction, RouteUtils.OUT, apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
             } else if (resourceID != null) {
                 //add resource level outFunction
             } else {

@@ -27,8 +27,8 @@ public class RouteUtils {
     //todo: set routesConfigPath as class variable
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
 
-    private static final String IN = "in";
-    private static final String OUT = "out";
+    public static final String IN = "in";
+    public static final String OUT = "out";
 
     public static void saveGlobalEpAndBasepath(String apiDefPath, String routesConfigPath, String basePath,
                                         String endpointConfigJson){
@@ -199,8 +199,8 @@ public class RouteUtils {
         return rootNode;
     }
 
-    public static String[] getBasePath(String apiName, String apiVersion, String routesConfigPath){
-        String apiId = HashUtils.generateAPIId(apiName, apiVersion);
+    public static String[] getBasePath(String apiId, String routesConfigPath){
+
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
         ArrayNode arrayNode = (ArrayNode) rootNode.get("basepaths").get(apiId);
 

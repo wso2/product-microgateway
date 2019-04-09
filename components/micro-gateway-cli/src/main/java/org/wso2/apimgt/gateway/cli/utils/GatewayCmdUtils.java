@@ -33,10 +33,9 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -316,29 +315,54 @@ public class GatewayCmdUtils {
      * Create API-Files Directory for a particular project
      * @param projectName name of the project
      * @param apiId md5 hash value for apiName:version
-     * @param apiDefinition swagger content as a JSON string
      */
-    public static void createPerAPIFolderStructure(String projectName, String apiId, String apiDefinition){
-        String projectDir = getUserDir() + File.separator + projectName;
+    public static void createPerAPIFolderStructure(String projectName, String apiId){
 
-        String apiFilesDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
-
+        String apiFilesDirPath = getProjectAPIFilesDirectoryPath(projectName);
         String apiDirPath = apiFilesDirPath + File.separator + apiId;
         createFolderIfNotExist(apiDirPath);
-        createFileIfNotExist(apiDirPath, GatewayCliConstants.API_METADATA_FILE);
+    }
 
+    public static void saveSwaggerDefinition(String projectName, String apiId, String apiDefinition){
         if (apiDefinition.isEmpty()){
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
-
         try {
-            writeContent(apiDefinition, new File (apiDirPath + File.separator +
-                    GatewayCliConstants.API_SWAGGER));
+            writeContent(apiDefinition, new File (GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId)));
         } catch (IOException e) {
             throw new CLIInternalException("Error while copying the swagger to the project directory");
         }
-
     }
+
+    private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api){
+        String swaggerString = SwaggerUtils.generateSwaggerString(api);
+        String apiId = HashUtils.generateAPIId( api.getName(), api.getVersion());
+        GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, swaggerString);
+    }
+
+    /**
+     * Save swagger definition for multiple APIs.
+     * @param projectName project name
+     * @param apis API object List
+     */
+    public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis){
+        for(ExtendedAPI api : apis){
+            String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+            GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
+            saveSwaggerDefinitionForSingleAPI(projectName, api);
+        }
+    }
+
+    public static void saveAPIMetadataFile(String projectName, String apiId, String apiMetadataYaml){
+        if(!apiMetadataYaml.isEmpty()){
+            try {
+                writeContent(apiMetadataYaml, new File(GatewayCmdUtils.getAPIMetadataFilePath(projectName, apiId)));
+            } catch (IOException e) {
+                throw new CLIInternalException("Error while copying api-metaData to the project directory");
+            }
+        }
+    }
+
 
     /**
      * Create a micro gateway distribution for the provided project name
@@ -468,6 +492,15 @@ public class GatewayCmdUtils {
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
+        }
+    }
+
+    public static String[] getProjectNameAndType(List<String> mainArgs) {
+        if (mainArgs.size() != 2) {
+            throw new CLIRuntimeException("Only two arguments accepted as the [api/route] and project name , "
+                    + "but provided: " + String.join(",", mainArgs));
+        } else {
+            return new String[]{mainArgs.get(0), mainArgs.get(1)};
         }
     }
 
@@ -657,6 +690,11 @@ public class GatewayCmdUtils {
     public static String getProjectSwaggerFilePath(String projectName, String apiId){
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
                 GatewayCliConstants.API_SWAGGER;
+    }
+
+    public static String getAPIMetadataFilePath(String projectName, String apiId){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
+                GatewayCliConstants.API_METADATA_FILE;
     }
 
     /**
