@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
+import org.wso2.apimgt.gateway.cli.utils.SwaggerUtils;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -34,6 +35,9 @@ public class ListCmd implements GatewayLauncherCmd{
 
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
+
+    @Parameter(names = {"-ai", "--api-id"}, hidden = true)
+    private String apiId;
 
     private boolean isListAPIsCmd;
     private String projectName;
@@ -58,6 +62,13 @@ public class ListCmd implements GatewayLauncherCmd{
         if(isListAPIsCmd){
             printAPIDetailsInTable(RouteUtils.listApis(projectName));
         }
+        else{
+            if(apiId.isEmpty()){
+                throw new RuntimeException("API Id is not provided by the user");
+            }
+            printResourceDetails(SwaggerUtils
+                    .listResourcesFromSwagger(GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId)));
+        }
 
     }
 
@@ -67,11 +78,25 @@ public class ListCmd implements GatewayLauncherCmd{
             OUT_STREAM.println("\nNo APIs in the project");
         }
         else{
-            String tableStructure = "%-32s%-20s%-10s%-80s\n";
+            String tableStructure = "%-33s%-20s%-10s%-80s\n";
             OUT_STREAM.format(tableStructure, "apiId", "title", "version", "basepath");
 
             for(String[] row : rows){
                 OUT_STREAM.format(tableStructure, row[0], row[1], row[2], row[3]);
+            }
+        }
+    }
+
+    private void printResourceDetails(List<String[]> rows){
+        if(rows == null || rows.size() == 0){
+            OUT_STREAM.println("\nNo resources available in the project");
+        }
+        else{
+            String tableStructure = "%-33s%-60s%-10s\n";
+            OUT_STREAM.format(tableStructure, "resourceId", "resource", "method");
+
+            for(String[] row: rows){
+                OUT_STREAM.format(tableStructure, row[0], row[1], row[2]);
             }
         }
     }

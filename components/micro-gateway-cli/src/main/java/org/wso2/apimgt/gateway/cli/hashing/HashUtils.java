@@ -260,4 +260,14 @@ public class HashUtils {
             throw new CLIInternalException("Error while generating md5 hash for API");
         }
     }
+
+    public static String generateResourceId(String apiName, String version, String resource, String method){
+        //todo: introduce constant for ':'
+        String concatString = apiName + ":" + version + ":" + resource + ":" + method;
+        try{
+            return getMD5Hex(concatString);
+        } catch (HashingException e){
+            throw new CLIInternalException("Error while generating md5 hash for API resource");
+        }
+    }
 }
