@@ -20,6 +20,7 @@ import ballerina/cache;
 public cache:Cache gatewayTokenCache = new;
 public cache:Cache gatewayKeyValidationCache = new;
 public cache:Cache invalidTokenCache= new;
+public cache:Cache jwtCache = new;
 
 public function initGatewayCaches() {
     gatewayTokenCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
