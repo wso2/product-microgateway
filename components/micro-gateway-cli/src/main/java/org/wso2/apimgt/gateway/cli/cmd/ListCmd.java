@@ -36,7 +36,7 @@ public class ListCmd implements GatewayLauncherCmd {
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
 
-    @Parameter(names = {"-ai", "--api-id"}, hidden = true)
+    @Parameter(names = {"-a", "--api"}, hidden = true)
     private String apiId;
 
     private boolean isListAPIsCmd;
