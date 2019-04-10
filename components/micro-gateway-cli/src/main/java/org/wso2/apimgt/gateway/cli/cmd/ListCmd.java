@@ -58,6 +58,8 @@ public class ListCmd implements GatewayLauncherCmd {
             throw new CLIRuntimeException("Argument cannot be identified : " + typeAndProjectName[0]);
         }
 
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+
         if (isListAPIsCmd) {
             printAPIDetailsInTable(RouteUtils.listApis(projectName));
         } else {

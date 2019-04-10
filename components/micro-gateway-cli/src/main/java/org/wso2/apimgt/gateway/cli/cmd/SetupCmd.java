@@ -127,12 +127,14 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     public void execute() {
 
+
         String workspace = GatewayCmdUtils.getUserDir();
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
         }
+
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
@@ -144,6 +146,8 @@ public class SetupCmd implements GatewayLauncherCmd {
         // Extracts the zipped ballerina platform and runtime
         extractPlatformAndRuntime();
         init(projectName, deploymentConfigPath);
+
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //set etcd requirement
         Etcd etcd = new Etcd();

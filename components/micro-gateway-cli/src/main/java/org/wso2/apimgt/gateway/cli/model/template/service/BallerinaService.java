@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -164,6 +165,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                     String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                     operation.getValue().setOperationId(operationId);
+
+                    MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfig(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                                    path.getKey(), operation.getKey().toUpperCase());
+                    if(epConfig != null){
+                        operation.getValue().setEpConfigDTO(epConfig);
+                    }
+
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));

@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> methods;
     private String scope;
     private boolean isSecured = true;
+    private boolean hasProdEpConfig = false;
+    private boolean hasSandEpConfig = false;
+    private MgwEndpointConfigDTO epConfig;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -169,5 +173,19 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setSecured(boolean secured) {
         isSecured = secured;
+    }
+
+    public MgwEndpointConfigDTO getEpConfigDTO() {
+        return epConfig;
+    }
+
+    public void setEpConfigDTO(MgwEndpointConfigDTO epConfigDTO) {
+        this.epConfig = epConfigDTO;
+        if(epConfigDTO.getProdEndpointList() != null){
+            hasProdEpConfig = true;
+        }
+        if(epConfigDTO.getSandboxEndpointList() != null){
+            hasSandEpConfig = true;
+        }
     }
 }

@@ -59,7 +59,7 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
 
 //todo: implement different classes for the different add commands
 @Parameters(commandNames = "add", commandDescription = "add api/route to the microgateway")
-public class AddCmd implements GatewayLauncherCmd{
+public class AddCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddCmd.class);
     private static PrintStream outStream = System.out;
 
@@ -128,8 +128,11 @@ public class AddCmd implements GatewayLauncherCmd{
     @Parameter(names = {"-b", "--basepath"}, hidden = true)
     private String basepath;
 
-    @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
+    @Parameter(names = {"-etcd", "--enable-etcd"}, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
+
+    @Parameter(names = {"-r", "--resource"}, hidden = true)
+    private String resource_id;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -138,6 +141,7 @@ public class AddCmd implements GatewayLauncherCmd{
     private String clientSecret;
     private boolean isOverwriteRequired;
     private boolean isAddAPIcmd;
+
     @Override
     public void execute() {
         String clientID;
@@ -148,17 +152,16 @@ public class AddCmd implements GatewayLauncherCmd{
         String[] typeAndProjectName = GatewayCmdUtils.getProjectNameAndType(mainArgs);
         isOverwriteRequired = false;
 
-        if(typeAndProjectName[0].equals("api")){
+        if (typeAndProjectName[0].equals("api")) {
             isAddAPIcmd = true;
             projectName = typeAndProjectName[1];
-        }
-        else if(typeAndProjectName[0].equals("route")){
+        } else if (typeAndProjectName[0].equals("route")) {
             isAddAPIcmd = false;
             projectName = typeAndProjectName[1];
-        }
-        else{
+        } else {
             throw new CLIRuntimeException("Argument cannot be identified : " + typeAndProjectName[0]);
         }
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //Security Schemas settings
         if (StringUtils.isEmpty(security)) {
@@ -174,7 +177,7 @@ public class AddCmd implements GatewayLauncherCmd{
         /*
          * If api is created via an api definition, the setup flow is altered
          */
-        if(isAddAPIcmd){
+        if (isAddAPIcmd) {
             if (isOpenApi) {
                 outStream.println("Loading Open Api Specification from Path: " + openApi);
                 String api = OpenApiCodegenUtils.readApi(openApi);
@@ -220,7 +223,7 @@ public class AddCmd implements GatewayLauncherCmd{
                              * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                              * the user
                              */
-                            if ((endpoint = promptForTextInput( "Enter Endpoint URL: "))
+                            if ((endpoint = promptForTextInput("Enter Endpoint URL: "))
                                     .trim().isEmpty()) {
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                             }
@@ -232,10 +235,10 @@ public class AddCmd implements GatewayLauncherCmd{
                         endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
                     }
 
-                    if(StringUtils.isEmpty(basepath)){
+                    if (StringUtils.isEmpty(basepath)) {
                         basepath = SwaggerUtils.getBasePathFromSwagger(apiDefPath);
-                        if(StringUtils.isEmpty(basepath)){
-                            if ((basepath = promptForTextInput( "Enter basepath: "))
+                        if (StringUtils.isEmpty(basepath)) {
+                            if ((basepath = promptForTextInput("Enter basepath: "))
                                     .trim().isEmpty()) {
                                 //todo: shall we allow the user to proceed with empty basepath
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
@@ -432,11 +435,38 @@ public class AddCmd implements GatewayLauncherCmd{
                     GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
                 }
             }
+        }//todo: implement add route command
+        else {
+            if (resource_id.isEmpty()) {
+                if ((endpoint = promptForTextInput("Enter Resource ID: "))
+                        .trim().isEmpty()) {
+                    throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
+                            "resource_id is not provided");
+                }
+            }
+
+            String endpointConfigString;
+            if (StringUtils.isEmpty(endpointConfig)) {
+                if (StringUtils.isEmpty(endpoint)) {
+                    /*
+                     * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                     * the user
+                     */
+                    if ((endpoint = promptForTextInput("Enter Endpoint URL for Resource " + resource_id + ": "))
+                            .trim().isEmpty()) {
+                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                    }
+                }
+                //todo: fix this in a proper way
+                endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
+                        "\"]}}";
+            } else {
+                endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
+            }
+            RouteUtils.saveResourceRoute(resource_id, endpointConfigString,
+                    GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+            outStream.println("Successfully added route for resource ID : " + resource_id);
         }
-
-        //todo: implement add route command
-
-
     }
 
     private static void init(String projectName, String configPath) {
@@ -491,6 +521,7 @@ public class AddCmd implements GatewayLauncherCmd{
         userInputURL = promptForTextInput("Enter APIM base URL [" + defaultBaseURL + "]: ").trim();
         return userInputURL;
     }
+
     /**
      * Set endpoints of publisher, admin, registration and token
      *
