@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -27,18 +27,34 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
-public class SwaggerUtils {
+public class OpenAPICodegenUtils {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(OpenAPICodegenUtils.class);
 
+    private static final String openAPISpec2 = "2";
+    private static final String openAPISpec3 = "3";
+
+    /**
+     * Generate API Id for a given OpenAPI definition.
+     * @param apiDefPath path to OpenAPI definition
+     * @return API Id
+     */
     public static String generateAPIdForSwagger(String apiDefPath){
 
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
@@ -49,6 +65,12 @@ public class SwaggerUtils {
         return HashUtils.generateAPIId(apiName, apiVersion);
     }
 
+    /**
+     * Generate JsonNode object for a given API definition.
+     * @param apiDefinition API definition (as a file path or String content)
+     * @param isFilePath   If the given api Definition is a file path
+     * @return  JsonNode object for the api definition
+     */
     private static JsonNode generateJsonNode(String apiDefinition, boolean isFilePath){
         try{
             if(isFilePath){
@@ -62,28 +84,37 @@ public class SwaggerUtils {
         }
     }
 
+    /**
+     * Discover the openAPI version of the given API definition
+     * @param apiDefinition API definition (as a file path or String content)
+     * @param isFilePath If the given api Definition is a file path
+     * @return openAPI version number (2 or 3)
+     */
     private static String findSwaggerVersion(String apiDefinition, boolean isFilePath){
 
         JsonNode rootNode = generateJsonNode(apiDefinition, isFilePath);
         if(rootNode.has("swagger") && rootNode.get("swagger").asText().trim().startsWith("2")){
             //todo: introduce a constant for swagger version
-            return "2";
+            return openAPISpec2;
         }
         else if(rootNode.has("openapi") && rootNode.get("openapi").asText().trim().startsWith("3")){
-            return "3";
+            return openAPISpec3;
         }
-
         throw new CLIRuntimeException("Error while reading the swagger file, check again.");
     }
 
-    //todo: check if this is required
-    public static String generateSwaggerString(ExtendedAPI api){
+    /**
+     * Extract the openAPI definition as String from an ExtendedAPI object.
+     * @param api ExtendedAPI object
+     * @return  openAPI definition as a String
+     */
+    static String generateSwaggerString(ExtendedAPI api){
 
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
         switch(swaggerVersion){
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                //to bring the settings in API Manager
+                //to save the basepath settings as provided in API Manager
                 swagger.setBasePath(api.getContext() + "/" + api.getVersion());
                 return Json.pretty(swagger);
             case "3":
@@ -93,17 +124,27 @@ public class SwaggerUtils {
         }
     }
 
+    /**
+     * get API name and version from the given openAPI definition.
+     * @param apiDefPath path to openAPI definition
+     * @return String array {API_name, Version}
+     */
     static String[] getAPINameVersionFromSwagger(String apiDefPath){
-
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
         return new String[] {openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion()};
 
     }
 
+    /**
+     * get basePath from the openAPI definition
+     * @param apiDefPath path to openAPI definition
+     * @return basePath (if the swagger version is 2 and it includes )
+     */
     public static String getBasePathFromSwagger(String apiDefPath){
         String swaggerVersion = findSwaggerVersion(apiDefPath, true);
 
-        if(swaggerVersion.equals("2")){
+        //openAPI version 2 contains basePath
+        if(swaggerVersion.equals(openAPISpec2)){
             Swagger swagger = new SwaggerParser().read(apiDefPath);
             if(!StringUtils.isEmpty(swagger.getBasePath())){
                 return swagger.getBasePath();
@@ -112,10 +153,15 @@ public class SwaggerUtils {
         return null;
     }
 
+    /**
+     * generate ExtendedAPI object from openAPI definition
+     * @param apiDefPath path to openAPI definition
+     * @return Extended API object
+     */
     public static ExtendedAPI generateAPIFromOpenAPIDef(String apiDefPath){
 
         ExtendedAPI api;
-        String apiId = UUID.randomUUID().toString(); //todo: clarify the purpose of this UUID ?
+        String apiId = UUID.randomUUID().toString();
 
         api = new ExtendedAPI();
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
@@ -128,6 +174,11 @@ public class SwaggerUtils {
         return api;
     }
 
+    /**
+     * list all the available resources from openAPI definition
+     * @param apiDefPath path to openAPI definition
+     * @return list of string arrays {resource_id, resource name, method}
+     */
     public static List<String[]> listResourcesFromSwagger(String apiDefPath){
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
         LinkedHashMap<String, PathItem> pathList = openAPI.getPaths();
@@ -157,6 +208,40 @@ public class SwaggerUtils {
             row[2] = method;
             resourcesList.add(row);
         }
+    }
+
+    /**
+     * read openAPI definition
+     * @param filePath path to openAPI definition
+     * @return openAPI as a String
+     */
+    public static String readApi(String filePath) {
+        String responseStr;
+        try {
+            responseStr = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("Error while reading api definition.", e);
+            throw new CLIInternalException("Error while reading api definition.");
+        }
+        return responseStr;
+    }
+
+    /**
+     * set additional configurations for an api for code generation process (basePath and CORS configuration)
+     * @param projectName  project Name
+     * @param api API object
+     */
+    public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
+        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+        MgwEndpointConfigDTO mgwEndpointConfigDTO =
+                RouteUtils.convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId,
+                        GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)));
+        api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
+        // 0th element represents the specific basepath
+        api.setSpecificBasepath(RouteUtils.getBasePath(apiId,
+                GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)) [0]);
+        api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
+        api.setCorsConfiguration(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getCorsConfigurationDTO());
     }
 
 }

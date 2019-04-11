@@ -245,12 +245,10 @@ public class HashUtils {
     }
 
     /**
-     * Get the MD5 hash for an API for the usage in routes configuration and maintaining folder structure.
-     *
+     * Get the MD5 hash for an API.
      * @param apiName API name
      * @param version API version
      * @return md5 hash value for concatenated string (apiName:version)
-     * @throws HashingException
      */
     public static String generateAPIId(String apiName, String version){
         String concatString = apiName + ":" + version;
@@ -261,8 +259,15 @@ public class HashUtils {
         }
     }
 
+    /**
+     * Get the MD5 hash for the given specific resource of an API.
+     * @param apiName API name
+     * @param version API version
+     * @param resource Resource name
+     * @param method  operation associated with the resource
+     * @return md5 hash value for concatenated string (apiName:version:resource:method)
+     */
     public static String generateResourceId(String apiName, String version, String resource, String method){
-        //todo: introduce constant for ':'
         String concatString = apiName + ":" + version + ":" + resource + ":" + method;
         try{
             return getMD5Hex(concatString);

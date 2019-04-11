@@ -51,6 +51,7 @@ import java.util.List;
 public class BuildCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
     private static PrintStream outStream = System.out;
+
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
@@ -62,8 +63,6 @@ public class BuildCmd implements GatewayLauncherCmd {
     @Parameter(names = {"--compiled"}, hidden = true, arity = 0)
     private boolean isCompiled;
 
-    private String projectName;
-
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
     private boolean helpFlag;
 
@@ -74,7 +73,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             return;
         }
 
-        projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
@@ -84,6 +83,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
         }
 
+        //first phase of the build command; generation of ballerina code
         if(!isCompiled){
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
@@ -112,6 +112,7 @@ public class BuildCmd implements GatewayLauncherCmd {
                 throw new CLIInternalException("Error occured while generating ballerina code for the swagger file.");
             }
         }
+        //second phase of the build command; ballerina code compilation
         else{
             try {
                 GatewayCmdUtils.createProjectGWDistribution(projectName);
@@ -120,25 +121,6 @@ public class BuildCmd implements GatewayLauncherCmd {
                 logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
                 throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
             }
-        }
-    }
-
-    private void balCodeGeneration(String projectName){
-        //todo: this depends on the PATH variable of the machine : needs to be fixed
-        ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", GatewayCmdUtils
-                .getProjectAPIFilesDirectoryPath(projectName) + "/balxGeneration.sh", projectName, GatewayCmdUtils
-                .getUserDir());
-        try {
-            Process process = processBuilder.start();
-            process.waitFor();
-
-            if(process.exitValue() != 0){
-                throw new RuntimeException("Error occurred when building.");
-            }
-        } catch (IOException e) {
-            throw new CLIInternalException("Cannot compile the ballerina code");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

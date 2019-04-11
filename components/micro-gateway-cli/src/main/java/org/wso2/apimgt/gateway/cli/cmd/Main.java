@@ -77,7 +77,7 @@ public class Main {
     private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
         try {
             DefaultCmd defaultCmd = new DefaultCmd();
-            JCommander cmdParser = new JCommander(defaultCmd);
+            ExtendedJCommander cmdParser = new ExtendedJCommander(defaultCmd);
             defaultCmd.setParentCmdParser(cmdParser);
 
             HelpCmd helpCmd = new HelpCmd();
@@ -101,13 +101,21 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.RESET, resetCmd);
             resetCmd.setParentCmdParser(cmdParser);
 
-            AddCmd addCmd = new AddCmd();
-            cmdParser.addCommand(GatewayCliCommands.ADD, addCmd);
-            addCmd.setParentCmdParser(cmdParser);
+            AddAPICmd addAPICmd = new AddAPICmd();
+            cmdParser.addCommand(GatewayCliCommands.ADD_API, addAPICmd);
+            addAPICmd.setParentCmdParser(cmdParser);
 
-            ListCmd listCmd = new ListCmd();
-            cmdParser.addCommand(GatewayCliCommands.LIST, listCmd);
-            listCmd.setParentCmdParser(cmdParser);
+            AddRouteCmd addRouteCmd = new AddRouteCmd();
+            cmdParser.addCommand(GatewayCliCommands.ADD_ROUTE, addRouteCmd);
+            addRouteCmd.setParentCmdParser(cmdParser);
+
+            ListAPIsCmd listAPIsCmd = new ListAPIsCmd();
+            cmdParser.addCommand(GatewayCliCommands.LIST_APIS, listAPIsCmd);
+            listAPIsCmd.setParentCmdParser(cmdParser);
+
+            ListRoutesCmd listRoutesCmd = new ListRoutesCmd();
+            cmdParser.addCommand(GatewayCliCommands.LIST_ROUTES, listRoutesCmd);
+            listRoutesCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);

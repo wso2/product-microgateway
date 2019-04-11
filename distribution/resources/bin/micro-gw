@@ -225,7 +225,7 @@ fi
 #execute build command
 if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
 
-  # ----- Execute The Requested Command -----------------------------------------
+  # ----- Execute The Build Command without --compiled flag (1st phase) -----------------------------------------
 
   $JAVACMD \
     -Xms256m -Xmx1024m \
@@ -252,7 +252,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental
     popd > /dev/null
 
-    # ----- Execute The Requested Command -----------------------------------------
+    # ----- Execute The Build Command with --compiled flag (2nd phase) -----------------------------------------
 
   $JAVACMD \
     -Xms256m -Xmx1024m \

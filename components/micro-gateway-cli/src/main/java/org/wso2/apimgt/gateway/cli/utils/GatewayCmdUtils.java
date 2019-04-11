@@ -37,16 +37,7 @@ import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -323,6 +314,12 @@ public class GatewayCmdUtils {
         createFolderIfNotExist(apiDirPath);
     }
 
+    /**
+     * Save openAPI definition (developer first approach)
+     * @param projectName project name
+     * @param apiId  API id
+     * @param apiDefinition api Definition as String
+     */
     public static void saveSwaggerDefinition(String projectName, String apiId, String apiDefinition){
         if (apiDefinition.isEmpty()){
             throw new CLIInternalException("No swagger definition is provided to generate API");
@@ -335,7 +332,7 @@ public class GatewayCmdUtils {
     }
 
     private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api){
-        String swaggerString = SwaggerUtils.generateSwaggerString(api);
+        String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
         String apiId = HashUtils.generateAPIId( api.getName(), api.getVersion());
         GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, swaggerString);
     }
@@ -495,15 +492,6 @@ public class GatewayCmdUtils {
         }
     }
 
-    public static String[] getProjectNameAndType(List<String> mainArgs) {
-        if (mainArgs.size() != 2) {
-            throw new CLIRuntimeException("Only two arguments accepted as the [api/route] and project name , "
-                    + "but provided: " + String.join(",", mainArgs));
-        } else {
-            return new String[]{mainArgs.get(0), mainArgs.get(1)};
-        }
-    }
-
     /**
      * Get resource hash holder file path
      *
@@ -639,10 +627,6 @@ public class GatewayCmdUtils {
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
     }
 
-    public static String getProjectPolicyDirectoryPath(String projectName){
-        return getProjectSrcDirectoryPath(projectName) + File.separator + GatewayCliConstants.POLICY_DIR;
-    }
-
     /**
      * Returns path to the /grpc_service/client of a given project in the current working directory
      *
@@ -696,6 +680,12 @@ public class GatewayCmdUtils {
                 GatewayCliConstants.API_SWAGGER;
     }
 
+    /**
+     * Returns the path to the metadata for a defined version of an API
+     * @param projectName name of the project
+     * @param apiId md5 hash value of apiName:apiVersion
+     * @return path to the metadata file of the API
+     */
     public static String getAPIMetadataFilePath(String projectName, String apiId){
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
                 GatewayCliConstants.API_METADATA_FILE;
@@ -731,6 +721,11 @@ public class GatewayCmdUtils {
                 GatewayCliConstants.CLIENT_CERT_METADATA_FILE;
     }
 
+    /**
+     * Returns the path to the routes configuration file (routes.yaml)
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
     public static String getProjectRoutesConfFilePath(String projectName){
         return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.ROUTES_FILE;
     }
@@ -878,7 +873,7 @@ public class GatewayCmdUtils {
      * @param file    file object initialized with path
      * @throws IOException error while writing content to file
      */
-    public static void writeContent(String content, File file) throws IOException {
+    private static void writeContent(String content, File file) throws IOException {
         FileWriter writer = null;
         writer = new FileWriter(file);
         writer.write(content);
@@ -1070,5 +1065,16 @@ public class GatewayCmdUtils {
         try(FileInputStream fis = new FileInputStream(filePath);ObjectInputStream obi = new ObjectInputStream(fis)){
             return (Map<String , String>) obi.readObject();
         }
+    }
+
+    /**
+     * Prompts for a test input
+     * @param outStream Print Stream
+     * @param msg message
+     * @return user entered text
+     */
+    public static String promptForTextInput(PrintStream outStream, String msg) {
+        outStream.println(msg);
+        return System.console().readLine();
     }
 }

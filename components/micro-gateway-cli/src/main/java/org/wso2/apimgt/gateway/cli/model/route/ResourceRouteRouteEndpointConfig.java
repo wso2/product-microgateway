@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResourceRouteEndpointConfig extends EndpointConfig{
+public class ResourceRouteRouteEndpointConfig extends RouteEndpointConfig {
 
     private String name = null;
     //todo: Use Enum

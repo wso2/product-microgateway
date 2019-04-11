@@ -47,39 +47,37 @@ import java.util.List;
  */
 public class ThrottlePolicyGenerator {
 
-//    /**
-//     * Generate ballerina and stream source for a given app and subs policies
-//     *
-//     * @param outPath              Destination file path to save generated source files. If not provided
-//     *                             {@code definitionPath} will be used as the default destination path
-//     * @param applicationPolicies  list of app policies
-//     * @param subscriptionPolicies list of subs policies
-//     * @throws IOException                  when file operations fail
-//     * @throws BallerinaServiceGenException when code generator fails
-//     */
-//    public void generate(String outPath, List<ApplicationThrottlePolicyDTO> applicationPolicies,
-//            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException, BallerinaServiceGenException {
-//        List<GenSrcFile> genFiles = new ArrayList<>();
-//        List<GenSrcFile> genAppFiles = generateApplicationPolicies(applicationPolicies);
-//
-//        if(genAppFiles != null){
-//            genFiles.addAll(genAppFiles);
-//        }
-//
-//        List<GenSrcFile> genSubsFiles = generateSubscriptionPolicies(subscriptionPolicies);
-//
-//        if(genSubsFiles != null){
-//            genFiles.addAll(genSubsFiles);
-//        }
-//
-//        GenSrcFile initGenFile = generateInitBal(applicationPolicies, subscriptionPolicies);
-//        genFiles.add(initGenFile);
-//        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(outPath), true);
-//    }
+    public void generate(String outPath, List<ApplicationThrottlePolicyDTO> applicationPolicies,
+            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException, BallerinaServiceGenException {
+        List<GenSrcFile> genFiles = new ArrayList<>();
+        List<GenSrcFile> genAppFiles = generateApplicationPolicies(applicationPolicies);
 
-    //todo: remove unnecessary code segments
+        if(genAppFiles != null){
+            genFiles.addAll(genAppFiles);
+        }
+
+        List<GenSrcFile> genSubsFiles = generateSubscriptionPolicies(subscriptionPolicies);
+
+        if(genSubsFiles != null){
+            genFiles.addAll(genSubsFiles);
+        }
+
+        GenSrcFile initGenFile = generateInitBal(applicationPolicies, subscriptionPolicies);
+        genFiles.add(initGenFile);
+        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(outPath), true);
+    }
+
+    /**
+     * Generate ballerina and stream source for a given app and subs policies
+     *
+     * @param outPath  Destination file path to save generated source files. If not provided
+     *                 {@code definitionPath} will be used as the default destination path
+     * @param projectName  Project name
+     * @throws IOException                  when file operations fail
+     */
     public void generate(String outPath, String projectName) throws IOException {
 
+        //read application throttle policies and subscription throttle policies
         ApplicationThrottlePolicyListDTO applicationPolicies = restoreApplicationThrottlePolicy(projectName);
         SubscriptionThrottlePolicyListDTO subscriptionPolicies = restoreSubscriptionThrottlePolicy(projectName);
 
@@ -133,22 +131,6 @@ public class ThrottlePolicyGenerator {
         return sourceFiles;
     }
 
-    private List<GenSrcFile> generateApplicationPolicies(String projectName) throws IOException {
-
-        ApplicationThrottlePolicyListDTO applicationPolicies = restoreApplicationThrottlePolicy(projectName);
-
-        ThrottlePolicy policyContext;
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
-        if(applicationPolicies == null){
-            return null;
-        }
-        for (ApplicationThrottlePolicyDTO applicationPolicy : applicationPolicies.getList()) {
-            policyContext = new ThrottlePolicy().buildContext(applicationPolicy);
-            sourceFiles.add(generatePolicy(policyContext));
-        }
-        return sourceFiles;
-    }
-
     private ApplicationThrottlePolicyListDTO restoreApplicationThrottlePolicy(String projectName) throws IOException {
         String applicationPolicyPath = GatewayCmdUtils.getProjectAppThrottlePoliciesFilePath(projectName);
 
@@ -161,7 +143,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate application policies source
+     * Generate subscription policies source
      *
      * @param subscriptionPolicies list of subscription policies
      * @return list of {@code GenSrcFile}
@@ -191,21 +173,6 @@ public class ThrottlePolicyGenerator {
         return null;
     }
 
-    private List<GenSrcFile> generateSubscriptionPolicies(String projectName) throws IOException {
-
-        SubscriptionThrottlePolicyListDTO subscriptionPolicies = restoreSubscriptionThrottlePolicy(projectName);
-        if(subscriptionPolicies == null){
-            return null;
-        }
-        ThrottlePolicy policyContext;
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
-        for (SubscriptionThrottlePolicyDTO subscriptionPolicy : subscriptionPolicies.getList()) {
-            policyContext = new ThrottlePolicy().buildContext(subscriptionPolicy);
-            sourceFiles.add(generatePolicy(policyContext));
-        }
-        return sourceFiles;
-    }
-
     /**
      * Generate init ballerina source which start all other policy ballerina
      *
@@ -227,16 +194,6 @@ public class ThrottlePolicyGenerator {
         }
         return generateInitBalFile(context);
     }
-
-//    private GenSrcFile generateInitBal(String projectName) throws IOException {
-//        List<ApplicationThrottlePolicyDTO> applicationPolicies = restoreApplicationThrottlePolicy(projectName)
-//                .getList();
-//        List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = restoreSubscriptionThrottlePolicy(projectName)
-//                .getList();
-//        ThrottlePolicyInitializer context = new ThrottlePolicyInitializer().buildAppContext(applicationPolicies)
-//                .buildSubsContext(subscriptionPolicies);
-//        return generateInitBalFile(context);
-//    }
 
     /**
      * Write ballerina definition of a <code>object</code> to a file as described by <code>template.</code>

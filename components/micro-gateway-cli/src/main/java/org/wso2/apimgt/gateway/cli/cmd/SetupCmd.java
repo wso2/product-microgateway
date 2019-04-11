@@ -23,11 +23,9 @@ import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.*;
 
@@ -35,10 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class represents the "setup" command and it holds arguments and flags specified by the user.
@@ -118,16 +114,19 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     private String[] addCmdArgs;
 
-    public void setArgsForAddCmd(String[] args){
+    /**
+     * This method is to support existing setup command
+     * @param args commandLine arguments
+     */
+    void setArgsForAddCmd(String[] args) {
         String[] addCmdArgs = new String[args.length];
-        System.arraycopy(args, 1, addCmdArgs,1, addCmdArgs.length - 1);
-        addCmdArgs[0] = "api";
+        System.arraycopy(args, 1, addCmdArgs, 1, addCmdArgs.length - 1);
+        addCmdArgs[0] = "add-api";
         this.addCmdArgs = addCmdArgs;
     }
 
+    @Override
     public void execute() {
-
-
         String workspace = GatewayCmdUtils.getUserDir();
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")) {
@@ -147,27 +146,17 @@ public class SetupCmd implements GatewayLauncherCmd {
         extractPlatformAndRuntime();
         init(projectName, deploymentConfigPath);
 
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-
         //set etcd requirement
         Etcd etcd = new Etcd();
         etcd.setEtcdEnabled(isEtcdEnabled);
-        //todo: needs to persist
+        //todo: needs to persist ?
         GatewayCmdUtils.setEtcd(etcd);
         LOGGER.debug("Etcd is enabled : " + isEtcdEnabled);
 
-        if((openApi != null) || (apiName != null) || (label != null)){
-
-            JCommander cmdParser = new JCommander(new AddCmd());
-            //todo: introduce constant
-            cmdParser.setProgramName("micro-gw");
-            cmdParser.parse(addCmdArgs);
-            Optional.of((GatewayLauncherCmd) cmdParser.getObjects().get(0))
-                    .ifPresent(GatewayLauncherCmd::execute);
+        if ((openApi != null) || (apiName != null) || (label != null)) {
+            Main.main(addCmdArgs);
         }
-
         OUT_STREAM.println("Setting up project " + projectName + " is successful.");
-
     }
 
     @Override
@@ -179,11 +168,16 @@ public class SetupCmd implements GatewayLauncherCmd {
     public void setParentCmdParser(JCommander parentCmdParser) {
     }
 
+    /**
+     * Create project folder structure and initial deployment configuration
+     * @param projectName projectName
+     * @param deploymentConfigPath deploymentConfigPath
+     */
     private static void init(String projectName, String deploymentConfigPath) {
+
         try {
             GatewayCmdUtils.createProjectStructure(projectName);
             GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
-
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurationss", e);
             throw new CLIInternalException("Error occurred while loading configurations.");

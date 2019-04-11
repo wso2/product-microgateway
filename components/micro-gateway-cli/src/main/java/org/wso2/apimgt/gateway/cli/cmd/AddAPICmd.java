@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -62,9 +61,9 @@ import java.util.Locale;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 //todo: implement different classes for the different add commands
-@Parameters(commandNames = "add", commandDescription = "add api/route to the microgateway")
-public class AddCmd implements GatewayLauncherCmd {
-    private static final Logger logger = LoggerFactory.getLogger(AddCmd.class);
+@Parameters(commandNames = "add-api", commandDescription = "add api to the microgateway")
+public class AddAPICmd implements GatewayLauncherCmd {
+    private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
     @SuppressWarnings("unused")
@@ -132,11 +131,9 @@ public class AddCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--basepath"}, hidden = true)
     private String basepath;
 
+    //todo: resolve etcd
     @Parameter(names = {"-etcd", "--enable-etcd"}, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
-
-    @Parameter(names = {"-r", "--resource"}, hidden = true)
-    private String resource_id;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -144,7 +141,6 @@ public class AddCmd implements GatewayLauncherCmd {
     private String tokenEndpoint;
     private String clientSecret;
     private boolean isOverwriteRequired;
-    private boolean isAddAPIcmd;
 
     @Override
     public void execute() {
@@ -152,19 +148,15 @@ public class AddCmd implements GatewayLauncherCmd {
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String grpc;
-        String projectName;
-        String[] typeAndProjectName = GatewayCmdUtils.getProjectNameAndType(mainArgs);
+        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         isOverwriteRequired = false;
 
-        if (typeAndProjectName[0].equals("api")) {
-            isAddAPIcmd = true;
-            projectName = typeAndProjectName[1];
-        } else if (typeAndProjectName[0].equals("route")) {
-            isAddAPIcmd = false;
-            projectName = typeAndProjectName[1];
-        } else {
-            throw new CLIRuntimeException("Argument cannot be identified : " + typeAndProjectName[0]);
+        if (!new File(workspace + File.separator + projectName).exists()) {
+            throw GatewayCmdUtils.createUsageException("Project name `" + projectName
+                    + "` does not exist");
         }
+
+        //todo: remove
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //Security Schemas settings
@@ -175,16 +167,13 @@ public class AddCmd implements GatewayLauncherCmd {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
 
-        init(projectName, toolkitConfigPath);
+        init(toolkitConfigPath);
         Config config = GatewayCmdUtils.getConfig();
 
-        /*
-         * If api is created via an api definition, the setup flow is altered
-         */
-        if (isAddAPIcmd) {
+        {
             if (isOpenApi) {
                 outStream.println("Loading Open Api Specification from Path: " + openApi);
-                String api = OpenApiCodegenUtils.readApi(openApi);
+                String api = OpenAPICodegenUtils.readApi(openApi);
 
                 if (openApi.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
                     grpc = openApi;
@@ -200,7 +189,7 @@ public class AddCmd implements GatewayLauncherCmd {
                                  * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                                  * the user
                                  */
-                                if ((endpoint = promptForTextInput("Enter Endpoint URL: "))
+                                if ((endpoint = GatewayCmdUtils.promptForTextInput(outStream,"Enter Endpoint URL: "))
                                         .trim().isEmpty()) {
                                     throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                                 }
@@ -217,9 +206,11 @@ public class AddCmd implements GatewayLauncherCmd {
                     }
 
                 } else {
-                    //todo: validate the swagger file before start processing
+                    //todo: validate the swagger file
                     logger.debug("Successfully read the api definition file");
                     String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
+
+                    //set endpoint configuration
                     String endpointConfigString;
                     if (StringUtils.isEmpty(endpointConfig)) {
                         if (StringUtils.isEmpty(endpoint)) {
@@ -227,53 +218,55 @@ public class AddCmd implements GatewayLauncherCmd {
                              * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                              * the user
                              */
-                            if ((endpoint = promptForTextInput("Enter Endpoint URL: "))
+                            if ((endpoint = GatewayCmdUtils.promptForTextInput(outStream,"Enter Endpoint URL: "))
                                     .trim().isEmpty()) {
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                             }
                         }
-                        //todo: fix this in a proper way
                         endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
                                 "\"]}}";
                     } else {
-                        endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
+                        endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
                     }
 
+                    //set basePath
                     if (StringUtils.isEmpty(basepath)) {
-                        basepath = SwaggerUtils.getBasePathFromSwagger(apiDefPath);
+                        basepath = OpenAPICodegenUtils.getBasePathFromSwagger(apiDefPath);
                         if (StringUtils.isEmpty(basepath)) {
-                            if ((basepath = promptForTextInput("Enter basepath: "))
+                            if ((basepath = GatewayCmdUtils.promptForTextInput(outStream,"Enter basePath: "))
                                     .trim().isEmpty()) {
-                                //todo: shall we allow the user to proceed with empty basepath
+                                //todo: allow the user to proceed with empty basepath ?
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
                             }
                         }
                     }
-                    String apiId = SwaggerUtils.generateAPIdForSwagger(apiDefPath);
+                    //generate API_ID from OpenAPI specification
+                    String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
+                    //Create folder structure for the API
                     GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
+                    //save OpenAPI Specification
                     GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
+                    //save API-metadata
                     JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
+                    //Save route configurations for the given endpointConfiguration
                     RouteUtils.saveGlobalEpAndBasepath(apiDefPath,
                             GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), basepath, endpointConfigString);
-
-                    //todo: remove this and handle properly ???
                     try {
+                        //copy policies folder
                         GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), GatewayCmdUtils.getProjectSrcDirectoryPath(projectName)
                                 + File.separator + GatewayCliConstants.GW_DIST_POLICIES);
                     } catch (IOException e) {
                         throw new CLIRuntimeException("cannot read source directory");
                     }
                 }
-
             } else {
-
                 validateAPIGetRequestParams(label, apiName, version);
                 //Setup username
                 String configuredUser = config.getToken().getUsername();
                 if (StringUtils.isEmpty(configuredUser)) {
                     if (StringUtils.isEmpty(username)) {
                         isOverwriteRequired = true;
-                        if ((username = promptForTextInput("Enter Username: "))
+                        if ((username = GatewayCmdUtils.promptForTextInput(outStream,"Enter Username: "))
                                 .trim().isEmpty()) {
                             throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                         }
@@ -305,7 +298,7 @@ public class AddCmd implements GatewayLauncherCmd {
                 if (StringUtils.isEmpty(configuredTrustStore)) {
                     if (StringUtils.isEmpty(trustStoreLocation)) {
                         isOverwriteRequired = true;
-                        if ((trustStoreLocation = promptForTextInput(
+                        if ((trustStoreLocation = GatewayCmdUtils.promptForTextInput(outStream,
                                 "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]")).trim().isEmpty()) {
                             trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
                         }
@@ -413,7 +406,6 @@ public class AddCmd implements GatewayLauncherCmd {
                 JsonProcessingUtils.saveSubscriptionThrottlePolicies(projectName, subscriptionPolicies);
                 JsonProcessingUtils.saveClientCertMetadata(projectName, clientCertificates);
 
-                //todo: fix here, per api structure is created inside this method
                 GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
                 JsonProcessingUtils.saveAPIMetadataForMultipleAPIs(projectName, apis, security);
                 //todo: check if the files has been changed using hash utils
@@ -439,40 +431,10 @@ public class AddCmd implements GatewayLauncherCmd {
                     GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
                 }
             }
-        }//todo: implement add route command
-        else {
-            if (resource_id.isEmpty()) {
-                if ((resource_id = promptForTextInput("Enter Resource ID: "))
-                        .trim().isEmpty()) {
-                    throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
-                            "resource_id is not provided");
-                }
-            }
-            String endpointConfigString;
-            if (StringUtils.isEmpty(endpointConfig)) {
-                if (StringUtils.isEmpty(endpoint)) {
-                    /*
-                     * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
-                     * the user
-                     */
-                    if ((endpoint = promptForTextInput("Enter Endpoint URL for Resource " + resource_id + ": "))
-                            .trim().isEmpty()) {
-                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
-                    }
-                }
-                //todo: fix this in a proper way
-                endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
-                        "\"]}}";
-            } else {
-                endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
-            }
-            RouteUtils.saveResourceRoute(resource_id, endpointConfigString,
-                    GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-            outStream.println("Successfully added route for resource ID : " + resource_id);
         }
     }
 
-    private static void init(String projectName, String configPath) {
+    private static void init(String configPath) {
         try {
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
@@ -482,14 +444,6 @@ public class AddCmd implements GatewayLauncherCmd {
                 logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
-
-            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
-            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            GatewayCmdUtils.setContainerConfig(containerConfig);
-
-            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
-            codeGenerationContext.setProjectName(projectName);
-            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
         } catch (ConfigParserException e) {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
@@ -506,11 +460,6 @@ public class AddCmd implements GatewayLauncherCmd {
 
     }
 
-    private String promptForTextInput(String msg) {
-        outStream.println(msg);
-        return System.console().readLine();
-    }
-
     private String promptForPasswordInput(String msg) {
         outStream.println(msg);
         return new String(System.console().readPassword());
@@ -521,7 +470,7 @@ public class AddCmd implements GatewayLauncherCmd {
      */
     private String getBaseURLfromCmd(String defaultBaseURL) {
         String userInputURL;
-        userInputURL = promptForTextInput("Enter APIM base URL [" + defaultBaseURL + "]: ").trim();
+        userInputURL = GatewayCmdUtils.promptForTextInput(outStream, "Enter APIM base URL [" + defaultBaseURL + "]: ").trim();
         return userInputURL;
     }
 
