@@ -25,17 +25,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -52,6 +52,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +63,7 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
 
 //todo: implement different classes for the different add commands
 @Parameters(commandNames = "add", commandDescription = "add api/route to the microgateway")
-public class AddCmd implements GatewayLauncherCmd{
+public class AddCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddCmd.class);
     private static PrintStream outStream = System.out;
 
@@ -130,8 +132,11 @@ public class AddCmd implements GatewayLauncherCmd{
     @Parameter(names = {"-b", "--basepath"}, hidden = true)
     private String basepath;
 
-    @Parameter(names = { "-etcd", "--enable-etcd" }, hidden = true, arity = 0)
+    @Parameter(names = {"-etcd", "--enable-etcd"}, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
+
+    @Parameter(names = {"-r", "--resource"}, hidden = true)
+    private String resource_id;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -140,6 +145,7 @@ public class AddCmd implements GatewayLauncherCmd{
     private String clientSecret;
     private boolean isOverwriteRequired;
     private boolean isAddAPIcmd;
+
     @Override
     public void execute() {
         String clientID;
@@ -148,30 +154,34 @@ public class AddCmd implements GatewayLauncherCmd{
         String grpc;
         String projectName;
         String[] typeAndProjectName = GatewayCmdUtils.getProjectNameAndType(mainArgs);
-        Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
-        if(typeAndProjectName[0].equals("api")){
+        if (typeAndProjectName[0].equals("api")) {
             isAddAPIcmd = true;
             projectName = typeAndProjectName[1];
-        }
-        else if(typeAndProjectName[0].equals("route")){
+        } else if (typeAndProjectName[0].equals("route")) {
             isAddAPIcmd = false;
             projectName = typeAndProjectName[1];
-        }
-        else{
+        } else {
             throw new CLIRuntimeException("Argument cannot be identified : " + typeAndProjectName[0]);
         }
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //Security Schemas settings
         if (StringUtils.isEmpty(security)) {
             security = "oauth2";
         }
+        if (StringUtils.isEmpty(toolkitConfigPath)) {
+            toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
+        }
+
+        init(projectName, toolkitConfigPath);
+        Config config = GatewayCmdUtils.getConfig();
 
         /*
          * If api is created via an api definition, the setup flow is altered
          */
-        if(isAddAPIcmd){
+        if (isAddAPIcmd) {
             if (isOpenApi) {
                 outStream.println("Loading Open Api Specification from Path: " + openApi);
                 String api = OpenApiCodegenUtils.readApi(openApi);
@@ -217,7 +227,7 @@ public class AddCmd implements GatewayLauncherCmd{
                              * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                              * the user
                              */
-                            if ((endpoint = promptForTextInput( "Enter Endpoint URL: "))
+                            if ((endpoint = promptForTextInput("Enter Endpoint URL: "))
                                     .trim().isEmpty()) {
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                             }
@@ -229,10 +239,10 @@ public class AddCmd implements GatewayLauncherCmd{
                         endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
                     }
 
-                    if(StringUtils.isEmpty(basepath)){
+                    if (StringUtils.isEmpty(basepath)) {
                         basepath = SwaggerUtils.getBasePathFromSwagger(apiDefPath);
-                        if(StringUtils.isEmpty(basepath)){
-                            if ((basepath = promptForTextInput( "Enter basepath: "))
+                        if (StringUtils.isEmpty(basepath)) {
+                            if ((basepath = promptForTextInput("Enter basepath: "))
                                     .trim().isEmpty()) {
                                 //todo: shall we allow the user to proceed with empty basepath
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
@@ -253,7 +263,6 @@ public class AddCmd implements GatewayLauncherCmd{
                     } catch (IOException e) {
                         throw new CLIRuntimeException("cannot read source directory");
                     }
-                    outStream.println("Setting up project " + projectName + " is successful.");
                 }
 
             } else {
@@ -430,11 +439,61 @@ public class AddCmd implements GatewayLauncherCmd{
                     GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
                 }
             }
+        }//todo: implement add route command
+        else {
+            if (resource_id.isEmpty()) {
+                if ((resource_id = promptForTextInput("Enter Resource ID: "))
+                        .trim().isEmpty()) {
+                    throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
+                            "resource_id is not provided");
+                }
+            }
+            String endpointConfigString;
+            if (StringUtils.isEmpty(endpointConfig)) {
+                if (StringUtils.isEmpty(endpoint)) {
+                    /*
+                     * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
+                     * the user
+                     */
+                    if ((endpoint = promptForTextInput("Enter Endpoint URL for Resource " + resource_id + ": "))
+                            .trim().isEmpty()) {
+                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
+                    }
+                }
+                //todo: fix this in a proper way
+                endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
+                        "\"]}}";
+            } else {
+                endpointConfigString = OpenApiCodegenUtils.readApi(endpointConfig);
+            }
+            RouteUtils.saveResourceRoute(resource_id, endpointConfigString,
+                    GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+            outStream.println("Successfully added route for resource ID : " + resource_id);
         }
+    }
 
-        //todo: implement add route command
+    private static void init(String projectName, String configPath) {
+        try {
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
 
+            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
 
+            CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
+            codeGenerationContext.setProjectName(projectName);
+            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
     }
 
     @Override
@@ -465,6 +524,7 @@ public class AddCmd implements GatewayLauncherCmd{
         userInputURL = promptForTextInput("Enter APIM base URL [" + defaultBaseURL + "]: ").trim();
         return userInputURL;
     }
+
     /**
      * Set endpoints of publisher, admin, registration and token
      *
@@ -621,8 +681,4 @@ public class AddCmd implements GatewayLauncherCmd{
                             + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
         }
     }
-
-
-    //----------------------- methods for add route impl
-
 }
