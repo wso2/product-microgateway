@@ -23,9 +23,11 @@ import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.*;
 
@@ -33,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
@@ -124,12 +127,14 @@ public class SetupCmd implements GatewayLauncherCmd {
 
     public void execute() {
 
+
         String workspace = GatewayCmdUtils.getUserDir();
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
         }
+
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
@@ -140,7 +145,9 @@ public class SetupCmd implements GatewayLauncherCmd {
         }
         // Extracts the zipped ballerina platform and runtime
         extractPlatformAndRuntime();
-        init(projectName, toolkitConfigPath, deploymentConfigPath);
+        init(projectName, deploymentConfigPath);
+
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //set etcd requirement
         Etcd etcd = new Etcd();
@@ -149,7 +156,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         GatewayCmdUtils.setEtcd(etcd);
         LOGGER.debug("Etcd is enabled : " + isEtcdEnabled);
 
-        if(!openApi.isEmpty() || !apiName.isEmpty()){
+        if((openApi != null) || (apiName != null) || (label != null)){
 
             JCommander cmdParser = new JCommander(new AddCmd());
             //todo: introduce constant
@@ -172,7 +179,7 @@ public class SetupCmd implements GatewayLauncherCmd {
     public void setParentCmdParser(JCommander parentCmdParser) {
     }
 
-    private static void init(String projectName, String configPath, String deploymentConfigPath) {
+    private static void init(String projectName, String deploymentConfigPath) {
         try {
             GatewayCmdUtils.createProjectStructure(projectName);
             GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);

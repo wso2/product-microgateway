@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.wso2.apimgt.gateway.cli.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,29 +23,44 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.util.Json;
+import org.wso2.apimgt.gateway.cli.cmd.GatewayLauncherCmd;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointDTO;
+import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.route.APIRouteEndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.route.EndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
-import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
+import org.wso2.apimgt.gateway.cli.model.route.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class RouteUtils {
     //todo: rename variable name
     private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
     //todo: set routesConfigPath as class variable
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
+    private static final String BASE_PATHS = "basePaths";
+    private static final String GLOBAL_ENDPOINTS = "globalEndpoints";
+    private static final String RESOURCES = "resources";
+    private static final String GLOBAL_FUNCTION = "resources";
+    private static JsonNode routesConfig;
+    //todo: change accordingly
+    private static String routesConfigPath;
 
     public static final String IN = "in";
     public static final String OUT = "out";
+    public static final String FUNCTION_IN ="functionIn";
+    public static final String FUNCTION_OUT ="functionOut";
+
 
     public static void saveGlobalEpAndBasepath(String apiDefPath, String routesConfigPath, String basePath,
                                         String endpointConfigJson){
@@ -63,42 +95,9 @@ public class RouteUtils {
         writeRoutesConfig(routesConfig, routesConfigPath);
     }
 
-//    //todo: decide whether we are going to use same endpointConfig json structure or not
-//    private static EndpointListRouteDTO[] convertEndpointConfig(EndpointConfig endpointConfig, APIEndpointSecurityDTO
-//            securityDTO){
-//        EndpointListRouteDTO prodList = new EndpointListRouteDTO();
-//        EndpointListRouteDTO sandboxList = new EndpointListRouteDTO();
-//
-//        try {
-//            prodList.setType(EndpointType.valueOf(endpointConfig.getEndpointType()));
-//            sandboxList.setType(EndpointType.valueOf(endpointConfig.getEndpointType()));
-//        } catch (IllegalArgumentException e){
-//            throw new CLIRuntimeException("The provided Endpoint type is not valid.", e);
-//        }
-//
-//        //all the endpoints are added to same list to make structure simple
-//        for(Endpoint endpoint: endpointConfig.getProdEndpoints().getEndpoints()){
-//            prodList.addEndpoint(endpoint.getEndpointUrl());
-//        }
-//        for(Endpoint endpoint: endpointConfig.getProdFailoverEndpoints().getEndpoints()){
-//            prodList.addEndpoint(endpoint.getEndpointUrl());
-//        }
-//        for(Endpoint endpoint: endpointConfig.getSandEndpoints().getEndpoints()){
-//            sandboxList.addEndpoint(endpoint.getEndpointUrl());
-//        }
-//        for(Endpoint endpoint: endpointConfig.getSandFailoverEndpoints().getEndpoints()){
-//            sandboxList.addEndpoint(endpoint.getEndpointUrl());
-//        }
-//
-//        prodList.setSecurityConfig(securityDTO);
-//        sandboxList.setSecurityConfig(securityDTO);
-//
-//        return new EndpointListRouteDTO[]{prodList, sandboxList};
-//    }
-
     private static void addBasePath(JsonNode rootNode, String apiId, String basePath){
 
-        JsonNode basePathsNode = rootNode.get("basepaths");
+        JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         String modifiedBasePath = basePath.startsWith("/") ? basePath : ( "/" + basePath);
         //todo: validate whether the basePath is already available
         //todo: validate basepath syntax
@@ -107,7 +106,7 @@ public class RouteUtils {
     }
 
     private static void addBasePath(JsonNode rootNode, ExtendedAPI api){
-        JsonNode basePathsNode = rootNode.get("basepaths");
+        JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         ArrayNode arrayNode = ((ObjectNode) basePathsNode).putArray(apiId);
         arrayNode.add(api.getContext() + "/" + api.getVersion());
@@ -119,15 +118,7 @@ public class RouteUtils {
     private static void addGlobalEndpoint(JsonNode rootNode, String apiName, String apiVersion, String apiId,
                                    String endpointConfigJson){
 
-        //todo: validate the endpointConfig
-        EndpointConfig endpointConfig;
-        try {
-            //todo: bring yaml file
-            endpointConfig = OBJECT_MAPPER_JSON.readValue(endpointConfigJson, EndpointConfig.class);
-        } catch (IOException e) {
-            throw new CLIRuntimeException("Error while parsing the provided endpointConfig Json");
-        }
-
+        EndpointConfig endpointConfig = parseEndpointConfig(endpointConfigJson);
         APIRouteEndpointConfig apiEpConfig = new APIRouteEndpointConfig();
         apiEpConfig.setApiName(apiName);
         apiEpConfig.setApiVersion(apiVersion);
@@ -138,7 +129,7 @@ public class RouteUtils {
 
     private static void addAPIRouteEndpointConfigAsGlobalEp(JsonNode rootNode, String apiId,
                                                             APIRouteEndpointConfig apiEpConfig){
-        JsonNode globalEpsNode = rootNode.get("global_endpoints");
+        JsonNode globalEpsNode = rootNode.get(GLOBAL_ENDPOINTS);
         //todo: check if the apiId is unique
         ((ObjectNode) globalEpsNode).set(apiId, OBJECT_MAPPER_YAML.valueToTree(apiEpConfig));
     }
@@ -146,6 +137,7 @@ public class RouteUtils {
     private static void writeRoutesConfig(JsonNode routesConfig, String routesConfigPath){
         try{
             OBJECT_MAPPER_YAML.writeValue(new File(routesConfigPath), routesConfig);
+            RouteUtils.routesConfig = routesConfig;
         }catch(IOException e){
             throw new CLIInternalException("Error while writing to the routes.yaml");
         }
@@ -153,56 +145,58 @@ public class RouteUtils {
 
 
     private static JsonNode getRoutesConfig(String routesConfigPath){
+        if(routesConfig != null){
+            return routesConfig;
+        }
         if(routesConfigPath == null){
             throw new CLIInternalException("routes.yaml is not provided");
         }
-        JsonNode rootNode;
         try {
-            rootNode = OBJECT_MAPPER_YAML.readTree(new File(routesConfigPath));
+            routesConfig = OBJECT_MAPPER_YAML.readTree(new File(routesConfigPath));
         } catch (IOException e) {
             throw new CLIInternalException("Error while reading the routesConfiguration in path : " + routesConfigPath);
         }
-        if(rootNode == null){
-            rootNode = OBJECT_MAPPER_YAML.createObjectNode();
+        if(routesConfig == null){
+            routesConfig = OBJECT_MAPPER_YAML.createObjectNode();
         }
         JsonNode basePathsNode = null;
         JsonNode globalEpsNode = null;
         JsonNode resourcesNode = null;
         JsonNode globalFunctionNode = null;
 
-        if(!rootNode.isNull()){
-            basePathsNode = rootNode.get("basepaths");
-            globalEpsNode = rootNode.get("global_endpoints");
-            resourcesNode = rootNode.get("resources");
-            globalFunctionNode = rootNode.get("global_function");
+        if(!routesConfig.isNull()){
+            basePathsNode = routesConfig.get(BASE_PATHS);
+            globalEpsNode = routesConfig.get(GLOBAL_ENDPOINTS);
+            resourcesNode = routesConfig.get(RESOURCES);
+            globalFunctionNode = routesConfig.get(GLOBAL_FUNCTION);
         }
 
         if(basePathsNode == null){
             basePathsNode = OBJECT_MAPPER_YAML.createObjectNode();
-            ((ObjectNode) rootNode).set("basepaths", basePathsNode);
+            ((ObjectNode) routesConfig).set(BASE_PATHS, basePathsNode);
         }
 
         if(globalEpsNode == null){
             globalEpsNode = OBJECT_MAPPER_YAML.createObjectNode();
-            ((ObjectNode) rootNode).set("global_endpoints", globalEpsNode);
+            ((ObjectNode) routesConfig).set(GLOBAL_ENDPOINTS, globalEpsNode);
         }
 
         if(resourcesNode == null){
             resourcesNode = OBJECT_MAPPER_YAML.createObjectNode();
-            ((ObjectNode) rootNode).set("resources", resourcesNode);
+            ((ObjectNode) routesConfig).set(RESOURCES, resourcesNode);
         }
 
         if(globalFunctionNode == null){
             globalFunctionNode = OBJECT_MAPPER_YAML.createObjectNode();
-            ((ObjectNode) rootNode).set("global_function", globalFunctionNode);
+            ((ObjectNode) routesConfig).set(GLOBAL_FUNCTION, globalFunctionNode);
         }
-        return rootNode;
+        return routesConfig;
     }
 
     public static String[] getBasePath(String apiId, String routesConfigPath){
 
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
-        ArrayNode arrayNode = (ArrayNode) rootNode.get("basepaths").get(apiId);
+        ArrayNode arrayNode = (ArrayNode) rootNode.get(BASE_PATHS).get(apiId);
 
         if(arrayNode.size() == 2){
             return new String[] {arrayNode.get(0).asText(), arrayNode.get(1).asText()};
@@ -218,7 +212,7 @@ public class RouteUtils {
 
     public static APIRouteEndpointConfig getGlobalEpConfig(String apiId, String routesConfigPath){
         JsonNode rootNode = getRoutesConfig(routesConfigPath);
-        JsonNode globalEpConfig = rootNode.get("global_endpoints").get(apiId);
+        JsonNode globalEpConfig = rootNode.get(GLOBAL_ENDPOINTS).get(apiId);
         APIRouteEndpointConfig apiRouteEndpointConfig;
 
         try {
@@ -322,13 +316,117 @@ public class RouteUtils {
         return endpointconfig;
     }
 
-    public static void addFunction(String function, String type, String apiID, String routeConfigPath, String projectName) {
+    public static List<String[]> listApis(String projectName){
+        JsonNode rootNode = getRoutesConfig(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        JsonNode basePathsNode = rootNode.get(BASE_PATHS);
+        Iterator<Map.Entry<String, JsonNode>> fields = basePathsNode.fields();
+        List<String[]> apis = new ArrayList<>();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            String key = field.getKey();
+            for(JsonNode value: field.getValue()){
+                String[] row = new String[4];
+                row[0] = key;
+                row[1] = rootNode.get(GLOBAL_ENDPOINTS).get(key).get("name").asText();
+                row[2] = rootNode.get(GLOBAL_ENDPOINTS).get(key).get("version").asText();
+                row[3] = value.asText();
+                apis.add(row);
+            }
+        }
+        return apis;
+    }
 
-        APIRouteEndpointConfig api = RouteUtils.getGlobalEpConfig(apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+    public static void saveResourceRoute(String resourceId, String endpointConfigJson, String routesConfigPath){
+        //todo: resolve adding method name and resource name if necessary
+        EndpointConfig endpointConfig =
+                parseEndpointConfig(endpointConfigJson);
+        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+        JsonNode resourcesNode = rootNode.get(RESOURCES);
+        //todo: validate if the resource_id already exists
+        ((ObjectNode) resourcesNode).set(resourceId, OBJECT_MAPPER_YAML.valueToTree(endpointConfig));
+        writeRoutesConfig(rootNode, routesConfigPath);
+    }
 
-        if (type.equals("in")) {
+    private static EndpointConfig parseEndpointConfig(String endpointConfigJson){
+        //todo: validate the endpointConfig
+        EndpointConfig endpointConfig;
+        try {
+            //todo: bring yaml file
+            endpointConfig = OBJECT_MAPPER_JSON.readValue(endpointConfigJson, EndpointConfig.class);
+            return  endpointConfig;
+        } catch (IOException e) {
+            throw new CLIRuntimeException("Error while parsing the provided endpointConfig Json");
+        }
+    }
+
+    public static MgwEndpointConfigDTO convertRouteToMgwServiceMap(EndpointConfig routeEndpointConfig){
+        MgwEndpointConfigDTO endpointConfigDTO = new MgwEndpointConfigDTO();
+
+        MgwEndpointListDTO prod = null;
+        MgwEndpointListDTO sandbox = null;
+
+        if(routeEndpointConfig.getProdEndpointList() != null &&
+                routeEndpointConfig.getProdEndpointList().getEndpoints() != null){
+            prod = new MgwEndpointListDTO();
+            prod.setEndpointUrlType(EndpointUrlTypeEnum.PROD);
+            prod.setType(routeEndpointConfig.getProdEndpointList().getType());
+            ArrayList<MgwEndpointDTO> prodEpList = new ArrayList<>();
+            for (String ep : routeEndpointConfig.getProdEndpointList().getEndpoints()){
+                prodEpList.add(new MgwEndpointDTO(ep));
+            }
+            prod.setEndpoints(prodEpList);
+        }
+
+        if(routeEndpointConfig.getSandboxEndpointList() != null &&
+                routeEndpointConfig.getSandboxEndpointList().getEndpoints() != null){
+            sandbox = new MgwEndpointListDTO();
+            sandbox.setEndpointUrlType(EndpointUrlTypeEnum.SAND);
+            sandbox.setType(routeEndpointConfig.getSandboxEndpointList().getType());
+            ArrayList<MgwEndpointDTO> sandEpList = new ArrayList<>();
+            for (String ep : routeEndpointConfig.getSandboxEndpointList().getEndpoints()){
+                sandEpList.add(new MgwEndpointDTO(ep));
+            }
+            sandbox.setEndpoints(sandEpList);
+        }
+
+        endpointConfigDTO.setProdEndpointList(prod);
+        endpointConfigDTO.setSandboxEndpointList(sandbox);
+
+        return endpointConfigDTO;
+    }
+
+    public static MgwEndpointConfigDTO getResourceEpConfig(String apiName, String apiVersion, String resource,
+                                                           String method){
+        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+        String resourceId = HashUtils.generateResourceId(apiName, apiVersion, resource, method);
+        try {
+            JsonNode resourceNode = rootNode.get(RESOURCES).get(resourceId);
+            if(resourceNode != null){
+                EndpointConfig endpointConfig = OBJECT_MAPPER_YAML.readValue(rootNode.get(RESOURCES).get(resourceId)
+                        .toString(), EndpointConfig.class);
+                return convertRouteToMgwServiceMap(endpointConfig);
+            }
+            else{
+                return null;
+            }
+        } catch (IOException e) {
+            throw new CLIInternalException("EndpointConfig for the given resource cannot be parsed");
+        }
+    }
+
+    public static void setRoutesConfigPath(String routesConfigPath) {
+        RouteUtils.routesConfigPath = routesConfigPath;
+    }
+
+    public static void addFunction(String function, String type, String apiID, String routeConfigPath,
+                                   String projectName) {
+
+        APIRouteEndpointConfig api = RouteUtils.getGlobalEpConfig(apiID,
+                GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+
+        if (type.equals(IN)) {
             api.setFunctionIn(function);
-        } else if (type.equals("out")) {
+        } else if (type.equals(OUT)) {
             api.setFunctionOut(function);
         }
         JsonNode jn = getRoutesConfig(routeConfigPath);
@@ -339,13 +437,13 @@ public class RouteUtils {
     public static void AddGlobalFunction(String routeConfigPath, String function, String type) {
 
         JsonNode rootNode = getRoutesConfig(routeConfigPath);
-        JsonNode jsonNode = rootNode.get("global_function");
+        JsonNode jsonNode = rootNode.get(GLOBAL_FUNCTION);
 
         if (type.equals(IN)) {
-            ((ObjectNode) jsonNode).put("functionIn", function);
+            ((ObjectNode) jsonNode).put(FUNCTION_IN, function);
         }
         if (type.equals(OUT)) {
-            ((ObjectNode) jsonNode).put("functionOut", function);
+            ((ObjectNode) jsonNode).put(FUNCTION_OUT, function);
         }
 
         writeRoutesConfig(rootNode, routeConfigPath);

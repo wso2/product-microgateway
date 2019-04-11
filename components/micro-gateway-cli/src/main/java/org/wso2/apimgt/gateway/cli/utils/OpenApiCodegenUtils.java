@@ -54,7 +54,7 @@ public class OpenApiCodegenUtils {
     public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId,
+                RouteUtils.convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId,
                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)));
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
@@ -63,41 +63,4 @@ public class OpenApiCodegenUtils {
         api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
         api.setCorsConfiguration(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getCorsConfigurationDTO());
     }
-
-    private static MgwEndpointConfigDTO convertRouteToMgwServiceMap(EndpointConfig routeEndpointConfig){
-        MgwEndpointConfigDTO endpointConfigDTO = new MgwEndpointConfigDTO();
-
-        MgwEndpointListDTO prod = null;
-        MgwEndpointListDTO sandbox = null;
-
-        if(routeEndpointConfig.getProdEndpointList() != null &&
-                routeEndpointConfig.getProdEndpointList().getEndpoints() != null){
-            prod = new MgwEndpointListDTO();
-            prod.setEndpointUrlType(EndpointUrlTypeEnum.PROD);
-            prod.setType(routeEndpointConfig.getProdEndpointList().getType());
-            ArrayList<MgwEndpointDTO> prodEpList = new ArrayList<>();
-            for (String ep : routeEndpointConfig.getProdEndpointList().getEndpoints()){
-                prodEpList.add(new MgwEndpointDTO(ep));
-            }
-            prod.setEndpoints(prodEpList);
-        }
-
-        if(routeEndpointConfig.getSandboxEndpointList() != null &&
-                routeEndpointConfig.getSandboxEndpointList().getEndpoints() != null){
-            sandbox = new MgwEndpointListDTO();
-            sandbox.setEndpointUrlType(EndpointUrlTypeEnum.SAND);
-            sandbox.setType(routeEndpointConfig.getSandboxEndpointList().getType());
-            ArrayList<MgwEndpointDTO> sandEpList = new ArrayList<>();
-            for (String ep : routeEndpointConfig.getSandboxEndpointList().getEndpoints()){
-                sandEpList.add(new MgwEndpointDTO(ep));
-            }
-            sandbox.setEndpoints(sandEpList);
-        }
-
-        endpointConfigDTO.setProdEndpointList(prod);
-        endpointConfigDTO.setSandboxEndpointList(sandbox);
-
-        return endpointConfigDTO;
-    }
-
 }

@@ -27,4 +27,5 @@ public class GatewayCliCommands {
     public static final String RESET = "reset";
     public static final String ADD = "add";
     public static final String FUNCTION = "function";
+    public static final String LIST = "list";
 }

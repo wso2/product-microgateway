@@ -67,7 +67,8 @@ public class FunctionCmd implements GatewayLauncherCmd {
     public void execute() {
 
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
-        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +"src");
+        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName)
+                + File.separator +"src");
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -88,22 +89,26 @@ public class FunctionCmd implements GatewayLauncherCmd {
         if (inFunction != null) {
             if (apiID != null) {
                 //api level inFunction
-                RouteUtils.addFunction(inFunction, RouteUtils.IN, apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                RouteUtils.addFunction(inFunction, RouteUtils.IN, apiID,
+                        GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
             } else if (resourceID != null) {
                 //add resource level inFunction
             } else {
                 //global level in function
-                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), inFunction, "in");
+                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),
+                        inFunction, "in");
             }
         } else if (outFunction != null) {
             //api level outFunction
             if (apiID != null) {
-                RouteUtils.addFunction(outFunction, RouteUtils.OUT, apiID, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
+                RouteUtils.addFunction(outFunction, RouteUtils.OUT, apiID,
+                        GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), projectName);
             } else if (resourceID != null) {
                 //add resource level outFunction
             } else {
                 //global level outFunction
-                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), outFunction, "out");
+                RouteUtils.AddGlobalFunction(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName),
+                        outFunction, "out");
             }
         }
 
