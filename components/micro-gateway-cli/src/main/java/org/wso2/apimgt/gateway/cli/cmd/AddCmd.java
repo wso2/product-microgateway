@@ -30,7 +30,11 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -438,13 +442,12 @@ public class AddCmd implements GatewayLauncherCmd {
         }//todo: implement add route command
         else {
             if (resource_id.isEmpty()) {
-                if ((endpoint = promptForTextInput("Enter Resource ID: "))
+                if ((resource_id = promptForTextInput("Enter Resource ID: "))
                         .trim().isEmpty()) {
                     throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
                             "resource_id is not provided");
                 }
             }
-
             String endpointConfigString;
             if (StringUtils.isEmpty(endpointConfig)) {
                 if (StringUtils.isEmpty(endpoint)) {
@@ -678,8 +681,4 @@ public class AddCmd implements GatewayLauncherCmd {
                             + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
         }
     }
-
-
-    //----------------------- methods for add route impl
-
 }
