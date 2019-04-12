@@ -40,14 +40,15 @@ esac
 # resolve links - $0 may be a softlink
 PRG="$0"
 
-while [ -h "$PRG" ]; do
-  ls=`ls -ld "$PRG"`
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '.*/.*' > /dev/null; then
-    PRG="$link"
-  else
-    PRG=`dirname "$PRG"`/"$link"
-  fi
+while [ -h "$PRG" ]
+do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '.*/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`/"$link"
+    fi
 done
 
 # Get standard environment variables
@@ -55,14 +56,14 @@ PRGDIR=`dirname "$PRG"`
 
 # if MICROGW_HOME environment variable not set then set it relative to the micro-gw binary location
 if [[ -z "${MICROGW_HOME}" ]]; then
-  export MICROGW_HOME=`cd "$PRGDIR/.." ; pwd`
+    export MICROGW_HOME=`cd "$PRGDIR/.." ; pwd`
 fi
 
 # set BALLERINA_HOME
 BALLERINA_HOME="$MICROGW_HOME/lib/platform"
 
 if [ ! -d "$BALLERINA_HOME" ]; then
-  BALLERINA_HOME="$MICROGW_HOME/lib"
+    BALLERINA_HOME="$MICROGW_HOME/lib"
 fi
 
 export BALLERINA_HOME=$BALLERINA_HOME
@@ -72,56 +73,56 @@ MICRO_GW_PROJECT_DIR=$(pwd)
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
-  [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
-  [ -n "$MICROGW_HOME" ] && MICROGW_HOME=`cygpath --unix "$MICROGW_HOME"`
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+    [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
+    [ -n "$MICROGW_HOME" ] && MICROGW_HOME=`cygpath --unix "$MICROGW_HOME"`
 fi
 
 # For OS400
 if $os400; then
-  # Set job priority to standard for interactive (interactive - 6) by using
-  # the interactive priority - 6, the helper threads that respond to requests
-  # will be running at the same priority as interactive jobs.
-  COMMAND='chgjob job('$JOBNAME') runpty(6)'
-  system $COMMAND
+    # Set job priority to standard for interactive (interactive - 6) by using
+    # the interactive priority - 6, the helper threads that respond to requests
+    # will be running at the same priority as interactive jobs.
+    COMMAND='chgjob job('$JOBNAME') runpty(6)'
+    system $COMMAND
 
-  # Enable multi threading
-  QIBM_MULTI_THREADED=Y
-  export QIBM_MULTI_THREADED
+    # Enable multi threading
+    QIBM_MULTI_THREADED=Y
+    export QIBM_MULTI_THREADED
 fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$BALLERINA_HOME" ] &&
-    BALLERINA_HOME="`(cd "$BALLERINA_HOME"; pwd)`"
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  [ -n "$MICROGW_HOME" ] &&
-    MICROGW_HOME="`(cd "$MICROGW_HOME"; pwd)`"
+    [ -n "$BALLERINA_HOME" ] &&
+        BALLERINA_HOME="`(cd "$BALLERINA_HOME"; pwd)`"
+    [ -n "$JAVA_HOME" ] &&
+        JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+    [ -n "$MICROGW_HOME" ] &&
+        MICROGW_HOME="`(cd "$MICROGW_HOME"; pwd)`"
 fi
 
 if [ -z "$JAVACMD" ] ; then
-  if [ -n "$JAVA_HOME"  ] ; then
-    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-      # IBM's JDK on AIX uses strange locations for the executables
-      JAVACMD="$JAVA_HOME/jre/sh/java"
+    if [ -n "$JAVA_HOME"  ] ; then
+        if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+            # IBM's JDK on AIX uses strange locations for the executables
+            JAVACMD="$JAVA_HOME/jre/sh/java"
+        else
+            JAVACMD="$JAVA_HOME/bin/java"
+        fi
     else
-      JAVACMD="$JAVA_HOME/bin/java"
+        JAVACMD=java
     fi
-  else
-    JAVACMD=java
-  fi
 fi
 
 if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly."
-  exit 1
+    echo "Error: JAVA_HOME is not defined correctly."
+    exit 1
 fi
 
 # if JAVA_HOME is not set we're not happy
 if [ -z "$JAVA_HOME" ]; then
-  echo "You must set the JAVA_HOME variable before running Ballerina."
-  exit 1
+    echo "You must set the JAVA_HOME variable before running Ballerina."
+    exit 1
 fi
 
 # ----- Process the input command ----------------------------------------------
@@ -130,36 +131,36 @@ ALL_ARGS=()
 DEFAULT_ARGS=()
 while [[ $# -gt 0 ]]
 do
-key="$1"
-case $key in
-    --java.debug|-java.debug|java.debug)
-    CMD="--java.debug"
-    PORT="$2"
-    shift # past java.debug argument
-    shift # past port value
-    ;;
-    help)
-    ALL_ARGS+=("$1")
-    ALL_ARGS+=("$2")
-    shift # past help argument
-    shift # past next argument after help
-    ;;
-    build)
-    ALL_ARGS+=("$1")
-    IS_BUILD_COMMAND=true
-    shift # past build argument
-    ;;
-    setup)
-    ALL_ARGS+=("$1")
-    IS_SETUP_COMMAND=true
-    shift # past build argument
-    ;;
-    *)    # default argument
-    DEFAULT_ARGS+=("$1") # save it in DEFAULT_ARGS array
-    ALL_ARGS+=("$1")
-    shift # past argument
-    ;;
-esac
+    key="$1"
+    case $key in
+        --java.debug|-java.debug|java.debug)
+            CMD="--java.debug"
+            PORT="$2"
+            shift # past java.debug argument
+            shift # past port value
+            ;;
+        help)
+            ALL_ARGS+=("$1")
+            ALL_ARGS+=("$2")
+            shift # past help argument
+            shift # past next argument after help
+            ;;
+        build)
+            ALL_ARGS+=("$1")
+            IS_BUILD_COMMAND=true
+            shift # past build argument
+            ;;
+        setup)
+            ALL_ARGS+=("$1")
+            IS_SETUP_COMMAND=true
+            shift # past build argument
+            ;;
+        *)    # default argument
+            DEFAULT_ARGS+=("$1") # save it in DEFAULT_ARGS array
+            ALL_ARGS+=("$1")
+            shift # past argument
+            ;;
+    esac
 done
 
 # restore all the shifted arguments
@@ -176,21 +177,23 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
             rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
         fi
+
         # build the ballerina source code for the label
         ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
     popd > /dev/null
 fi
 
 if [ "$CMD" = "--java.debug" ]; then
-  if [ "$PORT" = "" ]; then
-    echo "Please specify the debug port after the --java.debug option"
-    exit 1
-  fi
-  if [ -n "$JAVA_OPTS" ]; then
-    echo "Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --java.debug option."
-  fi
-  JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$PORT"
-  echo "Please start the remote debugging client to continue..."
+    if [ "$PORT" = "" ]; then
+        echo "Please specify the debug port after the --java.debug option"
+        exit 1
+    fi
+    if [ -n "$JAVA_OPTS" ]; then
+        echo "Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --java.debug option."
+    fi
+
+    JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$PORT"
+    echo "Please start the remote debugging client to continue..."
 fi
 
 CLI_CLASSPATH=""
@@ -215,39 +218,43 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
+# Ballerina platform is no extracted at the moment of first setup command
+# Therefore handle classpath seperately for setup command.
 if [ "$IS_SETUP_COMMAND" = true ] && [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
-for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
-do
-    CLI_CLASSPATH="$CLI_CLASSPATH":$j
-done
+    # Add required ballerina jars to classpath
+    for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
+    do
+        CLI_CLASSPATH="$CLI_CLASSPATH":$j
+    done
 
-for j in "$MICROGW_HOME"/lib/gateway/cli/*.jar
-do
-    CLI_CLASSPATH="$CLI_CLASSPATH":$j
-done
+    # Add required MGW jars to classpath
+    for j in "$MICROGW_HOME"/lib/gateway/cli/*.jar
+    do
+        CLI_CLASSPATH="$CLI_CLASSPATH":$j
+    done
 fi
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
-  JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
-  BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
-  CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
-  CLI_CLASSPATH=`cygpath --path --windows "$CLI_CLASSPATH"`
+    JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
+    BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
+    CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+    CLI_CLASSPATH=`cygpath --path --windows "$CLI_CLASSPATH"`
 fi
 
 # ----- Execute The Requested Command -----------------------------------------
 
 $JAVACMD \
-	-Xms256m -Xmx1024m \
-	-XX:+HeapDumpOnOutOfMemoryError \
-	-XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-	$JAVA_OPTS \
-	-classpath "$CLI_CLASSPATH" \
-	-Djava.security.egd=file:/dev/./urandom \
-	-Dballerina.home=$BALLERINA_HOME \
-	-Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-	-Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-	-Dfile.encoding=UTF8 \
-	-Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-	-Dcli.home=$MICROGW_HOME \
-	org.wso2.apimgt.gateway.cli.cmd.Main "$@"
+    -Xms256m -Xmx1024m \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -classpath "$CLI_CLASSPATH" \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dballerina.home=$BALLERINA_HOME \
+    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+    -Dfile.encoding=UTF8 \
+    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+    -Dcli.home=$MICROGW_HOME \
+    org.wso2.apimgt.gateway.cli.cmd.Main "$@"

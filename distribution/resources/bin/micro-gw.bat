@@ -28,112 +28,115 @@ REM                       is executed.
 REM
 REM NOTE: Borrowed generously from Apache Tomcat startup scripts.
 REM -----------------------------------------------------------------------------
-setlocal EnableDelayedExpansion
+SETLOCAL EnableDelayedExpansion
 
-if ""%1%""==""-v"" ( set verbose=T ) else ( set verbose=F )
-if %verbose%==T ( echo Verbose mode enabled )
+if ""%1%""==""-v"" ( SET verbose=T ) else ( SET verbose=F )
+if %verbose%==T ( ECHO Verbose mode enabled )
 
 REM Get the location of this(micro-gw.bat) file
 SET PRGDIR=%~sdp0
-set CURRENT_D=%CD%
+SET CURRENT_D=%CD%
 
 REM If the current disk drive ie: `E:\` is different from the drive where this (micro-gw.bat) resides(i:e `C:\`), Change the driver label the current drive
 :switchDrive
 	SET curDrive=%CURRENT_D:~0,1%
 	SET wsasDrive=%PRGDIR:~0,1%
-	if %verbose%==T ( echo Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
-	if not "%curDrive%" == "%wsasDrive%" %wsasDrive%:
+	if %verbose%==T ( ECHO Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
+	if NOT "%curDrive%" == "%wsasDrive%" %wsasDrive%:
 
-if "%MICROGW_HOME%" == "" set MICROGW_HOME=%PRGDIR%..
+if "%MICROGW_HOME%" == "" SET MICROGW_HOME=%PRGDIR%..
 
 REM  set BALLERINA_HOME
-set BALLERINA_HOME=%MICROGW_HOME%\lib\platform
-if not exist "%MICROGW_HOME%\lib\platform" BALLERINA_HOME="$MICROGW_HOME/lib"
-set PATH=%PATH%;%BALLERINA_HOME%\bin\
-if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
+SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
-if %verbose%==T echo MICROGW_HOME environment variable is set to %MICROGW_HOME%
+SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
+if %verbose%==T ECHO MICROGW_HOME environment variable is set to %MICROGW_HOME%
 
-rem Check JAVA availability
-:checkJava
+REM Check JAVA availability
+:checkJavaHome
 	if "%JAVA_HOME%" == "" goto noJavaHome
-	if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
-	goto checkJava
+	if NOT EXIST "%JAVA_HOME%\bin\java.exe" goto noJavaHome
+goto checkJava
 
 :noJavaHome
-	echo "You must set the JAVA_HOME variable before running Micro-Gateway Tooling."
+	ECHO "You must set the JAVA_HOME variable before running Micro-Gateway Tooling."
 goto end
 
 :checkJava
 	"%JAVA_HOME%\bin\java" -version >nul 2>&1
 	IF ERRORLEVEL 1 goto noJava
-	goto runServer
+goto runServer
 
 :noJava
-	echo Error: JAVA_HOME is not defined correctly.
+	ECHO Error: JAVA_HOME is not defined correctly.
 goto end
 
 :runServer
-	if %verbose%==T echo JAVA_HOME environment variable was set to %JAVA_HOME%
-	set originalArgs=%*
+	if %verbose%==T ECHO JAVA_HOME environment variable was set to %JAVA_HOME%
+	SET originalArgs=%*
 	if ""%1""=="""" goto usageInfo
 
-rem Slurp the command line arguments. This loop allows for an unlimited number
-rem of arguments (up to the command line limit, anyway).
+REM Slurp the command line arguments. This loop allows for an unlimited number
+REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
+	SET IS_SETUP_CMD=
+	if %verbose%==T ECHO Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
+	if ""%1""==""setup"" (
+		SET IS_SETUP_CMD=y
+		goto passToJar
+	)
 	if ""%1""==""help""     goto passToJar
-
 	if ""%1""==""build""     goto commandBuild
-
 	if ""%1""==""-java.debug""    goto commandDebug
 	if ""%1""==""java.debug""   goto commandDebug
 	if ""%1""==""--java.debug""  goto commandDebug
-	shift
+	SHIFT
 goto setupArgs
 
 :usageInfo
-	echo Missing command operand
-	echo "Usage: micro-gw [-v] ([ -l ] setup | build)"
+	ECHO Missing command operand
+	ECHO "Usage: micro-gw [-v] ([ -l ] setup | build)"
 goto :end
 
 :commandBuild
-	if %verbose%==T echo [%date% %time%] DEBUG: Running commandBuild
+	if %verbose%==T ECHO Running commandBuild
 
 	REM Immediate next parameter should be project name after the `build` command
-	shift
-	set "project_name=%1"
+	SHIFT
+	SET "project_name=%1"
 	if [%project_name%] == [] ( goto :noName ) else ( goto :nameFound )
 
 	:noName
-		echo "Project name not provided please follow the command usage patterns given below"
+		ECHO "Project name not provided please follow the command usage patterns given below"
 		goto :usageInfo
 
 	:nameFound
-		if %verbose%==T echo [%date% %time%] DEBUG: Building micro gateway for project %project_name:\=%
+		if %verbose%==T ECHO Building micro gateway for project %project_name:\=%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		set MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name:\=%"
-		if exist %MICRO_GW_PROJECT_DIR% goto :continueBuild
+		SET MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name:\=%"
+		if EXIST %MICRO_GW_PROJECT_DIR% goto :continueBuild
 			REM Exit, if can not find a project with given project name
-			if %verbose%==T echo [%date% %time%] DEBUG: Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
-			echo "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
+			if %verbose%==T ECHO Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
+			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
 	:continueBuild
 		pushd "%MICRO_GW_PROJECT_DIR%"
-			if %verbose%==T echo [%date% %time%] DEBUG: current dir %CD%
-			set TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
+			if %verbose%==T ECHO current dir %CD%
+			SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
 			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
 			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
-			if exist "%TARGET_DIR%"  ( rmdir "%TARGET_DIR%" /s /q )
+			if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
 			call ballerina build src -o %project_name:\=%.balx --experimental --siddhiruntime
 		popd
-		if %verbose%==T echo [%date% %time%] DEBUG: Ballerina build completed
+		if %verbose%==T ECHO Ballerina build completed
 		REM Check for a debug param by looping through the remaining args list
 		:checkDebug
-			shift
+			SHIFT
 			if ""%1""=="""" goto passToJar
 
 			if ""%1""==""-java.debug""    goto commandDebug
@@ -143,36 +146,58 @@ goto :end
 goto :passToJar
 
 :commandDebug
-	if %verbose%==T echo [%date% %time%] DEBUG: Running commandDebug
+	if %verbose%==T ECHO Running commandDebug
 
-	shift
-	set DEBUG_PORT=%1
+	SHIFT
+	SET DEBUG_PORT=%1
 	if "%DEBUG_PORT%"=="" goto noDebugPort
-	if not "%JAVA_OPTS%"=="" echo Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --debug option.
-	set JAVA_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%DEBUG_PORT%
-	echo Please start the remote debugging client to continue...
+	if NOT "%JAVA_OPTS%"=="" ECHO Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --debug option.
+	SET JAVA_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%DEBUG_PORT%
+	ECHO Please start the remote debugging client to continue...
 goto passToJar
 
 :noDebugPort
-	echo Please specify the debug port after the java.debug option
+	ECHO Please specify the debug port after the java.debug option
 goto end
 
 
 :passToJar
-	rem ---------- Add jars to classpath ----------------
-	if %verbose%==T echo [%date% %time%] DEBUG: Running passToJar
-
-	set CLI_CLASSPATH=
-	if exist "%BALLERINA_HOME%"\bre\lib ( 
+	REM ---------- Add jars to classpath ----------------
+	if %verbose%==T echo Running passToJar
+	SET CLI_CLASSPATH=
+	if EXIST "%BALLERINA_HOME%"\bre\lib (
 		for %%i in ("%BALLERINA_HOME%"\bre\lib\*.jar) do (
-			set CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\platform\bre\lib\%%~ni%%~xi
+			SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\platform\bre\lib\%%~ni%%~xi
+		)
+	) else (
+		REM Initial setup command. Ballerina platform is not extracted yet.
+		REM Therefore we need to set cli init jars to the classpath
+		if DEFINED IS_SETUP_CMD (
+			for %%i IN ("%MICROGW_HOME%"\lib\gateway\platform\*.jar) do (
+				SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\gateway\platform\%%~ni%%~xi
+			)
+			for %%i IN ("%MICROGW_HOME%"\lib\gateway\cli\*.jar) do (
+				SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\gateway\cli\%%~ni%%~xi
+			)
 		)
 	)
 
-	if %verbose%==T echo [%date% %time%] DEBUG: CLI_CLASSPATH = "%CLI_CLASSPATH%"
+	if %verbose%==T ECHO CLI_CLASSPATH = "%CLI_CLASSPATH%"
 
-	set JAVACMD=-Xms256m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%MICROGW_HOME%\heap-dump.hprof" %JAVA_OPTS% -classpath %CLI_CLASSPATH% -Djava.security.egd=file:/dev/./urandom -Dballerina.home="%BALLERINA_HOME%" -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -Dfile.encoding=UTF8 -Dcli.home="%MICROGW_HOME%" -Dtemplates.dir.path=.\resources\templates -Dcurrent.dir=%CURRENT_D%
-	if %verbose%==T echo [%date% %time%] DEBUG: JAVACMD = !JAVACMD!
+	SET JAVACMD=-Xms256m -Xmx1024m ^
+		-XX:+HeapDumpOnOutOfMemoryError ^
+		-XX:HeapDumpPath="%MICROGW_HOME%\heap-dump.hprof" ^
+		%JAVA_OPTS% ^
+		-classpath %CLI_CLASSPATH% ^
+		-Djava.security.egd=file:/dev/./urandom ^
+		-Dballerina.home="%BALLERINA_HOME%" ^
+		-Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" ^
+		-Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" ^
+		-Dfile.encoding=UTF8 ^
+		-Dtemplates.dir.path="%MICROGW_HOME%"\resources\templates ^
+		-Dcli.home="%MICROGW_HOME%" ^
+		-Dcurrent.dir=%CURRENT_D%
+	if %verbose%==T ECHO JAVACMD = !JAVACMD!
 
 :runJava
 	REM Jump to GW-CLI exec location when running the jar
