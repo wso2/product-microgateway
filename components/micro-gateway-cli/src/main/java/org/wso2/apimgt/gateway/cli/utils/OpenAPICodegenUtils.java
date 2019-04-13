@@ -57,6 +57,7 @@ public class OpenAPICodegenUtils {
      */
     public static String generateAPIdForSwagger(String apiDefPath){
 
+        //todo: optimize
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
 
         String apiName = openAPI.getInfo().getTitle();
@@ -176,38 +177,69 @@ public class OpenAPICodegenUtils {
 
     /**
      * list all the available resources from openAPI definition
-     * @param apiDefPath path to openAPI definition
+     * @param projectName project Name
+     * @param apiId api Id
      * @return list of string arrays {resource_id, resource name, method}
      */
-    public static List<String[]> listResourcesFromSwagger(String apiDefPath){
-        OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
-        LinkedHashMap<String, PathItem> pathList = openAPI.getPaths();
+    public static List<String[]> listResourcesFromSwaggerForAPI(String projectName, String apiId){
 
         List<String[]> resourceList = new ArrayList<>();
-        String apiName = openAPI.getInfo().getTitle();
-        String version = openAPI.getInfo().getVersion();
-
-        pathList.entrySet().stream().forEach(e -> {
-            //todo: add constants
-            addResourcesToList(resourceList, e.getValue().getGet(), apiName, version, e.getKey(), "GET");
-            addResourcesToList(resourceList, e.getValue().getPost(), apiName, version, e.getKey(), "POST");
-            addResourcesToList(resourceList, e.getValue().getDelete(), apiName, version, e.getKey(), "DELETE");
-            addResourcesToList(resourceList, e.getValue().getPut(), apiName, version, e.getKey(), "PUT");
-            addResourcesToList(resourceList, e.getValue().getOptions(), apiName, version, e.getKey(), "OPTIONS");
-            addResourcesToList(resourceList, e.getValue().getPatch(), apiName, version, e.getKey(), "PATCH");
-        } );
+        JsonNode openApiNode = generateJsonNode(GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId),
+                true);
+        addResourcesToListFromSwagger(openApiNode, resourceList);
         return resourceList;
     }
 
-    private static void addResourcesToList(List<String[]> resourcesList, Operation operation, String apiName,
+
+    private static void addResourcesToList(List<String[]> resourcesList, String apiName,
                                            String apiVersion, String resource, String method){
-        if(operation != null){
-            String[] row = new String[3];
-            row[0] = HashUtils.generateResourceId(apiName, apiVersion,resource, method);
-            row[1] = resource;
-            row[2] = method;
-            resourcesList.add(row);
+        String[] row = new String[5];
+        row[0] = HashUtils.generateResourceId(apiName, apiVersion,resource, method);
+        row[1] = resource;
+        row[2] = method;
+        row[3] = apiName;
+        row[4] = apiVersion;
+        resourcesList.add(row);
+    }
+
+    /**
+     * Add resources from the provided openAPI definition to existing array list
+     * @param apiDefNode   Api Definition as a JsonNode
+     * @param resourcesList   String[] arrayList
+     */
+    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<String[]> resourcesList){
+
+        String apiName = apiDefNode.get("info").get("title").asText();
+        String apiVersion = apiDefNode.get("info").get("version").asText();
+
+        apiDefNode.get("paths").fields().forEachRemaining( e -> {
+            e.getValue().fieldNames().forEachRemaining( operation -> {
+                addResourcesToList(resourcesList, apiName, apiVersion, e.getKey(), operation);
+            });
+        });
+    }
+
+    /**
+     * List all the resources available in the project
+     * @param projectName   project Name
+     * @return    String[] Arraylist with all the available resources
+     */
+    public static List<String[]> getAllResources(String projectName){
+
+        List<String[]> resourcesList = new ArrayList<>();
+
+        String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+        try{
+            Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
+                    .forEach( path -> {
+                        JsonNode openApiNode = generateJsonNode(path.toString(), true);
+                        OpenAPICodegenUtils.addResourcesToListFromSwagger(openApiNode,resourcesList);
+                    });
+            return resourcesList;
+        } catch (IOException e){
+            throw new CLIInternalException("Error while navigating API Files directory.");
         }
+
     }
 
     /**
