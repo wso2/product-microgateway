@@ -23,8 +23,6 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OpenAPICodegenUtils {
 
@@ -240,6 +239,31 @@ public class OpenAPICodegenUtils {
             throw new CLIInternalException("Error while navigating API Files directory.");
         }
 
+    }
+
+    public static boolean validateResource(String projectName, String resource_id){
+        String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+        AtomicBoolean resourceExists = new AtomicBoolean(false);
+        try{
+            Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
+                    .forEach( path -> {
+                        JsonNode openApiNode = generateJsonNode(path.toString(), true);
+                        String apiName = openApiNode.get("info").get("title").asText();
+                        String apiVersion = openApiNode.get("info").get("version").asText();
+
+                        openApiNode.get("paths").fields().forEachRemaining( e -> {
+                            e.getValue().fieldNames().forEachRemaining( operation -> {
+                                if(HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
+                                        .equals(resource_id)){
+                                    resourceExists.set(true);
+                                }
+                            });
+                        });
+                    });
+            return resourceExists.get();
+        } catch (IOException e){
+            throw new CLIInternalException("Error while navigating API Files directory.");
+        }
     }
 
     /**

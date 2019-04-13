@@ -6,6 +6,7 @@ import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -38,12 +39,15 @@ public class AddRouteCmd implements GatewayLauncherCmd{
         String projectName = GatewayCmdUtils.getProjectName(mainArgs);
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
-        if (resource_id.isEmpty()) {
+        if (resource_id == null || resource_id.isEmpty()) {
             if ((resource_id = GatewayCmdUtils.promptForTextInput(OUT_STREAM,"Enter Resource ID: "))
                     .trim().isEmpty()) {
                 throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
                         "resource_id is not provided");
             }
+        }
+        if(!OpenAPICodegenUtils.validateResource(projectName, resource_id)){
+            throw new CLIRuntimeException("Provided resource id is not available");
         }
         String endpointConfigString;
         if (StringUtils.isEmpty(endpointConfig)) {
