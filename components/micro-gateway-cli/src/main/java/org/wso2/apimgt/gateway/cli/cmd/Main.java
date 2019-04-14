@@ -113,9 +113,13 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.LIST_APIS, listAPIsCmd);
             listAPIsCmd.setParentCmdParser(cmdParser);
 
-            LIstResourcesCmd LIstResourcesCmd = new LIstResourcesCmd();
-            cmdParser.addCommand(GatewayCliCommands.LIST_ROUTES, LIstResourcesCmd);
-            LIstResourcesCmd.setParentCmdParser(cmdParser);
+            ListResourcesCmd listResourcesCmd = new ListResourcesCmd();
+            cmdParser.addCommand(GatewayCliCommands.LIST_RESOURCES, listResourcesCmd);
+            listResourcesCmd.setParentCmdParser(cmdParser);
+
+            DescResourceCmd descResourceCmd = new DescResourceCmd();
+            cmdParser.addCommand(GatewayCliCommands.DESC_RESOURCE, descResourceCmd);
+            descResourceCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);

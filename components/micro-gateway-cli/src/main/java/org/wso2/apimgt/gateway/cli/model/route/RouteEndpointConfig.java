@@ -9,16 +9,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouteEndpointConfig {
 
-    private EndpointListRouteDTO ProdEndpointList = null;
+    private EndpointListRouteDTO prodEndpointList = null;
     private EndpointListRouteDTO sandboxEndpointList = null;
 
     @JsonProperty("prod")
     public EndpointListRouteDTO getProdEndpointList() {
-        return ProdEndpointList;
+        return prodEndpointList;
     }
 
     public void setProdEndpointList(EndpointListRouteDTO prodEndpointList) {
-        this.ProdEndpointList = prodEndpointList;
+        this.prodEndpointList = prodEndpointList;
     }
 
     @JsonProperty("sandbox")

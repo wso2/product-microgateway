@@ -166,7 +166,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                     operation.getValue().setOperationId(operationId);
 
-                    MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfig(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                    MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
                                     path.getKey(), operation.getKey().toUpperCase());
                     if(epConfig != null){
                         operation.getValue().setEpConfigDTO(epConfig);

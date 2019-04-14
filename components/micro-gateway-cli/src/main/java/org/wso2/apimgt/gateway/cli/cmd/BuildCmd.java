@@ -73,7 +73,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             return;
         }
 
-        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 

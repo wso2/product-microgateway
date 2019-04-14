@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class APIRouteRouteEndpointConfig extends RouteEndpointConfig {
+public class APIRouteEndpointConfig extends RouteEndpointConfig {
 
     private String apiName = null;
     private String apiVersion = null;

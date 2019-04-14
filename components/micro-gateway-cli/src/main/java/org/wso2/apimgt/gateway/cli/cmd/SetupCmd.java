@@ -42,7 +42,7 @@ import java.util.List;
 @Parameters(commandNames = "setup", commandDescription = "setup information")
 public class SetupCmd implements GatewayLauncherCmd {
     private static final Logger LOGGER = LoggerFactory.getLogger(SetupCmd.class);
-    private static PrintStream OUT_STREAM = System.out;
+    private static PrintStream outStream = System.out;
 
     @SuppressWarnings("unused")
     @Parameter(hidden = true, required = true)
@@ -121,14 +121,14 @@ public class SetupCmd implements GatewayLauncherCmd {
     void setArgsForAddCmd(String[] args) {
         String[] addCmdArgs = new String[args.length];
         System.arraycopy(args, 1, addCmdArgs, 1, addCmdArgs.length - 1);
-        addCmdArgs[0] = "add-api";
+        addCmdArgs[0] = "add api";
         this.addCmdArgs = addCmdArgs;
     }
 
     @Override
     public void execute() {
         String workspace = GatewayCmdUtils.getUserDir();
-        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
@@ -156,7 +156,7 @@ public class SetupCmd implements GatewayLauncherCmd {
         if ((openApi != null) || (apiName != null) || (label != null)) {
             Main.main(addCmdArgs);
         }
-        OUT_STREAM.println("Setting up project " + projectName + " is successful.");
+        outStream.println("Setting up project " + projectName + " is successful.");
     }
 
     @Override

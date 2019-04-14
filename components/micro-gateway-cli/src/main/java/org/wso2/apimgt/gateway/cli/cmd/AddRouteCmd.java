@@ -14,10 +14,10 @@ import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 import java.io.PrintStream;
 import java.util.List;
 
-@Parameters(commandNames = "add-route", commandDescription = "add api/route to the microgateway")
+@Parameters(commandNames = "add route", commandDescription = "add api/route to the microgateway")
 public class AddRouteCmd implements GatewayLauncherCmd{
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
-    private static PrintStream OUT_STREAM = System.out;
+    private static PrintStream outStream = System.out;
 
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
@@ -36,17 +36,17 @@ public class AddRouteCmd implements GatewayLauncherCmd{
 
     @Override
     public void execute() {
-        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         if (resource_id == null || resource_id.isEmpty()) {
-            if ((resource_id = GatewayCmdUtils.promptForTextInput(OUT_STREAM,"Enter Resource ID: "))
+            if ((resource_id = GatewayCmdUtils.promptForTextInput(outStream,"Enter Resource ID: "))
                     .trim().isEmpty()) {
                 throw GatewayCmdUtils.createUsageException("Micro gateway add route failed: " +
                         "resource_id is not provided");
             }
         }
-        if(!OpenAPICodegenUtils.validateResource(projectName, resource_id)){
+        if(OpenAPICodegenUtils.getResource(projectName, resource_id) == null){
             throw new CLIRuntimeException("Provided resource id is not available");
         }
         String endpointConfigString;
@@ -56,7 +56,7 @@ public class AddRouteCmd implements GatewayLauncherCmd{
                  * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
                  * the user
                  */
-                if ((endpoint = GatewayCmdUtils.promptForTextInput(OUT_STREAM, "Enter Endpoint URL for Resource " + resource_id + ": "))
+                if ((endpoint = GatewayCmdUtils.promptForTextInput(outStream, "Enter Endpoint URL for Resource " + resource_id + ": "))
                         .trim().isEmpty()) {
                     throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
                 }
@@ -67,7 +67,7 @@ public class AddRouteCmd implements GatewayLauncherCmd{
         }
         RouteUtils.saveResourceRoute(resource_id, endpointConfigString,
                 GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-        OUT_STREAM.println("Successfully added route for resource ID : " + resource_id);
+        outStream.println("Successfully added route for resource ID : " + resource_id);
     }
 
     @Override

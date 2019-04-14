@@ -28,7 +28,7 @@ import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import java.io.PrintStream;
 import java.util.List;
 
-@Parameters(commandNames = "list-apis", commandDescription = "list apis of the microgateway")
+@Parameters(commandNames = "list apis", commandDescription = "list apis of the microgateway")
 public class ListAPIsCmd implements GatewayLauncherCmd {
     private static final String API_ID = "API ID";
     private static final String API_NAME = "Title";
@@ -39,11 +39,11 @@ public class ListAPIsCmd implements GatewayLauncherCmd {
     private List<String> mainArgs;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
-    private static PrintStream OUT_STREAM = System.out;
+    private static PrintStream outStream = System.out;
 
     @Override
     public void execute() {
-        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
         printAPIDetailsInTable(RouteUtils.listApis(projectName));
     }
@@ -52,13 +52,13 @@ public class ListAPIsCmd implements GatewayLauncherCmd {
     private void printAPIDetailsInTable(List<String[]> rows) {
         //todo: introduce constants
         if (rows == null || rows.size() == 0) {
-            OUT_STREAM.println("\nNo APIs in the project");
+            outStream.println("\nNo APIs in the project");
         } else {
             String tableStructure = "%-33s%-20s%-10s%-80s\n";
-            OUT_STREAM.format(tableStructure, API_ID, API_NAME, API_VERSION, BASEPATH);
+            outStream.format(tableStructure, API_ID, API_NAME, API_VERSION, BASEPATH);
 
             for (String[] row : rows) {
-                OUT_STREAM.format(tableStructure, row[0], row[1], row[2], row[3]);
+                outStream.format(tableStructure, row[0], row[1], row[2], row[3]);
             }
         }
     }

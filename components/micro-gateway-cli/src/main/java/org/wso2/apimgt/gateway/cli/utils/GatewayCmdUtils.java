@@ -483,7 +483,7 @@ public class GatewayCmdUtils {
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
-    public static String getProjectName(List<String> mainArgs) {
+    public static String getSingleArgument(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
             throw new CLIRuntimeException("Only one argument accepted as the project name, "
                     + "but provided: " + String.join(",", mainArgs));

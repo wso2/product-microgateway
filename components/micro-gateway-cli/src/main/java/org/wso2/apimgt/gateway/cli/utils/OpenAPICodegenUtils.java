@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.route.ResourceRepresentation;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OpenAPICodegenUtils {
 
@@ -180,9 +180,9 @@ public class OpenAPICodegenUtils {
      * @param apiId api Id
      * @return list of string arrays {resource_id, resource name, method}
      */
-    public static List<String[]> listResourcesFromSwaggerForAPI(String projectName, String apiId){
+    public static List<ResourceRepresentation> listResourcesFromSwaggerForAPI(String projectName, String apiId){
 
-        List<String[]> resourceList = new ArrayList<>();
+        List<ResourceRepresentation> resourceList = new ArrayList<>();
         JsonNode openApiNode = generateJsonNode(GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId),
                 true);
         addResourcesToListFromSwagger(openApiNode, resourceList);
@@ -190,15 +190,15 @@ public class OpenAPICodegenUtils {
     }
 
 
-    private static void addResourcesToList(List<String[]> resourcesList, String apiName,
-                                           String apiVersion, String resource, String method){
-        String[] row = new String[5];
-        row[0] = HashUtils.generateResourceId(apiName, apiVersion,resource, method);
-        row[1] = resource;
-        row[2] = method;
-        row[3] = apiName;
-        row[4] = apiVersion;
-        resourcesList.add(row);
+    private static void addResourcesToList(List<ResourceRepresentation> resourcesList, String apiName,
+                                           String apiVersion, String resourceName, String method){
+        ResourceRepresentation resource = new ResourceRepresentation();
+        resource.setId(HashUtils.generateResourceId(apiName, apiVersion,resourceName, method));
+        resource.setName(resourceName);
+        resource.setMethod(method);
+        resource.setApi(apiName);
+        resource.setVersion(apiVersion);
+        resourcesList.add(resource);
     }
 
     /**
@@ -206,16 +206,13 @@ public class OpenAPICodegenUtils {
      * @param apiDefNode   Api Definition as a JsonNode
      * @param resourcesList   String[] arrayList
      */
-    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<String[]> resourcesList){
+    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<ResourceRepresentation> resourcesList){
 
         String apiName = apiDefNode.get("info").get("title").asText();
         String apiVersion = apiDefNode.get("info").get("version").asText();
 
-        apiDefNode.get("paths").fields().forEachRemaining( e -> {
-            e.getValue().fieldNames().forEachRemaining( operation -> {
-                addResourcesToList(resourcesList, apiName, apiVersion, e.getKey(), operation);
-            });
-        });
+        apiDefNode.get("paths").fields().forEachRemaining( e -> e.getValue().fieldNames().forEachRemaining(operation ->
+                addResourcesToList(resourcesList, apiName, apiVersion, e.getKey(), operation)));
     }
 
     /**
@@ -223,9 +220,9 @@ public class OpenAPICodegenUtils {
      * @param projectName   project Name
      * @return    String[] Arraylist with all the available resources
      */
-    public static List<String[]> getAllResources(String projectName){
+    public static List<ResourceRepresentation> getAllResources(String projectName){
 
-        List<String[]> resourcesList = new ArrayList<>();
+        List<ResourceRepresentation> resourcesList = new ArrayList<>();
 
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         try{
@@ -241,9 +238,9 @@ public class OpenAPICodegenUtils {
 
     }
 
-    public static boolean validateResource(String projectName, String resource_id){
+    public static ResourceRepresentation getResource(String projectName, String resource_id){
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        AtomicBoolean resourceExists = new AtomicBoolean(false);
+        ResourceRepresentation resource = new ResourceRepresentation();
         try{
             Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
                     .forEach( path -> {
@@ -251,19 +248,26 @@ public class OpenAPICodegenUtils {
                         String apiName = openApiNode.get("info").get("title").asText();
                         String apiVersion = openApiNode.get("info").get("version").asText();
 
-                        openApiNode.get("paths").fields().forEachRemaining( e -> {
-                            e.getValue().fieldNames().forEachRemaining( operation -> {
-                                if(HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
-                                        .equals(resource_id)){
-                                    resourceExists.set(true);
-                                }
-                            });
-                        });
+                        openApiNode.get("paths").fields().forEachRemaining( e -> e.getValue().fieldNames()
+                                .forEachRemaining(operation -> {
+                            if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
+                                    .equals(resource_id)) {
+                                //todo: introduce an Object
+                                resource.setId(resource_id);
+                                resource.setName(e.getKey());
+                                resource.setMethod(operation);
+                                resource.setApi(apiName);
+                                resource.setVersion(apiVersion);
+                            }
+                        }));
                     });
-            return resourceExists.get();
         } catch (IOException e){
             throw new CLIInternalException("Error while navigating API Files directory.");
         }
+        if(resource.getId() == null){
+            return null;
+        }
+        return resource;
     }
 
     /**

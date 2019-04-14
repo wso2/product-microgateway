@@ -61,7 +61,7 @@ import java.util.Locale;
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 //todo: implement different classes for the different add commands
-@Parameters(commandNames = "add-api", commandDescription = "add api to the microgateway")
+@Parameters(commandNames = "add api", commandDescription = "add api to the microgateway")
 public class AddAPICmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
@@ -148,7 +148,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String grpc;
-        String projectName = GatewayCmdUtils.getProjectName(mainArgs);
+        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         isOverwriteRequired = false;
 
         if (!new File(workspace + File.separator + projectName).exists()) {
