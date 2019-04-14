@@ -22,6 +22,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
@@ -35,17 +36,19 @@ public class ListAPIsCmd implements GatewayLauncherCmd {
     private static final String API_VERSION = "Version";
     private static final String BASEPATH = "Base Path";
 
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(names = {"--project"}, hidden = true, required = true)
+    private String projectName;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
     @Override
     public void execute() {
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
+        if(projectName == null || projectName.isEmpty()){
+            throw new CLIRuntimeException("Project name is not provided.");
+        }
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-        printAPIDetailsInTable(RouteUtils.listApis(projectName));
+        printAPIDetailsInTable(RouteUtils.listApis());
     }
 
     //to present the results in a table structure

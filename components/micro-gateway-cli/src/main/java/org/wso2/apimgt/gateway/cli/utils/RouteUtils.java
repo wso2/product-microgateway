@@ -45,7 +45,6 @@ import java.util.Map;
 public class RouteUtils {
     //todo: rename variable name
     private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
-    //todo: set routesConfigPath as class variable
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
     private static final String BASE_PATHS = "basePaths";
     private static final String GLOBAL_ENDPOINTS = "globalEndpoints";
@@ -54,21 +53,30 @@ public class RouteUtils {
     //todo: change accordingly
     private static String routesConfigPath;
 
-    public static void saveGlobalEpAndBasepath(String apiDefPath, String routesConfigPath, String basePath,
-                                        String endpointConfigJson){
+    /**
+     * save endpoint configuration and basePath of API for developer first approach
+     * @param apiDefPath   Path to API Definition
+     * @param basePath    BasePath
+     * @param endpointConfigJson  Endpoint configuration Json as a String
+     */
+    public static void saveGlobalEpAndBasepath(String apiDefPath, String basePath, String endpointConfigJson){
         String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
         String[] apiNameAndVersion = OpenAPICodegenUtils.getAPINameVersionFromSwagger(apiDefPath);
         String apiName = apiNameAndVersion[0];
         String apiVersion = apiNameAndVersion[1];
 
-        JsonNode routesConfig = getRoutesConfig(routesConfigPath);
+        JsonNode routesConfig = getRoutesConfig();
         addBasePath(routesConfig, apiId, basePath);
         addGlobalEndpoint(routesConfig, apiName, apiVersion, apiId, endpointConfigJson);
-        writeRoutesConfig(routesConfig, routesConfigPath);
+        writeRoutesConfig(routesConfig);
     }
 
-    public static void saveGlobalEpAndBasepath(List<ExtendedAPI> apiList, String routesConfigPath) {
-        JsonNode routesConfig = getRoutesConfig(routesConfigPath);
+    /**
+     * save endpoint configuration and basePath of API
+     * @param apiList List of APIs
+     */
+    public static void saveGlobalEpAndBasepath(List<ExtendedAPI> apiList) {
+        JsonNode routesConfig = getRoutesConfig();
         for(ExtendedAPI api : apiList){
             APIRouteEndpointConfig apiEpConfig = new APIRouteEndpointConfig();
             apiEpConfig.setApiName(api.getName());
@@ -84,9 +92,15 @@ public class RouteUtils {
 
             addAPIRouteEndpointConfigAsGlobalEp(routesConfig, apiId, apiEpConfig);
         }
-        writeRoutesConfig(routesConfig, routesConfigPath);
+        writeRoutesConfig(routesConfig);
     }
 
+    /**
+     * Add basePath to the JsonNode representation of routes configuration (developer first approach)
+     * @param rootNode   Routes configuration JsonNode
+     * @param apiId      API Id
+     * @param basePath      basePath
+     */
     private static void addBasePath(JsonNode rootNode, String apiId, String basePath){
 
         JsonNode basePathsNode = rootNode.get(BASE_PATHS);
@@ -97,6 +111,11 @@ public class RouteUtils {
         arrayNode.add(modifiedBasePath);
     }
 
+    /**
+     * Add basePath to the JsonNode representation of routes configuration
+     * @param rootNode   Routes configuration JsonNode
+     * @param api    ExtendedAPI object
+     */
     private static void addBasePath(JsonNode rootNode, ExtendedAPI api){
         JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
@@ -107,6 +126,14 @@ public class RouteUtils {
         }
     }
 
+    /**
+     * Add API level endpoint Configuration
+     * @param rootNode      Routes configuration JsonNode
+     * @param apiName       API name
+     * @param apiVersion    API version
+     * @param apiId         API Id
+     * @param endpointConfigJson    Endpoint configuration Json as String
+     */
     private static void addGlobalEndpoint(JsonNode rootNode, String apiName, String apiVersion, String apiId,
                                    String endpointConfigJson){
 
@@ -119,6 +146,12 @@ public class RouteUtils {
         addAPIRouteEndpointConfigAsGlobalEp(rootNode, apiId, apiEpConfig);
     }
 
+    /**
+     * Add API level endpoint configuration to the Routes Configuration JsonNode
+     * @param rootNode      Routes configuration JsonNode
+     * @param apiId         API Id
+     * @param apiEpConfig   RouteEndpointConfig object (Endpoint configuration)
+     */
     private static void addAPIRouteEndpointConfigAsGlobalEp(JsonNode rootNode, String apiId,
                                                             APIRouteEndpointConfig apiEpConfig){
         JsonNode globalEpsNode = rootNode.get(GLOBAL_ENDPOINTS);
@@ -126,7 +159,11 @@ public class RouteUtils {
         ((ObjectNode) globalEpsNode).set(apiId, OBJECT_MAPPER_YAML.valueToTree(apiEpConfig));
     }
 
-    private static void writeRoutesConfig(JsonNode routesConfig, String routesConfigPath){
+    /**
+     * Write the RoutesConfiguration JsonNode Object to routes.yaml file
+     * @param routesConfig  Routes configuration JsonNode
+     */
+    private static void writeRoutesConfig(JsonNode routesConfig){
         try{
             OBJECT_MAPPER_YAML.writeValue(new File(routesConfigPath), routesConfig);
             RouteUtils.routesConfig = routesConfig;
@@ -135,8 +172,12 @@ public class RouteUtils {
         }
     }
 
-
-    private static JsonNode getRoutesConfig(String routesConfigPath){
+    /**
+     * Get routes configuration as a JsonNode Object
+     * if the routes configuration file exists, we take that
+     * @return Routes Configuration as a JsonNode
+     */
+    private static JsonNode getRoutesConfig(){
         if(routesConfig != null){
             return routesConfig;
         }
@@ -179,20 +220,29 @@ public class RouteUtils {
         return routesConfig;
     }
 
-    public static String[] getBasePath(String apiId, String routesConfigPath){
+    /**
+     * get basePath of an API
+     * @param apiId     API Id
+     * @return          BasePath as a String
+     */
+    public static String[] getBasePath(String apiId){
 
-        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+        JsonNode rootNode = getRoutesConfig();
         ArrayNode arrayNode = (ArrayNode) rootNode.get(BASE_PATHS).get(apiId);
 
         if(arrayNode.size() == 2){
             return new String[] {arrayNode.get(0).asText(), arrayNode.get(1).asText()};
         }
-
         return new String[] {arrayNode.get(0).asText()};
     }
 
-    static APIRouteEndpointConfig getGlobalEpConfig(String apiId, String routesConfigPath){
-        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+    /**
+     * get Global EndpointConfig of an API
+     * @param apiId     API Id
+     * @return          API Level Endpoint Configuration as a APIRouteEndpointConfig
+     */
+    static APIRouteEndpointConfig getGlobalEpConfig(String apiId){
+        JsonNode rootNode = getRoutesConfig();
         JsonNode globalEpConfig = rootNode.get(GLOBAL_ENDPOINTS).get(apiId);
         APIRouteEndpointConfig apiRouteEndpointConfig;
 
@@ -206,6 +256,12 @@ public class RouteUtils {
         return apiRouteEndpointConfig;
     }
 
+    /**
+     * To parse the Endpoint Configuration received from API Manager to RouteEndpointConfig Object
+     * @param endpointConfigJson    Endpoint Configuration Json received from Publisher API
+     * @param endpointSecurity      Endpoint Security details received from Publisher API
+     * @return                      RouteEndpointConfig object
+     */
     private static RouteEndpointConfig getEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity){
 
         RouteEndpointConfig endpointConfig = new RouteEndpointConfig();
@@ -297,8 +353,12 @@ public class RouteUtils {
         return endpointConfig;
     }
 
-    public static List<String[]> listApis(String projectName){
-        JsonNode rootNode = getRoutesConfig(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+    /**
+     * List all the available APIs
+     * @return All the available APIs {api-Id, name, version, basePath}
+     */
+    public static List<String[]> listApis(){
+        JsonNode rootNode = getRoutesConfig();
         JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         Iterator<Map.Entry<String, JsonNode>> fields = basePathsNode.fields();
         List<String[]> apis = new ArrayList<>();
@@ -317,29 +377,42 @@ public class RouteUtils {
         return apis;
     }
 
-    public static void saveResourceRoute(String resourceId, String endpointConfigJson, String routesConfigPath){
+    /**
+     * save the endpoint configuration for a given resource
+     * @param resourceId            resource Id
+     * @param endpointConfigJson    Endpoint Configuration Json
+     */
+    public static void saveResourceRoute(String resourceId, String endpointConfigJson){
         //todo: resolve adding method name and resource name if necessary
         RouteEndpointConfig endpointConfig =
                 parseEndpointConfig(endpointConfigJson);
-        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+        JsonNode rootNode = getRoutesConfig();
         JsonNode resourcesNode = rootNode.get(RESOURCES);
         //todo: validate if the resource_id already exists
         ((ObjectNode) resourcesNode).set(resourceId, OBJECT_MAPPER_YAML.valueToTree(endpointConfig));
-        writeRoutesConfig(rootNode, routesConfigPath);
+        writeRoutesConfig(rootNode);
     }
 
     private static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson){
         //todo: validate the endpointConfig
         RouteEndpointConfig endpointConfig;
         try {
-            //todo: bring yaml file
-            endpointConfig = OBJECT_MAPPER_JSON.readValue(endpointConfigJson, RouteEndpointConfig.class);
+            if(endpointConfigJson.startsWith("{")){
+                endpointConfig = OBJECT_MAPPER_JSON.readValue(endpointConfigJson, RouteEndpointConfig.class);
+            }else{
+                endpointConfig = OBJECT_MAPPER_YAML.readValue(endpointConfigJson, RouteEndpointConfig.class);
+            }
             return  endpointConfig;
         } catch (IOException e) {
             throw new CLIRuntimeException("Error while parsing the provided endpointConfig Json");
         }
     }
 
+    /**
+     * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation
+     * @param routeEndpointConfig   routeEndpointConfig Object
+     * @return                      MgeEndpointConfig Object corresponding to provided routeEndpointConfig
+     */
     static MgwEndpointConfigDTO convertRouteToMgwServiceMap(RouteEndpointConfig routeEndpointConfig){
         MgwEndpointConfigDTO endpointConfigDTO = new MgwEndpointConfigDTO();
 
@@ -376,6 +449,14 @@ public class RouteUtils {
         return endpointConfigDTO;
     }
 
+    /**
+     * get resource Endpoint configuration as MgwEndpointConfigDTO (for ballerina code generation)
+     * @param apiName       API name
+     * @param apiVersion    API version
+     * @param resource      Resource Name
+     * @param method        Method
+     * @return              MgwEndpointConfigDTO object
+     */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(String apiName, String apiVersion, String resource,
                                                                      String method) {
         RouteEndpointConfig endpointConfig = getResourceEpConfig(apiName, apiVersion, resource, method);
@@ -402,10 +483,15 @@ public class RouteUtils {
     }
 
     private static JsonNode getResourceJsonNode(String resourceId){
-        JsonNode rootNode = getRoutesConfig(routesConfigPath);
+        JsonNode rootNode = getRoutesConfig();
         return rootNode.get(RESOURCES).get(resourceId);
     }
 
+    /**
+     * get Resource Endpoint Configuration as a yaml String
+     * @param resourceId    Resource Id
+     * @return              Endpoint Configuration as a yaml String
+     */
     public static String getResourceAsYaml(String resourceId){
         JsonNode resourceNode = getResourceJsonNode(resourceId);
         if(resourceNode != null){

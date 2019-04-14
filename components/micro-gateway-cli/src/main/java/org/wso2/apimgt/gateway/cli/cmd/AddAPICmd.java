@@ -66,9 +66,8 @@ public class AddAPICmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
-    @SuppressWarnings("unused")
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(names = {"--project"}, hidden = true, required = true)
+    private String projectName;
 
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
@@ -148,7 +147,10 @@ public class AddAPICmd implements GatewayLauncherCmd {
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String grpc;
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
+
+        if(projectName == null || projectName.isEmpty()){
+            throw new CLIRuntimeException("Project name is not provided.");
+        }
         isOverwriteRequired = false;
 
         if (!new File(workspace + File.separator + projectName).exists()) {
@@ -249,8 +251,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                     //save API-metadata
                     JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
                     //Save route configurations for the given endpointConfiguration
-                    RouteUtils.saveGlobalEpAndBasepath(apiDefPath,
-                            GatewayCmdUtils.getProjectRoutesConfFilePath(projectName), basepath, endpointConfigString);
+                    RouteUtils.saveGlobalEpAndBasepath(apiDefPath, basepath, endpointConfigString);
                     try {
                         //copy policies folder
                         GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), GatewayCmdUtils.getProjectSrcDirectoryPath(projectName)
@@ -401,7 +402,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                 List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
                 logger.info(String.valueOf(clientCertificates));
 
-                RouteUtils.saveGlobalEpAndBasepath(apis, GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+                RouteUtils.saveGlobalEpAndBasepath(apis);
                 JsonProcessingUtils.saveApplicationThrottlePolicies(projectName, applicationPolicies);
                 JsonProcessingUtils.saveSubscriptionThrottlePolicies(projectName, subscriptionPolicies);
                 JsonProcessingUtils.saveClientCertMetadata(projectName, clientCertificates);

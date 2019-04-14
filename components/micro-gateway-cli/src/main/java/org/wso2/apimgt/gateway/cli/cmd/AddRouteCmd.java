@@ -19,8 +19,8 @@ public class AddRouteCmd implements GatewayLauncherCmd{
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(names = {"--project"}, hidden = true, required = true)
+    private String projectName;
 
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
@@ -36,7 +36,11 @@ public class AddRouteCmd implements GatewayLauncherCmd{
 
     @Override
     public void execute() {
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
+
+        if(projectName == null || projectName.isEmpty()){
+            throw new CLIRuntimeException("Project name is not provided.");
+        }
+
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         if (resource_id == null || resource_id.isEmpty()) {
@@ -65,8 +69,7 @@ public class AddRouteCmd implements GatewayLauncherCmd{
         } else {
             endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
         }
-        RouteUtils.saveResourceRoute(resource_id, endpointConfigString,
-                GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.saveResourceRoute(resource_id, endpointConfigString);
         outStream.println("Successfully added route for resource ID : " + resource_id);
     }
 

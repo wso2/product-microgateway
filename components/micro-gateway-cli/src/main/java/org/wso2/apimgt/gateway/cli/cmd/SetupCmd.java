@@ -119,9 +119,10 @@ public class SetupCmd implements GatewayLauncherCmd {
      * @param args commandLine arguments
      */
     void setArgsForAddCmd(String[] args) {
-        String[] addCmdArgs = new String[args.length];
-        System.arraycopy(args, 1, addCmdArgs, 1, addCmdArgs.length - 1);
+        String[] addCmdArgs = new String[args.length + 1];
+        System.arraycopy(args, 1, addCmdArgs, 2, args.length - 1);
         addCmdArgs[0] = "add api";
+        addCmdArgs[1] = "--project";
         this.addCmdArgs = addCmdArgs;
     }
 

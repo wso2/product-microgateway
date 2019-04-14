@@ -78,8 +78,7 @@ public class CodeGenerator {
                     String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
 
                     try {
-                        String[] basepaths = RouteUtils.getBasePath(apiId,
-                                GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+                        String[] basepaths = RouteUtils.getBasePath(apiId);
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
 

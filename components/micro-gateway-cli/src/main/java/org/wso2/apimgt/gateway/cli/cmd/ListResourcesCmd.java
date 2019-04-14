@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.ResourceRepresentation;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
@@ -18,22 +19,25 @@ public class ListResourcesCmd implements GatewayLauncherCmd{
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(names = {"--project"}, hidden = true, required = true)
+    private String projectName;
 
-    @Parameter(names = {"-a", "--api"}, hidden = true)
-    private String apiId;
+    @Parameter(hidden = true)
+    private List<String> mainArgs;
 
     @Override
     public void execute() {
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-        if(apiId == null){
-            printResourceDetailsForSingleAPI(OpenAPICodegenUtils.getAllResources(projectName));
-        } else if (apiId.isEmpty()) {
-            throw new RuntimeException("API Id is not provided by the user");
+        if(projectName == null || projectName.isEmpty()){
+            throw new CLIRuntimeException("Project name is not provided.");
         }
-        printResourceDetailsForSingleAPI(OpenAPICodegenUtils.listResourcesFromSwaggerForAPI(projectName, apiId));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        if(mainArgs == null){
+            printResourceDetailsForSingleAPI(OpenAPICodegenUtils.getAllResources(projectName));
+        }
+        else{
+            String apiId = GatewayCmdUtils.getSingleArgument(mainArgs);
+            printResourceDetailsForSingleAPI(OpenAPICodegenUtils.listResourcesFromSwaggerForAPI(projectName, apiId));
+        }
     }
 
     private void printResourceDetailsForSingleAPI(List<ResourceRepresentation> resources) {

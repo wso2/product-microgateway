@@ -25,7 +25,7 @@ public class DescResourceCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
-    @Parameter(names = {"-p", "--project"}, hidden = true)
+    @Parameter(names = {"--project"}, hidden = true)
     private String projectName;
 
     @Override

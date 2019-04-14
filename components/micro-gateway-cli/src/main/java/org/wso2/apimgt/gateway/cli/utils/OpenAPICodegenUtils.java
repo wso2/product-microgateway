@@ -238,6 +238,12 @@ public class OpenAPICodegenUtils {
 
     }
 
+    /**
+     * get the resource related information if the resource_id is given
+     * @param projectName   project name
+     * @param resource_id   resource id
+     * @return resource object with api name, version, method and key
+     */
     public static ResourceRepresentation getResource(String projectName, String resource_id){
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         ResourceRepresentation resource = new ResourceRepresentation();
@@ -252,7 +258,6 @@ public class OpenAPICodegenUtils {
                                 .forEachRemaining(operation -> {
                             if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
                                     .equals(resource_id)) {
-                                //todo: introduce an Object
                                 resource.setId(resource_id);
                                 resource.setName(e.getKey());
                                 resource.setMethod(operation);
@@ -292,14 +297,13 @@ public class OpenAPICodegenUtils {
      * @param api API object
      */
     public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
-        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+        String apiId;
+        apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                RouteUtils.convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId,
-                        GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)));
+                RouteUtils.convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId));
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
-        api.setSpecificBasepath(RouteUtils.getBasePath(apiId,
-                GatewayCmdUtils.getProjectRoutesConfFilePath(projectName)) [0]);
+        api.setSpecificBasepath(RouteUtils.getBasePath(apiId) [0]);
         api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
         api.setCorsConfiguration(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getCorsConfigurationDTO());
     }
