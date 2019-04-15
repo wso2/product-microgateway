@@ -34,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -239,23 +240,32 @@ public class AddAPICmd implements GatewayLauncherCmd {
                             }
                         }
                     }
+
                     //generate API_ID from OpenAPI specification
                     String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
-                    //Create folder structure for the API
-                    GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
-                    //save OpenAPI Specification
-                    GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
-                    //save API-metadata
-                    JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
-                    //Save route configurations for the given endpointConfiguration
-                    RouteUtils.saveGlobalEpAndBasepath(apiDefPath, basepath, endpointConfigString);
-                    try {
-                        //copy policies folder
-                        GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(), GatewayCmdUtils.getProjectSrcDirectoryPath(projectName)
-                                + File.separator + GatewayCliConstants.GW_DIST_POLICIES);
-                    } catch (IOException e) {
-                        throw new CLIRuntimeException("cannot read source directory");
+
+                    //to revert the folders created if any exception is thrown
+                    try{
+                        //Create folder structure for the API
+                        GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
+                        //save OpenAPI Specification
+                        GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
+                        //save API-metadata
+                        JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
+                        //Save route configurations for the given endpointConfiguration
+                        RouteUtils.saveGlobalEpAndBasepath(apiDefPath, basepath, endpointConfigString);
+                        try {
+                            //copy policies folder
+                            GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
+                                    GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
+                                            GatewayCliConstants.GW_DIST_POLICIES);
+                        } catch (IOException e) {
+                            throw new CLIRuntimeException("cannot read source directory");
+                        }
+                    } catch (Exception e){
+                        GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
                     }
+
                 }
             } else {
                 validateAPIGetRequestParams(label, apiName, version);
@@ -399,13 +409,22 @@ public class AddAPICmd implements GatewayLauncherCmd {
                 List<ClientCertMetadataDTO> clientCertificates = service.getClientCertificates(accessToken);
                 logger.info(String.valueOf(clientCertificates));
 
-                RouteUtils.saveGlobalEpAndBasepath(apis);
                 JsonProcessingUtils.saveApplicationThrottlePolicies(projectName, applicationPolicies);
                 JsonProcessingUtils.saveSubscriptionThrottlePolicies(projectName, subscriptionPolicies);
                 JsonProcessingUtils.saveClientCertMetadata(projectName, clientCertificates);
 
-                GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
-                JsonProcessingUtils.saveAPIMetadataForMultipleAPIs(projectName, apis, security);
+                //delete the folder if an exception is thrown in following steps
+                try{
+                    GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+                    JsonProcessingUtils.saveAPIMetadataForMultipleAPIs(projectName, apis, security);
+                    RouteUtils.saveGlobalEpAndBasepath(apis);
+                } catch (Exception e){
+                    for(ExtendedAPI api: apis){
+                        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+                        GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
+                    }
+                }
+
                 //todo: check if the files has been changed using hash utils
 
                 //if all the operations are success, write new config to file

@@ -1077,4 +1077,19 @@ public class GatewayCmdUtils {
         outStream.println(msg);
         return System.console().readLine();
     }
+
+    /**
+     * Delete the subfolder containing metadata and swagger File
+     * @param projectName   project name
+     * @param apiId         API Id
+     * @throws IOException  If the directory does not exist
+     */
+    public static void deletePerAPIFolder(String projectName, String apiId) {
+        try{
+            delete(new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                    apiId));
+        } catch (IOException e){
+            throw new CLIInternalException("Delete folder is failed : " + apiId);
+        }
+    }
 }

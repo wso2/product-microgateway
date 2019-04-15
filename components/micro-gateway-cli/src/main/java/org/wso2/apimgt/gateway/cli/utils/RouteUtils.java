@@ -408,13 +408,11 @@ public class RouteUtils {
                 parseEndpointConfig(endpointConfigJson);
         JsonNode rootNode = getRoutesConfig();
         JsonNode resourcesNode = rootNode.get(RESOURCES);
-        //todo: validate if the resource_id already exists
         ((ObjectNode) resourcesNode).set(resourceId, OBJECT_MAPPER_YAML.valueToTree(endpointConfig));
         writeRoutesConfig(rootNode);
     }
 
     private static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson){
-        //todo: validate the endpointConfig
         RouteEndpointConfig endpointConfig;
         try {
             if(endpointConfigJson.startsWith("{")){

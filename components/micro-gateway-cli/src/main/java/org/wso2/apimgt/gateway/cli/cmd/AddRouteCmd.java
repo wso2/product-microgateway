@@ -12,11 +12,10 @@ import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.io.PrintStream;
-import java.util.List;
 
-@Parameters(commandNames = "add route", commandDescription = "add api/route to the microgateway")
+@Parameters(commandNames = "add route", commandDescription = "add api to the microgateway")
 public class AddRouteCmd implements GatewayLauncherCmd{
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
     @Parameter(names = {"--project"}, hidden = true, required = true)
