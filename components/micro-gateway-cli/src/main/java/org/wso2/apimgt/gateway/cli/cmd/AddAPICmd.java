@@ -60,7 +60,6 @@ import java.util.Locale;
 
 import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
-//todo: implement different classes for the different add commands
 @Parameters(commandNames = "add api", commandDescription = "add api to the microgateway")
 public class AddAPICmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
@@ -208,7 +207,6 @@ public class AddAPICmd implements GatewayLauncherCmd {
                     }
 
                 } else {
-                    //todo: validate the swagger file
                     logger.debug("Successfully read the api definition file");
                     String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
 
@@ -237,7 +235,6 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         if (StringUtils.isEmpty(basepath)) {
                             if ((basepath = GatewayCmdUtils.promptForTextInput(outStream,"Enter basePath: "))
                                     .trim().isEmpty()) {
-                                //todo: allow the user to proceed with empty basepath ?
                                 throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
                             }
                         }

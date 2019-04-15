@@ -56,7 +56,7 @@ public class OpenAPICodegenUtils {
      */
     public static String generateAPIdForSwagger(String apiDefPath){
 
-        //todo: optimize
+        //another purpose in here is to validate the openAPI definition
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
 
         String apiName = openAPI.getInfo().getTitle();
@@ -94,7 +94,6 @@ public class OpenAPICodegenUtils {
 
         JsonNode rootNode = generateJsonNode(apiDefinition, isFilePath);
         if(rootNode.has("swagger") && rootNode.get("swagger").asText().trim().startsWith("2")){
-            //todo: introduce a constant for swagger version
             return openAPISpec2;
         }
         else if(rootNode.has("openapi") && rootNode.get("openapi").asText().trim().startsWith("3")){

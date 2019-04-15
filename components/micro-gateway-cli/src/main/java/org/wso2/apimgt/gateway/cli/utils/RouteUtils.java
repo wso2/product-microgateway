@@ -41,16 +41,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RouteUtils {
-    //todo: rename variable name
     private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
     private static final String BASE_PATHS = "basePaths";
     private static final String GLOBAL_ENDPOINTS = "globalEndpoints";
     private static final String RESOURCES = "resources";
     private static JsonNode routesConfig;
-    //todo: change accordingly
     private static String routesConfigPath;
 
     /**
@@ -105,8 +104,7 @@ public class RouteUtils {
 
         JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         String modifiedBasePath = basePath.startsWith("/") ? basePath : ( "/" + basePath);
-        //todo: validate whether the basePath is already available
-        //todo: validate basepath syntax
+        validateBasePath(basePathsNode, modifiedBasePath);
         ArrayNode arrayNode = ((ObjectNode) basePathsNode).putArray(apiId);
         arrayNode.add(modifiedBasePath);
     }
@@ -119,10 +117,33 @@ public class RouteUtils {
     private static void addBasePath(JsonNode rootNode, ExtendedAPI api){
         JsonNode basePathsNode = rootNode.get(BASE_PATHS);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+        String basePath = api.getContext() + "/" + api.getVersion();
+        validateBasePath(basePathsNode, basePath);
         ArrayNode arrayNode = ((ObjectNode) basePathsNode).putArray(apiId);
-        arrayNode.add(api.getContext() + "/" + api.getVersion());
+        arrayNode.add(basePath);
         if(api.getIsDefaultVersion()){
+            validateBasePath(basePathsNode, basePath);
             arrayNode.add(api.getContext());
+        }
+    }
+
+    /**
+     * check if the basePath is available (basePath needs to be unique) if it is not available Runtime exception throws
+     * @param basePathsNode     Basepaths node of routesConfig JsonNode
+     * @param basePath          BasePath
+     */
+    private static void validateBasePath(JsonNode basePathsNode, String basePath){
+        AtomicBoolean isAvailable = new AtomicBoolean(true);
+        basePathsNode.fields().forEachRemaining( api -> {
+            for(JsonNode basePathEntry : api.getValue()){
+                if(basePathEntry.asText().equals(basePath)){
+                    isAvailable.set(false);
+                }
+            }
+        });
+        if(!isAvailable.get()){
+            throw new CLIRuntimeException("Error: The provided basePath: \"" + basePath +
+                    "\" is already used. Try another basePath");
         }
     }
 
@@ -155,7 +176,6 @@ public class RouteUtils {
     private static void addAPIRouteEndpointConfigAsGlobalEp(JsonNode rootNode, String apiId,
                                                             APIRouteEndpointConfig apiEpConfig){
         JsonNode globalEpsNode = rootNode.get(GLOBAL_ENDPOINTS);
-        //todo: check if the apiId is unique
         ((ObjectNode) globalEpsNode).set(apiId, OBJECT_MAPPER_YAML.valueToTree(apiEpConfig));
     }
 
