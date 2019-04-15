@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/auth;
 import ballerina/internal;
 import ballerina/log;
 import ballerina/io;
@@ -52,100 +53,127 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
     string currentAPIContext = getContext(filterContext);
     AuthenticationContext authenticationContext = {};
 
-    var jwtPayload = getEncodedJWTPayload(jwtToken);
-    if(jwtPayload is error) {
-        log:printError(jwtPayload.reason(), err = jwtPayload);
-        setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
-        sendErrorResponse(caller, request, filterContext);
-        return false;
+    json|error decodedPayload = {};
+    var cachedJwt = trap <auth:CachedJwt>jwtCache.get(jwtToken);
+    if (cachedJwt is auth:CachedJwt) {
+        printDebug(KEY_SUBSCRIPTION_FILTER, "jwt found from the jwt cache");
+        internal:JwtPayload jwtPayload = cachedJwt.jwtPayload;
+        json payload = {};
+        map<json> customClaims = jwtPayload.customClaims;
+        if(customClaims.hasKey(APPLICATION)) {
+            payload.application = customClaims[APPLICATION];
+        }
+        if(customClaims.hasKey(SUBSCRIBED_APIS)) {
+            payload.subscribedAPIs = customClaims[SUBSCRIBED_APIS];
+        }
+        if(customClaims.hasKey(CONSUMER_KEY)) {
+            payload.consumerKey = customClaims[CONSUMER_KEY];
+        }
+        if(customClaims.hasKey(KEY_TYPE)) {
+            payload.keytype = customClaims[KEY_TYPE];
+        }
+
+        payload.sub = jwtPayload["sub"];
+        decodedPayload = payload;
     } else {
-        printTrace(KEY_SUBSCRIPTION_FILTER, "Encoded JWT payload: " + jwtPayload);
-        var decodedPayload = getDecodedJWTPayload(jwtPayload);
-        if(decodedPayload is json) {
-            printTrace(KEY_SUBSCRIPTION_FILTER, "Decoded JWT payload: " + decodedPayload.toString());
-            json subscribedAPIList = {};
-            if (decodedPayload.subscribedAPIs != null){
-                printDebug(KEY_SUBSCRIPTION_FILTER, "subscribedAPIs claim found in the jwt");
-                subscribedAPIList = json.convert(decodedPayload.subscribedAPIs);
-                printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
-                APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
-                int l = subscribedAPIList.length();
-                if (l == 0){
-                    authenticationContext.authenticated = true;
-                    authenticationContext.apiKey = jwtToken;
-                    authenticationContext.username = decodedPayload.sub.toString();
-                    if (decodedPayload.application.id != null) {
-                        authenticationContext.applicationId = decodedPayload.application.id.toString();
-                    }
-                    if (decodedPayload.application.name != null) {
-                        authenticationContext.applicationName = decodedPayload.application.name.toString
-                        ();
-                    }
-                    if (decodedPayload.application.tier != null) {
-                        authenticationContext.applicationTier = decodedPayload.application.tier.toString
-                        ();
-                    }
-                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
-                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
-                    authenticationContext.keyType = decodedPayload.keytype.toString();
-                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.
-                    keyType;
-                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                    return true;
-                }
-                int index = 0;
-                while (index < l) {
-                    var subscription = subscribedAPIList[index];
-                    if (subscription.name.toString() == apiConfig.name &&
-                        subscription["version"].toString() == apiConfig.apiVersion) {
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
-                                subscription.name.toString() + " version:" + subscription["version"].
-                                toString());
-                        authenticationContext.authenticated = true;
-                        authenticationContext.tier = subscription.subscriptionTier.toString();
-                        authenticationContext.apiKey = jwtToken;
-                        authenticationContext.username = decodedPayload.sub.toString();
-                        authenticationContext.callerToken = jwtToken;
-                        authenticationContext.applicationId = decodedPayload.application.id.toString();
-                        authenticationContext.applicationName = decodedPayload.application.name.toString
-                        ();
-                        authenticationContext.applicationTier = decodedPayload.application.tier.toString
-                        ();
-                        authenticationContext.subscriber = decodedPayload.application.owner.toString();
-                        authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
-                        authenticationContext.apiTier = subscription.subscriptionTier.toString();
-                        authenticationContext.apiPublisher = subscription.publisher.toString();
-                        authenticationContext.subscriberTenantDomain = subscription
-                        .subscriberTenantDomain.toString();
-                        authenticationContext.keyType = decodedPayload.keytype.toString();
-                        // setting keytype to invocationContext
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Setting key type as " +
-                                authenticationContext.keyType);
-                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
-                        .keyType;
-                        filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
-                        return true;
-                    }
-                    index = index + 1;
-                }
-            } else {
-                authenticationContext.authenticated = true;
-                authenticationContext.apiKey = jwtToken;
-                authenticationContext.username = decodedPayload.sub.toString();
-                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                return true;
-            }
-            setErrorMessageToFilterContext(filterContext, API_AUTH_FORBIDDEN);
-            sendErrorResponse(caller, request, filterContext);
-            return false;
-        } else {
-            log:printError("Error occurred while decoding the JWT token with the payload : " +
-                    jwtPayload, err = decodedPayload);
+        //If not found in cache decode jwt token and get the payload
+        var jwtPayload = getEncodedJWTPayload(jwtToken);
+        if (jwtPayload is error) {
+            log:printError(jwtPayload.reason(), err = jwtPayload);
             setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
             sendErrorResponse(caller, request, filterContext);
             return false;
+        } else {
+            printTrace(KEY_SUBSCRIPTION_FILTER, "Encoded JWT payload: " + jwtPayload);
+            decodedPayload = getDecodedJWTPayload(jwtPayload);
         }
     }
+
+    if(decodedPayload is json) {
+        printTrace(KEY_SUBSCRIPTION_FILTER, "Decoded JWT payload: " + decodedPayload.toString());
+        json subscribedAPIList = {};
+        if (decodedPayload.subscribedAPIs != null){
+            printDebug(KEY_SUBSCRIPTION_FILTER, "subscribedAPIs claim found in the jwt");
+            subscribedAPIList = json.convert(decodedPayload.subscribedAPIs);
+            printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
+            APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
+            int l = subscribedAPIList.length();
+            if (l == 0){
+                authenticationContext.authenticated = true;
+                authenticationContext.apiKey = jwtToken;
+                authenticationContext.username = decodedPayload.sub.toString();
+                if (decodedPayload.application.id != null) {
+                    authenticationContext.applicationId = decodedPayload.application.id.toString();
+                }
+                if (decodedPayload.application.name != null) {
+                    authenticationContext.applicationName = decodedPayload.application.name.toString
+                    ();
+                }
+                if (decodedPayload.application.tier != null) {
+                    authenticationContext.applicationTier = decodedPayload.application.tier.toString
+                    ();
+                }
+                authenticationContext.subscriber = decodedPayload.application.owner.toString();
+                authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                authenticationContext.keyType = decodedPayload.keytype.toString();
+                runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.
+                keyType;
+                filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                return true;
+            }
+            int index = 0;
+            while (index < l) {
+                var subscription = subscribedAPIList[index];
+                if (subscription.name.toString() == apiConfig.name &&
+                    subscription["version"].toString() == apiConfig.apiVersion) {
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
+                            subscription.name.toString() + " version:" + subscription["version"].
+                            toString());
+                    authenticationContext.authenticated = true;
+                    authenticationContext.tier = subscription.subscriptionTier.toString();
+                    authenticationContext.apiKey = jwtToken;
+                    authenticationContext.username = decodedPayload.sub.toString();
+                    authenticationContext.callerToken = jwtToken;
+                    authenticationContext.applicationId = decodedPayload.application.id.toString();
+                    authenticationContext.applicationName = decodedPayload.application.name.toString
+                    ();
+                    authenticationContext.applicationTier = decodedPayload.application.tier.toString
+                    ();
+                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
+                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                    authenticationContext.apiTier = subscription.subscriptionTier.toString();
+                    authenticationContext.apiPublisher = subscription.publisher.toString();
+                    authenticationContext.subscriberTenantDomain = subscription
+                    .subscriberTenantDomain.toString();
+                    authenticationContext.keyType = decodedPayload.keytype.toString();
+                    // setting keytype to invocationContext
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Setting key type as " +
+                            authenticationContext.keyType);
+                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
+                    .keyType;
+                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
+                    return true;
+                }
+                index = index + 1;
+            }
+        } else {
+            authenticationContext.authenticated = true;
+            authenticationContext.apiKey = jwtToken;
+            authenticationContext.username = decodedPayload.sub.toString();
+            runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+            filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+            return true;
+        }
+        setErrorMessageToFilterContext(filterContext, API_AUTH_FORBIDDEN);
+        sendErrorResponse(caller, request, filterContext);
+        return false;
+    } else {
+        log:printError("Error occurred while decoding the JWT token  : " +
+                jwtToken, err = decodedPayload);
+        setErrorMessageToFilterContext(filterContext, API_AUTH_GENERAL_ERROR);
+        sendErrorResponse(caller, request, filterContext);
+        return false;
+    }
+
 }

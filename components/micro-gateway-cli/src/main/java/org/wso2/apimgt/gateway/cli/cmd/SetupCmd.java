@@ -209,25 +209,26 @@ public class SetupCmd implements GatewayLauncherCmd {
             }
             if (!Files.exists(Paths.get(runtimeExtractedPath))) {
                 ZipUtils.unzip(runtimeExtractedPath + GatewayCliConstants.EXTENSION_ZIP, runtimeExtractedPath, false);
+                //copy balo to the runtime
+                GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
+                        runtimeExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
+                                + GatewayCliConstants.CLI_REPO);
+                //copy gateway jars to runtime
+                GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
+                        + GatewayCliConstants.CLI_RUNTIME, runtimeExtractedPath + File.separator + breLibPath);
             }
-            //Always copies the file to get the updated gateway balos and jars
-            //copy balo to the runtime
-            GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
-                    runtimeExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
-                            + GatewayCliConstants.CLI_REPO);
-            //copy gateway jars to runtime
-            GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
-                    + GatewayCliConstants.CLI_RUNTIME, runtimeExtractedPath + File.separator + breLibPath);
+
             if (!Files.exists(Paths.get(platformExtractedPath))) {
                 ZipUtils.unzip(platformExtractedPath + GatewayCliConstants.EXTENSION_ZIP, platformExtractedPath, true);
+                //copy balo to the platform
+                GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
+                        platformExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
+                                + GatewayCliConstants.CLI_REPO);
+                //copy gateway jars to platform
+                GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
+                        + GatewayCliConstants.CLI_PLATFORM, platformExtractedPath + File.separator + breLibPath);
             }
-            //copy balo to the platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
-                    platformExtractedPath + File.separator + GatewayCliConstants.CLI_LIB + File.separator
-                            + GatewayCliConstants.CLI_REPO);
-            //copy gateway jars to platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
-                    + GatewayCliConstants.CLI_PLATFORM, platformExtractedPath + File.separator + breLibPath);
+
         } catch (IOException e) {
             String message = "Error while unzipping platform and runtime while project setup";
             LOGGER.error(message, e);

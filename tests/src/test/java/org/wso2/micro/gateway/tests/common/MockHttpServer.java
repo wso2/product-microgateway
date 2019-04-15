@@ -32,19 +32,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -92,10 +86,10 @@ public class MockHttpServer extends Thread {
     public final static String INVALID_POSTBODY = "{\"customerName\":\"string\", \"delivered\":true, " +
             "\"address\":\"string\", \"pizzaType\":\"string\", \"creditCardNumber\":\"string\", \"quantity\":0," +
             " \"orderId\":44}";
-    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915," +
-            " \"message\":\"Unprocessable entity\", \"description\":\"[\\\"44 is not the type, string\\\"]\"}}";
-    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, " +
-            "\"message\":\"Unprocessable entity\", \"description\":\"[\\\"name is a required field\\\"]\"}}";
+    public final static String ERROR_MESSAGE_FOR_INVALID_RESPONSE = "{\"fault\":{\"code\":900916, \"message\":" +
+            "\"Unprocessable entity\", \"description\":\"name is a required field\"}}";
+    public final static String ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST = "{\"fault\":{\"code\":900915, " +
+            "\"message\":\"Unprocessable entity\", \"description\":\"44 is not the type, string\"}}";
     int count = 0;
 
     public static void main(String[] args) {
