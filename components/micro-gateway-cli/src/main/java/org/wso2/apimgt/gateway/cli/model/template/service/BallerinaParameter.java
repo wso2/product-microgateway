@@ -29,6 +29,7 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
     private String in;
     private String description;
     private Boolean required;
+    private Boolean allowEmptyValue;
 
     @Override
     public BallerinaParameter buildContext(Parameter parameter) throws BallerinaServiceGenException {
@@ -41,6 +42,7 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
         this.in = parameter.getIn();
         this.description = parameter.getDescription();
         this.required = parameter.getRequired();
+        this.allowEmptyValue = parameter.getAllowEmptyValue();
         return this;
     }
 
@@ -63,6 +65,14 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
 
     public Boolean getRequired() {
         return required;
+    }
+
+    public Boolean getAllowEmptyValue() {
+        return allowEmptyValue;
+    }
+
+    public void setAllowEmptyValue(Boolean allowEmptyValue) {
+        this.allowEmptyValue = allowEmptyValue;
     }
 
 }

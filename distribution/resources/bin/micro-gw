@@ -276,6 +276,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
     org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
 fi
 
+$JAVACMD \
     -Xms256m -Xmx1024m \
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
