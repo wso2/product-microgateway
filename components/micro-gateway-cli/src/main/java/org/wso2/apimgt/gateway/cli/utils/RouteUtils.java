@@ -129,7 +129,7 @@ public class RouteUtils {
         ArrayNode arrayNode = ((ObjectNode) basePathsNode).putArray(apiId);
         arrayNode.add(basePath);
         if(api.getIsDefaultVersion()){
-            validateBasePath(basePathsNode, basePath);
+            validateBasePath(basePathsNode, api.getContext());
             arrayNode.add(api.getContext());
         }
     }
@@ -205,9 +205,6 @@ public class RouteUtils {
      * @return Routes Configuration as a JsonNode
      */
     private static JsonNode getRoutesConfig(){
-        if(routesConfig != null){
-            return routesConfig;
-        }
         if(routesConfigPath == null){
             throw new CLIInternalException("routes.yaml is not provided");
         }
