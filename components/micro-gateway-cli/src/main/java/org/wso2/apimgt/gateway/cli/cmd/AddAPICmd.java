@@ -35,7 +35,10 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.config.Client;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
+import org.wso2.apimgt.gateway.cli.model.config.Token;
+import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
@@ -44,7 +47,10 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
-import org.wso2.apimgt.gateway.cli.utils.*;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.JsonProcessingUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
@@ -66,7 +72,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
-    @Parameter(names = {"--project"}, hidden = true, required = true)
+    @Parameter(names = {"--project"}, hidden = true)
     private String projectName;
 
     @SuppressWarnings("unused")
@@ -147,11 +153,8 @@ public class AddAPICmd implements GatewayLauncherCmd {
         String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String grpc;
-
-        if(projectName == null || projectName.isEmpty()){
-            throw new CLIRuntimeException("Project name is not provided.");
-        }
         isOverwriteRequired = false;
+        projectName = GatewayCmdUtils.buildProjectName(projectName);
 
         if (!new File(workspace + File.separator + projectName).exists()) {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName

@@ -22,11 +22,10 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.ResourceRepresentation;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -36,7 +35,7 @@ public class ListResourcesCmd implements GatewayLauncherCmd{
     private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
     private static PrintStream outStream = System.out;
 
-    @Parameter(names = {"--project"}, hidden = true, required = true)
+    @Parameter(names = {"--project"}, hidden = true)
     private String projectName;
 
     @Parameter(hidden = true)
@@ -44,14 +43,12 @@ public class ListResourcesCmd implements GatewayLauncherCmd{
 
     @Override
     public void execute() {
-        if(projectName == null || projectName.isEmpty()){
-            throw new CLIRuntimeException("Project name is not provided.");
-        }
+        projectName = GatewayCmdUtils.buildProjectName(projectName);
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
-        if(mainArgs == null){
+
+        if (mainArgs == null) {
             printResourceDetailsForSingleAPI(OpenAPICodegenUtils.getAllResources(projectName));
-        }
-        else{
+        } else {
             String apiId = GatewayCmdUtils.getSingleArgument(mainArgs);
             printResourceDetailsForSingleAPI(OpenAPICodegenUtils.listResourcesFromSwaggerForAPI(projectName, apiId));
         }
