@@ -249,6 +249,9 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
+                if(responseCode ==429) {
+                    return responseCode;
+                }
                 retry--;
             }
         }
