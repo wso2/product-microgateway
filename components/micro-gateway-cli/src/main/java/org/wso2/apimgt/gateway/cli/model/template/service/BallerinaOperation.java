@@ -73,16 +73,18 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         this.methods = null;
         Map<String, Object> extension =  operation.getExtensions();
-        Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
-        resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-        Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
-        scopes.ifPresent(value -> this.scope = value.toString());
-        Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
-        authType.ifPresent(value -> {
-            if (AUTH_TYPE_NONE.equals(value)) {
-                this.isSecured = false;
-            }
-        });
+        if(extension != null){
+            Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
+            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
+            scopes.ifPresent(value -> this.scope = value.toString());
+            Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
+            authType.ifPresent(value -> {
+                if (AUTH_TYPE_NONE.equals(value)) {
+                    this.isSecured = false;
+                }
+            });
+        }
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
