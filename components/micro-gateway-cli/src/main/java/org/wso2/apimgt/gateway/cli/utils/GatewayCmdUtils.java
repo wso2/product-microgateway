@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
@@ -478,14 +479,14 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Validate the list of main args and returns the first element as the project name
+     * Validate the list of main args and returns the first element.
      *
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
     public static String getSingleArgument(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
-            throw new CLIRuntimeException("Only one argument accepted as the project name, "
+            throw new CLIRuntimeException("Only one argument accepted, "
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
@@ -613,7 +614,7 @@ public class GatewayCmdUtils {
      * @return path to the given project in the current working directory
      */
     public static String getProjectDirectoryPath(String projectName) {
-        return getUserDir() + File.separator + projectName;
+        return File.separator + projectName;
     }
 
     /**
@@ -1056,7 +1057,7 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Read the deserialize file content to map
+     * Read the deserialize file content to map.
      *
      * @param filePath file path the map should be written to
      * @throws IOException error while saving resource hash content
@@ -1068,7 +1069,8 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Prompts for a test input
+     * Prompts for a test input.
+     *
      * @param outStream Print Stream
      * @param msg message
      * @return user entered text

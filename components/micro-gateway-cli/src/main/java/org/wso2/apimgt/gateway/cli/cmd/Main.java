@@ -125,6 +125,10 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
             functionCmd.setParentCmdParser(cmdParser);
 
+            SetProjectCmd setProjectCmd = new SetProjectCmd();
+            cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
+            setProjectCmd.setParentCmdParser(cmdParser);
+
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);
             String parsedCmdName = cmdParser.getParsedCommand();

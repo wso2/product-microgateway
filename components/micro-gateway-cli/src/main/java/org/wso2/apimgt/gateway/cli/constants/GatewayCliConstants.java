@@ -103,4 +103,5 @@ public class GatewayCliConstants {
     public static final String CLIENT_CERT_METADATA_FILE = "client-cert-metadata.json";
     public static final String API_METADATA_FILE = "api-metadata.yaml";
     public static final String API_SWAGGER = "swagger.json";
+    public static final String PROJECT_FILE_NAME = ".PROJECT";
 }
