@@ -254,18 +254,22 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
                         //Save route configurations for the given endpointConfiguration
                         RouteUtils.saveGlobalEpAndBasepath(apiDefPath, basepath, endpointConfigString);
-                        try {
-                            //copy policies folder
-                            GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
-                                    GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
-                                            GatewayCliConstants.GW_DIST_POLICIES);
-                        } catch (IOException e) {
-                            throw new CLIRuntimeException("cannot read source directory");
-                        }
                     } catch (Exception e){
                         GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
                     }
+                    try {
+                        //copy policies folder
+                        String policyDir = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
+                                GatewayCliConstants.GW_DIST_POLICIES;
+                        if((new File(policyDir)).list().length == 0) {
+                            GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
+                                    GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
+                                            GatewayCliConstants.GW_DIST_POLICIES);
+                        }
 
+                    } catch (IOException e) {
+                        throw new CLIRuntimeException("cannot read source directory");
+                    }
                 }
             } else {
                 validateAPIGetRequestParams(label, apiName, version);
