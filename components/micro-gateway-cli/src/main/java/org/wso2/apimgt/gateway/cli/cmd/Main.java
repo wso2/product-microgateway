@@ -125,6 +125,10 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
             functionCmd.setParentCmdParser(cmdParser);
 
+            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
+            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
+            updateRouteCmd.setParentCmdParser(cmdParser);
+
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);
             String parsedCmdName = cmdParser.getParsedCommand();

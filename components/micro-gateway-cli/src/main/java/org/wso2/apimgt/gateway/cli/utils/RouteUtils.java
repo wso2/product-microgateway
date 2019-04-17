@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.util.Json;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -276,6 +277,10 @@ public class RouteUtils {
         JsonNode globalEpConfig = rootNode.get(GLOBAL_ENDPOINTS).get(apiId);
         APIRouteEndpointConfig apiRouteEndpointConfig;
 
+        if(globalEpConfig == null){
+            return null;
+        }
+
         try {
             apiRouteEndpointConfig = OBJECT_MAPPER_YAML.readValue(globalEpConfig.toString(),
                     APIRouteEndpointConfig.class);
@@ -515,6 +520,13 @@ public class RouteUtils {
         return rootNode.get(RESOURCES).get(resourceId);
     }
 
+    public static boolean hasResource(String resourceId){
+        if(getResourceJsonNode(resourceId) == null){
+            return false;
+        }
+        return true;
+    }
+
     /**
      * get Resource Endpoint Configuration as a yaml String
      * @param resourceId    Resource Id
@@ -564,6 +576,29 @@ public class RouteUtils {
         }
 
         writeRoutesConfig(rootNode);
+    }
 
+    public static void updateResourceRoute(String id, String endpointConfigJson){
+        if(getResourceJsonNode(id) == null){
+            throw new CLIRuntimeException("Provided Resource ID is not available : " + id);
+        }
+        saveResourceRoute(id, endpointConfigJson);
+    }
+
+    public static void updateAPIRoute(String apiId, String endpointConfigJson){
+        JsonNode rootNode = getRoutesConfig();
+        APIRouteEndpointConfig apiEpConfig = getGlobalEpConfig(apiId);
+        if(apiEpConfig == null){
+            throw new CLIRuntimeException("Provided API ID is not available : " + apiId);
+        }
+        addGlobalEndpoint(rootNode, apiEpConfig.getApiName(), apiEpConfig.getApiVersion(), apiId, endpointConfigJson);
+        writeRoutesConfig(rootNode);
+    }
+
+    public static boolean hasApi(String apiId){
+        if(getGlobalEpConfig(apiId) == null){
+            return false;
+        }
+        return true;
     }
 }

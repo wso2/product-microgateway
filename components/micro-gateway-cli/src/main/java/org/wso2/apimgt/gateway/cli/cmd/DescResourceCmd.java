@@ -32,7 +32,7 @@ import java.util.List;
 
 @Parameters(commandNames = "desc resource", commandDescription = "describe the given resource in the microgateway")
 public class DescResourceCmd implements GatewayLauncherCmd {
-    private static final Logger logger = LoggerFactory.getLogger(AddAPICmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(DescResourceCmd.class);
     private static PrintStream outStream = System.out;
 
     @Parameter(hidden = true, required = true)

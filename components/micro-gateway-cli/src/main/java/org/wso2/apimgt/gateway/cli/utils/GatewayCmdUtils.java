@@ -1092,4 +1092,5 @@ public class GatewayCmdUtils {
             throw new CLIInternalException("Delete folder is failed : " + apiId);
         }
     }
+
 }

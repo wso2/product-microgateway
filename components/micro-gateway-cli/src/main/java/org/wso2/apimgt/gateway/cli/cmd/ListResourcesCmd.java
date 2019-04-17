@@ -33,7 +33,7 @@ import java.util.List;
 
 @Parameters(commandNames = "list resources", commandDescription = "list routes of the microgateway")
 public class ListResourcesCmd implements GatewayLauncherCmd{
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ListResourcesCmd.class);
     private static PrintStream outStream = System.out;
 
     @Parameter(names = {"--project"}, hidden = true, required = true)

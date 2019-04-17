@@ -31,4 +31,5 @@ public class GatewayCliCommands {
     public static final String LIST_RESOURCES = "list resources";
     public static final String DESC_RESOURCE = "desc resource";
     public static final String FUNCTION = "function";
+    public static final String UPDATE_ROUTE = "update route";
 }
