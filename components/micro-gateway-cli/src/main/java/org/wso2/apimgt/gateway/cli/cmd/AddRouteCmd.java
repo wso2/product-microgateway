@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
 import java.io.PrintStream;
 
@@ -18,7 +18,7 @@ public class AddRouteCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(AddRouteCmd.class);
     private static PrintStream outStream = System.out;
 
-    @Parameter(names = {"--project"}, hidden = true, required = true)
+    @Parameter(names = {"--project"}, hidden = true)
     private String projectName;
 
     @Parameter(names = "--java.debug", hidden = true)
@@ -36,10 +36,7 @@ public class AddRouteCmd implements GatewayLauncherCmd {
     @Override
     public void execute() {
 
-        if (projectName == null || projectName.isEmpty()) {
-            throw new CLIRuntimeException("Project name is not provided.");
-        }
-
+        projectName = GatewayCmdUtils.buildProjectName(projectName);
         RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         if (resource_id == null || resource_id.isEmpty()) {

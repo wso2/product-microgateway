@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
@@ -478,14 +479,14 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Validate the list of main args and returns the first element as the project name
+     * Validate the list of main args and returns the first element.
      *
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
     public static String getSingleArgument(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
-            throw new CLIRuntimeException("Only one argument accepted as the project name, "
+            throw new CLIRuntimeException("Only one argument accepted, "
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
@@ -613,7 +614,8 @@ public class GatewayCmdUtils {
      * @return path to the given project in the current working directory
      */
     public static String getProjectDirectoryPath(String projectName) {
-        return getUserDir() + File.separator + projectName;
+        // TODO: do we need to change this?
+        return new File(projectName).getAbsolutePath();
     }
 
     /**
@@ -1056,7 +1058,7 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Read the deserialize file content to map
+     * Read the deserialize file content to map.
      *
      * @param filePath file path the map should be written to
      * @throws IOException error while saving resource hash content
@@ -1068,7 +1070,8 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Prompts for a test input
+     * Prompts for a test input.
+     *
      * @param outStream Print Stream
      * @param msg message
      * @return user entered text
@@ -1093,4 +1096,69 @@ public class GatewayCmdUtils {
         }
     }
 
+    /**
+     * Read the project descriptor file at a given path.
+     * <p>
+     *     This will only read the first line of the file. We are not interested
+     *     in the rest of the content in the file.
+     * </p>
+     *
+     * @param filePath Path to project descriptor file
+     * @return First line of the file at {@code filePath}
+     * @throws IOException when failed to read file at {@code filePath}
+     */
+    private static String readGatewayProjectFile(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        String projectPath = reader.readLine();
+
+        return projectPath;
+    }
+
+    /**
+     * Find the working project directory set in the {@link GatewayCliConstants#PROJECT_FILE_NAME}
+     * of MGW_HOME.
+     *
+     * @return path to currently working project. {@code null} if unable to read project descriptor
+     * or invalid project dir is detected
+     */
+    public static String findCurrentProject() {
+        String projectFile = GatewayCmdUtils.getCLIHome() + File.separator + GatewayCliConstants.PROJECT_FILE_NAME;
+        String fileContent = null;
+        try {
+            fileContent = readGatewayProjectFile(projectFile);
+        } catch (IOException e) {
+             // Ignore the exception, which will result in null as return value
+        }
+
+        if (fileContent != null && Files.isDirectory(Paths.get(fileContent))) {
+            return fileContent.trim();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Build the correct current project directory. If {@code knownName} is a valid project name
+     * it'll take the priority as the project name. If not {@link GatewayCliConstants#PROJECT_FILE_NAME}
+     * file value will be taken as the project path. If both are no available error will be thrown.
+     *
+     * @param knownName known project name to prioritize
+     * @return valid project name
+     */
+    public static String buildProjectName(String knownName) {
+        String projectName = knownName;
+
+        if (StringUtils.isEmpty(knownName)) {
+            String workingProject = GatewayCmdUtils.findCurrentProject();
+
+            if (StringUtils.isEmpty(workingProject)) {
+                throw new CLIRuntimeException("Project name is not provided.");
+            } else {
+                projectName = workingProject;
+                logger.debug("Working project was set from config: " + projectName);
+            }
+        }
+
+        return projectName;
+    }
 }

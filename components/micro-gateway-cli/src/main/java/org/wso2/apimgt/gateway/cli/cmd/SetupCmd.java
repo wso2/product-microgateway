@@ -183,7 +183,7 @@ public class SetupCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.createProjectStructure(projectName);
             GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
-            LOGGER.error("Error occurred while generating project configurationss", e);
+            LOGGER.error("Error occurred while generating project configurations", e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
     }

@@ -125,6 +125,10 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
             functionCmd.setParentCmdParser(cmdParser);
 
+            SetProjectCmd setProjectCmd = new SetProjectCmd();
+            cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
+            setProjectCmd.setParentCmdParser(cmdParser);
+          
             UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
             cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
             updateRouteCmd.setParentCmdParser(cmdParser);

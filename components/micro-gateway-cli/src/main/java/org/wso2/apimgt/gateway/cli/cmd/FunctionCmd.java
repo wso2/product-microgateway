@@ -80,7 +80,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
             FileUtils.copyFileToDirectory(source, projectLocation);
             outStream.println("file copied");
         } catch (IOException e) {
-            LOGGER.error("error occured while copying file:" + e);
+            LOGGER.error("error occurred while copying file:" + e);
         }
 
         if (!isAdd) {
