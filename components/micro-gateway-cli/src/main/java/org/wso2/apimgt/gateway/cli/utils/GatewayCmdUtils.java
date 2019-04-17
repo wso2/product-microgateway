@@ -614,7 +614,8 @@ public class GatewayCmdUtils {
      * @return path to the given project in the current working directory
      */
     public static String getProjectDirectoryPath(String projectName) {
-        return File.separator + projectName;
+        // TODO: do we need to change this?
+        return new File(projectName).getAbsolutePath();
     }
 
     /**
