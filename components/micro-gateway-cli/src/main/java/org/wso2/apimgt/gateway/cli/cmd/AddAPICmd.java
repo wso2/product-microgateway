@@ -150,13 +150,12 @@ public class AddAPICmd implements GatewayLauncherCmd {
     @Override
     public void execute() {
         String clientID;
-        String workspace = GatewayCmdUtils.getUserDir();
         boolean isOpenApi = StringUtils.isNotEmpty(openApi);
         String grpc;
         isOverwriteRequired = false;
         projectName = GatewayCmdUtils.buildProjectName(projectName);
 
-        if (!new File(workspace + File.separator + projectName).exists()) {
+        if (!new File(File.separator + projectName).exists()) {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` does not exist");
         }
@@ -416,7 +415,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                 }
                 if (apis == null || apis.isEmpty()) {
                     // Delete folder
-                    GatewayCmdUtils.deleteProject(workspace + File.separator + projectName);
+                    GatewayCmdUtils.deleteProject(File.separator + projectName);
                     String errorMsg;
                     if (label != null) {
                         errorMsg = "No APIs found for the given label: " + label;
