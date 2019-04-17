@@ -161,17 +161,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             balPath.getOperations().forEach(operation -> {
+                //todo: check the behavior if miscellaneous characters appear, if so remove the if condition
                 if (operation.getValue().getOperationId() == null) {
                     // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                     String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                     operation.getValue().setOperationId(operationId);
 
-                    MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
-                                    path.getKey(), operation.getKey());
-                    if(epConfig != null){
-                        operation.getValue().setEpConfigDTO(epConfig);
-                    }
-
+                }
+                MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                        path.getKey(), operation.getKey());
+                if(epConfig != null){
+                    operation.getValue().setEpConfigDTO(epConfig);
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
