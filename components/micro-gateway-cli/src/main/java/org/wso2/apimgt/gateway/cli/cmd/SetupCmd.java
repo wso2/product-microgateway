@@ -143,6 +143,9 @@ public class SetupCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
+        if(new File(workspace + File.separator + projectName).exists()){
+            GatewayCmdUtils.deleteProject(projectName);
+        }
         // Extracts the zipped ballerina platform and runtime
         extractPlatformAndRuntime();
         init(projectName, deploymentConfigPath);

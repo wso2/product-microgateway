@@ -214,6 +214,19 @@ public class AddAPICmd implements GatewayLauncherCmd {
                     logger.debug("Successfully read the api definition file");
                     String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
 
+                    //generate API_ID from OpenAPI specification
+                    String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
+
+                    boolean isForcedUpdate = false;
+
+                    if(RouteUtils.hasApi(apiId)) {
+                        isForcedUpdate = checkAPIAndProceed(apiId);
+                        if(!isForcedUpdate){
+                            outStream.println("add api command is aborted");
+                            return;
+                        }
+                    }
+
                     //set endpoint configuration
                     String endpointConfigString;
                     if (StringUtils.isEmpty(endpointConfig)) {
@@ -244,9 +257,6 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         }
                     }
 
-                    //generate API_ID from OpenAPI specification
-                    String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
-
                     //to revert the folders created if any exception is thrown
                     try{
                         //Create folder structure for the API
@@ -257,8 +267,13 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
                         //Save route configurations for the given endpointConfiguration
                         RouteUtils.saveGlobalEpAndBasepath(apiDefPath, basepath, endpointConfigString);
+
+
                     } catch (Exception e){
-                        GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
+                        if(!isForcedUpdate){
+                            GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
+                        }
+                        throw e;
                     }
                     try {
                         //copy policies folder
@@ -430,8 +445,8 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
                         GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
                     }
+                    throw e;
                 }
-
                 //todo: check if the files has been changed using hash utils
 
                 //if all the operations are success, write new config to file
@@ -652,6 +667,21 @@ public class AddAPICmd implements GatewayLauncherCmd {
                             + "should be provided."
                             + "\n\nEx:\tmicro-gw setup accounts-project -l accounts"
                             + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
+        }
+    }
+
+    private boolean checkAPIAndProceed(String apiId){
+        String UserResponse;
+        if ((UserResponse = GatewayCmdUtils.promptForTextInput(outStream, "The provided API already exists. " +
+                "Do you need to overwrite ? yes[y] or no[n] :")).trim().isEmpty()) {
+            throw new CLIRuntimeException("No argument is provided.");
+        }
+        if (UserResponse.toLowerCase().equals("n") || UserResponse.toLowerCase().equals("no")) {
+            return false;
+        } else if (UserResponse.toLowerCase().equals("y") || UserResponse.toLowerCase().equals("yes")) {
+            return true;
+        } else {
+            throw new CLIRuntimeException("Provided argument is not valid :" + UserResponse);
         }
     }
 }

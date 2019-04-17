@@ -34,7 +34,7 @@ public class CLILogConfigReader {
     private static final PrintStream stderr = System.err;
 
     public CLILogConfigReader() {
-        LogManager logManager = LogManager.getLogManager();
+        CLILogManager logManager = (CLILogManager) LogManager.getLogManager();
         String initialFile = GatewayCmdUtils.getLoggingPropertiesFileLocation();
         try {
             InputStream configStream = new FileInputStream(initialFile);

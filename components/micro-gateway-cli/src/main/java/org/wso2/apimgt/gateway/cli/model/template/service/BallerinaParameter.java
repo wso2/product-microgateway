@@ -74,4 +74,5 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
     public void setAllowEmptyValue(Boolean allowEmptyValue) {
         this.allowEmptyValue = allowEmptyValue;
     }
+
 }

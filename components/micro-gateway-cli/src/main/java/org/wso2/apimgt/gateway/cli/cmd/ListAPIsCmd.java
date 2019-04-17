@@ -38,7 +38,7 @@ public class ListAPIsCmd implements GatewayLauncherCmd {
     @Parameter(names = {"--project"}, hidden = true)
     private String projectName;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddAPICmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListAPIsCmd.class);
     private static PrintStream outStream = System.out;
 
     @Override

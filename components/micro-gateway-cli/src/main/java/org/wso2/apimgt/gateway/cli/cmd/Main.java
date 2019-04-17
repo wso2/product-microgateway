@@ -128,6 +128,10 @@ public class Main {
             SetProjectCmd setProjectCmd = new SetProjectCmd();
             cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
             setProjectCmd.setParentCmdParser(cmdParser);
+          
+            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
+            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
+            updateRouteCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);
