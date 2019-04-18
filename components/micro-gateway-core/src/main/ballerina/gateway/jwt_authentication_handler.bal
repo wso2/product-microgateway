@@ -43,7 +43,6 @@ public type JwtAuthenticationHandler object {
 
 public function JwtAuthenticationHandler.canHandle(http:Request req) returns (boolean) {
     return self.jwtAuthnHandler.canHandle(req);
-
 }
 
 public function JwtAuthenticationHandler.handle(http:Request req) returns (boolean) {
