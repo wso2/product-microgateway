@@ -152,7 +152,7 @@ public class ImportCmd implements GatewayLauncherCmd  {
 
         if (isOpenApi) {
             outStream.println("Loading Open Api Specification from Path: " + openApi);
-            String api = OpenAPICodegenUtils.readApi(openApi);
+            String api = OpenAPICodegenUtils.readJson(openApi);
 
             if (openApi.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
                 grpc = openApi;
@@ -192,7 +192,7 @@ public class ImportCmd implements GatewayLauncherCmd  {
 
                 boolean isForcedUpdate = false;
 
-                if(RouteUtils.hasApi(apiId)) {
+                if(RouteUtils.hasApiInRoutesConfig(apiId)) {
                     isForcedUpdate = checkAPIAndProceed(apiId);
                     if(!isForcedUpdate){
                         outStream.println("add api command is aborted");
@@ -215,7 +215,7 @@ public class ImportCmd implements GatewayLauncherCmd  {
                     endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
                             "\"]}}";
                 } else {
-                    endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
+                    endpointConfigString = OpenAPICodegenUtils.readJson(endpointConfig);
                 }
 
                 //set basePath

@@ -69,7 +69,7 @@ public class CodeGenerator {
         List<BallerinaService> serviceList = new ArrayList<>();
 
         String openApiPath;
-        if(isUserAdded){
+        if (isUserAdded) {
             openApiPath = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +
                     GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
         } else {
