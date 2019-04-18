@@ -21,7 +21,6 @@ import ballerina/config;
 import ballerina/jms;
 import ballerina/http;
 
-
 string jmsConnectioninitialContextFactoryTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,
     REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
     "bmbInitialContextFactory");
