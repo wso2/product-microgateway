@@ -83,7 +83,7 @@ public class ThrottlePolicyGenerator {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         String policyFileLocation = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.POLICIES_FILE;
+                + GatewayCliConstants.GW_DIST_POLICIES_FILE;
         ThrottlePolicyListMapper throttlePolicyListMapper = mapper
                 .readValue(new File(policyFileLocation), ThrottlePolicyListMapper.class);
 
