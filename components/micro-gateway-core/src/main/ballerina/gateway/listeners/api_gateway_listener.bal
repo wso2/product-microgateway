@@ -84,7 +84,6 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
         jwtConfig.jwtCache = jwtCache;
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
-        //http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
         JwtAuthenticationHandler jwtAuthenticationHandler = new(jwtAuthProvider, jwtConfig);
         return <JwtAuthenticationHandler>jwtAuthenticationHandler;
         //return jwtAuthnHandler;
