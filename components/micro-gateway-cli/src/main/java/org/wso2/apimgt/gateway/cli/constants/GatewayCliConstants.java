@@ -67,6 +67,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_BAT_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator
             + GW_DIST_BAT;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
+    public static final String GW_DIST_TOKEN_REVOCATION_EXTENSION = "token_revocation_extension.bal";
     public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";

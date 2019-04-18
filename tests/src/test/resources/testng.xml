@@ -30,6 +30,7 @@
         <classes>
             <class name="org.wso2.micro.gateway.tests.services.AuthenticationFailureTestCase" />
             <class name="org.wso2.micro.gateway.tests.services.MutualSSLTestCase" />
+            <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
             <class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP1BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.services.HTTP2RequestsWithHTTP2BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.services.PreRequisites" />
