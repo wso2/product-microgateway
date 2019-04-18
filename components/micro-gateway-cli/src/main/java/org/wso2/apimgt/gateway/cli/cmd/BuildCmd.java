@@ -33,6 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        MgwDefinitionUtils.setMgwDefinition(projectLocation + "/routes.yaml");
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");

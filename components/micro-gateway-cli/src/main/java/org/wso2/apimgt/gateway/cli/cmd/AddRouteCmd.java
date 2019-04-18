@@ -63,9 +63,9 @@ public class AddRouteCmd implements GatewayLauncherCmd {
             }
             endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() + "\"]}}";
         } else {
-            endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
+            endpointConfigString = OpenAPICodegenUtils.readJson(endpointConfig);
         }
-        if (RouteUtils.hasResource(resource_id)) {
+        if (RouteUtils.hasResourceInRoutesConfig(resource_id)) {
             String UserResponse;
             if ((UserResponse = GatewayCmdUtils.promptForTextInput(outStream, "For the provided resource id " +
                     resource_id + " enpoint configuration already exist. Do you need to overwrite ? yes[y] or no[n] :"))

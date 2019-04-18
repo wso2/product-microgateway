@@ -154,6 +154,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
         String grpc;
         isOverwriteRequired = false;
         projectName = GatewayCmdUtils.buildProjectName(projectName);
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         if (!new File(File.separator + projectName).exists()) {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName
@@ -161,7 +162,6 @@ public class AddAPICmd implements GatewayLauncherCmd {
         }
 
         //todo: remove
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         //Security Schemas settings
         if (StringUtils.isEmpty(security)) {
@@ -177,7 +177,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
         {
             if (isOpenApi) {
                 outStream.println("Loading Open Api Specification from Path: " + openApi);
-                String api = OpenAPICodegenUtils.readApi(openApi);
+                String api = OpenAPICodegenUtils.readJson(openApi);
 
                 if (openApi.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
                     grpc = openApi;
@@ -218,7 +218,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
 
                     boolean isForcedUpdate = false;
 
-                    if(RouteUtils.hasApi(apiId)) {
+                    if(RouteUtils.hasApiInRoutesConfig(apiId)) {
                         isForcedUpdate = checkAPIAndProceed(apiId);
                         if(!isForcedUpdate){
                             outStream.println("add api command is aborted");
@@ -242,7 +242,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
                                 "\"]}}";
                     } else {
-                        endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
+                        endpointConfigString = OpenAPICodegenUtils.readJson(endpointConfig);
                     }
 
                     //set basePath
@@ -438,7 +438,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                 try{
                     GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
                     JsonProcessingUtils.saveAPIMetadataForMultipleAPIs(projectName, apis, security);
-                    RouteUtils.saveGlobalEpAndBasepath(apis);
+                    RouteUtils.saveGlobalEpAndBasepath(apis, isForcefully);
                 } catch (Exception e){
                     for(ExtendedAPI api: apis){
                         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());

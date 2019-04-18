@@ -21,7 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.model.route.ResourceRepresentation;
+import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
@@ -47,7 +47,6 @@ public class DescResourceCmd implements GatewayLauncherCmd {
     public void execute() {
 
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
 
         String resource_id = GatewayCmdUtils.getSingleArgument(mainArgs);
         ResourceRepresentation resource = OpenAPICodegenUtils.getResource(projectName, resource_id);

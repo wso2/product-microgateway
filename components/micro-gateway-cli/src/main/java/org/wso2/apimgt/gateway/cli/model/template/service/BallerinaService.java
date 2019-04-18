@@ -27,12 +27,12 @@ import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -168,7 +168,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     operation.getValue().setOperationId(operationId);
 
                 }
-                MgwEndpointConfigDTO epConfig = RouteUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
                         path.getKey(), operation.getKey());
                 if(epConfig != null){
                     operation.getValue().setEpConfigDTO(epConfig);

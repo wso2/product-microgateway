@@ -69,26 +69,18 @@ public class CodeGenerator {
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
 
-        Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
+        Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
                 .forEach( path -> {
                     ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
+                    String basepath = MgwDefinitionUtils.getBasePath(api.getName(), api.getVersion());
+                    api.setContext(basepath);
                     BallerinaService definitionContext;
                     OpenAPICodegenUtils.setAdditionalConfigs(projectName, api);
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-                    String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
 
                     try {
-                        String[] basepaths = RouteUtils.getBasePath(apiId);
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
-
-                        //if two basepaths are available, second one is the default one
-                        if(basepaths.length == 2){
-                            definitionContext = new BallerinaService().buildContext(openAPI, api);
-                            definitionContext.setBasepath(basepaths[1]);
-                            definitionContext.setQualifiedServiceName(api.getName());
-                            genFiles.add(generateService(definitionContext));
-                        }
 
                         serviceList.add(definitionContext);
                     } catch (BallerinaServiceGenException e) {
