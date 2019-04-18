@@ -21,6 +21,7 @@ import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.RequestCountLimitDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -117,6 +118,37 @@ public class ThrottlePolicy {
 
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    public ThrottlePolicy buildContext(ThrottlePolicyMapper policy, GeneratorConstants.POLICY_TYPE type) {
+        this.name = CodegenUtils.trim(policy.getName());
+        this.count = policy.getCount();
+        this.unitTime = getTimeInMilliSeconds(policy.getUnitTime(), policy.getTimeUnit());
+        this.stopOnQuotaReach = true;
+        switch (type) {
+        case RESOURCE:
+            this.policyType = GeneratorConstants.RESOURCE_POLICY_TYPE;
+            this.funcName =
+                    GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
+            this.policyKey = GeneratorConstants.RESOURCE_KEY;
+            this.tierType = GeneratorConstants.RESOURCE_TIER_TYPE;
+            break;
+        case APPLICATION:
+            this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
+            this.funcName =
+                    GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
+            this.policyKey = GeneratorConstants.APPLICATION_KEY;
+            this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
+            break;
+        case SUBSCRIPTION:
+            this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
+            this.funcName =
+                    GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
+            this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
+            this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
+            break;
+        }
+        return this;
     }
 
     public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {

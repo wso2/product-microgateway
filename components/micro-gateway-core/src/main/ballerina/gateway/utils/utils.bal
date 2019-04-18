@@ -135,7 +135,7 @@ public function getResourceLevelTier(reflect:annotationData[] annData)
     }
     reflect:annotationData|() tierAnn = ();
     foreach var ann in annData {
-        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.moduleName == RESOURCE_TIER_ANN_PACKAGE) {
+        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.moduleName == GATEWAY_ANN_PACKAGE) {
             tierAnn = ann;
             break;
         }

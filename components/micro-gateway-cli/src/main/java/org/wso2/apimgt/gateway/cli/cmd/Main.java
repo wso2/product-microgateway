@@ -84,10 +84,9 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.HELP, helpCmd);
             helpCmd.setParentCmdParser(cmdParser);
 
-            SetupCmd setupCmd = new SetupCmd();
-            setupCmd.setArgsForAddCmd(args);
-            cmdParser.addCommand(GatewayCliCommands.SETUP, setupCmd);
-            setupCmd.setParentCmdParser(cmdParser);
+            InitCmd initCmd = new InitCmd();
+            cmdParser.addCommand(GatewayCliCommands.INIT, initCmd);
+            initCmd.setParentCmdParser(cmdParser);
 
             BuildCmd buildCmd = new BuildCmd();
             cmdParser.addCommand(GatewayCliCommands.BUILD, buildCmd);

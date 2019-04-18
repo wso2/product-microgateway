@@ -150,9 +150,9 @@ do
             IS_BUILD_COMMAND=true
             shift # past build argument
             ;;
-        setup)
+        init)
             ALL_ARGS+=("$1")
-            IS_SETUP_COMMAND=true
+            IS_INIT_COMMAND=true
             shift # past build argument
             ;;
         *)    # default argument
@@ -204,9 +204,9 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
-# Ballerina platform is no extracted at the moment of first setup command
-# Therefore handle classpath seperately for setup command.
-if [ "$IS_SETUP_COMMAND" = true ] && [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
+# Ballerina platform is not extracted at the moment of first setup command
+# Therefore handle classpath separately for setup command.
+if [ "$IS_INIT_COMMAND" = true ] && [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
     # Add required ballerina jars to classpath
     for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
     do
@@ -274,19 +274,21 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
     -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
     -Dcli.home=$MICROGW_HOME \
     org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
+else
+  $JAVACMD \
+      -Xms256m -Xmx1024m \
+      -XX:+HeapDumpOnOutOfMemoryError \
+      -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+      $JAVA_OPTS \
+      -classpath "$CLI_CLASSPATH" \
+      -Djava.security.egd=file:/dev/./urandom \
+      -Dballerina.home=$BALLERINA_HOME \
+      -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+      -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+      -Dfile.encoding=UTF8 \
+      -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+      -Dcli.home=$MICROGW_HOME \
+      org.wso2.apimgt.gateway.cli.cmd.Main "$@"
+
 fi
 
-$JAVACMD \
-    -Xms256m -Xmx1024m \
-    -XX:+HeapDumpOnOutOfMemoryError \
-    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-    $JAVA_OPTS \
-    -classpath "$CLI_CLASSPATH" \
-    -Djava.security.egd=file:/dev/./urandom \
-    -Dballerina.home=$BALLERINA_HOME \
-    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-    -Dfile.encoding=UTF8 \
-    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-    -Dcli.home=$MICROGW_HOME \
-    org.wso2.apimgt.gateway.cli.cmd.Main "$@"

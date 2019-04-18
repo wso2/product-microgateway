@@ -245,6 +245,15 @@ public class GatewayCmdUtils {
      *
      * @return filters folder location
      */
+    public static String getDefinitionsLocation() {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_DEFINITIONS;
+    }
+
+    /**
+     * Get filters folder location
+     *
+     * @return filters folder location
+     */
     public static String getFiltersFolderLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
     }
@@ -282,25 +291,38 @@ public class GatewayCmdUtils {
      *
      * @param projectName name of the project
      */
-    public static void createProjectStructure(String projectName) {
+    public static void createProjectStructure(String projectName) throws IOException {
         File projectDir = createFolderIfNotExist(getUserDir() + File.separator + projectName);
 
-        String srcDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
-        createFolderIfNotExist(srcDirPath);
+        String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+        createFolderIfNotExist(interceptorsPath);
 
-        String policyDirPath = srcDirPath + File.separator + GatewayCliConstants.POLICY_DIR;
-        createFolderIfNotExist(policyDirPath);
-
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
+        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
         createFolderIfNotExist(targetDirPath);
 
-        String confDirPath = projectDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
         createFolderIfNotExist(confDirPath);
 
-        String apiFilesDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
-        createFolderIfNotExist(apiFilesDirPath);
+        String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+        createFolderIfNotExist(definitionsPath);
 
-        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.ROUTES_FILE);
+        String genDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        createFolderIfNotExist(genDirPath);
+
+        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_DEFINITION_FILE);
+        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
+
+        String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;
+        File policyResFile = new File(policyResPath);
+        File policesFile = new File(projectDir + File.separator + GatewayCliConstants.PROJECT_POLICIES_FILE);
+
+        if (Files.exists(policyResFile.toPath())) {
+            FileUtils.copyFile(policyResFile, policesFile);
+        } else {
+            throw new CLIRuntimeException("Policy definition not found in CLI_HOME");
+        }
+
+        createGenDirectoryStructure(genDirPath);
     }
 
     /**
@@ -421,7 +443,7 @@ public class GatewayCmdUtils {
         createFolderIfNotExist(distConfPath);
 
         //path : {projectName}/target/distribution/micro-gw-{projectName}/logs
-        String logsDirPath = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_LOGS_DIRECTORY_NAME;
+        String logsDirPath = distMicroGWPath + File.separator + GatewayCliConstants.PROJECT_LOGS_DIR;
         createFolderIfNotExist(logsDirPath);
 
         //path : {projectName}/target/distribution/micro-gw-{projectName}/logs/access_logs
@@ -432,7 +454,7 @@ public class GatewayCmdUtils {
         createFolderIfNotExist(distExec);
 
         //path : {label}/target/distribution/micro-gw-{label}/api-usage-data
-        String apiUsageDir = distMicroGWPath + File.separator + GatewayCliConstants.PROJECTS_API_USAGE_DIRECTORY_NAME;
+        String apiUsageDir = distMicroGWPath + File.separator + GatewayCliConstants.PROJECT_API_USAGE_DIR;
         createFolderIfNotExist(apiUsageDir);
     }
 
@@ -594,7 +616,7 @@ public class GatewayCmdUtils {
      * @return path to the project conf folder
      */
     private static String getProjectConfigDirPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
     }
 
     /**
@@ -626,7 +648,7 @@ public class GatewayCmdUtils {
      */
     public static String getProjectSrcDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
+                + GatewayCliConstants.PROJECT_GEN_DIR;
     }
 
     /**
@@ -636,8 +658,8 @@ public class GatewayCmdUtils {
      */
     public static String getProjectGrpcDirectoryPath() {
         return getUserDir() + File.separator
-                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME + File.separator +
-                GatewayCliConstants.PROJECTS_GRPC_CLIENT_DIRECTORY_NAME;
+                + GatewayCliConstants.PROJECT_GRPC_SERVICE_DIR + File.separator +
+                GatewayCliConstants.PROJECT_GRPC_CLIENT_DIR;
     }
 
     /**
@@ -647,7 +669,7 @@ public class GatewayCmdUtils {
      */
     public static String getProjectGrpcSoloDirectoryPath() {
         return getUserDir() + File.separator
-                + GatewayCliConstants.PROJECTS_GRPC_SERVICE_DIRECTORY_NAME;
+                + GatewayCliConstants.PROJECT_GRPC_SERVICE_DIR;
     }
 
     /**
@@ -658,7 +680,7 @@ public class GatewayCmdUtils {
      */
     private static String getProjectTargetDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
+                + GatewayCliConstants.PROJECT_TARGET_DIR;
     }
 
     /**
@@ -668,7 +690,7 @@ public class GatewayCmdUtils {
      */
     public static String getProjectAPIFilesDirectoryPath(String projectName){
         return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
     }
 
     /**
@@ -729,7 +751,7 @@ public class GatewayCmdUtils {
      * @return path to the client-cert-metadata.yaml for a defined version of an API
      */
     public static String getProjectRoutesConfFilePath(String projectName){
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.ROUTES_FILE;
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_DEFINITION_FILE;
     }
 
     /**
@@ -1160,5 +1182,21 @@ public class GatewayCmdUtils {
         }
 
         return projectName;
+    }
+
+    /**
+     * Create directory structure for projects /gen directory.
+     *
+     * @param genDirPath path to project's /gen directory
+     */
+    private static void createGenDirectoryStructure(String genDirPath) {
+        String genDefinitionsPath = genDirPath + File.separator + GatewayCliConstants.GEN_API_DEFINITIONS_DIR;
+        createFolderIfNotExist(genDefinitionsPath);
+
+        String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
+        createFolderIfNotExist(genSrcPath);
+
+        String genPoliciesPath = genSrcPath + File.separator + GatewayCliConstants.GEN_POLICIES_DIR;
+        createFolderIfNotExist(genPoliciesPath);
     }
 }

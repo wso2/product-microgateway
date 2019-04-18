@@ -81,11 +81,11 @@ goto end
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	SET IS_SETUP_CMD=
+	SET IS_INIT_CMD=
 	if %verbose%==T ECHO Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
-	if ""%1""==""setup"" (
-		SET IS_SETUP_CMD=y
+	if ""%1""==""init"" (
+		SET IS_INIT_CMD=y
 		goto passToJar
 	)
 	if ""%1""==""help""     goto passToJar
@@ -172,7 +172,7 @@ goto end
 	) else (
 		REM Initial setup command. Ballerina platform is not extracted yet.
 		REM Therefore we need to set cli init jars to the classpath
-		if DEFINED IS_SETUP_CMD (
+		if DEFINED IS_INIT_CMD (
 			for %%i IN ("%MICROGW_HOME%"\lib\gateway\platform\*.jar) do (
 				SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\gateway\platform\%%~ni%%~xi
 			)
