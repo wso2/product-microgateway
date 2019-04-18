@@ -1,0 +1,43 @@
+resourcePolicies:
+  - 50kPerMin:
+     count: 50000
+     unitTime: 1
+     timeUnit: min
+  - 20kPerMin:
+     count: 20000
+     unitTime: 1
+     timeUnit: min
+  - 10kPerMin:
+     count: 10000
+     unitTime: 1
+     timeUnit: min
+applicationPolicies:
+  - 50PerMin:
+     count: 50
+     unitTime: 1
+     timeUnit: min
+  - 20PerMin:
+     count: 20
+     unitTime: 1
+     timeUnit: min
+  - 10PerMin:
+     count: 10
+     unitTime: 1
+     timeUnit: min
+subscriptionPolicies:
+  - Gold:
+     count: 5000
+     unitTime: 1
+     timeUnit: min
+  - Silver:
+     count: 2000
+     unitTime: 1
+     timeUnit: min
+  - Bronze:
+     count: 10
+     unitTime: 1
+     timeUnit: min
+  - Unauthenticated:
+     count: 500
+     unitTime: 1
+     timeUnit: min

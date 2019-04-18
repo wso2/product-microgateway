@@ -49,7 +49,7 @@
  public int SUPER_TENANT_ID = -1234;
  public const string THROTTLE_KEY = "throttleKey";
  public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
- public const string RESOURCE_TIER_ANN_NAME = "ResourceTier";
+ public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
  public const string UNLIMITED_TIER = "Unlimited";
  public const string UNAUTHENTICATED_TIER = "Unauthenticated";
  public const string END_USER_ANONYMOUS = "anonymous";
@@ -242,10 +242,7 @@
  public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
  const string TRUE = "true";
  const string REQUEST_BLOCKED = "REQUEST_BLOCKED";
- const string THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED = "API_LIMIT_EXCEEDED";
- const string THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
- const string THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
- const string THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
+
 
  const string INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured";
  const string UNPROCESSABLE_ENTITY_MESSAGE = "Unable to process the entity";
