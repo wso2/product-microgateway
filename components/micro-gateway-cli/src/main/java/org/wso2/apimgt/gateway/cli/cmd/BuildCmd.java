@@ -67,6 +67,7 @@ public class BuildCmd implements GatewayLauncherCmd {
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
     private boolean helpFlag;
 
+
     public void execute() {
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
@@ -95,7 +96,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
-                codeGenerator.generate(projectName, true);
+                codeGenerator.generate(projectName, true, true);
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);

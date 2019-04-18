@@ -21,6 +21,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -34,7 +35,6 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -54,22 +54,29 @@ public class CodeGenerator {
     private static PrintStream outStream = System.out;
 
     /**
-     * Generates ballerina source for saved swagger definitions
-     * API endpoint details are identified by reading the routes configuration file
-     * Swagger definition is saved in the project
-     * @param projectName project name
-     * @param overwrite whether existing files overwrite or not
-     * @throws IOException if IOException occurs during writing generated ballerina files, copying extension filters
-     * or copying policy ballerina files
+     * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
+     * Generated source will be written to a ballerina package at {@code outPath}
+     * <p>Method can be used for generating Ballerina mock services and clients</p>
+     *
+     * @throws IOException                  when file operations fail
+     * @throws BallerinaServiceGenException when code generator fails
      */
-    public void generate(String projectName, boolean overwrite) throws IOException {
-
+    public void generate(String projectName, boolean overwrite, boolean isUserAdded)
+            throws IOException {
         String projectSrcPath = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName);
-        String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+        String projectGenPath = GatewayCmdUtils.getProjectGenSrcDirectoryPath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
 
-        Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
+        String openApiPath;
+        if(isUserAdded){
+            openApiPath = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +
+                    GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+        } else {
+            openApiPath = GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName);
+        }
+
+        Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
                 .forEach( path -> {
                     ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
                     String basepath = MgwDefinitionUtils.getBasePath(api.getName(), api.getVersion());
@@ -91,7 +98,7 @@ public class CodeGenerator {
                 });
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
-        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
+        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectGenPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
@@ -172,12 +179,14 @@ public class CodeGenerator {
             throws IOException, BallerinaServiceGenException {
         BallerinaService definitionContext;
         String projectSrcPath = GatewayCmdUtils
-                .getProjectSrcDirectoryPath(projectName);
+                .getProjectSwaggerDirectoryPath(projectName);
+
         String projectGrpcPath = GatewayCmdUtils.getProjectGrpcDirectoryPath();
         List<GenSrcFile> genFiles = new ArrayList<>();
         File dir = new File(projectGrpcPath);
         File[] files = dir.listFiles();
         genFiles.add(generateCommonEndpoints());
+
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
 
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
@@ -196,5 +205,20 @@ public class CodeGenerator {
         File temp = new File(GatewayCmdUtils.getProjectGrpcSoloDirectoryPath());
         dir.delete();
         temp.delete();
+    }
+
+    /**
+     * Generate swagger files
+     *
+     * @param context model context to be used by the templates
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
+        String concatTitle = context.getName();
+        String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
+        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+                GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 }

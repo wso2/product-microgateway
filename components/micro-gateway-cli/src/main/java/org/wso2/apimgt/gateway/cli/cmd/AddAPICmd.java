@@ -261,7 +261,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
                         //Create folder structure for the API
                         GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
                         //save OpenAPI Specification
-                        GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
+                       // GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, api);
                         //save API-metadata
                         JsonProcessingUtils.saveAPIMetadata(projectName, apiId, security);
                         //Save route configurations for the given endpointConfiguration
