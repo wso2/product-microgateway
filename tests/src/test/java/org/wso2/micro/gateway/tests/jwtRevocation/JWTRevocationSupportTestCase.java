@@ -17,7 +17,9 @@
  */
 package org.wso2.micro.gateway.tests.jwtRevocation;
 
-import io.ballerina.messaging.broker.EmbeddedBroker;
+//uncomment when running this test case only
+//import io.ballerina.messaging.broker.EmbeddedBroker;
+
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
@@ -66,7 +68,6 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     private String jwtTokenProd;
     private String jti = "2f3c1e3a-fe4c-4cd4-b049-156e3c63fc5d";
     private MockETCDServer mockETCDServer;
-    private EmbeddedBroker broker;
     private MessageConsumer consumer;
 
     @BeforeClass
@@ -115,9 +116,10 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
         //prepareConfigValues();
 
+        //uncomment to run this test case only
         //Initialize the JMS message broker
-        broker = new EmbeddedBroker();
-        startMessageBroker();
+        //broker = new EmbeddedBroker();
+        //startMessageBroker();
 
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
@@ -235,9 +237,10 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         }
     }
 
-    private void startMessageBroker() throws Exception {
-        broker.start();
-    }
+    //uncomment to run this test case only
+//    private void startMessageBroker() throws Exception {
+//        broker.start();
+//    }
 
     /**
      * Method to publish a messege to JwtRevocation topic
