@@ -39,14 +39,20 @@ public class GeneratorConstants {
 
     public static final String APPLICATION_POLICY_TYPE = "application";
     public static final String SUBSCRIPTION_POLICY_TYPE = "subscription";
+    public static final String RESOURCE_POLICY_TYPE = "resource";
+    public static final String RESOURCE_INIT_FUNC_PREFIX = "initResource";
     public static final String APPLICATION_INIT_FUNC_PREFIX = "initApplication";
     public static final String SUBSCRIPTION_INIT_FUNC_PREFIX = "initSubscription";
     public static final String APPLICATION_KEY = "appKey";
     public static final String SUBSCRIPTION_KEY = "subscriptionKey";
+    public static final String RESOURCE_KEY = "resourceKey";
     public static final String APPLICATION_TIER_TYPE = "appTier";
     public static final String SUBSCRIPTION_TIER_TYPE = "subscriptionTier";
+    public static final String RESOURCE_TIER_TYPE = "resourceTier";
     public static final String INIT_FUNC_SUFFIX = "Policy";
     public static final String THROTTLE_POLICY_INITIALIZER = "throttle_policy_initializer";
     public static final String UTF_8 = "UTF-8";
+
+    public enum POLICY_TYPE {RESOURCE, APPLICATION, SUBSCRIPTION};
 
 }

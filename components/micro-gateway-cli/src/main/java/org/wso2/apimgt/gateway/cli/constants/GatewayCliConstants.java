@@ -98,6 +98,7 @@ public class GatewayCliConstants {
 
     public static final String PROJECTS_API_FILES_DIRECTORY_NAME = "API-files";
     public static final String ROUTES_FILE = "routes.yaml";
+    public static final String POLICIES_FILE = "policies.yaml";
     public static final String SUBSCRIPTION_THROTTLE_POLICIES_FILE = "subscription-throttle-policies.json";
     public static final String APPLICATION_THROTTLE_POLICIES_FILE = "application-throttle-policies.json";
     public static final String CLIENT_CERT_METADATA_FILE = "client-cert-metadata.json";

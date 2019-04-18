@@ -54,6 +54,10 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${basedir}/resources/definitions</directory>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/definitions</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>
                 ${project.build.directory}/lib/repo/
             </directory>
