@@ -8,7 +8,6 @@ import ballerina/io;
 import ballerina/internal;
 import ballerina/system;
 
-
 string etcdPasswordTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_PASSWORD, "");
 string etcdUsernameTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_USERNAME, "");
 
