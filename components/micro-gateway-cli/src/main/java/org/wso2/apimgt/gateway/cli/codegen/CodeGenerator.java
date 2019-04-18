@@ -37,7 +37,12 @@ import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.*;
+import java.nio.file.Paths;
+import java.nio.file.FileSystems;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,8 +69,8 @@ public class CodeGenerator {
         Swagger swagger;
         String projectSrcPath = GatewayCmdUtils
                 .getProjectSrcDirectoryPath(projectName);
-
-        String projectAPIDefinitionPath = GatewayCmdUtils.getProjectApiDefinitionDirectoryPath(projectName);
+        String projectAPIDefinitionPath = GatewayCmdUtils
+                .getProjectApiDefinitionDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
         GenSrcFile generatedSwagger;
         List<BallerinaService> serviceList = new ArrayList<>();
