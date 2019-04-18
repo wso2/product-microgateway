@@ -37,12 +37,7 @@ import org.wso2.apimgt.gateway.cli.utils.OpenApiCodegenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Paths;
-import java.nio.file.FileSystems;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +64,10 @@ public class CodeGenerator {
         Swagger swagger;
         String projectSrcPath = GatewayCmdUtils
                 .getProjectSrcDirectoryPath(projectName);
+
+        String projectAPIDefinitionPath = GatewayCmdUtils.getProjectApiDefinitionDirectoryPath(projectName);
         List<GenSrcFile> genFiles = new ArrayList<>();
+        GenSrcFile generatedSwagger;
         List<BallerinaService> serviceList = new ArrayList<>();
         for (ExtendedAPI api : apis) {
             outStream.println("ID for API " + api.getName() + " : " + api.getId());
@@ -87,11 +85,20 @@ public class CodeGenerator {
             }
             serviceList.add(definitionContext);
             genFiles.add(generateService(definitionContext));
-            genFiles.add(generateSwagger(definitionContext));
-
+            generatedSwagger = generateSwagger(definitionContext);
+            Path filePath = Paths.get(projectAPIDefinitionPath);
+            if (Files.notExists(filePath)) {
+                CodegenUtils.writeFile(Paths.get(projectAPIDefinitionPath), generatedSwagger.getContent());
+            } else {
+                if (overwrite) {
+                    Files.delete(filePath);
+                    CodegenUtils.writeFile(filePath, generatedSwagger.getContent());
+                }
+            }
         }
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
+
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
                         + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,

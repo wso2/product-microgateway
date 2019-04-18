@@ -566,8 +566,22 @@ public class GatewayCmdUtils {
      * @return path to the /src of a given project in the current working directory
      */
     public static String getProjectSrcDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECTS_GEN_DIRECTORY_NAME +
+                GatewayCliConstants.PROJECTS_API_DEFINITION_DIRECTORY_NAME + File.separator
                 + GatewayCliConstants.PROJECTS_SRC_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /gen/api-definition of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     *      * @return path to the /gen/api-definition of a given project in the current working directory
+     */
+    public static String getProjectApiDefinitionDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECTS_GEN_DIRECTORY_NAME +
+                GatewayCliConstants.PROJECTS_API_DEFINITION_DIRECTORY_NAME;
     }
 
     /**

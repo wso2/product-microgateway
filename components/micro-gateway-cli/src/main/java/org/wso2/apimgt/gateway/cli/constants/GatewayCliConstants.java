@@ -26,6 +26,8 @@ import java.util.List;
 public class GatewayCliConstants {
     public static final String CONF_DIRECTORY_NAME = "conf";
     public static final String PROJECTS_SRC_DIRECTORY_NAME = "src";
+    public static final String PROJECTS_GEN_DIRECTORY_NAME = "gen";
+    public static final String PROJECTS_API_DEFINITION_DIRECTORY_NAME = "api-definition";
     public static final String PROJECTS_GRPC_SERVICE_DIRECTORY_NAME = "grpc_service";
     public static final String PROJECTS_GRPC_CLIENT_DIRECTORY_NAME = "client";
     public static final String PROJECTS_LOGS_DIRECTORY_NAME = "logs";
