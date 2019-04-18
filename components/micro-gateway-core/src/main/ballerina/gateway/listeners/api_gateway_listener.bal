@@ -86,7 +86,6 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
         JwtAuthenticationHandler jwtAuthenticationHandler = new(jwtAuthProvider, jwtConfig);
         return <JwtAuthenticationHandler>jwtAuthenticationHandler;
-        //return jwtAuthnHandler;
     } else {
         // TODO: create other HttpAuthnHandlers
         error e = error( "Invalid auth scheme: " + authProvider.scheme);
