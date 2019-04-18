@@ -77,7 +77,7 @@ public class Main {
     private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
         try {
             DefaultCmd defaultCmd = new DefaultCmd();
-            JCommander cmdParser = new JCommander(defaultCmd);
+            ExtendedJCommander cmdParser = new ExtendedJCommander(defaultCmd);
             defaultCmd.setParentCmdParser(cmdParser);
 
             HelpCmd helpCmd = new HelpCmd();
@@ -85,6 +85,7 @@ public class Main {
             helpCmd.setParentCmdParser(cmdParser);
 
             SetupCmd setupCmd = new SetupCmd();
+            setupCmd.setArgsForAddCmd(args);
             cmdParser.addCommand(GatewayCliCommands.SETUP, setupCmd);
             setupCmd.setParentCmdParser(cmdParser);
 
@@ -99,6 +100,38 @@ public class Main {
             ResetCmd resetCmd = new ResetCmd();
             cmdParser.addCommand(GatewayCliCommands.RESET, resetCmd);
             resetCmd.setParentCmdParser(cmdParser);
+
+            AddAPICmd addAPICmd = new AddAPICmd();
+            cmdParser.addCommand(GatewayCliCommands.ADD_API, addAPICmd);
+            addAPICmd.setParentCmdParser(cmdParser);
+
+            AddRouteCmd addRouteCmd = new AddRouteCmd();
+            cmdParser.addCommand(GatewayCliCommands.ADD_ROUTE, addRouteCmd);
+            addRouteCmd.setParentCmdParser(cmdParser);
+
+            ListAPIsCmd listAPIsCmd = new ListAPIsCmd();
+            cmdParser.addCommand(GatewayCliCommands.LIST_APIS, listAPIsCmd);
+            listAPIsCmd.setParentCmdParser(cmdParser);
+
+            ListResourcesCmd listResourcesCmd = new ListResourcesCmd();
+            cmdParser.addCommand(GatewayCliCommands.LIST_RESOURCES, listResourcesCmd);
+            listResourcesCmd.setParentCmdParser(cmdParser);
+
+            DescResourceCmd descResourceCmd = new DescResourceCmd();
+            cmdParser.addCommand(GatewayCliCommands.DESC_RESOURCE, descResourceCmd);
+            descResourceCmd.setParentCmdParser(cmdParser);
+
+            FunctionCmd functionCmd = new FunctionCmd();
+            cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
+            functionCmd.setParentCmdParser(cmdParser);
+
+            SetProjectCmd setProjectCmd = new SetProjectCmd();
+            cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
+            setProjectCmd.setParentCmdParser(cmdParser);
+          
+            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
+            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
+            updateRouteCmd.setParentCmdParser(cmdParser);
 
             cmdParser.setProgramName(MICRO_GW);
             cmdParser.parse(args);

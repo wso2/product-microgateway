@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.rest;
+package org.wso2.apimgt.gateway.cli.model.mgwServiceMap;
 
-public class Endpoint {
+public class MgwEndpointDTO {
     private String endpointUrl;
 
-    public Endpoint(){
-    }
+//    public MgwEndpointDTO(){
+//    }
 
-    public Endpoint(String endpointUrl){
+    public MgwEndpointDTO(String endpointUrl){
         setEndpointUrl(endpointUrl);
     }
 

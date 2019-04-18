@@ -16,7 +16,7 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
@@ -24,11 +24,12 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
  * Wraps the {@link Parameter} from swagger models for easier templating.
  *
  */
-public class BallerinaParameter implements BallerinaSwaggerObject<BallerinaParameter, Parameter> {
+public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParameter, Parameter> {
     private String name;
     private String in;
     private String description;
     private Boolean required;
+    private Boolean allowEmptyValue;
 
     @Override
     public BallerinaParameter buildContext(Parameter parameter) throws BallerinaServiceGenException {
@@ -41,6 +42,7 @@ public class BallerinaParameter implements BallerinaSwaggerObject<BallerinaParam
         this.in = parameter.getIn();
         this.description = parameter.getDescription();
         this.required = parameter.getRequired();
+        this.allowEmptyValue = parameter.getAllowEmptyValue();
         return this;
     }
 
@@ -63,6 +65,14 @@ public class BallerinaParameter implements BallerinaSwaggerObject<BallerinaParam
 
     public Boolean getRequired() {
         return required;
+    }
+
+    public Boolean getAllowEmptyValue() {
+        return allowEmptyValue;
+    }
+
+    public void setAllowEmptyValue(Boolean allowEmptyValue) {
+        this.allowEmptyValue = allowEmptyValue;
     }
 
 }

@@ -27,17 +27,14 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
-import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.Endpoint;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.rest.*;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
 
 import java.io.IOException;
@@ -185,7 +182,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
     private void setAdditionalConfigs(ExtendedAPI api) throws IOException {
         String endpointConfig = api.getEndpointConfig();
-        api.setEndpointConfigRepresentation(getEndpointConfig(endpointConfig));
+        //todo: remove the comment
+        //api.setEndpointConfigRepresentation((endpointConfig));
         // set default values from config if per api cors is not enabled
         Config config = GatewayCmdUtils.getConfig();
         if (config == null) {
@@ -298,83 +296,6 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
         }
         return filteredPolicyDTOS;
-    }
-
-    private EndpointConfig getEndpointConfig(String endpointConfig) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode;
-        EndpointConfig endpointConf = new EndpointConfig();
-        rootNode = mapper.readTree(endpointConfig);
-        String endpointType = rootNode.path(RESTServiceConstants.ENDPOINT_TYPE).asText();
-        endpointConf.setEndpointType(endpointType);
-
-        if (RESTServiceConstants.HTTP.equalsIgnoreCase(endpointType) || RESTServiceConstants.FAILOVER.
-                equalsIgnoreCase(endpointType) || RESTServiceConstants.ADDRESS.equalsIgnoreCase(endpointType)) {
-            JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
-            if (prodEndpointNode != null) {
-                Endpoint prod = new Endpoint();
-                prod.setEndpointUrl(prodEndpointNode.get(RESTServiceConstants.URL).asText());
-                endpointConf.addProdEndpoint(prod);
-            }
-
-            JsonNode sandEndpointNode = rootNode.get(RESTServiceConstants.SANDBOX_ENDPOINTS);
-            if (sandEndpointNode != null) {
-                Endpoint sandbox = new Endpoint();
-                sandbox.setEndpointUrl(sandEndpointNode.get(RESTServiceConstants.URL).asText());
-                endpointConf.addSandEndpoint(sandbox);
-            }
-
-            if (RESTServiceConstants.FAILOVER.equalsIgnoreCase(endpointType)) {
-                //ballerina does not treat primary/failover endpoint separately. Hence, primary production/sandbox
-                //  eps (if any) will be added into failover list.
-                if (endpointConf.getProdEndpoints() != null
-                        && endpointConf.getProdEndpoints().getEndpoints().size() > 0) {
-                    endpointConf.addProdFailoverEndpoint(endpointConf.getProdEndpoints().getEndpoints().get(0));
-                }
-                if (endpointConf.getSandEndpoints() != null
-                        && endpointConf.getSandEndpoints().getEndpoints().size() > 0) {
-                    endpointConf.addSandFailoverEndpoint(endpointConf.getSandEndpoints().getEndpoints().get(0));
-                }
-
-                //Adding additional production/sandbox failover endpoints
-                JsonNode prodFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.PRODUCTION_FAILOVERS);
-                if (prodFailoverEndpointNode != null) {
-                    for (JsonNode node : prodFailoverEndpointNode) {
-                        Endpoint endpoint = new Endpoint();
-                        endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
-                        endpointConf.addProdFailoverEndpoint(endpoint);
-                    }
-                }
-
-                JsonNode sandFailoverEndpointNode = rootNode.withArray(RESTServiceConstants.SANDBOX_FAILOVERS);
-                if (sandFailoverEndpointNode != null) {
-                    for (JsonNode node : sandFailoverEndpointNode) {
-                        Endpoint endpoint = new Endpoint();
-                        endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
-                        endpointConf.addSandFailoverEndpoint(endpoint);
-                    }
-                }
-            }
-        } else if (RESTServiceConstants.LOAD_BALANCE.equalsIgnoreCase(endpointType)) {
-            JsonNode prodEndpoints = rootNode.withArray(RESTServiceConstants.PRODUCTION_ENDPOINTS);
-            if (prodEndpoints != null) {
-                for (JsonNode node : prodEndpoints) {
-                    Endpoint endpoint = new Endpoint();
-                    endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
-                    endpointConf.addProdEndpoint(endpoint);
-                }
-            }
-
-            JsonNode sandboxEndpoints = rootNode.withArray(RESTServiceConstants.SANDBOX_ENDPOINTS);
-            if (sandboxEndpoints != null) {
-                for (JsonNode node : sandboxEndpoints) {
-                    Endpoint endpoint = new Endpoint();
-                    endpoint.setEndpointUrl(node.get(RESTServiceConstants.URL).asText());
-                    endpointConf.addSandEndpoint(endpoint);
-                }
-            }
-        }
-        return endpointConf;
     }
 
     /**

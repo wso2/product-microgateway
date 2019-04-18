@@ -59,6 +59,10 @@ public class CLIExecutor {
                 config, "--security", security};
         main.main(args);
 
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
+
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
         homeDirectory = path + File.separator + project;
@@ -76,7 +80,8 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition(String label, String project, String endpoint, String security) throws Exception {
+    public void generateFromDefinition(String label, String project, String endpoint, String security, String basepath)
+            throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -93,9 +98,14 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("testapi.json")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
+
         String[] args = {"setup", project, "--label", label,
-                "-oa", oasFilePath, "-e", endpoint, "--config", config, "--security", security};
+                "-oa", oasFilePath, "-e", endpoint, "--config", config, "--security", security, "--basepath", basepath};
         main.main(args);
+
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
@@ -133,6 +143,10 @@ public class CLIExecutor {
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", "oauth2", additionalFlag };
         main.main(args);
+
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";

@@ -16,7 +16,6 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.Path;
 import io.swagger.v3.oas.models.PathItem;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -31,7 +30,7 @@ import java.util.Set;
  * for operations.
  *
  */
-public class BallerinaPath implements BallerinaSwaggerObject<BallerinaPath, Path> {
+public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, PathItem> {
     private Set<Map.Entry<String, BallerinaOperation>> operations;
 
     public BallerinaPath() {
@@ -39,7 +38,7 @@ public class BallerinaPath implements BallerinaSwaggerObject<BallerinaPath, Path
     }
 
     @Override
-    public BallerinaPath buildContext(Path item, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaPath buildContext(PathItem item, ExtendedAPI api) throws BallerinaServiceGenException {
         Map.Entry<String, BallerinaOperation> entry;
         BallerinaOperation operation;
 
@@ -85,7 +84,7 @@ public class BallerinaPath implements BallerinaSwaggerObject<BallerinaPath, Path
     }
 
     @Override
-    public BallerinaPath buildContext(Path item) throws BallerinaServiceGenException {
+    public BallerinaPath buildContext(PathItem item) throws BallerinaServiceGenException {
         return buildContext(item, null);
     }
 

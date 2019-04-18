@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
@@ -33,18 +34,11 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -302,7 +296,71 @@ public class GatewayCmdUtils {
 
         String confDirPath = projectDir + File.separator + GatewayCliConstants.CONF_DIRECTORY_NAME;
         createFolderIfNotExist(confDirPath);
+
+        String apiFilesDirPath = projectDir + File.separator + GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+        createFolderIfNotExist(apiFilesDirPath);
+
+        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.ROUTES_FILE);
     }
+
+    /**
+     * Create API-Files Directory for a particular project
+     * @param projectName name of the project
+     * @param apiId md5 hash value for apiName:version
+     */
+    public static void createPerAPIFolderStructure(String projectName, String apiId){
+
+        String apiFilesDirPath = getProjectAPIFilesDirectoryPath(projectName);
+        String apiDirPath = apiFilesDirPath + File.separator + apiId;
+        createFolderIfNotExist(apiDirPath);
+    }
+
+    /**
+     * Save openAPI definition (developer first approach)
+     * @param projectName project name
+     * @param apiId  API id
+     * @param apiDefinition api Definition as String
+     */
+    public static void saveSwaggerDefinition(String projectName, String apiId, String apiDefinition){
+        if (apiDefinition.isEmpty()){
+            throw new CLIInternalException("No swagger definition is provided to generate API");
+        }
+        try {
+            writeContent(apiDefinition, new File (GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId)));
+        } catch (IOException e) {
+            throw new CLIInternalException("Error while copying the swagger to the project directory");
+        }
+    }
+
+    private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api){
+        String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
+        String apiId = HashUtils.generateAPIId( api.getName(), api.getVersion());
+        GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, swaggerString);
+    }
+
+    /**
+     * Save swagger definition for multiple APIs.
+     * @param projectName project name
+     * @param apis API object List
+     */
+    public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis){
+        for(ExtendedAPI api : apis){
+            String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+            GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
+            saveSwaggerDefinitionForSingleAPI(projectName, api);
+        }
+    }
+
+    public static void saveAPIMetadataFile(String projectName, String apiId, String apiMetadataYaml){
+        if(!apiMetadataYaml.isEmpty()){
+            try {
+                writeContent(apiMetadataYaml, new File(GatewayCmdUtils.getAPIMetadataFilePath(projectName, apiId)));
+            } catch (IOException e) {
+                throw new CLIInternalException("Error while copying api-metaData to the project directory");
+            }
+        }
+    }
+
 
     /**
      * Create a micro gateway distribution for the provided project name
@@ -421,14 +479,14 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Validate the list of main args and returns the first element as the project name
+     * Validate the list of main args and returns the first element.
      *
      * @param mainArgs List of main args provided to the command
      * @return first element
      */
-    public static String getProjectName(List<String> mainArgs) {
+    public static String getSingleArgument(List<String> mainArgs) {
         if (mainArgs.size() != 1) {
-            throw new CLIRuntimeException("Only one argument accepted as the project name, "
+            throw new CLIRuntimeException("Only one argument accepted, "
                     + "but provided: " + String.join(",", mainArgs));
         } else {
             return mainArgs.get(0);
@@ -556,7 +614,8 @@ public class GatewayCmdUtils {
      * @return path to the given project in the current working directory
      */
     public static String getProjectDirectoryPath(String projectName) {
-        return getUserDir() + File.separator + projectName;
+        // TODO: do we need to change this?
+        return new File(projectName).getAbsolutePath();
     }
 
     /**
@@ -600,6 +659,77 @@ public class GatewayCmdUtils {
     private static String getProjectTargetDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECTS_TARGET_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns path to the /API-Files of a given project in the current working directory
+     * @param projectName name of the project
+     * @return path to the /API-Files of a given project in the current working directory
+     */
+    public static String getProjectAPIFilesDirectoryPath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECTS_API_FILES_DIRECTORY_NAME;
+    }
+
+    /**
+     * Returns the path to the swagger for a defined version of an API
+     * @param projectName name of the project
+     * @param apiId md5 hash value of apiName:apiVersion
+     * @return path to the swagger for a defined version of an API
+     */
+    public static String getProjectSwaggerFilePath(String projectName, String apiId){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
+                GatewayCliConstants.API_SWAGGER;
+    }
+
+    /**
+     * Returns the path to the metadata for a defined version of an API
+     * @param projectName name of the project
+     * @param apiId md5 hash value of apiName:apiVersion
+     * @return path to the metadata file of the API
+     */
+    public static String getAPIMetadataFilePath(String projectName, String apiId){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
+                GatewayCliConstants.API_METADATA_FILE;
+    }
+
+    /**
+     * Returns the path to the application-throttle-policies.yaml for for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the application-throttle-policies.yaml for for a defined version of an API
+     */
+    public static String getProjectAppThrottlePoliciesFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.APPLICATION_THROTTLE_POLICIES_FILE;
+    }
+
+    /**
+     * Returns the path to the application-throttle-policies.yaml file for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the application-throttle-policies.yaml file for a defined version of an API
+     */
+    public static String getProjectSubscriptionThrottlePoliciesFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.SUBSCRIPTION_THROTTLE_POLICIES_FILE;
+    }
+
+    /**
+     * Returns the path to the client-cert-metadata.yaml for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
+    public static String getProjectClientCertMetadataFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.CLIENT_CERT_METADATA_FILE;
+    }
+
+    /**
+     * Returns the path to the routes configuration file (routes.yaml)
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
+    public static String getProjectRoutesConfFilePath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.ROUTES_FILE;
     }
 
     /**
@@ -746,9 +876,10 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     private static void writeContent(String content, File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        }
+        FileWriter writer = null;
+        writer = new FileWriter(file);
+        writer.write(content);
+        writer.flush();
     }
 
     /**
@@ -927,7 +1058,7 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Read the deserialize file content to map
+     * Read the deserialize file content to map.
      *
      * @param filePath file path the map should be written to
      * @throws IOException error while saving resource hash content
@@ -936,5 +1067,98 @@ public class GatewayCmdUtils {
         try(FileInputStream fis = new FileInputStream(filePath);ObjectInputStream obi = new ObjectInputStream(fis)){
             return (Map<String , String>) obi.readObject();
         }
+    }
+
+    /**
+     * Prompts for a test input.
+     *
+     * @param outStream Print Stream
+     * @param msg message
+     * @return user entered text
+     */
+    public static String promptForTextInput(PrintStream outStream, String msg) {
+        outStream.println(msg);
+        return System.console().readLine();
+    }
+
+    /**
+     * Delete the subfolder containing metadata and swagger File
+     * @param projectName   project name
+     * @param apiId         API Id
+     * @throws IOException  If the directory does not exist
+     */
+    public static void deletePerAPIFolder(String projectName, String apiId) {
+        try{
+            delete(new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                    apiId));
+        } catch (IOException e){
+            throw new CLIInternalException("Delete folder is failed : " + apiId);
+        }
+    }
+
+    /**
+     * Read the project descriptor file at a given path.
+     * <p>
+     *     This will only read the first line of the file. We are not interested
+     *     in the rest of the content in the file.
+     * </p>
+     *
+     * @param filePath Path to project descriptor file
+     * @return First line of the file at {@code filePath}
+     * @throws IOException when failed to read file at {@code filePath}
+     */
+    private static String readGatewayProjectFile(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        String projectPath = reader.readLine();
+
+        return projectPath;
+    }
+
+    /**
+     * Find the working project directory set in the {@link GatewayCliConstants#PROJECT_FILE_NAME}
+     * of MGW_HOME.
+     *
+     * @return path to currently working project. {@code null} if unable to read project descriptor
+     * or invalid project dir is detected
+     */
+    public static String findCurrentProject() {
+        String projectFile = GatewayCmdUtils.getCLIHome() + File.separator + GatewayCliConstants.PROJECT_FILE_NAME;
+        String fileContent = null;
+        try {
+            fileContent = readGatewayProjectFile(projectFile);
+        } catch (IOException e) {
+             // Ignore the exception, which will result in null as return value
+        }
+
+        if (fileContent != null && Files.isDirectory(Paths.get(fileContent))) {
+            return fileContent.trim();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Build the correct current project directory. If {@code knownName} is a valid project name
+     * it'll take the priority as the project name. If not {@link GatewayCliConstants#PROJECT_FILE_NAME}
+     * file value will be taken as the project path. If both are no available error will be thrown.
+     *
+     * @param knownName known project name to prioritize
+     * @return valid project name
+     */
+    public static String buildProjectName(String knownName) {
+        String projectName = knownName;
+
+        if (StringUtils.isEmpty(knownName)) {
+            String workingProject = GatewayCmdUtils.findCurrentProject();
+
+            if (StringUtils.isEmpty(workingProject)) {
+                throw new CLIRuntimeException("Project name is not provided.");
+            } else {
+                projectName = workingProject;
+                logger.debug("Working project was set from config: " + projectName);
+            }
+        }
+
+        return projectName;
     }
 }
