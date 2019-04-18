@@ -95,6 +95,3 @@ public function initiateTokenRevocationJmsListener() returns boolean {
     }
     return false;
 }
-
-
-
