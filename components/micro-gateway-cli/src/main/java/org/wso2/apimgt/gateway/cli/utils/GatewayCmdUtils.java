@@ -34,7 +34,6 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
@@ -45,6 +44,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class GatewayCmdUtils {
 
@@ -326,29 +326,16 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create API-Files Directory for a particular project
-     * @param projectName name of the project
-     * @param apiId md5 hash value for apiName:version
-     */
-    public static void createPerAPIFolderStructure(String projectName, String apiId){
-
-        String apiFilesDirPath = getProjectAPIFilesDirectoryPath(projectName);
-        String apiDirPath = apiFilesDirPath + File.separator + apiId;
-        createFolderIfNotExist(apiDirPath);
-    }
-
-    /**
      * Save openAPI definition (developer first approach)
      * @param projectName project name
-     * @param apiId  API id
      * @param apiDefinition api Definition as String
      */
-    public static void saveSwaggerDefinition(String projectName, String apiId, String apiDefinition){
+    public static void saveSwaggerDefinition(String projectName,String apiDefinition){
         if (apiDefinition.isEmpty()){
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
         try {
-            writeContent(apiDefinition, new File (GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId)));
+            writeContent(apiDefinition, new File (getProjectSwaggerDirectoryPath(projectName)));
         } catch (IOException e) {
             throw new CLIInternalException("Error while copying the swagger to the project directory");
         }
@@ -356,8 +343,7 @@ public class GatewayCmdUtils {
 
     private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api){
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
-        String apiId = HashUtils.generateAPIId( api.getName(), api.getVersion());
-        GatewayCmdUtils.saveSwaggerDefinition(projectName, apiId, swaggerString);
+        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString);
     }
 
     /**
@@ -367,22 +353,9 @@ public class GatewayCmdUtils {
      */
     public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis){
         for(ExtendedAPI api : apis){
-            String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-            GatewayCmdUtils.createPerAPIFolderStructure(projectName, apiId);
             saveSwaggerDefinitionForSingleAPI(projectName, api);
         }
     }
-
-    public static void saveAPIMetadataFile(String projectName, String apiId, String apiMetadataYaml){
-        if(!apiMetadataYaml.isEmpty()){
-            try {
-                writeContent(apiMetadataYaml, new File(GatewayCmdUtils.getAPIMetadataFilePath(projectName, apiId)));
-            } catch (IOException e) {
-                throw new CLIInternalException("Error while copying api-metaData to the project directory");
-            }
-        }
-    }
-
 
     /**
      * Create a micro gateway distribution for the provided project name
@@ -652,6 +625,30 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /gen/src of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /src of a given project in the current working directory
+     */
+    public static String getProjectGenSrcDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator
+                + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR;
+    }
+
+    /**
+     * Returns path to the /gen/api-definition of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     *      * @return path to the /gen/api-definition of a given project in the current working directory
+     */
+    public static String getProjectSwaggerDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + UUID.randomUUID()
+                + GatewayCliConstants.API_SWAGGER;
+    }
+
+    /**
      * Returns path to the /grpc_service/client of a given project in the current working directory
      *
      * @return path to the /grpc_service/client of a given project in the current working directory
@@ -684,65 +681,14 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /API-Files of a given project in the current working directory
+     * Returns path to the /api-definitions of a given project in the current working directory
      * @param projectName name of the project
-     * @return path to the /API-Files of a given project in the current working directory
+     * @return path to the /api-definitionsof a given project in the current working directory
      */
-    public static String getProjectAPIFilesDirectoryPath(String projectName){
+    public static String getProjectAPIDefinitionsDirectoryPath(String projectName){
         return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-    }
-
-    /**
-     * Returns the path to the swagger for a defined version of an API
-     * @param projectName name of the project
-     * @param apiId md5 hash value of apiName:apiVersion
-     * @return path to the swagger for a defined version of an API
-     */
-    public static String getProjectSwaggerFilePath(String projectName, String apiId){
-        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
-                GatewayCliConstants.API_SWAGGER;
-    }
-
-    /**
-     * Returns the path to the metadata for a defined version of an API
-     * @param projectName name of the project
-     * @param apiId md5 hash value of apiName:apiVersion
-     * @return path to the metadata file of the API
-     */
-    public static String getAPIMetadataFilePath(String projectName, String apiId){
-        return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
-                GatewayCliConstants.API_METADATA_FILE;
-    }
-
-    /**
-     * Returns the path to the application-throttle-policies.yaml for for a defined version of an API
-     * @param projectName name of the project
-     * @return path to the application-throttle-policies.yaml for for a defined version of an API
-     */
-    public static String getProjectAppThrottlePoliciesFilePath(String projectName){
-        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.APPLICATION_THROTTLE_POLICIES_FILE;
-    }
-
-    /**
-     * Returns the path to the application-throttle-policies.yaml file for a defined version of an API
-     * @param projectName name of the project
-     * @return path to the application-throttle-policies.yaml file for a defined version of an API
-     */
-    public static String getProjectSubscriptionThrottlePoliciesFilePath(String projectName){
-        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.SUBSCRIPTION_THROTTLE_POLICIES_FILE;
-    }
-
-    /**
-     * Returns the path to the client-cert-metadata.yaml for a defined version of an API
-     * @param projectName name of the project
-     * @return path to the client-cert-metadata.yaml for a defined version of an API
-     */
-    public static String getProjectClientCertMetadataFilePath(String projectName){
-        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.CLIENT_CERT_METADATA_FILE;
     }
 
     /**
