@@ -70,7 +70,6 @@ public function JwtAuthenticationHandler.handle(http:Request req) returns (boole
                 printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
                 isBlacklisted = false;
             }
-
         } else {
             printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
             isBlacklisted = false;
