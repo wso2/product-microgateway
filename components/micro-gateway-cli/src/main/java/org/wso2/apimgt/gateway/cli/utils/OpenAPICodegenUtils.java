@@ -33,6 +33,7 @@ import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
+import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -291,10 +292,9 @@ public class OpenAPICodegenUtils {
 
     /**
      * set additional configurations for an api for code generation process (basePath and CORS configuration)
-     * @param projectName  project Name
      * @param api API object
      */
-    public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
+    public static void setAdditionalConfigsDevFirst(ExtendedAPI api) {
         String basePath = MgwDefinitionUtils.getBasePath(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
                 RouteUtils.convertToMgwServiceMap(MgwDefinitionUtils.getProdEndpointList(basePath),
@@ -305,5 +305,14 @@ public class OpenAPICodegenUtils {
         api.setApiSecurity(MgwDefinitionUtils.getSecurity(basePath));
         api.setCorsConfiguration(MgwDefinitionUtils.getCorsConfiguration(basePath));
     }
+
+    public static void setAdditionalConfig(ExtendedAPI api){
+        RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
+                api.getEndpointSecurity());
+        api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
+                endpointConfig.getSandboxEndpointList()));
+        api.setSpecificBasepath(api.getContext() + "/" + api.getVersion());
+    }
+
 
 }

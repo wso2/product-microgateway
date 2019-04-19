@@ -57,7 +57,7 @@ public class CLIExecutor {
         String[] initArgs = {"init", project};
         main.main(initArgs);
 
-        String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
+        String[] args = {"import","--project", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", security};
@@ -69,7 +69,7 @@ public class CLIExecutor {
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project;
+        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
         String[] args2 = new String[]{"src", "-o", project,"--experimental","--siddhiruntime"};

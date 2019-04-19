@@ -276,11 +276,11 @@ public class AddAPICmd implements GatewayLauncherCmd {
                     }
                     try {
                         //copy policies folder
-                        String policyDir = GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
+                        String policyDir = GatewayCmdUtils.getProjectGenDirectoryPath(projectName) + File.separator +
                                 GatewayCliConstants.GW_DIST_POLICIES;
                         if((new File(policyDir)).list().length == 0) {
                             GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
-                                    GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator +
+                                    GatewayCmdUtils.getProjectGenDirectoryPath(projectName) + File.separator +
                                             GatewayCliConstants.GW_DIST_POLICIES);
                         }
 

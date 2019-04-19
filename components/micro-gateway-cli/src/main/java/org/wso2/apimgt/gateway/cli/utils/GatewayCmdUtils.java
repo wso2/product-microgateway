@@ -31,6 +31,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
@@ -45,8 +46,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.wso2.apimgt.gateway.cli.utils.JsonProcessingUtils.getProjectAPIFilesDirectoryPath;
 
 public class GatewayCmdUtils {
 
@@ -333,12 +332,12 @@ public class GatewayCmdUtils {
      * @param projectName   project name
      * @param apiDefinition api Definition as String
      */
-    public static void saveSwaggerDefinition(String projectName, String apiDefinition) {
+    public static void saveSwaggerDefinition(String projectName, String apiDefinition, String apiId) {
         if (apiDefinition.isEmpty()) {
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
         try {
-            writeContent(apiDefinition, new File(getProjectSwaggerDirectoryPath(projectName)));
+            writeContent(apiDefinition, new File(getProjectGenSwaggerPath(projectName, apiId)));
         } catch (IOException e) {
             throw new CLIInternalException("Error while copying the swagger to the project directory");
         }
@@ -346,7 +345,8 @@ public class GatewayCmdUtils {
 
     private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api) {
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
-        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString);
+        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId);
     }
 
     /**
@@ -563,17 +563,18 @@ public class GatewayCmdUtils {
      * @throws IOException error while coping balx files
      */
     private static void copyTargetDistBalx(String projectName) throws IOException {
-        String projectTargetDirectoryPath = getProjectTargetDirectoryPath(projectName);
+        String projectGenTargetDirectoryPath = getProjectGenDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_TARGET_DIR;
         String gatewayDistExecPath =
                 getTargetGatewayDistPath(projectName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
         File gatewayDistExecPathFile = new File(
                 gatewayDistExecPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
         File balxSourceFile = new File(
-                projectTargetDirectoryPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
+                projectGenTargetDirectoryPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
         if (balxSourceFile.exists()) {
             FileUtils.copyFile(balxSourceFile, gatewayDistExecPathFile);
         } else {
-            throw new CLIInternalException(projectName + ".balx could not be found in " + projectTargetDirectoryPath);
+            throw new CLIInternalException(projectName + ".balx could not be found in " + projectGenTargetDirectoryPath);
         }
     }
 
@@ -623,7 +624,7 @@ public class GatewayCmdUtils {
      * @param projectName name of the project
      * @return path to the /src of a given project in the current working directory
      */
-    public static String getProjectSrcDirectoryPath(String projectName) {
+    public static String getProjectGenDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECT_GEN_DIR;
     }
@@ -643,12 +644,13 @@ public class GatewayCmdUtils {
      * Returns path to the /gen/api-definition of a given project in the current working directory
      *
      * @param projectName name of the project
+     * @param apiId  md5 hash value of apiName:apiVersion
      *                    * @return path to the /gen/api-definition of a given project in the current working directory
      */
-    public static String getProjectSwaggerDirectoryPath(String projectName) {
+    public static String getProjectGenSwaggerPath(String projectName, String apiId) {
         return getProjectDirectoryPath(projectName) + File.separator +
                 GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + UUID.randomUUID()
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
                 + GatewayCliConstants.API_SWAGGER;
     }
 

@@ -61,6 +61,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private Etcd etcd;
     private String basepath;
+    //to recognize whether it is a devfirst approach
+    private boolean isDevFirst = true;
 
     /**
      * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
@@ -78,9 +80,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
         //todo: fix this properly
-        Config config = GatewayCmdUtils.getConfig();
         setSecuritySchemas(api.getApiSecurity());
-        this.config = config;
+        this.config = GatewayCmdUtils.getConfig();;
         //todo: fix this -> not working
         this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(openAPI);
@@ -168,10 +169,12 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     operation.getValue().setOperationId(operationId);
 
                 }
-                MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
-                        path.getKey(), operation.getKey());
-                if(epConfig != null){
-                    operation.getValue().setEpConfigDTO(epConfig);
+                if (isDevFirst) {
+                    MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                            path.getKey(), operation.getKey());
+                    if(epConfig != null){
+                        operation.getValue().setEpConfigDTO(epConfig);
+                    }
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
@@ -262,5 +265,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             basicAuth.setRequired(false);
         }
         config.setBasicAuth(basicAuth);
+    }
+
+    public void setIsDevFirst(boolean value){
+        isDevFirst = value;
     }
 }

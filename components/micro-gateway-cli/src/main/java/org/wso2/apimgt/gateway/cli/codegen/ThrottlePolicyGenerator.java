@@ -121,7 +121,7 @@ public class ThrottlePolicyGenerator {
             genFiles.addAll(genSubsFiles);
         } else {
             //declare empty object to avoid null pointer issue
-            subscriptionPolicies = new ArrayList<>();
+            resourcePolicies = new ArrayList<>();
         }
 
         GenSrcFile initGenFile = generateInitBal(applicationPolicies, subscriptionPolicies, resourcePolicies);

@@ -26,17 +26,15 @@ import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
@@ -51,6 +49,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,6 +147,7 @@ public class ImportCmd implements GatewayLauncherCmd  {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
         }
+        init(toolkitConfigPath, projectName);
         Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
@@ -230,7 +231,8 @@ public class ImportCmd implements GatewayLauncherCmd  {
                 }
                 //to revert the folders created if any exception is thrown
                 try {
-                    GatewayCmdUtils.saveSwaggerDefinition(projectName, api);
+                    //todo: remove this segment, after managing test cases
+                    GatewayCmdUtils.saveSwaggerDefinition(projectName, api,apiId);
                 } catch (Exception e){
                     if(!isForcedUpdate){
                         GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
@@ -363,6 +365,11 @@ public class ImportCmd implements GatewayLauncherCmd  {
                     apis.add(api);
                 }
             }
+            //if security option is not provided, default value is oauth2
+            if(security == null){
+                security = "oauth2";
+            }
+            apis.stream().forEach(api -> api.setApiSecurity(security));
             if (apis == null || apis.isEmpty()) {
                 // Delete folder
                 GatewayCmdUtils.deleteProject(File.separator + projectName);
@@ -375,19 +382,35 @@ public class ImportCmd implements GatewayLauncherCmd  {
                 throw new CLIRuntimeException(errorMsg);
             }
 
+            try {
+                //todo: remove this, added to avoid compilation errors due to mustache template
+                //copy policies folder
+                String policyDir = GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
+                        GatewayCliConstants.GW_DIST_POLICIES;
+                if((new File(policyDir)).list().length == 0) {
+                    GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
+                            GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
+                                    GatewayCliConstants.GW_DIST_POLICIES);
+                }
+
+            } catch (IOException e) {
+                throw new CLIRuntimeException("cannot read source directory");
+            }
+
             //delete the folder if an exception is thrown in following steps
             try{
                 GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
                 CodeGenerator codeGenerator = new CodeGenerator();
-                codeGenerator.generate(projectName, true, false);
+                codeGenerator.generate(projectName, apis, true);
                 //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
             } catch (Exception e){
-                for(ExtendedAPI api: apis){
-                    String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-                    GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
-                }
+//                for(ExtendedAPI api: apis){
+//                    String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+//                    GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
+//                }
+                throw new CLIInternalException("Exception occured during codeGeneration process");
             }
             //todo: check if the files has been changed using hash utils
 
@@ -427,6 +450,26 @@ public class ImportCmd implements GatewayLauncherCmd  {
     private String promptForTextInput(String msg) {
         outStream.println(msg);
         return System.console().readLine();
+    }
+
+    private static void init(String configPath, String projectName) {
+        try {
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                GatewayCmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+
+            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            GatewayCmdUtils.setContainerConfig(containerConfig);
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
     }
 
     /**

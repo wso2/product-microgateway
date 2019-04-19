@@ -299,7 +299,7 @@ public class RouteUtils {
      * @param endpointSecurity      Endpoint Security details received from Publisher API
      * @return                      RouteEndpointConfig object
      */
-    private static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity){
+    public static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity){
 
         RouteEndpointConfig endpointConfig = new RouteEndpointConfig();
         EndpointListRouteDTO prodEndpointConfig = new EndpointListRouteDTO();
