@@ -26,6 +26,7 @@ import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
@@ -283,24 +284,15 @@ public class ImportCmd implements GatewayLauncherCmd {
             throw new CLIRuntimeException(errorMsg);
         }
 
-        try {
-            //todo: remove this, added to avoid compilation errors due to mustache template
-            //copy policies folder
-            String policyDir = GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
-                    GatewayCliConstants.GW_DIST_POLICIES;
-            if ((new File(policyDir)).list().length == 0) {
-                GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
-                        GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
-                                GatewayCliConstants.GW_DIST_POLICIES);
-            }
-
-        } catch (IOException e) {
-            throw new CLIRuntimeException("cannot read source directory");
-        }
+        List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
+        List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
         //delete the folder if an exception is thrown in following steps
         try {
             GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
+            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
+                    + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
             CodeGenerator codeGenerator = new CodeGenerator();
             codeGenerator.generate(projectName, apis, true);
             //Initializing the ballerina project and creating .bal folder.
