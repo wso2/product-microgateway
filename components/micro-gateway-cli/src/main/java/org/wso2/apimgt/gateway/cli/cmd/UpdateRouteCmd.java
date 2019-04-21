@@ -63,7 +63,7 @@ public class UpdateRouteCmd implements GatewayLauncherCmd{
             }
             endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() + "\"]}}";
         } else {
-            endpointConfigString = OpenAPICodegenUtils.readApi(endpointConfig);
+            endpointConfigString = OpenAPICodegenUtils.readJson(endpointConfig);
         }
 
         if(apiId != null){

@@ -15,7 +15,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
-import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 
 public class ExtendedAPI extends APIDetailedDTO {

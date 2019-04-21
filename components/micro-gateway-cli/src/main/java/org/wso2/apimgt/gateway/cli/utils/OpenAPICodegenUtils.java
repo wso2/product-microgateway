@@ -30,9 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.mgwServiceMap.MgwEndpointConfigDTO;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.route.ResourceRepresentation;
+import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
+import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -168,7 +169,6 @@ public class OpenAPICodegenUtils {
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
-        api.setContext(getBasePathFromSwagger(apiDefPath));
         api.setTransport(Arrays.asList("http", "https"));
         return api;
     }
@@ -279,7 +279,7 @@ public class OpenAPICodegenUtils {
      * @param filePath path to openAPI definition
      * @return openAPI as a String
      */
-    public static String readApi(String filePath) {
+    public static String readJson(String filePath) {
         String responseStr;
         try {
             responseStr = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
@@ -292,19 +292,27 @@ public class OpenAPICodegenUtils {
 
     /**
      * set additional configurations for an api for code generation process (basePath and CORS configuration)
-     * @param projectName  project Name
      * @param api API object
      */
-    public static void setAdditionalConfigs(String projectName, ExtendedAPI api) {
-        String apiId;
-        apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
+    public static void setAdditionalConfigsDevFirst(ExtendedAPI api) {
+        String basePath = MgwDefinitionUtils.getBasePath(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                RouteUtils.convertRouteToMgwServiceMap(RouteUtils.getGlobalEpConfig( apiId));
+                RouteUtils.convertToMgwServiceMap(MgwDefinitionUtils.getProdEndpointList(basePath),
+                        MgwDefinitionUtils.getSandEndpointList(basePath));
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
-        api.setSpecificBasepath(RouteUtils.getBasePath(apiId) [0]);
-        api.setApiSecurity(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getSecurity());
-        api.setCorsConfiguration(JsonProcessingUtils.getAPIMetadata(projectName, apiId).getCorsConfigurationDTO());
+        api.setSpecificBasepath(basePath);
+        api.setApiSecurity(MgwDefinitionUtils.getSecurity(basePath));
+        api.setCorsConfiguration(MgwDefinitionUtils.getCorsConfiguration(basePath));
     }
+
+    public static void setAdditionalConfig(ExtendedAPI api){
+        RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
+                api.getEndpointSecurity());
+        api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
+                endpointConfig.getSandboxEndpointList()));
+        api.setSpecificBasepath(api.getContext() + "/" + api.getVersion());
+    }
+
 
 }

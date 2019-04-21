@@ -33,7 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        MgwDefinitionUtils.setMgwDefinition(projectLocation + "/definition.yaml");
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -93,11 +93,11 @@ public class BuildCmd implements GatewayLauncherCmd {
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
                 boolean changesDetected;
 
-                policyGenerator.generate(GatewayCmdUtils.getProjectSrcDirectoryPath(projectName) + File.separator
+                policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
-                codeGenerator.generate(projectName, true, true);
+                codeGenerator.generate(projectName, true);
                 //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
 
 //todo:
