@@ -68,7 +68,7 @@ Execute `micro-gw help setup` to get more detailed information regarding the set
 Example
 
 
-    `$ micro-gw init petstore-project`
+    $ micro-gw init petstore-project
 
 
 Sample definition.yaml can be defined as follows. This is defined for the petstore swagger : https://petstore.swagger.io/v2/swagger.json. API deveoper should copy this swagger to api_defintions file
