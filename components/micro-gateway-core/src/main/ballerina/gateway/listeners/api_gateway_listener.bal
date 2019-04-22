@@ -56,7 +56,6 @@ public type APIGatewayListener object {
     }
 
 
-
 };
 
 public function createAuthHandler(http:AuthProvider authProvider) returns http:HttpAuthnHandler {
@@ -85,8 +84,8 @@ public function createAuthHandler(http:AuthProvider authProvider) returns http:H
         jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
         jwtConfig.jwtCache = jwtCache;
         auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
-        http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
-        return jwtAuthnHandler;
+        JwtAuthenticationHandler jwtAuthenticationHandler = new(jwtAuthProvider, jwtConfig);
+        return <JwtAuthenticationHandler>jwtAuthenticationHandler;
     } else {
         // TODO: create other HttpAuthnHandlers
         error e = error( "Invalid auth scheme: " + authProvider.scheme);
