@@ -1,0 +1,1 @@
+apis: /petstore/v1: title: Swagger Petstore New version: 1.0.0 production_endpoint: type: 'http' urls: - 'https://petstore.swagger.io/v2' sandbox_endpoint: type: 'http' urls: - 'https://sand.petstore.ballerina.io/' resources: /pet/findByStatus: get: production_endpoint: type: 'http' urls: - 'http://www.mocky.io/v2/5cbd4d1d2f0000e70a16cc0e' policy: 10kPerMin security: 'oauth'

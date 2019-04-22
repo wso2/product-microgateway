@@ -655,6 +655,16 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /api-definition of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     */
+    public static String getProjectSwaggerPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+    }
+
+    /**
      * Returns path to the /grpc_service/client of a given project in the current working directory
      *
      * @return path to the /grpc_service/client of a given project in the current working directory
@@ -851,7 +861,7 @@ public class GatewayCmdUtils {
      * @param file    file object initialized with path
      * @throws IOException error while writing content to file
      */
-    private static void writeContent(String content, File file) throws IOException {
+    public static void writeContent(String content, File file) throws IOException {
         FileWriter writer = null;
         writer = new FileWriter(file);
         writer.write(content);

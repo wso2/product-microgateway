@@ -44,7 +44,7 @@ public class MgwDefinitionUtils {
                 rootDefinition = OBJECT_MAPPER_YAML.readValue(new File(path), MgwRootDefinition.class);
             }
         } catch (IOException e) {
-            throw new CLIRuntimeException("Error while reading the routes.yaml", e);
+            throw new CLIRuntimeException("Error while reading the definitions.yaml", e);
         }
     }
 

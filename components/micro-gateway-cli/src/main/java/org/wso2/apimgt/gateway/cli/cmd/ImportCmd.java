@@ -149,7 +149,7 @@ public class ImportCmd implements GatewayLauncherCmd {
                 isOverwriteRequired = true;
                 if ((username = GatewayCmdUtils.promptForTextInput(outStream, "Enter Username: "))
                         .trim().isEmpty()) {
-                    throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
+                    throw GatewayCmdUtils.createUsageException("Micro gateway init failed: empty username.");
                 }
             }
         } else {
@@ -164,7 +164,7 @@ public class ImportCmd implements GatewayLauncherCmd {
                     password = promptForPasswordInput(
                             "Password can't be empty; enter password for " + username + ": ");
                     if (password.trim().isEmpty()) {
-                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
+                        throw GatewayCmdUtils.createUsageException("Micro gateway init failed: empty password.");
                     }
                 }
             }
@@ -299,7 +299,7 @@ public class ImportCmd implements GatewayLauncherCmd {
             InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                     new ArrayList<>(), null);
         } catch (Exception e) {
-            throw new CLIInternalException("Exception occured during codeGeneration process");
+            throw new CLIInternalException("Exception occurred during codeGeneration process");
         }
         //todo: check if the files has been changed using hash utils
 
