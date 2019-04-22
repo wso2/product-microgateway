@@ -82,7 +82,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition(String label, String project, String endpoint, String security, String basepath)
+    public void generateFromDefinition( String project)
             throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
@@ -96,30 +96,31 @@ public class CLIExecutor {
         File swaggerFilePath = new File(getClass().getClassLoader().getResource("testapi.json").getPath());
         File resDefYaml =  new File(getClass().getClassLoader().getResource("definition.yaml").getPath());
 
+        File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
 
-       // String policyYamlContent= getClass().getClassLoader().getResource("policies.yaml").getContent().toString();
-
-        String apiDefinitionPath = path + "/apimTestProject"+ File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-
+        String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
+        File swagerDesPath = new File( path + "/apimTestProject"+ File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + "/testapi.json");
         File defYamlFile = new File (apiDefinitionPath + "/definition.yaml");
-
-        File apiDefRefPath = new File(apiDefinitionPath);
-
+        File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
 
         System.setProperty("user.dir", path.toString());
-
         String[] initArgs = {"init", project};
         main.main(initArgs);
 
-       if (defYamlFile.exists()) {
+        FileUtils.copyFile(swaggerFilePath,swagerDesPath);
+        if (defYamlFile.exists()) {
            defYamlFile.delete();
            FileUtils.copyFile(resDefYaml ,defYamlFile);
        } else {
             FileUtils.copyFile(resDefYaml ,defYamlFile);
        }
-        FileUtils.copyFile(swaggerFilePath,apiDefRefPath);
-        //GatewayCmdUtils.writeContent(defYamlContent, new File(GatewayCmdUtils.getProjectSwaggerPath(project) + "definition.yaml"));
-        //GatewayCmdUtils.writeContent(policyYamlContent, new File(GatewayCmdUtils.getProjectSwaggerPath(project) + "policies.yaml"));
+       if (policyYamlFile.exists()) {
+           policyYamlFile.delete();
+           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
+       } else {
+           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
+       }
 
         String[] buildargs = {"build", project};
         main = new org.wso2.apimgt.gateway.cli.cmd.Main();
@@ -127,7 +128,7 @@ public class CLIExecutor {
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project;
+        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
         String[] args2 = new String[]{"src", "-o", project, "--experimental", "--siddhiruntime"};

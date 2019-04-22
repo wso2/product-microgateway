@@ -28,10 +28,6 @@ applicationPolicies:
      count: 10
      unitTime: 1
      timeUnit: min
-  - Unlimited:
-     count: 2147483647
-     unitTime: 1
-     timeUnit: min
 subscriptionPolicies:
   - Gold:
      count: 5000
