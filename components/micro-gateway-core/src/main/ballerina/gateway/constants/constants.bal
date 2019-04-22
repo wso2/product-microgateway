@@ -236,6 +236,21 @@
  public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
  public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 
+ public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
+ public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
+ public const string REALTIME_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.realtime";
+ public const string REALTIME_MESSAGE_ENABLED = "enableRealtimeMessageRetrieval";
+ public const string REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "jmsConnectioninitialContextFactory";
+ public const string REALTIME_JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";
+ public const string REALTIME_JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
+ public const string REALTIME_JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
+ public const string PERSISTENT_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.persistent";
+ public const string PERSISTENT_MESSAGE_ENABLED = "enablePersistentStorageRetrieval";
+ public const string PERSISTENT_USE_DEFAULT = "useDefault";
+ public const string PERSISTENT_MESSAGE_HOSTNAME = "hotsname";
+ public const string PERSISTENT_MESSAGE_USERNAME = "username";
+ public const string PERSISTENT_MESSAGE_PASSWORD = "password";
+
 // end of config constants
 
  public const string IS_THROTTLED = "isThrottled";
@@ -286,6 +301,9 @@
  const string KEY_UPLOAD_TASK = "UploadTimerTask";
  const string KEY_ROTATE_TASK = "RotateTimerTask";
  const string KEY_ETCD_UTIL = "EtcdUtil";
+ const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
+ const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
+ const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 
 
  public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
