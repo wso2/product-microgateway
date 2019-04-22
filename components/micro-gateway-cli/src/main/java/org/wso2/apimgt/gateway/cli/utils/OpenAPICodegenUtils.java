@@ -302,7 +302,11 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
         api.setSpecificBasepath(basePath);
-        api.setApiSecurity(MgwDefinitionUtils.getSecurity(basePath));
+        String security = MgwDefinitionUtils.getSecurity(basePath);
+        if(security == null){
+            security = "oauth2";
+        }
+        api.setApiSecurity(security);
         api.setCorsConfiguration(MgwDefinitionUtils.getCorsConfiguration(basePath));
     }
 
