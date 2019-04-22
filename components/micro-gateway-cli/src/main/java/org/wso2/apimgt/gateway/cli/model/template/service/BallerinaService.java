@@ -170,10 +170,32 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 }
                 if (isDevFirst) {
-                    MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion(),
+                    String basePath = MgwDefinitionUtils.getBasePath(openAPI.getInfo().getTitle(),
+                            openAPI.getInfo().getVersion());
+                    //to add resource level endpoint configuration
+                    MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(basePath,
                             path.getKey(), operation.getKey());
                     if(epConfig != null){
                         operation.getValue().setEpConfigDTO(epConfig);
+                    }
+                    //todo: need to validate the existence of those functions
+                    //to add request interceptor
+                    String requestInterceptor = MgwDefinitionUtils.getRequestInterceptor(basePath, path.getKey(),
+                            operation.getKey());
+                    if(requestInterceptor != null){
+                        operation.getValue().setRequestInterceptor(requestInterceptor);
+                    }
+                    //to add response interceptor
+                    String responseInterceptor = MgwDefinitionUtils.getResponseInterceptor(basePath, path.getKey(),
+                            operation.getKey());
+                    if(responseInterceptor != null){
+                        operation.getValue().setResponseInterceptor(responseInterceptor);
+                    }
+                    //to add throttle policy
+                    String throttle_policy = MgwDefinitionUtils.getThrottlePolicy(basePath, path.getKey(),
+                            operation.getKey());
+                    if(throttle_policy != null){
+                        operation.getValue().setResourceTier(throttle_policy);
                     }
                 }
             });

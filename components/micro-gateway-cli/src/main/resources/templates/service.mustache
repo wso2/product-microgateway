@@ -99,6 +99,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
+
+    {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
     {{else}}
@@ -185,6 +187,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
+            {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);

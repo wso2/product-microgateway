@@ -106,6 +106,8 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
+                GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
+                        GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
