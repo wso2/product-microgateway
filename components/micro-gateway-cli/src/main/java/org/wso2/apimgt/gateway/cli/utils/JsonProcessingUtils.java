@@ -7,6 +7,7 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -16,6 +17,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyD
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -24,22 +26,22 @@ public class JsonProcessingUtils {
     private static final ObjectMapper objectMapper_yaml = new ObjectMapper(new YAMLFactory());
 
     //todo: decide whether we allow users to provide endpoint security details as a separate JSON
-//    /**
-//     * parse endpoint security configurations in json format {type: , name: , password: }
-//     * @param endpointSecurityString endpoint security definition in json
-//     * @return  APIEndpointSecurityDTO object (for the purpose of routes configuration file)
-//     */
-//    private static APIEndpointSecurityDTO parseEndpointSecurityDefinition(String endpointSecurityString){
-//        APIEndpointSecurityDTO endpointSecurity = null;
-//        if(endpointSecurityString != null){
-//            try {
-//                endpointSecurity = objectMapper.readValue(endpointSecurityString, APIEndpointSecurityDTO.class);
-//            } catch (IOException e) {
-//                throw new CLIInternalException("Error: endpoint security string cannot be parsed ");
-//            }
-//        }
-//        return endpointSecurity;
-//    }
+    /**
+     * parse endpoint security configurations in json format {type: , name: , password: }
+     * @param endpointSecurityString endpoint security definition in json
+     * @return  APIEndpointSecurityDTO object (for the purpose of routes configuration file)
+     */
+    private static APIEndpointSecurityDTO parseEndpointSecurityDefinition(String endpointSecurityString){
+        APIEndpointSecurityDTO endpointSecurity = null;
+        if(endpointSecurityString != null){
+            try {
+                endpointSecurity = objectMapper.readValue(endpointSecurityString, APIEndpointSecurityDTO.class);
+            } catch (IOException e) {
+                throw new CLIInternalException("Error: endpoint security string cannot be parsed ");
+            }
+        }
+        return endpointSecurity;
+    }
 
     /**
      * Save subscription throttle policies in JSON format
@@ -160,6 +162,82 @@ public class JsonProcessingUtils {
         }
 
     }
+
+    /**
+     * Returns the path to the application-throttle-policies.yaml file for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the application-throttle-policies.yaml file for a defined version of an API
+     */
+    public static String getProjectSubscriptionThrottlePoliciesFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.SUBSCRIPTION_THROTTLE_POLICIES_FILE;
+    }
+
+
+    /**
+     * Returns the path to the client-cert-metadata.yaml for a defined version of an API
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
+    public static String getProjectClientCertMetadataFilePath(String projectName){
+        return getProjectAPIFilesDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.CLIENT_CERT_METADATA_FILE;
+    }
+
+    /**
+     * Returns the path to the routes configuration file (routes.yaml)
+     * @param projectName name of the project
+     * @return path to the client-cert-metadata.yaml for a defined version of an API
+     */
+    public static String getProjectRoutesConfFilePath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_DEFINITION_FILE;
+    }
+
+    /**
+     * Returns path to the given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the given project in the current working directory
+     */
+    public static String getProjectDirectoryPath(String projectName) {
+        // TODO: do we need to change this?
+        return new File(projectName).getAbsolutePath();
+    }
+
+    /**
+     * Returns path to the /API-Files of a given project in the current working directory
+     * @param projectName name of the project
+     * @return path to the /API-Files of a given project in the current working directory
+     */
+    public static String getProjectAPIFilesDirectoryPath(String projectName){
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+    }
+
+    public static void saveAPIMetadataFile(String projectName, String apiId, String apiMetadataYaml){
+        if(!apiMetadataYaml.isEmpty()){
+            try {
+                writeContent(apiMetadataYaml, new File(GatewayCmdUtils.getAPIMetadataFilePath(projectName, apiId)));
+            } catch (IOException e) {
+                throw new CLIInternalException("Error while copying api-metaData to the project directory");
+            }
+        }
+    }
+
+    /**
+     * Write content to a specified file
+     *
+     * @param content content to be written
+     * @param file    file object initialized with path
+     * @throws IOException error while writing content to file
+     */
+    private static void writeContent(String content, File file) throws IOException {
+        FileWriter writer = null;
+        writer = new FileWriter(file);
+        writer.write(content);
+        writer.flush();
+    }
+
 
 
 }

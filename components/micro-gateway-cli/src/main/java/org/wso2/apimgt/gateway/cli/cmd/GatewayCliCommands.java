@@ -34,4 +34,5 @@ public class GatewayCliCommands {
     public static final String SET = "set";
     public static final String UPDATE_ROUTE = "update route";
     public static final String INIT = "init";
+    public static final String IMPORT = "import";
 }

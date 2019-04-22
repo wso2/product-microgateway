@@ -1,4 +1,4 @@
-package org.wso2.apimgt.gateway.cli.model.mgwServiceMap;
+package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;

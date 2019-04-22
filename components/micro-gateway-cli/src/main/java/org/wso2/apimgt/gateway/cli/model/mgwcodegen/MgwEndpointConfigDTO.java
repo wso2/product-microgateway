@@ -1,4 +1,4 @@
-package org.wso2.apimgt.gateway.cli.model.mgwServiceMap;
+package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
 public class MgwEndpointConfigDTO {
 
