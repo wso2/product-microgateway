@@ -34,7 +34,7 @@ Running the Microgateway is a 3 step process. The first two steps are involved i
  1. Building the microgateway project and creating a microgateway distribution.
  1. Running the microgateway distribution.
 
-##### Initiating  a microgateway project
+##### Initiating a microgateway project
 
 Once the project is initiated the default folder structure will be created for the respective folder.
 Empty `api_definitions` folder and `definitions.yaml` will be created inside the folder.API developer can add multiple open API definitions inside the
