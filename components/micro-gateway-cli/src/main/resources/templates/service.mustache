@@ -99,7 +99,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
-    {{#if api.isDefaultVersion}} <!--todo: remove the concept of default version ?-->
+    {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
     {{else}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
