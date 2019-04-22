@@ -29,6 +29,9 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 public class MgwEndpointListDefinition {
     private EndpointListRouteDTO prodEndpointList;
     private EndpointListRouteDTO sandEndpointList;
+    private String requestInterceptor;
+    private String responseInterceptor;
+    private String throttlePolicy;
 
     @JsonProperty("production_endpoint")
     public EndpointListRouteDTO getProdEndpointList() {
@@ -46,5 +49,33 @@ public class MgwEndpointListDefinition {
 
     public void setSandEndpointList(EndpointListRouteDTO sandEndpointList) {
         this.sandEndpointList = sandEndpointList;
+    }
+
+    @JsonProperty("request_interceptor")
+    public String getRequestInterceptor() {
+        return requestInterceptor;
+    }
+
+    public void setRequestInterceptor(String requestInterceptor) {
+        this.requestInterceptor = requestInterceptor;
+    }
+
+    @JsonProperty("response_interceptor")
+    public String getResponseInterceptor() {
+        return responseInterceptor;
+    }
+
+    public void setResponseInterceptor(String responseInterceptor) {
+        this.responseInterceptor = responseInterceptor;
+    }
+
+
+    @JsonProperty("throttle_policy")
+    public String getThrottlePolicy() {
+        return throttlePolicy;
+    }
+
+    public void setThrottlePolicy(String throttlePolicy) {
+        this.throttlePolicy = throttlePolicy;
     }
 }

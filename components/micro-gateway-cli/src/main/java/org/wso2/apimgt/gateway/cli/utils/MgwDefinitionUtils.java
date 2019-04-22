@@ -69,22 +69,52 @@ public class MgwDefinitionUtils {
         return rootDefinition.getApis().getApiFromBasepath(basePath).getCorsConfiguration();
     }
 
-    public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(String apiName, String apiVersion, String resourceName, String method) {
-        String basePath = getBasePath(apiName, apiVersion);
-        if(rootDefinition.getApis().getApiFromBasepath(basePath) == null){
-            return null;
-        }
-        if(rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(resourceName) == null){
-            return null;
-        }
-        if(rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(resourceName)
-                .getEndpointListDefinition(method) == null){
+    public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(String basePath, String path, String method) {
+        if(!isResourceAvailable(basePath, path, method)){
             return null;
         }
         EndpointListRouteDTO prodList = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().
-                getMgwResource(resourceName).getEndpointListDefinition(method).getProdEndpointList();
+                getMgwResource(path).getEndpointListDefinition(method).getProdEndpointList();
         EndpointListRouteDTO sandList = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().
-                getMgwResource(resourceName).getEndpointListDefinition(method).getSandEndpointList();
+                getMgwResource(path).getEndpointListDefinition(method).getSandEndpointList();
         return RouteUtils.convertToMgwServiceMap(prodList,sandList);
+    }
+
+    public static String getRequestInterceptor(String basePath, String path, String method){
+        if(!isResourceAvailable(basePath, path, method)){
+            return null;
+        }
+        return rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+                getEndpointListDefinition(method).getRequestInterceptor();
+    }
+
+    public static String getResponseInterceptor(String basePath, String path, String method){
+        if(!isResourceAvailable(basePath, path, method)){
+            return null;
+        }
+        return rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+                getEndpointListDefinition(method).getResponseInterceptor();
+    }
+
+    public static String getThrottlePolicy(String basePath, String path, String method){
+        if(!isResourceAvailable(basePath, path, method)){
+            return null;
+        }
+        return rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+                getEndpointListDefinition(method).getThrottlePolicy();
+    }
+
+    private static boolean isResourceAvailable(String basePath, String path, String method){
+        if(rootDefinition.getApis().getApiFromBasepath(basePath) == null){
+            return false;
+        }
+        if(rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path) == null){
+            return false;
+        }
+        if(rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path)
+                .getEndpointListDefinition(method) == null){
+            return false;
+        }
+        return true;
     }
 }

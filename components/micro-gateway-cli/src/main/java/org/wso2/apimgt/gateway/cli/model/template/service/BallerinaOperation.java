@@ -52,6 +52,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private boolean hasProdEpConfig = false;
     private boolean hasSandEpConfig = false;
     private MgwEndpointConfigDTO epConfig;
+    private String requestInterceptor;
+    private String responseInterceptor;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -189,5 +191,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         if(epConfigDTO.getSandboxEndpointList() != null){
             hasSandEpConfig = true;
         }
+    }
+
+    public String getRequestInterceptor() {
+        return requestInterceptor;
+    }
+
+    public void setRequestInterceptor(String requestInterceptor) {
+        this.requestInterceptor = requestInterceptor;
+    }
+
+    public String getResponseInterceptor() {
+        return responseInterceptor;
+    }
+
+    public void setResponseInterceptor(String responseInterceptor) {
+        this.responseInterceptor = responseInterceptor;
     }
 }

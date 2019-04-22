@@ -25,8 +25,6 @@ import java.util.Map;
 
 public class MgwResourceDefinition {
     private Map<String, MgwEndpointListDefinition> operations = new LinkedHashMap<>();
-    private String requestInterceptor;
-    private String responseInterceptor;
 
     @JsonAnySetter
     public void setEndpoints(String key, MgwEndpointListDefinition endpoint) {
@@ -36,23 +34,4 @@ public class MgwResourceDefinition {
     public MgwEndpointListDefinition getEndpointListDefinition(String resourceName) {
         return operations.get(resourceName);
     }
-
-    @JsonProperty("request-interceptor")
-    public String getRequestInterceptor() {
-        return requestInterceptor;
-    }
-
-    public void setRequestInterceptor(String requestInterceptor) {
-        this.requestInterceptor = requestInterceptor;
-    }
-
-    @JsonProperty("response-interceptor")
-    public String getResponseInterceptor() {
-        return responseInterceptor;
-    }
-
-    public void setResponseInterceptor(String responseInterceptor) {
-        this.responseInterceptor = responseInterceptor;
-    }
-
 }
