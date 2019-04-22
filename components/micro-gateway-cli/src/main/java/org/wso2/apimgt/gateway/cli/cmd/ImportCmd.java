@@ -137,6 +137,14 @@ public class ImportCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
                     " " + projectName);
         }
+        //Security Schemas settings
+        if (StringUtils.isEmpty(security)) {
+            security = "oauth2";
+        }
+        if (StringUtils.isEmpty(toolkitConfigPath)) {
+            toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
+        }
+
         init(toolkitConfigPath, projectName);
         Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;

@@ -619,7 +619,7 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /src of a given project in the current working directory
+     * Returns path to the /gen of a given project in the current working directory
      *
      * @param projectName name of the project
      * @return path to the /src of a given project in the current working directory
@@ -638,6 +638,29 @@ public class GatewayCmdUtils {
     public static String getProjectGenSrcDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR;
+    }
+
+    /**
+     * Returns path to the /interceptors of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /src of a given project in the current working directory
+     */
+    public static String getProjectInterceptorsDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator
+                + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+    }
+
+    /**
+     * Returns path to the /gen/src/interceptors of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /src of a given project in the current working directory
+     */
+    public static String getProjectGenSrcInterceptorsDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator
+                + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR
+                + File.separator +GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**

@@ -29,4 +29,10 @@ public class Constants {
     public static final String BALLERINA_SERVER_SCRIPT_NAME = "ballerina";
     //File extension the the ballerina rest file
     public static final String SERVICE_FILE_EXTENSION = ".bal";
+    //policies file name
+    public static final String POLICIES_FILE = "policies.yaml";
+    //definitions folder location in the cli
+    public static final String DEFINITION_FOLDER = "definitions";
+    //resources folder location in the cli
+    public static final String RESOURCES_FOLDER = "resources";
 }
