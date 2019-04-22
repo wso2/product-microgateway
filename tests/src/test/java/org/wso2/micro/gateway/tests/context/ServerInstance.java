@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -371,8 +374,12 @@ public class ServerInstance implements Server {
 
         try {
             Utils.extractFile(serverZipFile, extractDir);
-
             this.serverHome = extractDir + File.separator + extractedCarbonDir;
+            //copies the policies.yaml to run test cases.
+            Files.copy(Paths.get(getClass().getClassLoader().getResource(Constants.POLICIES_FILE).getPath()), Paths.get(
+                    serverHome + File.separator + Constants.RESOURCES_FOLDER + File.separator
+                            + Constants.DEFINITION_FOLDER + File.separator + Constants.POLICIES_FILE),
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new MicroGWTestException("Error extracting server zip file", e);
         }
