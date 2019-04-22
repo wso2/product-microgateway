@@ -26,6 +26,7 @@ import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
+import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
@@ -62,7 +63,7 @@ import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConsta
  * This class represents the "import" command and it pull the swagger and generate the source code
  */
 @Parameters(commandNames = "import", commandDescription = "pull the api from publisher")
-public class ImportCmd implements GatewayLauncherCmd  {
+public class ImportCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(ImportCmd.class);
     private static PrintStream outStream = System.out;
 
@@ -85,15 +86,6 @@ public class ImportCmd implements GatewayLauncherCmd  {
 
     @Parameter(names = {"-s", "--server-url"}, hidden = true)
     private String baseURL;
-
-    @Parameter(names = {"-oa", "--openapi"}, hidden = true)
-    private String openApi;
-
-    @Parameter(names = {"-e", "--endpoint"}, hidden = true)
-    private String endpoint;
-
-    @Parameter(names = {"-ec", "--endpoint-config"}, hidden = true)
-    private String endpointConfig;
 
     @Parameter(names = {"-t", "--truststore"}, hidden = true)
     private String trustStoreLocation;
@@ -140,8 +132,6 @@ public class ImportCmd implements GatewayLauncherCmd  {
     @Override
     public void execute() {
         String clientID;
-        boolean isOpenApi = StringUtils.isNotEmpty(openApi);
-        String grpc;
         projectName = GatewayCmdUtils.buildProjectName(projectName);
         if (projectName.contains(" ")) {
             throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
@@ -151,289 +141,187 @@ public class ImportCmd implements GatewayLauncherCmd  {
         Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
-        if (isOpenApi) {
-            outStream.println("Loading Open Api Specification from Path: " + openApi);
-            String api = OpenAPICodegenUtils.readJson(openApi);
-
-            if (openApi.toLowerCase(Locale.ENGLISH).endsWith(PROTO_SUFFIX)) {
-                grpc = openApi;
-                outStream.println("Loading ProtoBuff Api Specification from Path: " + grpc);
-                GRPCUtils grpcUtils = new GRPCUtils(grpc);
-                grpcUtils.execute();
-                logger.debug("Successfully read the api definition file");
-                CodeGenerator codeGenerator = new CodeGenerator();
-                try {
-                    if (StringUtils.isEmpty(endpointConfig)) {
-                        if (StringUtils.isEmpty(endpoint)) {
-                            /*
-                             * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
-                             * the user
-                             */
-                            if ((endpoint = GatewayCmdUtils.promptForTextInput(outStream,"Enter Endpoint URL: "))
-                                    .trim().isEmpty()) {
-                                throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
-                            }
-                        }
-                    }
-                    codeGenerator.generateGrpc(projectName, api, true);
-                    //Initializing the ballerina project and creating .bal folder.
-                    logger.debug("Creating source artifacts");
-                    InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectDirectoryPath(projectName)), null,
-                            new ArrayList<>(), null);
-                } catch (IOException | BallerinaServiceGenException e) {
-                    logger.error("Error while generating ballerina source.", e);
-                    throw new CLIInternalException("Error while generating ballerina source.");
-                }
-            } else {
-                logger.debug("Successfully read the api definition file");
-                String apiDefPath = Paths.get(openApi).toAbsolutePath().toString();
-
-                //generate API_ID from OpenAPI specification
-                String apiId = OpenAPICodegenUtils.generateAPIdForSwagger(apiDefPath);
-
-                boolean isForcedUpdate = false;
-
-                if(RouteUtils.hasApiInRoutesConfig(apiId)) {
-                    isForcedUpdate = checkAPIAndProceed(apiId);
-                    if(!isForcedUpdate){
-                        outStream.println("add api command is aborted");
-                        return;
-                    }
-                }
-                //set endpoint configuration
-                String endpointConfigString;
-                if (StringUtils.isEmpty(endpointConfig)) {
-                    if (StringUtils.isEmpty(endpoint)) {
-                        /*
-                         * if an endpoint config or an endpoint is not provided as an argument, it is prompted from
-                         * the user
-                         */
-                        if ((endpoint = GatewayCmdUtils.promptForTextInput(outStream,"Enter Endpoint URL: "))
-                                .trim().isEmpty()) {
-                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty endpoint.");
-                        }
-                    }
-                    endpointConfigString = "{\"prod\": {\"type\": \"http\", \"endpoints\" : [\"" + endpoint.trim() +
-                            "\"]}}";
-                } else {
-                    endpointConfigString = OpenAPICodegenUtils.readJson(endpointConfig);
-                }
-
-                //set basePath
-                if (StringUtils.isEmpty(basepath)) {
-                    basepath = OpenAPICodegenUtils.getBasePathFromSwagger(apiDefPath);
-                    if (StringUtils.isEmpty(basepath)) {
-                        if ((basepath = GatewayCmdUtils.promptForTextInput(outStream,"Enter basePath: "))
-                                .trim().isEmpty()) {
-                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty basepath");
-                        }
-                    }
-                }
-                //to revert the folders created if any exception is thrown
-                try {
-                    //todo: remove this segment, after managing test cases
-                    GatewayCmdUtils.saveSwaggerDefinition(projectName, api,apiId);
-                } catch (Exception e){
-                    if(!isForcedUpdate){
-                        GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
-                    }
-                    throw e;
+        validateAPIGetRequestParams(label, apiName, version);
+        //Setup username
+        String configuredUser = config.getToken().getUsername();
+        if (StringUtils.isEmpty(configuredUser)) {
+            if (StringUtils.isEmpty(username)) {
+                isOverwriteRequired = true;
+                if ((username = GatewayCmdUtils.promptForTextInput(outStream, "Enter Username: "))
+                        .trim().isEmpty()) {
+                    throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
                 }
             }
         } else {
-            validateAPIGetRequestParams(label, apiName, version);
-            //Setup username
-            String configuredUser = config.getToken().getUsername();
-            if (StringUtils.isEmpty(configuredUser)) {
-                if (StringUtils.isEmpty(username)) {
-                    isOverwriteRequired = true;
-                    if ((username = GatewayCmdUtils.promptForTextInput(outStream,"Enter Username: "))
-                            .trim().isEmpty()) {
-                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty username.");
-                    }
-                }
-            } else {
-                username = configuredUser;
-            }
+            username = configuredUser;
+        }
 
-            //Setup password
-            if (StringUtils.isEmpty(password)) {
-                if ((password = promptForPasswordInput("Enter Password for " +
-                        username + ": ")).trim().isEmpty()) {
-                    if (StringUtils.isEmpty(password)) {
-                        password = promptForPasswordInput(
-                                "Password can't be empty; enter password for " + username + ": ");
-                        if (password.trim().isEmpty()) {
-                            throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
-                        }
+        //Setup password
+        if (StringUtils.isEmpty(password)) {
+            if ((password = promptForPasswordInput("Enter Password for " +
+                    username + ": ")).trim().isEmpty()) {
+                if (StringUtils.isEmpty(password)) {
+                    password = promptForPasswordInput(
+                            "Password can't be empty; enter password for " + username + ": ");
+                    if (password.trim().isEmpty()) {
+                        throw GatewayCmdUtils.createUsageException("Micro gateway setup failed: empty password.");
                     }
                 }
             }
+        }
 
-            //setup endpoints
-            Token configToken = config.getToken();
-            TokenBuilder configTokenValues = setEndpoints(configToken);
+        //setup endpoints
+        Token configToken = config.getToken();
+        TokenBuilder configTokenValues = setEndpoints(configToken);
 
-            //configure trust store
-            String configuredTrustStore = config.getToken().getTrustStoreLocation();
-            if (StringUtils.isEmpty(configuredTrustStore)) {
-                if (StringUtils.isEmpty(trustStoreLocation)) {
-                    isOverwriteRequired = true;
-                    if ((trustStoreLocation = GatewayCmdUtils.promptForTextInput(outStream,
-                            "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]")).trim().isEmpty()) {
-                        trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
-                    }
-                }
-            } else {
-                trustStoreLocation = configuredTrustStore;
-            }
-
-            //configure trust store password
-            String encryptedPass = config.getToken().getTrustStorePassword();
-            String configuredTrustStorePass;
-            if (StringUtils.isEmpty(encryptedPass)) {
-                configuredTrustStorePass = null;
-            } else {
-                try {
-                    configuredTrustStorePass = GatewayCmdUtils.decrypt(encryptedPass, password);
-                } catch (CliLauncherException e) {
-                    //different password used to encrypt
-                    configuredTrustStorePass = null;
+        //configure trust store
+        String configuredTrustStore = config.getToken().getTrustStoreLocation();
+        if (StringUtils.isEmpty(configuredTrustStore)) {
+            if (StringUtils.isEmpty(trustStoreLocation)) {
+                isOverwriteRequired = true;
+                if ((trustStoreLocation = GatewayCmdUtils.promptForTextInput(outStream,
+                        "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]")).trim().isEmpty()) {
+                    trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
                 }
             }
+        } else {
+            trustStoreLocation = configuredTrustStore;
+        }
 
-            if (StringUtils.isEmpty(configuredTrustStorePass)) {
-                if (StringUtils.isEmpty(trustStorePassword)) {
-                    isOverwriteRequired = true;
-                    if ((trustStorePassword = promptForPasswordInput(
-                            "Enter Trust store password: " + "[ use default? ]")).trim()
-                            .isEmpty()) {
-                        trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
-                    }
-                }
-            } else {
-                trustStorePassword = configuredTrustStorePass;
-            }
-
-            File trustStoreFile = new File(trustStoreLocation);
-            if (!trustStoreFile.isAbsolute()) {
-                trustStoreLocation = GatewayCmdUtils.getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator
-                        + trustStoreLocation);
-            }
-            trustStoreFile = new File(trustStoreLocation);
-            if (!trustStoreFile.exists()) {
-                logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
-                throw new CLIRuntimeException("Provided trust store location does not exist.");
-            }
-
-            //set the trustStore
-            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStoreType", "pkcs12");
-            System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
-            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-
-            OAuthService manager = new OAuthServiceImpl();
-            clientID = config.getToken().getClientId();
-            String encryptedSecret = config.getToken().getClientSecret();
-            if (!StringUtils.isEmpty(clientID.trim()) && !StringUtils.isEmpty(encryptedSecret.trim())) {
-                try {
-                    clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, password);
-                } catch (CliLauncherException e) {
-                    //different password used to encrypt
-                    clientSecret = null;
-                }
-            }
-
-            if (StringUtils.isEmpty(clientID) || StringUtils.isEmpty(clientSecret)) {
-                String[] clientInfo = manager
-                        .generateClientIdAndSecret(registrationEndpoint, username, password.toCharArray(), isInsecure);
-                clientID = clientInfo[0];
-                clientSecret = clientInfo[1];
-            }
-
-            String accessToken = manager
-                    .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret,
-                            isInsecure);
-
-            List<ExtendedAPI> apis = new ArrayList<>();
-            RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, isInsecure);
-            if (label != null) {
-                apis = service.getAPIs(label, accessToken);
-            } else {
-                ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-                if (api != null) {
-                    apis.add(api);
-                }
-            }
-            //if security option is not provided, default value is oauth2
-            if(security == null){
-                security = "oauth2";
-            }
-            apis.stream().forEach(api -> api.setApiSecurity(security));
-            if (apis == null || apis.isEmpty()) {
-                // Delete folder
-                GatewayCmdUtils.deleteProject(File.separator + projectName);
-                String errorMsg;
-                if (label != null) {
-                    errorMsg = "No APIs found for the given label: " + label;
-                } else {
-                    errorMsg = "No Published APIs matched for name:" + apiName + ", version:" + version;
-                }
-                throw new CLIRuntimeException(errorMsg);
-            }
-
+        //configure trust store password
+        String encryptedPass = config.getToken().getTrustStorePassword();
+        String configuredTrustStorePass;
+        if (StringUtils.isEmpty(encryptedPass)) {
+            configuredTrustStorePass = null;
+        } else {
             try {
-                //todo: remove this, added to avoid compilation errors due to mustache template
-                //copy policies folder
-                String policyDir = GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
-                        GatewayCliConstants.GW_DIST_POLICIES;
-                if((new File(policyDir)).list().length == 0) {
-                    GatewayCmdUtils.copyFolder(GatewayCmdUtils.getPoliciesFolderLocation(),
-                            GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator +
-                                    GatewayCliConstants.GW_DIST_POLICIES);
+                configuredTrustStorePass = GatewayCmdUtils.decrypt(encryptedPass, password);
+            } catch (CliLauncherException e) {
+                //different password used to encrypt
+                configuredTrustStorePass = null;
+            }
+        }
+
+        if (StringUtils.isEmpty(configuredTrustStorePass)) {
+            if (StringUtils.isEmpty(trustStorePassword)) {
+                isOverwriteRequired = true;
+                if ((trustStorePassword = promptForPasswordInput(
+                        "Enter Trust store password: " + "[ use default? ]")).trim()
+                        .isEmpty()) {
+                    trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
                 }
-
-            } catch (IOException e) {
-                throw new CLIRuntimeException("cannot read source directory");
             }
+        } else {
+            trustStorePassword = configuredTrustStorePass;
+        }
 
-            //delete the folder if an exception is thrown in following steps
-            try{
-                GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
-                CodeGenerator codeGenerator = new CodeGenerator();
-                codeGenerator.generate(projectName, apis, true);
-                //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
-                        new ArrayList<>(), null);
-            } catch (Exception e){
-//                for(ExtendedAPI api: apis){
-//                    String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-//                    GatewayCmdUtils.deletePerAPIFolder(projectName, apiId);
-//                }
-                throw new CLIInternalException("Exception occured during codeGeneration process");
+        File trustStoreFile = new File(trustStoreLocation);
+        if (!trustStoreFile.isAbsolute()) {
+            trustStoreLocation = GatewayCmdUtils.getUnixPath(GatewayCmdUtils.getCLIHome() + File.separator
+                    + trustStoreLocation);
+        }
+        trustStoreFile = new File(trustStoreLocation);
+        if (!trustStoreFile.exists()) {
+            logger.error("Provided trust store location {} does not exist.", trustStoreLocation);
+            throw new CLIRuntimeException("Provided trust store location does not exist.");
+        }
+
+        //set the trustStore
+        System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+        System.setProperty("javax.net.ssl.trustStoreType", "pkcs12");
+        System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
+        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+        OAuthService manager = new OAuthServiceImpl();
+        clientID = config.getToken().getClientId();
+        String encryptedSecret = config.getToken().getClientSecret();
+        if (!StringUtils.isEmpty(clientID.trim()) && !StringUtils.isEmpty(encryptedSecret.trim())) {
+            try {
+                clientSecret = GatewayCmdUtils.decrypt(encryptedSecret, password);
+            } catch (CliLauncherException e) {
+                //different password used to encrypt
+                clientSecret = null;
             }
-            //todo: check if the files has been changed using hash utils
+        }
 
-            //if all the operations are success, write new config to file
-            if (isOverwriteRequired) {
-                Config newConfig = new Config();
-                Client client = new Client();
-                client.setHttpRequestTimeout(1000000);
-                newConfig.setClient(client);
+        if (StringUtils.isEmpty(clientID) || StringUtils.isEmpty(clientSecret)) {
+            String[] clientInfo = manager
+                    .generateClientIdAndSecret(registrationEndpoint, username, password.toCharArray(), isInsecure);
+            clientID = clientInfo[0];
+            clientSecret = clientInfo[1];
+        }
 
-                String encryptedCS = GatewayCmdUtils.encrypt(clientSecret, password);
-                String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, password);
-                Token token = configTokenValues
-                        .setUsername(username)
-                        .setClientId(clientID)
-                        .setClientSecret(encryptedCS)
-                        .setTrustStoreLocation(trustStoreLocation)
-                        .setTrustStorePassword(encryptedTrustStorePass)
-                        .build();
-                newConfig.setToken(token);
-                newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-                GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
+        String accessToken = manager
+                .generateAccessToken(tokenEndpoint, username, password.toCharArray(), clientID, clientSecret,
+                        isInsecure);
+
+        List<ExtendedAPI> apis = new ArrayList<>();
+        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, isInsecure);
+        if (label != null) {
+            apis = service.getAPIs(label, accessToken);
+        } else {
+            ExtendedAPI api = service.getAPI(apiName, version, accessToken);
+            if (api != null) {
+                apis.add(api);
             }
+        }
+        //if security option is not provided, default value is oauth2
+        if (security == null) {
+            security = "oauth2";
+        }
+        //ExtendedAPI's security is updated
+        apis.forEach(api -> api.setApiSecurity(security));
+
+        if (apis.isEmpty()) {
+            // Delete folder
+            GatewayCmdUtils.deleteProject(File.separator + projectName);
+            String errorMsg;
+            if (label != null) {
+                errorMsg = "No APIs found for the given label: " + label;
+            } else {
+                errorMsg = "No Published APIs matched for name:" + apiName + ", version:" + version;
+            }
+            throw new CLIRuntimeException(errorMsg);
+        }
+
+        List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
+        List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
+
+        //delete the folder if an exception is thrown in following steps
+        try {
+            GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
+            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
+                    + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
+            CodeGenerator codeGenerator = new CodeGenerator();
+            codeGenerator.generate(projectName, apis, true);
+            //Initializing the ballerina project and creating .bal folder.
+            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
+                    new ArrayList<>(), null);
+        } catch (Exception e) {
+            throw new CLIInternalException("Exception occured during codeGeneration process");
+        }
+        //todo: check if the files has been changed using hash utils
+
+        //if all the operations are success, write new config to file
+        if (isOverwriteRequired) {
+            Config newConfig = new Config();
+            Client client = new Client();
+            client.setHttpRequestTimeout(1000000);
+            newConfig.setClient(client);
+
+            String encryptedCS = GatewayCmdUtils.encrypt(clientSecret, password);
+            String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, password);
+            Token token = configTokenValues
+                    .setUsername(username)
+                    .setClientId(clientID)
+                    .setClientSecret(encryptedCS)
+                    .setTrustStoreLocation(trustStoreLocation)
+                    .setTrustStorePassword(encryptedTrustStorePass)
+                    .build();
+            newConfig.setToken(token);
+            newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+            GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
     }
 
@@ -642,21 +530,4 @@ public class ImportCmd implements GatewayLauncherCmd  {
         outStream.println(msg);
         return new String(System.console().readPassword());
     }
-
-    private boolean checkAPIAndProceed(String apiId){
-        String UserResponse;
-        if ((UserResponse = GatewayCmdUtils.promptForTextInput(outStream, "The provided API already exists. " +
-                "Do you need to overwrite ? yes[y] or no[n] :")).trim().isEmpty()) {
-            throw new CLIRuntimeException("No argument is provided.");
-        }
-        if (UserResponse.toLowerCase().equals("n") || UserResponse.toLowerCase().equals("no")) {
-            return false;
-        } else if (UserResponse.toLowerCase().equals("y") || UserResponse.toLowerCase().equals("yes")) {
-            return true;
-        } else {
-            throw new CLIRuntimeException("Provided argument is not valid :" + UserResponse);
-        }
-    }
-
-
 }
