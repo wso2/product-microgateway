@@ -37,7 +37,7 @@ Running the Microgateway is a 3 step process. The first two steps are involved i
 ##### Initiating  a microgateway project
 
 Once the project is initiated the default folder structure will be created for the respective folder.
-Empty api_definitions folder and definitions.yaml will be created inside the folder.API developer can add multiple open API definitions inside the
+Empty `api_definitions` folder and `definitions.yaml` will be created inside the folder.API developer can add multiple open API definitions inside the
 api_definitions file and define endpoints and interceptors for the resources in definitions.yaml
 
 
