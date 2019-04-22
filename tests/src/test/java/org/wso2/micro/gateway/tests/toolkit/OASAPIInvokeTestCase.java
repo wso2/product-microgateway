@@ -60,13 +60,13 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         super.inits(label, project, api.getProdEndpoint(), security, basepath);
     }
 
-    @Test(description = "Test API invocation with a JWT token")
+    @Test(description = "Test API invocation with a JWT token", enabled = false)
     public void testApiInvokeWithJWT() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+                .doGet(getServiceURLHttp("/v2/1.0.0/store/inventory"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), MockHttpServer.PROD_ENDPOINT_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");

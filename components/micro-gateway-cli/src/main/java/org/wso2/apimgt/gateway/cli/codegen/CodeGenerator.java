@@ -113,7 +113,6 @@ public class CodeGenerator {
      */
     public void generate(String projectName, boolean overwrite)
             throws IOException {
-        String projectGenPath = GatewayCmdUtils.getProjectGenDirectoryPath(projectName);
         String projectSrcPath = GatewayCmdUtils.getProjectGenSrcDirectoryPath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
