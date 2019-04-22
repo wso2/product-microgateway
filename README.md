@@ -6,7 +6,7 @@ In summary, a Microgateway is a specialized form of the WSO2 API Gateway with ch
 
 1. Its ability to execute in isolation without mandatory connections to other components (Secure Token Service, Rate limiting component , Analytics).
 1. Expose micro services directly from Open API definitions
-1. Ability to host a subset of APIs of choice (defined on the API Publisher) instead of all.
+1. Ability to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
 1. Immutability - The gateway runtime is immutable. If APIs or Policies change after the Microgateway has been built, a rebuild process is required to capture the changes.
 1. Seamless integration with deployment automation tools and techniques.
 1. Easy integration with CI/CD processes.
