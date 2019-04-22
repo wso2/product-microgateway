@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.cli.model.template.policy;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
 import java.util.ArrayList;
@@ -59,6 +60,29 @@ public class ThrottlePolicyInitializer {
             String escapedPolicyName = CodegenUtils.trim(policyDTO.getPolicyName());
             policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + escapedPolicyName
                     + GeneratorConstants.INIT_FUNC_SUFFIX);
+            policyNames.add(escapedPolicyName);
+        }
+        return this;
+    }
+
+    public ThrottlePolicyInitializer buildPolicyContext(List<ThrottlePolicyMapper> policies, GeneratorConstants
+            .POLICY_TYPE type) {
+        for (ThrottlePolicyMapper policyDTO : policies) {
+            String escapedPolicyName = CodegenUtils.trim(policyDTO.getName());
+            switch (type) {
+            case RESOURCE:
+                policyInitNames.add(GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + escapedPolicyName
+                        + GeneratorConstants.INIT_FUNC_SUFFIX);
+                break;
+            case APPLICATION:
+                policyInitNames.add(GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + escapedPolicyName
+                        + GeneratorConstants.INIT_FUNC_SUFFIX);
+                break;
+            case SUBSCRIPTION:
+                policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + escapedPolicyName
+                        + GeneratorConstants.INIT_FUNC_SUFFIX);
+                break;
+            }
             policyNames.add(escapedPolicyName);
         }
         return this;

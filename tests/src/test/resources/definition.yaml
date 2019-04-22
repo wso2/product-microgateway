@@ -1,0 +1,22 @@
+apis:
+  petstore/v1:
+    title: PetStoreAPI
+    version: 1.0.0
+    production_endpoint:
+      type: 'load_balance'
+      urls:
+        - 'https://petstore.ballerina.io/'
+        - 'https://petstore.ballerina.io/'
+    sandbox_endpoint:
+      type: 'http'
+      urls:
+        - 'https://sand.petstore.ballerina.io/'
+    resources:
+      /pet:
+        put:
+          sandbox_endpoint:
+            type: 'http'
+            urls:
+              - 'https://sand.petstore.ballerina.io/'
+          throttle_policy: 50kPerMin
+    security: 'oauth,basic'

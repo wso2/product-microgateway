@@ -25,4 +25,14 @@ public class GatewayCliCommands {
     public static final String BUILD = "build";
     public static final String RUN = "run";
     public static final String RESET = "reset";
+    public static final String ADD_API = "add api";
+    public static final String ADD_ROUTE = "add route";
+    public static final String LIST_APIS = "list apis";
+    public static final String LIST_RESOURCES = "list resources";
+    public static final String DESC_RESOURCE = "desc resource";
+    public static final String FUNCTION = "function";
+    public static final String SET = "set";
+    public static final String UPDATE_ROUTE = "update route";
+    public static final String INIT = "init";
+    public static final String IMPORT = "import";
 }

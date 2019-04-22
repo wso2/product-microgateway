@@ -74,6 +74,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     public void start() throws Exception {
         initializeEtcdServer();
 
+        String security = "oauth2";
         String balPath, configPath = "";
         String label = "apimTestLabel";
         String project = "apimTestProject";
@@ -134,7 +135,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generatePassingFlag(label, project, "");
+        cliExecutor.generate(label, project, security);
 
         balPath = CLIExecutor.getInstance().getLabelBalx(project);
         try {

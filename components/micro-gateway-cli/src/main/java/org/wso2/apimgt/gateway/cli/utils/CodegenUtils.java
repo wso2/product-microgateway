@@ -16,6 +16,8 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
@@ -42,7 +44,7 @@ public class CodegenUtils {
      * @param content content of the file
      * @throws IOException when a file operation fails
      */
-    private static void writeFile(Path filePath, String content) throws IOException {
+    public static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(),  GeneratorConstants.UTF_8);

@@ -17,9 +17,11 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.micro.gateway.tests.context.Constants;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
 
@@ -53,7 +55,11 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-        String[] args = {"setup", project, "--label", label, "--username", "admin", "--password",
+
+        String[] initArgs = {"init", project};
+        main.main(initArgs);
+
+        String[] args = {"import","--project", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", security};
@@ -61,7 +67,7 @@ public class CLIExecutor {
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project;
+        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
         String[] args2 = new String[]{"src", "-o", project,"--experimental","--siddhiruntime"};
@@ -76,7 +82,8 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition(String label, String project, String endpoint, String security) throws Exception {
+    public void generateFromDefinition( String project)
+            throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -86,20 +93,42 @@ public class CLIExecutor {
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
-        String config = new File(
-                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
-                        .getPath()).getAbsolutePath();
-        String oasFilePath = new File(
-                getClass().getClassLoader().getResource("testapi.json")
-                        .getPath()).getAbsolutePath();
+        File swaggerFilePath = new File(getClass().getClassLoader().getResource("testapi.json").getPath());
+        File resDefYaml =  new File(getClass().getClassLoader().getResource("definition.yaml").getPath());
+
+        File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
+
+        String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
+        File swagerDesPath = new File( path + "/apimTestProject"+ File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + "/testapi.json");
+        File defYamlFile = new File (apiDefinitionPath + "/definition.yaml");
+        File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
+
         System.setProperty("user.dir", path.toString());
-        String[] args = {"setup", project, "--label", label,
-                "-oa", oasFilePath, "-e", endpoint, "--config", config, "--security", security};
-        main.main(args);
+        String[] initArgs = {"init", project};
+        main.main(initArgs);
+
+        FileUtils.copyFile(swaggerFilePath,swagerDesPath);
+        if (defYamlFile.exists()) {
+           defYamlFile.delete();
+           FileUtils.copyFile(resDefYaml ,defYamlFile);
+       } else {
+            FileUtils.copyFile(resDefYaml ,defYamlFile);
+       }
+       if (policyYamlFile.exists()) {
+           policyYamlFile.delete();
+           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
+       } else {
+           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
+       }
+
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+        main.main(buildargs);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project;
+        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
 
         String[] cmdArray = new String[]{"bash", balCommand, "build"};
         String[] args2 = new String[]{"src", "-o", project, "--experimental", "--siddhiruntime"};
@@ -128,15 +157,22 @@ public class CLIExecutor {
                 getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-        String[] args = { "setup", project, "--label", label, "--username", "admin", "--password",
+
+        String[] initArgs = {"init", project};
+        main.main(initArgs);
+
+        String[] args = {"import","--project", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config, "--security", "oauth2", additionalFlag };
+                config, "--security", "oauth2", additionalFlag};
+
+        String[] buildargs = {"build", project};
+        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
         main.main(args);
 
         String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
                 + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project;
+        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
 
         String[] cmdArray = new String[] { "bash", balCommand, "build" };
         String[] args2 = new String[] { "src", "-o", project, "--experimental", "--siddhiruntime"};

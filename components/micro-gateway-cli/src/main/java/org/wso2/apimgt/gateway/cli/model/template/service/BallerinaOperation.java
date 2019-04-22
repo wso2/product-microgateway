@@ -16,10 +16,11 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Operation;
-import io.swagger.models.parameters.Parameter;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import java.util.Optional;
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
  *
  */
-public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOperation, Operation> {
+public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOperation, Operation> {
 
     public static final String X_THROTTLING_TIER = "x-throttling-tier";
     public static final String X_SCOPE = "x-scope";
@@ -42,12 +43,17 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
     private String summary;
     private String description;
     private String resourceTier;
-    private ExternalDocs externalDocs;
+    private ExternalDocumentation externalDocs;
     private String operationId;
     private List<BallerinaParameter> parameters;
     private List<String> methods;
     private String scope;
     private boolean isSecured = true;
+    private boolean hasProdEpConfig = false;
+    private boolean hasSandEpConfig = false;
+    private MgwEndpointConfigDTO epConfig;
+    private String requestInterceptor;
+    private String responseInterceptor;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -68,17 +74,19 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
-        Map<String, Object> extension =  operation.getVendorExtensions();
-        Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
-        resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-        Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
-        scopes.ifPresent(value -> this.scope = value.toString());
-        Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
-        authType.ifPresent(value -> {
-            if (AUTH_TYPE_NONE.equals(value)) {
-                this.isSecured = false;
-            }
-        });
+        Map<String, Object> extension =  operation.getExtensions();
+        if(extension != null){
+            Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
+            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
+            scopes.ifPresent(value -> this.scope = value.toString());
+            Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
+            authType.ifPresent(value -> {
+                if (AUTH_TYPE_NONE.equals(value)) {
+                    this.isSecured = false;
+                }
+            });
+        }
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
@@ -139,11 +147,11 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
         return allMethods;
     }
 
-    public ExternalDocs getExternalDocs() {
+    public ExternalDocumentation getExternalDocs() {
         return externalDocs;
     }
 
-    public void setExternalDocs(ExternalDocs externalDocs) {
+    public void setExternalDocs(ExternalDocumentation externalDocs) {
         this.externalDocs = externalDocs;
     }
 
@@ -169,5 +177,35 @@ public class BallerinaOperation implements BallerinaSwaggerObject<BallerinaOpera
 
     public void setSecured(boolean secured) {
         isSecured = secured;
+    }
+
+    public MgwEndpointConfigDTO getEpConfigDTO() {
+        return epConfig;
+    }
+
+    public void setEpConfigDTO(MgwEndpointConfigDTO epConfigDTO) {
+        this.epConfig = epConfigDTO;
+        if(epConfigDTO.getProdEndpointList() != null){
+            hasProdEpConfig = true;
+        }
+        if(epConfigDTO.getSandboxEndpointList() != null){
+            hasSandEpConfig = true;
+        }
+    }
+
+    public String getRequestInterceptor() {
+        return requestInterceptor;
+    }
+
+    public void setRequestInterceptor(String requestInterceptor) {
+        this.requestInterceptor = requestInterceptor;
+    }
+
+    public String getResponseInterceptor() {
+        return responseInterceptor;
+    }
+
+    public void setResponseInterceptor(String responseInterceptor) {
+        this.responseInterceptor = responseInterceptor;
     }
 }

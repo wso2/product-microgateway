@@ -134,11 +134,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.cli</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jms_1.1_spec</artifactId>
             <version>1.1.1</version>

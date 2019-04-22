@@ -18,6 +18,13 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 public class Endpoint {
     private String endpointUrl;
 
+    public Endpoint(){
+    }
+
+    public Endpoint(String endpointUrl){
+        setEndpointUrl(endpointUrl);
+    }
+
     public String getEndpointUrl() {
         return endpointUrl;
     }

@@ -82,6 +82,17 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
+        if (isResourceLevelThrottled(context, keyvalidationResult)) {
+            printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
+            context.attributes[IS_THROTTLE_OUT] = true;
+            context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
+            setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
+                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            sendErrorResponse(caller, request, context);
+            return false;
+        } else {
+            printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
+        }
         (isThrottled, stopOnQuota) =         isSubscriptionLevelThrottled(context, keyvalidationResult);
         printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
                 + isThrottled + ", stopOnQuota:" + stopOnQuota);
@@ -124,6 +135,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         } else {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
         }
+
     } else if (!isSecured) {
         printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
         // setting keytype to invocationContext
@@ -222,6 +234,27 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
     return throttled;
 }
 
+
+function isResourceLevelThrottled(http:FilterContext context,AuthenticationContext keyValidationDto) returns (boolean) {
+    TierConfiguration? tier = resourceTierAnnotationMap[context.resourceName];
+    string? policy = tier.policy;
+    if (policy is string) {
+        if (policy == UNLIMITED_TIER) {
+            return false;
+        }
+        string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
+        string resourceLevelThrottleKey = context.resourceName.replaceAll("_", "");
+        if (apiVersion is string) {
+            resourceLevelThrottleKey += ":" + apiVersion;
+        }
+        boolean throttled;
+        boolean stopOnQuota;
+        (throttled, stopOnQuota) = isRequestThrottled(resourceLevelThrottleKey);
+        return throttled;
+    }
+    return false;
+}
+
 function isUnauthenticateLevelThrottled(http:FilterContext context) returns (boolean, boolean) {
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
@@ -257,12 +290,14 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.appTier = keyValidationDto.applicationTier;
     requestStreamDto.apiTier = keyValidationDto.apiTier;
     requestStreamDto.subscriptionTier = keyValidationDto.tier;
-    requestStreamDto.resourceKey = getContext(context);
+    string resourcekey = context.resourceName;
+    requestStreamDto.resourceKey = resourcekey.replaceAll("_", "");
     TierConfiguration? tier = resourceTierAnnotationMap[context.resourceName];
     string? policy = tier.policy;
     if (policy is string) {
        requestStreamDto.resourceTier = policy;
     }
+
     requestStreamDto.userId = keyValidationDto.username;
     requestStreamDto.apiContext = getContext(context);
     if (apiVersion is string) {
@@ -276,7 +311,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     if (apiVersion is string) {
         requestStreamDto.apiKey += ":" + apiVersion;
         requestStreamDto.subscriptionKey +=":" + apiVersion;
-        requestStreamDto.resourceKey += "/" + apiVersion;
+        requestStreamDto.resourceKey += ":" + apiVersion;
     }
 
     json properties = {};
