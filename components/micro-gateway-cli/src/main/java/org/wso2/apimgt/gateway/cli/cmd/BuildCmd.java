@@ -78,7 +78,17 @@ public class BuildCmd implements GatewayLauncherCmd {
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
-        MgwDefinitionUtils.setMgwDefinition(projectLocation + "/definition.yaml");
+        File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
+        File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
+
+        if(importedAPIDefLocation.list().length == 0 && addedAPIDefLocation.list().length == 0 ){
+            throw new CLIInternalException("'api_definitions folder doesnot exist.");
+        }
+
+        if(importedAPIDefLocation.list().length > 0 && addedAPIDefLocation.list().length == 0 && !isCompiled){
+            //if only imported swaggers available, we do not explicitly generate ballerina code
+            return;
+        }
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -89,6 +99,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
                 init(projectName, toolkitConfigPath);
+                MgwDefinitionUtils.setMgwDefinition(projectLocation + "/definition.yaml");
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
                 boolean changesDetected;
