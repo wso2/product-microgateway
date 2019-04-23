@@ -37,7 +37,7 @@ public class MgwAPIDefinition {
     private String security; //todo: bring enum
     private APICorsConfigurationDTO corsConfiguration;
     //to identify whether it has been used
-    private boolean isUsed = false;
+    private boolean isDefinitionUsed = false;
 
     @JsonProperty("title")
     public String getTitle() {
