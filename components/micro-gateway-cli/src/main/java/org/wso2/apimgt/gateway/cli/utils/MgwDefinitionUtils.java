@@ -166,11 +166,11 @@ public class MgwDefinitionUtils {
     public static void FindNotUsedAPIInformation(PrintStream outStream) {
         rootDefinition.getApis().getApisMap().forEach((k, v) -> {
             if (!v.getIsUsed()) {
-                String msg = "[Warning] API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
+                String msg = "API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
                         "added to the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".";
-                LOGGER.info(msg);
+                LOGGER.warn(msg);
                 if(outStream != null){
-                    outStream.println(msg);
+                    outStream.println("[Warning] " + msg);
                 }
             }
         });
