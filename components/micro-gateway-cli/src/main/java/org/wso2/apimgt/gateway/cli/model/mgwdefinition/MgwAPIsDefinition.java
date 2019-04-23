@@ -35,6 +35,15 @@ public class MgwAPIsDefinition {
         apis.put(key, api);
     }
 
+    /**
+     * get all the api information from the root level
+     *
+     * @return map with (basepath, api information object)
+     */
+    public Map<String, MgwAPIDefinition> getApisMap(){
+        return apis;
+    }
+
     public MgwAPIDefinition getApiFromBasepath(String basepath) {
         return apis.get(basepath);
     }
@@ -42,6 +51,8 @@ public class MgwAPIsDefinition {
     public String getBasepathFromAPI(String apiName, String apiVersion) {
         for (Map.Entry<String, MgwAPIDefinition> apiEntry : apis.entrySet()) {
             if (apiEntry.getValue().getTitle().equals(apiName) && apiEntry.getValue().getVersion().equals(apiVersion)) {
+                //because if this method is called, it means that API information is utilized.
+                apiEntry.getValue().setIsUsed(true);
                 return apiEntry.getKey();
             }
         }

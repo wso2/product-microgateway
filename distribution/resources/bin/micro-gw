@@ -248,32 +248,39 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
     -Dcli.home=$MICROGW_HOME \
     org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 
-    MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
-    pushd $MICRO_GW_LABEL_PROJECT_DIR/gen > /dev/null
-        # clean the content of target folder
-        if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
-            rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
-        fi
-        # build the ballerina source code for the label
-        ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
-    popd > /dev/null
+
+
+
+
+    if [ $? -eq 0 ]
+    then
+        MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
+        pushd $MICRO_GW_LABEL_PROJECT_DIR/gen > /dev/null
+            # clean the content of target folder
+            if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
+                rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
+            fi
+            # build the ballerina source code for the label
+            ballerina build src/ -o $CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
+        popd > /dev/null
 
     # ----- Execute The Build Command with --compiled flag (2nd phase) -----------------------------------------
 
-  $JAVACMD \
-    -Xms256m -Xmx1024m \
-    -XX:+HeapDumpOnOutOfMemoryError \
-    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-    $JAVA_OPTS \
-    -classpath "$CLI_CLASSPATH" \
-    -Djava.security.egd=file:/dev/./urandom \
-    -Dballerina.home=$BALLERINA_HOME \
-    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-    -Dfile.encoding=UTF8 \
-    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-    -Dcli.home=$MICROGW_HOME \
-    org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
+      $JAVACMD \
+        -Xms256m -Xmx1024m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+        $JAVA_OPTS \
+        -classpath "$CLI_CLASSPATH" \
+        -Djava.security.egd=file:/dev/./urandom \
+        -Dballerina.home=$BALLERINA_HOME \
+        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+        -Dfile.encoding=UTF8 \
+        -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+        -Dcli.home=$MICROGW_HOME \
+        org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
+     fi
 else
   $JAVACMD \
       -Xms256m -Xmx1024m \

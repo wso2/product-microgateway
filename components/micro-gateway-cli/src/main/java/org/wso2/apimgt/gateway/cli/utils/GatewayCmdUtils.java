@@ -143,6 +143,30 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Create validation exception
+     * requires to set a system property to avoid ballerina compilation errors
+     *
+     * @param errorMsg Error message
+     * @return         CLIRuntimeException with the added error message
+     */
+    public static CLIRuntimeException createValidationException(String errorMsg, Logger logger){
+        logger.error(errorMsg);
+        return new CLIRuntimeException(errorMsg);
+    }
+
+    /**
+     * Create validation exception
+     * requires to set a system property to avoid ballerina compilation errors
+     *
+     * @param errorMsg Error message
+     * @return         CLIRuntimeException with the added error message
+     */
+    public static CLIRuntimeException createValidationException(String errorMsg, Exception e, Logger logger){
+        logger.error(errorMsg);
+        return new CLIRuntimeException(errorMsg, e);
+    }
+
+    /**
      * Convert first letter to lower case
      *
      * @param s string

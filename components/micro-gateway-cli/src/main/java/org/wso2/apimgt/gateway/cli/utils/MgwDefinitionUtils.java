@@ -19,7 +19,9 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.mgwdefinition.MgwRootDefinition;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
@@ -27,6 +29,7 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 
 /**
@@ -35,22 +38,39 @@ import java.io.IOException;
 public class MgwDefinitionUtils {
 
     private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionUtils.class);
     //private static String routesConfigPath;
     private static MgwRootDefinition rootDefinition;
 
     public static void setMgwDefinition(String path) {
         try {
             if (rootDefinition == null) {
+                validateYamlSyntax(path);
                 rootDefinition = OBJECT_MAPPER_YAML.readValue(new File(path), MgwRootDefinition.class);
+                LOGGER.info(GatewayCliConstants.PROJECT_DEFINITION_FILE + " is parsed successfully");
             }
         } catch (IOException e) {
-            throw new CLIRuntimeException("Error while reading the definitions.yaml", e);
+            throw GatewayCmdUtils.createValidationException("Error while reading the " +
+                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", e, LOGGER);
         }
     }
 
-    //todo: check the need of validate basepath
+    /**
+     * Get basePath from the definition.yaml
+     *
+     * @param apiName    API name
+     * @param apiVersion API version
+     * @return basePath
+     */
     public static String getBasePath(String apiName, String apiVersion) {
-        return rootDefinition.getApis().getBasepathFromAPI(apiName, apiVersion);
+        String basePath = rootDefinition.getApis().getBasepathFromAPI(apiName, apiVersion);
+        if (basePath == null) {
+            throw GatewayCmdUtils.createValidationException("Error: The API '" + apiName + "' and version '" +
+                    apiVersion + "' is not " + "found in the " +
+                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", LOGGER);
+        }
+        LOGGER.info("basePath: '" + basePath + "' recieved for API: '" + apiName + "' Version: '" + apiVersion + "'.");
+        return basePath;
     }
 
     public static EndpointListRouteDTO getProdEndpointList(String basePath) {
@@ -116,5 +136,43 @@ public class MgwDefinitionUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * To validate the provided definition.yaml follows the yaml syntax
+     *
+     * @param filePath file path to definition.yaml
+     */
+    private static void validateYamlSyntax(String filePath) {
+        File file = new File(filePath);
+        //to check the existence of definitions.yaml file
+        if (!file.exists()) {
+            throw GatewayCmdUtils.createValidationException("'definition.yaml' file does not exists.", LOGGER);
+        }
+        try {
+            OBJECT_MAPPER_YAML.readTree(file);
+            //if the provided definitions.yaml file does not follow the yaml syntax
+        } catch (IOException e) {
+            throw GatewayCmdUtils.createValidationException("'definitions.yaml file cannot be parsed as yaml document.",
+                    LOGGER);
+        }
+    }
+
+    /**
+     * To find out the api information which is not used for code generation but included in the definitions.yaml
+     *
+     * @param outStream print stream if needed
+     */
+    public static void FindNotUsedAPIInformation(PrintStream outStream) {
+        rootDefinition.getApis().getApisMap().forEach((k, v) -> {
+            if (!v.getIsUsed()) {
+                String msg = "[Warning] API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
+                        "added to the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".";
+                LOGGER.info(msg);
+                if(outStream != null){
+                    outStream.println(msg);
+                }
+            }
+        });
     }
 }
