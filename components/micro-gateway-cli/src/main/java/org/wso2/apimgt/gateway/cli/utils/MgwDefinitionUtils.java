@@ -163,7 +163,7 @@ public class MgwDefinitionUtils {
      *
      * @param outStream print stream if needed
      */
-    public static void FindNotUsedAPIInformation(PrintStream outStream) {
+    public static void FindUnusedAPIInformation(PrintStream outStream) {
         rootDefinition.getApis().getApisMap().forEach((k, v) -> {
             if (!v.getIsUsed()) {
                 String msg = "API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
