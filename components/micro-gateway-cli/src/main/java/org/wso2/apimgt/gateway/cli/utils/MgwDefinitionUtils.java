@@ -29,7 +29,6 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 
 /**
@@ -69,7 +68,6 @@ public class MgwDefinitionUtils {
                     apiVersion + "' is not " + "found in the " +
                     GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", LOGGER);
         }
-        LOGGER.info("basePath: '" + basePath + "' recieved for API: '" + apiName + "' Version: '" + apiVersion + "'.");
         return basePath;
     }
 
@@ -161,17 +159,14 @@ public class MgwDefinitionUtils {
     /**
      * To find out the api information which is not used for code generation but included in the definitions.yaml
      *
-     * @param outStream print stream if needed
      */
-    public static void FindNotUsedAPIInformation(PrintStream outStream) {
+    public static void FindNotUsedAPIInformation() {
         rootDefinition.getApis().getApisMap().forEach((k, v) -> {
             if (!v.getIsUsed()) {
                 String msg = "API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
                         "added to the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".";
                 LOGGER.warn(msg);
-                if(outStream != null){
-                    outStream.println("[Warning] " + msg);
-                }
+                GatewayCmdUtils.printVerbose(msg);
             }
         });
     }

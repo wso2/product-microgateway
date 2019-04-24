@@ -166,6 +166,19 @@ done
 # restore all the shifted arguments
 set -- "${ALL_ARGS[@]}"
 
+#add system variable VERBOSE_ENABLED
+VerboseRemovedArgs="$@"
+if [[ " ${VerboseRemovedArgs[*]} " == *" --verbose "* ]]; then
+    VERBOSE_ENABLED=true
+    #delete '--verbose' if available
+    delete=( --verbose )
+    VerboseRemovedArgs=${VerboseRemovedArgs/$delete}
+    #set modified args as $@
+    set -- $VerboseRemovedArgs
+else
+    VERBOSE_ENABLED=false
+fi
+
 # take the first default argument as the project name
 CMD_PRO_NAME_VAL=$(echo ${DEFAULT_ARGS[0]}|sed 's#/##g')
 
@@ -246,11 +259,8 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
     -Dfile.encoding=UTF8 \
     -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
     -Dcli.home=$MICROGW_HOME \
+    -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
     org.wso2.apimgt.gateway.cli.cmd.Main "$@"
-
-
-
-
 
     if [ $? -eq 0 ]
     then
@@ -279,6 +289,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         -Dfile.encoding=UTF8 \
         -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
         -Dcli.home=$MICROGW_HOME \
+        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
         org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
      fi
 else
@@ -295,6 +306,7 @@ else
       -Dfile.encoding=UTF8 \
       -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
       -Dcli.home=$MICROGW_HOME \
+      -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
       org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 
 fi
