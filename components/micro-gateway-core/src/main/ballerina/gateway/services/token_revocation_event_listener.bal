@@ -60,7 +60,7 @@ service {
 # It binds the subscriber endpoint and jms listener
 #
 # + return - jms:TopicSubscriber for token Revocation
-public function startTokenRevocationSubscriberService() returns jms:TopicSubscriber {
+public function startTokenRevocationSubscriberService() returns jms:TopicSubscriber|error {
     // Initialize a JMS connectiontion with the provider.
     jms:Connection jmsTokenRevocationConnection = new({
             initialContextFactory: jmsConnectioninitialContextFactoryTokenRevocation,
@@ -88,9 +88,14 @@ public function initiateTokenRevocationJmsListener() returns boolean {
         REALTIME_MESSAGE_ENABLED, false);
 
     if (enabledRealtimeMessage) {
-        jms:TopicSubscriber topicTokenRevocationSubscriber = startTokenRevocationSubscriberService();
-        printInfo(KEY_TOKEN_REVOCATION_JMS , "subscriber service for token revocation is started");
-        return true;
+        jms:TopicSubscriber|error topicTokenRevocationSubscriber = trap startTokenRevocationSubscriberService();
+        if (topicTokenRevocationSubscriber is jms:TopicSubscriber) {
+            printInfo(KEY_TOKEN_REVOCATION_JMS , "subscriber service for token revocation is started");
+            return true;
+        } else {
+            printError(KEY_TOKEN_REVOCATION_JMS , "Error while starting subscriber service for token revocation");
+            return false;
+        }
     }
     return false;
 }
