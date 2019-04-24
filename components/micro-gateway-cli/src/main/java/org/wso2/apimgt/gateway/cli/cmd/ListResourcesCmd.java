@@ -44,7 +44,7 @@ public class ListResourcesCmd implements GatewayLauncherCmd{
     @Override
     public void execute() {
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
 
         if (mainArgs == null) {
             printResourceDetailsForSingleAPI(OpenAPICodegenUtils.getAllResources(projectName));

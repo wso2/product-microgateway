@@ -44,7 +44,7 @@ public class ListAPIsCmd implements GatewayLauncherCmd {
     @Override
     public void execute() {
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
         printAPIDetailsInTable(RouteUtils.listApis());
     }
 
