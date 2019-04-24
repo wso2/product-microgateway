@@ -121,7 +121,7 @@ public class MgwAPIDefinition {
     }
 
     /**
-     * Identify if the API information used or not
+     * Identify if the API information used or not.
      *
      * @return true if the API information is used inside
      */
