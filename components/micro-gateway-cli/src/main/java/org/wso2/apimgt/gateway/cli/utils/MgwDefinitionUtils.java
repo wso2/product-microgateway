@@ -158,7 +158,6 @@ public class MgwDefinitionUtils {
 
     /**
      * To find out the api information which is not used for code generation but included in the definitions.yaml
-     *
      */
     public static void FindNotUsedAPIInformation() {
         rootDefinition.getApis().getApisMap().forEach((k, v) -> {
