@@ -275,7 +275,6 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         popd > /dev/null
 
     # ----- Execute The Build Command with --compiled flag (2nd phase) -----------------------------------------
-
       $JAVACMD \
         -Xms256m -Xmx1024m \
         -XX:+HeapDumpOnOutOfMemoryError \
