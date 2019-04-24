@@ -72,7 +72,7 @@ public class BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
     }
 
-    protected void inits(String label, String project, String endpoint, String security, String basepath) throws Exception {
+    protected void inits(String project) throws Exception {
         CLIExecutor cliExecutor;
 
         microGWServer = ServerInstance.initMicroGwServer();

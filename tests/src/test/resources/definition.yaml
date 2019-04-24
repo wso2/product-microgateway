@@ -5,18 +5,18 @@ apis:
     production_endpoint:
       type: 'load_balance'
       urls:
-        - 'https://petstore.ballerina.io/'
-        - 'https://petstore.ballerina.io/'
+        - 'http://www.mocky.io/v2/5cbfdeb03100006600035ef1'
+        - 'http://www.mocky.io/v2/5cbfdeb03100006600035ef1'
     sandbox_endpoint:
       type: 'http'
       urls:
-        - 'https://sand.petstore.ballerina.io/'
+        - 'http://www.mocky.io/v2/5cbfdad1310000ea04035ee4'
     resources:
       /pet:
         put:
           sandbox_endpoint:
             type: 'http'
             urls:
-              - 'https://sand.petstore.ballerina.io/'
+              - 'http://www.mocky.io/v2/5cbfdad1310000ea04035ee4'
           throttle_policy: 50kPerMin
-    security: 'oauth,basic'
+    security: 'oauth'

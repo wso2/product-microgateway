@@ -37,11 +37,10 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
-        String label = "apimTestLabel";
         String project = "apimTestProject";
         API api = new API();
-        api.setName("PizzaShackAPI");
-        api.setContext("/pizzashack");
+        api.setName("PetStoreAPI");
+        api.setContext("petstore/v1");
         api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
@@ -51,22 +50,19 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
-        //set security schemas
-        //todo: change this?
-        String security = "oauth2";
-        String basepath = api.getContext() + "/" + api.getVersion();
+
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.inits(label, project, api.getProdEndpoint(), security, basepath);
+        super.inits(project);
     }
 
-    @Test(description = "Test API invocation with a JWT token", enabled = false)
+    @Test(description = "Test API invocation with a JWT token")
     public void testApiInvokeWithJWT() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/v2/1.0.0/store/inventory"), headers);
+                .doGet(getServiceURLHttp("petstore/v1/pet/findByStatus?status=available"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), MockHttpServer.PROD_ENDPOINT_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
