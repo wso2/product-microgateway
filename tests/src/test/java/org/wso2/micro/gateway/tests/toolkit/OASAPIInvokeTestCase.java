@@ -41,9 +41,8 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
-
         startMockBackendServer();
-
+        
         String project = "apimTestProject";
         API api = new API();
         api.setName("PetStoreAPI");
@@ -81,7 +80,6 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         mockBackEndServer.stopIt();
         mockHttpServer.stopIt();
         super.finalize();
-
     }
 
     public void startMockBackendServer() {
@@ -90,6 +88,5 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         Assert.assertFalse(isOpen, "Port: " + port + " already in use.");
         mockBackEndServer = new MockBackEndServer(2379);
         mockBackEndServer.start();
-
     }
 }
