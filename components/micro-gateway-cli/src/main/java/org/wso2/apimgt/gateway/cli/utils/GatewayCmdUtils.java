@@ -1313,7 +1313,7 @@ public class GatewayCmdUtils {
      */
     public static void printVerbose(String msg) {
         if (verboseLogsEnabled) {
-            System.out.println(msg);
+            System.out.println("micro-gw: [verbose] " + msg);
         }
     }
 
