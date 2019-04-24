@@ -117,4 +117,24 @@ public class MgwDefinitionUtils {
         }
         return true;
     }
+
+    /**
+     * get the API-level request interceptor of an API.
+     *
+     * @param basePath basePath of the API
+     * @return  API response request function name
+     */
+    public static String getApiRequestInterceptor(String basePath){
+        return rootDefinition.getApis().getApiFromBasepath(basePath).getRequestInterceptor();
+    }
+
+    /**
+     * get the API-level response interceptor of an API.
+     *
+     * @param basePath basePath of the API
+     * @return  API response interceptor function name
+     */
+    public static String getApiResponseInterceptor(String basePath){
+        return rootDefinition.getApis().getApiFromBasepath(basePath).getResponseInterceptor();
+    }
 }
