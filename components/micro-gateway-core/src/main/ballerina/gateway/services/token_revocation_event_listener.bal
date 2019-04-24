@@ -27,6 +27,7 @@ string jmsConnectionProviderUrlTokenRevocation = getConfigValue(REALTIME_MESSAGE
     "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
 string jmsConnectionPasswordTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_PASSWORD, "");
 string jmsConnectionUsernameTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_USERNAME, "");
+string tokenRevocationJMSTopic = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_TOPIC, "tokenRevocation");
 
 service jmsTokenRevocationListener =
 service {
@@ -72,7 +73,7 @@ public function startTokenRevocationSubscriberService() returns jms:TopicSubscri
             acknowledgementMode: "AUTO_ACKNOWLEDGE"
         });
 
-    jms:TopicSubscriber subscriberTokenRevocationEndpoint = new(jmsTokenRevocationSession, topicPattern = "jwtRevocation");
+    jms:TopicSubscriber subscriberTokenRevocationEndpoint = new(jmsTokenRevocationSession, topicPattern = tokenRevocationJMSTopic);
     _ = subscriberTokenRevocationEndpoint.__attach(jmsTokenRevocationListener, {});
     _ = subscriberTokenRevocationEndpoint.__start();
     return subscriberTokenRevocationEndpoint;

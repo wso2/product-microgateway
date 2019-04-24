@@ -244,6 +244,7 @@
  public const string REALTIME_JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";
  public const string REALTIME_JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
  public const string REALTIME_JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
+ public const string REALTIME_JMS_CONNECTION_TOPIC = "jmsConnectionTopic";
  public const string PERSISTENT_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.persistent";
  public const string PERSISTENT_MESSAGE_ENABLED = "enablePersistentStorageRetrieval";
  public const string PERSISTENT_USE_DEFAULT = "useDefault";
