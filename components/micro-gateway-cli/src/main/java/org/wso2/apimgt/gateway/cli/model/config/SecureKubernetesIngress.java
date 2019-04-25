@@ -29,6 +29,7 @@ public class SecureKubernetesIngress {
     private String path;
     private String targetPath;
     private String ingressClass;
+    private boolean enableTLS = true;
     private boolean enable = false;
 
     public String getName() {
@@ -90,6 +91,14 @@ public class SecureKubernetesIngress {
 
     public void setIngressClass(String ingressClass) {
         this.ingressClass = ingressClass;
+    }
+
+    public boolean isEnableTLS() {
+        return enableTLS;
+    }
+
+    public void setEnableTLS(boolean enableTLS) {
+        this.enableTLS = enableTLS;
     }
 
     public boolean isEnable() {

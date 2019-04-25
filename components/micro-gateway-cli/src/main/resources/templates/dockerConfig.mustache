@@ -3,7 +3,7 @@
     {{#containerConfig.docker.dockerConfig.name}}name:"{{containerConfig.docker.dockerConfig.name}}"{{/containerConfig.docker.dockerConfig.name}}{{^containerConfig.docker.dockerConfig.name}}name:"{{qualifiedServiceName}}"{{/containerConfig.docker.dockerConfig.name}}{{#if containerConfig.docker.dockerConfig.registry}},
     registry:"{{containerConfig.docker.dockerConfig.registry}}"{{/if}}{{#if containerConfig.docker.dockerConfig.tag}},
     tag:"{{containerConfig.docker.dockerConfig.tag}}"{{/if}}{{#if containerConfig.docker.dockerConfig.buildImage}},
-    buildImage:"{{containerConfig.docker.dockerConfig.buildImage}}"{{/if}}{{#if containerConfig.docker.dockerConfig.dockerHost}},
+    buildImage:{{containerConfig.docker.dockerConfig.buildImage}}{{/if}}{{#if containerConfig.docker.dockerConfig.dockerHost}},
     dockerHost:"{{containerConfig.docker.dockerConfig.dockerHost}}"{{/if}}{{#if containerConfig.docker.dockerConfig.dockerCertPath}},
     dockerCertPath:"{{containerConfig.docker.dockerConfig.dockerCertPath}}"{{/if}}{{#if containerConfig.docker.dockerConfig.baseImage}},
     baseImage:"{{containerConfig.docker.dockerConfig.baseImage}}"{{/if}}{{#if containerConfig.docker.dockerConfig.enableDebug}},
