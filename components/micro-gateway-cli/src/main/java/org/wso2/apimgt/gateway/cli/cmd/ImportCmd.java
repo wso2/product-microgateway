@@ -133,9 +133,11 @@ public class ImportCmd implements GatewayLauncherCmd {
     public void execute() {
         String clientID;
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        if (projectName.contains(" ")) {
-            throw GatewayCmdUtils.createUsageException("Only one argument accepted as the project name. but provided:" +
-                    " " + projectName);
+        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
+
+        if (!projectLocation.exists()) {
+            throw GatewayCmdUtils.createUsageException("Project " + projectName + " does not exist. Please execute the command '" +
+                    "micro-gw init " + projectName + "' to initialize the project.");
         }
         //Security Schemas settings
         if (StringUtils.isEmpty(security)) {
