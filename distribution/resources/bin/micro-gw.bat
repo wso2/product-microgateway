@@ -30,7 +30,7 @@ REM NOTE: Borrowed generously from Apache Tomcat startup scripts.
 REM -----------------------------------------------------------------------------
 SETLOCAL EnableDelayedExpansion
 
-if ""%1%""==""-v"" ( SET verbose=T ) else ( SET verbose=F )
+if ""%1%""==""--verbose"" ( SET verbose=T ) else ( SET verbose=F )
 if %verbose%==T ( ECHO Verbose mode enabled )
 
 REM Get the location of this(micro-gw.bat) file
@@ -124,7 +124,10 @@ goto :end
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
+		if ERRORLEVEL 1 goto :end
+
 	:continueBuild
+	    goto :passToJar
 		pushd "%MICRO_GW_PROJECT_DIR%"
 			if %verbose%==T ECHO current dir %CD%
 			SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
@@ -134,6 +137,9 @@ goto :end
 			call ballerina build src -o %project_name:\=%.balx --experimental --siddhiruntime
 		popd
 		if %verbose%==T ECHO Ballerina build completed
+
+		set %* = %* --compiled
+
 		REM Check for a debug param by looping through the remaining args list
 		:checkDebug
 			SHIFT
@@ -197,6 +203,7 @@ goto end
 		-Dtemplates.dir.path="%MICROGW_HOME%"\resources\templates ^
 		-Dcli.home="%MICROGW_HOME%" ^
 		-Dcurrent.dir=%CURRENT_D%
+		-DVERBOSE_ENABLED=%verbose%
 	if %verbose%==T ECHO JAVACMD = !JAVACMD!
 
 :runJava

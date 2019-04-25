@@ -109,6 +109,10 @@ public class BuildCmd implements GatewayLauncherCmd {
                 GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                         GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
+
+                //to indicate the api information which is not used in the code generation process, but included in
+                //definition.yaml
+                MgwDefinitionUtils.FindNotUsedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);

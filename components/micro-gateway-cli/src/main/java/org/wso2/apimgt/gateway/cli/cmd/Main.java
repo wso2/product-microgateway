@@ -51,19 +51,19 @@ public class Main {
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
-            logger.error("micro-gw: Error occurred while executing command.", e);
+            logger.error(MICRO_GW + ": Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
-            outStream.println("micro-gw: " + INTERNAL_ERROR_MESSAGE  + " - " + e.getMessage());
+            outStream.println(MICRO_GW + ":" + " + INTERNAL_ERROR_MESSAGE" + " - " + e.getMessage());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
-            outStream.println("micro-gw: " + e.getTerminalMsg());
+            outStream.println(MICRO_GW + ": " + e.getTerminalMsg());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(e.getExitCode());
         } catch (Exception e) {
             //Use generic exception to catch all the runtime exception
-            outStream.println("micro-gw: " + INTERNAL_ERROR_MESSAGE);
+            outStream.println(MICRO_GW + ": " + INTERNAL_ERROR_MESSAGE);
             logger.error(INTERNAL_ERROR_MESSAGE, e);
             Runtime.getRuntime().exit(1);
         }
@@ -136,18 +136,23 @@ public class Main {
 //            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
 //            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
 //            updateRouteCmd.setParentCmdParser(cmdParser);
+            Map<String, JCommander> commanderMap;
+            String parsedCmdName;
+            if (args.length != 0) {
+                cmdParser.setProgramName(MICRO_GW);
+                cmdParser.parse(args);
+                parsedCmdName = cmdParser.getParsedCommand();
 
-            cmdParser.setProgramName(MICRO_GW);
-            cmdParser.parse(args);
-            String parsedCmdName = cmdParser.getParsedCommand();
-
-            // User has not specified a command. Therefore returning the main command
-            // which simply prints usage information.
-            if (parsedCmdName == null) {
-                return Optional.of(defaultCmd);
+                // User has not specified a command. Therefore returning the main command
+                // which simply prints usage information.
+                if (parsedCmdName == null) {
+                    return Optional.of(defaultCmd);
+                }
+                commanderMap = cmdParser.getCommands();
+            } else {
+                String errorMsg = "No arguments supplied";
+                throw GatewayCmdUtils.createUsageException(errorMsg);
             }
-
-            Map<String, JCommander> commanderMap = cmdParser.getCommands();
             return Optional.of((GatewayLauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";

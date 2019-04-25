@@ -5,18 +5,18 @@ apis:
     production_endpoint:
       type: 'load_balance'
       urls:
-        - 'https://petstore.ballerina.io/'
-        - 'https://petstore.ballerina.io/'
+        - 'https://localhost:2379/pet/v1'
+        - 'https://localhost:2379/pet/v1'
     sandbox_endpoint:
       type: 'http'
       urls:
-        - 'https://sand.petstore.ballerina.io/'
+        - 'https://localhost:2379/pet/v1'
     resources:
       /pet:
         put:
           sandbox_endpoint:
             type: 'http'
             urls:
-              - 'https://sand.petstore.ballerina.io/'
+              - 'https://localhost:2379/pet/v1'
           throttle_policy: 50kPerMin
-    security: 'oauth,basic'
+    security: 'oauth'

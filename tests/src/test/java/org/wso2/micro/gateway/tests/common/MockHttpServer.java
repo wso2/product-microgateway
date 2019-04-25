@@ -60,6 +60,9 @@ public class MockHttpServer extends Thread {
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
     public final static String PROD_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-production\"}";
     public final static String SAND_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-sandbox\"}";
+    public final static String PET_RESOURCE_RESPONSE = "{\"id\":111111148, \"category\":{ \"id\":0," +
+            " \"name\":\"ABCD\" }, \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ]," +
+            " \"tags\":[ { \"id\":0, \"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
     public final static String ECHOINVALIDRESPONSE_ENDPOINT_RESPONSE = "[{\"description\":\"Grilled white chicken, " +
             "hickory-smoked bacon and fresh sliced onions in barbeque sauce\", \"price\":\"25.99\"," +
             " \"icon\":\"/images/6.png\"}, {\"name\":\"Chicken Parmesan\", \"description\":\"Grilled chicken, fresh " +
