@@ -52,7 +52,7 @@ public class MgwAPIsDefinition {
         for (Map.Entry<String, MgwAPIDefinition> apiEntry : apis.entrySet()) {
             if (apiEntry.getValue().getTitle().equals(apiName) && apiEntry.getValue().getVersion().equals(apiVersion)) {
                 //because if this method is called, it means that API information is utilized.
-                apiEntry.getValue().setIsUsed(true);
+                apiEntry.getValue().setIsDefinitionUsed(true);
                 return apiEntry.getKey();
             }
         }

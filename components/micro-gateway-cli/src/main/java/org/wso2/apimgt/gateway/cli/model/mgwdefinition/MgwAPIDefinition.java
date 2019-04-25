@@ -125,8 +125,8 @@ public class MgwAPIDefinition {
      *
      * @return true if the API information is used inside
      */
-    public boolean getIsUsed(){
-        return isUsed;
+    public boolean getIsDefinitionUsed(){
+        return isDefinitionUsed;
     }
 
     /**
@@ -134,7 +134,7 @@ public class MgwAPIDefinition {
      *
      * @param flag true if the API information is used
      */
-    public void setIsUsed(boolean flag){
-        isUsed = flag;
+    public void setIsDefinitionUsed(boolean flag){
+        isDefinitionUsed = flag;
     }
 }
