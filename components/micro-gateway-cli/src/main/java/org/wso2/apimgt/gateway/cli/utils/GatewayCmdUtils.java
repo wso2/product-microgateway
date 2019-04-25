@@ -298,6 +298,9 @@ public class GatewayCmdUtils {
         String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
         createFolderIfNotExist(interceptorsPath);
 
+        String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
+        createFolderIfNotExist(extensionsPath);
+
         String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
         createFolderIfNotExist(targetDirPath);
 
@@ -317,6 +320,28 @@ public class GatewayCmdUtils {
         File policyResFile = new File(policyResPath);
         File policesFile = new File(projectDir + File.separator + GatewayCliConstants.PROJECT_POLICIES_FILE);
 
+        String extensionResPath = getFiltersFolderLocation() + File.separator +
+                GatewayCliConstants.GW_DIST_EXTENSION_FILTER;
+        File extensionResFile = new File(extensionResPath);
+        File extensionFile = new File(extensionsPath + File.separator +
+                GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+
+        String tokenRevocationResPath = getFiltersFolderLocation() + File.separator +
+                GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION;
+        File tokenRevocationResFile = new File(tokenRevocationResPath);
+        File tokenRevocationFile = new File(extensionsPath + File.separator +
+                GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+
+        if (Files.exists(extensionResFile.toPath())) {
+            FileUtils.copyFile(extensionResFile, extensionFile);
+        } else {
+            throw new CLIRuntimeException("Extension filter not found in CLI_HOME");
+        }
+        if (Files.exists(tokenRevocationResFile.toPath())) {
+            FileUtils.copyFile(tokenRevocationResFile, tokenRevocationFile);
+        } else {
+            throw new CLIRuntimeException("Token revocation extension not Found in CLI_HOME");
+        }
         if (Files.exists(policyResFile.toPath())) {
             FileUtils.copyFile(policyResFile, policesFile);
         } else {
@@ -638,6 +663,16 @@ public class GatewayCmdUtils {
     public static String getProjectGenSrcDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR;
+    }
+
+    /**
+     * Returns path to the /extensions of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /extensions of a given project in the current working directory
+     */
+    public static String getProjectExtensionsDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
     }
 
     /**
