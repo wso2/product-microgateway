@@ -59,6 +59,7 @@ public class GatewayCliConstants {
     public static final String EXTENSION_BALX = ".balx";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_JAR = ".jar";
+    public static final String EXTENSION_BAL = ".bal";
     public static final String GW_TARGET_DIST = "distribution";
     public static final String GW_DIST_PREFIX = "micro-gw-";
     public static final String GW_DIST_BIN = "bin";

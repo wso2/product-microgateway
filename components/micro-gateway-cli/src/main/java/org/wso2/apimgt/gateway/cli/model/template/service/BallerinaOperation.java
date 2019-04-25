@@ -54,6 +54,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private MgwEndpointConfigDTO epConfig;
     private String requestInterceptor;
     private String responseInterceptor;
+    private String apiRequestInterceptor;
+    private String apiResponseInterceptor;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -207,5 +209,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setResponseInterceptor(String responseInterceptor) {
         this.responseInterceptor = responseInterceptor;
+    }
+
+    public String getApiRequestInterceptor() {
+        return apiRequestInterceptor;
+    }
+
+    public void setApiRequestInterceptor(String requestInterceptor) {
+        this.apiRequestInterceptor = requestInterceptor;
+    }
+
+    public String getApiResponseInterceptor() {
+        return apiResponseInterceptor;
+    }
+
+    public void setApiResponseInterceptor(String responseInterceptor) {
+        this.apiResponseInterceptor = responseInterceptor;
     }
 }

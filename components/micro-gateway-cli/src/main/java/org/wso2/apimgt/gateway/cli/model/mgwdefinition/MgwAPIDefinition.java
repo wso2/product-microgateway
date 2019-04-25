@@ -36,6 +36,8 @@ public class MgwAPIDefinition {
     private MgwPathsDefinition pathsDefinition;
     private String security; //todo: bring enum
     private APICorsConfigurationDTO corsConfiguration;
+    //to identify whether it has been used
+    private boolean isDefinitionUsed = false;
 
     @JsonProperty("title")
     public String getTitle() {
@@ -116,5 +118,23 @@ public class MgwAPIDefinition {
 
     public void setResponseInterceptor(String responseInterceptor) {
         this.responseInterceptor = responseInterceptor;
+    }
+
+    /**
+     * Identify if the API information used or not.
+     *
+     * @return true if the API information is used inside
+     */
+    public boolean getIsDefinitionUsed(){
+        return isDefinitionUsed;
+    }
+
+    /**
+     * Set the IsUsed if the API information is used
+     *
+     * @param flag true if the API information is used
+     */
+    public void setIsDefinitionUsed(boolean flag){
+        isDefinitionUsed = flag;
     }
 }
