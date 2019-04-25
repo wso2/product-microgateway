@@ -99,7 +99,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
                 init(projectName, toolkitConfigPath);
-                MgwDefinitionUtils.setMgwDefinition(projectLocation + "/definition.yaml");
+                MgwDefinitionUtils.configureMgwDefinition(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
                 boolean changesDetected;

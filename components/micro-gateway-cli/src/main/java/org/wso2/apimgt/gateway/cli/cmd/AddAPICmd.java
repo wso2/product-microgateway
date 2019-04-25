@@ -154,7 +154,7 @@ public class AddAPICmd implements GatewayLauncherCmd {
         String grpc;
         isOverwriteRequired = false;
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
 
         if (!new File(File.separator + projectName).exists()) {
             throw GatewayCmdUtils.createUsageException("Project name `" + projectName

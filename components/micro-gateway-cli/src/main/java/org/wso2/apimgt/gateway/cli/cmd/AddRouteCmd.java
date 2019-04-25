@@ -37,7 +37,7 @@ public class AddRouteCmd implements GatewayLauncherCmd {
     public void execute() {
 
         projectName = GatewayCmdUtils.buildProjectName(projectName);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
 
         if (resource_id == null || resource_id.isEmpty()) {
             if ((resource_id = GatewayCmdUtils.promptForTextInput(outStream, "Enter Resource ID: "))

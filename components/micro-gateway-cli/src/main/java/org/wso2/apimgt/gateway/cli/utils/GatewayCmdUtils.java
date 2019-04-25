@@ -767,12 +767,12 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns the path to the routes configuration file (routes.yaml)
+     * Returns the path to the microgateway definition file (definition.yaml).
      *
      * @param projectName name of the project
      * @return path to the client-cert-metadata.yaml for a defined version of an API
      */
-    public static String getProjectRoutesConfFilePath(String projectName) {
+    public static String getProjectMgwDefinitionFilePath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_DEFINITION_FILE;
     }
 
@@ -1301,7 +1301,7 @@ public class GatewayCmdUtils {
      * @param apiId md5 hash value of apiName:apiVersion
      * @return path to the swagger for a defined version of an API
      */
-    public static String getProjectSwaggerFilePath(String projectName, String apiId){
+    public static String getProjectSwaggerFilePath(String projectName, String apiId) {
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
                 GatewayCliConstants.API_SWAGGER;
     }

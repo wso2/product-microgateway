@@ -162,40 +162,53 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             balPath.getOperations().forEach(operation -> {
-                //todo: check the behavior if miscellaneous characters appear, if so remove the if condition
-                if (operation.getValue().getOperationId() == null) {
-                    // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                    String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
-                    operation.getValue().setOperationId(operationId);
-
-                }
+                // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
+                String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                operation.getValue().setOperationId(operationId);
+                //if it is the developer first approach
                 if (isDevFirst) {
                     String basePath = MgwDefinitionUtils.getBasePath(openAPI.getInfo().getTitle(),
                             openAPI.getInfo().getVersion());
                     //to add resource level endpoint configuration
                     MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(basePath,
                             path.getKey(), operation.getKey());
-                    if(epConfig != null){
+                    if (epConfig != null) {
                         operation.getValue().setEpConfigDTO(epConfig);
                     }
                     //todo: need to validate the existence of those functions
                     //to add request interceptor
                     String requestInterceptor = MgwDefinitionUtils.getRequestInterceptor(basePath, path.getKey(),
                             operation.getKey());
-                    if(requestInterceptor != null){
+                    if (requestInterceptor != null) {
                         operation.getValue().setRequestInterceptor(requestInterceptor);
                     }
                     //to add response interceptor
                     String responseInterceptor = MgwDefinitionUtils.getResponseInterceptor(basePath, path.getKey(),
                             operation.getKey());
-                    if(responseInterceptor != null){
+                    if (responseInterceptor != null) {
                         operation.getValue().setResponseInterceptor(responseInterceptor);
                     }
                     //to add throttle policy
                     String throttle_policy = MgwDefinitionUtils.getThrottlePolicy(basePath, path.getKey(),
                             operation.getKey());
-                    if(throttle_policy != null){
+                    if (throttle_policy != null) {
                         operation.getValue().setResourceTier(throttle_policy);
+                    }
+
+                    //to add API level request interceptor
+                    String apiRequestInterceptor = MgwDefinitionUtils.getApiRequestInterceptor(basePath);
+                    if (apiRequestInterceptor != null) {
+                        //if user specify the same interceptor function in both api level and resource level ignore
+                        // api level interceptor
+                        if (!apiRequestInterceptor.equals(requestInterceptor)) {
+                            operation.getValue().setApiRequestInterceptor(apiRequestInterceptor);
+                        }
+                    }
+
+                    //to add API level response interceptor
+                    String apiResponseInterceptor = MgwDefinitionUtils.getApiResponseInterceptor(basePath);
+                    if (apiResponseInterceptor != null) {
+                        operation.getValue().setApiResponseInterceptor(apiResponseInterceptor);
                     }
                 }
             });

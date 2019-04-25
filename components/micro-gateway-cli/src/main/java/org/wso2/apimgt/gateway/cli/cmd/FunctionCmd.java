@@ -67,7 +67,7 @@ public class FunctionCmd implements GatewayLauncherCmd {
     public void execute() {
 
         String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName)
                 + File.separator +"src");
 

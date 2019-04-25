@@ -39,7 +39,7 @@ public class UpdateRouteCmd implements GatewayLauncherCmd{
         if(projectName == null || projectName.isEmpty()){
             throw new CLIRuntimeException("Project name is not provided.");
         }
-        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectRoutesConfFilePath(projectName));
+        RouteUtils.setRoutesConfigPath(GatewayCmdUtils.getProjectMgwDefinitionFilePath(projectName));
 
         if((apiId == null || apiId.isEmpty()) && (resourceId == null || resourceId.isEmpty())){
             throw new CLIRuntimeException("Error: API Id or resource id is not provided.");
