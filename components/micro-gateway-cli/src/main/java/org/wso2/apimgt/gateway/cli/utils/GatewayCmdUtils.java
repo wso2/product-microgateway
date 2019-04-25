@@ -38,14 +38,24 @@ import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class GatewayCmdUtils {
 
@@ -55,6 +65,7 @@ public class GatewayCmdUtils {
     private static CodeGenerationContext codeGenerationContext;
     private static Etcd etcd;
     private static final String algorithm = "AES";
+    private static boolean verboseLogsEnabled = setVerboseEnabled();
 
     public static Etcd getEtcd() {
         return etcd;
@@ -140,6 +151,30 @@ public class GatewayCmdUtils {
         launcherException.addMessage("micro-gw: " + errorMsg);
         launcherException.addMessage("Run 'micro-gw help' for usage.");
         return launcherException;
+    }
+
+    /**
+     * Create validation exception
+     * requires to set a system property to avoid ballerina compilation errors
+     *
+     * @param errorMsg Error message
+     * @return         CLIRuntimeException with the added error message
+     */
+    public static CLIRuntimeException createValidationException(String errorMsg, Logger logger){
+        logger.error(errorMsg);
+        return new CLIRuntimeException(errorMsg);
+    }
+
+    /**
+     * Create validation exception
+     * requires to set a system property to avoid ballerina compilation errors
+     *
+     * @param errorMsg Error message
+     * @return         CLIRuntimeException with the added error message
+     */
+    public static CLIRuntimeException createValidationException(String errorMsg, Exception e, Logger logger){
+        logger.error(errorMsg);
+        return new CLIRuntimeException(errorMsg, e);
     }
 
     /**
@@ -1271,5 +1306,28 @@ public class GatewayCmdUtils {
                 GatewayCliConstants.API_SWAGGER;
     }
 
+    /**
+     * To print the message if verbose flag is set
+     *
+     * @param msg Message
+     */
+    public static void printVerbose(String msg) {
+        if (verboseLogsEnabled) {
+            System.out.println("micro-gw: [verbose] " + msg);
+        }
+    }
 
+    /**
+     * To read the system variable VERBOSE_ENABLED
+     *
+     * @return true if verbose flag is enabled
+     */
+    private static Boolean setVerboseEnabled() {
+        String value = System.getProperty("VERBOSE_ENABLED");
+        //bat file provides T and shell script provides true
+        if (value.equals("T") || value.equalsIgnoreCase("true")) {
+            return true;
+        }
+        return false;
+    }
 }
