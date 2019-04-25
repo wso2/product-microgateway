@@ -78,20 +78,21 @@ public class BuildCmd implements GatewayLauncherCmd {
         projectName = projectName.replaceAll("[\\/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
+        if (!projectLocation.exists()) {
+            throw new CLIRuntimeException("Project " + projectName + " does not exist.");
+        }
+
         File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
         File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
 
+
         if(importedAPIDefLocation.list().length == 0 && addedAPIDefLocation.list().length == 0 ){
-            throw new CLIInternalException("'api_definitions folder doesnot exist.");
+            throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
         }
 
         if(importedAPIDefLocation.list().length > 0 && addedAPIDefLocation.list().length == 0 && !isCompiled){
             //if only imported swaggers available, we do not explicitly generate ballerina code
             return;
-        }
-
-        if (!projectLocation.exists()) {
-            throw new CLIRuntimeException("Project " + projectName + " does not exist.");
         }
 
         //first phase of the build command; generation of ballerina code
