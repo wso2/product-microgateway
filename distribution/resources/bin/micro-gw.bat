@@ -81,13 +81,8 @@ goto end
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	SET IS_INIT_CMD=
 	if %verbose%==T ECHO Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
-	if ""%1""==""init"" (
-		SET IS_INIT_CMD=y
-		goto passToJar
-	)
 	if ""%1""==""help""     goto passToJar
 	if ""%1""==""build""     goto commandBuild
 	if ""%1""==""-java.debug""    goto commandDebug

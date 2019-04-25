@@ -150,11 +150,6 @@ do
             IS_BUILD_COMMAND=true
             shift # past build argument
             ;;
-        init)
-            ALL_ARGS+=("$1")
-            IS_INIT_COMMAND=true
-            shift # past build argument
-            ;;
         *)    # default argument
             DEFAULT_ARGS+=("$1") # save it in DEFAULT_ARGS array
             ALL_ARGS+=("$1")
