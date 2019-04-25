@@ -117,17 +117,6 @@ public class InitCmd implements GatewayLauncherCmd {
             String runtimeExtractedPath = libPath + File.separator + GatewayCliConstants.CLI_RUNTIME;
             String platformExtractedPath =
                     GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
-            try {
-                boolean isChangesDetected = LibHashUtils.detectChangesInLibraries();
-
-                // Delete already extracted files if changes detected.
-                if (isChangesDetected) {
-                    Files.deleteIfExists(Paths.get(runtimeExtractedPath));
-                    Files.deleteIfExists(Paths.get(platformExtractedPath));
-                }
-            } catch (HashingException e) {
-                LOGGER.error("Error while detecting changes in gateway libraries", e);
-            }
 
             extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath);
             extractBallerinaDist(runtimeExtractedPath, libPath, baloPath, breLibPath);
