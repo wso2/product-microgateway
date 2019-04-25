@@ -17,44 +17,13 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class KubernetesSecret {
-    private String name;
-    private String mountPath;
-    private String readOnly;
-    private String data;
+
     private boolean enable = false;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMountPath() {
-        return mountPath;
-    }
-
-    public void setMountPath(String mountPath) {
-        this.mountPath = mountPath;
-    }
-
-    public String getReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(String readOnly) {
-        this.readOnly = readOnly;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
+    private List<KubernetesSecretItem> secrets = new ArrayList<>();
 
     public boolean isEnable() {
         return enable;
@@ -62,5 +31,13 @@ public class KubernetesSecret {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public List<KubernetesSecretItem> getSecrets() {
+        return secrets;
+    }
+
+    public void setSecrets(List<KubernetesSecretItem> secrets) {
+        this.secrets = secrets;
     }
 }
