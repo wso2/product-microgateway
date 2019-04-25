@@ -54,7 +54,7 @@ public class Main {
             logger.error(MICRO_GW + ": Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
-            outStream.println(MICRO_GW + ":" + " + INTERNAL_ERROR_MESSAGE" + " - " + e.getMessage());
+            outStream.println(MICRO_GW + ":" + INTERNAL_ERROR_MESSAGE + " - " + e.getMessage());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
