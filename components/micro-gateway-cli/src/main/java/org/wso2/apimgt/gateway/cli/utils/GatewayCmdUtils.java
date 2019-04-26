@@ -1360,7 +1360,7 @@ public class GatewayCmdUtils {
     private static Boolean setVerboseEnabled() {
         String value = System.getProperty("VERBOSE_ENABLED");
         //bat file provides T and shell script provides true
-        if (value.equals("T") || value.equalsIgnoreCase("true")) {
+        if (value != null && (value.equals("T") || value.equalsIgnoreCase("true"))) {
             return true;
         }
         return false;

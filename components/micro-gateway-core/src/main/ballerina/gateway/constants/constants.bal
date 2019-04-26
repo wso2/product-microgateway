@@ -33,6 +33,7 @@
  public const string AUTHORIZATION_HEADER = "Authorization";
  public const string COOKIE_HEADER = "Cookie";
  public const string CONTENT_TYPE_HEADER = "Content-Type";
+ public const string CONTENT_LENGHT_HEADER = "Content-Length";
  public const string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
  public const string APPLICATION_JSON = "application/json";
  public const string TEXT_XML = "text/xml";
