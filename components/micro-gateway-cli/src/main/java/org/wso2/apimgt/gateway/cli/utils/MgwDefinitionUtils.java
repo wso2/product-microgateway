@@ -211,7 +211,7 @@ public class MgwDefinitionUtils {
             if (path != null && operation != null) {
                 errorMsg += "path:'" + path + "' operation:'" + operation + "' ";
             }
-            errorMsg += "is not available in the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".";
+            errorMsg += "is not available in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + " directory.";
             LOGGER.error(errorMsg);
             throw new CLIRuntimeException(errorMsg);
         }
