@@ -27,6 +27,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * This class represents the utility functions required for library packages extraction
+ */
 public class ToolkitLibExtractionUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(InitCmd.class);
 

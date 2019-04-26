@@ -21,13 +21,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.exception.HashingException;
-import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
-import org.wso2.apimgt.gateway.cli.utils.ZipUtils;
 
 import java.io.File;
 import java.io.IOException;
