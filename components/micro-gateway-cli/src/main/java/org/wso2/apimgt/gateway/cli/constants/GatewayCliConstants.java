@@ -28,6 +28,7 @@ public class GatewayCliConstants {
     public static final String PROJECT_INTERCEPTORS_DIR = "interceptors";
     public static final String PROJECT_GRPC_SERVICE_DIR = "grpc_service";
     public static final String PROJECT_GRPC_CLIENT_DIR = "client";
+    public static final String PROJECT_EXTENSIONS_DIR = "extensions";
     public static final String PROJECT_LOGS_DIR = "logs";
     public static final String PROJECT_API_USAGE_DIR = "api-usage-data";
     public static final String PROJECT_API_DEFINITIONS_DIR = "api_definitions";
@@ -89,6 +90,7 @@ public class GatewayCliConstants {
     public static final String SYS_PROP_USER_DIR = "user.dir";
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
     public static final String SYS_PROP_SECURITY = "security";
+    public static final String MICRO_GW = "micro-gw";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
