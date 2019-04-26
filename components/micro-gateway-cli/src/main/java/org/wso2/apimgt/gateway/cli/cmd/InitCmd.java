@@ -26,6 +26,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.HashingException;
 import org.wso2.apimgt.gateway.cli.hashing.LibHashUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 import org.wso2.apimgt.gateway.cli.utils.ZipUtils;
 
 import java.io.File;
@@ -75,7 +76,7 @@ public class InitCmd implements GatewayLauncherCmd {
         }
 
         // Extract the zipped ballerina platform and runtime
-        extractPlatformAndRuntime();
+        ToolkitLibExtractionUtils.extractPlatformAndRuntime();
         init(projectName, deploymentConfigPath);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
@@ -103,43 +104,6 @@ public class InitCmd implements GatewayLauncherCmd {
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
             throw new CLIInternalException("Error occurred while loading configurations.");
-        }
-    }
-
-    /**
-     * Extracts the platform and runtime and copy related jars and balos to extracted runtime and platform.
-     */
-    private void extractPlatformAndRuntime() {
-        try {
-            String libPath = GatewayCmdUtils.getCLILibPath();
-            String baloPath = GatewayCliConstants.CLI_GATEWAY + File.separator + GatewayCliConstants.CLI_BALO;
-            String breLibPath = GatewayCliConstants.CLI_BRE + File.separator + GatewayCliConstants.CLI_LIB;
-            String runtimeExtractedPath = libPath + File.separator + GatewayCliConstants.CLI_RUNTIME;
-            String platformExtractedPath =
-                    GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
-
-            extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath);
-            extractBallerinaDist(runtimeExtractedPath, libPath, baloPath, breLibPath);
-
-        } catch (IOException e) {
-            String message = "Error while unzipping platform and runtime while project setup";
-            LOGGER.error(message, e);
-            throw new CLIInternalException(message);
-        }
-    }
-
-    private void extractBallerinaDist(String destination, String libPath, String baloPath, String breLibPath) throws IOException {
-        if (!Files.exists(Paths.get(destination))) {
-            ZipUtils.unzip(destination + GatewayCliConstants.EXTENSION_ZIP, destination, true);
-
-            // Copy balo to the platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
-                    destination + File.separator + GatewayCliConstants.CLI_LIB + File.separator
-                            + GatewayCliConstants.CLI_REPO);
-
-            // Copy gateway jars to platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
-                    + GatewayCliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
         }
     }
 }
