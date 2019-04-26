@@ -150,11 +150,6 @@ do
             IS_BUILD_COMMAND=true
             shift # past build argument
             ;;
-        init)
-            ALL_ARGS+=("$1")
-            IS_INIT_COMMAND=true
-            shift # past build argument
-            ;;
         *)    # default argument
             DEFAULT_ARGS+=("$1") # save it in DEFAULT_ARGS array
             ALL_ARGS+=("$1")
@@ -217,9 +212,10 @@ do
     CLI_CLASSPATH="$CLI_CLASSPATH":$j
 done
 
-# Ballerina platform is not extracted at the moment of first setup command
-# Therefore handle classpath separately for setup command.
-if [ "$IS_INIT_COMMAND" = true ] && [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
+# Ballerina platform is not extracted initially.
+# If the ballerina platform is not available, it will be extracted during init command
+# Therefore handle classpath separately until the ballerina platform become available.
+if [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
     # Add required ballerina jars to classpath
     for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
     do
