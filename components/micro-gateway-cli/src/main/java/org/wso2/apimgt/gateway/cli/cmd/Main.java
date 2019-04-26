@@ -39,7 +39,7 @@ public class Main {
     private static final String JC_UNKNOWN_OPTION_PREFIX = "Unknown option:";
     private static final String JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX = "Expected a value after parameter";
     private static final String INTERNAL_ERROR_MESSAGE = "Internal error occurred while executing command.";
-    private static final String MICRO_GW = "micro-gw";
+    private static final String MICRO_GW = "micro-gw: ";
 
     private static PrintStream outStream = System.err;
 
@@ -51,19 +51,19 @@ public class Main {
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
-            logger.error(MICRO_GW + ": Error occurred while executing command.", e);
+            logger.error(MICRO_GW + "Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
-            outStream.println(MICRO_GW + ":" + " + INTERNAL_ERROR_MESSAGE" + " - " + e.getMessage());
+            outStream.println(MICRO_GW + INTERNAL_ERROR_MESSAGE + " - " + e.getMessage());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
-            outStream.println(MICRO_GW + ": " + e.getTerminalMsg());
+            outStream.println(MICRO_GW + e.getTerminalMsg());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(e.getExitCode());
         } catch (Exception e) {
             //Use generic exception to catch all the runtime exception
-            outStream.println(MICRO_GW + ": " + INTERNAL_ERROR_MESSAGE);
+            outStream.println(MICRO_GW + INTERNAL_ERROR_MESSAGE);
             logger.error(INTERNAL_ERROR_MESSAGE, e);
             Runtime.getRuntime().exit(1);
         }
@@ -139,7 +139,7 @@ public class Main {
             Map<String, JCommander> commanderMap;
             String parsedCmdName;
             if (args.length != 0) {
-                cmdParser.setProgramName(MICRO_GW);
+                cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
                 cmdParser.parse(args);
                 parsedCmdName = cmdParser.getParsedCommand();
 

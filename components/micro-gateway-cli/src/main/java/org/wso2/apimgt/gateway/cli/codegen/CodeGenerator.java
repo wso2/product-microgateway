@@ -65,7 +65,6 @@ public class CodeGenerator {
             throws IOException, BallerinaServiceGenException {
 
         String projectSrcPath = GatewayCmdUtils.getProjectGenSrcDirectoryPath((projectName));
-        String projectGenPath = GatewayCmdUtils.getProjectGenDirectoryPath(projectName);
         BallerinaService definitionContext;
 
         List<GenSrcFile> genFiles = new ArrayList<>();
@@ -96,11 +95,13 @@ public class CodeGenerator {
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
+
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
+                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
+
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
+                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
 
     }
@@ -148,11 +149,11 @@ public class CodeGenerator {
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
+                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
+                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
     }
 
