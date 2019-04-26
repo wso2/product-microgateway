@@ -108,8 +108,18 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
 
     requestResponseExecutionDTO.apiHostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
         HOSTNAME_PROPERTY]);
-    //todo: Response size is yet to be decided
-    requestResponseExecutionDTO.responseSize = 0;
+    // if response contains Content-Length header that value will be taken
+    if (response.hasHeader(CONTENT_LENGHT_HEADER)) {
+        var respSize = int.convert(response.getHeader(CONTENT_LENGHT_HEADER));
+        if (respSize is int) {
+            requestResponseExecutionDTO.responseSize = respSize;
+            printDebug(KEY_ANALYTICS_FILTER, "Response content lenght header : " + respSize);
+        } else {
+            requestResponseExecutionDTO.responseSize = 0;
+        }
+    } else { //TODO: we are not building message in order to get the response size if the message is chunk
+        requestResponseExecutionDTO.responseSize = 0;
+    }
     requestResponseExecutionDTO.responseCode = response.statusCode;
     requestResponseExecutionDTO.apiResourcePath = <string>getResourceConfigAnnotation
     (resourceAnnotationMap[context.resourceName] ?: []).path;
