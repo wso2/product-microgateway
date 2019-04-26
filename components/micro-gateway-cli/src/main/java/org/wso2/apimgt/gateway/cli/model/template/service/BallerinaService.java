@@ -32,7 +32,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinition;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -167,29 +167,29 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.getValue().setOperationId(operationId);
                 //if it is the developer first approach
                 if (isDevFirst) {
-                    String basePath = MgwDefinitionUtils.getBasePath(openAPI.getInfo().getTitle(),
+                    String basePath = MgwDefinition.getBasePath(openAPI.getInfo().getTitle(),
                             openAPI.getInfo().getVersion());
                     //to add resource level endpoint configuration
-                    MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(basePath,
+                    MgwEndpointConfigDTO epConfig = MgwDefinition.getResourceEpConfigForCodegen(basePath,
                             path.getKey(), operation.getKey());
                     if (epConfig != null) {
                         operation.getValue().setEpConfigDTO(epConfig);
                     }
                     //todo: need to validate the existence of those functions
                     //to add request interceptor
-                    String requestInterceptor = MgwDefinitionUtils.getRequestInterceptor(basePath, path.getKey(),
+                    String requestInterceptor = MgwDefinition.getRequestInterceptor(basePath, path.getKey(),
                             operation.getKey());
                     if (requestInterceptor != null) {
                         operation.getValue().setRequestInterceptor(requestInterceptor);
                     }
                     //to add response interceptor
-                    String responseInterceptor = MgwDefinitionUtils.getResponseInterceptor(basePath, path.getKey(),
+                    String responseInterceptor = MgwDefinition.getResponseInterceptor(basePath, path.getKey(),
                             operation.getKey());
                     if (responseInterceptor != null) {
                         operation.getValue().setResponseInterceptor(responseInterceptor);
                     }
                     //to add throttle policy
-                    String throttle_policy = MgwDefinitionUtils.getThrottlePolicy(basePath, path.getKey(),
+                    String throttle_policy = MgwDefinition.getThrottlePolicy(basePath, path.getKey(),
                             operation.getKey());
                     if (throttle_policy != null) {
                         operation.getValue().setResourceTier(throttle_policy);

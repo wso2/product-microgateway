@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.definition.DefinitionConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.mgwdefinition.MgwRootDefinition;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
@@ -35,13 +35,13 @@ import java.io.IOException;
 /**
  * This class includes the Util functions related to operations on MgwDefinition.
  */
-public class MgwDefinitionUtils {
+public class MgwDefinition {
 
     private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
     private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionUtils.class);
     //private static String routesConfigPath;
-    private static MgwRootDefinition rootDefinition;
     private static String projectName;
+    private static DefinitionConfig rootDefinition;
 
     public static void configureMgwDefinition(String project) {
         projectName = project;
@@ -231,3 +231,4 @@ public class MgwDefinitionUtils {
         });
     }
 }
+

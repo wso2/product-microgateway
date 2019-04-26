@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.mgwdefinition;
+package org.wso2.apimgt.gateway.cli.model.definition;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,11 +27,11 @@ import java.util.Map;
  * This class represents the DTO for multiple APIs in Microgateway Definition.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MgwAPIsDefinition {
-    private Map<String, MgwAPIDefinition> apis = new LinkedHashMap<>();
+public class APIDefinitions {
+    private Map<String, APIDefinition> apis = new LinkedHashMap<>();
 
     @JsonAnySetter
-    public void setApis(String key, MgwAPIDefinition api) {
+    public void setApis(String key, APIDefinition api) {
         apis.put(key, api);
     }
 
@@ -49,7 +49,7 @@ public class MgwAPIsDefinition {
     }
 
     public String getBasepathFromAPI(String apiName, String apiVersion) {
-        for (Map.Entry<String, MgwAPIDefinition> apiEntry : apis.entrySet()) {
+        for (Map.Entry<String, APIDefinition> apiEntry : apis.entrySet()) {
             if (apiEntry.getValue().getTitle().equals(apiName) && apiEntry.getValue().getVersion().equals(apiVersion)) {
                 //because if this method is called, it means that API information is utilized.
                 apiEntry.getValue().setIsDefinitionUsed(true);

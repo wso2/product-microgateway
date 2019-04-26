@@ -295,19 +295,19 @@ public class OpenAPICodegenUtils {
      * @param api API object
      */
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api) {
-        String basePath = MgwDefinitionUtils.getBasePath(api.getName(), api.getVersion());
+        String basePath = MgwDefinition.getBasePath(api.getName(), api.getVersion());
         MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                RouteUtils.convertToMgwServiceMap(MgwDefinitionUtils.getProdEndpointList(basePath),
-                        MgwDefinitionUtils.getSandEndpointList(basePath));
+                RouteUtils.convertToMgwServiceMap(MgwDefinition.getProdEndpointList(basePath),
+                        MgwDefinition.getSandEndpointList(basePath));
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
         // 0th element represents the specific basepath
         api.setSpecificBasepath(basePath);
-        String security = MgwDefinitionUtils.getSecurity(basePath);
+        String security = MgwDefinition.getSecurity(basePath);
         if(security == null){
             security = "oauth2";
         }
         api.setApiSecurity(security);
-        api.setCorsConfiguration(MgwDefinitionUtils.getCorsConfiguration(basePath));
+        api.setCorsConfiguration(MgwDefinition.getCorsConfiguration(basePath));
     }
 
     public static void setAdditionalConfig(ExtendedAPI api){

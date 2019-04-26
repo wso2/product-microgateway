@@ -33,7 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinition;
 
 import java.io.File;
 import java.io.IOException;
