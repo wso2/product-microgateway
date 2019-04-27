@@ -160,8 +160,7 @@ public class GatewayCmdUtils {
      * @param errorMsg Error message
      * @return         CLIRuntimeException with the added error message
      */
-    public static CLIRuntimeException createValidationException(String errorMsg, Logger logger){
-        logger.error(errorMsg);
+    public static CLIRuntimeException createValidationException(String errorMsg){
         return new CLIRuntimeException(errorMsg);
     }
 
@@ -172,8 +171,7 @@ public class GatewayCmdUtils {
      * @param errorMsg Error message
      * @return         CLIRuntimeException with the added error message
      */
-    public static CLIRuntimeException createValidationException(String errorMsg, Exception e, Logger logger){
-        logger.error(errorMsg);
+    public static CLIRuntimeException createValidationException(String errorMsg, Exception e){
         return new CLIRuntimeException(errorMsg, e);
     }
 

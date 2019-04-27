@@ -50,7 +50,7 @@ public class MgwDefinitionUtils {
             rootDefinition = OBJECT_MAPPER_YAML.readValue(new File(definitionFilePath), MgwRootDefinition.class);
         } catch (IOException e) {
             throw GatewayCmdUtils.createValidationException("Error while reading the " +
-                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", e, LOGGER);
+                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", e);
         }
     }
 
@@ -66,7 +66,7 @@ public class MgwDefinitionUtils {
         if (basePath == null) {
             throw GatewayCmdUtils.createValidationException("Error: The API '" + apiName + "' and version '" +
                     apiVersion + "' is not " + "found in the " +
-                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", LOGGER);
+                    GatewayCliConstants.PROJECT_DEFINITION_FILE + ".");
         }
         return basePath;
     }
@@ -212,7 +212,6 @@ public class MgwDefinitionUtils {
                 errorMsg += "path:'" + path + "' operation:'" + operation + "' ";
             }
             errorMsg += "is not available in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + " directory.";
-            LOGGER.error(errorMsg);
             throw new CLIRuntimeException(errorMsg);
         }
     }
