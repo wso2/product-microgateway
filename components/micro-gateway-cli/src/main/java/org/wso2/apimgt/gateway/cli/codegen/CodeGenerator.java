@@ -129,7 +129,7 @@ public class CodeGenerator {
         Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
                 .forEach( path -> {
                     ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
-                    String basepath = MgwDefinition.getBasePath(api.getName(), api.getVersion());
+                    String basepath = MgwDefinitionBuilder.getBasePath(api.getName(), api.getVersion());
                     api.setContext(basepath);
                     BallerinaService definitionContext;
                     OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api);

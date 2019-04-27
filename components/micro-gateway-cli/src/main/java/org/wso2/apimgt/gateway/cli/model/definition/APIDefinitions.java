@@ -40,11 +40,11 @@ public class APIDefinitions {
      *
      * @return map with (basepath, api information object)
      */
-    public Map<String, MgwAPIDefinition> getApisMap(){
+    public Map<String, APIDefinition> getApisMap() {
         return apis;
     }
 
-    public MgwAPIDefinition getApiFromBasepath(String basepath) {
+    public APIDefinition getApiFromBasepath(String basepath) {
         return apis.get(basepath);
     }
 

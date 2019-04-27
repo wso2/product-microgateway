@@ -33,7 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.*;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinition;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
                 init(projectName, toolkitConfigPath);
-                MgwDefinitionUtils.configureMgwDefinition(projectName);
+                MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
                 boolean changesDetected;
@@ -113,7 +113,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 //to indicate the api information which is not used in the code generation process, but included in
                 //definition.yaml
-                MgwDefinitionUtils.FindNotUsedAPIInformation();
+                MgwDefinitionBuilder.FindNotUsedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
