@@ -17,13 +17,6 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -50,8 +43,14 @@ public class MgwDefinitionBuilder {
     private static String projectName;
     private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionBuilder.class);
 
+    /**
+     * Builds the {@link DefinitionConfig} object model for {@link GatewayCliConstants#PROJECT_DEFINITION_FILE}.
+     * Before parsing the yaml file to {@link DefinitionConfig}, validation will be performed on
+     * the the input project definition file.
+     *
+     * @param project microgateway project name
+     */
     public static void build(String project) {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         projectName = project;
         String definitionPath = GatewayCmdUtils.getProjectMgwDefinitionFilePath(project);
         File definitionFile = new File(definitionPath);
@@ -59,20 +58,7 @@ public class MgwDefinitionBuilder {
         try {
             InputStream isSchema = MgwDefinitionBuilder.class.getClassLoader()
                     .getResourceAsStream(GatewayCliConstants.DEFINITION_SCHEMA_FILE);
-            JsonNode jsonNode = mapper.readTree(definitionFile);
-
-            if (jsonNode == null) {
-                // exception will be properly handled in the catch block
-                throw new IOException("Empty definition file");
-            }
-
-            JSONObject rawSchema = new JSONObject(new JSONTokener(isSchema));
-            Schema schema = SchemaLoader.load(rawSchema);
-            schema.validate(new JSONObject(jsonNode.toString()));
-
-            if (definitionConfig == null) {
-                definitionConfig = mapper.readValue(definitionFile, DefinitionConfig.class);
-            }
+            definitionConfig = YamlValidator.parse(definitionFile, isSchema, DefinitionConfig.class);
         } catch (IOException e) {
             throw GatewayCmdUtils.createValidationException("Error while reading the " +
                     GatewayCliConstants.PROJECT_DEFINITION_FILE + ".", e, LOGGER);

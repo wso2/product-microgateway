@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.ParameterException;
+import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -29,6 +30,7 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,15 +42,28 @@ public class Main {
     private static final String JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX = "Expected a value after parameter";
     private static final String INTERNAL_ERROR_MESSAGE = "Internal error occurred while executing command.";
     private static final String MICRO_GW = "micro-gw: ";
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static PrintStream outStream = System.err;
-
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... args) {
         try {
             Optional<GatewayLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
+        } catch (ValidationException e) {
+            outStream.println("micro-gw: Errors found in definition.yaml file");
+            List<ValidationException> errorList = e.getCausingExceptions();
+
+            if (errorList != null){
+                for (ValidationException exp : errorList) {
+                    outStream.println(exp.getMessage());
+                }
+            } else {
+                outStream.println(e.getMessage());
+            }
+
+            logger.error("micro-gw: Invalid definition.yaml file", e);
+            Runtime.getRuntime().exit(1);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
             logger.error(MICRO_GW + "Error occurred while executing command.", e);
@@ -105,37 +120,10 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.IMPORT, importCmd);
             importCmd.setParentCmdParser(cmdParser);
 
-//            AddAPICmd addAPICmd = new AddAPICmd();
-//            cmdParser.addCommand(GatewayCliCommands.ADD_API, addAPICmd);
-//            addAPICmd.setParentCmdParser(cmdParser);
-//
-//            AddRouteCmd addRouteCmd = new AddRouteCmd();
-//            cmdParser.addCommand(GatewayCliCommands.ADD_ROUTE, addRouteCmd);
-//            addRouteCmd.setParentCmdParser(cmdParser);
-//
-//            ListAPIsCmd listAPIsCmd = new ListAPIsCmd();
-//            cmdParser.addCommand(GatewayCliCommands.LIST_APIS, listAPIsCmd);
-//            listAPIsCmd.setParentCmdParser(cmdParser);
-//
-//            ListResourcesCmd listResourcesCmd = new ListResourcesCmd();
-//            cmdParser.addCommand(GatewayCliCommands.LIST_RESOURCES, listResourcesCmd);
-//            listResourcesCmd.setParentCmdParser(cmdParser);
-//
-//            DescResourceCmd descResourceCmd = new DescResourceCmd();
-//            cmdParser.addCommand(GatewayCliCommands.DESC_RESOURCE, descResourceCmd);
-//            descResourceCmd.setParentCmdParser(cmdParser);
-//
-//            FunctionCmd functionCmd = new FunctionCmd();
-//            cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
-//            functionCmd.setParentCmdParser(cmdParser);
-
             SetProjectCmd setProjectCmd = new SetProjectCmd();
             cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
             setProjectCmd.setParentCmdParser(cmdParser);
-          
-//            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
-//            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
-//            updateRouteCmd.setParentCmdParser(cmdParser);
+            
             Map<String, JCommander> commanderMap;
             String parsedCmdName;
             if (args.length != 0) {
