@@ -45,8 +45,8 @@ public class ToolkitLibExtractionUtils {
             String platformExtractedPath =
                     GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
 
-            extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath);
-            extractBallerinaDist(runtimeExtractedPath, libPath, baloPath, breLibPath);
+            extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
+            extractBallerinaDist(runtimeExtractedPath, libPath, baloPath, breLibPath, false);
 
         } catch (IOException e) {
             String message = "Error while unzipping platform and runtime while project setup";
@@ -55,9 +55,11 @@ public class ToolkitLibExtractionUtils {
         }
     }
 
-    private static void extractBallerinaDist(String destination, String libPath, String baloPath, String breLibPath) throws IOException {
+    private static void extractBallerinaDist(String destination, String libPath, String baloPath, String breLibPath,
+                                             Boolean isAddToClasspath) throws IOException {
         if (!Files.exists(Paths.get(destination))) {
-            ZipUtils.unzip(destination + GatewayCliConstants.EXTENSION_ZIP, destination, true);
+            ZipUtils.unzip(destination + GatewayCliConstants.EXTENSION_ZIP, destination,
+                    isAddToClasspath);
 
             // Copy balo to the platform
             GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
