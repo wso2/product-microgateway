@@ -53,6 +53,10 @@
 
     <repositories>
         <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
             <id>wso2.releases</id>
             <name>WSO2 Releases Repository</name>
             <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
@@ -312,6 +316,11 @@
                 <artifactId>broker-launcher</artifactId>
                 <version>${broker.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.everit-org.json-schema</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${json.schema.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -423,6 +432,7 @@
         <project.scm.id>scm-server</project.scm.id>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
         <andes.version>3.2.47</andes.version>
+        <json.schema.version>1.11.1</json.schema.version>
     </properties>
 
 </project>

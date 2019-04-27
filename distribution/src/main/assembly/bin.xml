@@ -140,6 +140,9 @@
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
+                <include>com.github.everit-org.json-schema:org.everit.json.schema</include>
+                <include>org.json:json</include>
+                <include>com.damnhandy:handy-uri-templates</include>
             </includes>
         </dependencySet>
         <dependencySet>
