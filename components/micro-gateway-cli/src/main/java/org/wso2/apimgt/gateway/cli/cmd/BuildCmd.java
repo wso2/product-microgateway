@@ -107,7 +107,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
-                GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
+                GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                         GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
 
