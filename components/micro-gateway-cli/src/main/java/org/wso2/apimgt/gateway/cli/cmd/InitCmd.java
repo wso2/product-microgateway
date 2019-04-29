@@ -54,8 +54,17 @@ public class InitCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
     private String deploymentConfigPath;
 
+    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
+    private boolean helpFlag;
+
     @Override
     public void execute() {
+        if (helpFlag) {
+            String commandUsageInfo = getCommandUsageInfo("init");
+            OUT.println(commandUsageInfo);
+            return;
+        }
+
         String workspace = GatewayCmdUtils.getUserDir();
         String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         Path projectLocation = Paths.get(workspace + File.separator + projectName);

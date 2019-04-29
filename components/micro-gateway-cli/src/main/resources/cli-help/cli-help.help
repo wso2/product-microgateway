@@ -17,9 +17,10 @@ micro-gw command synopsis:
     micro-gw [COMMAND] [options]
 
 COMMAND is one of the available commands listed below:
-    1. micro-gw setup : Setting up a project specifying a single API or a group of APIs.
-    2. micro-gw build : Building the project.
-    3. micro-gw reset : Reset microgateway configurations to default.
+    1. micro-gw init : Initialize a project.
+    2. micro-gw build : Build the project.
+    3. micro-gw import : Import a single API or multiple APIs to the project
+    4. micro-gw reset : Reset microgateway configurations to default.
 
 OPTIONS
     "micro-gw help" has no command line options
@@ -29,4 +30,4 @@ EXAMPLES
     $ micro-gw help
 
     Learn how to use the "micro-gw setup" command
-    $ micro-gw help setup
+    $ micro-gw setup --help
