@@ -123,6 +123,10 @@ goto :end
 
 	:continueBuild
 	    goto :passToJar
+	    REM set ballerina home again as the platform is extracted at this point.
+	    SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+	    SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+        if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 		pushd "%MICRO_GW_PROJECT_DIR%"
 			if %verbose%==T ECHO current dir %CD%
 			SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"

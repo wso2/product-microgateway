@@ -34,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
+import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,8 @@ public class BuildCmd implements GatewayLauncherCmd {
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
         }
+        //extract the ballerina platform and runtime
+        ToolkitLibExtractionUtils.extractPlatformAndRuntime();
 
         File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
         File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
@@ -107,7 +110,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
-                GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
+                GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                         GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
 

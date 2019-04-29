@@ -60,7 +60,7 @@ service {
 # It binds the subscriber endpoint and jms listener
 #
 # + return - jms:TopicSubscriber for global throttling event publishing
-public function startSubscriberService() returns jms:TopicSubscriber {
+public function startSubscriberService() returns jms:TopicSubscriber|error {
     // Initialize a JMS connectiontion with the provider.
     jms:Connection jmsConnection = new({
             initialContextFactory: jmsConnectionInitialContextFactory,
@@ -88,9 +88,14 @@ public function initiateThrottlingJmsListener() returns boolean {
         GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
     if (enabledGlobalTMEventPublishing) {
-        jms:TopicSubscriber topicSubscriber = startSubscriberService();
-        log:printInfo("subscriber service for global throttling is started");
-        return true;
+        jms:TopicSubscriber|error topicSubscriber = trap startSubscriberService();
+        if (topicSubscriber is jms:TopicSubscriber) {
+            log:printInfo("subscriber service for global throttling is started");
+            return true;
+        } else {
+            log:printError("Error while starting subscriber service for global throttling");
+            return false;
+        }
     }
     return false;
 }

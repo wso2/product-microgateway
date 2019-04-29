@@ -27,6 +27,7 @@ string jmsConnectionProviderUrlTokenRevocation = getConfigValue(REALTIME_MESSAGE
     "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
 string jmsConnectionPasswordTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_PASSWORD, "");
 string jmsConnectionUsernameTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_USERNAME, "");
+string tokenRevocationJMSTopic = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_TOPIC, "tokenRevocation");
 
 service jmsTokenRevocationListener =
 service {
@@ -59,7 +60,7 @@ service {
 # It binds the subscriber endpoint and jms listener
 #
 # + return - jms:TopicSubscriber for token Revocation
-public function startTokenRevocationSubscriberService() returns jms:TopicSubscriber {
+public function startTokenRevocationSubscriberService() returns jms:TopicSubscriber|error {
     // Initialize a JMS connectiontion with the provider.
     jms:Connection jmsTokenRevocationConnection = new({
             initialContextFactory: jmsConnectioninitialContextFactoryTokenRevocation,
@@ -72,7 +73,7 @@ public function startTokenRevocationSubscriberService() returns jms:TopicSubscri
             acknowledgementMode: "AUTO_ACKNOWLEDGE"
         });
 
-    jms:TopicSubscriber subscriberTokenRevocationEndpoint = new(jmsTokenRevocationSession, topicPattern = "jwtRevocation");
+    jms:TopicSubscriber subscriberTokenRevocationEndpoint = new(jmsTokenRevocationSession, topicPattern = tokenRevocationJMSTopic);
     _ = subscriberTokenRevocationEndpoint.__attach(jmsTokenRevocationListener, {});
     _ = subscriberTokenRevocationEndpoint.__start();
     return subscriberTokenRevocationEndpoint;
@@ -87,9 +88,14 @@ public function initiateTokenRevocationJmsListener() returns boolean {
         REALTIME_MESSAGE_ENABLED, false);
 
     if (enabledRealtimeMessage) {
-        jms:TopicSubscriber topicTokenRevocationSubscriber = startTokenRevocationSubscriberService();
-        printInfo(KEY_TOKEN_REVOCATION_JMS , "subscriber service for token revocation is started");
-        return true;
+        jms:TopicSubscriber|error topicTokenRevocationSubscriber = trap startTokenRevocationSubscriberService();
+        if (topicTokenRevocationSubscriber is jms:TopicSubscriber) {
+            printInfo(KEY_TOKEN_REVOCATION_JMS , "subscriber service for token revocation is started");
+            return true;
+        } else {
+            printError(KEY_TOKEN_REVOCATION_JMS , "Error while starting subscriber service for token revocation");
+            return false;
+        }
     }
     return false;
 }
