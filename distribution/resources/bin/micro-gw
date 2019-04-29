@@ -29,6 +29,52 @@
 # NOTE: Borrowed generously from Apache Tomcat startup scripts.
 # -----------------------------------------------------------------------------
 
+#To update the CLI Class Path
+updateCLIClassPath()
+{
+    CLI_CLASSPATH=""
+    if [ -e "$BALLERINA_HOME/bre/lib/bootstrap/tools.jar" ]; then
+        CLI_CLASSPATH="$JAVA_HOME/lib/tools.jar"
+    fi
+
+    for f in "$BALLERINA_HOME"/bre/lib/bootstrap/*.jar
+    do
+        if [ "$f" != "$BALLERINA_HOME/bre/lib/bootstrap/*.jar" ];then
+            CLI_CLASSPATH="$CLI_CLASSPATH":$f
+        fi
+    done
+
+    for j in "$BALLERINA_HOME"/bre/lib/*.jar
+    do
+        CLI_CLASSPATH="$CLI_CLASSPATH":$j
+    done
+
+    for j in "$MICROGW_HOME"/target/*.jar
+    do
+        CLI_CLASSPATH="$CLI_CLASSPATH":$j
+    done
+
+    # Ballerina platform is not extracted initially.
+    # If the ballerina platform is not available, it will be extracted during init command
+    # Therefore handle classpath separately until the ballerina platform become available.
+    if [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
+        # Add required ballerina jars to classpath
+        for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
+        do
+            CLI_CLASSPATH="$CLI_CLASSPATH":$j
+        done
+
+        # Add required MGW jars to classpath
+        for j in "$MICROGW_HOME"/lib/gateway/cli/*.jar
+        do
+            CLI_CLASSPATH="$CLI_CLASSPATH":$j
+        done
+    fi
+    # For Cygwin, switch paths to Windows format before running java
+    if $cygwin; then
+        CLI_CLASSPATH=`cygpath --path --windows "$CLI_CLASSPATH"`
+    fi
+}
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
 os400=false
@@ -190,51 +236,13 @@ if [ "$CMD" = "--java.debug" ]; then
     echo "Please start the remote debugging client to continue..."
 fi
 
-CLI_CLASSPATH=""
-if [ -e "$BALLERINA_HOME/bre/lib/bootstrap/tools.jar" ]; then
-    CLI_CLASSPATH="$JAVA_HOME/lib/tools.jar"
-fi
-
-for f in "$BALLERINA_HOME"/bre/lib/bootstrap/*.jar
-do
-    if [ "$f" != "$BALLERINA_HOME/bre/lib/bootstrap/*.jar" ];then
-        CLI_CLASSPATH="$CLI_CLASSPATH":$f
-    fi
-done
-
-for j in "$BALLERINA_HOME"/bre/lib/*.jar
-do
-    CLI_CLASSPATH="$CLI_CLASSPATH":$j
-done
-
-for j in "$MICROGW_HOME"/target/*.jar
-do
-    CLI_CLASSPATH="$CLI_CLASSPATH":$j
-done
-
-# Ballerina platform is not extracted initially.
-# If the ballerina platform is not available, it will be extracted during init command
-# Therefore handle classpath separately until the ballerina platform become available.
-if [ ! -d "$MICROGW_HOME/lib/platform/" ]; then
-    # Add required ballerina jars to classpath
-    for j in "$MICROGW_HOME"/lib/gateway/platform/*.jar
-    do
-        CLI_CLASSPATH="$CLI_CLASSPATH":$j
-    done
-
-    # Add required MGW jars to classpath
-    for j in "$MICROGW_HOME"/lib/gateway/cli/*.jar
-    do
-        CLI_CLASSPATH="$CLI_CLASSPATH":$j
-    done
-fi
+updateCLIClassPath
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
     JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
     BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
     CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
-    CLI_CLASSPATH=`cygpath --path --windows "$CLI_CLASSPATH"`
 fi
 
 #execute build command
@@ -260,6 +268,22 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
 
     if [ $? -eq 0 ]
     then
+        # Ballerina path is updated as ballerina platform is extracted
+        BALLERINA_HOME="$MICROGW_HOME/lib/platform"
+        export BALLERINA_HOME=$BALLERINA_HOME
+        export PATH=$BALLERINA_HOME/bin:$PATH
+        # For Migwn, ensure paths are in UNIX format before anything is touched
+        if $mingw ; then
+            [ -n "$BALLERINA_HOME" ] &&
+                BALLERINA_HOME="`(cd "$BALLERINA_HOME"; pwd)`"
+        fi
+        # For Cygwin, ensure paths are in UNIX format before anything is touched
+        if $cygwin; then
+            [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
+            BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
+
+        fi
+        updateCLIClassPath
         MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
         pushd $MICRO_GW_LABEL_PROJECT_DIR/gen > /dev/null
             # clean the content of target folder

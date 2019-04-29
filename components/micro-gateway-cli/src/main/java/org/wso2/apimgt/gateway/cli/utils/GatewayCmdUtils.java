@@ -154,30 +154,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create validation exception
-     * requires to set a system property to avoid ballerina compilation errors
-     *
-     * @param errorMsg Error message
-     * @return         CLIRuntimeException with the added error message
-     */
-    public static CLIRuntimeException createValidationException(String errorMsg, Logger logger){
-        logger.error(errorMsg);
-        return new CLIRuntimeException(errorMsg);
-    }
-
-    /**
-     * Create validation exception
-     * requires to set a system property to avoid ballerina compilation errors
-     *
-     * @param errorMsg Error message
-     * @return         CLIRuntimeException with the added error message
-     */
-    public static CLIRuntimeException createValidationException(String errorMsg, Exception e, Logger logger){
-        logger.error(errorMsg);
-        return new CLIRuntimeException(errorMsg, e);
-    }
-
-    /**
      * Convert first letter to lower case
      *
      * @param s string
@@ -821,6 +797,23 @@ public class GatewayCmdUtils {
     public static void copyFolder(String source, String destination) throws IOException {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
+        copyFolder(sourceFolder, destinationFolder);
+    }
+
+    /**
+     * This function deletes the existing destination folder and recursively copy all the sub folder and files from
+     * source to destination file paths.
+     *
+     * @param source      source location
+     * @param destination destination location
+     * @throws IOException error while copying folder to destination
+     */
+    public static void copyAndReplaceFolder(String source, String destination) throws IOException {
+        File sourceFolder = new File(source);
+        File destinationFolder = new File(destination);
+        if (destinationFolder.exists()) {
+            delete(destinationFolder);
+        }
         copyFolder(sourceFolder, destinationFolder);
     }
 

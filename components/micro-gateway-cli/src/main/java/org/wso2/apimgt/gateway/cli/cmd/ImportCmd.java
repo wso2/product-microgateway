@@ -43,6 +43,7 @@ import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
+import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
@@ -139,6 +140,8 @@ public class ImportCmd implements GatewayLauncherCmd {
             throw GatewayCmdUtils.createUsageException("Project " + projectName + " does not exist. Please execute the command '" +
                     "micro-gw init " + projectName + "' to initialize the project.");
         }
+        //extract the ballerina platform and runtime
+        ToolkitLibExtractionUtils.extractPlatformAndRuntime();
         //Security Schemas settings
         if (StringUtils.isEmpty(security)) {
             security = "oauth2";
