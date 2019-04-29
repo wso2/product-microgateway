@@ -1,18 +1,18 @@
 etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
                     if (etcdKey != "" && gateway:etcdConnectionEstablished) {
                         hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                        match hasUrlChanged {
-                            boolean matchUrlChanged => reinitRequired = matchUrlChanged;
-                            error err => log:printError("Error in checking for Re-initialization", err = err);
-                        }
+                        if(hasUrlChanged is boolean) {
+			    reinitRequired = hasUrlChanged;
+			} else {
+			    log:printError("Error in checking for Re-initialization", err = hasUrlChanged);
+			}
+
                         if (reinitRequired) {
-                            newConfig = { url : <string>gateway:etcdUrls[etcdKey] };
+
                             destination_attribute = <string>gateway:etcdUrls[etcdKey];
-                            try {
-                                {{qualifiedServiceName}}_prod.init(newConfig);
-                                gateway:urlChanged[etcdKey] = false;
-                            } catch (error err) {
-                                reinitFailed = true;
+                            var err = trap {{qualifiedServiceName}}_prod.__init(<string>gateway:etcdUrls[etcdKey], config = { {{>http2}}{{>caching}}{{>basicAuth}} });
+                            if(err is error) {
+				                reinitFailed = true;
                                 gateway:urlChanged[etcdKey] = true;
 
                                 http:Response res = new;
@@ -28,11 +28,14 @@ etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "");
                                 res.setPayload(payload);
                                 clientResponse = res;
                                 log:printError("URL defined at etcd for key " + config:getAsString(etcdKeyConfigValue) + " is invalid");
-                            }
+}
+
                         }
+
                     }
 
-                    if (!reinitFailed) {
-                        clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+
+                        if (!reinitFailed) {
+                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                         runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                     }

@@ -107,9 +107,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
     {{/if}}
         http:Response|error clientResponse;
+        http:Response r = new;
+        clientResponse = r;
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#if etcd.etcdEnabled}}boolean reinitRequired;
+        {{#if etcd.etcdEnabled}}boolean reinitRequired = false;
         string etcdKey;
         string etcdKeyConfigValue;
         boolean|error hasUrlChanged;
@@ -129,7 +131,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 {{/if}}
                 } else {
                     destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}nt
+                {{#if etcd.etcdEnabled}}
                     etcdKeyConfigValue = apiId + "_sand_etcdKey";
                     {{>sandEndpointReinit}}
                 {{else}}
