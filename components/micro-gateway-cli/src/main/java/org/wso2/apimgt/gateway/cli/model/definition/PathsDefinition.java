@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.mgwdefinition;
+package org.wso2.apimgt.gateway.cli.model.definition;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,15 +27,15 @@ import java.util.Map;
  * This class represents the DTO for all the paths in API in Microgateway Definition.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MgwPathsDefinition {
-    private Map<String, MgwResourceDefinition> resources = new LinkedHashMap<>();
+public class PathsDefinition {
+    private Map<String, ResourceDefinition> resources = new LinkedHashMap<>();
 
     @JsonAnySetter
-    public void setResources(String key, MgwResourceDefinition path) {
+    public void setResources(String key, ResourceDefinition path) {
         resources.put(key, path);
     }
 
-    public MgwResourceDefinition getMgwResource(String path) {
+    public ResourceDefinition getMgwResource(String path) {
         return resources.get(path);
     }
 }

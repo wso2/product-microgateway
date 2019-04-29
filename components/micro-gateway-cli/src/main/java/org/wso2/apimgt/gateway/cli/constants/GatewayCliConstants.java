@@ -18,10 +18,10 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.regex.Pattern;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class GatewayCliConstants {
     public static final String PROJECT_CONF_DIR = "conf";
@@ -115,4 +115,5 @@ public class GatewayCliConstants {
     public static final String API_METADATA_FILE = "api-metadata.yaml";
     public static final String API_SWAGGER = "swagger.json";
     public static final String PROJECT_FILE_NAME = ".PROJECT";
+    public static final String DEFINITION_SCHEMA_FILE = "definition-schema.json";
 }

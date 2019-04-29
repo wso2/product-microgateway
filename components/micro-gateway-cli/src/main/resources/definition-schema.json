@@ -1,0 +1,114 @@
+{
+  "$id": "https://raw.githubusercontent.com/wso2/product-microgateway/master/components/micro-gateway-cli/src/main/resources/definition-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Definition",
+  "type": "object",
+  "properties": {
+    "apis": {
+      "type": "object",
+      "patternProperties": {
+        "\/.*": {
+          "type": "object",
+          "required": ["title", "version","security"],
+          "anyOf": [
+            {
+              "required": ["production_endpoint"]
+            },
+            {
+              "required": ["sandbox_endpoint"]
+            },
+            {
+              "required": ["production_endpoint", "sandbox_endpoint"]
+            }
+          ],
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "production_endpoint": {
+              "$ref": "#/definitions/endpoint"
+            },
+            "sandbox_endpoint": {
+              "$ref": "#/definitions/endpoint"
+            },
+            "security": {
+              "type": "string",
+              "enum": ["oauth", "basic"]
+            },
+            "resources": {
+              "type": "object",
+              "patternProperties": {
+                "\/.*": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^[^\\d\\W]+$": {
+                      "type": "object",
+                      "anyOf": [
+                        {
+                          "required": ["production_endpoint"]
+                        },
+                        {
+                          "required": ["sandbox_endpoint"]
+                        },
+                        {
+                          "required": ["production_endpoint", "sandbox_endpoint"]
+                        }
+                      ],
+                      "properties": {
+                        "production_endpoint": {
+                          "$ref": "#/definitions/endpoint"
+                        },
+                        "sandbox_endpoint": {
+                          "$ref": "#/definitions/endpoint"
+                        },
+                        "throttle_policy": {
+                          "type": "string"
+                        },
+                        "request_interceptor": {
+                          "type": "string"
+                        },
+                        "response_interceptor": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "endpoint": {
+      "type": "object",
+      "required": ["urls", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "http",
+            "failover",
+            "load_balance"
+          ]
+        }
+      }
+    }
+  }
+}

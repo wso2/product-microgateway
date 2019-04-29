@@ -15,22 +15,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.mgwdefinition;
+package org.wso2.apimgt.gateway.cli.model.definition;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class represents the DTO for root in Microgateway Definition.
  */
-public class MgwRootDefinition {
-    private MgwAPIsDefinition apis;
-
+public class DefinitionConfig {
     @JsonProperty("apis")
-    public MgwAPIsDefinition getApis() {
+    private APIDefinitions apis;
+
+    public APIDefinitions getApis() {
         return apis;
     }
 
-    public void setApis(MgwAPIsDefinition apis) {
+    public void setApis(APIDefinitions apis) {
         this.apis = apis;
     }
 }

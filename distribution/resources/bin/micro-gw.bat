@@ -44,9 +44,10 @@ REM If the current disk drive ie: `E:\` is different from the drive where this (
 	if %verbose%==T ( ECHO Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
 	if NOT "%curDrive%" == "%wsasDrive%" %wsasDrive%:
 
+REM if MICROGW_HOME environment variable not set then set it
 if "%MICROGW_HOME%" == "" SET MICROGW_HOME=%PRGDIR%..
 
-REM  set BALLERINA_HOME
+REM set BALLERINA_HOME
 SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
@@ -85,15 +86,13 @@ REM of arguments (up to the command line limit, anyway).
 	if ""%1""=="""" goto passToJar
 	if ""%1""==""help""     goto passToJar
 	if ""%1""==""build""     goto commandBuild
-	if ""%1""==""-java.debug""    goto commandDebug
-	if ""%1""==""java.debug""   goto commandDebug
 	if ""%1""==""--java.debug""  goto commandDebug
 	SHIFT
 goto setupArgs
 
 :usageInfo
 	ECHO Missing command operand
-	ECHO "Usage: micro-gw [-v] ([ -l ] setup | build)"
+	ECHO "Use: micro-gw [--verbose] (init | import | build)"
 goto :end
 
 :commandBuild
@@ -105,7 +104,7 @@ goto :end
 	if [%project_name%] == [] ( goto :noName ) else ( goto :nameFound )
 
 	:noName
-		ECHO "Project name not provided please follow the command usage patterns given below"
+		ECHO "micro-gw: main parameters are required (""), Run 'micro-gw help' for usage."
 		goto :usageInfo
 
 	:nameFound
@@ -121,33 +120,30 @@ goto :end
 
 		if ERRORLEVEL 1 goto :end
 
-	:continueBuild
-	    goto :passToJar
-	    REM set ballerina home again as the platform is extracted at this point.
-	    SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
-	    SET PATH=%PATH%;%BALLERINA_HOME%\bin\
-        if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-		pushd "%MICRO_GW_PROJECT_DIR%"
-			if %verbose%==T ECHO current dir %CD%
-			SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
-			:: /s : Removes the specified directory and all subdirectories including any files. Use /s to remove a tree.
-			:: /q : Runs rmdir in quiet mode. Deletes directories without confirmation.
-			if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
-			call ballerina build src -o %project_name:\=%.balx --experimental --siddhiruntime
-		popd
-		if %verbose%==T ECHO Ballerina build completed
+        :continueBuild
+            call :passToJar
+            REM set ballerina home again as the platform is extracted at this point.
+            SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+            SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+            if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
+            ECHO MICRO_GW_PROJECT_DIR:  "%CURRENT_D%"
+            PUSHD "%CURRENT_D%"
+            PUSHD "%MICRO_GW_PROJECT_DIR%\gen"
+                if %verbose%==T ECHO current dir %CD%
+                SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
+                if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
+                call ballerina build src -o %project_name:\=%.balx --offline --experimental --siddhiruntime
+            POPD
 
-		set %* = %* --compiled
+            if %verbose%==T ECHO Ballerina build completed
+            SET originalArgs=%originalArgs% --compiled
 
-		REM Check for a debug param by looping through the remaining args list
-		:checkDebug
-			SHIFT
-			if ""%1""=="""" goto passToJar
-
-			if ""%1""==""-java.debug""    goto commandDebug
-			if ""%1""==""java.debug""   goto commandDebug
-			if ""%1""==""--java.debug""  goto commandDebug
-		goto checkDebug
+            REM Check for a debug param by looping through the remaining args list
+            :checkDebug
+                SHIFT
+                if ""%1""=="""" goto passToJar
+                if ""%1""==""--java.debug""  goto commandDebug
+            goto checkDebug
 goto :passToJar
 
 :commandDebug
@@ -156,13 +152,13 @@ goto :passToJar
 	SHIFT
 	SET DEBUG_PORT=%1
 	if "%DEBUG_PORT%"=="" goto noDebugPort
-	if NOT "%JAVA_OPTS%"=="" ECHO Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --debug option.
+	if NOT "%JAVA_OPTS%"=="" ECHO Warning !!!. User specified JAVA_OPTS will be ignored, once you give the --java.debug option.
 	SET JAVA_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%DEBUG_PORT%
 	ECHO Please start the remote debugging client to continue...
 goto passToJar
 
 :noDebugPort
-	ECHO Please specify the debug port after the java.debug option
+	ECHO Please specify the debug port after the --java.debug option
 goto end
 
 
@@ -200,7 +196,7 @@ goto end
 		-Dfile.encoding=UTF8 ^
 		-Dtemplates.dir.path="%MICROGW_HOME%"\resources\templates ^
 		-Dcli.home="%MICROGW_HOME%" ^
-		-Dcurrent.dir=%CURRENT_D%
+		-Dcurrent.dir="%CD%" ^
 		-DVERBOSE_ENABLED=%verbose%
 	if %verbose%==T ECHO JAVACMD = !JAVACMD!
 
@@ -209,6 +205,7 @@ goto end
 	CD %MICROGW_HOME%
 	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
 	if "%ERRORLEVEL%"=="121" goto runJava
+	if ERRORLEVEL 1 goto :end
 :end
 goto endlocal
 

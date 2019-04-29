@@ -29,12 +29,14 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
-import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -83,7 +85,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         }
 
         String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
-        projectName = projectName.replaceAll("[\\/\\\\]", "");
+        projectName = projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
@@ -115,10 +117,9 @@ public class BuildCmd implements GatewayLauncherCmd {
                 etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
                 GatewayCmdUtils.setEtcd(etcd);
 
-                MgwDefinitionUtils.configureMgwDefinition(projectName);
+                MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-                boolean changesDetected;
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
@@ -128,7 +129,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 //to indicate the api information which is not used in the code generation process, but included in
                 //definition.yaml
-                MgwDefinitionUtils.FindNotUsedAPIInformation();
+                MgwDefinitionBuilder.FindUnusedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);

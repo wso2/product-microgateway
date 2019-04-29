@@ -18,7 +18,6 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.cmd.InitCmd;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 
@@ -31,7 +30,7 @@ import java.nio.file.Paths;
  * This class represents the utility functions required for library packages extraction
  */
 public class ToolkitLibExtractionUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InitCmd.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitLibExtractionUtils.class);
 
     /**
      * Extracts the platform and runtime and copy related jars and balos to extracted runtime and platform.

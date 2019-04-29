@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.mgwdefinition;
+package org.wso2.apimgt.gateway.cli.model.definition;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,14 +26,14 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
  * This class represents the DTO for Single API in Microgateway Definition.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MgwAPIDefinition {
+public class APIDefinition {
     private String title;
     private String version;
     private EndpointListRouteDTO prodEpList;
     private EndpointListRouteDTO sandEpList;
     private String requestInterceptor;
     private String responseInterceptor;
-    private MgwPathsDefinition pathsDefinition;
+    private PathsDefinition pathsDefinition;
     private String security; //todo: bring enum
     private APICorsConfigurationDTO corsConfiguration;
     //to identify whether it has been used
@@ -94,11 +94,11 @@ public class MgwAPIDefinition {
     }
 
     @JsonProperty("resources")
-    public MgwPathsDefinition getPathsDefinition() {
+    public PathsDefinition getPathsDefinition() {
         return pathsDefinition;
     }
 
-    public void setPathsDefinition(MgwPathsDefinition pathsDefinition) {
+    public void setPathsDefinition(PathsDefinition pathsDefinition) {
         this.pathsDefinition = pathsDefinition;
     }
 
