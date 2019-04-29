@@ -91,6 +91,8 @@
   "definitions": {
     "endpoint": {
       "type": "object",
+      "required": ["urls", "type"],
+      "additionalProperties": false,
       "properties": {
         "urls": {
           "type": "array",

@@ -20,7 +20,6 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.ParameterException;
-import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -30,7 +29,6 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.PrintStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,20 +48,6 @@ public class Main {
         try {
             Optional<GatewayLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
-        } catch (ValidationException e) {
-            outStream.println("micro-gw: Errors found in definition.yaml file");
-            List<ValidationException> errorList = e.getCausingExceptions();
-
-            if (errorList != null){
-                for (ValidationException exp : errorList) {
-                    outStream.println(exp.getMessage());
-                }
-            } else {
-                outStream.println(e.getMessage());
-            }
-
-            logger.error("micro-gw: Invalid definition.yaml file", e);
-            Runtime.getRuntime().exit(1);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
             logger.error(MICRO_GW + "Error occurred while executing command.", e);
@@ -123,7 +107,7 @@ public class Main {
             SetProjectCmd setProjectCmd = new SetProjectCmd();
             cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
             setProjectCmd.setParentCmdParser(cmdParser);
-            
+
             Map<String, JCommander> commanderMap;
             String parsedCmdName;
             if (args.length != 0) {
