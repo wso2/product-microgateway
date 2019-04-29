@@ -1,12 +1,12 @@
 # WSO2 API Microgateway
 
-The WSO2 API Microgateway toolkit is designed to create a specialized, lightweight, gateway distribution (WSO2 API Microgateway) by including a single API or a group of APIs. The WSO2 API Microgateway is able to serve the included APIs as soon as it is up and running.
+The WSO2 API Microgateway is a toolkit designed to create a specialized, lightweight, gateway distribution (WSO2 API Microgateway) by including a single API or a group of APIs. The WSO2 API Microgateway is able to serve the included APIs as soon as it is up and running.
 
 In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
 
 1. Able to execute in isolation without mandatory connections to other components (Secure Token Service, Rate limiting component , Analytics).
 1. Capable of exposing micro services directly from Open API definitions
-1. Abile to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
+1. Able to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
 1. Immutable. The gateway runtime is immutable. If APIs or Policies change after the WSO2 API Microgateway has been built, a rebuild process is required to capture the changes.
 1. Seamless integration with deployment automation tools and techniques.
 1. Easy integration with CI/CD processes.
