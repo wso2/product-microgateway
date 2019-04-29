@@ -39,14 +39,14 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
@@ -650,8 +650,7 @@ public class GatewayCmdUtils {
      * @return path to the given project in the current working directory
      */
     public static String getProjectDirectoryPath(String projectName) {
-        // TODO: do we need to change this?
-        return new File(projectName).getAbsolutePath();
+        return getUserDir() + File.separator + projectName;
     }
 
     /**
