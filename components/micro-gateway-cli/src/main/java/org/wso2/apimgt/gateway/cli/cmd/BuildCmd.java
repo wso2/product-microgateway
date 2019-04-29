@@ -34,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
@@ -111,6 +112,11 @@ public class BuildCmd implements GatewayLauncherCmd {
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
                 init(projectName, toolkitConfigPath, deploymentConfigPath);
+
+                Etcd etcd = new Etcd();
+                etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
+                GatewayCmdUtils.setEtcd(etcd);
+
                 MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();

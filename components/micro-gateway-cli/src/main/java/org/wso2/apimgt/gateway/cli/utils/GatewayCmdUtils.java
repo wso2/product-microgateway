@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +74,33 @@ public class GatewayCmdUtils {
 
     public static void setEtcd(Etcd etcd) {
         GatewayCmdUtils.etcd = etcd;
+    }
+
+    //todo: change this later after being finalized
+    public static void saveEtcdEnabled(String projectName, boolean isEnabled){
+        createFileIfNotExist(getProjectGenDirectoryPath(projectName), "internal.conf");
+        Map<String, String> confMap = new HashMap<>(1);
+        confMap.put("isEtcdEnabled", String.valueOf(isEnabled));
+        try {
+            writeMapToFile(confMap, getProjectGenDirectoryPath(projectName) + File.separator + "internal.conf");
+        } catch (IOException e){
+            throw new CLIInternalException("Error while writing etcdEnabled to the internal.conf file", e);
+        }
+    }
+
+    public static boolean getEtcdEnabled(String projectName){
+        String internalConfPath = getProjectGenDirectoryPath(projectName)+ File.separator + "internal.conf";
+        if(!(new File(internalConfPath)).exists()){
+            return false;
+        }
+        try{
+            return Boolean.valueOf(readFileToMap(internalConfPath).get("isEtcdEnabled"));
+        } catch (IOException e){
+            throw new CLIInternalException("Error while reading the internal.conf file", e);
+        } catch (ClassNotFoundException e) {
+            throw new CLIInternalException("Error while while reading the internal.conf file", e);
+        }
+
     }
 
     public static Config getConfig() {
