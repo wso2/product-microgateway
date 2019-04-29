@@ -1,29 +1,28 @@
 NAME
-    micro-gw help setup - Set up the environment and initialize a project with artifacts required for 
-    generating a microgateway distribution.
+    micro-gw help import - Import an existing API or multiple APIs from WSO2 API Manager to the project.
 
 SYNOPSIS
-    micro-gw setup <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-u|--username] [-p|--password]
+    micro-gw import <project> <[-l|--label] | [-a|--api-name] & [-v|--version]> [-u|--username] [-p|--password]
         [-s|--server-url] [-c|--config] [-t|--trust-store] [-w|--truststore-pass]
 
 DESCRIPTION
-     The "micro-gw setup" command is used to initialize a project with artifacts required for generating a microgateway
-     distribution. During the setup phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve the
+     The "micro-gw import" command is used to import a single API or multiple APIs from WSO2 API Manager. During the
+     import phase, the Microgateway CLI will communicate with the API Manager REST APIs and retrieve the
      details of the resources (APIs, policies ..) which are required to generate the microgateway project artifacts.
      
-     There are two main ways to set up a project.
+     There are two main ways to execute Import Command.
      
-        1. Setting up a project for a single API.
+        1. import a single API.
              
-            Specify the name and the version of the API using the below format and execute the "setup" command.
+            Specify the name and the version of the API using the below format and execute the "import" command.
             
-            The micro-gw setup <project> -a <api-name> -v <version> [args..]
+            micro-gw import <project> -a <api-name> -v <version> [args..]
         
         2. Setting up a project for a group of APIs using a label.
              
-            Specify the label which represents the group of APIs using below format and execute the "setup" command.
+            Specify the label which represents the group of APIs using below format and execute the "import" command.
                     
-            The micro-gw setup <project> -l <label-name> [args..]
+            micro-gw import <project> -l <label-name> [args..]
              
 
 OPTIONS
@@ -75,21 +74,26 @@ OPTIONS
     --version
        <Optional>
        Version of the API
-       
-    -f
-    --force
-       <Optional>
-       By default, when the microgateway CLI does not allow you to run "micro-gw setup" upon an existing project. But, if you
-       want to overwrite the existing project, specify -f option when running "micro-gw setup" command.
 
     -k
     --insecure
        <Optional>
        Allow insecure server connections when using SSL
 
+    -b
+    --security
+       <Optional>
+       API security ('OAuth', 'BasicAuth' or 'OAuth,BasicAuth')
+       default value is OAuth
+
+    -d
+    --deployment-config
+       <Optional>
+       Deployment configuration file of the project for docker/kubernetes environments
+
 EXAMPLES
-    Setup the project using a label
-    $ micro-gw setup accounts-project -l accounts
+    Import multiple APIs using a label
+    $ micro-gw import accounts-project -l accounts
     
-    Setup the project using a single API
-    $ micro-gw setup pizzashack-project -a PizzaShackAPI -v 1.0.0
+    Import a single API
+    $ micro-gw import pizzashack-project -a PizzaShackAPI -v 1.0.0
