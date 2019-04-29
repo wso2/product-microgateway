@@ -59,7 +59,7 @@ public class CLIExecutor {
         String[] initArgs = {"init", project};
         main.main(initArgs);
 
-        String[] args = {"import","--project", project, "--label", label, "--username", "admin", "--password",
+        String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", security};
@@ -161,7 +161,7 @@ public class CLIExecutor {
         String[] initArgs = {"init", project};
         main.main(initArgs);
 
-        String[] args = {"import","--project", project, "--label", label, "--username", "admin", "--password",
+        String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
                 "admin", "--server-url", "http://localhost:9443", "--truststore",
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", "oauth2", additionalFlag};
