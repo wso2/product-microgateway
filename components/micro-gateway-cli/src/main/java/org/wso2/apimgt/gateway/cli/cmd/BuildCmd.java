@@ -63,22 +63,28 @@ public class BuildCmd implements GatewayLauncherCmd {
     @Parameter(hidden = true, required = true)
     private List<String> mainArgs;
 
+    @SuppressWarnings("unused")
     @Parameter(names = {"--compiled"}, hidden = true, arity = 0)
     private boolean isCompiled;
 
-    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information")
-    private boolean helpFlag;
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
+    private String deploymentConfigPath;
 
+    @SuppressWarnings("unused")
+    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
+    private boolean helpFlag;
 
     public void execute() {
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
             outStream.println(commandUsageInfo);
-            return;
+            //to avoid the command running for a second time
+            System.exit(1);
         }
 
         String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
-        projectName = projectName.replaceAll("[\\/\\\\]", "");
+        projectName = projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
@@ -104,11 +110,10 @@ public class BuildCmd implements GatewayLauncherCmd {
         if(!isCompiled){
             try{
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
-                init(projectName, toolkitConfigPath);
+                init(projectName, toolkitConfigPath, deploymentConfigPath);
                 MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-                boolean changesDetected;
 
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
@@ -158,7 +163,7 @@ public class BuildCmd implements GatewayLauncherCmd {
     }
 
     //todo: implement this method properly
-    private void init(String projectName, String configPath) {
+    private void init(String projectName, String configPath, String deploymentConfig) {
         try {
 
             Path configurationFile = Paths.get(configPath);
@@ -169,7 +174,12 @@ public class BuildCmd implements GatewayLauncherCmd {
                 logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
-
+            if(deploymentConfig != null){
+                Path deploymentConfigFile = Paths.get(deploymentConfig);
+                if(Files.exists(deploymentConfigFile)){
+                    GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfig);
+                }
+            }
             String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
             GatewayCmdUtils.setContainerConfig(containerConfig);
@@ -180,6 +190,8 @@ public class BuildCmd implements GatewayLauncherCmd {
         } catch (ConfigParserException e) {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
+        } catch (IOException e){
+            throw new CLIInternalException("Error occured while reading the deployment configuration", e);
         }
     }
 }

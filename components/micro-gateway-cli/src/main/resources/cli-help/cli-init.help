@@ -1,0 +1,25 @@
+NAME
+    micro-gw init - The init command creates a new project in the current directory.
+
+SYNOPSIS
+    micro-gw init <project>
+
+DESCRIPTION
+    The init command generates a project folder with all the required components. If there is another folder under
+    the same name in the current directory and '-f (--force) is not used', the project folder will not be created.
+
+OPTIONS
+    -f
+    --force
+       <Optional>
+       By default, when the microgateway CLI does not allow you to run "micro-gw init" upon an existing project. But, if you
+       want to overwrite the existing project, specify -f option when running "micro-gw init" command.
+
+    -d
+    --deployment-config
+       <Optional>
+       Deployment configuration file for docker/kubernetes environments
+
+EXAMPLES
+    $ micro-gw init accounts-project
+
