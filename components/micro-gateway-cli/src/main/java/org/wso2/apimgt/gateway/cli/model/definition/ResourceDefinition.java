@@ -15,23 +15,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.mgwdefinition;
+package org.wso2.apimgt.gateway.cli.model.definition;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MgwResourceDefinition {
-    private Map<String, MgwEndpointListDefinition> operations = new LinkedHashMap<>();
+public class ResourceDefinition {
+    private Map<String, EndpointListDefinition> operations = new LinkedHashMap<>();
 
     @JsonAnySetter
-    public void setEndpoints(String key, MgwEndpointListDefinition endpoint) {
+    public void setEndpoints(String key, EndpointListDefinition endpoint) {
         operations.put(key, endpoint);
     }
 
-    public MgwEndpointListDefinition getEndpointListDefinition(String resourceName) {
+    public EndpointListDefinition getEndpointListDefinition(String resourceName) {
         return operations.get(resourceName);
     }
 }

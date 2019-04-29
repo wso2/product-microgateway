@@ -32,7 +32,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionUtils;
+import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -167,36 +167,36 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.getValue().setOperationId(operationId);
                 //if it is the developer first approach
                 if (isDevFirst) {
-                    String basePath = MgwDefinitionUtils.getBasePath(openAPI.getInfo().getTitle(),
+                    String basePath = MgwDefinitionBuilder.getBasePath(openAPI.getInfo().getTitle(),
                             openAPI.getInfo().getVersion());
                     //to add resource level endpoint configuration
-                    MgwEndpointConfigDTO epConfig = MgwDefinitionUtils.getResourceEpConfigForCodegen(basePath,
+                    MgwEndpointConfigDTO epConfig = MgwDefinitionBuilder.getResourceEpConfigForCodegen(basePath,
                             path.getKey(), operation.getKey());
                     if (epConfig != null) {
                         operation.getValue().setEpConfigDTO(epConfig);
                     }
                     //todo: need to validate the existence of those functions
                     //to add request interceptor
-                    String requestInterceptor = MgwDefinitionUtils.getRequestInterceptor(basePath, path.getKey(),
+                    String requestInterceptor = MgwDefinitionBuilder.getRequestInterceptor(basePath, path.getKey(),
                             operation.getKey());
                     if (requestInterceptor != null) {
                         operation.getValue().setRequestInterceptor(requestInterceptor);
                     }
                     //to add response interceptor
-                    String responseInterceptor = MgwDefinitionUtils.getResponseInterceptor(basePath, path.getKey(),
+                    String responseInterceptor = MgwDefinitionBuilder.getResponseInterceptor(basePath, path.getKey(),
                             operation.getKey());
                     if (responseInterceptor != null) {
                         operation.getValue().setResponseInterceptor(responseInterceptor);
                     }
                     //to add throttle policy
-                    String throttle_policy = MgwDefinitionUtils.getThrottlePolicy(basePath, path.getKey(),
+                    String throttle_policy = MgwDefinitionBuilder.getThrottlePolicy(basePath, path.getKey(),
                             operation.getKey());
                     if (throttle_policy != null) {
                         operation.getValue().setResourceTier(throttle_policy);
                     }
 
                     //to add API level request interceptor
-                    String apiRequestInterceptor = MgwDefinitionUtils.getApiRequestInterceptor(basePath);
+                    String apiRequestInterceptor = MgwDefinitionBuilder.getApiRequestInterceptor(basePath);
                     if (apiRequestInterceptor != null) {
                         //if user specify the same interceptor function in both api level and resource level ignore
                         // api level interceptor
@@ -206,7 +206,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     }
 
                     //to add API level response interceptor
-                    String apiResponseInterceptor = MgwDefinitionUtils.getApiResponseInterceptor(basePath);
+                    String apiResponseInterceptor = MgwDefinitionBuilder.getApiResponseInterceptor(basePath);
                     if (apiResponseInterceptor != null) {
                         operation.getValue().setApiResponseInterceptor(apiResponseInterceptor);
                     }

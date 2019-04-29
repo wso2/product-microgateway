@@ -40,10 +40,9 @@ public class Main {
     private static final String JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX = "Expected a value after parameter";
     private static final String INTERNAL_ERROR_MESSAGE = "Internal error occurred while executing command.";
     private static final String MICRO_GW = "micro-gw: ";
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static PrintStream outStream = System.err;
-
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... args) {
         try {
@@ -105,37 +104,10 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.IMPORT, importCmd);
             importCmd.setParentCmdParser(cmdParser);
 
-//            AddAPICmd addAPICmd = new AddAPICmd();
-//            cmdParser.addCommand(GatewayCliCommands.ADD_API, addAPICmd);
-//            addAPICmd.setParentCmdParser(cmdParser);
-//
-//            AddRouteCmd addRouteCmd = new AddRouteCmd();
-//            cmdParser.addCommand(GatewayCliCommands.ADD_ROUTE, addRouteCmd);
-//            addRouteCmd.setParentCmdParser(cmdParser);
-//
-//            ListAPIsCmd listAPIsCmd = new ListAPIsCmd();
-//            cmdParser.addCommand(GatewayCliCommands.LIST_APIS, listAPIsCmd);
-//            listAPIsCmd.setParentCmdParser(cmdParser);
-//
-//            ListResourcesCmd listResourcesCmd = new ListResourcesCmd();
-//            cmdParser.addCommand(GatewayCliCommands.LIST_RESOURCES, listResourcesCmd);
-//            listResourcesCmd.setParentCmdParser(cmdParser);
-//
-//            DescResourceCmd descResourceCmd = new DescResourceCmd();
-//            cmdParser.addCommand(GatewayCliCommands.DESC_RESOURCE, descResourceCmd);
-//            descResourceCmd.setParentCmdParser(cmdParser);
-//
-//            FunctionCmd functionCmd = new FunctionCmd();
-//            cmdParser.addCommand(GatewayCliCommands.FUNCTION,functionCmd);
-//            functionCmd.setParentCmdParser(cmdParser);
-
             SetProjectCmd setProjectCmd = new SetProjectCmd();
             cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
             setProjectCmd.setParentCmdParser(cmdParser);
-          
-//            UpdateRouteCmd updateRouteCmd = new UpdateRouteCmd();
-//            cmdParser.addCommand(GatewayCliCommands.UPDATE_ROUTE, updateRouteCmd);
-//            updateRouteCmd.setParentCmdParser(cmdParser);
+
             Map<String, JCommander> commanderMap;
             String parsedCmdName;
             if (args.length != 0) {

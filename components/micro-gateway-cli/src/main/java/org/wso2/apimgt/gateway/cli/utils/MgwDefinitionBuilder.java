@@ -17,19 +17,18 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.definition.DefinitionConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.mgwdefinition.MgwRootDefinition;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,26 +39,40 @@ import java.util.regex.Pattern;
 
 
 /**
- * This class includes the Util functions related to operations on MgwDefinition.
+ * Represents the microgateway definitions file.
+ * <p>
+ * Implementation contains the methods required to build a valid definition object model
+ * from a definition file.
+ * </p>
  */
-public class MgwDefinitionUtils {
-
-    private static final ObjectMapper OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory());
-    private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionUtils.class);
-    private static MgwRootDefinition rootDefinition;
+public class MgwDefinitionBuilder {
+    private static DefinitionConfig definitionConfig;
     private static String projectName;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionBuilder.class);
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
 
-    public static void configureMgwDefinition(String project) {
+    /**
+     * Builds the {@link DefinitionConfig} object model for {@link GatewayCliConstants#PROJECT_DEFINITION_FILE}.
+     * Before parsing the yaml file to {@link DefinitionConfig}, validation will be performed on
+     * the the input project definition file.
+     *
+     * @param project microgateway project name
+     */
+    public static void build(String project) {
         projectName = project;
+        String definitionPath = GatewayCmdUtils.getProjectMgwDefinitionFilePath(project);
+        File definitionFile = new File(definitionPath);
+
         try {
-            String definitionFilePath = GatewayCmdUtils.getProjectMgwDefinitionFilePath(project);
-            rootDefinition = OBJECT_MAPPER_YAML.readValue(new File(definitionFilePath), MgwRootDefinition.class);
+            InputStream isSchema = MgwDefinitionBuilder.class.getClassLoader()
+                    .getResourceAsStream(GatewayCliConstants.DEFINITION_SCHEMA_FILE);
+            definitionConfig = YamlValidator.parse(definitionFile, isSchema, DefinitionConfig.class);
         } catch (IOException e) {
             throw new CLIRuntimeException("Error while reading the " + GatewayCliConstants.PROJECT_DEFINITION_FILE +
                     ".", e);
         }
+
         try {
             //update the interceptor map
             setInterceptors();
@@ -77,37 +90,38 @@ public class MgwDefinitionUtils {
      * @return basePath
      */
     public static String getBasePath(String apiName, String apiVersion) {
-        String basePath = rootDefinition.getApis().getBasepathFromAPI(apiName, apiVersion);
+        String basePath = definitionConfig.getApis().getBasepathFromAPI(apiName, apiVersion);
         if (basePath == null) {
             throw new CLIRuntimeException("Error: The API '" + apiName + "' and version '" + apiVersion + "' is not " +
                     "found in the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".");
         }
+
         return basePath;
     }
 
     public static EndpointListRouteDTO getProdEndpointList(String basePath) {
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getProdEpList();
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getProdEpList();
     }
 
     public static EndpointListRouteDTO getSandEndpointList(String basePath) {
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getProdEpList();
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getProdEpList();
     }
 
     public static String getSecurity(String basePath) {
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getSecurity();
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getSecurity();
     }
 
     public static APICorsConfigurationDTO getCorsConfiguration(String basePath) {
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getCorsConfiguration();
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getCorsConfiguration();
     }
 
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(String basePath, String path, String operation) {
         if (!isResourceAvailable(basePath, path, operation)) {
             return null;
         }
-        EndpointListRouteDTO prodList = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().
+        EndpointListRouteDTO prodList = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().
                 getMgwResource(path).getEndpointListDefinition(operation).getProdEndpointList();
-        EndpointListRouteDTO sandList = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().
+        EndpointListRouteDTO sandList = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().
                 getMgwResource(path).getEndpointListDefinition(operation).getSandEndpointList();
         return RouteUtils.convertToMgwServiceMap(prodList, sandList);
     }
@@ -124,9 +138,10 @@ public class MgwDefinitionUtils {
         if (!isResourceAvailable(basePath, path, operation)) {
             return null;
         }
-        String interceptor = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+        String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
                 getEndpointListDefinition(operation).getRequestInterceptor();
         validateInterceptorAvailability(requestInterceptorMap, interceptor, basePath, path, operation);
+
         return interceptor;
     }
 
@@ -142,9 +157,10 @@ public class MgwDefinitionUtils {
         if (!isResourceAvailable(basePath, path, operation)) {
             return null;
         }
-        String interceptor = rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+        String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
                 getEndpointListDefinition(operation).getResponseInterceptor();
         validateInterceptorAvailability(responseInterceptorMap, interceptor, basePath, path, operation);
+
         return interceptor;
     }
 
@@ -152,7 +168,7 @@ public class MgwDefinitionUtils {
         if (!isResourceAvailable(basePath, path, operation)) {
             return null;
         }
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
                 getEndpointListDefinition(operation).getThrottlePolicy();
     }
 
@@ -165,13 +181,13 @@ public class MgwDefinitionUtils {
      * @return true if the resource is available
      */
     private static boolean isResourceAvailable(String basePath, String path, String operation) {
-        if (rootDefinition.getApis().getApiFromBasepath(basePath) == null) {
+        if (definitionConfig.getApis().getApiFromBasepath(basePath) == null) {
             return false;
         }
-        if (rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path) == null) {
+        if (definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path) == null) {
             return false;
         }
-        return rootDefinition.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path)
+        return definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path)
                 .getEndpointListDefinition(operation) != null;
     }
 
@@ -182,7 +198,7 @@ public class MgwDefinitionUtils {
      * @return API response request function name
      */
     public static String getApiRequestInterceptor(String basePath) {
-        String interceptor = rootDefinition.getApis().getApiFromBasepath(basePath).getRequestInterceptor();
+        String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getRequestInterceptor();
         validateInterceptorAvailability(requestInterceptorMap, interceptor, basePath, null, null);
         return interceptor;
     }
@@ -194,7 +210,7 @@ public class MgwDefinitionUtils {
      * @return API response interceptor function name
      */
     public static String getApiResponseInterceptor(String basePath) {
-        String interceptor = rootDefinition.getApis().getApiFromBasepath(basePath).getResponseInterceptor();
+        String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getResponseInterceptor();
         validateInterceptorAvailability(responseInterceptorMap, interceptor, basePath, null, null);
         return interceptor;
     }
@@ -230,8 +246,8 @@ public class MgwDefinitionUtils {
     /**
      * To find out the api information which is not used for code generation but included in the definitions.yaml
      */
-    public static void FindNotUsedAPIInformation() {
-        rootDefinition.getApis().getApisMap().forEach((k, v) -> {
+    public static void FindUnusedAPIInformation() {
+        definitionConfig.getApis().getApisMap().forEach((k, v) -> {
             if (!v.getIsDefinitionUsed()) {
                 String msg = "API '" + v.getTitle() + "' version: '" + v.getVersion() + "' is not used but " +
                         "added to the " + GatewayCliConstants.PROJECT_DEFINITION_FILE + ".";
@@ -340,3 +356,4 @@ public class MgwDefinitionUtils {
         findInterceptors(balSrcCode, interceptorFilePath, false, responseInterceptorMap);
     }
 }
+
