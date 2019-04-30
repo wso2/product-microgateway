@@ -152,3 +152,167 @@ ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
+
+### Usages of definition.yaml
+#### 1. Override endpoint per API resource
+API developer can specify endpoints per resource using the definition.yaml
+If a specific resource have an endpoint which requires different back end rather than the global back end defined for the API, then it can be overridden as below.
+
+In following example `/pet/findByStatus` resource endpoint is overridden with load balance endpoint and `pet/{petId}` resource overridden with another http endpoint
+
+```
+apis:
+    /petstore/v1:
+        title: Swagger Petstore New
+        version: 1.0.0
+        production_endpoint:
+            type: 'http'
+            urls:
+                - 'https://petstore.swagger.io/v2'
+        sandbox_endpoint:
+            type: 'http'
+            urls:
+                - 'https://sand.petstore.swagger.io/'
+        resources:
+            /pet/findByStatus:
+                get:
+                    production_endpoint:
+                        type: 'load_balance'
+                        urls:
+                            - 'http://petstore.override.swagger.io/v2'
+                            - 'http://petstore.override.swagger.io/v3'
+            /pet/{petId}:
+                get:
+                    production_endpoint:
+                        type: 'http'
+                        urls:
+                            - 'http://petstore.override.swagger.io/v2'
+
+        security: 'oauth'
+
+
+```
+
+#### 2. Add API/resource level request and response interceptors
+Interceptors can be used to do request and response transformations and mediation. Request interceptors are engaged before sending the request to the back end and
+response interceptors are engaged before responding to the client.
+API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the definition.yaml
+
+In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` folder inside the project. This interceptors will only be enagged for that particular resource only
+```
+apis:
+    /petstore/v1:
+        title: Swagger Petstore New
+        version: 1.0.0
+        production_endpoint:
+            type: 'http'
+            urls:
+                - 'https://petstore.swagger.io/v2'
+        resources:
+            /pet/findByStatus:
+                get:
+                    request_interceptor: validateRequest
+                    response_interceptor: validateResponse
+```
+
+Sample validateRequest method can be implemented as below.
+```
+import ballerina/io;
+import ballerina/http;
+
+public function validateRequest (http:Caller outboundEp, http:Request req) {
+    io:println("Request is intercepted.");
+}
+```
+
+Sample validateResponse method can be implemented as below.
+```
+import ballerina/io;
+import ballerina/http;
+
+public function validateResponse (http:Caller outboundEp, http:Response res) {
+    io:println("Response is intercepted.");
+}
+```
+
+Similarly the API developer can add interceptors globally at the API level as well
+```
+apis:
+    /petstore/v1:
+        title: Swagger Petstore New
+        version: 1.0.0
+        production_endpoint:
+            type: 'http'
+            urls:
+                - 'https://petstore.swagger.io/v2'
+        sandbox_endpoint:
+            type: 'http'
+            urls:
+                - 'https://sand.petstore.ballerina.io/'
+        request_interceptor: validateRequest
+        response_interceptor: validateResponse
+        security: 'oauth'
+```
+
+#### 3. Add resource level throttling policies
+API developer can specify the rate limiting policies for each resource. These policies should be defined in the policies.yaml file in the project directory
+By default set of policies are available, but user can add more policies to the file and later refer them by name in the definition.yaml
+
+```
+apis:
+    /petstore/v1:
+        title: Swagger Petstore New
+        version: 1.0.0
+        production_endpoint:
+            type: 'http'
+            urls:
+                - 'https://petstore.swagger.io/v2'
+        sandbox_endpoint:
+            type: 'http'
+            urls:
+                - 'https://sand.petstore.swagger.io/'
+        resources:
+            /pet/findByStatus:
+                get:
+                    throttle_policy: 10kPerMin
+        security: 'oauth'
+
+```
+The throttle policy "10kPerMin" is defined in the policies.yaml of the project as below.
+```
+- 10kPerMin:
+     count: 10000
+     unitTime: 1
+     timeUnit: min
+```
+
+#### 4. Add API level CORS configuration
+
+CORS configurations can be added to each API in the definition.yaml file
+```
+apis:
+    /petstore/v1:
+        title: Swagger Petstore New
+        version: 1.0.0
+        production_endpoint:
+            type: 'http'
+            urls:
+                - 'https://petstore.swagger.io/v2'
+        sandbox_endpoint:
+            type: 'http'
+            urls:
+                - 'https://sand.petstore.swagger.io/'
+        security: 'oauth'
+        cors:
+            access_control_allow_origins:
+                - test.com
+                - example.com
+            access_control_allow_headers:
+                - Authorization
+                - Content-Type
+            access_control_allow_methods:
+                - GET
+                - PUT
+                - POST
+
+```

@@ -33,7 +33,7 @@ import wso2/gateway;
     {{#equals epConfig.sandEndpoints.type "http"}}
         {{#epConfig.sandEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.sandEndpoints}}
     {{/equals}}
-    {{#equals endpointConfig.prodEndpoints.type "load_balance"}}
+    {{#equals epConfig.prodEndpoints.type "load_balance"}}
         {{#epConfig.prodEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.prodEndpoints}}
     {{/equals}}
     {{#equals epConfig.sandEndpoints.type "load_balance"}}
