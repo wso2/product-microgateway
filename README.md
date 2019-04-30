@@ -1,53 +1,53 @@
-# WSO2 API Manager Microgateway
+# WSO2 API Microgateway
 
-The Microgateway provides the capability to create specialized gateway distribution (Microgateway distributions) where only a single API or a group of APIs are included. Once a Microgateway distribution is started, it will start serving those specific API(s) right away.
+The WSO2 API Microgateway is a toolkit designed to create a specialized, lightweight, gateway distribution (WSO2 API Microgateway) by including a single API or a group of APIs. The WSO2 API Microgateway is able to serve the included APIs as soon as it is up and running.
 
-In summary, a Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
+In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
 
-1. Its ability to execute in isolation without mandatory connections to other components (Secure Token Service, Rate limiting component , Analytics).
-1. Expose micro services directly from Open API definitions
-1. Ability to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
-1. Immutability - The gateway runtime is immutable. If APIs or Policies change after the Microgateway has been built, a rebuild process is required to capture the changes.
+1. Able to execute in isolation without mandatory connections to other components (Secure Token Service, Rate limiting component , Analytics).
+1. Capable of exposing micro services directly from Open API definitions
+1. Able to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
+1. Immutable. The gateway runtime is immutable. If APIs or Policies change after the WSO2 API Microgateway has been built, a rebuild process is required to capture the changes.
 1. Seamless integration with deployment automation tools and techniques.
 1. Easy integration with CI/CD processes.
 
-Microgateway offers you a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
+WSO2 API Microgateway acts as a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
 
 #### Architecture
 
-The following diagram illustrates the process of exposing the micro services via Microgateway using Open API defintion.
+The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API defintion.
 
 ![Alt text](architecture-new.png?raw=true "Title")
 
 ###### Dev Phase
 
-* API developer creates a microgateway project using a microgateway controller(toolkit)
+* API developer creates a WSO2 API Microgateway project using a WSO2 API Microgateway controller(toolkit)
 * Adds the open API definitions of microservices into the project
 * Developer defines endpoints and interceptors for the api/resources using the definition.yaml inside the project
 * Builds the project and generates executables, images and k8s artifacts
 
 #### Running the microgateway
 
-Running the Microgateway is a 3 step process. The first two steps are involved in building the runtime.
+Running the WSO2 API Microgateway is a 3 step process. The first two steps are involved in building the runtime.
 
- 1. initiating a microgateway project.
- 1. Building the microgateway project and creating a microgateway distribution.
- 1. Running the microgateway distribution.
+ 1. Initializing a WSO2 API Microgateway project.
+ 1. Building the WSO2 API Microgateway project and creating a WSO2 API Microgateway distribution.
+ 1. Running the WSO2 API Microgateway distribution.
 
-##### Initiating a microgateway project
+##### Initializing a WSO2 API Microgateway project
 
-Once the project is initiated the default folder structure will be created for the respective folder.
-Empty `api_definitions` folder and `definitions.yaml` will be created inside the folder.API developer can add multiple open API definitions inside the
+Initializing a WSO2 API Microgateway project creates the default folder structure at the location where the command is run.
+Empty `api_definitions` folder and `definitions.yaml` will be created inside the main folder. API developer can add multiple open API definitions inside the
 api_definitions file and define endpoints and interceptors for the resources in definitions.yaml
 
 
-##### Building a microgateway project
+##### Building the WSO2 API Microgateway project
 
 Once the project has been created, the next step is to build the project sources.
 
-#### Microgateway commands
+#### WSO2 API Microgateway commands
 
-Following are the set of commands included within the Microgateway.
+Following are the set of commands included within the WSO2 API Microgateway.
 
 Note: Before you execute any of the commands below you need to add the path to the <micro-gw-home>/bin directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw/bin
 
@@ -55,8 +55,7 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 `$ micro-gw init`
 
-The "micro-gw init" command is used to initialize a project structure with artifacts required for generating a microgateway
-distribution. This will create a **api_definitions**  folder and an empty **definitions.yaml**.
+The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder and an empty **definitions.yaml**.
 
 * **api_defintions** - API developer should copy all the open API definitions of microservices inside this folder
 * **definitions.yaml** - API developer can define API level and resource level endpoints and interceptors and  resource level throttle policies
@@ -104,7 +103,7 @@ apis:
 
 `$ micro-gw build`
 
-Upon execution of this command, the Microgateway CLI tool will build the micro gateway distribution for the specified project.
+Upon execution of this command, the WSO2 API Microgateway CLI tool will build the micro gateway distribution for the specified project.
 
 Execute `micro-gw help build` to get more detailed information regarding the build command.
 
