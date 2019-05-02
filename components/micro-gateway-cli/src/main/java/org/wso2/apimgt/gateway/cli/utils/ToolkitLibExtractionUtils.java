@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 
 import static org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils.getResourceFolderLocation;
 
-
 /**
  * This class represents the utility functions required for library packages extraction
  */
@@ -62,7 +61,7 @@ public class ToolkitLibExtractionUtils {
                     File.separator + GatewayCliConstants.SECURITY + File.separator +
                     GatewayCliConstants.BALLERINA_TRUSTSTORE;
             File runtimeTruststoreFile = new File(runtimeTruststorePath);
-            
+
             String resourceTrustStorePath = getResourceFolderLocation() + File.separator +
                     GatewayCliConstants.BALLERINA_TRUSTSTORE;
             File resourceTruststoreFile = new File(resourceTrustStorePath);
