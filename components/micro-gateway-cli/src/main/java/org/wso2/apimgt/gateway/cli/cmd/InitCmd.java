@@ -47,6 +47,10 @@ public class InitCmd implements GatewayLauncherCmd {
     private List<String> mainArgs;
 
     @SuppressWarnings("unused")
+    @Parameter(names = "--java.debug", hidden = true)
+    private String javaDebugPort;
+
+    @SuppressWarnings("unused")
     @Parameter(names = {"-f", "--force"}, hidden = true, arity = 0)
     private boolean isForceful;
 
