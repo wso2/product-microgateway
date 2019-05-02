@@ -111,6 +111,10 @@
             <outputDirectory>wso2am-micro-gw-${pom.version}</outputDirectory>
         </file>
         <file>
+            <source>${basedir}/resources/ballerinaTruststore.p12</source>
+            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/</outputDirectory>
+        </file>
+        <file>
             <source>${basedir}/resources/updates/product.txt</source>
             <outputDirectory>wso2am-micro-gw-${pom.version}/updates</outputDirectory>
             <filtered>true</filtered>
