@@ -19,14 +19,14 @@
 
 <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
-    <id>Micro Gateway Runtime Zip</id>
+    <id>Micro Gateway Runtime Mac-OS Zip</id>
     <formats>
         <format>zip</format>
     </formats>
 
     <fileSets>
         <fileSet>
-            <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
+            <directory>${basedir}/target/ballerina/ballerina-runtime-macos-${ballerina.platform.version}</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
