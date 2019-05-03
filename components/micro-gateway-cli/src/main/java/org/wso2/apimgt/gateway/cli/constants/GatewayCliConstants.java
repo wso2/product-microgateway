@@ -93,8 +93,7 @@ public class GatewayCliConstants {
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
     public static final String SYS_PROP_SECURITY = "security";
     public static final String MICRO_GW = "micro-gw";
-
-
+    
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
