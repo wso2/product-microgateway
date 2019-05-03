@@ -52,13 +52,13 @@ public class ToolkitLibExtractionUtils {
 
             //get the platform .p12 path
             String platformTruststorePath = platformExtractedPath + File.separator + GatewayCliConstants.CLI_BRE +
-                    File.separator + GatewayCliConstants.SECURITY + File.separator +
+                    File.separator + GatewayCliConstants.SECURITY_DIR + File.separator +
                     GatewayCliConstants.BALLERINA_TRUSTSTORE;
             File platformTruststoreFile = new File(platformTruststorePath);
 
             //get the runtime .p12 path
             String runtimeTruststorePath = runtimeExtractedPath + File.separator + GatewayCliConstants.CLI_BRE +
-                    File.separator + GatewayCliConstants.SECURITY + File.separator +
+                    File.separator + GatewayCliConstants.SECURITY_DIR + File.separator +
                     GatewayCliConstants.BALLERINA_TRUSTSTORE;
             File runtimeTruststoreFile = new File(runtimeTruststorePath);
 
