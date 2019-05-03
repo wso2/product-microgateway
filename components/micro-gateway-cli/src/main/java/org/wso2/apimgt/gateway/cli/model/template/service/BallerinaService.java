@@ -32,13 +32,13 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.Optional;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -82,7 +82,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         //todo: fix this properly
         setSecuritySchemas(api.getApiSecurity());
         this.config = GatewayCmdUtils.getConfig();
-        //todo: fix this -> not working
         this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(openAPI);
         return this;
@@ -167,49 +166,25 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.getValue().setOperationId(operationId);
                 //if it is the developer first approach
                 if (isDevFirst) {
-                    String basePath = MgwDefinitionBuilder.getBasePath(openAPI.getInfo().getTitle(),
-                            openAPI.getInfo().getVersion());
-                    //to add resource level endpoint configuration
-                    MgwEndpointConfigDTO epConfig = MgwDefinitionBuilder.getResourceEpConfigForCodegen(basePath,
-                            path.getKey(), operation.getKey());
-                    if (epConfig != null) {
-                        operation.getValue().setEpConfigDTO(epConfig);
-                    }
-                    //todo: need to validate the existence of those functions
-                    //to add request interceptor
-                    String requestInterceptor = MgwDefinitionBuilder.getRequestInterceptor(basePath, path.getKey(),
-                            operation.getKey());
-                    if (requestInterceptor != null) {
-                        operation.getValue().setRequestInterceptor(requestInterceptor);
-                    }
-                    //to add response interceptor
-                    String responseInterceptor = MgwDefinitionBuilder.getResponseInterceptor(basePath, path.getKey(),
-                            operation.getKey());
-                    if (responseInterceptor != null) {
-                        operation.getValue().setResponseInterceptor(responseInterceptor);
-                    }
-                    //to add throttle policy
-                    String throttle_policy = MgwDefinitionBuilder.getThrottlePolicy(basePath, path.getKey(),
-                            operation.getKey());
-                    if (throttle_policy != null) {
-                        operation.getValue().setResourceTier(throttle_policy);
-                    }
-
                     //to add API level request interceptor
-                    String apiRequestInterceptor = MgwDefinitionBuilder.getApiRequestInterceptor(basePath);
-                    if (apiRequestInterceptor != null) {
-                        //if user specify the same interceptor function in both api level and resource level ignore
-                        // api level interceptor
-                        if (!apiRequestInterceptor.equals(requestInterceptor)) {
-                            operation.getValue().setApiRequestInterceptor(apiRequestInterceptor);
-                        }
-                    }
-
+                    Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                            .get("x-mgw-request-interceptor"));
+                    apiRequestInterceptor.ifPresent(value -> operation.getValue()
+                            .setApiRequestInterceptor(value.toString()));
                     //to add API level response interceptor
-                    String apiResponseInterceptor = MgwDefinitionBuilder.getApiResponseInterceptor(basePath);
-                    if (apiResponseInterceptor != null) {
-                        operation.getValue().setApiResponseInterceptor(apiResponseInterceptor);
-                    }
+                    Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                            .get("x-mgw-response-interceptor"));
+                    apiResponseInterceptor.ifPresent(value -> operation.getValue()
+                            .setApiResponseInterceptor(value.toString()));
+                    //to add API-level throttling policy
+                    Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                            .get("x-mgw-throttling-tier"));
+                    apiThrottlePolicy.ifPresent(value -> {
+                        //api level throttle policy is added only if resource level resource tier is not available
+                        if (operation.getValue().getResourceTier() == null) {
+                            operation.getValue().setResourceTier(value.toString());
+                        }
+                    });
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));

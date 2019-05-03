@@ -117,7 +117,7 @@ public class BuildCmd implements GatewayLauncherCmd {
                 etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
                 GatewayCmdUtils.setEtcd(etcd);
 
-                MgwDefinitionBuilder.build(projectName);
+                //MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
 
@@ -129,7 +129,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 //to indicate the api information which is not used in the code generation process, but included in
                 //definition.yaml
-                MgwDefinitionBuilder.FindUnusedAPIInformation();
+                //MgwDefinitionBuilder.FindUnusedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);

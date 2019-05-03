@@ -125,17 +125,14 @@ public class CodeGenerator {
         String openApiPath;
         openApiPath = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +
                     GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-
-
+        //to store the available interceptors for validation purposes
+        OpenAPICodegenUtils.setInterceptors(projectName);
         Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
                 .forEach( path -> {
                     ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
-                    String basepath = MgwDefinitionBuilder.getBasePath(api.getName(), api.getVersion());
-                    api.setContext(basepath);
                     BallerinaService definitionContext;
-                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api);
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-
+                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI);
                     try {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
