@@ -33,6 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
@@ -336,7 +337,7 @@ public class OpenAPICodegenUtils {
         }
     }
 
-    public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI) {
+    public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
 
         EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
                 .get("x-mgw-production-endpoints"), EndpointListRouteDTO.class);
@@ -346,10 +347,16 @@ public class OpenAPICodegenUtils {
                 sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
-        //todo:introduce enum
         String security = (String) openAPI.getExtensions().get("x-mgw-security");
         api.setApiSecurity(security);
         api.setSpecificBasepath((String) openAPI.getExtensions().get("x-mgw-basePath"));
+        try{
+            api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get("x-cors"),
+                    APICorsConfigurationDTO.class));
+        } catch (IllegalArgumentException e) {
+            throw new CLIRuntimeException("'x-cors' property is not properly set for the openAPI definition file. \n"
+            + openAPIFilePath);
+        }
     }
 
     /**

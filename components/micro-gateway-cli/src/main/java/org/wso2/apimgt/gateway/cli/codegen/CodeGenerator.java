@@ -35,6 +35,7 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -133,7 +134,7 @@ public class CodeGenerator {
                     OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
                     ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
                     BallerinaService definitionContext;
-                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI);
+                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
                     try {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
