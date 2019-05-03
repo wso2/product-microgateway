@@ -129,9 +129,10 @@ public class CodeGenerator {
         OpenAPICodegenUtils.setInterceptors(projectName);
         Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
                 .forEach( path -> {
-                    ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
-                    BallerinaService definitionContext;
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
+                    OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
+                    ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
+                    BallerinaService definitionContext;
                     OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI);
                     try {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);

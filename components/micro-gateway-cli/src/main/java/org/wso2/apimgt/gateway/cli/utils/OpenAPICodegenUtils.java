@@ -58,6 +58,12 @@ public class OpenAPICodegenUtils {
     private static final Map<String, String> basePathMap = new HashMap<>();
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
+    private static Map<String, String> apiNameVersionMap = new HashMap<>();
+
+    enum APISecurity{
+        basic,
+        oauth2
+    }
 
     /**
      * Generate API Id for a given OpenAPI definition.
@@ -164,16 +170,15 @@ public class OpenAPICodegenUtils {
 
     /**
      * generate ExtendedAPI object from openAPI definition
-     * @param apiDefPath path to openAPI definition
+     * @param openAPI {@link OpenAPI} object
      * @return Extended API object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(String apiDefPath){
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI){
 
         ExtendedAPI api;
         String apiId = UUID.randomUUID().toString();
 
         api = new ExtendedAPI();
-        OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
 
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
@@ -343,9 +348,6 @@ public class OpenAPICodegenUtils {
 
         //todo:introduce enum
         String security = (String) openAPI.getExtensions().get("x-mgw-security");
-        if (security == null) {
-            security = "oauth2";
-        }
         api.setApiSecurity(security);
         api.setSpecificBasepath((String) openAPI.getExtensions().get("x-mgw-basePath"));
     }
@@ -371,7 +373,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI  {@link OpenAPI} object
      * @param openApiFilePath   OpenAPI definition file
      */
-    public static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
+    private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
         String basePath = (String) openAPI.getExtensions().get("x-mgw-basePath");
         if (basePath == null || basePath.isEmpty()) {
             throw new CLIRuntimeException("'x-mgw-basePath' property is not included in openAPI definition '" +
@@ -495,7 +497,7 @@ public class OpenAPICodegenUtils {
      * @param path            path of the resource (if interceptor is Api level keep null)
      * @param operation       operation of the resource (if interceptor is Api level keep null)
      */
-    public static void validateInterceptorAvailability(boolean isRequestInterceptor, String interceptorName,
+    private static void validateInterceptorAvailability(String interceptorName, boolean isRequestInterceptor,
                                                         String openAPIFilePath, String path, String operation) {
         if (interceptorName == null) {
             return;
@@ -517,5 +519,83 @@ public class OpenAPICodegenUtils {
             errorMsg += "is not available in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + " directory.";
             throw new CLIRuntimeException(errorMsg);
         }
+    }
+
+    private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
+        Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                .get("x-mgw-request-interceptor"));
+        apiRequestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
+                true, openAPIFilePath, null, null));
+        Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                .get("x-mgw-response-interceptor"));
+        apiResponseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
+                false, openAPIFilePath, null, null));
+    }
+
+    private static void validateAllResourceExtensions(OpenAPI openAPI, String openAPIFilePath) {
+        openAPI.getPaths().entrySet().forEach(entry -> {
+            validateSingleResourceExtensions(entry.getValue().getGet(), entry.getKey(), "get", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getPost(), entry.getKey(), "post", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getPut(), entry.getKey(), "put", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getPatch(), entry.getKey(), "patch", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getHead(), entry.getKey(), "head", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getDelete(), entry.getKey(), "delete", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getOptions(), entry.getKey(), "options", openAPIFilePath);
+            validateSingleResourceExtensions(entry.getValue().getTrace(), entry.getKey(), "trace", openAPIFilePath);
+        });
+    }
+
+    private static void validateSingleResourceExtensions(Operation operation, String pathItem, String operationName,
+                                                         String openAPIFilePath) {
+        //todo: validate policy
+        validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
+    }
+
+    private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
+                                                          String openAPIFilePath) {
+        //validate request interceptor
+        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions().get("x-mgw-request-interceptor"));
+        requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
+                openAPIFilePath, pathItem, operationName));
+        //validate response interceptor
+        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions().get("x-mgw-response-interceptor"));
+        responseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), false,
+                openAPIFilePath, pathItem, operationName));
+    }
+
+    //todo: handle security as an array
+    private static void validateAPISecurity(OpenAPI openAPI, String openAPIFilePath) {
+        Optional<Object> security = Optional.ofNullable(openAPI.getExtensions().get("x-mgw-security"));
+        if(security.isPresent()) {
+            openAPI.addExtension("x-mgw-security", APISecurity.oauth2);
+        } else {
+            String value = security.toString().toLowerCase();
+            if(value.equals("oauth") || value.equals("oauth2")){
+                openAPI.addExtension("x-mgw-security", APISecurity.oauth2);
+            } else if (value.equals("basic") || value.equals("basicauth") || value.equals("basic_auth")){
+                openAPI.addExtension("x-mgw-security", APISecurity.basic);
+            } else {
+                throw new CLIRuntimeException("The property '" + "x-mgw-security" + "is not properly defined." );
+            }
+        }
+    }
+
+    private static void validateAPINameAndVersion(OpenAPI openAPI, String openAPIFilePath){
+        String apiNameVersion = openAPI.getInfo().getTitle() + ":" + openAPI.getInfo().getVersion();
+        if(apiNameVersionMap.containsKey(apiNameVersion)){
+            throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                    openAPI.getInfo().getVersion() + "' is duplicated across multiple openAPI definitions. \n" +
+                    apiNameVersionMap.get(apiNameVersion) + "\n" + openAPIFilePath);
+        }
+        apiNameVersionMap.put(apiNameVersion, openAPIFilePath);
+    }
+
+    public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath) {
+        //todo:validate throttle policy
+        validateAPINameAndVersion(openAPI, openAPIFilePath);
+        validateBasepath(openAPI, openAPIFilePath);
+        validateAPIInterceptors(openAPI, openAPIFilePath);
+        validateAllResourceExtensions(openAPI, openAPIFilePath);
+        validateAPISecurity(openAPI, openAPIFilePath);
     }
 }
