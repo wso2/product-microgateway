@@ -280,12 +280,9 @@ public class ImportCmd implements GatewayLauncherCmd {
                 apis.add(api);
             }
         }
-        //if security option is not provided, default value is oauth2
-        if (security == null) {
-            security = "oauth2";
-        }
+
         //ExtendedAPI's security is updated
-        apis.forEach(api -> api.setApiSecurity(security));
+        apis.forEach(api -> api.setMgwApiSecurity(security));
 
         if (apis.isEmpty()) {
             // Delete folder

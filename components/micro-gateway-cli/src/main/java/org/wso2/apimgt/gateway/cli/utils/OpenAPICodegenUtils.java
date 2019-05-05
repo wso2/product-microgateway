@@ -47,6 +47,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class OpenAPICodegenUtils {
 
@@ -61,17 +62,18 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
 
-    enum APISecurity{
+    enum APISecurity {
         basic,
         oauth2
     }
 
     /**
      * Generate API Id for a given OpenAPI definition.
+     *
      * @param apiDefPath path to OpenAPI definition
      * @return API Id
      */
-    public static String generateAPIdForSwagger(String apiDefPath){
+    public static String generateAPIdForSwagger(String apiDefPath) {
 
         //another purpose in here is to validate the openAPI definition
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
@@ -84,36 +86,37 @@ public class OpenAPICodegenUtils {
 
     /**
      * Generate JsonNode object for a given API definition.
+     *
      * @param apiDefinition API definition (as a file path or String content)
-     * @param isFilePath   If the given api Definition is a file path
-     * @return  JsonNode object for the api definition
+     * @param isFilePath    If the given api Definition is a file path
+     * @return JsonNode object for the api definition
      */
-    private static JsonNode generateJsonNode(String apiDefinition, boolean isFilePath){
-        try{
-            if(isFilePath){
+    private static JsonNode generateJsonNode(String apiDefinition, boolean isFilePath) {
+        try {
+            if (isFilePath) {
                 //if filepath to the swagger is provided
                 return objectMapper.readTree(new File(apiDefinition));
             }
             //if the raw string of the swagger is provided
             return objectMapper.readTree(apiDefinition);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new CLIRuntimeException("Api Definition cannot be parsed.");
         }
     }
 
     /**
      * Discover the openAPI version of the given API definition
+     *
      * @param apiDefinition API definition (as a file path or String content)
-     * @param isFilePath If the given api Definition is a file path
+     * @param isFilePath    If the given api Definition is a file path
      * @return openAPI version number (2 or 3)
      */
-    private static String findSwaggerVersion(String apiDefinition, boolean isFilePath){
+    private static String findSwaggerVersion(String apiDefinition, boolean isFilePath) {
 
         JsonNode rootNode = generateJsonNode(apiDefinition, isFilePath);
-        if(rootNode.has("swagger") && rootNode.get("swagger").asText().trim().startsWith("2")){
+        if (rootNode.has("swagger") && rootNode.get("swagger").asText().trim().startsWith("2")) {
             return openAPISpec2;
-        }
-        else if(rootNode.has("openapi") && rootNode.get("openapi").asText().trim().startsWith("3")){
+        } else if (rootNode.has("openapi") && rootNode.get("openapi").asText().trim().startsWith("3")) {
             return openAPISpec3;
         }
         throw new CLIRuntimeException("Error while reading the swagger file, check again.");
@@ -121,13 +124,14 @@ public class OpenAPICodegenUtils {
 
     /**
      * Extract the openAPI definition as String from an ExtendedAPI object.
+     *
      * @param api ExtendedAPI object
-     * @return  openAPI definition as a String
+     * @return openAPI definition as a String
      */
-    static String generateSwaggerString(ExtendedAPI api){
+    static String generateSwaggerString(ExtendedAPI api) {
 
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
-        switch(swaggerVersion){
+        switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
                 //to save the basepath settings as provided in API Manager
@@ -142,27 +146,29 @@ public class OpenAPICodegenUtils {
 
     /**
      * get API name and version from the given openAPI definition.
+     *
      * @param apiDefPath path to openAPI definition
      * @return String array {API_name, Version}
      */
-    static String[] getAPINameVersionFromSwagger(String apiDefPath){
+    static String[] getAPINameVersionFromSwagger(String apiDefPath) {
         OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
-        return new String[] {openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion()};
+        return new String[]{openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion()};
 
     }
 
     /**
      * get basePath from the openAPI definition
+     *
      * @param apiDefPath path to openAPI definition
      * @return basePath (if the swagger version is 2 and it includes )
      */
-    public static String getBasePathFromSwagger(String apiDefPath){
+    public static String getBasePathFromSwagger(String apiDefPath) {
         String swaggerVersion = findSwaggerVersion(apiDefPath, true);
 
         //openAPI version 2 contains basePath
-        if(swaggerVersion.equals(openAPISpec2)){
+        if (swaggerVersion.equals(openAPISpec2)) {
             Swagger swagger = new SwaggerParser().read(apiDefPath);
-            if(!StringUtils.isEmpty(swagger.getBasePath())){
+            if (!StringUtils.isEmpty(swagger.getBasePath())) {
                 return swagger.getBasePath();
             }
         }
@@ -171,10 +177,11 @@ public class OpenAPICodegenUtils {
 
     /**
      * generate ExtendedAPI object from openAPI definition
+     *
      * @param openAPI {@link OpenAPI} object
      * @return Extended API object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI){
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI) {
 
         ExtendedAPI api;
         String apiId = UUID.randomUUID().toString();
@@ -190,11 +197,12 @@ public class OpenAPICodegenUtils {
 
     /**
      * list all the available resources from openAPI definition
+     *
      * @param projectName project Name
-     * @param apiId api Id
+     * @param apiId       api Id
      * @return list of string arrays {resource_id, resource name, method}
      */
-    public static List<ResourceRepresentation> listResourcesFromSwaggerForAPI(String projectName, String apiId){
+    public static List<ResourceRepresentation> listResourcesFromSwaggerForAPI(String projectName, String apiId) {
 
         List<ResourceRepresentation> resourceList = new ArrayList<>();
         JsonNode openApiNode = generateJsonNode(GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId),
@@ -205,9 +213,9 @@ public class OpenAPICodegenUtils {
 
 
     private static void addResourcesToList(List<ResourceRepresentation> resourcesList, String apiName,
-                                           String apiVersion, String resourceName, String method){
+                                           String apiVersion, String resourceName, String method) {
         ResourceRepresentation resource = new ResourceRepresentation();
-        resource.setId(HashUtils.generateResourceId(apiName, apiVersion,resourceName, method));
+        resource.setId(HashUtils.generateResourceId(apiName, apiVersion, resourceName, method));
         resource.setName(resourceName);
         resource.setMethod(method);
         resource.setApi(apiName);
@@ -217,36 +225,38 @@ public class OpenAPICodegenUtils {
 
     /**
      * Add resources from the provided openAPI definition to existing array list
-     * @param apiDefNode   Api Definition as a JsonNode
-     * @param resourcesList   String[] arrayList
+     *
+     * @param apiDefNode    Api Definition as a JsonNode
+     * @param resourcesList String[] arrayList
      */
-    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<ResourceRepresentation> resourcesList){
+    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<ResourceRepresentation> resourcesList) {
 
         String apiName = apiDefNode.get("info").get("title").asText();
         String apiVersion = apiDefNode.get("info").get("version").asText();
 
-        apiDefNode.get("paths").fields().forEachRemaining( e -> e.getValue().fieldNames().forEachRemaining(operation ->
+        apiDefNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames().forEachRemaining(operation ->
                 addResourcesToList(resourcesList, apiName, apiVersion, e.getKey(), operation)));
     }
 
     /**
      * List all the resources available in the project
-     * @param projectName   project Name
-     * @return    String[] Arraylist with all the available resources
+     *
+     * @param projectName project Name
+     * @return String[] Arraylist with all the available resources
      */
-    public static List<ResourceRepresentation> getAllResources(String projectName){
+    public static List<ResourceRepresentation> getAllResources(String projectName) {
 
         List<ResourceRepresentation> resourcesList = new ArrayList<>();
 
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        try{
-            Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
-                    .forEach( path -> {
+        try {
+            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> path.getFileName().toString().equals("swagger.json"))
+                    .forEach(path -> {
                         JsonNode openApiNode = generateJsonNode(path.toString(), true);
-                        OpenAPICodegenUtils.addResourcesToListFromSwagger(openApiNode,resourcesList);
+                        OpenAPICodegenUtils.addResourcesToListFromSwagger(openApiNode, resourcesList);
                     });
             return resourcesList;
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new CLIInternalException("Error while navigating API Files directory.");
         }
 
@@ -254,36 +264,37 @@ public class OpenAPICodegenUtils {
 
     /**
      * get the resource related information if the resource_id is given
-     * @param projectName   project name
-     * @param resource_id   resource id
+     *
+     * @param projectName project name
+     * @param resource_id resource id
      * @return resource object with api name, version, method and key
      */
-    public static ResourceRepresentation getResource(String projectName, String resource_id){
+    public static ResourceRepresentation getResource(String projectName, String resource_id) {
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         ResourceRepresentation resource = new ResourceRepresentation();
-        try{
-            Files.walk(Paths.get(projectAPIFilesPath)).filter( path -> path.getFileName().toString().equals("swagger.json"))
-                    .forEach( path -> {
+        try {
+            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> path.getFileName().toString().equals("swagger.json"))
+                    .forEach(path -> {
                         JsonNode openApiNode = generateJsonNode(path.toString(), true);
                         String apiName = openApiNode.get("info").get("title").asText();
                         String apiVersion = openApiNode.get("info").get("version").asText();
 
-                        openApiNode.get("paths").fields().forEachRemaining( e -> e.getValue().fieldNames()
+                        openApiNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames()
                                 .forEachRemaining(operation -> {
-                            if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
-                                    .equals(resource_id)) {
-                                resource.setId(resource_id);
-                                resource.setName(e.getKey());
-                                resource.setMethod(operation);
-                                resource.setApi(apiName);
-                                resource.setVersion(apiVersion);
-                            }
-                        }));
+                                    if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
+                                            .equals(resource_id)) {
+                                        resource.setId(resource_id);
+                                        resource.setName(e.getKey());
+                                        resource.setMethod(operation);
+                                        resource.setApi(apiName);
+                                        resource.setVersion(apiVersion);
+                                    }
+                                }));
                     });
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new CLIInternalException("Error while navigating API Files directory.");
         }
-        if(resource.getId() == null){
+        if (resource.getId() == null) {
             return null;
         }
         return resource;
@@ -291,6 +302,7 @@ public class OpenAPICodegenUtils {
 
     /**
      * read openAPI definition
+     *
      * @param filePath path to openAPI definition
      * @return openAPI as a String
      */
@@ -307,6 +319,7 @@ public class OpenAPICodegenUtils {
 
     /**
      * set additional configurations for an api for code generation process (basePath and CORS configuration)
+     *
      * @param api API object
      */
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api) {
@@ -318,19 +331,19 @@ public class OpenAPICodegenUtils {
         // 0th element represents the specific basepath
         api.setSpecificBasepath(basePath);
         String security = MgwDefinitionBuilder.getSecurity(basePath);
-        if(security == null){
+        if (security == null) {
             security = "oauth2";
         }
-        api.setApiSecurity(security);
+        api.setMgwApiSecurity(security);
         api.setCorsConfiguration(MgwDefinitionBuilder.getCorsConfiguration(basePath));
     }
 
-    public static void setAdditionalConfig(ExtendedAPI api){
+    public static void setAdditionalConfig(ExtendedAPI api) {
         RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
                 api.getEndpointSecurity());
         api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
                 endpointConfig.getSandboxEndpointList()));
-        if(api.getIsDefaultVersion()) {
+        if (api.getIsDefaultVersion()) {
             api.setSpecificBasepath(api.getContext());
         } else {
             api.setSpecificBasepath(api.getContext() + "/" + api.getVersion());
@@ -347,15 +360,14 @@ public class OpenAPICodegenUtils {
                 sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
-        String security = (String) openAPI.getExtensions().get("x-mgw-security");
-        api.setApiSecurity(security);
-        api.setSpecificBasepath((String) openAPI.getExtensions().get("x-mgw-basePath"));
-        try{
+        validateAndSetAPISecurity(api, openAPI, openAPIFilePath);
+        api.setSpecificBasepath(openAPI.getExtensions().get("x-mgw-basePath").toString());
+        try {
             api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get("x-cors"),
                     APICorsConfigurationDTO.class));
         } catch (IllegalArgumentException e) {
             throw new CLIRuntimeException("'x-cors' property is not properly set for the openAPI definition file. \n"
-            + openAPIFilePath);
+                    + openAPIFilePath);
         }
     }
 
@@ -364,7 +376,7 @@ public class OpenAPICodegenUtils {
      * template
      *
      * @param operation {@link Operation} object
-     * @return  {@link MgwEndpointConfigDTO} object
+     * @return {@link MgwEndpointConfigDTO} object
      */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
         EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
@@ -377,8 +389,8 @@ public class OpenAPICodegenUtils {
     /**
      * Validate basePath to avoid having the same basePath for two or more APIs
      *
-     * @param openAPI  {@link OpenAPI} object
-     * @param openApiFilePath   OpenAPI definition file
+     * @param openAPI         {@link OpenAPI} object
+     * @param openApiFilePath OpenAPI definition file
      */
     private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
         String basePath = (String) openAPI.getExtensions().get("x-mgw-basePath");
@@ -498,11 +510,11 @@ public class OpenAPICodegenUtils {
      * Throws an runtime error if the interceptor is not found.
      * if the provided interceptor name is null, 'null' will be returned.
      *
-     * @param isRequestInterceptor  true if it is a request interceptor, false if it is a response interceptor
-     * @param interceptorName name of the interceptor
-     * @param openAPIFilePath path of the openAPI definition file
-     * @param path            path of the resource (if interceptor is Api level keep null)
-     * @param operation       operation of the resource (if interceptor is Api level keep null)
+     * @param isRequestInterceptor true if it is a request interceptor, false if it is a response interceptor
+     * @param interceptorName      name of the interceptor
+     * @param openAPIFilePath      path of the openAPI definition file
+     * @param path                 path of the resource (if interceptor is Api level keep null)
+     * @param operation            operation of the resource (if interceptor is Api level keep null)
      */
     private static void validateInterceptorAvailability(String interceptorName, boolean isRequestInterceptor,
                                                         String openAPIFilePath, String path, String operation) {
@@ -554,12 +566,15 @@ public class OpenAPICodegenUtils {
 
     private static void validateSingleResourceExtensions(Operation operation, String pathItem, String operationName,
                                                          String openAPIFilePath) {
+        if (operation == null || operation.getExtensions() == null) {
+            return;
+        }
         //todo: validate policy
         validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
     }
 
     private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
-                                                          String openAPIFilePath) {
+                                                           String openAPIFilePath) {
         //validate request interceptor
         Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions().get("x-mgw-request-interceptor"));
         requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
@@ -571,25 +586,38 @@ public class OpenAPICodegenUtils {
     }
 
     //todo: handle security as an array
-    private static void validateAPISecurity(OpenAPI openAPI, String openAPIFilePath) {
-        Optional<Object> security = Optional.ofNullable(openAPI.getExtensions().get("x-mgw-security"));
-        if(security.isPresent()) {
-            openAPI.addExtension("x-mgw-security", APISecurity.oauth2);
+    private static void validateAndSetAPISecurity(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
+        Object securityObject = openAPI.getExtensions().get("x-mgw-security");
+        List<String> security;
+        try {
+            security = (ArrayList<String>) securityObject;
+        } catch (ClassCastException e) {
+            throw new CLIRuntimeException("'x-mgw-security' should be provided as an array");
+        }
+        if (securityObject == null || security.size() == 0) {
+            api.setMgwApiSecurity("oauth2");
+            return;
         } else {
-            String value = security.toString().toLowerCase();
-            if(value.equals("oauth") || value.equals("oauth2")){
-                openAPI.addExtension("x-mgw-security", APISecurity.oauth2);
-            } else if (value.equals("basic") || value.equals("basicauth") || value.equals("basic_auth")){
-                openAPI.addExtension("x-mgw-security", APISecurity.basic);
-            } else {
-                throw new CLIRuntimeException("The property '" + "x-mgw-security" + "is not properly defined." );
+            String securityString = "";
+            List<String> filteredSecurity = security.stream().map(String::toLowerCase)
+                    .filter(value -> (value.equals("oauth2") || value.equals("basic"))).collect(Collectors.toList());
+            if (filteredSecurity.size() != security.size()) {
+                throw new CLIRuntimeException("'x-mgw-security' can accept 'basic' and 'oauth2' only");
             }
+            if (security.contains("oauth") || security.contains("oauth2")) {
+                securityString += APISecurity.oauth2;
+            }
+            if (security.contains("basic") || security.contains("basicauth")) {
+                securityString = securityString.isEmpty() ? securityString : securityString + ",";
+                securityString += "basic";
+            }
+            api.setMgwApiSecurity(securityString);
         }
     }
 
-    private static void validateAPINameAndVersion(OpenAPI openAPI, String openAPIFilePath){
+    private static void validateAPINameAndVersion(OpenAPI openAPI, String openAPIFilePath) {
         String apiNameVersion = openAPI.getInfo().getTitle() + ":" + openAPI.getInfo().getVersion();
-        if(apiNameVersionMap.containsKey(apiNameVersion)){
+        if (apiNameVersionMap.containsKey(apiNameVersion)) {
             throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
                     openAPI.getInfo().getVersion() + "' is duplicated across multiple openAPI definitions. \n" +
                     apiNameVersionMap.get(apiNameVersion) + "\n" + openAPIFilePath);
@@ -598,11 +626,9 @@ public class OpenAPICodegenUtils {
     }
 
     public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath) {
-        //todo:validate throttle policy
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasepath(openAPI, openAPIFilePath);
         validateAPIInterceptors(openAPI, openAPIFilePath);
         validateAllResourceExtensions(openAPI, openAPIFilePath);
-        validateAPISecurity(openAPI, openAPIFilePath);
     }
 }
