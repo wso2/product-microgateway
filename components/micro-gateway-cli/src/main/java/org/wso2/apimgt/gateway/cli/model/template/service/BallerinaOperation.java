@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -92,13 +93,15 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set resource level endpoint configuration
             setEpConfigDTO(operation);
             //set resource level request interceptors
-            Optional<Object> requestInterceptor = Optional.ofNullable(extensions.get("x-mgw-request-interceptor"));
+            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
             requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
             //set resource level response interceptors
-            Optional<Object> responseInterceptor = Optional.ofNullable(extensions.get("x-mgw-response-interceptor"));
+            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
             responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
             //set dev-first resource level throttle policy
-            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get("x-mgw-throttling-tier"));
+            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
         }
 

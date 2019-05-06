@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
@@ -353,21 +354,21 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
 
         EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get("x-mgw-production-endpoints"), EndpointListRouteDTO.class);
+                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
         EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get("x-mgw-sandbox-endpoints"), EndpointListRouteDTO.class);
+                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
         MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils.convertToMgwServiceMap(prodEndpointListDTO,
                 sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         validateAndSetAPISecurity(api, openAPI, openAPIFilePath);
-        api.setSpecificBasepath(openAPI.getExtensions().get("x-mgw-basePath").toString());
+        api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         try {
-            api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get("x-cors"),
+            api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
                     APICorsConfigurationDTO.class));
         } catch (IllegalArgumentException e) {
-            throw new CLIRuntimeException("'x-cors' property is not properly set for the openAPI definition file. \n"
-                    + openAPIFilePath);
+            throw new CLIRuntimeException("'" + OpenAPIConstants.CORS + "' property is not properly set for the " +
+                    "openAPI definition file. \n" + openAPIFilePath);
         }
     }
 
@@ -380,9 +381,9 @@ public class OpenAPICodegenUtils {
      */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
         EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get("x-mgw-production-endpoints"), EndpointListRouteDTO.class);
+                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
         EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get("x-mgw-sandbox-endpoints"), EndpointListRouteDTO.class);
+                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
         return RouteUtils.convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
     }
 
@@ -393,15 +394,16 @@ public class OpenAPICodegenUtils {
      * @param openApiFilePath OpenAPI definition file
      */
     private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
-        String basePath = (String) openAPI.getExtensions().get("x-mgw-basePath");
+        String basePath = (String) openAPI.getExtensions().get(OpenAPIConstants.BASEPATH);
         if (basePath == null || basePath.isEmpty()) {
-            throw new CLIRuntimeException("'x-mgw-basePath' property is not included in openAPI definition '" +
-                    openApiFilePath + "'.");
+            throw new CLIRuntimeException("'"+ OpenAPIConstants.BASEPATH +"' property is not included in openAPI " +
+                    "definition '" + openApiFilePath + "'.");
         }
         basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
         if (basePathMap.containsKey(basePath)) {
-            throw new CLIRuntimeException("The valude for 'x-mgw-basePath' " + basePath + " property is duplicated " +
-                    "in the following openAPI definitions.\n" + basePathMap.get(basePath) + "\n" + openApiFilePath);
+            throw new CLIRuntimeException("The valude for '" + OpenAPIConstants.BASEPATH + "' " + basePath +
+                    " property is duplicated in the following openAPI definitions.\n" + basePathMap.get(basePath) +
+                    "\n" + openApiFilePath);
         }
         basePathMap.put(basePath, openApiFilePath);
     }
@@ -542,11 +544,11 @@ public class OpenAPICodegenUtils {
 
     private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
         Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get("x-mgw-request-interceptor"));
+                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
         apiRequestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
                 true, openAPIFilePath, null, null));
         Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get("x-mgw-response-interceptor"));
+                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
         apiResponseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
                 false, openAPIFilePath, null, null));
     }
@@ -576,11 +578,13 @@ public class OpenAPICodegenUtils {
     private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
                                                            String openAPIFilePath) {
         //validate request interceptor
-        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions().get("x-mgw-request-interceptor"));
+        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions()
+                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
         requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
                 openAPIFilePath, pathItem, operationName));
         //validate response interceptor
-        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions().get("x-mgw-response-interceptor"));
+        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions()
+                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
         responseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), false,
                 openAPIFilePath, pathItem, operationName));
     }
@@ -604,10 +608,10 @@ public class OpenAPICodegenUtils {
             if (filteredSecurity.size() != security.size()) {
                 throw new CLIRuntimeException("'x-mgw-security' can accept 'basic' and 'oauth2' only");
             }
-            if (security.contains("oauth") || security.contains("oauth2")) {
+            if (security.contains("oauth2")) {
                 securityString += APISecurity.oauth2;
             }
-            if (security.contains("basic") || security.contains("basicauth")) {
+            if (security.contains("basic")) {
                 securityString = securityString.isEmpty() ? securityString : securityString + ",";
                 securityString += "basic";
             }

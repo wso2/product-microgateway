@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
@@ -168,17 +169,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 if (isDevFirst) {
                     //to add API level request interceptor
                     Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get("x-mgw-request-interceptor"));
+                            .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
                     apiRequestInterceptor.ifPresent(value -> operation.getValue()
                             .setApiRequestInterceptor(value.toString()));
                     //to add API level response interceptor
                     Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get("x-mgw-response-interceptor"));
+                            .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
                     apiResponseInterceptor.ifPresent(value -> operation.getValue()
                             .setApiResponseInterceptor(value.toString()));
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
-                            .get("x-mgw-throttling-tier"));
+                            .get(OpenAPIConstants.THROTTLING_TIER));
                     apiThrottlePolicy.ifPresent(value -> {
                         //api level throttle policy is added only if resource level resource tier is not available
                         if (operation.getValue().getResourceTier() == null) {
