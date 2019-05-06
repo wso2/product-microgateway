@@ -24,6 +24,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,6 +63,8 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
+    private static List<String> oauthSecuritySchemaList;
+    private static List<String> basicSecuritySchemaList;
 
     enum APISecurity {
         basic,
@@ -591,32 +594,22 @@ public class OpenAPICodegenUtils {
 
     //todo: handle security as an array
     private static void validateAndSetAPISecurity(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
-        Object securityObject = openAPI.getExtensions().get("x-mgw-security");
-        List<String> security;
-        try {
-            security = (ArrayList<String>) securityObject;
-        } catch (ClassCastException e) {
-            throw new CLIRuntimeException("'x-mgw-security' should be provided as an array");
-        }
-        if (securityObject == null || security.size() == 0) {
-            api.setMgwApiSecurity("oauth2");
-            return;
-        } else {
-            String securityString = "";
-            List<String> filteredSecurity = security.stream().map(String::toLowerCase)
-                    .filter(value -> (value.equals("oauth2") || value.equals("basic"))).collect(Collectors.toList());
-            if (filteredSecurity.size() != security.size()) {
-                throw new CLIRuntimeException("'x-mgw-security' can accept 'basic' and 'oauth2' only");
+        String securityString = "";
+        if(openAPI.getSecurity() != null) {
+            if(openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+                    .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))){
+                securityString = APISecurity.oauth2.toString();
             }
-            if (security.contains("oauth2")) {
-                securityString += APISecurity.oauth2;
-            }
-            if (security.contains("basic")) {
+            if(openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+                    .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))){
                 securityString = securityString.isEmpty() ? securityString : securityString + ",";
-                securityString += "basic";
+                securityString += APISecurity.basic.toString();
             }
-            api.setMgwApiSecurity(securityString);
         }
+        if(StringUtils.isEmpty(securityString)){
+            securityString = APISecurity.oauth2.toString();
+        }
+        api.setMgwApiSecurity(securityString);
     }
 
     private static void validateAPINameAndVersion(OpenAPI openAPI, String openAPIFilePath) {
@@ -634,5 +627,30 @@ public class OpenAPICodegenUtils {
         validateBasepath(openAPI, openAPIFilePath);
         validateAPIInterceptors(openAPI, openAPIFilePath);
         validateAllResourceExtensions(openAPI, openAPIFilePath);
+    }
+
+    public static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+        if (oauthSecuritySchemaList != null) {
+            return;
+        }
+        oauthSecuritySchemaList = new ArrayList<>();
+        openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
+            if (value1.getType() == SecurityScheme.Type.OAUTH2 ||
+                    (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("jwt"))) {
+                oauthSecuritySchemaList.add(key);
+            }
+        });
+    }
+
+    public static void setBasicSecuritySchemaList(OpenAPI openAPI) {
+        if (basicSecuritySchemaList != null) {
+            return;
+        }
+        basicSecuritySchemaList = new ArrayList<>();
+        openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
+            if (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("basic")) {
+                basicSecuritySchemaList.add(key);
+            }
+        });
     }
 }
