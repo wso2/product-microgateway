@@ -455,49 +455,81 @@ public class RouteUtils {
         MgwEndpointListDTO prod = null;
         MgwEndpointListDTO sandbox = null;
 
-        //todo: remove redundant code
         if (prodEpListDTO != null) {
             prod = new MgwEndpointListDTO();
             prod.setEndpointUrlType(EndpointUrlTypeEnum.PROD);
-            if (prodEpListDTO.getType() != null) {
-                prod.setType(prodEpListDTO.getType());
-            } else {
-                if (prodEpListDTO.getEndpoints().size() > 1) {
-                    prod.setType(EndpointType.load_balance);
-                } else{
-                    prod.setType(EndpointType.http);
-                }
-            }
-            ArrayList<MgwEndpointDTO> prodEpList = new ArrayList<>();
-            for (String ep : prodEpListDTO.getEndpoints()) {
-                prodEpList.add(new MgwEndpointDTO(ep));
-            }
-            prod.setEndpoints(prodEpList);
+            setEndpointType(prodEpListDTO, prod);
+            setEndpointUrls(prodEpListDTO, prod);
         }
 
         if (sandEpListDTO != null) {
             sandbox = new MgwEndpointListDTO();
             sandbox.setEndpointUrlType(EndpointUrlTypeEnum.SAND);
-            if (sandEpListDTO.getType() != null) {
-                sandbox.setType(sandEpListDTO.getType());
-            } else {
-                if (sandEpListDTO.getEndpoints().size() > 1) {
-                    sandbox.setType(EndpointType.load_balance);
-                } else{
-                    sandbox.setType(EndpointType.http);
-                }
-            }
-            ArrayList<MgwEndpointDTO> sandEpList = new ArrayList<>();
-            for (String ep : sandEpListDTO.getEndpoints()) {
-                sandEpList.add(new MgwEndpointDTO(ep));
-            }
-            sandbox.setEndpoints(sandEpList);
+            setEndpointType(sandEpListDTO, sandbox);
+            setEndpointUrls(sandEpListDTO, sandbox);
         }
 
         endpointConfigDTO.setProdEndpointList(prod);
         endpointConfigDTO.setSandboxEndpointList(sandbox);
 
         return endpointConfigDTO;
+    }
+
+    /**
+     * Set endpoint type from {@link EndpointListRouteDTO} object to {@link MgwEndpointConfigDTO} object.
+     *
+     * @param sourceObject {@link EndpointListRouteDTO} object
+     * @param destObject   {@link MgwEndpointListDTO} object
+     */
+    private static void setEndpointType(EndpointListRouteDTO sourceObject, MgwEndpointListDTO destObject) {
+        int endpointListSize = sourceObject.getEndpoints().size();
+        EndpointType endpointType = sourceObject.getType();
+        if (endpointListSize > 1) {
+            if (endpointType == null) {
+                //default value is load_balance
+                destObject.setType(EndpointType.load_balance);
+                return;
+            }
+            switch (endpointType) {
+                case http:
+                    //if endpointList size is greater than one but the given type is http, verbose log will be printed.
+                    GatewayCmdUtils.printVerbose("'" + EndpointType.http + "' is not effective with many urls. " +
+                            "Only the first url will be used.");
+                    destObject.setType(endpointType);
+                    break;
+                case failover:
+                    //if endpointList type is explicitly provided as failover
+                    destObject.setType(endpointType);
+                    break;
+                default:
+                    destObject.setType(EndpointType.load_balance);
+            }
+        } else {
+            if (endpointType == null) {
+                destObject.setType(EndpointType.http);
+                return;
+            }
+            //if endpointList size is one, we ignore the user input for 'type'
+            destObject.setType(EndpointType.http);
+            if (endpointType.equals(EndpointType.failover) || endpointType.equals(EndpointType.load_balance)) {
+                GatewayCmdUtils.printVerbose(endpointType + " is changed to " + EndpointType.http +
+                        " as one endpoint is available.");
+            }
+        }
+    }
+
+    /**
+     * Set endpoint Urls from {@link EndpointListRouteDTO} object to {@link MgwEndpointConfigDTO} object.
+     *
+     * @param sourceObject {@link EndpointListRouteDTO} object
+     *                     * @param destObject {@link MgwEndpointListDTO} object
+     */
+    private static void setEndpointUrls(EndpointListRouteDTO sourceObject, MgwEndpointListDTO destObject) {
+        ArrayList<MgwEndpointDTO> mgwEpList = new ArrayList<>();
+        for (String ep : sourceObject.getEndpoints()) {
+            mgwEpList.add(new MgwEndpointDTO(ep));
+        }
+        destObject.setEndpoints(mgwEpList);
     }
 
 //    /**
