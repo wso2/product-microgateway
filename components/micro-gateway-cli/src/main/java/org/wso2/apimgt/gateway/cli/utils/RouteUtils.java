@@ -459,7 +459,15 @@ public class RouteUtils {
         if (prodEpListDTO != null) {
             prod = new MgwEndpointListDTO();
             prod.setEndpointUrlType(EndpointUrlTypeEnum.PROD);
-            prod.setType(prodEpListDTO.getType());
+            if (prodEpListDTO.getType() != null) {
+                prod.setType(prodEpListDTO.getType());
+            } else {
+                if (prodEpListDTO.getEndpoints().size() > 1) {
+                    prod.setType(EndpointType.load_balance);
+                } else{
+                    prod.setType(EndpointType.http);
+                }
+            }
             ArrayList<MgwEndpointDTO> prodEpList = new ArrayList<>();
             for (String ep : prodEpListDTO.getEndpoints()) {
                 prodEpList.add(new MgwEndpointDTO(ep));
@@ -470,7 +478,15 @@ public class RouteUtils {
         if (sandEpListDTO != null) {
             sandbox = new MgwEndpointListDTO();
             sandbox.setEndpointUrlType(EndpointUrlTypeEnum.SAND);
-            sandbox.setType(sandEpListDTO.getType());
+            if (sandEpListDTO.getType() != null) {
+                sandbox.setType(sandEpListDTO.getType());
+            } else {
+                if (sandEpListDTO.getEndpoints().size() > 1) {
+                    sandbox.setType(EndpointType.load_balance);
+                } else{
+                    sandbox.setType(EndpointType.http);
+                }
+            }
             ArrayList<MgwEndpointDTO> sandEpList = new ArrayList<>();
             for (String ep : sandEpListDTO.getEndpoints()) {
                 sandEpList.add(new MgwEndpointDTO(ep));

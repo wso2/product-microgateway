@@ -27,24 +27,12 @@ import wso2/gateway;
 {{/equals}}
 
 {{#paths}}{{#value}}{{#operations}}{{#value}}
-    {{#equals epConfig.prodEndpoints.type "http"}}
-        {{#epConfig.prodEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.prodEndpoints}}
-    {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "http"}}
-        {{#epConfig.sandEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.sandEndpoints}}
-    {{/equals}}
-    {{#equals endpointConfig.prodEndpoints.type "load_balance"}}
-        {{#epConfig.prodEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.prodEndpoints}}
-    {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "load_balance"}}
-        {{#epConfig.sandEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.sandEndpoints}}
-    {{/equals}}
-    {{#equals epConfig.prodEndpoints.type "failover"}}
-        {{#epConfig.prodEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}}
-    {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "failover"}}
-        {{#epConfig.sandEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}}
-    {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "http"}} {{#epConfig.prodEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "http"}} {{#epConfig.sandEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "load_balance"}} {{#epConfig.prodEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "load_balance"}} {{#epConfig.sandEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "failover"}} {{#epConfig.prodEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
 

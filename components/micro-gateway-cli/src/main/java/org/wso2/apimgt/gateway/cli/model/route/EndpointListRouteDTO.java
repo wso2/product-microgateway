@@ -37,7 +37,7 @@ public class EndpointListRouteDTO {
         this.type = type;
     }
 
-    @JsonProperty("urls")
+    @JsonProperty(value = "urls", required = true)
     public List<String> getEndpoints() {
         return endpoints;
     }
