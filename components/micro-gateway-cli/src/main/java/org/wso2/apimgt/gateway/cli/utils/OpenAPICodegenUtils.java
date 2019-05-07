@@ -49,7 +49,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class OpenAPICodegenUtils {
 
@@ -364,7 +363,7 @@ public class OpenAPICodegenUtils {
                 sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
-        validateAndSetAPISecurity(api, openAPI, openAPIFilePath);
+        setMgwAPISecurity(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         try {
             api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
@@ -399,7 +398,7 @@ public class OpenAPICodegenUtils {
     private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
         String basePath = (String) openAPI.getExtensions().get(OpenAPIConstants.BASEPATH);
         if (basePath == null || basePath.isEmpty()) {
-            throw new CLIRuntimeException("'"+ OpenAPIConstants.BASEPATH +"' property is not included in openAPI " +
+            throw new CLIRuntimeException("'" + OpenAPIConstants.BASEPATH + "' property is not included in openAPI " +
                     "definition '" + openApiFilePath + "'.");
         }
         basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
@@ -545,6 +544,12 @@ public class OpenAPICodegenUtils {
         }
     }
 
+    /**
+     * validate API level interceptors
+     *
+     * @param openAPI         {@link OpenAPI} object
+     * @param openAPIFilePath file path to openAPI definition
+     */
     private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
         Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
                 .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
@@ -556,7 +561,13 @@ public class OpenAPICodegenUtils {
                 false, openAPIFilePath, null, null));
     }
 
-    private static void validateAllResourceExtensions(OpenAPI openAPI, String openAPIFilePath) {
+    /**
+     * validate all resource extensions for single path
+     *
+     * @param openAPI         {@link OpenAPI} object
+     * @param openAPIFilePath file path to openAPI definition
+     */
+    private static void validateResourceExtensionsForSinglePath(OpenAPI openAPI, String openAPIFilePath) {
         openAPI.getPaths().entrySet().forEach(entry -> {
             validateSingleResourceExtensions(entry.getValue().getGet(), entry.getKey(), "get", openAPIFilePath);
             validateSingleResourceExtensions(entry.getValue().getPost(), entry.getKey(), "post", openAPIFilePath);
@@ -569,6 +580,14 @@ public class OpenAPICodegenUtils {
         });
     }
 
+    /**
+     * Validate Resource level extensions for Single Resource
+     *
+     * @param operation       {@link Operation} object
+     * @param pathItem        path name
+     * @param operationName   operation name
+     * @param openAPIFilePath file path to openAPI definition
+     */
     private static void validateSingleResourceExtensions(Operation operation, String pathItem, String operationName,
                                                          String openAPIFilePath) {
         if (operation == null || operation.getExtensions() == null) {
@@ -578,6 +597,14 @@ public class OpenAPICodegenUtils {
         validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
     }
 
+    /**
+     * Validate Resource interceptors for Single Resource
+     *
+     * @param operation       {@link Operation} object
+     * @param pathItem        path name
+     * @param operationName   operation name
+     * @param openAPIFilePath file path to openAPI definition
+     */
     private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
                                                            String openAPIFilePath) {
         //validate request interceptor
@@ -592,26 +619,37 @@ public class OpenAPICodegenUtils {
                 openAPIFilePath, pathItem, operationName));
     }
 
-    //todo: handle security as an array
-    private static void validateAndSetAPISecurity(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
+    /**
+     * set the security for API from 'security' section in openAPI
+     *
+     * @param api     {@link ExtendedAPI} object
+     * @param openAPI {@link OpenAPI} object
+     */
+    private static void setMgwAPISecurity(ExtendedAPI api, OpenAPI openAPI) {
         String securityString = "";
-        if(openAPI.getSecurity() != null) {
-            if(openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))){
-                securityString = APISecurity.oauth2.toString();
+        if (openAPI.getSecurity() != null) {
+            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+                    .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))) {
+                securityString = APISecurity.oauth2.name();
             }
-            if(openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))){
+            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+                    .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))) {
                 securityString = securityString.isEmpty() ? securityString : securityString + ",";
-                securityString += APISecurity.basic.toString();
+                securityString += APISecurity.basic.name();
             }
         }
-        if(StringUtils.isEmpty(securityString)){
-            securityString = APISecurity.oauth2.toString();
+        if (StringUtils.isEmpty(securityString)) {
+            securityString = APISecurity.oauth2.name();
         }
         api.setMgwApiSecurity(securityString);
     }
 
+    /**
+     * validate API name and version.
+     *
+     * @param openAPI         {@link OpenAPI} object
+     * @param openAPIFilePath file path to openAPI definition
+     */
     private static void validateAPINameAndVersion(OpenAPI openAPI, String openAPIFilePath) {
         String apiNameVersion = openAPI.getInfo().getTitle() + ":" + openAPI.getInfo().getVersion();
         if (apiNameVersionMap.containsKey(apiNameVersion)) {
@@ -622,18 +660,31 @@ public class OpenAPICodegenUtils {
         apiNameVersionMap.put(apiNameVersion, openAPIFilePath);
     }
 
+    /**
+     * validate the openAPI definition
+     *
+     * @param openAPI         {@link OpenAPI} object
+     * @param openAPIFilePath file path to openAPI definition
+     */
     public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath) {
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasepath(openAPI, openAPIFilePath);
         validateAPIInterceptors(openAPI, openAPIFilePath);
-        validateAllResourceExtensions(openAPI, openAPIFilePath);
+        validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
+        setOauthSecuritySchemaList(openAPI);
+        setBasicSecuritySchemaList(openAPI);
     }
 
-    public static void setOauthSecuritySchemaList(OpenAPI openAPI) {
-        if (oauthSecuritySchemaList != null) {
+    /**
+     * store the security schemas of type "oauth2"
+     *
+     * @param openAPI {@link OpenAPI} object
+     */
+    private static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+        oauthSecuritySchemaList = new ArrayList<>();
+        if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
         }
-        oauthSecuritySchemaList = new ArrayList<>();
         openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
             if (value1.getType() == SecurityScheme.Type.OAUTH2 ||
                     (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("jwt"))) {
@@ -642,11 +693,16 @@ public class OpenAPICodegenUtils {
         });
     }
 
-    public static void setBasicSecuritySchemaList(OpenAPI openAPI) {
-        if (basicSecuritySchemaList != null) {
+    /**
+     * store the security schemas of type "basic"
+     *
+     * @param openAPI {@link OpenAPI} object
+     */
+    private static void setBasicSecuritySchemaList(OpenAPI openAPI) {
+        basicSecuritySchemaList = new ArrayList<>();
+        if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
         }
-        basicSecuritySchemaList = new ArrayList<>();
         openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
             if (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("basic")) {
                 basicSecuritySchemaList.add(key);
