@@ -93,7 +93,6 @@ apis:
                         type: 'http'
                         urls:
                             - 'http://www.mocky.io/v2/5cbd4d1d2f0000e70a16cc0e'
-                    throttlePolicy: 10kPerMin
         security: 'oauth'
 
 ```
