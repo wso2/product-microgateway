@@ -429,6 +429,7 @@
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
         <andes.version>3.2.47</andes.version>
         <json.schema.version>1.5.0</json.schema.version>
+        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
     </properties>
 
 </project>
