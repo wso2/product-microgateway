@@ -19,9 +19,11 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,18 +78,31 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
-        Map<String, Object> extension =  operation.getExtensions();
-        if(extension != null){
-            Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
+        Map<String, Object> extensions =  operation.getExtensions();
+        if(extensions != null){
+            Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
+            Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = value.toString());
-            Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
+            Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
                     this.isSecured = false;
                 }
             });
+            //set resource level endpoint configuration
+            setEpConfigDTO(operation);
+            //set resource level request interceptors
+            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+            requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
+            //set resource level response interceptors
+            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+            responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
+            //set dev-first resource level throttle policy
+            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
+            devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
         }
 
         if (operation.getParameters() != null) {
@@ -185,13 +200,15 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         return epConfig;
     }
 
-    public void setEpConfigDTO(MgwEndpointConfigDTO epConfigDTO) {
-        this.epConfig = epConfigDTO;
-        if(epConfigDTO.getProdEndpointList() != null){
-            hasProdEpConfig = true;
-        }
-        if(epConfigDTO.getSandboxEndpointList() != null){
-            hasSandEpConfig = true;
+    private void setEpConfigDTO(Operation operation) {
+        this.epConfig = OpenAPICodegenUtils.getResourceEpConfigForCodegen(operation);
+        if (epConfig != null) {
+            if (epConfig.getProdEndpointList() != null) {
+                hasProdEpConfig = true;
+            }
+            if (epConfig.getSandboxEndpointList() != null) {
+                hasSandEpConfig = true;
+            }
         }
     }
 
@@ -216,7 +233,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setApiRequestInterceptor(String requestInterceptor) {
-        this.apiRequestInterceptor = requestInterceptor;
+        //if user specify the same interceptor function in both api level and resource level ignore
+        // api level interceptor
+        if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
+            this.apiRequestInterceptor = requestInterceptor;
+        }
     }
 
     public String getApiResponseInterceptor() {
@@ -224,6 +245,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setApiResponseInterceptor(String responseInterceptor) {
-        this.apiResponseInterceptor = responseInterceptor;
+        //if user specify the same interceptor function in both api level and resource level ignore
+        // api level interceptor
+        if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
+            this.apiResponseInterceptor = responseInterceptor;
+        }
     }
 }

@@ -77,7 +77,7 @@ public class Main {
     private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
         try {
             DefaultCmd defaultCmd = new DefaultCmd();
-            ExtendedJCommander cmdParser = new ExtendedJCommander(defaultCmd);
+            JCommander cmdParser = new JCommander(defaultCmd);
             defaultCmd.setParentCmdParser(cmdParser);
 
             HelpCmd helpCmd = new HelpCmd();
@@ -92,10 +92,6 @@ public class Main {
             cmdParser.addCommand(GatewayCliCommands.BUILD, buildCmd);
             buildCmd.setParentCmdParser(cmdParser);
 
-            RunCmd runCmd = new RunCmd();
-            cmdParser.addCommand(GatewayCliCommands.RUN, runCmd);
-            runCmd.setParentCmdParser(cmdParser);
-
             ResetCmd resetCmd = new ResetCmd();
             cmdParser.addCommand(GatewayCliCommands.RESET, resetCmd);
             resetCmd.setParentCmdParser(cmdParser);
@@ -103,10 +99,6 @@ public class Main {
             ImportCmd importCmd = new ImportCmd();
             cmdParser.addCommand(GatewayCliCommands.IMPORT, importCmd);
             importCmd.setParentCmdParser(cmdParser);
-
-            SetProjectCmd setProjectCmd = new SetProjectCmd();
-            cmdParser.addCommand(GatewayCliCommands.SET, setProjectCmd);
-            setProjectCmd.setParentCmdParser(cmdParser);
 
             Map<String, JCommander> commanderMap;
             String parsedCmdName;
