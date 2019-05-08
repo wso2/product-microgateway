@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -58,6 +59,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
+    private BasicAuth basicAuth;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -78,6 +80,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
+        //to provide resource level security
+        this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
         Map<String, Object> extensions =  operation.getExtensions();
         if(extensions != null){
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
@@ -103,6 +107,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+
         }
 
         if (operation.getParameters() != null) {
@@ -177,7 +182,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setResourceTier(String resourceTier) {
-        this.resourceTier = resourceTier;
+        if (resourceTier == null) {
+            this.resourceTier = resourceTier;
+        }
     }
 
     public String getScope() {
@@ -249,6 +256,13 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         // api level interceptor
         if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
             this.apiResponseInterceptor = responseInterceptor;
+        }
+    }
+
+    public void setBasicAuth(BasicAuth basicAuth) {
+        //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
+        if (basicAuth == null) {
+            this.basicAuth = basicAuth;
         }
     }
 }

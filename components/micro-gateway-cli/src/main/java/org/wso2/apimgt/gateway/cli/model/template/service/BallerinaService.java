@@ -25,7 +25,6 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -33,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.Map;
 import java.util.List;
@@ -180,12 +180,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
-                    apiThrottlePolicy.ifPresent(value -> {
-                        //api level throttle policy is added only if resource level resource tier is not available
-                        if (operation.getValue().getResourceTier() == null) {
-                            operation.getValue().setResourceTier(value.toString());
-                        }
-                    });
+                    //api level throttle policy is added only if resource level resource tier is not available
+                    apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    //to set BasicAuth property corresponding to the security schema in API-level
+                    operation.getValue().setBasicAuth(OpenAPICodegenUtils
+                            .generateBasicAuthFromSecurity(api.getMgwApiSecurity()));
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
@@ -254,28 +253,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     private void setSecuritySchemas(String schemas) {
         Config config = GatewayCmdUtils.getConfig();
-        BasicAuth basicAuth = new BasicAuth();
-        boolean basic = false;
-        boolean oauth2 = false;
-        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-        for (String s : schemasArray) {
-            if (s.equalsIgnoreCase("basic")) {
-                basic = true;
-            } else if (s.equalsIgnoreCase("oauth2")) {
-                oauth2 = true;
-            }
-        }
-        if (basic && oauth2) {
-            basicAuth.setOptional(true);
-            basicAuth.setRequired(false);
-        } else if (basic) {
-            basicAuth.setRequired(true);
-            basicAuth.setOptional(false);
-        } else if (oauth2) {
-            basicAuth.setOptional(false);
-            basicAuth.setRequired(false);
-        }
-        config.setBasicAuth(basicAuth);
+        config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 
     public void setIsDevFirst(boolean value){

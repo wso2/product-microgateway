@@ -24,6 +24,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -631,22 +633,61 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      */
     private static void setMgwAPISecurity(ExtendedAPI api, OpenAPI openAPI) {
-        String securityString = "";
-        if (openAPI.getSecurity() != null) {
-            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+        String securitySchemas = generateMgwSecuritySchemas(openAPI.getSecurity());
+        //if securitySchemas String is an emptyString, set to oauth2
+        if (StringUtils.isEmpty(securitySchemas)) {
+            securitySchemas = APISecurity.oauth2.name();
+        }
+        api.setMgwApiSecurity(securitySchemas);
+    }
+
+    private static String generateMgwSecuritySchemas(List<SecurityRequirement> securityRequirementList){
+        String securitySchemas = "";
+        if (securityRequirementList != null) {
+            if (securityRequirementList.stream().anyMatch(value -> value.entrySet().stream()
                     .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))) {
-                securityString = APISecurity.oauth2.name();
+                securitySchemas = APISecurity.oauth2.name();
             }
-            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
+            if (securityRequirementList.stream().anyMatch(value -> value.entrySet().stream()
                     .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))) {
-                securityString = securityString.isEmpty() ? securityString : securityString + ",";
-                securityString += APISecurity.basic.name();
+                securitySchemas = securitySchemas.isEmpty() ? securitySchemas : securitySchemas + ",";
+                securitySchemas += APISecurity.basic.name();
             }
         }
-        if (StringUtils.isEmpty(securityString)) {
-            securityString = APISecurity.oauth2.name();
+        return securitySchemas;
+    }
+
+    public static BasicAuth getMgwResourceBasicAuth(Operation operation) {
+        String securitySchemas = generateMgwSecuritySchemas(operation.getSecurity());
+        if(StringUtils.isEmpty(securitySchemas)){
+            return null;
         }
-        api.setMgwApiSecurity(securityString);
+        return generateBasicAuthFromSecurity(securitySchemas);
+    }
+
+    public static BasicAuth generateBasicAuthFromSecurity(String schemas){
+        BasicAuth basicAuth = new BasicAuth();
+        boolean basic = false;
+        boolean oauth2 = false;
+        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+        for (String s : schemasArray) {
+            if (s.equalsIgnoreCase("basic")) {
+                basic = true;
+            } else if (s.equalsIgnoreCase("oauth2")) {
+                oauth2 = true;
+            }
+        }
+        if (basic && oauth2) {
+            basicAuth.setOptional(true);
+            basicAuth.setRequired(false);
+        } else if (basic) {
+            basicAuth.setRequired(true);
+            basicAuth.setOptional(false);
+        } else if (oauth2) {
+            basicAuth.setOptional(false);
+            basicAuth.setRequired(false);
+        }
+        return basicAuth;
     }
 
     /**
