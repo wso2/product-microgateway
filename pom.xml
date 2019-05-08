@@ -410,7 +410,7 @@
         <maven.replacer.plugin.version>1.5.3</maven.replacer.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
         <wso2.maven.compiler.target>1.8</wso2.maven.compiler.target>
-        <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <jcommander.version>1.72</jcommander.version>
         <handlebars.version>4.1.2</handlebars.version>
