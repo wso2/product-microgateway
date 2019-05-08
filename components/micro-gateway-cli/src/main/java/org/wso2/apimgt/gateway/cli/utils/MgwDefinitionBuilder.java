@@ -50,36 +50,6 @@ public class MgwDefinitionBuilder {
     private static String projectName;
     private static final Logger LOGGER = LoggerFactory.getLogger(MgwDefinitionBuilder.class);
 
-//    /**
-//     * Builds the {@link DefinitionConfig} object model for {@link GatewayCliConstants#PROJECT_DEFINITION_FILE}.
-//     * Before parsing the yaml file to {@link DefinitionConfig}, validation will be performed on
-//     * the the input project definition file.
-//     *
-//     * @param project microgateway project name
-//     */
-//    public static void build(String project) {
-//        projectName = project;
-//        String definitionPath = GatewayCmdUtils.getProjectMgwDefinitionFilePath(project);
-//        File definitionFile = new File(definitionPath);
-//
-//        try {
-//            InputStream isSchema = MgwDefinitionBuilder.class.getClassLoader()
-//                    .getResourceAsStream(GatewayCliConstants.DEFINITION_SCHEMA_FILE);
-//            definitionConfig = YamlValidator.parse(definitionFile, isSchema, DefinitionConfig.class);
-//        } catch (IOException e) {
-//            throw new CLIRuntimeException("Error while reading the " + GatewayCliConstants.PROJECT_DEFINITION_FILE +
-//                    ".", e);
-//        }
-//
-//        try {
-//            //update the interceptor map
-//            setInterceptors();
-//        } catch (IOException e) {
-//            throw new CLIRuntimeException("Error while reading the '" + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR +
-//                    "' directory");
-//        }
-//    }
-
     /**
      * Get basePath from the definition.yaml.
      *
@@ -138,7 +108,6 @@ public class MgwDefinitionBuilder {
         }
         String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
                 getEndpointListDefinition(operation).getRequestInterceptor();
-        //validateInterceptorAvailability(requestInterceptorMap, interceptor, basePath, path, operation);
 
         return interceptor;
     }
@@ -157,7 +126,6 @@ public class MgwDefinitionBuilder {
         }
         String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path).
                 getEndpointListDefinition(operation).getResponseInterceptor();
-        //validateInterceptorAvailability(responseInterceptorMap, interceptor, basePath, path, operation);
 
         return interceptor;
     }
@@ -197,7 +165,6 @@ public class MgwDefinitionBuilder {
      */
     public static String getApiRequestInterceptor(String basePath) {
         String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getRequestInterceptor();
-        //validateInterceptorAvailability(requestInterceptorMap, interceptor, basePath, null, null);
         return interceptor;
     }
 
@@ -209,7 +176,6 @@ public class MgwDefinitionBuilder {
      */
     public static String getApiResponseInterceptor(String basePath) {
         String interceptor = definitionConfig.getApis().getApiFromBasepath(basePath).getResponseInterceptor();
-        //validateInterceptorAvailability(responseInterceptorMap, interceptor, basePath, null, null);
         return interceptor;
     }
 
