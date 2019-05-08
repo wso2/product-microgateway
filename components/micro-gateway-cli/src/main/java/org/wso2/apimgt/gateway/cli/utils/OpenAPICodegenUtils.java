@@ -36,8 +36,8 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 
@@ -46,7 +46,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -371,8 +377,12 @@ public class OpenAPICodegenUtils {
         setMgwAPISecurity(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         try {
-            api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
-                    APICorsConfigurationDTO.class));
+            if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
+                api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
+                        APICorsConfigurationDTO.class));
+                // explicitly set the cors enabled value to true if cors config found in the open API definition
+                api.getCorsConfiguration().setCorsConfigurationEnabled(true);
+            }
         } catch (IllegalArgumentException e) {
             throw new CLIRuntimeException("'" + OpenAPIConstants.CORS + "' property is not properly set for the " +
                     "openAPI definition file. \n" + openAPIFilePath);
