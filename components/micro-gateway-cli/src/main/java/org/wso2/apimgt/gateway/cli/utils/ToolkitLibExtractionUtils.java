@@ -68,6 +68,9 @@ public class ToolkitLibExtractionUtils {
             // Copy gateway jars to platform
             GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
                     + GatewayCliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
+            //todo: remove this segment in next release
+            new File(destination + File.separator + breLibPath + File.separator +
+                    "swagger-to-ballerina-generator-0.990.4.jar").delete();
         }
     }
 }

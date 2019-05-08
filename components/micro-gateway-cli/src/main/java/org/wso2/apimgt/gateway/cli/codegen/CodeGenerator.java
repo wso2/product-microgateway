@@ -128,7 +128,8 @@ public class CodeGenerator {
                     GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
-        Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
+        Files.walk(Paths.get(openApiPath)).filter(path -> (path.getFileName().toString().endsWith(".json") ||
+                path.getFileName().toString().endsWith(".yaml")))
                 .forEach( path -> {
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
                     OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
