@@ -20,7 +20,14 @@
       "https://localhost:2379/pet/v1"
     ]
   },
-  "x-mgw-security": ["oauth2"],
+  "security": [
+    {
+      "petstore_auth": [
+        "write:pets",
+        "read:pets"
+      ]
+    }
+  ],
   "x-mgw-sandbox-endpoints": {
     "urls": [
       "https://localhost:2379/pet/v1"
