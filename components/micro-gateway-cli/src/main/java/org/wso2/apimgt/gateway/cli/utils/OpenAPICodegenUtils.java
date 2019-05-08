@@ -339,6 +339,11 @@ public class OpenAPICodegenUtils {
         }
         api.setMgwApiSecurity(security);
         api.setCorsConfiguration(MgwDefinitionBuilder.getCorsConfiguration(basePath));
+        if(api.getCorsConfiguration() != null) {
+            //Setting the value true here so user do not need to add the "corsConfigurationEnabled" property to the
+            // definition.yaml
+            api.getCorsConfiguration().setCorsConfigurationEnabled(true);
+        }
     }
 
     public static void setAdditionalConfig(ExtendedAPI api) {

@@ -102,7 +102,7 @@ public class APIDefinition {
         this.pathsDefinition = pathsDefinition;
     }
 
-    @JsonProperty("request-interceptor")
+    @JsonProperty("request_interceptor")
     public String getRequestInterceptor() {
         return requestInterceptor;
     }
@@ -111,7 +111,7 @@ public class APIDefinition {
         this.requestInterceptor = requestInterceptor;
     }
 
-    @JsonProperty("response-interceptor")
+    @JsonProperty("response_interceptor")
     public String getResponseInterceptor() {
         return responseInterceptor;
     }

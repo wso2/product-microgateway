@@ -15,6 +15,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
@@ -35,7 +36,7 @@ public class APICorsConfigurationDTO  {
   private List<String> accessControlAllowHeaders = new ArrayList<String>();
   private List<String> accessControlAllowMethods = new ArrayList<String>();
   
-  @JsonProperty("accessControlAllowOrigins")
+  @JsonAlias({"accessControlAllowOrigins","access_control_allow_origins"})
   public List<String> getAccessControlAllowOrigins() {
     return accessControlAllowOrigins;
   }
@@ -43,7 +44,7 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowOrigins = accessControlAllowOrigins;
   }
 
-  @JsonProperty("accessControlAllowCredentials")
+  @JsonAlias({"accessControlAllowCredentials","access_control_allow_credentials"})
   public Boolean getAccessControlAllowCredentials() {
     return accessControlAllowCredentials;
   }
@@ -51,7 +52,7 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowCredentials = accessControlAllowCredentials;
   }
 
-  @JsonProperty("corsConfigurationEnabled")
+  @JsonAlias ("corsConfigurationEnabled")
   public Boolean getCorsConfigurationEnabled() {
     return corsConfigurationEnabled;
   }
@@ -59,7 +60,7 @@ public class APICorsConfigurationDTO  {
     this.corsConfigurationEnabled = corsConfigurationEnabled;
   }
 
-  @JsonProperty("accessControlAllowHeaders")
+  @JsonAlias({"accessControlAllowHeaders","access_control_allow_headers"})
   public List<String> getAccessControlAllowHeaders() {
     return accessControlAllowHeaders;
   }
@@ -67,7 +68,7 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowHeaders = accessControlAllowHeaders;
   }
 
-  @JsonProperty("accessControlAllowMethods")
+  @JsonAlias({"accessControlAllowMethods","access_control_allow_methods"})
   public List<String> getAccessControlAllowMethods() {
     return accessControlAllowMethods;
   }

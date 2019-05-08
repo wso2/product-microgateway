@@ -46,17 +46,6 @@
                   "patternProperties": {
                     "^[^\\d\\W]+$": {
                       "type": "object",
-                      "anyOf": [
-                        {
-                          "required": ["production_endpoint"]
-                        },
-                        {
-                          "required": ["sandbox_endpoint"]
-                        },
-                        {
-                          "required": ["production_endpoint", "sandbox_endpoint"]
-                        }
-                      ],
                       "properties": {
                         "production_endpoint": {
                           "$ref": "#/definitions/endpoint"

@@ -150,6 +150,9 @@ public class MgwDefinitionBuilder {
         if (definitionConfig.getApis().getApiFromBasepath(basePath) == null) {
             return false;
         }
+        if (definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition() == null) {
+            return false;
+        }
         if (definitionConfig.getApis().getApiFromBasepath(basePath).getPathsDefinition().getMgwResource(path) == null) {
             return false;
         }
