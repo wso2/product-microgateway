@@ -13,6 +13,43 @@ In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gate
 
 WSO2 API Microgateway acts as a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
 
+#### Table of Contents
+
+
+   * [Why WSO2 API Microgateway](#why-wso2-api-microgateway)
+   * [Features](#features)
+   * [Architecture](#architecture)
+   * [Running the microgateway](#running-the-microgateway)
+      * [Initializing a WSO2 API Microgateway project](#initializing-a-wso2-api-microgateway-project)
+      * [Building the WSO2 API Microgateway project](#building-the-wso2-api-microgateway-project)
+   * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
+      * [Init](#init)
+      * [Build](#build)
+   * [Project Structure](#project-structure)
+   * [How to run the microgateway distribution](#how-to-run-the-microgateway-distribution)
+   * [Micro gateway supported open API extensions](#micro-gateway-supported-open-api-extensions)
+   * [Micro gateway open API extension usages](#micro-gateway-open-api-extension-usages)
+      * [1. Override endpoint per API resource](#1-override-endpoint-per-api-resource)
+      * [2. Add API/resource level request and response interceptors](#2-add-apiresource-level-request-and-response-interceptors)
+      * [3. Add API/resource level throttling policies](#3-add-apiresource-level-throttling-policies)
+      * [4. Add API level CORS configuration](#4-add-api-level-cors-configuration)
+
+
+#### Why WSO2 API Microgateway
+WSO2 API Microgateway  can be explained as as enrichment  layer for
+services and microservices. In traditional monolithic architectures, common functionality seems to be duplicated among
+multiple services. Functionalities like Authentication, rate limiting, transformations are duplicated in each service. This where the WSO2 API microgateway comes handy
+where the duplicated functionality is supported via gateway layer and acts as a single entry point to all the services.
+
+#### Features
+- **Authentication** : Supports mutual TLS, Oauth2(opaque tokens and JWT) and basic authentication
+- **Rate limiting** : Throttle the request to the APIs based on the request count for a give time period
+- **Transformations** : Manipulate API request and response using interceptor functions
+- **Analytics** : Publish data to streams
+- **Service Discovery** : Resolve endpoints using third party distributed key value stores like etcd
+- **Cloud native** : A lightweight gateway that can be run on any platform(bare metal, docker and k8s)
+- **Scalable** : Distributed nature allows to scale horizontally.
+
 #### Architecture
 
 The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API defintion.
@@ -136,6 +173,15 @@ ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
+
+### Micro gateway supported open API extensions
+| Extension                     | Description                                               | Required/Not Required |
+| -------------                 | -------------                                             | ----------------------|
+| x-mgw-basePath                | Base path which gateway exposes the API                   | **Required** -> API level only
+| x-mgw-production-endpoints    | Specify the actual back end of the service                | **Required** -> API level/ Not required -> Resource level
+| x-mgw-sandbox-endpoints       | Specify the sandbox endpoint of the service if available  | Not Required -> API/Resource level
+| x-mgw-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
+| x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
 
 ### Micro gateway open API extension usages
 #### 1. Override endpoint per API resource
