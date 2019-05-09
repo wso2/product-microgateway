@@ -80,8 +80,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
-        //to provide resource level security
+        //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        //to set resource level scopes in dev-first approach
+        this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         Map<String, Object> extensions =  operation.getExtensions();
         if(extensions != null){
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
@@ -107,7 +109,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
-
         }
 
         if (operation.getParameters() != null) {
@@ -192,7 +193,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setScope(String scope) {
-        this.scope = scope;
+        if (this.scope == null) {
+            this.scope = scope;
+        }
     }
 
     public boolean isSecured() {
@@ -261,7 +264,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setBasicAuth(BasicAuth basicAuth) {
         //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
-        if (basicAuth == null) {
+        if (this.basicAuth == null) {
             this.basicAuth = basicAuth;
         }
     }

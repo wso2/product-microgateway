@@ -22,10 +22,7 @@
   },
   "security": [
     {
-      "petstore_auth": [
-        "write:pets",
-        "read:pets"
-      ]
+      "petstore_auth": []
     }
   ],
   "x-mgw-sandbox-endpoints": {
@@ -203,10 +200,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": []
           }
         ]
       }

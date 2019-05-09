@@ -165,6 +165,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                 String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                 operation.getValue().setOperationId(operationId);
+                //to set BasicAuth property corresponding to the security schema in API-level
+                operation.getValue().setBasicAuth(OpenAPICodegenUtils
+                        .generateBasicAuthFromSecurity(api.getMgwApiSecurity()));
                 //if it is the developer first approach
                 if (isDevFirst) {
                     //to add API level request interceptor
@@ -182,9 +185,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             .get(OpenAPIConstants.THROTTLING_TIER));
                     //api level throttle policy is added only if resource level resource tier is not available
                     apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
-                    //to set BasicAuth property corresponding to the security schema in API-level
-                    operation.getValue().setBasicAuth(OpenAPICodegenUtils
-                            .generateBasicAuthFromSecurity(api.getMgwApiSecurity()));
+                    //to set scope property of API
+                    operation.getValue().setScope(api.getMgwApiScope());
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));

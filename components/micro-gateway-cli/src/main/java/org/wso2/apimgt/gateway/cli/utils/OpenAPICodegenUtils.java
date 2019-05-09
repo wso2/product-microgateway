@@ -64,8 +64,8 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
-    private static List<String> oauthSecuritySchemaList;
-    private static List<String> basicSecuritySchemaList;
+    private static List<String> oauthSecuritySchemaList = new ArrayList<>();
+    private static List<String> basicSecuritySchemaList = new ArrayList<>();
 
     enum APISecurity {
         basic,
@@ -370,7 +370,7 @@ public class OpenAPICodegenUtils {
                 sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
-        setMgwAPISecurity(api, openAPI);
+        setMgwAPISecurityAndScopes(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         try {
             api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
@@ -627,44 +627,95 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * set the security for API from 'security' section in openAPI
+     * set the security for API from 'security' section in openAPI.
+     * Default value is "oauth2".
      *
      * @param api     {@link ExtendedAPI} object
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setMgwAPISecurity(ExtendedAPI api, OpenAPI openAPI) {
-        String securitySchemas = generateMgwSecuritySchemas(openAPI.getSecurity());
-        //if securitySchemas String is an emptyString, set to oauth2
+    private static void setMgwAPISecurityAndScopes(ExtendedAPI api, OpenAPI openAPI) {
+        String[] securitySchemasAndScopes = generateMgwSecuritySchemasAndScopes(openAPI.getSecurity());
+        String securitySchemas = securitySchemasAndScopes[0];
+        String scopes = securitySchemasAndScopes[1];
+        //if securitySchemas String is null, set to oauth2
         if (StringUtils.isEmpty(securitySchemas)) {
             securitySchemas = APISecurity.oauth2.name();
         }
         api.setMgwApiSecurity(securitySchemas);
+        api.setMgwApiScope(scopes);
     }
 
-    private static String generateMgwSecuritySchemas(List<SecurityRequirement> securityRequirementList){
-        String securitySchemas = "";
+    /**
+     * generate String array with security schema and scopes when the {@link SecurityRequirement} list mentioned
+     * under {@link OpenAPI} object or {@link Operation} object is provided.
+     * Resulted array contains two elements.
+     * First element contains set of comma separated security schema types (oauth2 and basic).
+     * Second element contains set of comma separated scopes.
+     *
+     * @param securityRequirementList {@link List<SecurityRequirement>} object
+     * @return String array with two elements {'schema','scopes'} (ex. {"oauth2", "read:pets,write:pets"}
+     */
+    private static String[] generateMgwSecuritySchemasAndScopes(List<SecurityRequirement> securityRequirementList) {
+        String securitySchemas = null;
+        String scopes = null;
+        List<String> securitySchemaList = new ArrayList<>(2);
+        List<String> scopeList = new ArrayList<>();
         if (securityRequirementList != null) {
-            if (securityRequirementList.stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))) {
-                securitySchemas = APISecurity.oauth2.name();
+            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
+                //check if the key's type is oauth2
+                if (oauthSecuritySchemaList.contains(k)) {
+                    if (!securitySchemaList.contains(APISecurity.oauth2.name())) {
+                        securitySchemaList.add(APISecurity.oauth2.name());
+                    }
+                    //if oauth2, add all the available scopes
+                    v.forEach(scope -> {
+                        if (!scopeList.contains(scope)) {
+                            scopeList.add(scope);
+                        }
+                    });
+                    //if the key's type is basic
+                } else if (basicSecuritySchemaList.contains(k) &&
+                        !securitySchemaList.contains(APISecurity.basic.name())) {
+                    securitySchemaList.add(APISecurity.basic.name());
+                }
+            }));
+            //generate security schema String
+            for (String schema : securitySchemaList) {
+                securitySchemas = StringUtils.isEmpty(securitySchemas) ? schema : securitySchemas + "," + schema;
             }
-            if (securityRequirementList.stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))) {
-                securitySchemas = securitySchemas.isEmpty() ? securitySchemas : securitySchemas + ",";
-                securitySchemas += APISecurity.basic.name();
+            //generate scopes string
+            for (String scope : scopeList) {
+                scopes = StringUtils.isEmpty(scopes) ? scope : scopes + "," + scope;
             }
         }
-        return securitySchemas;
+        return new String[]{securitySchemas, scopes};
     }
 
     public static BasicAuth getMgwResourceBasicAuth(Operation operation) {
-        String securitySchemas = generateMgwSecuritySchemas(operation.getSecurity());
+        String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
         if(StringUtils.isEmpty(securitySchemas)){
             return null;
         }
         return generateBasicAuthFromSecurity(securitySchemas);
     }
 
+    /**
+     * Get resource level security scopes of {@link Operation} if the security scheme is oauth2.
+     *
+     * @param operation {@link Operation}
+     * @return comma separated set of scopes (ex. 'read:pets, write:pets')
+     */
+    public static String getMgwResourceScope(Operation operation) {
+        return generateMgwSecuritySchemasAndScopes(operation.getSecurity())[1];
+    }
+
+    /**
+     * When the security schema string is provided as a comma separated set of values
+     * generate the corresponding schema string.
+     *
+     * @param schemas comma separated security security schema types (ex. basic,oauth2)
+     * @return {@link BasicAuth} object
+     */
     public static BasicAuth generateBasicAuthFromSecurity(String schemas){
         BasicAuth basicAuth = new BasicAuth();
         boolean basic = false;
@@ -727,6 +778,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      */
     private static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+        //Since the security schema list needs to instantiated per each API
         oauthSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
@@ -745,6 +797,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      */
     private static void setBasicSecuritySchemaList(OpenAPI openAPI) {
+        //Since the security schema list needs to instantiated per each API
         basicSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
