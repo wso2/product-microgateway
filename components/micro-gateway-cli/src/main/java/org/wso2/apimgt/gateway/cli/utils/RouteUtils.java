@@ -460,6 +460,8 @@ public class RouteUtils {
             prod.setEndpointUrlType(EndpointUrlTypeEnum.PROD);
             setEndpointType(prodEpListDTO, prod);
             setEndpointUrls(prodEpListDTO, prod);
+            prod.setSecurityConfig(prodEpListDTO.getSecurityConfig());
+            prod.setName(prodEpListDTO.getName());
         }
 
         if (sandEpListDTO != null) {
@@ -467,6 +469,8 @@ public class RouteUtils {
             sandbox.setEndpointUrlType(EndpointUrlTypeEnum.SAND);
             setEndpointType(sandEpListDTO, sandbox);
             setEndpointUrls(sandEpListDTO, sandbox);
+            sandbox.setSecurityConfig(sandEpListDTO.getSecurityConfig());
+            sandbox.setName(sandEpListDTO.getName());
         }
 
         endpointConfigDTO.setProdEndpointList(prod);

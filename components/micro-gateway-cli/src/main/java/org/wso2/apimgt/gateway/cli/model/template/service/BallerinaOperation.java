@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
@@ -69,9 +70,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             return getDefaultValue();
         }
 
-        // OperationId with spaces will cause trouble in ballerina code.
-        // Replacing it with '_' so that we can identify there was a ' ' when doing bal -> swagger
-        this.operationId = getTrimmedOperationId(operation.getOperationId());
+        // OperationId with spaces with special characters will cause errors in ballerina code.
+        // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();
         this.description = operation.getDescription();

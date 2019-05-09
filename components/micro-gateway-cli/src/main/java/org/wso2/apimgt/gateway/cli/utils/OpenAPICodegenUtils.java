@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
@@ -70,6 +71,7 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
     private static List<String> oauthSecuritySchemaList;
     private static List<String> basicSecuritySchemaList;
+    private static List<Map<Object, Object>> endPointReferenceExtensions ;
 
     enum APISecurity {
         basic,
@@ -366,12 +368,12 @@ public class OpenAPICodegenUtils {
 
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
 
-        EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
-        EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
-        MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils.convertToMgwServiceMap(prodEndpointListDTO,
-                sandEndpointListDTO);
+        EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
+                openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+        EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
+                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+        MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils
+                .convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurity(api, openAPI);
@@ -397,11 +399,40 @@ public class OpenAPICodegenUtils {
      * @return {@link MgwEndpointConfigDTO} object
      */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
-        EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
-        EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
+        EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
+                operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+        // if endpoint name is empty set operation id as the name
+        if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
+            prodEndpointListDTO.setName(operation.getOperationId());
+        }
+        EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
+                operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+        if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
+            sandEndpointListDTO.setName(operation.getOperationId());
+        }
         return RouteUtils.convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
+    }
+
+    private static EndpointListRouteDTO extractEndpointFromOpenAPI(Object endpointExtensionObject) {
+        EndpointListRouteDTO endpointListRouteDTO = null;
+        if (endpointExtensionObject != null) {
+            String endpointExtensionObjectValue = endpointExtensionObject.toString();
+            if (endpointExtensionObjectValue.contains(OpenAPIConstants.ENDPOINTS_REFERENCE)) {
+                String referencePath = endpointExtensionObjectValue.split(OpenAPIConstants.ENDPOINTS_REFERENCE)[1];
+                for (Map<Object, Object> value : endPointReferenceExtensions) {
+                    if (value.containsKey(referencePath)) {
+                        endpointListRouteDTO = objectMapper
+                                .convertValue(value.get(referencePath), EndpointListRouteDTO.class);
+                        endpointListRouteDTO.setName(referencePath);
+                        return endpointListRouteDTO;
+                    }
+                }
+
+            } else {
+                endpointListRouteDTO = objectMapper.convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
+            }
+        }
+        return endpointListRouteDTO;
     }
 
     /**
@@ -688,6 +719,7 @@ public class OpenAPICodegenUtils {
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setBasicSecuritySchemaList(openAPI);
+        setOpenAPIDefinitionEndpointReferenceExtensions(openAPI.getExtensions());
     }
 
     /**
@@ -723,5 +755,27 @@ public class OpenAPICodegenUtils {
                 basicSecuritySchemaList.add(key);
             }
         });
+    }
+
+
+    /**
+     * store the endpoint extensions which are used as references
+     *
+     * @param extensions {@link Map<String,Object>} object
+     */
+    private static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
+        if (extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
+            try {
+                TypeReference<List<Map<Object, Object>>> typeRef1 = new TypeReference<List<Map<Object, Object>>>() {
+
+                };
+                endPointReferenceExtensions = objectMapper
+                        .convertValue(extensions.get(OpenAPIConstants.ENDPOINTS), typeRef1);
+            } catch (IllegalArgumentException e) {
+                throw new CLIRuntimeException(
+                        "Open API \"" + OpenAPIConstants.ENDPOINTS + "\" extension format is " + "wrong : " + e
+                                .getMessage(), e);
+            }
+        }
     }
 }
