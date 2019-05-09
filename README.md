@@ -37,8 +37,10 @@ Running the WSO2 API Microgateway is a 3 step process. The first two steps are i
 ##### Initializing a WSO2 API Microgateway project
 
 Initializing a WSO2 API Microgateway project creates the default folder structure at the location where the command is run.
-Empty `api_definitions` folder and `definitions.yaml` will be created inside the main folder. API developer can add multiple open API definitions inside the
-api_definitions file and define endpoints and interceptors for the resources in definitions.yaml
+Empty `api_definitions` folder will be created inside the main folder. API developer can add multiple open API definitions inside the
+api_definitions file and define endpoints and interceptors for the resources  by adding open API extensions.
+API developer can specify the  back end endpoint details, request and response interceptors, throttle policies, CORS config and etc using open API
+vendor specific extensions.
 
 
 ##### Building the WSO2 API Microgateway project
@@ -55,10 +57,9 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 `$ micro-gw init`
 
-The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder and an empty **definitions.yaml**.
+The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder.
 
 * **api_defintions** - API developer should copy all the open API definitions of microservices inside this folder
-* **definitions.yaml** - API developer can define API level and resource level endpoints and interceptors and  resource level throttle policies
 
 If the project already exists, a warning will be prompted requesting permission to override existing project.
 
@@ -69,35 +70,19 @@ Example
 
     $ micro-gw init petstore-project
 
-
-Sample definition.yaml can be defined as follows. This is defined for the petstore swagger : https://petstore.swagger.io/v2/swagger.json. API deveoper should copy this swagger to api_defintions file
+Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw
+Lets define the basic microgateway open API extension in order to expose the API.
 
 
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.swagger.io/'
-        resources:
-            /pet/findByStatus:
-                get:
-                    production_endpoint:
-                        type: 'http'
-                        urls:
-                            - 'http://www.mocky.io/v2/5cbd4d1d2f0000e70a16cc0e'
-                    throttle_policy: 10kPerMin
-        security: 'oauth'
+x-mgw-basePath: /petstore/v1
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
 
 ```
 
+Sample for petstore open API definition with two resources and extensions can be found [here](samples/petstore_basic.yaml)
 
 ##### Build
 
@@ -120,7 +105,6 @@ petstore-project/
 ├── api_definitions
 ├── conf
 │   └── deployment-config.toml
-├── definition.yaml
 ├── gen
 │   ├── api_definitions
 │   └── src
@@ -153,66 +137,98 @@ ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
 
-### Usages of definition.yaml
+### Micro gateway open API extension usages
 #### 1. Override endpoint per API resource
-API developer can specify endpoints per resource using the definition.yaml
+API developer can specify endpoints per resource by adding the **x-mgw-production-endpoints** extension under the respective resource in open API definition.
 If a specific resource have an endpoint which requires different back end rather than the global back end defined for the API, then it can be overridden as below.
 
 In following example `/pet/findByStatus` resource endpoint is overridden with load balance endpoint and `pet/{petId}` resource overridden with another http endpoint
 
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore New
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.swagger.io/'
-        resources:
-            /pet/findByStatus:
-                get:
-                    production_endpoint:
-                        type: 'load_balance'
-                        urls:
-                            - 'http://petstore.override.swagger.io/v2'
-                            - 'http://petstore.override.swagger.io/v3'
-            /pet/{petId}:
-                get:
-                    production_endpoint:
-                        type: 'http'
-                        urls:
-                            - 'http://petstore.override.swagger.io/v2'
 
-        security: 'oauth'
+"/pet/findByStatus":
+ get:
+   tags:
+   - pet
+   summary: Finds Pets by status
+   description: Multiple status values can be provided with comma separated strings
+   operationId: findPetsByStatus
+   parameters:
+   - name: status
+     in: query
+     description: Status values that need to be considered for filter
+     required: true
+     explode: true
+     schema:
+       type: array
+       items:
+         type: string
+         enum:
+         - available
+         - pending
+         - sold
+         default: available
+   x-mgw-production-endpoints:
+     urls:
+     - http://www.mocky.io/v2/5cd28cd73100008628339802
+     - https://petstore.swagger.io/v2
 
+
+"/pet/{petId}":
+ get:
+   tags:
+   - pet
+   summary: Find pet by ID
+   description: Returns a single pet
+   operationId: getPetById
+   parameters:
+   - name: petId
+     in: path
+     description: ID of pet to return
+     required: true
+     schema:
+       type: integer
+       format: int64
+   x-mgw-production-endpoints:
+     urls:
+     - http://www.mocky.io/v2/5cd28b9a310000bf293397f9
 
 ```
+
+Complete sample can be found [here](samples/per_resource_endpoint.yaml)
 
 #### 2. Add API/resource level request and response interceptors
 Interceptors can be used to do request and response transformations and mediation. Request interceptors are engaged before sending the request to the back end and
 response interceptors are engaged before responding to the client.
-API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the definition.yaml
+API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the open API definition using extensions
 
 In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` folder inside the project. This interceptors will only be enagged for that particular resource only
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore New
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        resources:
-            /pet/findByStatus:
-                get:
-                    request_interceptor: validateRequest
-                    response_interceptor: validateResponse
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-request-interceptor: validateRequest
+      x-mgw-response-interceptor: validateResponse
+      parameters:
+      - name: status
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - available
+            - pending
+            - sold
+            default: available
 ```
 
 Sample validateRequest method can be implemented as below.
@@ -237,46 +253,29 @@ public function validateResponse (http:Caller outboundEp, http:Response res) {
 
 Similarly the API developer can add interceptors globally at the API level as well
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore New
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.ballerina.io/'
-        request_interceptor: validateRequest
-        response_interceptor: validateResponse
-        security: 'oauth'
+openapi: 3.0.0
+  version: 1.0.0
+  title: Swagger Petstore New
+  termsOfService: http://swagger.io/terms/
+x-mgw-basePath: /petstore/v1
+x-mgw-request-interceptor: validateRequest
+x-mgw-response-interceptor: validateResponse
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
 ```
 
-#### 3. Add resource level throttling policies
-API developer can specify the rate limiting policies for each resource. These policies should be defined in the policies.yaml file in the project directory
-By default set of policies are available, but user can add more policies to the file and later refer them by name in the definition.yaml
-
+Sample open API definition for interceptors can be found [here](samples/interceptors_sample.yaml).
+#### 3. Add API/resource level throttling policies
+API developer can specify the rate limiting policies for each resource or globally for the API. These policies should be defined in the policies.yaml file in the project directory
+By default set of policies are available, but user can add more policies to the file and later refer them by name in the open API definition
+Following samples show how throttling policies can be added to API level
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore New
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.swagger.io/'
-        resources:
-            /pet/findByStatus:
-                get:
-                    throttle_policy: 10kPerMin
-        security: 'oauth'
-
+x-mgw-basePath: /petstore/v1
+x-mgw-throttling-tier: 10kPerMin
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
 ```
 The throttle policy "10kPerMin" is defined in the policies.yaml of the project as below.
 ```
@@ -286,33 +285,38 @@ The throttle policy "10kPerMin" is defined in the policies.yaml of the project a
      timeUnit: min
 ```
 
+Resource level throttle policies also can be defined as well.
+```
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-throttling-tier: 20kPerMin
+```
+Complete sample can be found [here](samples/policies_sample.yaml)
+
 #### 4. Add API level CORS configuration
 
-CORS configurations can be added to each API in the definition.yaml file
+CORS configurations can be added to each API using the open API extension **x-mgw-cors**
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore New
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.swagger.io/'
-        security: 'oauth'
-        cors:
-            access_control_allow_origins:
-                - test.com
-                - example.com
-            access_control_allow_headers:
-                - Authorization
-                - Content-Type
-            access_control_allow_methods:
-                - GET
-                - PUT
-                - POST
-
+x-mgw-basePath: /petstore/v1
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+x-mgw-cors:
+  access-control-allow-origins:
+      - test.com
+      - example.com
+  access-control-allow-headers:
+      - Authorization
+      - Content-Type
+  access-control-allow-methods:
+      - GET
+      - PUT
+      - POST
 ```
+Complete sample can be found [here](samples/cors_sample.yaml)

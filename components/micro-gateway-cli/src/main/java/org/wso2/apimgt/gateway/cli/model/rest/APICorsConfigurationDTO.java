@@ -36,7 +36,7 @@ public class APICorsConfigurationDTO  {
   private List<String> accessControlAllowHeaders = new ArrayList<String>();
   private List<String> accessControlAllowMethods = new ArrayList<String>();
   
-  @JsonAlias({"accessControlAllowOrigins","access_control_allow_origins"})
+  @JsonAlias({"accessControlAllowOrigins","access_control_allow_origins","access-control-allow-origins"})
   public List<String> getAccessControlAllowOrigins() {
     return accessControlAllowOrigins;
   }
@@ -44,7 +44,7 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowOrigins = accessControlAllowOrigins;
   }
 
-  @JsonAlias({"accessControlAllowCredentials","access_control_allow_credentials"})
+  @JsonAlias({"accessControlAllowCredentials","access_control_allow_credentials","access-control-allow-credentials"})
   public Boolean getAccessControlAllowCredentials() {
     return accessControlAllowCredentials;
   }
@@ -60,7 +60,7 @@ public class APICorsConfigurationDTO  {
     this.corsConfigurationEnabled = corsConfigurationEnabled;
   }
 
-  @JsonAlias({"accessControlAllowHeaders","access_control_allow_headers"})
+  @JsonAlias({"accessControlAllowHeaders","access_control_allow_headers","access-control-allow-headers"})
   public List<String> getAccessControlAllowHeaders() {
     return accessControlAllowHeaders;
   }
@@ -68,7 +68,7 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowHeaders = accessControlAllowHeaders;
   }
 
-  @JsonAlias({"accessControlAllowMethods","access_control_allow_methods"})
+  @JsonAlias({"accessControlAllowMethods","access_control_allow_methods","access-control-allow-methods"})
   public List<String> getAccessControlAllowMethods() {
     return accessControlAllowMethods;
   }
