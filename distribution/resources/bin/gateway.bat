@@ -51,7 +51,13 @@ if "%isInvalidPath%"=="T" (
 )
 
 REM Extract ballerina runtime
-if not exist %GW_HOME%\runtime\bin\ballerina call %PRGDIR%\tools.exe
+if not exist %GW_HOME%\runtime\ (
+    call %PRGDIR%\tools.exe
+    if ERRORLEVEL 0 (
+        xcopy /y %GWHOME%\lib\gateway\*.jar %GWHOME%\runtime\bre\lib\ >nul
+        xcopy /sy %GWHOME%\lib\gateway\balo\wso2 %GWHOME%\runtime\lib\repo\wso2\ >nul
+    )
+)
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
