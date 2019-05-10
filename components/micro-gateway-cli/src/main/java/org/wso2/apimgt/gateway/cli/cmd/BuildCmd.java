@@ -129,28 +129,8 @@ public class BuildCmd implements GatewayLauncherCmd {
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
-
-//todo:
-//                try {
-//                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies,
-//                            applicationPolicies, projectName);
-//                } catch (HashingException e) {
-//                    logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
-//                    throw new CLIInternalException(
-//                            "Error while checking for changes of resources. Skipping no-change detection..");
-//                }
             } catch (IOException e) {
                 throw new CLIInternalException("Error occured while generating ballerina code for the swagger file.");
-            }
-        }
-        //second phase of the build command; ballerina code compilation
-        else{
-            try {
-                GatewayCmdUtils.createProjectGWDistribution(projectName);
-                outStream.println("Build successful for the project - " + projectName);
-            } catch (IOException e) {
-                logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
-                throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
             }
         }
     }
