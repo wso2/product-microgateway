@@ -180,7 +180,7 @@ pizzashack-project.balx
 ```
 
 Then use the micro gateway runtime component to run this executable file.
-* Got to the <MG_RUNTIME_HOME>/bin folder and execute the following command
+* Go to the <MG_RUNTIME_HOME>/bin folder and execute the following command
 
 `$ bash gateway <path_to_the_excutable_file>`
 
@@ -463,7 +463,7 @@ The variable format is **\<epName\>_\<epType\>_basic_password**
 - epType : either prod or sand
 So the complete command for the above sample is like
 ```
-bash gateway -e myEndpoint3_prod_basic_password=123456
+bash gateway -e myEndpoint3_prod_basic_password=123456 <path_to_the_excutable_file>
 ```
 
 #### 6. Override backend service connection URLS
@@ -478,5 +478,5 @@ The variable format is **\<epName\>\_\<epType\>\_endpoint_\<epIndex\>**
 So the complete command for the above sample is like
 
 ```
-bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url>
+bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excutable_file>
 ```
