@@ -78,6 +78,12 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
+        <file>
+            <source>${project.build.directory}/bin/gw/tools.exe</source>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/bin</outputDirectory>
+            <destName>tools.exe</destName>
+            <fileMode>755</fileMode>
+        </file>
     </files>
 
     <dependencySets>
