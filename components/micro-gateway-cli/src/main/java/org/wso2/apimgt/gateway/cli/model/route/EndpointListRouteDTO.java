@@ -17,7 +17,7 @@ public class EndpointListRouteDTO {
     private APIEndpointSecurityDTO securityConfig = null;
     private EndpointType type = null;
     private List<String> endpoints = null;
-
+    private String name;
 
     @JsonProperty("securityConfig")
     public APIEndpointSecurityDTO getSecurityConfig() {
@@ -44,6 +44,14 @@ public class EndpointListRouteDTO {
 
     public void setEndpoints(List<String> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     //todo: add "add endpoint" method

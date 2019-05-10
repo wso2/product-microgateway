@@ -1,6 +1,6 @@
-{{#api.endpointSecurity}}{{#equals api.endpointSecurity.type "basic"}},
+{{#securityConfig}}{{#equals securityConfig.type "basic"}},
     auth: {
         scheme: "Basic",
-        username: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_basic_username", "{{api.endpointSecurity.username}}"),
-        password: gateway:retrieveConfig("{{api.id}}_{{endpointUrlType}}_basic_password", "")
-    }{{/equals}}{{/api.endpointSecurity}}
+        username: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_basic_username", "{{securityConfig.username}}"),
+        password: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_basic_password", "")
+    }{{/equals}}{{/securityConfig}}
