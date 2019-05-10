@@ -1,4 +1,5 @@
 # WSO2 API Microgateway
+[![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway)
 
 The WSO2 API Microgateway is a toolkit designed to create a specialized, lightweight, gateway distribution (WSO2 API Microgateway) by including a single API or a group of APIs. The WSO2 API Microgateway is able to serve the included APIs as soon as it is up and running.
 
