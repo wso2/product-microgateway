@@ -33,7 +33,8 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
       * [2. Add API/resource level request and response interceptors](#2-add-apiresource-level-request-and-response-interceptors)
       * [3. Add API/resource level throttling policies](#3-add-apiresource-level-throttling-policies)
       * [4. Add API level CORS configuration](#4-add-api-level-cors-configuration)
-
+      * [5. Define backend security parameters](#5-define-backend-security-parameters)
+      * [6. Override backend service connection URLS](#6-override-backend-service-connection-urls)
 
 #### Why WSO2 API Microgateway
 WSO2 API Microgateway  can be explained as as enrichment  layer for
@@ -366,3 +367,79 @@ x-mgw-cors:
       - POST
 ```
 Complete sample can be found [here](samples/cors_sample.yaml)
+
+#### 5. Define backend security parameters
+There might be occasions where the actual back end service of the API might be protected using
+basic authentication. In those scenarios we need to send the basic authentication parameters(username and password) to the back end service.
+We can specify the endpoint security parameters in the openAPI definition using extensions.
+The supported way to define endpoint security is to define endpoints under the **x-mgw-endpoints** parameter and then refer them in the API level or resource level endpoint.
+When we define the endpoint under extension "x-mgw-endpoints" then endpoint should have a name. This name(myEndpoint in below sample) is used to pass the password when running the microgateway
+Under the endpoint config we can define security parameters as below
+
+```
+securityConfig:
+      type: basic
+      username: rajith
+```
+
+```
+x-mgw-basePath: /petstore/v1
+x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint"
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint3"
+      .
+      .
+      .
+      .
+
+
+x-mgw-endpoints:
+ - myEndpoint:
+    urls:
+    - https://petstore.swagger.io/v2
+    - https://petstore.swagger.io/v5
+    securityConfig:
+      type: basic
+      username: roshan
+ - myEndpoint3:
+    urls:
+    - https://petstore.swagger.io/v3
+    - https://petstore.swagger.io/v4
+    securityConfig:
+      type: basic
+      username: rajith
+
+```
+
+Complete sample can be found [here](samples/endpoint_by_reference_sample.yaml)
+
+When running the micro gateway we can provide the password as an environment variable.
+The variable format is **\<epName\>_\<epType\>_basic_password**
+- epName : Name specified in the open API definition under x-mgw-endpoints
+- epType : either prod or sand
+So the complete command for the above sample is like
+```
+bash gateway -e myEndpoint3_prod_basic_password=123456
+```
+
+#### 6. Override backend service connection URLS
+There can be use cases where we want to override the back end connection url provided in the open API definition
+during the run time. We can override endpoints that are used as references similar to previous topic.
+In order to override the endpoint url we need to define endpoint in **x-mgw-endpoints** extension and refer them in the API level or resource level.
+Lets use the same example we have used in previous topic. So we can override the *myEndpoint3* url during the runtime as follows.
+The variable format is **\<epName\>\_\<epType\>\_endpoint_\<epIndex\>**
+- epName : Name specified in the open API definition under x-mgw-endpoints
+- epType : either prod or sand
+- epIndex : Index starting from 0. If there are many URLS(load balanced or fail over) we can override them using indexes 1,2,3 and etc
+So the complete command for the above sample is like
+
+```
+bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url>
+```

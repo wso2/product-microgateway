@@ -357,6 +357,12 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfig(ExtendedAPI api) {
         RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
                 api.getEndpointSecurity());
+        if (endpointConfig.getProdEndpointList() != null) {
+            endpointConfig.getProdEndpointList().setName(api.getId());
+        }
+        if (endpointConfig.getSandboxEndpointList() != null) {
+            endpointConfig.getSandboxEndpointList().setName(api.getId());
+        }
         api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
                 endpointConfig.getSandboxEndpointList()));
         if (api.getIsDefaultVersion()) {
@@ -370,8 +376,15 @@ public class OpenAPICodegenUtils {
 
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
                 openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+        // if endpoint name is empty set api id as the name
+        if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
+            prodEndpointListDTO.setName(api.getId());
+        }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
                 openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+        if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
+            sandEndpointListDTO.setName(api.getId());
+        }
         MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils
                 .convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
@@ -421,15 +434,31 @@ public class OpenAPICodegenUtils {
                 String referencePath = endpointExtensionObjectValue.split(OpenAPIConstants.ENDPOINTS_REFERENCE)[1];
                 for (Map<Object, Object> value : endPointReferenceExtensions) {
                     if (value.containsKey(referencePath)) {
-                        endpointListRouteDTO = objectMapper
-                                .convertValue(value.get(referencePath), EndpointListRouteDTO.class);
-                        endpointListRouteDTO.setName(referencePath);
-                        return endpointListRouteDTO;
+                        try {
+                            endpointListRouteDTO = objectMapper
+                                    .convertValue(value.get(referencePath), EndpointListRouteDTO.class);
+                            endpointListRouteDTO.setName(referencePath);
+                            return endpointListRouteDTO;
+                        } catch (IllegalArgumentException e) {
+                            throw new CLIRuntimeException(
+                                    "Error while parsing the referenced endpoint object " + endpointExtensionObjectValue
+                                            + ". The endpoint \"" + referencePath + "\" defined under x-mgw-endpoints "
+                                            + "is incompatible : " + value.get(referencePath).toString());
+                        }
                     }
                 }
+                throw new CLIRuntimeException("The referenced endpoint value : \"" + endpointExtensionObjectValue
+                        + "\" is not defined under the open API extension " + OpenAPIConstants.ENDPOINTS);
 
             } else {
-                endpointListRouteDTO = objectMapper.convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
+                try {
+                    endpointListRouteDTO = objectMapper
+                            .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
+                } catch (IllegalArgumentException e) {
+                    throw new CLIRuntimeException("Error while parsing the endpoint object. The "
+                            + "x-mgw-production-endpoints or x-mgw-sandbox-endpoints format is incompatible : "
+                            + endpointExtensionObjectValue);
+                }
             }
         }
         return endpointListRouteDTO;

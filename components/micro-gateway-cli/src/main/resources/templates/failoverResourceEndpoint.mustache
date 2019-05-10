@@ -3,5 +3,5 @@ targets: [
 {{#endpoints}}    {url: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")
 }{{#unless @last}},
 {{/unless}}{{/endpoints}}
-]{{>basicResourceAuth}}
+]{{>basicAuth}}
 });
