@@ -40,12 +40,10 @@ public class ToolkitLibExtractionUtils {
             String libPath = GatewayCmdUtils.getCLILibPath();
             String baloPath = GatewayCliConstants.CLI_GATEWAY + File.separator + GatewayCliConstants.CLI_BALO;
             String breLibPath = GatewayCliConstants.CLI_BRE + File.separator + GatewayCliConstants.CLI_LIB;
-            String runtimeExtractedPath = libPath + File.separator + GatewayCliConstants.CLI_RUNTIME;
             String platformExtractedPath =
                     GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
 
             extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
-            extractBallerinaDist(runtimeExtractedPath, libPath, baloPath, breLibPath, false);
 
         } catch (IOException e) {
             String message = "Error while unzipping platform and runtime while project setup";
@@ -68,6 +66,9 @@ public class ToolkitLibExtractionUtils {
             // Copy gateway jars to platform
             GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
                     + GatewayCliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
+            //todo: remove this segment in next release
+            new File(destination + File.separator + breLibPath + File.separator +
+                    "swagger-to-ballerina-generator-0.990.4.jar").delete();
         }
     }
 }

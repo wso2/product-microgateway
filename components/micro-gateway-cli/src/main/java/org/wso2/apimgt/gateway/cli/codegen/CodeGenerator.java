@@ -35,6 +35,7 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.utils.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -125,17 +126,16 @@ public class CodeGenerator {
         String openApiPath;
         openApiPath = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +
                     GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-
-
-        Files.walk(Paths.get(openApiPath)).filter( path -> path.getFileName().toString().endsWith(".json"))
+        //to store the available interceptors for validation purposes
+        OpenAPICodegenUtils.setInterceptors(projectName);
+        Files.walk(Paths.get(openApiPath)).filter(path -> (path.getFileName().toString().endsWith(".json") ||
+                path.getFileName().toString().endsWith(".yaml")))
                 .forEach( path -> {
-                    ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(path.toString());
-                    String basepath = MgwDefinitionBuilder.getBasePath(api.getName(), api.getVersion());
-                    api.setContext(basepath);
-                    BallerinaService definitionContext;
-                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api);
                     OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-
+                    OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
+                    ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
+                    BallerinaService definitionContext;
+                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
                     try {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));

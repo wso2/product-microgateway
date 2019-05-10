@@ -101,7 +101,6 @@ public class CLIExecutor {
         String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
         File swagerDesPath = new File( path + "/apimTestProject"+ File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + "/testapi.json");
-        File defYamlFile = new File (apiDefinitionPath + "/definition.yaml");
         File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
 
         System.setProperty("user.dir", path.toString());
@@ -109,12 +108,7 @@ public class CLIExecutor {
         main.main(initArgs);
 
         FileUtils.copyFile(swaggerFilePath,swagerDesPath);
-        if (defYamlFile.exists()) {
-           defYamlFile.delete();
-           FileUtils.copyFile(resDefYaml ,defYamlFile);
-       } else {
-            FileUtils.copyFile(resDefYaml ,defYamlFile);
-       }
+
        if (policyYamlFile.exists()) {
            policyYamlFile.delete();
            FileUtils.copyFile(policyYamlResouce, policyYamlFile);

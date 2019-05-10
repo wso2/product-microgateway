@@ -117,7 +117,6 @@ public class BuildCmd implements GatewayLauncherCmd {
                 etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
                 GatewayCmdUtils.setEtcd(etcd);
 
-                MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
 
@@ -127,34 +126,11 @@ public class BuildCmd implements GatewayLauncherCmd {
                         GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
 
-                //to indicate the api information which is not used in the code generation process, but included in
-                //definition.yaml
-                MgwDefinitionBuilder.FindUnusedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
-
-//todo:
-//                try {
-//                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies,
-//                            applicationPolicies, projectName);
-//                } catch (HashingException e) {
-//                    logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
-//                    throw new CLIInternalException(
-//                            "Error while checking for changes of resources. Skipping no-change detection..");
-//                }
             } catch (IOException e) {
                 throw new CLIInternalException("Error occured while generating ballerina code for the swagger file.");
-            }
-        }
-        //second phase of the build command; ballerina code compilation
-        else{
-            try {
-                GatewayCmdUtils.createProjectGWDistribution(projectName);
-                outStream.println("Build successful for the project - " + projectName);
-            } catch (IOException e) {
-                logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
-                throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
             }
         }
     }
