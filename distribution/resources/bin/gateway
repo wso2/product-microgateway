@@ -51,13 +51,9 @@ if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
 
-for last; do true; done
-
-if [ ! -z "$CMD" ]  && [ $CMD != "stop" ]; then
-  if [[ ! -f "$last" ]]; then
-      echo "Executable balx file does not exist"
-      exit 0
-  fi
+# Extract ballerina runtime
+if [ ! -d "$GWHOME/runtime" ]; then
+    $PRGDIR/tools
 fi
 
 # Set JAVA Xms and Xmx values in Ballerina runtime
@@ -90,6 +86,15 @@ do
         args="$args $c"
     fi
 done
+
+for last; do true; done
+
+if [ ! "$CMD" = "stop" ]; then
+  if [[ ! -f "$last" ]]; then
+      echo "Path to executable balx file is invalid"
+      exit 0
+  fi
+fi
 
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
