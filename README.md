@@ -1,7 +1,7 @@
 # WSO2 API Microgateway
 [![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway)
 
-The WSO2 API Microgateway is a toolkit designed to create a specialized, lightweight, gateway distribution (WSO2 API Microgateway) by including a single API or a group of APIs. The WSO2 API Microgateway is able to serve the included APIs as soon as it is up and running.
+The WSO2 API Microgateway is a lightweight, gateway distribution (WSO2 API Microgateway) which can be used with single or multiple APIs.
 
 In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
 
@@ -23,11 +23,13 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
    * [Running the microgateway](#running-the-microgateway)
       * [Initializing a WSO2 API Microgateway project](#initializing-a-wso2-api-microgateway-project)
       * [Building the WSO2 API Microgateway project](#building-the-wso2-api-microgateway-project)
+      * [Running the WSO2 API Microgateway](#running-the-wso2-api-microgateway)
    * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
       * [Init](#init)
       * [Build](#build)
    * [Project Structure](#project-structure)
    * [How to run the microgateway distribution](#how-to-run-the-microgateway-distribution)
+   * [Invoke API exposed via microgateway](#invoke-api-exposed-via-microgateway)
    * [Micro gateway supported open API extensions](#micro-gateway-supported-open-api-extensions)
    * [Micro gateway open API extension usages](#micro-gateway-open-api-extension-usages)
       * [1. Override endpoint per API resource](#1-override-endpoint-per-api-resource)
@@ -52,6 +54,14 @@ where the duplicated functionality is supported via gateway layer and acts as a 
 - **Cloud native** : A lightweight gateway that can be run on any platform(bare metal, docker and k8s)
 - **Scalable** : Distributed nature allows to scale horizontally.
 
+#### Microgateway Components
+- **Toolkit** : The toolkit is used to initiate micro gateway projects. Once the project is initialized API developer can
+add(copy) open API definitions of the APIs to the  project or import APIs from WSO2 API Manager. Once the all the APIs are added the toolkit can be used
+to build the project and create and executable file.
+
+- **Runtime** : The gateway run time can expose the APIS and servees the API requests. The executable output of the toolkit should be provided as an input when running the microgateway runtime.
+Then this run time will expose all the APIs which were included in the particular project which used to create the executable file
+
 #### Architecture
 
 The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API defintion.
@@ -67,10 +77,11 @@ The following diagram illustrates how the WSO2 API Microgateway expose micro ser
 
 #### Running the microgateway
 
-Running the WSO2 API Microgateway is a 3 step process. The first two steps are involved in building the runtime.
+Running the WSO2 API Microgateway is a 3 step process. The first two steps are involved in building the executable using the toolkit and the last
+step is to run that executable file using the micro gateway runtime component.
 
  1. Initializing a WSO2 API Microgateway project.
- 1. Building the WSO2 API Microgateway project and creating a WSO2 API Microgateway distribution.
+ 1. Building the WSO2 API Microgateway project and creating a executable file
  1. Running the WSO2 API Microgateway distribution.
 
 ##### Initializing a WSO2 API Microgateway project
@@ -84,9 +95,13 @@ vendor specific extensions.
 
 ##### Building the WSO2 API Microgateway project
 
-Once the project has been created, the next step is to build the project sources.
+Once the project has been created, the next step is to build the project sources. This output of this operation is a
+executable file(.balx) which later provided as an input to the runtime
 
-#### WSO2 API Microgateway commands
+##### Running the WSO2 API Microgateway
+The output(.balx file) of toolkit build process is used to run the micro gateway runtime component.
+
+#### WSO2 API Microgateway toolkit commands
 
 Following are the set of commands included within the WSO2 API Microgateway.
 
@@ -127,7 +142,7 @@ Sample for petstore open API definition with two resources and extensions can be
 
 `$ micro-gw build`
 
-Upon execution of this command, the WSO2 API Microgateway CLI tool will build the micro gateway distribution for the specified project.
+Upon execution of this command, the WSO2 API Microgateway CLI tool will build the executable file for the specified project.
 
 Execute `micro-gw help build` to get more detailed information regarding the build command.
 
@@ -157,16 +172,17 @@ petstore-project/
 
 #### How to run the microgateway distribution
 
-Once the **init, build** commands are executed, a micro gateway distribution will be created under target folder.
+Once the **init, build** commands are executed, a executable file will be created under target folder.
 
 ```
 ../petstore-project/target$ ls
-micro-gw-pizzashack-project.zip
+pizzashack-project.balx
 ```
 
-* Unzip the micro-gw-petstore-project.zip and run the `gateway` script inside the bin folder of the extracted zip using below command.
+Then use the micro gateway runtime component to run this executable file.
+* Got to the <MG_RUNTIME_HOME>/bin folder and execute the following command
 
-`$ bash gateway `
+`$ bash gateway <path_to_the_excutable_file>`
 
 ```
 micro-gw-internal/bin$ bash gateway
@@ -176,6 +192,25 @@ ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
 
+#### Invoke API exposed via microgateway
+Once APIs are exposed we can invoke API with an valid jwt token or an opaque access token.
+In order to use jwt tokens micro gateway should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
+
+1. Any third party secure token service
+The public certificate of the token service which used to sign the token should be added to the trust store of the microgateway.
+The jwt should have the claims **sub, aud, exp** in order to validate with microgateway
+
+1. Get jwt from WSO2 API Manager
+Please refer the [documentation](https://docs.wso2.com/display/AM260/Generate+a+JWT+token+from+the+API+Store) on how to get a valid jwt
+
+The following sample command can be used to invoke the "/pet/findByStatus" resource of the petstore API
+
+```
+curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
+```
+Please note that the jwt provided in the command is a jwt toke retrieved from WSO2 API Manager with higher expiry time which can be used with any API not protected with scopes.
+This token works with any API because, default  microgateway config uses the public certificate of WSO2 API Manager to validate the signature.
+
 ### Micro gateway supported open API extensions
 | Extension                     | Description                                               | Required/Not Required |
 | -------------                 | -------------                                             | ----------------------|
@@ -184,6 +219,7 @@ ballerina: started HTTPS/WSS endpoint localhost:9096
 | x-mgw-sandbox-endpoints       | Specify the sandbox endpoint of the service if available  | Not Required -> API/Resource level
 | x-mgw-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
 | x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
+| x-mgw-endpoints               | Define endpoint configs globally which can be then referred with  x-mgw-production-endpoints or x-mgw-sandbox-endpoints extensions | Not Required
 
 ### Micro gateway open API extension usages
 #### 1. Override endpoint per API resource
