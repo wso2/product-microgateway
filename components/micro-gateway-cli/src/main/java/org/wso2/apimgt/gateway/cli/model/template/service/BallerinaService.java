@@ -25,6 +25,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -185,6 +186,20 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             .get(OpenAPIConstants.THROTTLING_TIER));
                     //api level throttle policy is added only if resource level resource tier is not available
                     apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    //to add API-level security disable
+                    Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
+                            .get(OpenAPIConstants.DISABLE_SECURITY));
+                    disableSecurity.ifPresent(value -> {
+                        try {
+                            //Since we are considering based on 'x-mgw-security-disable', secured value should be the
+                            // negation
+                            boolean secured = !(Boolean) value;
+                            operation.getValue().setSecured(secured);
+                        } catch (ClassCastException e) {
+                            throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                                    "' should be a boolean value. But provided '" + value.toString() + "'.");
+                        }
+                    });
                     //to set scope property of API
                     operation.getValue().setScope(api.getMgwApiScope());
                 }

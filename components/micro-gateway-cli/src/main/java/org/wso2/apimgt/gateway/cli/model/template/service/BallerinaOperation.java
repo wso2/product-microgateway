@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -52,6 +53,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> methods;
     private String scope;
     private boolean isSecured = true;
+    //to identify if the isSecured flag is set from the operation
+    private boolean isSecuredAssignedFromOperation = false;
     private boolean hasProdEpConfig = false;
     private boolean hasSandEpConfig = false;
     private MgwEndpointConfigDTO epConfig;
@@ -109,6 +112,17 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.DISABLE_SECURITY));
+            devFirstDisableSecurity.ifPresent(value -> {
+                try {
+                    this.isSecured = !(Boolean) value;
+                    this.isSecuredAssignedFromOperation = true;
+                } catch (ClassCastException e) {
+                    throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                            "' should be a boolean value. But provided '" + value.toString() + "'.");
+                }
+            });
         }
 
         if (operation.getParameters() != null) {
@@ -203,6 +217,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setSecured(boolean secured) {
+        if (isSecuredAssignedFromOperation) {
+            return;
+        }
         isSecured = secured;
     }
 
