@@ -880,7 +880,6 @@ public class OpenAPICodegenUtils {
         });
     }
 
-
     /**
      * store the endpoint extensions which are used as references
      *
