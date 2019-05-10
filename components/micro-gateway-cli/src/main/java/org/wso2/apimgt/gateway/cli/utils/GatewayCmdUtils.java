@@ -352,7 +352,6 @@ public class GatewayCmdUtils {
         String genDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
         createFolderIfNotExist(genDirPath);
 
-        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_DEFINITION_FILE);
         createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
 
         String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;

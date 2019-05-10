@@ -13,6 +13,43 @@ In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gate
 
 WSO2 API Microgateway acts as a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
 
+#### Table of Contents
+
+
+   * [Why WSO2 API Microgateway](#why-wso2-api-microgateway)
+   * [Features](#features)
+   * [Architecture](#architecture)
+   * [Running the microgateway](#running-the-microgateway)
+      * [Initializing a WSO2 API Microgateway project](#initializing-a-wso2-api-microgateway-project)
+      * [Building the WSO2 API Microgateway project](#building-the-wso2-api-microgateway-project)
+   * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
+      * [Init](#init)
+      * [Build](#build)
+   * [Project Structure](#project-structure)
+   * [How to run the microgateway distribution](#how-to-run-the-microgateway-distribution)
+   * [Micro gateway supported open API extensions](#micro-gateway-supported-open-api-extensions)
+   * [Micro gateway open API extension usages](#micro-gateway-open-api-extension-usages)
+      * [1. Override endpoint per API resource](#1-override-endpoint-per-api-resource)
+      * [2. Add API/resource level request and response interceptors](#2-add-apiresource-level-request-and-response-interceptors)
+      * [3. Add API/resource level throttling policies](#3-add-apiresource-level-throttling-policies)
+      * [4. Add API level CORS configuration](#4-add-api-level-cors-configuration)
+
+
+#### Why WSO2 API Microgateway
+WSO2 API Microgateway  can be explained as as enrichment  layer for
+services and microservices. In traditional monolithic architectures, common functionality seems to be duplicated among
+multiple services. Functionalities like Authentication, rate limiting, transformations are duplicated in each service. This where the WSO2 API microgateway comes handy
+where the duplicated functionality is supported via gateway layer and acts as a single entry point to all the services.
+
+#### Features
+- **Authentication** : Supports mutual TLS, Oauth2(opaque tokens and JWT) and basic authentication
+- **Rate limiting** : Throttle the request to the APIs based on the request count for a give time period
+- **Transformations** : Manipulate API request and response using interceptor functions
+- **Analytics** : Publish data to streams
+- **Service Discovery** : Resolve endpoints using third party distributed key value stores like etcd
+- **Cloud native** : A lightweight gateway that can be run on any platform(bare metal, docker and k8s)
+- **Scalable** : Distributed nature allows to scale horizontally.
+
 #### Architecture
 
 The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API defintion.
@@ -37,8 +74,10 @@ Running the WSO2 API Microgateway is a 3 step process. The first two steps are i
 ##### Initializing a WSO2 API Microgateway project
 
 Initializing a WSO2 API Microgateway project creates the default folder structure at the location where the command is run.
-Empty `api_definitions` folder and `definitions.yaml` will be created inside the main folder. API developer can add multiple open API definitions inside the
-api_definitions file and define endpoints and interceptors for the resources in definitions.yaml
+Empty `api_definitions` folder will be created inside the main folder. API developer can add multiple open API definitions inside the
+api_definitions file and define endpoints and interceptors for the resources  by adding open API extensions.
+API developer can specify the  back end endpoint details, request and response interceptors, throttle policies, CORS config and etc using open API
+vendor specific extensions.
 
 
 ##### Building the WSO2 API Microgateway project
@@ -55,10 +94,9 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 `$ micro-gw init`
 
-The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder and an empty **definitions.yaml**.
+The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder.
 
 * **api_defintions** - API developer should copy all the open API definitions of microservices inside this folder
-* **definitions.yaml** - API developer can define API level and resource level endpoints and interceptors and  resource level throttle policies
 
 If the project already exists, a warning will be prompted requesting permission to override existing project.
 
@@ -69,35 +107,19 @@ Example
 
     $ micro-gw init petstore-project
 
-
-Sample definition.yaml can be defined as follows. This is defined for the petstore swagger : https://petstore.swagger.io/v2/swagger.json. API deveoper should copy this swagger to api_defintions file
+Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw
+Lets define the basic microgateway open API extension in order to expose the API.
 
 
 ```
-apis:
-    /petstore/v1:
-        title: Swagger Petstore
-        version: 1.0.0
-        production_endpoint:
-            type: 'http'
-            urls:
-                - 'https://petstore.swagger.io/v2'
-        sandbox_endpoint:
-            type: 'http'
-            urls:
-                - 'https://sand.petstore.swagger.io/'
-        resources:
-            /pet/findByStatus:
-                get:
-                    production_endpoint:
-                        type: 'http'
-                        urls:
-                            - 'http://www.mocky.io/v2/5cbd4d1d2f0000e70a16cc0e'
-                    throttlePolicy: 10kPerMin
-        security: 'oauth'
+x-mgw-basePath: /petstore/v1
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
 
 ```
 
+Sample for petstore open API definition with two resources and extensions can be found [here](samples/petstore_basic.yaml)
 
 ##### Build
 
@@ -120,7 +142,6 @@ petstore-project/
 ├── api_definitions
 ├── conf
 │   └── deployment-config.toml
-├── definition.yaml
 ├── gen
 │   ├── api_definitions
 │   └── src
@@ -152,3 +173,196 @@ ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
+
+### Micro gateway supported open API extensions
+| Extension                     | Description                                               | Required/Not Required |
+| -------------                 | -------------                                             | ----------------------|
+| x-mgw-basePath                | Base path which gateway exposes the API                   | **Required** -> API level only
+| x-mgw-production-endpoints    | Specify the actual back end of the service                | **Required** -> API level/ Not required -> Resource level
+| x-mgw-sandbox-endpoints       | Specify the sandbox endpoint of the service if available  | Not Required -> API/Resource level
+| x-mgw-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
+| x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
+
+### Micro gateway open API extension usages
+#### 1. Override endpoint per API resource
+API developer can specify endpoints per resource by adding the **x-mgw-production-endpoints** extension under the respective resource in open API definition.
+If a specific resource have an endpoint which requires different back end rather than the global back end defined for the API, then it can be overridden as below.
+
+In following example `/pet/findByStatus` resource endpoint is overridden with load balance endpoint and `pet/{petId}` resource overridden with another http endpoint
+
+```
+
+"/pet/findByStatus":
+ get:
+   tags:
+   - pet
+   summary: Finds Pets by status
+   description: Multiple status values can be provided with comma separated strings
+   operationId: findPetsByStatus
+   parameters:
+   - name: status
+     in: query
+     description: Status values that need to be considered for filter
+     required: true
+     explode: true
+     schema:
+       type: array
+       items:
+         type: string
+         enum:
+         - available
+         - pending
+         - sold
+         default: available
+   x-mgw-production-endpoints:
+     urls:
+     - http://www.mocky.io/v2/5cd28cd73100008628339802
+     - https://petstore.swagger.io/v2
+
+
+"/pet/{petId}":
+ get:
+   tags:
+   - pet
+   summary: Find pet by ID
+   description: Returns a single pet
+   operationId: getPetById
+   parameters:
+   - name: petId
+     in: path
+     description: ID of pet to return
+     required: true
+     schema:
+       type: integer
+       format: int64
+   x-mgw-production-endpoints:
+     urls:
+     - http://www.mocky.io/v2/5cd28b9a310000bf293397f9
+
+```
+
+Complete sample can be found [here](samples/per_resource_endpoint.yaml)
+
+#### 2. Add API/resource level request and response interceptors
+Interceptors can be used to do request and response transformations and mediation. Request interceptors are engaged before sending the request to the back end and
+response interceptors are engaged before responding to the client.
+API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the open API definition using extensions
+
+In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` folder inside the project. This interceptors will only be enagged for that particular resource only
+```
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-request-interceptor: validateRequest
+      x-mgw-response-interceptor: validateResponse
+      parameters:
+      - name: status
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - available
+            - pending
+            - sold
+            default: available
+```
+
+Sample validateRequest method can be implemented as below.
+```
+import ballerina/io;
+import ballerina/http;
+
+public function validateRequest (http:Caller outboundEp, http:Request req) {
+    io:println("Request is intercepted.");
+}
+```
+
+Sample validateResponse method can be implemented as below.
+```
+import ballerina/io;
+import ballerina/http;
+
+public function validateResponse (http:Caller outboundEp, http:Response res) {
+    io:println("Response is intercepted.");
+}
+```
+
+Similarly the API developer can add interceptors globally at the API level as well
+```
+openapi: 3.0.0
+  version: 1.0.0
+  title: Swagger Petstore New
+  termsOfService: http://swagger.io/terms/
+x-mgw-basePath: /petstore/v1
+x-mgw-request-interceptor: validateRequest
+x-mgw-response-interceptor: validateResponse
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+```
+
+Sample open API definition for interceptors can be found [here](samples/interceptors_sample.yaml).
+#### 3. Add API/resource level throttling policies
+API developer can specify the rate limiting policies for each resource or globally for the API. These policies should be defined in the policies.yaml file in the project directory
+By default set of policies are available, but user can add more policies to the file and later refer them by name in the open API definition
+Following samples show how throttling policies can be added to API level
+```
+x-mgw-basePath: /petstore/v1
+x-mgw-throttling-tier: 10kPerMin
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+```
+The throttle policy "10kPerMin" is defined in the policies.yaml of the project as below.
+```
+- 10kPerMin:
+     count: 10000
+     unitTime: 1
+     timeUnit: min
+```
+
+Resource level throttle policies also can be defined as well.
+```
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-throttling-tier: 20kPerMin
+```
+Complete sample can be found [here](samples/policies_sample.yaml)
+
+#### 4. Add API level CORS configuration
+
+CORS configurations can be added to each API using the open API extension **x-mgw-cors**
+```
+x-mgw-basePath: /petstore/v1
+x-mgw-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+x-mgw-cors:
+  access-control-allow-origins:
+      - test.com
+      - example.com
+  access-control-allow-headers:
+      - Authorization
+      - Content-Type
+  access-control-allow-methods:
+      - GET
+      - PUT
+      - POST
+```
+Complete sample can be found [here](samples/cors_sample.yaml)

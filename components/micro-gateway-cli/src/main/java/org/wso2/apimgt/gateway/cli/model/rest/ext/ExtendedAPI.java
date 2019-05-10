@@ -23,6 +23,10 @@ public class ExtendedAPI extends APIDetailedDTO {
     private MgwEndpointConfigDTO endpointConfigRepresentation = null;
     //Basepath
     private String specificBasepath = null;
+    //Security
+    private String mgwApiSecurity = null;
+    //Scopes
+    private String mgwApiScope = null;
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;
@@ -38,5 +42,21 @@ public class ExtendedAPI extends APIDetailedDTO {
 
     public void setSpecificBasepath(String specificBasepath) {
         this.specificBasepath = specificBasepath;
+    }
+
+    public String getMgwApiSecurity() {
+        return mgwApiSecurity;
+    }
+
+    public void setMgwApiSecurity(String mgwApiSecurity) {
+        this.mgwApiSecurity = mgwApiSecurity;
+    }
+
+    public void setMgwApiScope(String mgwApiScope) {
+        this.mgwApiScope = mgwApiScope;
+    }
+
+    public String getMgwApiScope() {
+        return mgwApiScope;
     }
 }
