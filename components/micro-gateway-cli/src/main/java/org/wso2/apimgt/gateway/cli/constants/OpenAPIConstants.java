@@ -10,4 +10,5 @@ public class OpenAPIConstants {
     public static final String SANDBOX_ENDPOINTS = "x-mgw-sandbox-endpoints";
     public static final String CORS = "x-mgw-cors";
     public static final String THROTTLING_TIER = "x-mgw-throttling-tier";
+    public static final String DISABLE_SECURITY = "x-mgw-security-disable";
 }

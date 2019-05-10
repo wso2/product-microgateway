@@ -277,7 +277,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         }
         return isAuthorized;
     }
-    return isAuthorized;
+    return true;
 }
 
 function getResourceAuthConfig(http:FilterContext context) returns (boolean, string[]) {
