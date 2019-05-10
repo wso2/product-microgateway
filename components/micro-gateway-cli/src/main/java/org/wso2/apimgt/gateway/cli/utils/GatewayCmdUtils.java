@@ -65,7 +65,6 @@ public class GatewayCmdUtils {
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
     private static Etcd etcd;
-    private static final String algorithm = "AES";
     private static boolean verboseLogsEnabled = setVerboseEnabled();
 
     public static Etcd getEtcd() {
@@ -308,15 +307,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Get config folder location
-     *
-     * @return config folder location
-     */
-    private static String getConfigFolderLocation() {
-        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF;
-    }
-
-    /**
      * Get temp folder location
      *
      * @param projectName name of the project
@@ -425,80 +415,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Create a micro gateway distribution for the provided project name
-     *
-     * @param projectName name of the project
-     * @throws IOException error while creating micro gateway distribution
-     */
-    public static void createProjectGWDistribution(String projectName) throws IOException {
-        createTargetGatewayDistStructure(projectName);
-
-        String distPath = getTargetDistPath(projectName);
-        String gwDistPath = getTargetGatewayDistPath(projectName);
-        copyFolder(getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB + File.separator
-                + GatewayCliConstants.CLI_RUNTIME, gwDistPath + File.separator + GatewayCliConstants.GW_DIST_RUNTIME);
-        copyTargetDistBinScripts(projectName);
-        copyTargetDistBalx(projectName);
-
-        //copy micro-gw.conf file to the distribution
-        copyFilesToSources(
-                GatewayCmdUtils.getConfigFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_CONF_FILE,
-                gwDistPath + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                        + GatewayCliConstants.GW_DIST_CONF_FILE);
-
-        String targetPath = getProjectTargetDirectoryPath(projectName);//target
-        String zipFileName = GatewayCliConstants.GW_DIST_PREFIX + projectName + GatewayCliConstants.EXTENSION_ZIP;//micro-gw-projname.zip
-        //creating an archive of the distribution
-        ZipUtils.zip(distPath, targetPath + File.separator + zipFileName);
-
-        // clean the target folder while keeping the distribution zip file
-        cleanFolder(targetPath, ArrayUtils.add(GatewayCliConstants.PROJECTS_TARGET_DELETE_FILES,
-                projectName + GatewayCliConstants.EXTENSION_BALX));
-    }
-
-    /**
-     * Creates the distribution structure for the project name
-     *
-     * @param projectName name of the label
-     */
-    private static void createTargetGatewayDistStructure(String projectName) {
-        //path : {projectName}/target
-        String projectTargetPath = getProjectTargetDirectoryPath(projectName);
-        createFolderIfNotExist(projectTargetPath);
-
-        //path : {projectName}/target/distribution
-        String distPath = getTargetDistPath(projectName);
-        createFolderIfNotExist(distPath);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}
-        String distMicroGWPath = getTargetGatewayDistPath(projectName);
-        createFolderIfNotExist(distMicroGWPath);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}/bin
-        String distBinPath = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_BIN;
-        createFolderIfNotExist(distBinPath);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}/conf
-        String distConfPath = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_CONF;
-        createFolderIfNotExist(distConfPath);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}/logs
-        String logsDirPath = distMicroGWPath + File.separator + GatewayCliConstants.PROJECT_LOGS_DIR;
-        createFolderIfNotExist(logsDirPath);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}/logs/access_logs
-        createFileIfNotExist(logsDirPath, GatewayCliConstants.ACCESS_LOG_FILE);
-
-        //path : {projectName}/target/distribution/micro-gw-{projectName}/exec
-        String distExec = distMicroGWPath + File.separator + GatewayCliConstants.GW_DIST_EXEC;
-        createFolderIfNotExist(distExec);
-
-        //path : {label}/target/distribution/micro-gw-{label}/api-usage-data
-        String apiUsageDir = distMicroGWPath + File.separator + GatewayCliConstants.PROJECT_API_USAGE_DIR;
-        createFolderIfNotExist(apiUsageDir);
-    }
-
-    /**
      * Load the stored resource hash content from the CLI temp folder
      *
      * @param projectName name of the project
@@ -575,70 +491,6 @@ public class GatewayCmdUtils {
     public static String getCLILibHashHolderFileLocation() {
         return getCLIHome() + File.separator + GatewayCliConstants.TEMP_DIR_NAME + File.separator + GatewayCliConstants
                 .LIB_HASH_HOLDER_FILE_NAME;
-    }
-
-    /**
-     * Get the distribution path for a given project name
-     *
-     * @param projectName name of the project
-     * @return distribution path for a given project name
-     */
-    private static String getTargetDistPath(String projectName) {
-        return getProjectTargetDirectoryPath(projectName) + File.separator + GatewayCliConstants.GW_TARGET_DIST;
-    }
-
-    /**
-     * Get the gateway distribution path for a given project name
-     *
-     * @param projectName name of the project
-     * @return gateway distribution path for a given project name
-     */
-    private static String getTargetGatewayDistPath(String projectName) {
-        return getTargetDistPath(projectName) + File.separator + GatewayCliConstants.GW_DIST_PREFIX + projectName;
-    }
-
-    /**
-     * Copies shell scripts to the distribution location
-     *
-     * @param projectName name of the project
-     * @throws IOException error while coping scripts
-     */
-    private static void copyTargetDistBinScripts(String projectName) throws IOException {
-        String targetPath = getTargetGatewayDistPath(projectName);
-        String binDir = targetPath + File.separator
-                + GatewayCliConstants.GW_DIST_BIN + File.separator;
-
-        String linuxShContent = readFileAsString(GatewayCliConstants.GW_DIST_SH_PATH, true);
-        linuxShContent = linuxShContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File shPathFile = new File(binDir + GatewayCliConstants.GW_DIST_SH);
-        saveScript(linuxShContent, shPathFile);
-
-        String winBatContent = readFileAsString(GatewayCliConstants.GW_DIST_BAT_PATH, true);
-        winBatContent = winBatContent.replace(GatewayCliConstants.LABEL_PLACEHOLDER, projectName);
-        File batPathFile = new File(binDir + GatewayCliConstants.GW_DIST_BAT);
-        saveScript(winBatContent, batPathFile);
-    }
-
-    /**
-     * Copies balx binaries to the distribution location
-     *
-     * @param projectName name of the project
-     * @throws IOException error while coping balx files
-     */
-    private static void copyTargetDistBalx(String projectName) throws IOException {
-        String projectGenTargetDirectoryPath = getProjectGenDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_TARGET_DIR;
-        String gatewayDistExecPath =
-                getTargetGatewayDistPath(projectName) + File.separator + GatewayCliConstants.GW_DIST_EXEC;
-        File gatewayDistExecPathFile = new File(
-                gatewayDistExecPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
-        File balxSourceFile = new File(
-                projectGenTargetDirectoryPath + File.separator + projectName + GatewayCliConstants.EXTENSION_BALX);
-        if (balxSourceFile.exists()) {
-            FileUtils.copyFile(balxSourceFile, gatewayDistExecPathFile);
-        } else {
-            throw new CLIInternalException(projectName + ".balx could not be found in " + projectGenTargetDirectoryPath);
-        }
     }
 
     /**
@@ -750,16 +602,6 @@ public class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /api-definition of a given project in the current working directory
-     *
-     * @param projectName name of the project
-     */
-    public static String getProjectSwaggerPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-    }
-
-    /**
      * Returns path to the /grpc_service/client of a given project in the current working directory
      *
      * @return path to the /grpc_service/client of a given project in the current working directory
@@ -778,17 +620,6 @@ public class GatewayCmdUtils {
     public static String getProjectGrpcSoloDirectoryPath() {
         return getUserDir() + File.separator
                 + GatewayCliConstants.PROJECT_GRPC_SERVICE_DIR;
-    }
-
-    /**
-     * Returns path to the /target of a given project in the current working directory
-     *
-     * @param projectName name of the project
-     * @return path to the /target of a given project in the current working directory
-     */
-    private static String getProjectTargetDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_TARGET_DIR;
     }
 
     /**
@@ -852,51 +683,6 @@ public class GatewayCmdUtils {
      */
     public static void copyFilesToSources(String sourcePath, String destinationPath) throws IOException {
         Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    /**
-     * Cleans the given folder by deleting a set of specified files
-     *
-     * @param targetPath path of folder to clean
-     * @param delete     files to delete
-     * @throws IOException error while cleaning the folder
-     */
-    private static void cleanFolder(String targetPath, String... delete) throws IOException {
-        File targetFolder = new File(targetPath);
-        logger.debug("Cleaning the target folder: {}", targetPath);
-        if (!targetFolder.isDirectory()) {
-            logger.warn("Nothing to delete. Target folder {} is not a directory.", targetPath);
-            return;
-        }
-        //Get all files from source directory
-        String[] files = targetFolder.list();
-        if (files == null) {
-            logger.warn("Nothing to delete. Target folder {} is empty.", targetPath);
-            return;
-        }
-        for (String file : files) {
-            for (String deleteFile : delete) {
-                if (!file.equals(deleteFile)) {
-                    logger.trace("Keeping file: {}", file);
-                    continue;
-                }
-                logger.trace("Deleting file: {}", file);
-                File fileToDelete = new File(targetFolder, file);
-                boolean success;
-                if (fileToDelete.isDirectory()) {
-                    FileUtils.deleteDirectory(fileToDelete);
-                    success = !fileToDelete.exists();
-                } else {
-                    success = fileToDelete.delete();
-                }
-                if (success) {
-                    logger.trace("Deleting file {} is successful.", file);
-                } else {
-                    logger.trace("Deleting file {} failed.", file);
-                }
-            }
-        }
-        logger.debug("Cleaning the target folder {} complete.", targetPath);
     }
 
     /**
@@ -1088,25 +874,6 @@ public class GatewayCmdUtils {
      */
     public static String getUnixPath(String path) {
         return path.replace(File.separator, "/");
-    }
-
-    /**
-     * Create script file in the given path with the given content
-     *
-     * @param content Content needs to be added to the script file
-     * @param path    File object containing the path to save the script
-     */
-    private static void saveScript(String content, File path) throws IOException {
-        try (FileWriter writer = new FileWriter(path)) {
-            writer.write(content);
-            boolean success = path.setExecutable(true);
-            if (success) {
-                logger.trace("File: {} is set to executable. ", path.getAbsolutePath());
-            } else {
-                logger.error("Failed to set executable file: {} ", path.getAbsolutePath());
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
-            }
-        }
     }
 
     /**
