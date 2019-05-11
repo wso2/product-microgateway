@@ -51,11 +51,6 @@ if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
 
-# Set JAVA Xms and Xmx values in Ballerina runtime
-sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
-sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
-rm $BALLERINA_HOME/bin/ballerina.back
-
 # ----- Process the input command ----------------------------------------------
 args=""
 for c in $*
@@ -82,6 +77,29 @@ do
     fi
 done
 
+for last; do true; done
+
+if [ ! "$CMD" = "stop" ]; then
+  if [[ ! -f "$last" ]]; then
+      echo "Path to executable balx file is invalid"
+      exit 0
+  fi
+fi
+
+# Extract ballerina runtime
+if [ ! -d "$GWHOME/runtime" ]; then
+    $PRGDIR/tools
+    if [ $? -eq 0 ]; then
+        cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
+        cp -r $GWHOME/lib/gateway/balo/wso2 $GWHOME/runtime/lib/repo/
+    fi
+fi
+
+# Set JAVA Xms and Xmx values in Ballerina runtime
+sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
+sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
+rm $BALLERINA_HOME/bin/ballerina.back
+
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
     if  ps -p $PID > /dev/null ; then
@@ -93,7 +111,7 @@ if [ "$CMD" = "start" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-    sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1 $GWHOME/exec/${label}.balx  | tee -a $GWHOME/logs/microgateway.log
+    sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
@@ -134,7 +152,7 @@ elif [ "$CMD" = "restart" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-   sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1 $GWHOME/exec/${label}.balx  | tee -a $GWHOME/logs/microgateway.log
+   sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   PROCESS_ID=""
@@ -156,4 +174,4 @@ EOF
 fi
 
 # run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
-sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1 $GWHOME/exec/${label}.balx  | tee -a $GWHOME/logs/microgateway.log
+sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1  | tee -a $GWHOME/logs/microgateway.log

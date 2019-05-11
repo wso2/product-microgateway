@@ -41,9 +41,9 @@ import wso2/gateway;
 @http:ServiceConfig {
     basePath: "{{basepath}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
     authConfig:{
-    {{#if config.basicAuth.isOptional}}
+    {{#if basicAuth.isOptional}}
         authProviders:["basic","oauth2","jwt"]
-    {{else if config.basicAuth.isRequired}}
+    {{else if basicAuth.isRequired}}
         authProviders:["basic"]
     {{else}}
         authProviders:["jwt","oauth2"]
@@ -72,9 +72,9 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         authConfig:{
-    {{#if config.basicAuth.isOptional}}
+    {{#if basicAuth.isOptional}}
         authProviders:["basic","oauth2","jwt"]
-    {{else if config.basicAuth.isRequired}}
+    {{else if basicAuth.isRequired}}
         authProviders:["basic"]
     {{else}}
         authProviders:["jwt","oauth2"]

@@ -21,6 +21,8 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -30,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
@@ -51,6 +54,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> methods;
     private String scope;
     private boolean isSecured = true;
+    //to identify if the isSecured flag is set from the operation
+    private boolean isSecuredAssignedFromOperation = false;
     private boolean hasProdEpConfig = false;
     private boolean hasSandEpConfig = false;
     private MgwEndpointConfigDTO epConfig;
@@ -58,6 +63,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
+    private BasicAuth basicAuth;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -69,15 +75,20 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             return getDefaultValue();
         }
 
-        // OperationId with spaces will cause trouble in ballerina code.
-        // Replacing it with '_' so that we can identify there was a ' ' when doing bal -> swagger
-        this.operationId = getTrimmedOperationId(operation.getOperationId());
+        // OperationId with spaces with special characters will cause errors in ballerina code.
+        // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();
         this.description = operation.getDescription();
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
+        //to provide resource level security in dev-first approach
+        this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        //to set resource level scopes in dev-first approach
+        this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         Map<String, Object> extensions =  operation.getExtensions();
         if(extensions != null){
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
@@ -103,6 +114,17 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.DISABLE_SECURITY));
+            devFirstDisableSecurity.ifPresent(value -> {
+                try {
+                    this.isSecured = !(Boolean) value;
+                    this.isSecuredAssignedFromOperation = true;
+                } catch (ClassCastException e) {
+                    throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                            "' should be a boolean value. But provided '" + value.toString() + "'.");
+                }
+            });
         }
 
         if (operation.getParameters() != null) {
@@ -177,7 +199,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setResourceTier(String resourceTier) {
-        this.resourceTier = resourceTier;
+        if (resourceTier == null) {
+            this.resourceTier = resourceTier;
+        }
     }
 
     public String getScope() {
@@ -185,7 +209,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setScope(String scope) {
-        this.scope = scope;
+        if (this.scope == null) {
+            this.scope = scope;
+        }
     }
 
     public boolean isSecured() {
@@ -193,6 +219,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setSecured(boolean secured) {
+        if (isSecuredAssignedFromOperation) {
+            return;
+        }
         isSecured = secured;
     }
 
@@ -249,6 +278,13 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         // api level interceptor
         if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
             this.apiResponseInterceptor = responseInterceptor;
+        }
+    }
+
+    public void setBasicAuth(BasicAuth basicAuth) {
+        //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
+        if (this.basicAuth == null) {
+            this.basicAuth = basicAuth;
         }
     }
 }

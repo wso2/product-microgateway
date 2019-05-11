@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
@@ -24,6 +25,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +36,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
@@ -68,8 +71,9 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
-    private static List<String> oauthSecuritySchemaList;
-    private static List<String> basicSecuritySchemaList;
+    private static List<Map<Object, Object>> endPointReferenceExtensions ;
+    private static List<String> oauthSecuritySchemaList = new ArrayList<>();
+    private static List<String> basicSecuritySchemaList = new ArrayList<>();
 
     enum APISecurity {
         basic,
@@ -355,6 +359,12 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfig(ExtendedAPI api) {
         RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
                 api.getEndpointSecurity());
+        if (endpointConfig.getProdEndpointList() != null) {
+            endpointConfig.getProdEndpointList().setName(api.getId());
+        }
+        if (endpointConfig.getSandboxEndpointList() != null) {
+            endpointConfig.getSandboxEndpointList().setName(api.getId());
+        }
         api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
                 endpointConfig.getSandboxEndpointList()));
         if (api.getIsDefaultVersion()) {
@@ -366,15 +376,22 @@ public class OpenAPICodegenUtils {
 
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
 
-        EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
-        EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(openAPI.getExtensions()
-                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
-        MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils.convertToMgwServiceMap(prodEndpointListDTO,
-                sandEndpointListDTO);
+        EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
+                openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+        // if endpoint name is empty set api id as the name
+        if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
+            prodEndpointListDTO.setName(api.getId());
+        }
+        EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
+                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+        if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
+            sandEndpointListDTO.setName(api.getId());
+        }
+        MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils
+                .convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
-        setMgwAPISecurity(api, openAPI);
+        setMgwAPISecurityAndScopes(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         try {
             if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
@@ -397,11 +414,56 @@ public class OpenAPICodegenUtils {
      * @return {@link MgwEndpointConfigDTO} object
      */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
-        EndpointListRouteDTO prodEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get(OpenAPIConstants.PRODUCTION_ENDPOINTS), EndpointListRouteDTO.class);
-        EndpointListRouteDTO sandEndpointListDTO = objectMapper.convertValue(operation.getExtensions()
-                .get(OpenAPIConstants.SANDBOX_ENDPOINTS), EndpointListRouteDTO.class);
+        EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
+                operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+        // if endpoint name is empty set operation id as the name
+        if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
+            prodEndpointListDTO.setName(operation.getOperationId());
+        }
+        EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
+                operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+        if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
+            sandEndpointListDTO.setName(operation.getOperationId());
+        }
         return RouteUtils.convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
+    }
+
+    private static EndpointListRouteDTO extractEndpointFromOpenAPI(Object endpointExtensionObject) {
+        EndpointListRouteDTO endpointListRouteDTO = null;
+        if (endpointExtensionObject != null) {
+            String endpointExtensionObjectValue = endpointExtensionObject.toString();
+            if (endpointExtensionObjectValue.contains(OpenAPIConstants.ENDPOINTS_REFERENCE)) {
+                String referencePath = endpointExtensionObjectValue.split(OpenAPIConstants.ENDPOINTS_REFERENCE)[1];
+                for (Map<Object, Object> value : endPointReferenceExtensions) {
+                    if (value.containsKey(referencePath)) {
+                        try {
+                            endpointListRouteDTO = objectMapper
+                                    .convertValue(value.get(referencePath), EndpointListRouteDTO.class);
+                            endpointListRouteDTO.setName(referencePath);
+                            return endpointListRouteDTO;
+                        } catch (IllegalArgumentException e) {
+                            throw new CLIRuntimeException(
+                                    "Error while parsing the referenced endpoint object " + endpointExtensionObjectValue
+                                            + ". The endpoint \"" + referencePath + "\" defined under x-mgw-endpoints "
+                                            + "is incompatible : " + value.get(referencePath).toString());
+                        }
+                    }
+                }
+                throw new CLIRuntimeException("The referenced endpoint value : \"" + endpointExtensionObjectValue
+                        + "\" is not defined under the open API extension " + OpenAPIConstants.ENDPOINTS);
+
+            } else {
+                try {
+                    endpointListRouteDTO = objectMapper
+                            .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
+                } catch (IllegalArgumentException e) {
+                    throw new CLIRuntimeException("Error while parsing the endpoint object. The "
+                            + "x-mgw-production-endpoints or x-mgw-sandbox-endpoints format is incompatible : "
+                            + endpointExtensionObjectValue);
+                }
+            }
+        }
+        return endpointListRouteDTO;
     }
 
     /**
@@ -635,28 +697,118 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * set the security for API from 'security' section in openAPI
+     * set the security for API from 'security' section in openAPI.
+     * Default value is "oauth2".
      *
      * @param api     {@link ExtendedAPI} object
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setMgwAPISecurity(ExtendedAPI api, OpenAPI openAPI) {
-        String securityString = "";
-        if (openAPI.getSecurity() != null) {
-            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> oauthSecuritySchemaList.contains(value1.getKey())))) {
-                securityString = APISecurity.oauth2.name();
+    private static void setMgwAPISecurityAndScopes(ExtendedAPI api, OpenAPI openAPI) {
+        String[] securitySchemasAndScopes = generateMgwSecuritySchemasAndScopes(openAPI.getSecurity());
+        String securitySchemas = securitySchemasAndScopes[0];
+        String scopes = securitySchemasAndScopes[1];
+        //if securitySchemas String is null, set to oauth2
+        if (StringUtils.isEmpty(securitySchemas)) {
+            securitySchemas = APISecurity.oauth2.name();
+        }
+        api.setMgwApiSecurity(securitySchemas);
+        api.setMgwApiScope(scopes);
+    }
+
+    /**
+     * generate String array with security schema and scopes when the {@link SecurityRequirement} list mentioned
+     * under {@link OpenAPI} object or {@link Operation} object is provided.
+     * Resulted array contains two elements.
+     * First element contains set of comma separated security schema types (oauth2 and basic).
+     * Second element contains set of comma separated scopes.
+     *
+     * @param securityRequirementList {@link List<SecurityRequirement>} object
+     * @return String array with two elements {'schema','scopes'} (ex. {"oauth2", "read:pets,write:pets"}
+     */
+    private static String[] generateMgwSecuritySchemasAndScopes(List<SecurityRequirement> securityRequirementList) {
+        String securitySchemas = null;
+        String scopes = null;
+        List<String> securitySchemaList = new ArrayList<>(2);
+        List<String> scopeList = new ArrayList<>();
+        if (securityRequirementList != null) {
+            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
+                //check if the key's type is oauth2
+                if (oauthSecuritySchemaList.contains(k)) {
+                    if (!securitySchemaList.contains(APISecurity.oauth2.name())) {
+                        securitySchemaList.add(APISecurity.oauth2.name());
+                    }
+                    //if oauth2, add all the available scopes
+                    v.forEach(scope -> {
+                        if (!scopeList.contains(scope)) {
+                            scopeList.add(scope);
+                        }
+                    });
+                    //if the key's type is basic
+                } else if (basicSecuritySchemaList.contains(k) &&
+                        !securitySchemaList.contains(APISecurity.basic.name())) {
+                    securitySchemaList.add(APISecurity.basic.name());
+                }
+            }));
+            //generate security schema String
+            for (String schema : securitySchemaList) {
+                securitySchemas = StringUtils.isEmpty(securitySchemas) ? schema : securitySchemas + "," + schema;
             }
-            if (openAPI.getSecurity().stream().anyMatch(value -> value.entrySet().stream()
-                    .anyMatch(value1 -> basicSecuritySchemaList.contains(value1.getKey())))) {
-                securityString = securityString.isEmpty() ? securityString : securityString + ",";
-                securityString += APISecurity.basic.name();
+            //generate scopes string
+            for (String scope : scopeList) {
+                scopes = StringUtils.isEmpty(scopes) ? scope : scopes + "," + scope;
             }
         }
-        if (StringUtils.isEmpty(securityString)) {
-            securityString = APISecurity.oauth2.name();
+        return new String[]{securitySchemas, scopes};
+    }
+
+    public static BasicAuth getMgwResourceBasicAuth(Operation operation) {
+        String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
+        if(StringUtils.isEmpty(securitySchemas)){
+            return null;
         }
-        api.setMgwApiSecurity(securityString);
+        return generateBasicAuthFromSecurity(securitySchemas);
+    }
+
+    /**
+     * Get resource level security scopes of {@link Operation} if the security scheme is oauth2.
+     *
+     * @param operation {@link Operation}
+     * @return comma separated set of scopes (ex. 'read:pets, write:pets')
+     */
+    public static String getMgwResourceScope(Operation operation) {
+        return generateMgwSecuritySchemasAndScopes(operation.getSecurity())[1];
+    }
+
+    /**
+     * When the security schema string is provided as a comma separated set of values
+     * generate the corresponding schema string.
+     *
+     * @param schemas comma separated security security schema types (ex. basic,oauth2)
+     * @return {@link BasicAuth} object
+     */
+    public static BasicAuth generateBasicAuthFromSecurity(String schemas){
+        BasicAuth basicAuth = new BasicAuth();
+        boolean basic = false;
+        boolean oauth2 = false;
+        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+        for (String s : schemasArray) {
+            if (s.equalsIgnoreCase("basic")) {
+                basic = true;
+            } else if (s.equalsIgnoreCase("oauth2")) {
+                oauth2 = true;
+            }
+        }
+        if (basic && oauth2) {
+            basicAuth.setOptional(true);
+            basicAuth.setRequired(false);
+        } else if (basic) {
+            basicAuth.setRequired(true);
+            basicAuth.setOptional(false);
+        } else if (oauth2) {
+            basicAuth.setOptional(false);
+            basicAuth.setRequired(false);
+        }
+        return basicAuth;
     }
 
     /**
@@ -688,6 +840,7 @@ public class OpenAPICodegenUtils {
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setBasicSecuritySchemaList(openAPI);
+        setOpenAPIDefinitionEndpointReferenceExtensions(openAPI.getExtensions());
     }
 
     /**
@@ -696,6 +849,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      */
     private static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+        //Since the security schema list needs to instantiated per each API
         oauthSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
@@ -714,6 +868,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      */
     private static void setBasicSecuritySchemaList(OpenAPI openAPI) {
+        //Since the security schema list needs to instantiated per each API
         basicSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
@@ -723,5 +878,26 @@ public class OpenAPICodegenUtils {
                 basicSecuritySchemaList.add(key);
             }
         });
+    }
+
+    /**
+     * store the endpoint extensions which are used as references
+     *
+     * @param extensions {@link Map<String,Object>} object
+     */
+    private static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
+        if (extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
+            try {
+                TypeReference<List<Map<Object, Object>>> typeRef1 = new TypeReference<List<Map<Object, Object>>>() {
+
+                };
+                endPointReferenceExtensions = objectMapper
+                        .convertValue(extensions.get(OpenAPIConstants.ENDPOINTS), typeRef1);
+            } catch (IllegalArgumentException e) {
+                throw new CLIRuntimeException(
+                        "Open API \"" + OpenAPIConstants.ENDPOINTS + "\" extension format is " + "wrong : " + e
+                                .getMessage(), e);
+            }
+        }
     }
 }

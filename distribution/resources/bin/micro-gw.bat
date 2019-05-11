@@ -132,7 +132,8 @@ goto :end
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
                 if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
-                call ballerina build src -o %project_name:\=%.balx --offline --experimental --siddhiruntime
+                MD target
+                call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
 
             if %verbose%==T ECHO Ballerina build completed

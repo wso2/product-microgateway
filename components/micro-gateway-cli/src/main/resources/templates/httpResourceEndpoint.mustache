@@ -1,4 +1,5 @@
 http:Client {{operationId}}_{{endpointUrlType}} = new (
-{{#if etcd.etcdEnabled}}gateway:etcdSetup("{{operationId}}_{{endpointUrlType}}_endpoint_0","{{operationId}}_{{endpointUrlType}}_etcdKey","{{endpoints.0.endpointUrl}}"){{else}}gateway:retrieveConfig("{{operationId}}_{{endpointUrlType}}_endpoint_0","{{endpoints.0.endpointUrl}}"){{/if}},
+{{#if etcd.etcdEnabled}}gateway:etcdSetup("{{name}}_{{endpointUrlType}}_endpoint_0",
+"{{name}}_{{endpointUrlType}}_etcdKey","{{endpoints.0.endpointUrl}}"){{else}}gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_0","{{endpoints.0.endpointUrl}}"){{/if}},
 config = { {{>http2}}{{>caching}}{{>basicAuth}}
 });

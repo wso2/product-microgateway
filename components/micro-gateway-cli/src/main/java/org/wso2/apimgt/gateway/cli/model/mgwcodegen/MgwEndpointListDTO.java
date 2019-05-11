@@ -13,6 +13,7 @@ public class MgwEndpointListDTO {
     private EndpointType type = null;
     private List<MgwEndpointDTO> endpoints = null;
     private EndpointUrlTypeEnum endpointUrlType = null;
+    private String name = null;
 
     public APIEndpointSecurityDTO getSecurityConfig() {
         return securityConfig;
@@ -44,5 +45,13 @@ public class MgwEndpointListDTO {
 
     public void setEndpointUrlType(EndpointUrlTypeEnum endpointUrlType) {
         this.endpointUrlType = endpointUrlType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
