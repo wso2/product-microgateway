@@ -42,6 +42,12 @@ public class EndpointListRouteDTO {
         return endpoints;
     }
 
+    /**
+     * set endpoints to the {@link EndpointListRouteDTO} object.
+     * endpoint could be either etcd(etcd_key, default_url) or default url.
+     *
+     * @param endpoints endpoint string
+     */
     public void setEndpoints(List<String> endpoints) {
         this.endpoints = endpoints;
     }

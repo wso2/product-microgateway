@@ -89,54 +89,81 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
-    {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
-    {{else}}
-    string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
-    {{/if}}
         http:Response|error clientResponse;
         http:Response r = new;
         clientResponse = r;
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#if etcd.etcdEnabled}}boolean reinitRequired = false;
+        boolean reinitRequired = false;
         string etcdKey;
         string etcdKeyConfigValue;
         boolean|error hasUrlChanged;
         http:ClientEndpointConfig newConfig;
         boolean reinitFailed = false;
-        string apiId = "{{api.id}}";{{/if}}
+        string apiId = "{{api.id}}";
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
-                    {{>prodEndpointReinit}}
+                {{#if hasProdEpConfig}}
+                    {{#if epConfig.prodEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{epConfig.prodEndpoints.name}}_prod_etcdKey";
+                        {{>prodEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{else}}
-                        clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{#if endpointConfig.prodEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{endpointConfig.prodEndpoints.name}}_{{endpointUrlType}}_etcdKey";
+                        {{>prodEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{/if}}
                 } else {
                     destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_sand_etcdKey";
-                    {{>sandEndpointReinit}}
+
+                {{#if hasSandEpConfig}}
+                    {{#if epConfig.sandEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{epConfig.sandEndpoints.name}}_sand_etcdKey";
+                        {{>sandEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{else}}
-                    clientResponse = {{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{#if endpointConfig.sandEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{endpointConfig.sandEndpoints.name}}_sand_etcdKey";
+                        {{>sandEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
-                    {{>prodEndpointReinit}}
+                {{#if hasProdEpConfig}}
+                    {{#if epConfig.prodEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{epConfig.prodEndpoints.name}}_prod_etcdKey";
+                        {{>prodEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{else}}
-                    clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{#if endpointConfig.prodEndpoints.endpoints.0.isEtcdEnabled}}
+                            etcdKeyConfigValue = "{{endpointConfig.prodEndpoints.name}}_prod_etcdKey";
+                        {{>prodEndpointReinit}}
+                    {{else}}
+                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                            runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{/if}}
                 } else {
                     http:Response res = new;
@@ -154,12 +181,22 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{^endpointConfig.prodEndpoints}}
             if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-            {{#if etcd.etcdEnabled}}
-                etcdKeyConfigValue = apiId + "_sand_etcdKey";
-                {{>sandEndpointReinit}}
+            {{#if hasSandEpConfig}}
+                {{#if epConfig.sandEndpoints.endpoints.0.isEtcdEnabled}}
+                        etcdKeyConfigValue = "{{epConfig.sandEndpoints.name}}_sand_etcdKey";
+                    {{>sandEndpointReinit}}
+                {{else}}
+                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                        runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
             {{else}}
-                clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_sand->forward(urlPostfix, req);
-                runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{#if endpointConfig.sandEndpoints.endpoints.0.isEtcdEnabled}}
+                        etcdKeyConfigValue = "{{endpointConfig.sandEndpoints.name}}_sand_etcdKey";
+                    {{>sandEndpointReinit}}
+                {{else}}
+                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                        runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
             {{/if}}
             } else {
                 http:Response res = new;
