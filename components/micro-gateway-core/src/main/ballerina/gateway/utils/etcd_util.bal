@@ -105,7 +105,7 @@ public function etcdSetup(string key, string etcdConfigKey, string default) retu
 
         if (etcdKey == "") {
             printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
-            endpointUrl = config:getAsString(key);
+            endpointUrl = config:getAsString(key, default=default);
         }
         else {
             printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + key);
@@ -116,7 +116,7 @@ public function etcdSetup(string key, string etcdConfigKey, string default) retu
         }
     }
     else {
-        endpointUrl = config:getAsString(key);
+        endpointUrl = config:getAsString(key,default=default);
     }
 
     return endpointUrl;
