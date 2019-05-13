@@ -27,23 +27,23 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/conf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/lib/repo/
             </directory>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/lib/gateway/balo</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/gateway/balo</outputDirectory>
         </fileSet>
 
         <fileSet>
             <directory>${basedir}/resources/runtime_logs</directory>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/logs</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/logs</outputDirectory>
         </fileSet>
         <!--create an empty exec folder-->
         <fileSet>
             <directory>${basedir}/resources/exec</directory>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/exec</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/exec</outputDirectory>
             <excludes>
                 <exclude>*/**</exclude>
             </excludes>
@@ -53,28 +53,28 @@
     <files>
         <file>
             <source>${basedir}/target/runtime-windows.zip</source>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/</outputDirectory>
             <destName>runtime.zip</destName>
         </file>
         <file>
         <source>${basedir}/resources/bin/gateway.bat</source>
-        <outputDirectory>wso2am-micro-gw-windows-${pom.version}/bin</outputDirectory>
+        <outputDirectory>wso2am-micro-gw-windows-${project.version}/bin</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../README.md</source>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../LICENSE.txt</source>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../release-notes.html</source>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/updates/product.txt</source>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/updates</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
@@ -88,7 +88,7 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-windows-${pom.version}/lib/gateway</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/gateway</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
