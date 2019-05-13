@@ -30,6 +30,7 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
    * [Project Structure](#project-structure)
    * [How to run the microgateway distribution](#how-to-run-the-microgateway-distribution)
    * [Invoke API exposed via microgateway](#invoke-api-exposed-via-microgateway)
+   * [Micro gateway quick start](#micro-gateway-quick-start)
    * [Micro gateway supported open API extensions](#micro-gateway-supported-open-api-extensions)
    * [Micro gateway open API extension usages](#micro-gateway-open-api-extension-usages)
       * [1. Override endpoint per API resource](#1-override-endpoint-per-api-resource)
@@ -210,6 +211,43 @@ curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=availabl
 ```
 Please note that the jwt provided in the command is a jwt toke retrieved from WSO2 API Manager with higher expiry time which can be used with any API not protected with scopes.
 This token works with any API because, default  microgateway config uses the public certificate of WSO2 API Manager to validate the signature.
+
+#### Micro gateway quick start
+Lets see how we can expose pet store API using microgatway with the open API definition
+
+1. First download the microgateway toolkit related to latest release from product [release page](https://github.com/wso2/product-microgateway/releases)
+
+1. Then extract the toolkit and navigate to the /bin folder of the toolkit.
+
+1. Now lets create the project with name "petstore-project"
+```
+./micro-gw init petstore-project
+```
+
+4. Now the project is initialized. There will be directory with name "petstore-project" in the location where we executed the command.
+Lets copy the [open API definition](samples/petstore_basic.yaml) to the **api_definitions** directory inside the project.
+
+1. Lets execute the following command to build the project.
+```
+./micro-gw build petstore-project
+```
+Executable file will be created inside the target folder of the project.
+
+6. Lets run the executable file using the micro gateway runtime docker image
+```
+docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
+
+<PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
+```
+ this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
+
+7. Lets invoke the API with below commands
+```
+curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
+
+
+curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
+```
 
 ### Micro gateway supported open API extensions
 | Extension                     | Description                                               | Required/Not Required |
@@ -479,4 +517,37 @@ So the complete command for the above sample is like
 
 ```
 bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excutable_file>
+```
+
+### Micro gateway securing APIs.
+The gateway supports the "securitySchemes" keyword in open API specifications.
+Currently micro gateway supports oauth2 and basic authentication for APIs which can be defined via open API extensions.
+If none of the securitySchemes are defined the gateway by default applies oauth2 security.
+
+1. Define scopes for the resources and API using oauth2 security type.
+```
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: 'https://petstore.swagger.io/oauth/authorize'
+    flow: implicit
+    scopes:
+      'write:pets': modify pets in your account
+      'read:pets': read your pets
+```
+
+We can define oauth2 security type, and add scopes and refer the security scheme in API level or resource level
+
+```
+security:
+    - petstore_auth:
+        - 'write:pets'
+        - 'read:pets'
+```
+
+2. Define basic authentication for the API
+```
+securityDefinitions:
+  petstore_basic:
+    type: basic
 ```
