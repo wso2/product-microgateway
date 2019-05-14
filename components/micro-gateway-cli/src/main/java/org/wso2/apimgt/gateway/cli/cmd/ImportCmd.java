@@ -30,16 +30,9 @@ import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
-import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
+import org.wso2.apimgt.gateway.cli.exception.*;
+import org.wso2.apimgt.gateway.cli.model.config.*;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -48,6 +41,8 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -60,6 +55,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class represents the "import" command and it pull the swagger and generate the source code
