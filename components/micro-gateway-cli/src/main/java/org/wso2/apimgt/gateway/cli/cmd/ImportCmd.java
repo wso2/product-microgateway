@@ -44,7 +44,6 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
-import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,8 +56,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 /**
  * This class represents the "import" command and it pull the swagger and generate the source code
