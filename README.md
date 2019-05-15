@@ -110,7 +110,7 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 ##### Init
 
-`$ micro-gw init`
+`$ micro-gw init <project_name>`
 
 The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder.
 
@@ -118,15 +118,16 @@ The "micro-gw init" command is used to initialize a project structure with artif
 
 If the project already exists, a warning will be prompted requesting permission to override existing project.
 
-Execute `micro-gw help setup` to get more detailed information regarding the setup command.
+Execute `micro-gw help init` to get more detailed information regarding the setup command.
 
 Example
 
 
     $ micro-gw init petstore-project
 
-Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw
-Lets define the basic microgateway open API extension in order to expose the API.
+Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw.
+
+Lets add the basic microgateway Open API extension to the petstore OAS file.
 
 
 ```
@@ -137,11 +138,11 @@ x-mgw-production-endpoints:
 
 ```
 
-Sample for petstore open API definition with two resources and extensions can be found [here](samples/petstore_basic.yaml)
+Sample for petstore OAS file with two resources and extensions can be found [here](samples/petstore_basic.yaml)
 
 ##### Build
 
-`$ micro-gw build`
+`$ micro-gw build <project_name>`
 
 Upon execution of this command, the WSO2 API Microgateway CLI tool will build the executable file for the specified project.
 
