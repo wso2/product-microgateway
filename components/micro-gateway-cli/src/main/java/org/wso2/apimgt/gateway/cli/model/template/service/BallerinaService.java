@@ -191,7 +191,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             .get(OpenAPIConstants.DISABLE_SECURITY));
                     disableSecurity.ifPresent(value -> {
                         try {
-                            //Since we are considering based on 'x-mgw-security-disable', secured value should be the
+                            //Since we are considering based on 'x-mgw-disable-security', secured value should be the
                             // negation
                             boolean secured = !(Boolean) value;
                             operation.getValue().setSecured(secured);

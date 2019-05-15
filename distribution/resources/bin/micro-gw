@@ -289,14 +289,14 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         
         update_cli_classpath
         MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
-        pushd $MICRO_GW_LABEL_PROJECT_DIR/gen > /dev/null
+        pushd $MICRO_GW_LABEL_PROJECT_DIR/target/gen > /dev/null
             # clean the content of target folder
-            if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
-                rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
+            if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target/exec" ]; then
+                rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target/exec
             fi
-            mkdir $MICRO_GW_LABEL_PROJECT_DIR/target
+            mkdir $MICRO_GW_LABEL_PROJECT_DIR/target/exec
             # build the ballerina source code for the label
-            ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
+            ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/exec/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
         popd > /dev/null
 
     # ----- Execute The Build Command with --compiled flag (2nd phase) -----------------------------------------
