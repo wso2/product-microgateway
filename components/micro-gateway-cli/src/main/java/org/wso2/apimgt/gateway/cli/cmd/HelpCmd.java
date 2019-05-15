@@ -31,6 +31,8 @@ import java.util.List;
 @Parameters(commandNames = "help", commandDescription = "print usage information")
 public class HelpCmd implements GatewayLauncherCmd {
     private static PrintStream outStream = System.err;
+
+    @SuppressWarnings("unused")
     @Parameter(description = "Command name")
     private List<String> helpCommands;
 
