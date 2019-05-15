@@ -1,0 +1,49 @@
+        {{#endpoints}}
+            {{#if isEtcdEnabled}}
+                etcdKeyConfigValue = "{{name}}_{{endpointUrlType}}__{{@index}}_etcdKey";
+                etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "{{etcdKey}}");
+                if (etcdKey != "" && gateway:etcdConnectionEstablished) {
+                    hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                    if(hasUrlChanged is boolean) {
+                        if (reinitRequired == false) {
+                            reinitRequired = hasUrlChanged;
+                            if (hasUrlChanged == true) {
+                            failedEtcdKeyConfigValue = etcdKeyConfigValue;
+                                failedEtcdKey = etcdKey;
+                            }
+                        }
+                    } else {
+                    log:printError("Error in checking for Re-initialization", err = hasUrlChanged);
+                    }
+                }
+            {{/if}}
+                {{#if @last}}
+                        if (reinitRequired) {
+                        //destination_attribute = <string>gateway:etcdUrls[etcdKey];
+                        {{#equals type "http"}} {{>httpEndpointReInit}} {{/equals}}
+                        {{#equals type "load_balance"}} {{>lbEndpointReInit}} {{/equals}}
+                        {{#equals type "failover"}} {{>failoverEndpointReInit}} {{/equals}}
+
+                            if(err is error) {
+                                reinitFailed = true;
+                                gateway:urlChanged[failedEtcdKey] = true;
+
+                                http:Response res = new;
+                                res.statusCode = 500;
+                                json payload = {
+                                    "fault": {
+                                        "code": "101503",
+                                        "message": "Runtime Error",
+                                        "description": "Error connecting to the back end"
+                                    }
+                                };
+                                runtime:getInvocationContext().attributes["error_code"] = "101503";
+                                res.setPayload(payload);
+                                clientResponse = res;
+                                log:printError("URL defined at etcd for key " + config:getAsString(failedEtcdKeyConfigValue) + " is invalid");
+                            }
+                            reinitRequired = false;
+                        }
+                {{/if}}
+
+        {{/endpoints}}

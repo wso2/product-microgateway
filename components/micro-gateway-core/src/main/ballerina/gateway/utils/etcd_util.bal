@@ -121,7 +121,6 @@ public function etcdSetup(string key, string etcdConfigKey, string default, stri
     else {
         endpointUrl = config:getAsString(key,default=default);
     }
-
     return endpointUrl;
 }
 

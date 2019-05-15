@@ -1,0 +1,4 @@
+var err = trap
+{{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}.__init{{/equals}}
+{{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}.__init{{/equals}}
+                (<string>gateway:etcdUrls[etcdKey], config = { {{>http2}}{{>caching}}{{>basicAuth}} });

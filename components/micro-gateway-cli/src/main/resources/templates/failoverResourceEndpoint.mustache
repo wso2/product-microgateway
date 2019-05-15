@@ -1,6 +1,6 @@
 http:FailoverClient {{operationId}}_{{endpointUrlType}} = new({
 targets: [
-{{#endpoints}}    {url: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")
+{{#endpoints}}    {url: {{#if isEtcdEnabled}}gateway:etcdSetup("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{endpointUrl}}","{{etcdKey}}"){{else}}gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{/if}}
 }{{#unless @last}},
 {{/unless}}{{/endpoints}}
 ]{{>basicAuth}}
