@@ -96,8 +96,6 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
         boolean reinitRequired = false;
-        string etcdKey="";
-        string etcdKeyConfigValue;
         string failedEtcdKey = "";
         string failedEtcdKeyConfigValue = "";
         boolean|error hasUrlChanged;
@@ -105,6 +103,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         boolean reinitFailed = false;
         boolean isProdEtcdEnabled = false;
         boolean isSandEtcdEnabled = false;
+        map<string> endpointEtcdConfigValues = {};
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {

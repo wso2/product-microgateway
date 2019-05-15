@@ -1,23 +1,26 @@
+
         {{#endpoints}}
             {{#if isEtcdEnabled}}
-                etcdKeyConfigValue = "{{name}}_{{endpointUrlType}}__{{@index}}_etcdKey";
-                etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, "{{etcdKey}}");
-                if (etcdKey != "" && gateway:etcdConnectionEstablished) {
-                    hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
-                    if(hasUrlChanged is boolean) {
-                        if (reinitRequired == false) {
-                            reinitRequired = hasUrlChanged;
-                            if (hasUrlChanged == true) {
-                            failedEtcdKeyConfigValue = etcdKeyConfigValue;
-                                failedEtcdKey = etcdKey;
-                            }
-                        }
-                    } else {
-                    log:printError("Error in checking for Re-initialization", err = hasUrlChanged);
-                    }
-                }
+                endpointEtcdConfigValues["{{name}}_{{endpointUrlType}}__{{@index}}_etcdKey"] = "{{etcdKey}}";
             {{/if}}
-                {{#if @last}}
+        {{/endpoints}}
+        foreach var (etcdKeyConfigValue,defaultEtcdKey) in endpointEtcdConfigValues {
+            string etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, defaultEtcdKey);
+            if (etcdKey != "" && gateway:etcdConnectionEstablished) {
+                hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+                if(hasUrlChanged is boolean) {
+                    if (reinitRequired == false) {
+                        reinitRequired = hasUrlChanged;
+                        if (hasUrlChanged == true) {
+                            failedEtcdKeyConfigValue = etcdKeyConfigValue;
+                        failedEtcdKey = etcdKey;
+                        }
+                    }
+                } else {
+                log:printError("Error in checking for Re-initialization", err = hasUrlChanged);
+                }
+            }
+        }
                         if (reinitRequired) {
                         //destination_attribute = <string>gateway:etcdUrls[etcdKey];
                         {{#equals type "http"}} {{>httpEndpointReInit}} {{/equals}}
@@ -44,6 +47,5 @@
                             }
                             reinitRequired = false;
                         }
-                {{/if}}
 
-        {{/endpoints}}
+
