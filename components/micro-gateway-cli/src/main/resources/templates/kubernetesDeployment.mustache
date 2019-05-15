@@ -16,8 +16,7 @@
       {{#containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
           {
             {{#if source}} source:"{{source}}", {{/if}}
-            {{#if target}} target:"{{target}}", {{/if}}
-            {{#if isBallerinaConf}} isBallerinaConf:{{isBallerinaConf}} {{/if}}
+            {{#if target}} target:"{{target}}" {{/if}}
           }{{#unless @last}},{{/unless}}
       {{/containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
     ]{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerHost}},
