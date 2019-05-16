@@ -109,64 +109,53 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     //destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasProdEpConfig}}
-                    {{#epConfig.prodEndpoints.endpoints}}
-                        {{#if isEtcdEnabled}} isProdEtcdEnabled = true;{{/if}}
-                    {{/epConfig.prodEndpoints.endpoints}}
-                    if(isProdEtcdEnabled == true){
+                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                         if (!reinitFailed) {
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
                             //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                         }
-                    } else {
+                    {{else}}
                         clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
                         //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                    }
+                    {{/if}}
                 {{else}}
-                        {{#endpointConfig.prodEndpoints.endpoints}}
-                            {{#if isEtcdEnabled}} isProdEtcdEnabled = true;{{/if}}
-                        {{/endpointConfig.prodEndpoints.endpoints}}
-                            if(isProdEtcdEnabled == true){
+
+                    {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
                             {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
                                 if (!reinitFailed) {
                                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                                     //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                                 }
-                            } else {
+                    {{else}}
                                 clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
                                 //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                            }
+                    {{/if}}
                 {{/if}}
                 } else {
                     //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasSandEpConfig}}
-                    {{#epConfig.sandEndpoints.endpoints}}
-                        {{#if isEtcdEnabled}} isSandEtcdEnabled = true;{{/if}}
-                    {{/epConfig.sandEndpoints.endpoints}}
-                        if(isSandEtcdEnabled == true){
+                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
                             {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                             if (!reinitFailed) {
                                 clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
                                 //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                             }
-                        } else {
+                    {{else}}
                         clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
                         //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                        }
+                    {{/if}}
                 {{else}}
-                        {{#endpointConfig.sandEndpoints.endpoints}}
-                            {{#if isEtcdEnabled}} isSandEtcdEnabled = true;{{/if}}
-                        {{/endpointConfig.sandEndpoints.endpoints}}
-                            if(isSandEtcdEnabled == true){
+                    {{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
                             {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
                                 if (!reinitFailed) {
                                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                                     //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                                 }
-                            } else {
+                    {{else}}
                             clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
                             //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                            }
+                    {{/if}}
                 {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
@@ -174,33 +163,28 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     //destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasProdEpConfig}}
-                    {{#epConfig.prodEndpoints.endpoints}}
-                        {{#if isEtcdEnabled}} isProdEtcdEnabled = true;{{/if}}
-                    {{/epConfig.prodEndpoints.endpoints}}
-                        if(isProdEtcdEnabled == true){
-                    {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
+                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                             if (!reinitFailed) {
-                                clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                                //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                             }
-                        } else {
-                        clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                        }
+                    {{else}}
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{else}}
-                    {{#endpointConfig.prodEndpoints.endpoints}}
-                        {{#if isEtcdEnabled}} isProdEtcdEnabled = true;{{/if}}
-                    {{/endpointConfig.prodEndpoints.endpoints}}
-                        if(isProdEtcdEnabled == true){
+
+                    {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
                             if (!reinitFailed) {
-                                clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                                //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                             }
-                        } else {
-                        clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                        }
+                    {{else}}
+                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{/if}}
                 } else {
                     http:Response res = new;
@@ -219,33 +203,27 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
             {{#if hasSandEpConfig}}
-                {{#epConfig.sandEndpoints.endpoints}}
-                    {{#if isEtcdEnabled}} isSandEtcdEnabled = true;{{/if}}
-                {{/epConfig.sandEndpoints.endpoints}}
-                    if(isSandEtcdEnabled == true){
-                {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
+                {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
+                    {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                         if (!reinitFailed) {
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                         }
-                    } else {
-                    clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                    }
+                {{else}}
+                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
             {{else}}
-                {{#endpointConfig.sandEndpoints.endpoints}}
-                    {{#if isEtcdEnabled}} isSandEtcdEnabled = true;{{/if}}
-                {{/endpointConfig.sandEndpoints.endpoints}}
-                    if(isSandEtcdEnabled == true){
-                {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
+                {{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
+                    {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
                         if (!reinitFailed) {
-                            clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                         }
-                    } else {
-                    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                    //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                    }
+                {{else}}
+                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                {{/if}}
             {{/if}}
             } else {
                 http:Response res = new;
@@ -318,7 +296,6 @@ function getUrlOfEtcdKeyForReInit(string defaultUrlRef,string etcdRef, string de
     string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
     gateway:urlChanged[<string> retrievedEtcdKey] = false;
     string url = <string> gateway:etcdUrls[retrievedEtcdKey];
-    io:println(url);
     if (url == "") {
         return <string> gateway:retrieveConfig(defaultUrlRef, defaultUrl);
     } else {

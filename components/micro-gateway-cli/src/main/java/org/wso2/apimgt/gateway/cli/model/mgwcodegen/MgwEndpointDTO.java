@@ -56,4 +56,8 @@ public class MgwEndpointDTO {
         }
         this.endpointUrl = endpointUrl;
     }
+
+    public boolean isEtcdEnabled() {
+        return isEtcdEnabled;
+    }
 }
