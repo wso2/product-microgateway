@@ -32,7 +32,6 @@ import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -44,7 +43,6 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -57,60 +55,56 @@ import java.util.List;
 /**
  * This class represents the "import" command and it pull the swagger and generate the source code
  */
-@Parameters(commandNames = "import", commandDescription = "pull the api from publisher")
+@Parameters(commandNames = "import", commandDescription = "pull APIs from API Publisher")
 public class ImportCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(ImportCmd.class);
     private static PrintStream outStream = System.out;
 
     @SuppressWarnings("unused")
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(description = "project", required = true)
+    private String projectName;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = "--java.debug", hidden = true)
-    private String javaDebugPort;
-
-    @Parameter(names = {"-u", "--username"}, hidden = true)
+    @Parameter(names = {"-u", "--username"}, description = "API Publisher username")
     private String username;
 
-    @Parameter(names = {"-p", "--password"}, hidden = true)
+    @Parameter(names = {"-p", "--password"}, description = "API Publisher password")
     private String password;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-l", "--label"}, hidden = true)
+    @Parameter(names = {"-l", "--label"}, description = "gateway label")
     private String label;
 
-    @Parameter(names = {"-s", "--server-url"}, hidden = true)
+    @Parameter(names = {"-s", "--server-url"}, description = "API Publisher url")
     private String baseURL;
 
-    @Parameter(names = {"-t", "--truststore"}, hidden = true)
+    @Parameter(names = {"-t", "--truststore"}, description = "truststore for https connection")
     private String trustStoreLocation;
 
-    @Parameter(names = {"-w", "--truststore-pass"}, hidden = true)
+    @Parameter(names = {"-w", "--truststore-pass"}, description = "truststore password")
     private String trustStorePassword;
 
     @Parameter(names = {"-c", "--config"}, hidden = true)
     private String toolkitConfigPath;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
-    private String deploymentConfigPath;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"-a", "--api-name"}, hidden = true)
+    @Parameter(names = {"-a", "--api-name"}, description = "name of the API")
     private String apiName;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-v", "--version"}, hidden = true)
+    @Parameter(names = {"-v", "--version"}, description = "version of the API")
     private String version;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
+    @Parameter(names = {"-k", "--insecure"}, description = "skip ssl validation", arity = 0)
     private boolean isInsecure;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
+    @Parameter(names = {"--help", "-h", "?"}, description = "print command help", help = true)
     private boolean helpFlag;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--java.debug", hidden = true)
+    private String javaDebugPort;
 
     private String publisherEndpoint;
     private String adminEndpoint;
@@ -127,7 +121,6 @@ public class ImportCmd implements GatewayLauncherCmd {
             return;
         }
         String clientID;
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
@@ -140,7 +133,7 @@ public class ImportCmd implements GatewayLauncherCmd {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
 
-        init(toolkitConfigPath, deploymentConfigPath, projectName);
+        init(toolkitConfigPath);
         Config config = GatewayCmdUtils.getConfig();
         isOverwriteRequired = false;
 
@@ -326,7 +319,7 @@ public class ImportCmd implements GatewayLauncherCmd {
         return System.console().readLine();
     }
 
-    private static void init(String configPath, String deploymentConfig, String projectName) {
+    private static void init(String configPath) {
         try {
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
@@ -336,20 +329,9 @@ public class ImportCmd implements GatewayLauncherCmd {
                 logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
-            if(deploymentConfig != null){
-                Path deploymentConfigFile = Paths.get(deploymentConfig);
-                if(Files.exists(deploymentConfigFile)){
-                    GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfig);
-                }
-            }
-            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
-            ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            GatewayCmdUtils.setContainerConfig(containerConfig);
         } catch (ConfigParserException e) {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
-        } catch (IOException e){
-            throw new CLIInternalException("Error occured while reading the deployment configuration", e);
         }
     }
 

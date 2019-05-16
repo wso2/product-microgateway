@@ -36,8 +36,6 @@ import java.util.Optional;
  * This class executes the gateway cli program.
  */
 public class Main {
-    private static final String JC_UNKNOWN_OPTION_PREFIX = "Unknown option:";
-    private static final String JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX = "Expected a value after parameter";
     private static final String INTERNAL_ERROR_MESSAGE = "Internal error occurred while executing command.";
     private static final String MICRO_GW = "micro-gw: ";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -50,6 +48,10 @@ public class Main {
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
+            if (e.getCause() instanceof ParameterException) {
+                ParameterException paramEx = (ParameterException) e.getCause();
+                paramEx.usage();
+            }
             logger.error(MICRO_GW + "Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
@@ -77,61 +79,51 @@ public class Main {
     private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
         try {
             HelpCmd helpCmd = new HelpCmd();
-            JCommander cmdParser = new JCommander(helpCmd);
-            cmdParser.addCommand(GatewayCliCommands.HELP, helpCmd);
-            helpCmd.setParentCmdParser(cmdParser);
-
             InitCmd initCmd = new InitCmd();
-            cmdParser.addCommand(GatewayCliCommands.INIT, initCmd);
-            initCmd.setParentCmdParser(cmdParser);
-
             BuildCmd buildCmd = new BuildCmd();
-            cmdParser.addCommand(GatewayCliCommands.BUILD, buildCmd);
-            buildCmd.setParentCmdParser(cmdParser);
-
             ResetCmd resetCmd = new ResetCmd();
-            cmdParser.addCommand(GatewayCliCommands.RESET, resetCmd);
-            resetCmd.setParentCmdParser(cmdParser);
-
             ImportCmd importCmd = new ImportCmd();
-            cmdParser.addCommand(GatewayCliCommands.IMPORT, importCmd);
+
+            JCommander cmdParser = JCommander.newBuilder()
+                    .addCommand(GatewayCliCommands.HELP, helpCmd)
+                    .addCommand(GatewayCliCommands.INIT, initCmd)
+                    .addCommand(GatewayCliCommands.BUILD, buildCmd)
+                    .addCommand(GatewayCliCommands.RESET, resetCmd)
+                    .addCommand(GatewayCliCommands.IMPORT, importCmd)
+                    .build();
+            cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
+
+            helpCmd.setParentCmdParser(cmdParser);
+            initCmd.setParentCmdParser(cmdParser);
+            buildCmd.setParentCmdParser(cmdParser);
+            resetCmd.setParentCmdParser(cmdParser);
             importCmd.setParentCmdParser(cmdParser);
 
+            cmdParser.parse(args);
             Map<String, JCommander> commanderMap;
-            String parsedCmdName;
-            if (args.length != 0) {
-                cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
-                cmdParser.parse(args);
-                parsedCmdName = cmdParser.getParsedCommand();
+            String parsedCmdName = cmdParser.getParsedCommand();
 
-                // User has not specified a command. Therefore returning the main command
-                // which simply prints usage information.
-                if (parsedCmdName == null) {
-                    return Optional.of(helpCmd);
-                }
-                commanderMap = cmdParser.getCommands();
-            } else {
-                String errorMsg = "No arguments supplied";
-                throw GatewayCmdUtils.createUsageException(errorMsg);
+            // User has not specified a command. print usage
+            if (parsedCmdName == null) {
+                ParameterException paramEx = new ParameterException("Command not specified");
+                paramEx.setJCommander(cmdParser);
+                throw paramEx;
             }
+            commanderMap = cmdParser.getCommands();
             return Optional.of((GatewayLauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";
             throw GatewayCmdUtils.createUsageException(errorMsg);
         } catch (ParameterException e) {
             String msg = e.getMessage();
+            CliLauncherException cliEx = new CliLauncherException(e);
             if (msg == null) {
-                throw GatewayCmdUtils.createUsageException("Internal error occurred");
-            } else if (msg.startsWith(JC_UNKNOWN_OPTION_PREFIX)) {
-                String flag = msg.substring(JC_UNKNOWN_OPTION_PREFIX.length());
-                throw GatewayCmdUtils.createUsageException("Unknown flag '" + flag.trim() + "'");
-            } else if (msg.startsWith(JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX)) {
-                String flag = msg.substring(JC_EXPECTED_A_VALUE_AFTER_PARAMETER_PREFIX.length());
-                throw GatewayCmdUtils.createUsageException("Flag '" + flag.trim() + "' needs an argument");
+                cliEx.addMessage("Internal error occurred");
             } else {
-                // Make the first character of the error message lower case
-                throw GatewayCmdUtils.createUsageException(GatewayCmdUtils.makeFirstLetterLowerCase(msg));
+                cliEx.addMessage(msg);
             }
+
+            throw cliEx;
         }
     }
 

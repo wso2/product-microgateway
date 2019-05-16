@@ -139,23 +139,8 @@ public class GatewayCmdUtils {
     public static CliLauncherException createUsageException(String errorMsg) {
         CliLauncherException launcherException = new CliLauncherException();
         launcherException.addMessage("micro-gw: " + errorMsg);
-        launcherException.addMessage("Run 'micro-gw help' for usage.");
+        launcherException.addMessage("Run 'micro-gw' for usage.");
         return launcherException;
-    }
-
-    /**
-     * Convert first letter to lower case
-     *
-     * @param s string
-     * @return first letter lower case string
-     */
-    public static String makeFirstLetterLowerCase(String s) {
-        if (s == null) {
-            return null;
-        }
-        char[] c = s.toCharArray();
-        c[0] = Character.toLowerCase(c[0]);
-        return new String(c);
     }
 
     /**

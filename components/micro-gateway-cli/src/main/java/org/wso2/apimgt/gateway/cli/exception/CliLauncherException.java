@@ -26,6 +26,14 @@ import java.util.List;
 public class CliLauncherException extends RuntimeException {
     private List<String> detailedMessages = new ArrayList<>();
 
+    public CliLauncherException() {
+        super();
+    }
+
+    public CliLauncherException(RuntimeException e) {
+        super(e);
+    }
+
     public void addMessage(String message) {
         detailedMessages.add(message);
     }

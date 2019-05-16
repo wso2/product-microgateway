@@ -35,7 +35,7 @@ public interface GatewayLauncherCmd {
 
     default String getCommandUsageInfo(String commandName) {
         if (commandName == null) {
-            throw GatewayCmdUtils.createUsageException("Invalid command");
+            commandName = GatewayCliCommands.DEFAULT;
         }
 
         String fileName = "cli-help/cli-" + commandName + ".help";
