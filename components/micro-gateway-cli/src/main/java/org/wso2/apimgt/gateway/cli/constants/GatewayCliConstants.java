@@ -36,9 +36,6 @@ public class GatewayCliConstants {
     public static final String GEN_API_DEFINITIONS_DIR = PROJECT_API_DEFINITIONS_DIR;
     public static final String GEN_SRC_DIR = "src";
     public static final String GEN_POLICIES_DIR = "policies";
-    public static final String BALLERINA_TRUSTSTORE = "ballerinaTruststore.p12";
-    public static final String SECURITY_DIR = "security";
-    public static final String ACCESS_LOG_FILE = "access_logs";
     public static final String MAIN_CONFIG_FILE_NAME = "toolkit-config.toml";
     public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
