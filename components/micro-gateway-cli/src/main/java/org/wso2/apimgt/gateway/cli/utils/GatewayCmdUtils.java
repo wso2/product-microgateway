@@ -420,6 +420,7 @@ public class GatewayCmdUtils {
     public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis) {
         for (ExtendedAPI api : apis) {
             saveSwaggerDefinitionForSingleAPI(projectName, api);
+            System.out.println("ID for API " + api.getName() + " : " + api.getId());
         }
     }
 

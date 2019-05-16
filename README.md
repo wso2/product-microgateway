@@ -39,6 +39,10 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
       * [4. Add API level CORS configuration](#4-add-api-level-cors-configuration)
       * [5. Define backend security parameters](#5-define-backend-security-parameters)
       * [6. Override backend service connection URLS](#6-override-backend-service-connection-urls)
+      * [7. Disable security for resources](#7-disable-security-for-resources)
+   * [Micro gateway securing APIs](#micro-gateway-securing-apis)
+   * [Import APIs from WSO2 API Manager](#import-apis-from-wso2-api-manager)
+
 
 #### Why WSO2 API Microgateway
 WSO2 API Microgateway  can be explained as as enrichment  layer for
@@ -163,8 +167,6 @@ petstore-project/
 │   └── deployment-config.toml
 ├── gen
 │   ├── api_definitions
-│   └── src
-│       └── policies
 ├── interceptors
 ├── policies.yaml
 └── target
@@ -174,7 +176,7 @@ petstore-project/
 
 #### How to run the microgateway distribution
 
-Once the **init, build** commands are executed, a executable file will be created under target folder.
+Once the **init, build** commands are executed, a executable file will be created under target/exec folder inside the project.
 
 ```
 ../petstore-project/target$ ls
@@ -187,8 +189,8 @@ Then use the micro gateway runtime component to run this executable file.
 `$ bash gateway <path_to_the_excutable_file>`
 
 ```
-micro-gw-internal/bin$ bash gateway
-ballerina: initiating service(s) in '/home/user/Petstore-Project/target/micro-gw-pizzashack-project/exec/internal.balx'
+micro-gw-internal/bin$ bash gateway /home/user/petstore-project/target/exec/exec/petstore-project.balx
+ballerina: initiating service(s) in '/home/user/petstore-project/target/exec/exec/petstore-project.balx'
 ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
@@ -236,9 +238,9 @@ Executable file will be created inside the target folder of the project.
 
 6. Lets run the executable file using the micro gateway runtime docker image
 ```
-docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
+docker run -d -v <PROJECT_TARGET_EXEC_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
 
-<PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
+<PROJECT_TARGET_EXEC_PATH> - The path of the target/exec directoy created inside the project directory
 ```
  this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
 
@@ -259,6 +261,7 @@ curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/x
 | x-mgw-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
 | x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
 | x-mgw-endpoints               | Define endpoint configs globally which can be then referred with  x-mgw-production-endpoints or x-mgw-sandbox-endpoints extensions | Not Required
+| x-mgw-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
 
 ### Micro gateway open API extension usages
 #### 1. Override endpoint per API resource
@@ -520,7 +523,24 @@ So the complete command for the above sample is like
 bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excutable_file>
 ```
 
-### Micro gateway securing APIs.
+#### 7. Disable security for resources
+By default the APIs and resources are protected via oauth2 in micro gateway. API consumer need a valid oauth2 access token(jwt or opaque)
+to invoke the APIs. But API developer can expose APIs without any authentication using the open API extension **x-mgw-disable-security**.
+This extension is only supported at resource level only
+
+```
+paths:
+  "/pet/findByStatus":
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-mgw-disable-security: true
+```
+
+#### Micro gateway securing APIs
 The gateway supports the "securitySchemes" keyword in open API specifications.
 Currently micro gateway supports oauth2 and basic authentication for APIs which can be defined via open API extensions.
 If none of the securitySchemes are defined the gateway by default applies oauth2 security.
@@ -552,3 +572,61 @@ securityDefinitions:
   petstore_basic:
     type: basic
 ```
+
+Complete sample can be found [here](samples/security_sample.yaml)
+
+#### Import APIs from WSO2 API Manager
+The published apis from [WSO2 API Manager](https://wso2.com/api-management/) can be exposed via micro gateway as well.
+We can import API from WSO2 API Manager by specifying the API name and version.
+The **import** command of the toolkit can be used to fetch APIs.
+
+First init the project
+```
+micro-gw init pizza-api
+```
+
+Then import the API. Toolkit will prompt for API manager url, user name and password of a valid user in API manager, trust store location and password of toolkit.
+If url, trust store location and password is not provided default values will be used
+
+```
+micro-gw import <PROJECT_NAME> -a <API-NAME> -v <API_VERSION>
+
+ex: micro-gw import pizza-api -a PizzaShackAPI -v 1.0.0
+
+$ micro-gw import pizza-api -a PizzaShackAPI -v 1.0.0
+Enter Username:
+admin
+Enter Password for admin:
+
+Enter APIM base URL [https://localhost:9443]:
+
+You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MICROGW_HOME>/conf/toolkit-config.toml)
+Enter Trust store location: [lib/platform/bre/security/ballerinaTruststore.p12]
+
+Enter Trust store password: [ use default? ]
+
+ID for API PizzaShackAPI : 48776504-9479-48c0-abd2-711ea0263ac9
+
+```
+
+Once imported the auto generated swagger will be inside the gen directory of the project. Project structure will be as follows.
+```
+pizza-api/
+├── api_definitions
+├── conf
+│   └── deployment-config.toml
+├── extensions
+│   ├── extension_filter.bal
+│   └── token_revocation_extension.bal
+├── gen
+│   └── api_definitions
+│       └── 30e623704c5c5479b7c0d9ab78e965df02c1610401e37cbd557e6353e3191c76swagger.json
+├── interceptors
+├── policies.yaml
+└── target
+    └── gen
+        └── internal.conf
+
+```
+
+And then this project can be build and run in the same manner.
