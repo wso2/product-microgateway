@@ -58,6 +58,7 @@ public class InitCmd implements GatewayLauncherCmd {
     @Parameter(names = {"--etcd"}, hidden = true, arity = 0)
     private boolean isEtcdEnabled;
 
+    @SuppressWarnings("unused")
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
 

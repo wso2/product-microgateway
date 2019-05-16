@@ -26,11 +26,8 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
-import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyListMapper;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
@@ -52,7 +49,7 @@ import java.util.List;
 public class ThrottlePolicyGenerator {
 
     public void generate(String outPath, List<ApplicationThrottlePolicyDTO> applicationPolicies,
-            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException, BallerinaServiceGenException {
+            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies) throws IOException {
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<GenSrcFile> genAppFiles = generateApplicationPolicies(applicationPolicies);
 
@@ -175,17 +172,6 @@ public class ThrottlePolicyGenerator {
         return sourceFiles;
     }
 
-    private ApplicationThrottlePolicyListDTO restoreApplicationThrottlePolicy(String projectName) throws IOException {
-        String applicationPolicyPath = GatewayCmdUtils.getProjectAppThrottlePoliciesFilePath(projectName);
-
-        if(new File(applicationPolicyPath).exists()){
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(new File(applicationPolicyPath), ApplicationThrottlePolicyListDTO.class);
-        }
-        return null;
-
-    }
-
     /**
      * Generate subscription policies source
      *
@@ -205,16 +191,6 @@ public class ThrottlePolicyGenerator {
             sourceFiles.add(generatePolicy(policyContext));
         }
         return sourceFiles;
-    }
-
-    private SubscriptionThrottlePolicyListDTO restoreSubscriptionThrottlePolicy(String projectName) throws IOException {
-        String subscriptionPolicyPath = GatewayCmdUtils.getProjectSubscriptionThrottlePoliciesFilePath(projectName);
-
-        if(new File(subscriptionPolicyPath).exists()){
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(new File(subscriptionPolicyPath), SubscriptionThrottlePolicyListDTO.class);
-        }
-        return null;
     }
 
     /**
@@ -308,44 +284,44 @@ public class ThrottlePolicyGenerator {
     private GenSrcFile generatePolicy(ThrottlePolicy context) throws IOException {
         String concatTitle = context.getPolicyType() + "_" + context.getName();
         String srcFile = concatTitle + ".bal";
+        String mainContent = getContent(context);
 
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.THROTTLE_POLICY_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     private GenSrcFile generateInitBalFile(ThrottlePolicyInitializer context) throws IOException {
         String concatTitle = GeneratorConstants.THROTTLE_POLICY_INITIALIZER;
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
+        String mainContent = getPolicyInitContent(context);
 
-        String mainContent = getPolicyInitContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.THROTTLE_POLICY_INIT_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     /**
      * Retrieve generated source content as a String value.
      *
-     * @param object       context to be used by template engine
-     * @param templateDir  templates directory
-     * @param templateName name of the template to be used for this code generation
+     * @param object context to be used by template engine
      * @return String with populated template
      * @throws IOException when template population fails
      */
-    private String getContent(ThrottlePolicy object, String templateDir, String templateName) throws IOException {
-        Template template = CodegenUtils.compileTemplate(templateDir, templateName);
+    private String getContent(ThrottlePolicy object) throws IOException {
+        Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+                GeneratorConstants.THROTTLE_POLICY_TEMPLATE_NAME);
         Context context = Context.newBuilder(object)
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
+
         return template.apply(context);
     }
 
-    private String getPolicyInitContent(ThrottlePolicyInitializer object, String templateDir, String templateName)
+    private String getPolicyInitContent(ThrottlePolicyInitializer object)
             throws IOException {
-        Template template = CodegenUtils.compileTemplate(templateDir, templateName);
+        Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+                GeneratorConstants.THROTTLE_POLICY_INIT_TEMPLATE_NAME);
         Context context = Context.newBuilder(object)
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
+
         return template.apply(context);
     }
 }

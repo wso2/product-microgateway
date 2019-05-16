@@ -118,6 +118,7 @@ public class ImportCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
+    @SuppressWarnings("unused")
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
 

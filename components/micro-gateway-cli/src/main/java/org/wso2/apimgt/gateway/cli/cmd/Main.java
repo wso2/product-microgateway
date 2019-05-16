@@ -76,11 +76,8 @@ public class Main {
      */
     private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
         try {
-            DefaultCmd defaultCmd = new DefaultCmd();
-            JCommander cmdParser = new JCommander(defaultCmd);
-            defaultCmd.setParentCmdParser(cmdParser);
-
             HelpCmd helpCmd = new HelpCmd();
+            JCommander cmdParser = new JCommander(helpCmd);
             cmdParser.addCommand(GatewayCliCommands.HELP, helpCmd);
             helpCmd.setParentCmdParser(cmdParser);
 
@@ -110,7 +107,7 @@ public class Main {
                 // User has not specified a command. Therefore returning the main command
                 // which simply prints usage information.
                 if (parsedCmdName == null) {
-                    return Optional.of(defaultCmd);
+                    return Optional.of(helpCmd);
                 }
                 commanderMap = cmdParser.getCommands();
             } else {
