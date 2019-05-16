@@ -118,6 +118,7 @@ public class ImportCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
+    @SuppressWarnings("unused")
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
 
@@ -303,14 +304,6 @@ public class ImportCmd implements GatewayLauncherCmd {
         //delete the folder if an exception is thrown in following steps
         try {
             GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
-            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                    + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
-            CodeGenerator codeGenerator = new CodeGenerator();
-            codeGenerator.generate(projectName, apis, true);
-            //Initializing the ballerina project and creating .bal folder.
-            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
-                    new ArrayList<>(), null);
         } catch (Exception e) {
             throw new CLIInternalException("Exception occurred during codeGeneration process");
         }

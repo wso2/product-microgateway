@@ -289,32 +289,14 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         
         update_cli_classpath
         MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
-        pushd $MICRO_GW_LABEL_PROJECT_DIR/gen > /dev/null
-            # clean the content of target folder
-            if [ -d "$MICRO_GW_LABEL_PROJECT_DIR/target" ]; then
-                rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target
+        pushd $MICRO_GW_LABEL_PROJECT_DIR/target/gen > /dev/null
+            # clean the .balx files of target folder
+            if ls $MICRO_GW_LABEL_PROJECT_DIR/target/*.balx 1> /dev/null 2>&1; then
+                rm -f $MICRO_GW_LABEL_PROJECT_DIR/target/*.balx
             fi
-            mkdir $MICRO_GW_LABEL_PROJECT_DIR/target
             # build the ballerina source code for the label
             ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
         popd > /dev/null
-
-    # ----- Execute The Build Command with --compiled flag (2nd phase) -----------------------------------------
-      $JAVACMD \
-        -Xms256m -Xmx1024m \
-        -XX:+HeapDumpOnOutOfMemoryError \
-        -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-        $JAVA_OPTS \
-        -classpath "$CLI_CLASSPATH" \
-        -Djava.security.egd=file:/dev/./urandom \
-        -Dballerina.home=$BALLERINA_HOME \
-        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-        -Dfile.encoding=UTF8 \
-        -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-        -Dcli.home=$MICROGW_HOME \
-        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
-        org.wso2.apimgt.gateway.cli.cmd.Main "$@" "--compiled"
      fi
 else
   $JAVACMD \

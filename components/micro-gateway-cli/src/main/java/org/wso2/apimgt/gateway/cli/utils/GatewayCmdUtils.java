@@ -18,7 +18,6 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -65,6 +65,7 @@ public class GatewayCmdUtils {
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
     private static boolean verboseLogsEnabled = setVerboseEnabled();
+    private static final String openAPISpec2 = "2";
 
     public static Config getConfig() {
         return config;
@@ -297,14 +298,15 @@ public class GatewayCmdUtils {
         String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
         createFolderIfNotExist(targetDirPath);
 
+        String targetGenDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR + File.separator
+                + GatewayCliConstants.PROJECT_GEN_DIR;
+        createFolderIfNotExist(targetGenDirPath);
+
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
         createFolderIfNotExist(confDirPath);
 
         String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
         createFolderIfNotExist(definitionsPath);
-
-        String genDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
-        createFolderIfNotExist(genDirPath);
 
         createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
 
@@ -340,7 +342,6 @@ public class GatewayCmdUtils {
             throw new CLIRuntimeException("Policy definition not found in CLI_HOME");
         }
 
-        createGenDirectoryStructure(genDirPath);
     }
 
     /**
@@ -349,12 +350,18 @@ public class GatewayCmdUtils {
      * @param projectName   project name
      * @param apiDefinition api Definition as String
      */
-    public static void saveSwaggerDefinition(String projectName, String apiDefinition, String apiId) {
+    public static void saveSwaggerDefinition(String projectName, String apiDefinition, String apiId, String extension) {
         if (apiDefinition.isEmpty()) {
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
         try {
-            writeContent(apiDefinition, new File(getProjectGenSwaggerPath(projectName, apiId)));
+            Path genPath = Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName));
+            Path apiDefPath = Paths.get(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
+            if(Files.notExists(genPath)){
+                Files.createDirectory(genPath);
+                Files.createDirectory(apiDefPath);
+            }
+            writeContent(apiDefinition, new File(getProjectGenSwaggerPath(projectName, apiId, extension)));
         } catch (IOException e) {
             throw new CLIInternalException("Error while copying the swagger to the project directory");
         }
@@ -363,7 +370,9 @@ public class GatewayCmdUtils {
     private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api) {
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId);
+        String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
+                ? GatewayCliConstants.API_SWAGGER: GatewayCliConstants.API_OPENAPI_YAML;
+        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
     }
 
     /**
@@ -375,6 +384,7 @@ public class GatewayCmdUtils {
     public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis) {
         for (ExtendedAPI api : apis) {
             saveSwaggerDefinitionForSingleAPI(projectName, api);
+            System.out.println("ID for API " + api.getName() + " : " + api.getId());
         }
     }
 
@@ -508,14 +518,26 @@ public class GatewayCmdUtils {
     }
 
     /**
+     * Returns path to the /target/gen of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /src of a given project in the current working directory
+     */
+    public static String getProjectTargetGenDirectoryPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
+                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+    }
+
+    /**
      * Returns path to the /gen/src of a given project in the current working directory
      *
      * @param projectName name of the project
      * @return path to the /src of a given project in the current working directory
      */
     public static String getProjectGenSrcDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR;
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
+                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator
+                + GatewayCliConstants.GEN_SRC_DIR;
     }
 
     /**
@@ -546,9 +568,24 @@ public class GatewayCmdUtils {
      * @return path to the /src of a given project in the current working directory
      */
     public static String getProjectGenSrcInterceptorsDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR + File.separator + GatewayCliConstants.GEN_SRC_DIR
-                + File.separator +GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
+                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator
+                + GatewayCliConstants.GEN_SRC_DIR + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+    }
+
+    /**
+     * Returns path to the /gen/api-definition of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @param apiId  md5 hash value of apiName:apiVersion
+     * @param extensionType The file extension type. (ex : yaml or json)
+     * @return path to the /gen/api-definition of a given project in the current working directory
+     */
+    public static String getProjectGenSwaggerPath(String projectName, String apiId, String extensionType) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
+                + extensionType;
     }
 
     /**
@@ -563,6 +600,18 @@ public class GatewayCmdUtils {
                 GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
                 + GatewayCliConstants.API_SWAGGER;
+    }
+
+    /**
+     * Returns path to the /gen/api-definition of a given project in the current working directory
+     *
+     * @param projectName name of the project
+     * @return path to the /gen/api-definition of a given project in the current working directory
+     */
+    public static String getProjectGenAPIDefinitionPath(String projectName ) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
     }
 
     /**
@@ -997,10 +1046,10 @@ public class GatewayCmdUtils {
      *
      * @param genDirPath path to project's /gen directory
      */
-    private static void createGenDirectoryStructure(String genDirPath) {
-        String genDefinitionsPath = genDirPath + File.separator + GatewayCliConstants.GEN_API_DEFINITIONS_DIR;
-        createFolderIfNotExist(genDefinitionsPath);
-
+    public static void createGenDirectoryStructure(String genDirPath) throws IOException {
+        Path genPath = Paths.get(genDirPath);
+        FileUtils.deleteDirectory(new File(genDirPath));
+        Files.createDirectory(genPath);
         String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
         createFolderIfNotExist(genSrcPath);
 

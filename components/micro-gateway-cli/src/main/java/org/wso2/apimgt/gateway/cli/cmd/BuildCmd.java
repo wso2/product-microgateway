@@ -36,7 +36,6 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -97,14 +96,9 @@ public class BuildCmd implements GatewayLauncherCmd {
         File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
         File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
 
-
-        if(importedAPIDefLocation.list().length == 0 && addedAPIDefLocation.list().length == 0 ){
+        if (importedAPIDefLocation.list() != null && importedAPIDefLocation.list().length == 0
+                && addedAPIDefLocation.list() != null && addedAPIDefLocation.list().length == 0) {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
-        }
-
-        if(importedAPIDefLocation.list().length > 0 && addedAPIDefLocation.list().length == 0 && !isCompiled){
-            //if only imported swaggers available, we do not explicitly generate ballerina code
-            return;
         }
 
         //first phase of the build command; generation of ballerina code
@@ -115,7 +109,8 @@ public class BuildCmd implements GatewayLauncherCmd {
 
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-
+                GatewayCmdUtils
+                        .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
                 GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
@@ -123,10 +118,11 @@ public class BuildCmd implements GatewayLauncherCmd {
                 codeGenerator.generate(projectName, true);
 
                 //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
             } catch (IOException e) {
-                throw new CLIInternalException("Error occured while generating ballerina code for the swagger file.");
+                throw new CLIInternalException(
+                        "Error occurred while generating source code for the open API definitions.", e);
             }
         }
     }
