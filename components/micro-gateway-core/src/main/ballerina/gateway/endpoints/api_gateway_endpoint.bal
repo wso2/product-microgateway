@@ -25,6 +25,7 @@ http:Client conditionRetrievalEndpoint = new (
         }
     }
 );
+
 http:Client keyValidationEndpoint = new (
     getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
     config =

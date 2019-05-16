@@ -42,7 +42,6 @@ public type APIGatewaySecureListener object {
 
 };
 
-
 function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration config) {
     string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
         "${ballerina.home}/bre/security/ballerinaKeystore.p12");
