@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.0.0-beta-SNAPSHOT</version>
+        <version>3.0.0-beta3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <type>zip</type>
             <classifier>micro-gw-binary-repo</classifier>
         </dependency>
@@ -60,7 +60,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-dependencies</id>
+                        <id>unpack-gw-lib</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
@@ -88,6 +88,26 @@
                             <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                       <id>unpack-gw-tools</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>unpack</goal>
+                       </goals>
+                       <configuration>
+                           <artifactItems>
+                               <artifactItem>
+                                   <groupId>org.wso2.am.microgw</groupId>
+                                   <artifactId>org.wso2.micro.gateway.tools</artifactId>
+                                   <version>${project.version}</version>
+                                   <type>zip</type>
+                                   <classifier>micro-gateway-tools</classifier>
+                                   <outputDirectory>${project.build.directory}/bin/gw</outputDirectory>
+                               </artifactItem>
+                           </artifactItems>
+                       </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
             <plugin>
@@ -109,13 +129,39 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>download-ballerina-runtime</id>
+                        <id>download-ballerina-runtime-linux</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/internal-installer-distributions/ballerina-runtime-linux-${ballerina.platform.version}.zip</url>
+                            <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-ballerina-runtime-macos</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/internal-installer-distributions/ballerina-runtime-macos-${ballerina.platform.version}.zip</url>
+                            <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-ballerina-runtime-windows</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/internal-installer-distributions/ballerina-runtime-windows-${ballerina.platform.version}.zip</url>
                             <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>-->
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
@@ -128,7 +174,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>micro-gateway-platform</id>
+                        <id>ballerina-platform</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>attached</goal>
@@ -145,7 +191,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>micro-gateway-runtime</id>
+                        <id>ballerina-runtime-linux</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>attached</goal>
@@ -155,14 +201,48 @@
                                 <filter>${basedir}/src/main/assembly/filter.properties</filter>
                             </filters>
                             <descriptors>
-                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>
+                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_linux_zip.xml</descriptor>
                             </descriptors>
-                            <finalName>runtime</finalName>
+                            <finalName>runtime-linux</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>micro-gateway</id>
+                        <id>ballerina-runtime-macos</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_macos_zip.xml</descriptor>
+                            </descriptors>
+                            <finalName>runtime-macos</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>ballerina-runtime-windows</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_windows_zip.xml</descriptor>
+                            </descriptors>
+                            <finalName>runtime-windows</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-toolkit</id>
                         <phase>package</phase>
                         <goals>
                             <goal>attached</goal>
@@ -174,8 +254,80 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-toolkit-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-runtime-linux</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime_linux.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-linux-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-runtime-mac-os</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime_macos.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-macos-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-runtime-windows</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime_windows.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-windows-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven.clean.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>auto-clean</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${basedir}/target/ballerina</directory>
+                                </fileset>
+                            </filesets>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
                         </configuration>
                     </execution>
                 </executions>

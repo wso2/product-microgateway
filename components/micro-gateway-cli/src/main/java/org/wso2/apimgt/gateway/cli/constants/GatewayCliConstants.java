@@ -17,7 +17,6 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +28,6 @@ public class GatewayCliConstants {
     public static final String PROJECT_GRPC_SERVICE_DIR = "grpc_service";
     public static final String PROJECT_GRPC_CLIENT_DIR = "client";
     public static final String PROJECT_EXTENSIONS_DIR = "extensions";
-    public static final String PROJECT_LOGS_DIR = "logs";
-    public static final String PROJECT_API_USAGE_DIR = "api-usage-data";
     public static final String PROJECT_API_DEFINITIONS_DIR = "api_definitions";
     public static final String PROJECT_DEFINITION_FILE = "definition.yaml";
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
@@ -52,18 +49,14 @@ public class GatewayCliConstants {
     public static final String CLI_LIB = "lib";
     public static final String CLI_REPO = "repo";
     public static final String CLI_CONF = "conf";
-    public static final String CLI_RUNTIME = "runtime";
     public static final String CLI_PLATFORM = "platform";
     public static final String CLI_GATEWAY = "gateway";
     public static final String CLI_BALO = "balo";
     public static final String CLI_BRE = "bre";
     public static final String POLICY_DIR = "policies";
-    public static final String EXTENSION_BALX = ".balx";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_JAR = ".jar";
     public static final String EXTENSION_BAL = ".bal";
-    public static final String GW_TARGET_DIST = "distribution";
-    public static final String GW_DIST_PREFIX = "micro-gw-";
     public static final String GW_DIST_BIN = "bin";
     public static final String GW_DIST_CONF = "conf";
     public static final String GW_DIST_RESOURCES = "resources";
@@ -71,17 +64,8 @@ public class GatewayCliConstants {
     public static final String GW_DIST_DEFINITIONS = "definitions";
     public static final String GW_DIST_POLICIES = "policies";
     public static final String GW_DIST_POLICIES_FILE = PROJECT_POLICIES_FILE;
-    public static final String GW_DIST_RUNTIME = "runtime";
-    public static final String GW_DIST_EXEC = "exec";
-    public static final String GW_DIST_SH = "gateway";
-    public static final String GW_DIST_BAT = "gateway.bat";
-    public static final String GW_DIST_SH_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator
-            + GW_DIST_SH;
-    public static final String GW_DIST_BAT_PATH = "distribution" + File.separator + GW_DIST_BIN + File.separator
-            + GW_DIST_BAT;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_TOKEN_REVOCATION_EXTENSION = "token_revocation_extension.bal";
-    public static final String GW_DIST_CONF_FILE = "micro-gw.conf";
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";
     public static final String K8S_INGRESS = "ingress";
@@ -97,8 +81,6 @@ public class GatewayCliConstants {
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
-    public static final int EXIT_CODE_NOT_MODIFIED = 34;
-
     public static final List<String> accessControlAllowOrigins = Collections.singletonList("*");
     public static final List<String> accessControlAllowMethods = Arrays
             .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS");
@@ -106,16 +88,11 @@ public class GatewayCliConstants {
             .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction");
     public static final boolean accessControlAllowCredentials = false;
 
-    public static final String[] PROJECTS_TARGET_DELETE_FILES = new String[] {
-            GW_TARGET_DIST,
-            "Ballerina.lock"
-    };
-
     public static final String SUBSCRIPTION_THROTTLE_POLICIES_FILE = "subscription-throttle-policies.json";
     public static final String APPLICATION_THROTTLE_POLICIES_FILE = "application-throttle-policies.json";
     public static final String CLIENT_CERT_METADATA_FILE = "client-cert-metadata.json";
     public static final String API_METADATA_FILE = "api-metadata.yaml";
     public static final String API_SWAGGER = "swagger.json";
+    public static final String API_OPENAPI_YAML = "openAPI.yaml";
     public static final String PROJECT_FILE_NAME = ".PROJECT";
-    public static final String DEFINITION_SCHEMA_FILE = "definition-schema.json";
 }

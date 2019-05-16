@@ -36,7 +36,6 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -97,14 +96,9 @@ public class BuildCmd implements GatewayLauncherCmd {
         File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
         File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
 
-
-        if(importedAPIDefLocation.list().length == 0 && addedAPIDefLocation.list().length == 0 ){
+        if (importedAPIDefLocation.list() != null && importedAPIDefLocation.list().length == 0
+                && addedAPIDefLocation.list() != null && addedAPIDefLocation.list().length == 0) {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
-        }
-
-        if(importedAPIDefLocation.list().length > 0 && addedAPIDefLocation.list().length == 0 && !isCompiled){
-            //if only imported swaggers available, we do not explicitly generate ballerina code
-            return;
         }
 
         //first phase of the build command; generation of ballerina code
@@ -117,44 +111,22 @@ public class BuildCmd implements GatewayLauncherCmd {
                 etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
                 GatewayCmdUtils.setEtcd(etcd);
 
-                MgwDefinitionBuilder.build(projectName);
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-
+                GatewayCmdUtils
+                        .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
                 policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
                         + GatewayCliConstants.POLICY_DIR, projectName);
                 GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                         GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
                 codeGenerator.generate(projectName, true);
 
-                //to indicate the api information which is not used in the code generation process, but included in
-                //definition.yaml
-                MgwDefinitionBuilder.FindUnusedAPIInformation();
                 //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
+                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
-
-//todo:
-//                try {
-//                    changesDetected = HashUtils.detectChanges(apis, subscriptionPolicies,
-//                            applicationPolicies, projectName);
-//                } catch (HashingException e) {
-//                    logger.error("Error while checking for changes of resources. Skipping no-change detection..", e);
-//                    throw new CLIInternalException(
-//                            "Error while checking for changes of resources. Skipping no-change detection..");
-//                }
             } catch (IOException e) {
-                throw new CLIInternalException("Error occured while generating ballerina code for the swagger file.");
-            }
-        }
-        //second phase of the build command; ballerina code compilation
-        else{
-            try {
-                GatewayCmdUtils.createProjectGWDistribution(projectName);
-                outStream.println("Build successful for the project - " + projectName);
-            } catch (IOException e) {
-                logger.error("Error occurred while creating the micro gateway distribution for the project {}.", projectName, e);
-                throw new CLIInternalException("Error occurred while creating the micro gateway distribution for the project");
+                throw new CLIInternalException(
+                        "Error occurred while generating source code for the open API definitions.", e);
             }
         }
     }

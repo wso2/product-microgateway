@@ -20,7 +20,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.0.0-beta-SNAPSHOT</version>
+        <version>3.0.0-beta3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -66,10 +66,6 @@
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.everit.json</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -112,14 +108,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-            </plugin>
             <!-- We want to package up license resources in the JARs produced -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -133,6 +121,55 @@
                             <resourceBundles>
                                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
                             </resourceBundles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--todo: remove this with the next update.-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.github.jknack:handlebars</include>
+                                    <include>commons-io:commons-io</include>
+                                    <include>io.swagger:swagger-core</include>
+                                    <include>io.swagger:swagger-models</include>
+                                    <include>io.swagger:swagger-parser</include>
+                                    <include>io.swagger.core.v3:swagger-core</include>
+                                    <include>io.swagger.core.v3:swagger-models</include>
+                                    <include>io.swagger.parser.v3:swagger-parser</include>
+                                    <include>io.swagger.parser.v3:swagger-parser-core</include>
+                                    <include>io.swagger.parser.v3:swagger-parser-v2-converter</include>
+                                    <include>io.swagger.parser.v3:swagger-parser-v3</include>
+                                    <include>javax.validation:validation-api</include>
+                                    <include>com.google.code.gson:gson</include>
+                                    <include>org.ballerinalang:ballerina-to-swagger</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

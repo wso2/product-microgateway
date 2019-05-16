@@ -1,0 +1,178 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+#  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+# ----------------------------------------------------------------------------
+# Startup Script for API Manager Micro Gateway for ${label} APIs
+#
+# NOTE: Borrowed generously from Apache Tomcat startup scripts.
+# -----------------------------------------------------------------------------
+
+# OS specific support.  $var _must_ be set to either true or false.
+#ulimit -n 100000
+
+# Set Java Xms and Xmx values. The values specified here will set in gateway runtime.
+JAVA_XMS_VALUE="256m"
+JAVA_XMX_VALUE="512m"
+
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+# Get standard environment variables
+PRGDIR=`dirname "$PRG"`
+
+# set BALLERINA_HOME
+GWHOME=`cd "$PRGDIR/.." ; pwd`
+export BALLERINA_HOME=$GWHOME'/runtime'
+export JAVA_HOME=$BALLERINA_HOME'/bre/lib/jre1.8.0_172'
+
+if [ -e "$GWHOME/bin/gateway.pid" ]; then
+  PID=`cat "$GWHOME"/bin/gateway.pid`
+fi
+
+# ----- Process the input command ----------------------------------------------
+args=""
+for c in $*
+do
+    if [ "$c" = "--debug" ] || [ "$c" = "-debug" ] || [ "$c" = "debug" ]; then
+          CMD="--debug"
+          continue
+    elif [ "$CMD" = "--debug" ]; then
+          if [ -z "$PORT" ]; then
+                PORT=$c
+          fi
+    elif [ "$c" = "--stop" ] || [ "$c" = "-stop" ] || [ "$c" = "stop" ]; then
+          CMD="stop"
+    elif [ "$c" = "--start" ] || [ "$c" = "-start" ] || [ "$c" = "start" ]; then
+          CMD="start"
+    elif [ "$c" = "--version" ] || [ "$c" = "-version" ] || [ "$c" = "version" ]; then
+          CMD="version"
+    elif [ "$c" = "--restart" ] || [ "$c" = "-restart" ] || [ "$c" = "restart" ]; then
+          CMD="restart"
+    elif [ "$c" = "--test" ] || [ "$c" = "-test" ] || [ "$c" = "test" ]; then
+          CMD="test"
+    else
+        args="$args $c"
+    fi
+done
+
+for last; do true; done
+
+if [ ! "$CMD" = "stop" ]; then
+  if [[ ! -f "$last" ]]; then
+      echo "Path to executable balx file is invalid"
+      exit 0
+  fi
+fi
+
+# Extract ballerina runtime
+if [ ! -d "$GWHOME/runtime" ]; then
+    $PRGDIR/tools
+    if [ $? -eq 0 ]; then
+        cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
+        cp -r $GWHOME/lib/gateway/balo/wso2 $GWHOME/runtime/lib/repo/
+    fi
+fi
+
+# Set JAVA Xms and Xmx values in Ballerina runtime
+sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
+sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
+rm $BALLERINA_HOME/bin/ballerina.back
+
+if [ "$CMD" = "start" ]; then
+  if [ -e "$GWHOME/bin/gateway.pid" ]; then
+    if  ps -p $PID > /dev/null ; then
+      echo "Process is already running"
+      exit 0
+    fi
+  fi
+  export GWHOME="$GWHOME"
+  rm -f file $GWHOME/bin/gateway.pid
+  # using nohup sh to avoid erros in solaris OS.TODO
+  nohup $SHELL <<EOF &
+    sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
+EOF
+  SESS_PID=$!
+  #getting the process id of the child process which spawn by the parent process
+  PROCESS_ID=""
+  TEMP_PID=""
+  while : ;
+  do
+    #spawns different child processes during startup. get the last existing one
+    TEMP_PID=$(ps -ef | pgrep -P "$SESS_PID" | awk '{print $1}')
+    if [ "$TEMP_PID" = "" ] ; then
+      continue;
+    fi
+    if [ "$PROCESS_ID" = "$TEMP_PID" ] ; then
+      echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
+      exit 0
+    fi
+    PROCESS_ID=$TEMP_PID
+    sleep 0.1
+  done
+elif [ "$CMD" = "stop" ]; then
+  export GWHOME="$GWHOME"
+  kill -term `cat "$GWHOME"/bin/gateway.pid`
+  kill -9 `lsof -t $GWHOME/logs/access_logs`
+  rm -f file $GWHOME/bin/gateway.pid
+  exit 0
+elif [ "$CMD" = "restart" ]; then
+  export GWHOME="$GWHOME"
+  kill -term `cat "$GWHOME"/bin/gateway.pid`
+  kill -9 `lsof -t $GWHOME/logs/access_logs`
+  process_status=0
+  pid=`cat "$GWHOME"/bin/gateway.pid`
+  while [ "$process_status" -eq "0" ]
+  do
+        sleep 1
+        ps -p$pid 2>&1 > /dev/null
+        process_status=$?
+  done
+  rm -f file $GWHOME/bin/gateway.pid
+  # using nohup sh to avoid erros in solaris OS.TODO
+  nohup $SHELL <<EOF &
+   sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
+EOF
+  SESS_PID=$!
+  PROCESS_ID=""
+  TEMP_PID=""
+  while : ;
+  do
+    #spawns different child processes during startup. get the last existing one
+    TEMP_PID=$(ps -ef | pgrep -P "$SESS_PID" | awk '{print $1}')
+    if [ "$TEMP_PID" = "" ] ; then
+      continue;
+    fi
+    if [ "$PROCESS_ID" = "$TEMP_PID" ] ; then
+      echo $PROCESS_ID >> $GWHOME/bin/gateway.pid
+      exit 0
+    fi
+    PROCESS_ID=$TEMP_PID
+    sleep 0.1
+  done
+fi
+
+# run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
+sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1  | tee -a $GWHOME/logs/microgateway.log

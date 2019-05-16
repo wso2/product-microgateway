@@ -128,11 +128,11 @@ goto :end
             if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
             ECHO MICRO_GW_PROJECT_DIR:  "%CURRENT_D%"
             PUSHD "%CURRENT_D%"
-            PUSHD "%MICRO_GW_PROJECT_DIR%\gen"
+            PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
-                if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
-                call ballerina build src -o %project_name:\=%.balx --offline --experimental --siddhiruntime
+                if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
+                call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
 
             if %verbose%==T ECHO Ballerina build completed

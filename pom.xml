@@ -22,7 +22,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-beta-SNAPSHOT</version>
+    <version>3.0.0-beta3-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>http://wso2.org</url>
@@ -229,12 +229,12 @@
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
-                <version>${pom.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.cli</artifactId>
-                <version>${pom.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -383,6 +383,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${maven.exec.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.bsc.maven</groupId>
+                    <artifactId>maven-processor-plugin</artifactId>
+                    <version>${maven.processor.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -404,9 +414,9 @@
         <com.fasterxml.jackson.datatype.version>2.4.1</com.fasterxml.jackson.datatype.version>
         <swagger.parser.version>1.0.34</swagger.parser.version>
         <swagger.models.version>1.5.16</swagger.models.version>
-        <swagger.v3.parser.version>2.0.0-rc3</swagger.v3.parser.version>
-        <swagger.v3.models.version>2.0.0</swagger.v3.models.version>
-        <swagger.parser.v2.converter.version>2.0.0-rc3</swagger.parser.v2.converter.version>
+        <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
+        <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
+        <swagger.parser.v2.converter.version>2.0.8</swagger.parser.v2.converter.version>
         <maven.replacer.plugin.version>1.5.3</maven.replacer.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
         <wso2.maven.compiler.target>1.8</wso2.maven.compiler.target>
@@ -429,6 +439,12 @@
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
         <andes.version>3.2.47</andes.version>
         <json.schema.version>1.5.0</json.schema.version>
+        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
+        <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
+        <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
 </project>

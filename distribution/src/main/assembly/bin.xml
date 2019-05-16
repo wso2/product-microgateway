@@ -19,7 +19,7 @@
 
 <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
-    <id>Micro Gateway Distribution</id>
+    <id>Micro Gateway Toolkit</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -27,53 +27,53 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/templates</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/templates</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/templates</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/policies</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/policies</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/policies</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/conf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/conf</outputDirectory>
         </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/temp</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/temp</outputDirectory>
             <excludes>
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/cli-conf</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/conf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/filters</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/filters</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/filters</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/definitions</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/definitions</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/definitions</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/lib/repo/
             </directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/balo</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/balo</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/lib/repo/
             </directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/balo</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/balo</outputDirectory>
         </fileSet>
 
         <!--create an empty logs folder-->
         <fileSet>
             <directory>${basedir}/resources/logs</directory>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/logs</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/logs</outputDirectory>
             <excludes>
                 <exclude>*/**</exclude>
             </excludes>
@@ -83,40 +83,31 @@
     <files>
         <file>
             <source>${basedir}/target/platform.zip</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib</outputDirectory>
-        </file>
-        <file>
-            <source>${basedir}/target/runtime.zip</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib</outputDirectory>
-            <destName>runtime.zip</destName>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/bin</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/bin</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw.bat</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/bin</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/bin</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../README.md</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../LICENSE.txt</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../release-notes.html</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}</outputDirectory>
-        </file>
-        <file>
-            <source>${basedir}/resources/ballerinaTruststore.p12</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/resources/</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/updates/product.txt</source>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/updates</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
@@ -124,32 +115,30 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/platform/</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform/</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/runtime</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/runtime</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/platform</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
-                <include>org.everit.json:org.everit.json.schema:jar</include>
-                <include>org.json:json:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-${pom.version}/lib/gateway/cli</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/cli</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.slf4j:slf4j-api</include>

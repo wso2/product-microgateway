@@ -31,4 +31,11 @@
         </fileSet>
     </fileSets>
 
+    <files>
+        <file>
+            <source>${basedir}/resources/ballerinaTruststore.p12</source>
+            <outputDirectory>/bre/security/</outputDirectory>
+        </file>
+    </files>
+
 </assembly>

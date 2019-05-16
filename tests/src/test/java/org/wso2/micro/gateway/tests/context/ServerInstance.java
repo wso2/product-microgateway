@@ -363,7 +363,7 @@ public class ServerInstance implements Server {
         if (fileSeparator.equals("\\")) {
             serverZipFile = serverZipFile.replace("/", "\\");
         }
-        String extractedCarbonDir =
+        String extractedServerDir =
                 serverZipFile.substring(serverZipFile.lastIndexOf(fileSeparator) + 1,
                         indexOfZip);
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -374,7 +374,7 @@ public class ServerInstance implements Server {
 
         try {
             Utils.extractFile(serverZipFile, extractDir);
-            this.serverHome = extractDir + File.separator + extractedCarbonDir;
+            this.serverHome = extractDir + File.separator + extractedServerDir;
             //copies the policies.yaml to run test cases.
             Files.copy(Paths.get(getClass().getClassLoader().getResource(Constants.POLICIES_FILE).getPath()), Paths.get(
                     serverHome + File.separator + Constants.RESOURCES_FOLDER + File.separator

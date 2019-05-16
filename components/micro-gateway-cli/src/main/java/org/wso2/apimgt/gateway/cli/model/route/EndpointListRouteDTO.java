@@ -3,7 +3,6 @@ package org.wso2.apimgt.gateway.cli.model.route;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class EndpointListRouteDTO {
     private APIEndpointSecurityDTO securityConfig = null;
     private EndpointType type = null;
     private List<String> endpoints = null;
-
+    private String name;
 
     @JsonProperty("securityConfig")
     public APIEndpointSecurityDTO getSecurityConfig() {
@@ -38,13 +37,21 @@ public class EndpointListRouteDTO {
         this.type = type;
     }
 
-    @JsonProperty("urls")
+    @JsonProperty(value = "urls", required = true)
     public List<String> getEndpoints() {
         return endpoints;
     }
 
     public void setEndpoints(List<String> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     //todo: add "add endpoint" method

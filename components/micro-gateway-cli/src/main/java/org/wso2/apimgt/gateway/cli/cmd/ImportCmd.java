@@ -30,9 +30,16 @@ import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
-import org.wso2.apimgt.gateway.cli.exception.*;
-import org.wso2.apimgt.gateway.cli.model.config.*;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
+import org.wso2.apimgt.gateway.cli.model.config.Client;
+import org.wso2.apimgt.gateway.cli.model.config.Config;
+import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
+import org.wso2.apimgt.gateway.cli.model.config.Token;
+import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -41,10 +48,7 @@ import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
-import org.wso2.apimgt.gateway.cli.utils.grpc.GRPCUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,9 +60,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import static org.wso2.apimgt.gateway.cli.utils.grpc.GrpcGen.BalGenerationConstants.PROTO_SUFFIX;
 
 /**
  * This class represents the "import" command and it pull the swagger and generate the source code
@@ -117,6 +118,7 @@ public class ImportCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-b", "--security"}, hidden = true)
     private String security;
 
+    @SuppressWarnings("unused")
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
 
@@ -280,12 +282,9 @@ public class ImportCmd implements GatewayLauncherCmd {
                 apis.add(api);
             }
         }
-        //if security option is not provided, default value is oauth2
-        if (security == null) {
-            security = "oauth2";
-        }
+
         //ExtendedAPI's security is updated
-        apis.forEach(api -> api.setApiSecurity(security));
+        apis.forEach(api -> api.setMgwApiSecurity(security));
 
         if (apis.isEmpty()) {
             // Delete folder
@@ -309,14 +308,6 @@ public class ImportCmd implements GatewayLauncherCmd {
         //delete the folder if an exception is thrown in following steps
         try {
             GatewayCmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
-            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                    + GatewayCliConstants.POLICY_DIR, applicationPolicies, subscriptionPolicies);
-            CodeGenerator codeGenerator = new CodeGenerator();
-            codeGenerator.generate(projectName, apis, true);
-            //Initializing the ballerina project and creating .bal folder.
-            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName)), null,
-                    new ArrayList<>(), null);
         } catch (Exception e) {
             throw new CLIInternalException("Exception occurred during codeGeneration process");
         }

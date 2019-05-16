@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) WSO2 2019 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <id>Micro Gateway Mac-OS Distribution</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <directory>${basedir}/resources/conf</directory>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/lib/repo/
+            </directory>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/lib/gateway/balo</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/resources/runtime_logs</directory>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/logs</outputDirectory>
+        </fileSet>
+        <!--create an empty exec folder-->
+        <fileSet>
+            <directory>${basedir}/resources/exec</directory>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/exec</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>${basedir}/target/runtime-macos.zip</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/</outputDirectory>
+            <destName>runtime.zip</destName>
+        </file>
+        <file>
+            <source>${basedir}/resources/bin/gateway</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/bin</outputDirectory>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/../README.md</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/../LICENSE.txt</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/../release-notes.html</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/updates/product.txt</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/updates</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${project.build.directory}/bin/gw/tools-osx</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/bin</outputDirectory>
+            <destName>tools</destName>
+            <fileMode>755</fileMode>
+        </file>
+    </files>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/lib/gateway</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

@@ -18,3 +18,6 @@ FROM ballerina/ballerina-runtime:0.990.4
 LABEL maintainer="dev@wso2.org"
 
 COPY runtime/ /ballerina/runtime/bre/lib/
+ADD conf/ /home/ballerina/conf/
+
+CMD ballerina run  --config /home/ballerina/conf/micro-gw.conf /home/exec/${project}.balx

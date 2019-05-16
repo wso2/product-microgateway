@@ -16,28 +16,29 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
-import org.wso2.apimgt.gateway.cli.utils.MgwDefinitionBuilder;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -80,9 +81,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
         //todo: fix this properly
-        setSecuritySchemas(api.getApiSecurity());
+        setSecuritySchemas(api.getMgwApiSecurity());
         this.config = GatewayCmdUtils.getConfig();
-        //todo: fix this -> not working
         this.etcd = GatewayCmdUtils.getEtcd();
         setPaths(openAPI);
         return this;
@@ -165,51 +165,44 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                 String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                 operation.getValue().setOperationId(operationId);
+                //to set BasicAuth property corresponding to the security schema in API-level
+                operation.getValue().setBasicAuth(OpenAPICodegenUtils
+                        .generateBasicAuthFromSecurity(api.getMgwApiSecurity()));
                 //if it is the developer first approach
                 if (isDevFirst) {
-                    String basePath = MgwDefinitionBuilder.getBasePath(openAPI.getInfo().getTitle(),
-                            openAPI.getInfo().getVersion());
-                    //to add resource level endpoint configuration
-                    MgwEndpointConfigDTO epConfig = MgwDefinitionBuilder.getResourceEpConfigForCodegen(basePath,
-                            path.getKey(), operation.getKey());
-                    if (epConfig != null) {
-                        operation.getValue().setEpConfigDTO(epConfig);
-                    }
-                    //todo: need to validate the existence of those functions
-                    //to add request interceptor
-                    String requestInterceptor = MgwDefinitionBuilder.getRequestInterceptor(basePath, path.getKey(),
-                            operation.getKey());
-                    if (requestInterceptor != null) {
-                        operation.getValue().setRequestInterceptor(requestInterceptor);
-                    }
-                    //to add response interceptor
-                    String responseInterceptor = MgwDefinitionBuilder.getResponseInterceptor(basePath, path.getKey(),
-                            operation.getKey());
-                    if (responseInterceptor != null) {
-                        operation.getValue().setResponseInterceptor(responseInterceptor);
-                    }
-                    //to add throttle policy
-                    String throttle_policy = MgwDefinitionBuilder.getThrottlePolicy(basePath, path.getKey(),
-                            operation.getKey());
-                    if (throttle_policy != null) {
-                        operation.getValue().setResourceTier(throttle_policy);
-                    }
-
                     //to add API level request interceptor
-                    String apiRequestInterceptor = MgwDefinitionBuilder.getApiRequestInterceptor(basePath);
-                    if (apiRequestInterceptor != null) {
-                        //if user specify the same interceptor function in both api level and resource level ignore
-                        // api level interceptor
-                        if (!apiRequestInterceptor.equals(requestInterceptor)) {
-                            operation.getValue().setApiRequestInterceptor(apiRequestInterceptor);
-                        }
-                    }
-
+                    Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                            .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+                    apiRequestInterceptor.ifPresent(value -> operation.getValue()
+                            .setApiRequestInterceptor(value.toString()));
                     //to add API level response interceptor
-                    String apiResponseInterceptor = MgwDefinitionBuilder.getApiResponseInterceptor(basePath);
-                    if (apiResponseInterceptor != null) {
-                        operation.getValue().setApiResponseInterceptor(apiResponseInterceptor);
+                    Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                            .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+                    apiResponseInterceptor.ifPresent(value -> operation.getValue()
+                            .setApiResponseInterceptor(value.toString()));
+                    //to add API-level throttling policy
+                    Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                            .get(OpenAPIConstants.THROTTLING_TIER));
+                    //api level throttle policy is added only if resource level resource tier is not available
+                    if (operation.getValue().getResourceTier() == null) {
+                        apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
                     }
+                    //to add API-level security disable
+                    Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
+                            .get(OpenAPIConstants.DISABLE_SECURITY));
+                    disableSecurity.ifPresent(value -> {
+                        try {
+                            //Since we are considering based on 'x-mgw-disable-security', secured value should be the
+                            // negation
+                            boolean secured = !(Boolean) value;
+                            operation.getValue().setSecured(secured);
+                        } catch (ClassCastException e) {
+                            throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                                    "' should be a boolean value. But provided '" + value.toString() + "'.");
+                        }
+                    });
+                    //to set scope property of API
+                    operation.getValue().setScope(api.getMgwApiScope());
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
@@ -278,28 +271,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     private void setSecuritySchemas(String schemas) {
         Config config = GatewayCmdUtils.getConfig();
-        BasicAuth basicAuth = new BasicAuth();
-        boolean basic = false;
-        boolean oauth2 = false;
-        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-        for (String s : schemasArray) {
-            if (s.equalsIgnoreCase("basic")) {
-                basic = true;
-            } else if (s.equalsIgnoreCase("oauth2")) {
-                oauth2 = true;
-            }
-        }
-        if (basic && oauth2) {
-            basicAuth.setOptional(true);
-            basicAuth.setRequired(false);
-        } else if (basic) {
-            basicAuth.setRequired(true);
-            basicAuth.setOptional(false);
-        } else if (oauth2) {
-            basicAuth.setOptional(false);
-            basicAuth.setRequired(false);
-        }
-        config.setBasicAuth(basicAuth);
+        config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 
     public void setIsDevFirst(boolean value){

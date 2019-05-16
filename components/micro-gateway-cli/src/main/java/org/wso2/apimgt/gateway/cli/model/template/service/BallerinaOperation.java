@@ -19,15 +19,20 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
@@ -49,6 +54,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> methods;
     private String scope;
     private boolean isSecured = true;
+    //to identify if the isSecured flag is set from the operation
+    private boolean isSecuredAssignedFromOperation = false;
     private boolean hasProdEpConfig = false;
     private boolean hasSandEpConfig = false;
     private MgwEndpointConfigDTO epConfig;
@@ -56,6 +63,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
+    private BasicAuth basicAuth;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -67,25 +75,54 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             return getDefaultValue();
         }
 
-        // OperationId with spaces will cause trouble in ballerina code.
-        // Replacing it with '_' so that we can identify there was a ' ' when doing bal -> swagger
-        this.operationId = getTrimmedOperationId(operation.getOperationId());
+        // OperationId with spaces with special characters will cause errors in ballerina code.
+        // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();
         this.description = operation.getDescription();
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         this.methods = null;
-        Map<String, Object> extension =  operation.getExtensions();
-        if(extension != null){
-            Optional<Object> resourceTier = Optional.ofNullable(extension.get(X_THROTTLING_TIER));
+        //to provide resource level security in dev-first approach
+        this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        //to set resource level scopes in dev-first approach
+        this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
+        Map<String, Object> extensions =  operation.getExtensions();
+        if(extensions != null){
+            Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> scopes = Optional.ofNullable(extension.get(X_SCOPE));
+            Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = value.toString());
-            Optional<Object> authType = Optional.ofNullable(extension.get(X_AUTH_TYPE));
+            Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
                     this.isSecured = false;
+                }
+            });
+            //set resource level endpoint configuration
+            setEpConfigDTO(operation);
+            //set resource level request interceptors
+            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+            requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
+            //set resource level response interceptors
+            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+            responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
+            //set dev-first resource level throttle policy
+            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
+            devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.DISABLE_SECURITY));
+            devFirstDisableSecurity.ifPresent(value -> {
+                try {
+                    this.isSecured = !(Boolean) value;
+                    this.isSecuredAssignedFromOperation = true;
+                } catch (ClassCastException e) {
+                    throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                            "' should be a boolean value. But provided '" + value.toString() + "'.");
                 }
             });
         }
@@ -170,7 +207,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setScope(String scope) {
-        this.scope = scope;
+        if (this.scope == null) {
+            this.scope = scope;
+        }
     }
 
     public boolean isSecured() {
@@ -178,6 +217,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setSecured(boolean secured) {
+        if (isSecuredAssignedFromOperation) {
+            return;
+        }
         isSecured = secured;
     }
 
@@ -185,13 +227,15 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         return epConfig;
     }
 
-    public void setEpConfigDTO(MgwEndpointConfigDTO epConfigDTO) {
-        this.epConfig = epConfigDTO;
-        if(epConfigDTO.getProdEndpointList() != null){
-            hasProdEpConfig = true;
-        }
-        if(epConfigDTO.getSandboxEndpointList() != null){
-            hasSandEpConfig = true;
+    private void setEpConfigDTO(Operation operation) {
+        this.epConfig = OpenAPICodegenUtils.getResourceEpConfigForCodegen(operation);
+        if (epConfig != null) {
+            if (epConfig.getProdEndpointList() != null) {
+                hasProdEpConfig = true;
+            }
+            if (epConfig.getSandboxEndpointList() != null) {
+                hasSandEpConfig = true;
+            }
         }
     }
 
@@ -216,7 +260,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setApiRequestInterceptor(String requestInterceptor) {
-        this.apiRequestInterceptor = requestInterceptor;
+        //if user specify the same interceptor function in both api level and resource level ignore
+        // api level interceptor
+        if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
+            this.apiRequestInterceptor = requestInterceptor;
+        }
     }
 
     public String getApiResponseInterceptor() {
@@ -224,6 +272,17 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setApiResponseInterceptor(String responseInterceptor) {
-        this.apiResponseInterceptor = responseInterceptor;
+        //if user specify the same interceptor function in both api level and resource level ignore
+        // api level interceptor
+        if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
+            this.apiResponseInterceptor = responseInterceptor;
+        }
+    }
+
+    public void setBasicAuth(BasicAuth basicAuth) {
+        //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
+        if (this.basicAuth == null) {
+            this.basicAuth = basicAuth;
+        }
     }
 }
