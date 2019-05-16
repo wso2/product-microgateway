@@ -74,6 +74,7 @@ public class AESCipherTool {
      * @throws IOException            Thrown if any I/O error occurs while reading the user secret file.
      * @throws AESCipherToolException Thrown if any error occurs while initializing the cipher tool.
      */
+    @SuppressWarnings({"unused"})
     public AESCipherTool(Path userSecretFile) throws IOException, AESCipherToolException {
         List<String> userSecret = Files.readAllLines(userSecretFile, StandardCharsets.UTF_8);
         Files.deleteIfExists(userSecretFile);

@@ -23,11 +23,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +126,7 @@ public class OpenAPICodegenUtils {
      * @param isFilePath    If the given api Definition is a file path
      * @return openAPI version number (2 or 3)
      */
-    private static String findSwaggerVersion(String apiDefinition, boolean isFilePath) {
+    public static String findSwaggerVersion(String apiDefinition, boolean isFilePath) {
 
         JsonNode rootNode = generateJsonNode(apiDefinition, isFilePath);
         if (rootNode.has("swagger") && rootNode.get("swagger").asText().trim().startsWith("2")) {
@@ -144,17 +146,43 @@ public class OpenAPICodegenUtils {
     static String generateSwaggerString(ExtendedAPI api) {
 
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
+
+        RouteEndpointConfig mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+        Map<String, Object> extensionsMap = new HashMap<>();
         switch (swaggerVersion) {
-            case "2":
-                Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                //to save the basepath settings as provided in API Manager
-                swagger.setBasePath(api.getContext() + "/" + api.getVersion());
-                return Json.pretty(swagger);
-            case "3":
-                return api.getApiDefinition();
-            default:
-                throw new CLIRuntimeException("Error: Swagger version is not identified");
+        case "2":
+            Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
+            swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+            return Json.pretty(swagger);
+        case "3":
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
+            OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+            openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+            return Yaml.pretty(openAPI);
+
+        default:
+            throw new CLIRuntimeException("Error: Swagger version is not identified");
         }
+    }
+
+    private static Map<String, Object> getExtensionMap(ExtendedAPI api, RouteEndpointConfig mgwEndpointConfigDTO) {
+        Map<String, Object> extensionsMap = new HashMap<>();
+        String basePath = api.getContext() + "/" + api.getVersion();
+        extensionsMap.put(OpenAPIConstants.BASEPATH, basePath);
+        if (mgwEndpointConfigDTO.getProdEndpointList() != null) {
+            extensionsMap.put(OpenAPIConstants.PRODUCTION_ENDPOINTS, mgwEndpointConfigDTO.getProdEndpointList());
+        }
+        if (mgwEndpointConfigDTO.getSandboxEndpointList() != null) {
+            extensionsMap.put(OpenAPIConstants.SANDBOX_ENDPOINTS, mgwEndpointConfigDTO.getSandboxEndpointList());
+        }
+        if (api.getCorsConfiguration() != null) {
+            extensionsMap.put(OpenAPIConstants.CORS, api.getCorsConfiguration());
+        } return extensionsMap;
+    }
+
+    private static RouteEndpointConfig getEndpointObjectFromAPI(ExtendedAPI api) {
+        return RouteUtils.parseEndpointConfig(api.getEndpointConfig(), api.getEndpointSecurity());
+
     }
 
     /**

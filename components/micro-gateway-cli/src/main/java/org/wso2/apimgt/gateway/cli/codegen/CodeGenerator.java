@@ -21,7 +21,6 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
@@ -34,16 +33,18 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
-import org.wso2.apimgt.gateway.cli.utils.*;
+import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Paths;
-import java.nio.file.FileSystems;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,39 +115,50 @@ public class CodeGenerator {
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be used for generating Ballerina mock services and clients</p>
      *
-     * @throws IOException                  when file operations fail
-     * @throws BallerinaServiceGenException when code generator fails
+     * @throws IOException when file operations fail
      */
     public void generate(String projectName, boolean overwrite)
             throws IOException {
         String projectSrcPath = GatewayCmdUtils.getProjectGenSrcDirectoryPath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
-
-        String openApiPath;
-        openApiPath = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator +
-                    GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+        List<String> openAPIDirectoryLocations = new ArrayList<>();
+        String projectAPIDefGenLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
+        openAPIDirectoryLocations.add(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
+                + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR);
+        if (Files.exists(Paths.get(projectAPIDefGenLocation)))
+            openAPIDirectoryLocations.add(projectAPIDefGenLocation);
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
-        Files.walk(Paths.get(openApiPath)).filter(path -> (path.getFileName().toString().endsWith(".json") ||
-                path.getFileName().toString().endsWith(".yaml")))
-                .forEach( path -> {
-                    OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-                    OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
-                    ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
-                    BallerinaService definitionContext;
-                    OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
-                    try {
-                        definitionContext = new BallerinaService().buildContext(openAPI, api);
-                        genFiles.add(generateService(definitionContext));
+        openAPIDirectoryLocations.forEach(openApiPath -> {
+            try {
+                Files.walk(Paths.get(openApiPath)).filter(path -> (path
+                        .getFileName()
+                        .toString()
+                        .endsWith(".json") ||
+                        path.getFileName().toString().endsWith(".yaml")))
+                        .forEach( path -> {
+                            OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
+                            OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
+                            ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
+                            BallerinaService definitionContext;
+                            OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
+                            try {
+                                definitionContext = new BallerinaService().buildContext(openAPI, api);
+                                genFiles.add(generateService(definitionContext));
 
-                        serviceList.add(definitionContext);
-                    } catch (BallerinaServiceGenException e) {
-                        throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code",e);
-                    } catch (IOException e) {
-                        throw new CLIInternalException("File write operations failed during ballerina code generation");
-                    }
-                });
+                                serviceList.add(definitionContext);
+                            } catch (BallerinaServiceGenException e) {
+                                throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code",e);
+                            } catch (IOException e) {
+                                throw new CLIInternalException("File write operations failed during ballerina code "
+                                        + "generation", e);
+                            }
+                        });
+            } catch (IOException e) {
+                throw new CLIInternalException("File write operations failed during ballerina code generation", e);
+            }
+        });
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
@@ -168,7 +180,7 @@ public class CodeGenerator {
     private GenSrcFile generateService(BallerinaService context) throws IOException {
         String concatTitle = context.getQualifiedServiceName();
         String srcFile = concatTitle + GeneratorConstants.BALLERINA_EXTENSION;
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
+        String mainContent = getContent(context,
                 GeneratorConstants.SERVICE_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
@@ -182,8 +194,7 @@ public class CodeGenerator {
      */
     private GenSrcFile generateMainBal(List<BallerinaService> services) throws IOException {
         String srcFile = GeneratorConstants.MAIN_TEMPLATE_NAME + GeneratorConstants.BALLERINA_EXTENSION;
-        String mainContent = getContent(services, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.MAIN_TEMPLATE_NAME);
+        String mainContent = getContent(services, GeneratorConstants.MAIN_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
@@ -196,8 +207,7 @@ public class CodeGenerator {
     private GenSrcFile generateCommonEndpoints() throws IOException {
         String srcFile = GeneratorConstants.LISTENERS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
-        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.LISTENERS_TEMPLATE_NAME);
+        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.LISTENERS_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
@@ -205,13 +215,12 @@ public class CodeGenerator {
      * Retrieve generated source content as a String value.
      *
      * @param endpoints    context to be used by template engine
-     * @param templateDir  templates directory
      * @param templateName name of the template to be used for this code generation
      * @return String with populated template
      * @throws IOException when template population fails
      */
-    private String getContent(Object endpoints, String templateDir, String templateName) throws IOException {
-        Template template = CodegenUtils.compileTemplate(templateDir, templateName);
+    private String getContent(Object endpoints, String templateName) throws IOException {
+        Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
         Context context = Context.newBuilder(endpoints)
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
@@ -222,14 +231,15 @@ public class CodeGenerator {
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina package at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
+     *
      * @param projectName name of the project being set up
      * @param apiDef      api definition string
      * @param overwrite   whether existing files overwrite or not
      * @throws IOException                  when file operations fail
-     * @throws BallerinaServiceGenException when code generator fails
      */
+    @SuppressWarnings("unused")
     public void generateGrpc(String projectName, String apiDef, boolean overwrite)
-            throws IOException, BallerinaServiceGenException {
+            throws IOException {
         BallerinaService definitionContext;
 
         //apiId is not considered as the method is not functioning
@@ -239,7 +249,6 @@ public class CodeGenerator {
         String projectGrpcPath = GatewayCmdUtils.getProjectGrpcDirectoryPath();
         List<GenSrcFile> genFiles = new ArrayList<>();
         File dir = new File(projectGrpcPath);
-        File[] files = dir.listFiles();
         genFiles.add(generateCommonEndpoints());
 
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
@@ -275,8 +284,7 @@ public class CodeGenerator {
     private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
         String concatTitle = context.getName();
         String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_TEMPLATE_DIR,
-                GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
+        String mainContent = getContent(context, GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 }

@@ -16,7 +16,6 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -28,19 +27,19 @@ import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
-import java.util.Optional;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -184,13 +183,15 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
                     //api level throttle policy is added only if resource level resource tier is not available
-                    apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    if (operation.getValue().getResourceTier() == null) {
+                        apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    }
                     //to add API-level security disable
                     Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.DISABLE_SECURITY));
                     disableSecurity.ifPresent(value -> {
                         try {
-                            //Since we are considering based on 'x-mgw-security-disable', secured value should be the
+                            //Since we are considering based on 'x-mgw-disable-security', secured value should be the
                             // negation
                             boolean secured = !(Boolean) value;
                             operation.getValue().setSecured(secured);
