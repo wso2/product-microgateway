@@ -174,7 +174,6 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                             //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                     {{/if}}
                 {{else}}
-
                     {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
                             if (!reinitFailed) {
@@ -186,56 +185,136 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                             //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
                     {{/if}}
                 {{/if}}
-                } else {
-                    http:Response res = new;
-                    res.statusCode = 403;
-                    json payload = {
-                        ERROR_CODE: "900901",
-                        ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
-                    };
-                    runtime:getInvocationContext().attributes["error_code"] = "900901";
-                    res.setPayload(payload);
-                    clientResponse = res;
+                    } else {
+                {{#if hasSandEpConfig}}
+                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
+                            if (!reinitFailed) {
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{else}}
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                        }
+                    {{/if}}
+                {{else}}
+                            http:Response res = new;
+                            res.statusCode = 403;
+                            json payload = {
+                                ERROR_CODE: "900901",
+                                ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
+                            };
+                            runtime:getInvocationContext().attributes["error_code"] = "900901";
+                            res.setPayload(payload);
+                            clientResponse = res;
+                        }
+                {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
-            if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-            {{#if hasSandEpConfig}}
-                {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
-                    {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
-                        if (!reinitFailed) {
-                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                        }
-                {{else}}
-                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+            {{#endpointConfig.sandEndpoints}}
+                    if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
+                {{#if hasSandEpConfig}}
+                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
+                            if (!reinitFailed) {
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{else}}
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
                 {{/if}}
-            {{else}}
-                {{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
-                    {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
-                        if (!reinitFailed) {
-                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-                        }
+                    } else {
+                {{#if hasProdEpConfig}}
+                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
+                            if (!reinitFailed) {
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{else}}
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{/if}}
                 {{else}}
-                        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            http:Response res = new;
+                            res.statusCode = 403;
+                            json payload = {
+                                ERROR_CODE: "900901",
+                                ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
+                                };
+                            runtime:getInvocationContext().attributes["error_code"] = "900901";
+                            res.setPayload(payload);
+                            clientResponse = res;
+                        }
                 {{/if}}
-            {{/if}}
-            } else {
-                http:Response res = new;
-                res.statusCode = 403;
-                json payload = {
-                    ERROR_CODE: "900901",
-                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
-                };
-                runtime:getInvocationContext().attributes["error_code"] = "900901";
-                res.setPayload(payload);
-                clientResponse = res;
-            }
+            {{/endpointConfig.sandEndpoints}}
+            {{^endpointConfig.sandEndpoints}}
+                {{#if hasSandEpConfig}}
+                        if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
+                            if (!reinitFailed) {
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{else}}
+                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
+                        } else {
+                    {{#if hasProdEpConfig}}
+                    {{else}}
+                                http:Response res = new;
+                                res.statusCode = 403;
+                                json payload = {
+                                    ERROR_CODE: "900901",
+                                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
+                                    };
+                                runtime:getInvocationContext().attributes["error_code"] = "900901";
+                                res.setPayload(payload);
+                                clientResponse = res;
+                        }
+                    {{/if}}
+                {{else}}
+                    {{#if hasProdEpConfig}}
+                            if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    {{/if}}
+                {{/if}}
+                {{#if hasProdEpConfig}}
+                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
+                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
+                            if (!reinitFailed) {
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            }
+                    {{else}}
+                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{/if}}
+                    {{#if hasSandEpConfig}}
+                        }
+                    {{else}}
+                        } else {
+                            http:Response res = new;
+                            res.statusCode = 403;
+                            json payload = {
+                                ERROR_CODE: "900901",
+                                ERROR_MESSAGE: "Production key offered to the API with no sandbox endpoint"
+                            };
+                            runtime:getInvocationContext().attributes["error_code"] = "900901";
+                            res.setPayload(payload);
+                            clientResponse = res;
+                        }
+                    {{/if}}
+                {{/if}}
+            {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 

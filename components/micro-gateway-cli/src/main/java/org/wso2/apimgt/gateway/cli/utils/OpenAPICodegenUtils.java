@@ -480,7 +480,7 @@ public class OpenAPICodegenUtils {
         }
         basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
         if (basePathMap.containsKey(basePath)) {
-            throw new CLIRuntimeException("The valude for '" + OpenAPIConstants.BASEPATH + "' " + basePath +
+            throw new CLIRuntimeException("The value for '" + OpenAPIConstants.BASEPATH + "' " + basePath +
                     " property is duplicated in the following openAPI definitions.\n" + basePathMap.get(basePath) +
                     "\n" + openApiFilePath);
         }
@@ -836,6 +836,7 @@ public class OpenAPICodegenUtils {
     public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath) {
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasepath(openAPI, openAPIFilePath);
+        validateEndpointAvailability(openAPI, openAPIFilePath);
         validateAPIInterceptors(openAPI, openAPIFilePath);
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
@@ -899,5 +900,44 @@ public class OpenAPICodegenUtils {
                                 .getMessage(), e);
             }
         }
+    }
+
+    /**
+     * validate the availability of endpoints.
+     * If the api-level endpoints are not provided and there are resources with no endpoints assigned,
+     * an exception will be thrown.
+     *
+     * @param openAPI         {@link OpenAPI} object
+     * @param openAPIFilePath file path to openAPI definition
+     */
+    private static void validateEndpointAvailability(OpenAPI openAPI, String openAPIFilePath) {
+        if (openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) != null ||
+                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) == null) {
+            return;
+        }
+        boolean EpsUnavailableForAll = false;
+        EpsUnavailableForAll = openAPI.getPaths().entrySet().stream().anyMatch(path ->
+                isResourceEpUnavailable(path.getValue().getGet()) || isResourceEpUnavailable(path.getValue().getPost()) ||
+                        isResourceEpUnavailable(path.getValue().getPut()) ||
+                        isResourceEpUnavailable(path.getValue().getTrace()) ||
+                        isResourceEpUnavailable(path.getValue().getHead()) ||
+                        isResourceEpUnavailable(path.getValue().getDelete()) ||
+                        isResourceEpUnavailable(path.getValue().getPatch()) ||
+                        isResourceEpUnavailable(path.getValue().getOptions())
+        );
+        if (EpsUnavailableForAll) {
+            throw new CLIRuntimeException("'" + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' and '" +
+                    OpenAPIConstants.SANDBOX_ENDPOINTS + "' properties are not included under API Level in openAPI " +
+                    "definition '" + openAPIFilePath + "'. Please include at least one of them under API Level or " +
+                    "provide those properties for all the resources to overcome this issue");
+        }
+    }
+
+    private static boolean isResourceEpUnavailable(Operation operation) {
+        if (operation != null && operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) == null &&
+                operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) == null) {
+            return true;
+        }
+        return false;
     }
 }

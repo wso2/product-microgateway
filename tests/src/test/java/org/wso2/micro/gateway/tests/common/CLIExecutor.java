@@ -56,7 +56,7 @@ public class CLIExecutor {
                         .getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
 
-        String[] initArgs = {"init", project,"--etcd"};
+        String[] initArgs = {"init", project};
         main.main(initArgs);
 
         String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
