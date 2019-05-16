@@ -176,7 +176,7 @@ petstore-project/
 
 #### How to run the microgateway distribution
 
-Once the **init, build** commands are executed, a executable file with extension .balx will be created under target folder inside the project.
+Once the **init, build** commands are executed, an executable file with extension .balx will be created under target directory inside the project.
 
 ```
 ../petstore-project/target$ ls
@@ -238,9 +238,9 @@ Executable file will be created inside the target folder of the project.
 
 6. Lets run the executable file using the micro gateway runtime docker image
 ```
-docker run -d -v <PROJECT_TARGET__PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
+docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
 
-<PROJECT_TARGET__PATH> - The path of the target directoy created inside the project directory
+<PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
 ```
  this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
 

@@ -292,7 +292,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         pushd $MICRO_GW_LABEL_PROJECT_DIR/target/gen > /dev/null
             # clean the .balx files of target folder
             if ls $MICRO_GW_LABEL_PROJECT_DIR/target/*.balx 1> /dev/null 2>&1; then
-                rm -rf $MICRO_GW_LABEL_PROJECT_DIR/target/*.balx
+                rm -f $MICRO_GW_LABEL_PROJECT_DIR/target/*.balx
             fi
             mkdir $MICRO_GW_LABEL_PROJECT_DIR/target/exec
             # build the ballerina source code for the label

@@ -642,7 +642,7 @@ public class GatewayCmdUtils {
      * Returns path to the /gen/api-definition of a given project in the current working directory
      *
      * @param projectName name of the project
-     *                    * @return path to the /gen/api-definition of a given project in the current working directory
+     * @return path to the /gen/api-definition of a given project in the current working directory
      */
     public static String getProjectGenAPIDefinitionPath(String projectName ) {
         return getProjectDirectoryPath(projectName) + File.separator +
