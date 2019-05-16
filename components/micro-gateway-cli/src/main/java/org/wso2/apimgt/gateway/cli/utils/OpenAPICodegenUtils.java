@@ -912,7 +912,7 @@ public class OpenAPICodegenUtils {
      */
     private static void validateEndpointAvailability(OpenAPI openAPI, String openAPIFilePath) {
         if (openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) != null ||
-                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) == null) {
+                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) != null) {
             return;
         }
         boolean EpsUnavailableForAll = false;
