@@ -130,9 +130,8 @@ goto :end
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
-                SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target\exec"
-                if EXIST "%TARGET_DIR%"  ( RMDIR "%TARGET_DIR%" /s /q )
-                MD exec
+                SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
+                if EXIST "%TARGET_DIR%\%project_name:\=%.balx"  ( DEL /F "%TARGET_DIR%\%project_name:\=%.balx"  )
                 call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
 

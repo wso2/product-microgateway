@@ -176,7 +176,7 @@ petstore-project/
 
 #### How to run the microgateway distribution
 
-Once the **init, build** commands are executed, a executable file will be created under target/exec folder inside the project.
+Once the **init, build** commands are executed, a executable file with extension .balx will be created under target folder inside the project.
 
 ```
 ../petstore-project/target$ ls
@@ -189,8 +189,8 @@ Then use the micro gateway runtime component to run this executable file.
 `$ bash gateway <path_to_the_excutable_file>`
 
 ```
-micro-gw-internal/bin$ bash gateway /home/user/petstore-project/target/exec/exec/petstore-project.balx
-ballerina: initiating service(s) in '/home/user/petstore-project/target/exec/exec/petstore-project.balx'
+micro-gw-internal/bin$ bash gateway /home/user/petstore-project/target/petstore-project.balx
+ballerina: initiating service(s) in '/home/user/petstore-project/target/petstore-project.balx'
 ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
@@ -238,9 +238,9 @@ Executable file will be created inside the target folder of the project.
 
 6. Lets run the executable file using the micro gateway runtime docker image
 ```
-docker run -d -v <PROJECT_TARGET_EXEC_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
+docker run -d -v <PROJECT_TARGET__PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0-beta2
 
-<PROJECT_TARGET_EXEC_PATH> - The path of the target/exec directoy created inside the project directory
+<PROJECT_TARGET__PATH> - The path of the target directoy created inside the project directory
 ```
  this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
 
