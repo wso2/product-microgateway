@@ -64,43 +64,7 @@ public class GatewayCmdUtils {
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
-    private static Etcd etcd;
     private static boolean verboseLogsEnabled = setVerboseEnabled();
-
-    public static Etcd getEtcd() {
-        return etcd;
-    }
-
-    public static void setEtcd(Etcd etcd) {
-        GatewayCmdUtils.etcd = etcd;
-    }
-
-    //todo: change this later after being finalized
-    public static void saveEtcdEnabled(String projectName, boolean isEnabled){
-        createFileIfNotExist(getProjectGenDirectoryPath(projectName), "internal.conf");
-        Map<String, String> confMap = new HashMap<>(1);
-        confMap.put("isEtcdEnabled", String.valueOf(isEnabled));
-        try {
-            writeMapToFile(confMap, getProjectGenDirectoryPath(projectName) + File.separator + "internal.conf");
-        } catch (IOException e){
-            throw new CLIInternalException("Error while writing etcdEnabled to the internal.conf file", e);
-        }
-    }
-
-    public static boolean getEtcdEnabled(String projectName){
-        String internalConfPath = getProjectGenDirectoryPath(projectName)+ File.separator + "internal.conf";
-        if(!(new File(internalConfPath)).exists()){
-            return false;
-        }
-        try{
-            return Boolean.valueOf(readFileToMap(internalConfPath).get("isEtcdEnabled"));
-        } catch (IOException e){
-            throw new CLIInternalException("Error while reading the internal.conf file", e);
-        } catch (ClassNotFoundException e) {
-            throw new CLIInternalException("Error while while reading the internal.conf file", e);
-        }
-
-    }
 
     public static Config getConfig() {
         return config;

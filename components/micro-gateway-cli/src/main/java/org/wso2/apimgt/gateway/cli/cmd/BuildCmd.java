@@ -113,10 +113,6 @@ public class BuildCmd implements GatewayLauncherCmd {
                 String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
                 init(projectName, toolkitConfigPath, deploymentConfigPath);
 
-                Etcd etcd = new Etcd();
-                etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
-                GatewayCmdUtils.setEtcd(etcd);
-
                 CodeGenerator codeGenerator = new CodeGenerator();
                 ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
 

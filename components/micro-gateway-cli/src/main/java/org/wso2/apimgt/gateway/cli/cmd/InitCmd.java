@@ -54,10 +54,6 @@ public class InitCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
     private String deploymentConfigPath;
 
-    @SuppressWarnings("unused")
-    @Parameter(names = {"--etcd"}, hidden = true, arity = 0)
-    private boolean isEtcdEnabled;
-
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
 
@@ -87,8 +83,6 @@ public class InitCmd implements GatewayLauncherCmd {
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
         init(projectName, deploymentConfigPath);
-        //todo: remove the temporary solution
-        GatewayCmdUtils.saveEtcdEnabled(projectName, isEtcdEnabled);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
     }
