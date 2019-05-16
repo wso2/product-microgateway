@@ -24,11 +24,20 @@
         <format>zip</format>
     </formats>
 
+    <!-- Copy the runtime created from ballerina installers. This contains OS specific JRE as well-->
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/ballerina/ballerina-runtime-windows-${ballerina.platform.version}</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
+    <!-- Copy the executable ballerina file from platform since the executable file get from runtime created by
+    installer is different-->
+    <files>
+        <file>
+            <source>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}/bin/ballerina.bat</source>
+            <outputDirectory>/bin</outputDirectory>
+        </file>
+    </files>
 
 </assembly>

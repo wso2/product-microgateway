@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.0.0-beta2-SNAPSHOT</version>
+        <version>3.0.0-beta3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <type>zip</type>
             <classifier>micro-gw-binary-repo</classifier>
         </dependency>
@@ -254,7 +254,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-toolkit-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-toolkit-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
@@ -271,7 +271,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/gw_runtimes/gw_runtime_linux.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-linux-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-linux-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
@@ -288,7 +288,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/gw_runtimes/gw_runtime_macos.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-macos-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-macos-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
@@ -305,7 +305,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/gw_runtimes/gw_runtime_windows.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-windows-${pom.version}</finalName>
+                            <finalName>wso2am-micro-gw-windows-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>

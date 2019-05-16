@@ -22,7 +22,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-beta2-SNAPSHOT</version>
+    <version>3.0.0-beta3-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>http://wso2.org</url>
@@ -229,12 +229,12 @@
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
-                <version>${pom.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.cli</artifactId>
-                <version>${pom.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -388,6 +388,11 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>${maven.exec.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.bsc.maven</groupId>
+                    <artifactId>maven-processor-plugin</artifactId>
+                    <version>${maven.processor.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -436,6 +441,10 @@
         <json.schema.version>1.5.0</json.schema.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
+        <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
 </project>

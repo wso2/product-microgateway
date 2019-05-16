@@ -37,6 +37,7 @@ SET PRGDIR=%~sdp0
 SET GWHOME=%PRGDIR%..
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
+set JAVA_HOME=%BALLERINA_HOME%\bre\lib\jre1.8.0_172'
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 

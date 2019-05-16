@@ -21,6 +21,6 @@ package org.wso2.apimgt.gateway.cli.constants;
 public class HashingConstants {
 
     public static final String HASH_SEPARATOR = "::";
-    public static final String HASH_ALGORITHM = "MD5";
+    public static final String HASH_ALGORITHM = "SHA-256";
     public static final int BASE_16 = 16;
 }
