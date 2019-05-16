@@ -125,7 +125,8 @@ public class BuildCmd implements GatewayLauncherCmd {
                 InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
                         new ArrayList<>(), null);
             } catch (IOException e) {
-                throw new CLIInternalException("Error occurred while generating ballerina code for the swagger file.");
+                throw new CLIInternalException(
+                        "Error occurred while generating source code for the open API definitions.", e);
             }
         }
     }

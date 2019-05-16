@@ -1082,8 +1082,10 @@ public class GatewayCmdUtils {
      *
      * @param genDirPath path to project's /gen directory
      */
-    public static void createGenDirectoryStructure(String genDirPath) {
-        createFolderIfNotExist(genDirPath);
+    public static void createGenDirectoryStructure(String genDirPath) throws IOException {
+        Path genPath = Paths.get(genDirPath);
+        FileUtils.deleteDirectory(new File(genDirPath));
+        Files.createDirectory(genPath);
         String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
         createFolderIfNotExist(genSrcPath);
 

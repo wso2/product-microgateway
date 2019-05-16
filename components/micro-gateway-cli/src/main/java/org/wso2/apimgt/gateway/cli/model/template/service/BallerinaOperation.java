@@ -199,9 +199,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     public void setResourceTier(String resourceTier) {
-        if (resourceTier == null) {
-            this.resourceTier = resourceTier;
-        }
+        this.resourceTier = resourceTier;
     }
 
     public String getScope() {
