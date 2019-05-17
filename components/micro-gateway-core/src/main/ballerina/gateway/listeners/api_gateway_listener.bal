@@ -26,25 +26,31 @@ import ballerina/io;
 public type APIGatewayListener object {
     *AbstractListener;
 
+    private int listenerPort = 0;
+    private string listenerType = "HTTP";
     public http:Listener httpListener;
 
-
     public function __init(int port, http:ServiceEndpointConfiguration config) {
-        int port1 = 0;
         if ((config.secureSocket is ())) {
-            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
+            self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
         } else {
-            port1 = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
+            self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
+            self.listenerType = "HTTPS";
         }
         initiateGatewayConfigurations(config);
-        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + port1);
-        self.httpListener = new(port1, config = config);
-        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + port1);
+        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort);
+
+        self.httpListener = new(self.listenerPort, config = config);
+
+        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort);
     }
 
 
     public function __start() returns error? {
-        return self.httpListener.__start();
+        error? gwListener = self.httpListener.__start();
+
+        log:printInfo(self.listenerType + " listener is active on port " + self.listenerPort);
+        return gwListener;
     }
 
     public function __stop() returns error? {
