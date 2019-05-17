@@ -28,6 +28,14 @@ applicationPolicies:
      count: 10
      unitTime: 1
      timeUnit: min
+  - 10MinAppPolicy:
+     count: 10
+     unitTime: 1
+     timeUnit: min
+  - 5MinAppPolicy:
+     count: 5
+     unitTime: 1
+     timeUnit: min
 subscriptionPolicies:
   - Gold:
      count: 5000
@@ -53,3 +61,15 @@ subscriptionPolicies:
      count: 2147483647
      unitTime: 1
      timeUnit: min
+  - 10MinSubPolicy:
+     count: 10
+     unitTime: 1
+     timeUnit: min
+  - 5MinSubPolicy:
+     count: 5
+     unitTime: 1
+     timeUnit: min
+  - allowOnLimitExceed:
+      count: 10
+      unitTime: 1
+      timeUnit: min

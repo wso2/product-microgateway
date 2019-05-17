@@ -62,7 +62,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         ApplicationPolicy applicationPolicy = new ApplicationPolicy();
-        applicationPolicy.setPolicyName("10MinAppPolicy");
+        applicationPolicy.setPolicyName("5MinAppPolicy");
         applicationPolicy.setRequestCount(5);
         pub.addApplicationPolicy(applicationPolicy);
 
@@ -73,7 +73,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         application2.setId((int) (Math.random() * 1000));
 
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
-        subscriptionPolicy.setPolicyName("10MinSubPolicy");
+        subscriptionPolicy.setPolicyName("5MinSubPolicy");
         subscriptionPolicy.setRequestCount(5);
         pub.addSubscriptionPolicy(subscriptionPolicy);
 
