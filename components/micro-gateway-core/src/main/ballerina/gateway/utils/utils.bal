@@ -306,8 +306,13 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     }
 }
 public function getApiName(http:FilterContext context) returns (string) {
+    string qualifiedName = "";
     string serviceName = context.serviceName;
-    return serviceName.split("_")[0];
+    string apiName = serviceName.split("__")[0];
+    if (apiName.contains("_")) {
+        qualifiedName = apiName.replaceAll("_", "-");
+    }
+    return qualifiedName;
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {

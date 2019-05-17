@@ -93,7 +93,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
         this.qualifiedServiceName =
-                CodegenUtils.trim(api.getName()) + "_" + replaceAllNonAlphaNumeric(api.getVersion());
+                CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.setBasepath(api.getSpecificBasepath());
 

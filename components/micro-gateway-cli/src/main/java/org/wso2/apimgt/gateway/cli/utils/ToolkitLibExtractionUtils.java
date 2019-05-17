@@ -44,7 +44,6 @@ public class ToolkitLibExtractionUtils {
                     GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
 
             extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
-
         } catch (IOException e) {
             String message = "Error while unzipping platform and runtime while project setup";
             LOGGER.error(message, e);

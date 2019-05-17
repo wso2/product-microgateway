@@ -38,6 +38,10 @@
             <source>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}/bin/ballerina.bat</source>
             <outputDirectory>/bin</outputDirectory>
         </file>
+        <file>
+            <source>${basedir}/resources/ballerinaTruststore.p12</source>
+            <outputDirectory>/bre/security/</outputDirectory>
+        </file>
     </files>
 
 </assembly>
