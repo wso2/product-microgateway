@@ -33,7 +33,6 @@ public class GatewayCliConstants {
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
     public static final String PROJECT_TARGET_DIR = "target";
     public static final String PROJECT_GEN_DIR = "gen";
-    public static final String GEN_API_DEFINITIONS_DIR = PROJECT_API_DEFINITIONS_DIR;
     public static final String GEN_SRC_DIR = "src";
     public static final String GEN_POLICIES_DIR = "policies";
     public static final String MAIN_CONFIG_FILE_NAME = "toolkit-config.toml";
@@ -44,6 +43,7 @@ public class GatewayCliConstants {
     public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
+    public static final String CLI_BIN = "bin";
     public static final String CLI_REPO = "repo";
     public static final String CLI_CONF = "conf";
     public static final String CLI_PLATFORM = "platform";

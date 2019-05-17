@@ -65,14 +65,11 @@ public class CLIExecutor {
                 config};
         main.main(args);
 
-        String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
-                + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        homeDirectory = path.toString();
 
-        String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project,"--experimental","--siddhiruntime"};
-        String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
-        Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
+        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
+        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
 
         new ServerLogReader("errorStream", process.getErrorStream()).start();
         new ServerLogReader("inputStream", process.getInputStream()).start();
@@ -120,14 +117,11 @@ public class CLIExecutor {
         main = new org.wso2.apimgt.gateway.cli.cmd.Main();
         main.main(buildargs);
 
-        String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
-                + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        homeDirectory = path.toString();
 
-        String[] cmdArray = new String[]{"bash", balCommand, "build"};
-        String[] args2 = new String[]{"src", "-o", project, "--experimental", "--siddhiruntime"};
-        String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
-        Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
+        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
+        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
 
         new ServerLogReader("errorStream", process.getErrorStream()).start();
         new ServerLogReader("inputStream", process.getInputStream()).start();
@@ -160,18 +154,14 @@ public class CLIExecutor {
                 "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
                 config, "--security", "oauth2", additionalFlag};
 
-        String[] buildargs = {"build", project};
         main = new org.wso2.apimgt.gateway.cli.cmd.Main();
         main.main(args);
 
-        String balCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_LIB + File.separator + "platform"
-                + File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator + "ballerina";
-        homeDirectory = path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        homeDirectory = path.toString();
 
-        String[] cmdArray = new String[] { "bash", balCommand, "build" };
-        String[] args2 = new String[] { "src", "-o", project, "--experimental", "--siddhiruntime"};
-        String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args2)).toArray(String[]::new);
-        Process process = Runtime.getRuntime().exec(cmdArgs, null, new File(homeDirectory));
+        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
+        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
 
         new ServerLogReader("errorStream", process.getErrorStream()).start();
         new ServerLogReader("inputStream", process.getInputStream()).start();
@@ -208,6 +198,6 @@ public class CLIExecutor {
     }
 
     public String getLabelBalx(String project) {
-        return homeDirectory + File.separator + "target" + File.separator + project + ".balx";
+        return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project + ".balx";
     }
 }
