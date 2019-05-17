@@ -49,7 +49,7 @@ public type APIGatewayListener object {
     public function __start() returns error? {
         error? gwListener = self.httpListener.__start();
 
-        io:println("[micro-gateway] " + self.listenerType + " listener active on port " + self.listenerPort);
+        log:printInfo(self.listenerType + " listener is active on port " + self.listenerPort);
         return gwListener;
     }
 
