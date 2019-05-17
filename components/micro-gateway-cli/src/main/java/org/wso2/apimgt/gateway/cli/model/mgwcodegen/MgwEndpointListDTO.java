@@ -14,6 +14,7 @@ public class MgwEndpointListDTO {
     private List<MgwEndpointDTO> endpoints = null;
     private EndpointUrlTypeEnum endpointUrlType = null;
     private String name = null;
+    private boolean endpointListEtcdEnabled = false;
 
     public APIEndpointSecurityDTO getSecurityConfig() {
         return securityConfig;
@@ -53,5 +54,9 @@ public class MgwEndpointListDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setEndpointListEtcdEnabled(boolean endpointListEtcdEnabled) {
+        this.endpointListEtcdEnabled = endpointListEtcdEnabled;
     }
 }

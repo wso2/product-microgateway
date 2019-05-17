@@ -15,11 +15,12 @@
  */
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+
 public class MgwEndpointDTO {
     private String endpointUrl;
-
-//    public MgwEndpointDTO(){
-//    }
+    private boolean isEtcdEnabled = false;
+    private String etcdKey = "";
 
     public MgwEndpointDTO(String endpointUrl){
         setEndpointUrl(endpointUrl);
@@ -29,7 +30,29 @@ public class MgwEndpointDTO {
         return endpointUrl;
     }
 
+    /**
+     * sets endpointUrl and isEtcdEnabled
+     * endpointUrl could be in the format of either 'etcd_key, default url' or 'url'.
+     *
+     * @param endpointUrl endpoint string
+     */
     public void setEndpointUrl(String endpointUrl) {
-        this.endpointUrl = endpointUrl;
+        if (endpointUrl.trim().matches("etcd\\s*\\(.*,.*\\)")) {
+            String temp = endpointUrl.substring(endpointUrl.indexOf("(") + 1, endpointUrl.indexOf(")"));
+            String[] entries = temp.split(",");
+            if (entries.length != 2) {
+                throw new CLIRuntimeException("'etcd' key containing string should be provided as 'etcd " +
+                        "( etcd_key, url)'.");
+            }
+            isEtcdEnabled = true;
+            etcdKey = entries[0];
+            endpointUrl = entries[1];
+        } else {
+            this.endpointUrl = endpointUrl;
+        }
+    }
+
+    public boolean isEtcdEnabled() {
+        return isEtcdEnabled;
     }
 }

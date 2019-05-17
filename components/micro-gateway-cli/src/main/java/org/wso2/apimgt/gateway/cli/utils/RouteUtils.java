@@ -533,6 +533,13 @@ public class RouteUtils {
         for (String ep : sourceObject.getEndpoints()) {
             mgwEpList.add(new MgwEndpointDTO(ep));
         }
+        //if any etcd enabled key is available, update the destObject for the usage of ballerina code generation
+        for (MgwEndpointDTO mgwEndpointDTO : mgwEpList) {
+            if(mgwEndpointDTO.isEtcdEnabled()){
+                destObject.setEndpointListEtcdEnabled(true);
+                break;
+            }
+        }
         destObject.setEndpoints(mgwEpList);
     }
 

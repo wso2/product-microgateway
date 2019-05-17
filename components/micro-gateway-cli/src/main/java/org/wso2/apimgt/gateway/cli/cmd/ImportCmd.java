@@ -298,10 +298,6 @@ public class ImportCmd implements GatewayLauncherCmd {
             throw new CLIRuntimeException(errorMsg);
         }
 
-        Etcd etcd = new Etcd();
-        etcd.setEtcdEnabled(GatewayCmdUtils.getEtcdEnabled(projectName));
-        GatewayCmdUtils.setEtcd(etcd);
-
         List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 

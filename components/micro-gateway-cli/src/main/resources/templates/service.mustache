@@ -89,94 +89,100 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
-    {{#if api.isDefaultVersion}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
-    {{else}}
-    string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
-    {{/if}}
         http:Response|error clientResponse;
         http:Response r = new;
         clientResponse = r;
         string destination_attribute;
         runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
-        {{#if etcd.etcdEnabled}}boolean reinitRequired = false;
-        string etcdKey;
-        string etcdKeyConfigValue;
+        boolean reinitRequired = false;
+        string failedEtcdKey = "";
+        string failedEtcdKeyConfigValue = "";
         boolean|error hasUrlChanged;
         http:ClientEndpointConfig newConfig;
         boolean reinitFailed = false;
-        string apiId = "{{api.id}}";{{/if}}
+        boolean isProdEtcdEnabled = false;
+        boolean isSandEtcdEnabled = false;
+        map<string> endpointEtcdConfigValues = {};
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
-                    {{>prodEndpointReinit}}
+                {{#if hasProdEpConfig}}
+                    {{>useResourceProdEp}}
                 {{else}}
-                        clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{>useAPIProdEp}}
                 {{/if}}
                 } else {
-                    destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_sand_etcdKey";
-                    {{>sandEndpointReinit}}
+                {{#if hasSandEpConfig}}
+                    {{>useResourceSandEp}}
                 {{else}}
-                    clientResponse = {{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_sand->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{>useApiSandEp}}
                 {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-                {{#if etcd.etcdEnabled}}
-                    etcdKeyConfigValue = apiId + "_prod_etcdKey";
-                    {{>prodEndpointReinit}}
+                {{#if hasProdEpConfig}}
+                    {{>useResourceProdEp}}
                 {{else}}
-                    clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_prod->forward(urlPostfix, req);
-                    runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                    {{>useAPIProdEp}}
                 {{/if}}
-                } else {
-                    http:Response res = new;
-                    res.statusCode = 403;
-                    json payload = {
-                        ERROR_CODE: "900901",
-                        ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
-                    };
-                    runtime:getInvocationContext().attributes["error_code"] = "900901";
-                    res.setPayload(payload);
-                    clientResponse = res;
-                }
+                    } else {
+                {{#if hasSandEpConfig}}
+                    {{>useResourceSandEp}}
+                {{else}}
+                    {{>noSandAvailableError}}
+                {{/if}}
+                    }
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
-            if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
-            {{#if etcd.etcdEnabled}}
-                etcdKeyConfigValue = apiId + "_sand_etcdKey";
-                {{>sandEndpointReinit}}
-            {{else}}
-                clientResponse = {{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_sand->forward(urlPostfix, req);
-                runtime:getInvocationContext().attributes["destination"] = destination_attribute;
-            {{/if}}
-            } else {
-                http:Response res = new;
-                res.statusCode = 403;
-                json payload = {
-                    ERROR_CODE: "900901",
-                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
-                };
-                runtime:getInvocationContext().attributes["error_code"] = "900901";
-                res.setPayload(payload);
-                clientResponse = res;
-            }
+            {{#endpointConfig.sandEndpoints}}
+                    if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                {{#if hasSandEpConfig}}
+                    {{>useResourceSandEp}}
+                {{else}}
+                    {{>useApiSandEp}}
+                {{/if}}
+                    } else {
+                {{#if hasProdEpConfig}}
+                    {{>useResourceProdEp}}
+                {{else}}
+                            {{>noProdAvailableError}}
+                {{/if}}
+                    }
+            {{/endpointConfig.sandEndpoints}}
+            {{^endpointConfig.sandEndpoints}}
+                {{#if hasSandEpConfig}}
+                        if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    {{>useResourceSandEp}}
+                        } else {
+                    {{#if hasProdEpConfig}}
+                    {{else}}
+                        {{>noProdAvailableError}}
+                        }
+                    {{/if}}
+                {{else}}
+                    {{#if hasProdEpConfig}}
+                            if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    {{/if}}
+                {{/if}}
+                {{#if hasProdEpConfig}}
+                    {{>useResourceProdEp}}
+                    {{#if hasSandEpConfig}}
+                    {{else}}
+                        } else {
+                            {{>noSandAvailableError}}
+                    {{/if}}
+                    }
+                {{/if}}
+            {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
 
 
         if(clientResponse is http:Response) {
+            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
             {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
             {{#if apiResponseInterceptor}}{{apiResponseInterceptor}} (outboundEp, clientResponse);{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
@@ -227,3 +233,14 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }
         }
     }
+
+function getUrlOfEtcdKeyForReInit(string defaultUrlRef,string etcdRef, string defaultUrl, string etcdKey) returns string {
+    string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
+    gateway:urlChanged[<string> retrievedEtcdKey] = false;
+    string url = <string> gateway:etcdUrls[retrievedEtcdKey];
+    if (url == "") {
+        return <string> gateway:retrieveConfig(defaultUrlRef, defaultUrl);
+    } else {
+        return url;
+    }
+}

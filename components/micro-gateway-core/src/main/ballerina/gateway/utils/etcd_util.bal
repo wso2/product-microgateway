@@ -87,11 +87,11 @@ public function etcdError(error e) {
 
 # Setting up etcd requirements
 # + return - ....
-public function etcdSetup(string key, string etcdConfigKey, string default) returns string {
+public function etcdSetup(string key, string etcdConfigKey, string default, string defaultEtcdKey) returns string {
     string endpointUrl;
 
     if (!etcdConnectionAttempted) {
-        establishEtcdConnection();
+        establishEtcdConnection(defaultEtcdKey);
         etcdConnectionAttempted = true;
         printDebug(KEY_ETCD_UTIL, "Etcd Connection Attempted");
     }
@@ -102,30 +102,32 @@ public function etcdSetup(string key, string etcdConfigKey, string default) retu
             initiateEtcdTimerTask();
         }
         string etcdKey = config:getAsString(etcdConfigKey, default="");
-
+        if (etcdKey == "") {
+            config:setConfig(etcdConfigKey, defaultEtcdKey);
+            etcdKey = defaultEtcdKey;
+        }
         if (etcdKey == "") {
             printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
-            endpointUrl = config:getAsString(key);
+            endpointUrl = config:getAsString(key, default=default);
         }
         else {
             printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + key);
-            defaultUrls[etcdKey] = config:getAsString(key);
+            defaultUrls[etcdKey] = config:getAsString(key, default=default);
             urlChanged[etcdKey] = false;
             etcdUrls[etcdKey] = etcdLookup(etcdKey);
             endpointUrl = <string>etcdUrls[etcdKey];
         }
     }
     else {
-        endpointUrl = config:getAsString(key);
+        endpointUrl = config:getAsString(key,default=default);
     }
-
     return endpointUrl;
 }
 
 # Establish etcd connection by authenticating etcd
-public function establishEtcdConnection() {
+public function establishEtcdConnection(string defaultEtcdKey) {
     printDebug(KEY_ETCD_UTIL, "Establishing Etcd Connection");
-    string etcdurl = config:getAsString("etcdurl", default="");
+    string etcdurl = config:getAsString("etcdurl", default=defaultEtcdKey);
     if (etcdurl != "") {
         printDebug(KEY_ETCD_UTIL, "etcdurl CLI parameter has been provided");
         etcdAuthenticate();
@@ -158,7 +160,13 @@ public function etcdLookup(string base10EncodedKey) returns string {
         var msg = response.getJsonPayload();
         if(msg is json) {
             printDebug(KEY_ETCD_UTIL, "etcd responded with a payload");
-            base64EncodedValue = <string>msg.kvs[0].value;      
+            json value = msg.kvs[0].value;
+            if (value == null) {
+                printError("No availale endpoint for the provided etcd key : '" + base10EncodedKey + "'.", "");
+                valueNotFound = true;
+            } else {
+                base64EncodedValue = <string>value;
+            }
         }
         else {
             printError(KEY_ETCD_UTIL, msg.reason());

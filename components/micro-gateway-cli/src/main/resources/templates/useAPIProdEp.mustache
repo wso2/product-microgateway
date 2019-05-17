@@ -1,0 +1,8 @@
+{{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
+    {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
+    if (!reinitFailed) {
+        clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+    }
+{{else}}
+    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
+{{/if}}
