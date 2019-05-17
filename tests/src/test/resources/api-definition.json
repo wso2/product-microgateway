@@ -48,10 +48,7 @@
         },
         "security": [
           {
-            "pizzashack_auth": [
-              "write:order",
-              "read:order"
-            ]
+            "pizzashack_auth": []
           }
         ]
       }
@@ -85,9 +82,41 @@
         },
         "security": [
           {
-            "pizzashack_auth": [
-              "read:menu"
-            ]
+            "pizzashack_auth": []
+          }
+        ]
+      }
+    },
+    "/basic-menu": {
+      "get": {
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "description": "Return a list of available menu items",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "headers": {},
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/MenuItem"
+              },
+              "type": "array"
+            },
+            "description": "OK. List of APIs is returned."
+          },
+          "304": {
+            "description": "Not Modified. Empty body because the client has already the latest version of the requested resource."
+          },
+          "406": {
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "description": "Not Acceptable. The requested media type is not supported"
+          }
+        },
+        "security": [
+          {
+            "pizzashack_basic": []
           }
         ]
       }
@@ -286,6 +315,7 @@
     "application/json"
   ],
   "swagger": "2.0",
+  "x-mgw-throttling-tier": "10MinAppPolicy",
   "securityDefinitions": {
     "pizzashack_auth": {
       "type": "oauth2",
@@ -296,6 +326,9 @@
         "read:order": "read your order",
         "read:menu": "read your menu"
       }
+    },
+    "pizzashack_basic": {
+      "type": "basic"
     }
   },
   "definitions": {

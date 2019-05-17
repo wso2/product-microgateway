@@ -22,13 +22,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
-import org.ballerinalang.packerina.init.InitHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
-import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -37,12 +33,9 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthService;
 import org.wso2.apimgt.gateway.cli.oauth.OAuthServiceImpl;
 import org.wso2.apimgt.gateway.cli.rest.RESTAPIService;
@@ -115,9 +108,6 @@ public class ImportCmd implements GatewayLauncherCmd {
     @Parameter(names = {"-k", "--insecure"}, hidden = true, arity = 0)
     private boolean isInsecure;
 
-    @Parameter(names = {"-b", "--security"}, hidden = true)
-    private String security;
-
     @SuppressWarnings("unused")
     @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
     private boolean helpFlag;
@@ -146,10 +136,6 @@ public class ImportCmd implements GatewayLauncherCmd {
         }
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        //Security Schemas settings
-        if (StringUtils.isEmpty(security)) {
-            security = "oauth2";
-        }
         if (StringUtils.isEmpty(toolkitConfigPath)) {
             toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
         }
@@ -283,9 +269,6 @@ public class ImportCmd implements GatewayLauncherCmd {
             }
         }
 
-        //ExtendedAPI's security is updated
-        apis.forEach(api -> api.setMgwApiSecurity(security));
-
         if (apis.isEmpty()) {
             // Delete folder
             GatewayCmdUtils.deleteProject(File.separator + projectName);
@@ -297,9 +280,6 @@ public class ImportCmd implements GatewayLauncherCmd {
             }
             throw new CLIRuntimeException(errorMsg);
         }
-
-        List<ApplicationThrottlePolicyDTO> applicationPolicies = service.getApplicationPolicies(accessToken);
-        List<SubscriptionThrottlePolicyDTO> subscriptionPolicies = service.getSubscriptionPolicies(accessToken);
 
         //delete the folder if an exception is thrown in following steps
         try {
