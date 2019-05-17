@@ -37,7 +37,7 @@ SET PRGDIR=%~sdp0
 SET GWHOME=%PRGDIR%..
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
-set JAVA_HOME=%BALLERINA_HOME%\bre\lib\jre1.8.0_172'
+set JAVA_HOME=%BALLERINA_HOME%\bre\lib\jre1.8.0_172
 if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 
@@ -125,10 +125,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
