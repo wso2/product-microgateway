@@ -1,0 +1,8 @@
+{{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
+    {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
+    if (!reinitFailed) {
+        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+    }
+{{else}}
+    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
+{{/if}}

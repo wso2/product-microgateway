@@ -1,0 +1,8 @@
+{{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
+    {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
+    if (!reinitFailed) {
+        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+    }
+{{else}}
+    clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+{{/if}}

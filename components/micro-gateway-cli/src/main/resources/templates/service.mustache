@@ -108,173 +108,58 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#if hasProdEpConfig}}
-                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
-                        if (!reinitFailed) {
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                        }
-                    {{else}}
-                        clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                        runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceProdEp}}
                 {{else}}
-
-                    {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
-                            {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
-                                if (!reinitFailed) {
-                                    clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                                    runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                                }
-                    {{else}}
-                                clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                                runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useAPIProdEp}}
                 {{/if}}
                 } else {
                 {{#if hasSandEpConfig}}
-                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
-                            {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
-                            if (!reinitFailed) {
-                                clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                                runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                        runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceSandEp}}
                 {{else}}
-                    {{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
-                            {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
-                                if (!reinitFailed) {
-                                    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                                    runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                                }
-                    {{else}}
-                            clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useApiSandEp}}
                 {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#if hasProdEpConfig}}
-                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceProdEp}}
                 {{else}}
-                    {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
-                        {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useAPIProdEp}}
                 {{/if}}
                     } else {
                 {{#if hasSandEpConfig}}
-                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                        }
-                    {{/if}}
+                    {{>useResourceSandEp}}
                 {{else}}
-                            http:Response res = new;
-                            res.statusCode = 403;
-                            json payload = {
-                                ERROR_CODE: "900901",
-                                ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
-                            };
-                            runtime:getInvocationContext().attributes["error_code"] = "900901";
-                            res.setPayload(payload);
-                            clientResponse = res;
-                        }
+                    {{>noSandAvailableError}}
                 {{/if}}
+                    }
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                     if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#if hasSandEpConfig}}
-                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceSandEp}}
+                {{else}}
+                    {{>useApiSandEp}}
                 {{/if}}
                     } else {
                 {{#if hasProdEpConfig}}
-                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{/if}}
+                    {{>useResourceProdEp}}
                 {{else}}
-                            http:Response res = new;
-                            res.statusCode = 403;
-                            json payload = {
-                                ERROR_CODE: "900901",
-                                ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
-                                };
-                            runtime:getInvocationContext().attributes["error_code"] = "900901";
-                            res.setPayload(payload);
-                            clientResponse = res;
-                        }
+                            {{>noProdAvailableError}}
                 {{/if}}
+                    }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 {{#if hasSandEpConfig}}
                         if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceSandEp}}
                         } else {
                     {{#if hasProdEpConfig}}
                     {{else}}
-                                http:Response res = new;
-                                res.statusCode = 403;
-                                json payload = {
-                                    ERROR_CODE: "900901",
-                                    ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
-                                    };
-                                runtime:getInvocationContext().attributes["error_code"] = "900901";
-                                res.setPayload(payload);
-                                clientResponse = res;
+                        {{>noProdAvailableError}}
                         }
                     {{/if}}
                 {{else}}
@@ -283,31 +168,13 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                     {{/if}}
                 {{/if}}
                 {{#if hasProdEpConfig}}
-                    {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
-                        {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
-                            if (!reinitFailed) {
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                            }
-                    {{else}}
-                            clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
-                    {{/if}}
+                    {{>useResourceProdEp}}
                     {{#if hasSandEpConfig}}
-                        }
                     {{else}}
                         } else {
-                            http:Response res = new;
-                            res.statusCode = 403;
-                            json payload = {
-                                ERROR_CODE: "900901",
-                                ERROR_MESSAGE: "Production key offered to the API with no sandbox endpoint"
-                            };
-                            runtime:getInvocationContext().attributes["error_code"] = "900901";
-                            res.setPayload(payload);
-                            clientResponse = res;
-                        }
+                            {{>noSandAvailableError}}
                     {{/if}}
+                    }
                 {{/if}}
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
@@ -315,6 +182,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
+            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
             {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
             {{#if apiResponseInterceptor}}{{apiResponseInterceptor}} (outboundEp, clientResponse);{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);

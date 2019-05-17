@@ -943,8 +943,7 @@ public class OpenAPICodegenUtils {
                 openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) != null) {
             return;
         }
-        boolean EpsUnavailableForAll = false;
-        EpsUnavailableForAll = openAPI.getPaths().entrySet().stream().anyMatch(path ->
+        boolean EpsUnavailableForAll = openAPI.getPaths().entrySet().stream().anyMatch(path ->
                 isResourceEpUnavailable(path.getValue().getGet()) || isResourceEpUnavailable(path.getValue().getPost()) ||
                         isResourceEpUnavailable(path.getValue().getPut()) ||
                         isResourceEpUnavailable(path.getValue().getTrace()) ||
@@ -957,7 +956,7 @@ public class OpenAPICodegenUtils {
             throw new CLIRuntimeException("'" + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' and '" +
                     OpenAPIConstants.SANDBOX_ENDPOINTS + "' properties are not included under API Level in openAPI " +
                     "definition '" + openAPIFilePath + "'. Please include at least one of them under API Level or " +
-                    "provide those properties for all the resources to overcome this issue");
+                    "provide those properties for all the resources to overcome this issue.");
         }
     }
 
