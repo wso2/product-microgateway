@@ -210,7 +210,6 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                             clientResponse = res;
                         }
                 {{/if}}
-                }
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
