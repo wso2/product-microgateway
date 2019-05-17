@@ -224,11 +224,8 @@ public class OpenAPICodegenUtils {
      */
     public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI) {
 
-        ExtendedAPI api;
         String apiId = UUID.randomUUID().toString();
-
-        api = new ExtendedAPI();
-
+        ExtendedAPI api = new ExtendedAPI();
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
@@ -243,6 +240,7 @@ public class OpenAPICodegenUtils {
      * @param apiId       api Id
      * @return list of string arrays {resource_id, resource name, method}
      */
+    @SuppressWarnings("unused")
     public static List<ResourceRepresentation> listResourcesFromSwaggerForAPI(String projectName, String apiId) {
 
         List<ResourceRepresentation> resourceList = new ArrayList<>();
