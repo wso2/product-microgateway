@@ -424,7 +424,7 @@
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <jcommander.version>1.72</jcommander.version>
         <handlebars.version>4.1.2</handlebars.version>
-        <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
+        <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
         <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
         <testng.version>6.13.1</testng.version>
         <toml.parser.version>0.7.2</toml.parser.version>
