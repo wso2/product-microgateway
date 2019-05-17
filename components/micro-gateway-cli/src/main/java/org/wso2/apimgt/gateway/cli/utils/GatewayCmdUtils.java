@@ -33,7 +33,6 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
@@ -54,7 +53,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -384,7 +382,7 @@ public class GatewayCmdUtils {
     public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis) {
         for (ExtendedAPI api : apis) {
             saveSwaggerDefinitionForSingleAPI(projectName, api);
-            System.out.println("ID for API " + api.getName() + " : " + api.getId());
+            System.out.println("ID for API " + HashUtils.generateAPIId(api.getName(), api.getVersion()));
         }
     }
 

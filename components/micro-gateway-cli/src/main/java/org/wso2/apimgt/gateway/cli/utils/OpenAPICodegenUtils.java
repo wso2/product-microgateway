@@ -225,7 +225,7 @@ public class OpenAPICodegenUtils {
     public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI) {
 
         ExtendedAPI api;
-        String apiId = UUID.randomUUID().toString();
+        String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
 
         api = new ExtendedAPI();
 

@@ -239,7 +239,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                         return false;
                     }
                 } else {
-                    log:printError(<string>apiKeyValidationDto.detail().message, err = apiKeyValidationDto);
+                    log:printError(<string>apiKeyValidationDto.reason(), err = apiKeyValidationDto);
                     setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
                     sendErrorResponse(caller, request, untaint context);
                     return false;
