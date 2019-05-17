@@ -113,7 +113,7 @@ public type BasicAuthUtils object {
         authenticationContext.apiTier = UNAUTHENTICATED_TIER;
         authenticationContext.apiPublisher = USER_NAME_UNKNOWN;
         authenticationContext.subscriberTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
-        authenticationContext.keyType = ANONYMOUS_CONSUMER_KEY;
+        authenticationContext.keyType = PRODUCTION_KEY_TYPE;
         runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
         context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
         isAuthenticated = true;
