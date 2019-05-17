@@ -37,24 +37,19 @@ public class MgwEndpointDTO {
      * @param endpointUrl endpoint string
      */
     public void setEndpointUrl(String endpointUrl) {
-        //todo: introduce more precise way to distinguish the two types
-        if (endpointUrl.startsWith("etcd")) {
-            if (endpointUrl.endsWith(")") && endpointUrl.contains("(") && endpointUrl.contains(",")) {
-                String temp = endpointUrl.substring(endpointUrl.indexOf("(") + 1, endpointUrl.indexOf(")"));
-                String[] entries = temp.split(",");
-                if (entries.length != 2) {
-                    throw new CLIRuntimeException("'etcd' key containing string should be provided as 'etcd " +
-                            "( etcd_key, url)'.");
-                }
-                isEtcdEnabled = true;
-                etcdKey = entries[0];
-                endpointUrl = entries[1];
-            } else {
+        if (endpointUrl.trim().matches("etcd\\s*\\(.*,.*\\)")) {
+            String temp = endpointUrl.substring(endpointUrl.indexOf("(") + 1, endpointUrl.indexOf(")"));
+            String[] entries = temp.split(",");
+            if (entries.length != 2) {
                 throw new CLIRuntimeException("'etcd' key containing string should be provided as 'etcd " +
                         "( etcd_key, url)'.");
             }
+            isEtcdEnabled = true;
+            etcdKey = entries[0];
+            endpointUrl = entries[1];
+        } else {
+            this.endpointUrl = endpointUrl;
         }
-        this.endpointUrl = endpointUrl;
     }
 
     public boolean isEtcdEnabled() {

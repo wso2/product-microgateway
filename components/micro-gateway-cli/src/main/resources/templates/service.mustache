@@ -107,17 +107,16 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    //destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasProdEpConfig}}
                     {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                         if (!reinitFailed) {
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                         }
                     {{else}}
                         clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                        runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{else}}
 
@@ -125,64 +124,62 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                             {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
                                 if (!reinitFailed) {
                                     clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                                    //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                                    runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                                 }
                     {{else}}
                                 clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                                //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                                runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{/if}}
                 } else {
-                    //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasSandEpConfig}}
                     {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
                             {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                             if (!reinitFailed) {
                                 clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                                //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                                runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                         clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                        //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                        runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{else}}
                     {{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
                             {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
                                 if (!reinitFailed) {
                                     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                                    //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                                    runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                                 }
                     {{else}}
                             clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{/if}}
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    //destination_attribute = "{{#if hasProdEpConfig}}{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.prodEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasProdEpConfig}}
                     {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{else}}
                     {{#if endpointConfig.prodEndpoints.endpointListEtcdEnabled}}
                         {{#endpointConfig.prodEndpoints}}{{>endpointReinit}}{{/endpointConfig.prodEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{qualifiedServiceName}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{/if}}
                     } else {
@@ -191,11 +188,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                         {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                         }
                     {{/if}}
                 {{else}}
@@ -215,17 +212,16 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{^endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
                     if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
-                    //destination_attribute = "{{#if hasSandEpConfig}}{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}{{else}}{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}{{/if}}";
                 {{#if hasSandEpConfig}}
                     {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
                         {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                 {{/if}}
                     } else {
@@ -234,11 +230,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                         {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{/if}}
                 {{else}}
@@ -261,11 +257,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                         {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                         } else {
                     {{#if hasProdEpConfig}}
@@ -291,11 +287,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                         {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
                             if (!reinitFailed) {
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                             }
                     {{else}}
                             clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
-                            //runtime:getInvocationContext().attributes["destination"] = destination_attribute;
+                            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
                     {{/if}}
                     {{#if hasSandEpConfig}}
                         }
