@@ -162,7 +162,7 @@ public function etcdLookup(string base10EncodedKey) returns string {
             printDebug(KEY_ETCD_UTIL, "etcd responded with a payload");
             json value = msg.kvs[0].value;
             if (value == null) {
-                io:println("json value is null.");
+                printError(msg, "json value for the given etcd key is null.");
                 valueNotFound = true;
             } else {
                 base64EncodedValue = <string>value;
