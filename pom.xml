@@ -404,7 +404,7 @@
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
         <shade.plugin.version>2.4.3</shade.plugin.version>
         <processor.plugin.version>2.2.4</processor.plugin.version>
-        <download.plugin.version>1.4.0</download.plugin.version>
+        <download.plugin.version>1.4.1</download.plugin.version>
         <junit.version>4.12</junit.version>
         <swagger.codegen.version>2.2.2</swagger.codegen.version>
         <airline.version>0.7</airline.version>
