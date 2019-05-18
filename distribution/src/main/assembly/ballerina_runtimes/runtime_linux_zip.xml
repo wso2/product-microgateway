@@ -27,17 +27,19 @@
     <!-- Copy the runtime created from ballerina installers. This contains OS specific JRE as well-->
     <fileSets>
         <fileSet>
-            <directory>${basedir}/target/ballerina/ballerina-runtime-linux-${ballerina.platform.version}</directory>
+            <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/extracted-jre-linux
+            </directory>
+            <outputDirectory>bre/lib/</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
     </fileSets>
-    <!-- Copy the executable ballerina file from platform since the executable file get from runtime created by
-    installer is different-->
+
     <files>
-        <file>
-            <source>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}/bin/ballerina</source>
-            <outputDirectory>/bin</outputDirectory>
-        </file>
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
             <outputDirectory>/bre/security/</outputDirectory>

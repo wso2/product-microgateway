@@ -317,6 +317,12 @@
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${json.schema.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.ballerina.jre.artifacts</groupId>
+                <artifactId>ballerina-jre-artifacts</artifactId>
+                <version>${ballerina.jre.artifacts.version}</version>
+                <type>zip</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -393,6 +399,11 @@
                     <artifactId>maven-processor-plugin</artifactId>
                     <version>${maven.processor.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven.antrun.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -442,6 +453,8 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
+        <ballerina.jre.artifacts.version>2.0.0</ballerina.jre.artifacts.version>
+        <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
