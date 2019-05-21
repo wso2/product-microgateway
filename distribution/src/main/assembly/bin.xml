@@ -98,8 +98,9 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}</outputDirectory>
         </file>
         <file>
-            <source>${basedir}/../LICENSE.txt</source>
+            <source>${basedir}/LICENSE-TOOLKIT.txt</source>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}</outputDirectory>
+            <destName>LICENSE.txt</destName>
         </file>
         <file>
             <source>${basedir}/../release-notes.html</source>
