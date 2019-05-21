@@ -18,21 +18,21 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
 
 
    * [Why WSO2 API Microgateway](#why-wso2-api-microgateway)
-   * [Micro gateway quick start](#micro-gateway-quick-start)
+   * [Microgateway quick start](#microgateway-quick-start)
    * [Features](#features)
    * [Architecture](#architecture)
    * [Running the microgateway](#running-the-microgateway)
-      * [Initializing a WSO2 API Microgateway project](#initializing-a-wso2-api-microgateway-project)
-      * [Building the WSO2 API Microgateway project](#building-the-wso2-api-microgateway-project)
-      * [Running the WSO2 API Microgateway](#running-the-wso2-api-microgateway)
+      * [Initializing a microgateway project](#initializing-a-microgateway-project)
+      * [Building the microgateway project](#building-the-microgateway-project)
+      * [Running the microgateway](#running-the-microgateway)
    * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
       * [Init](#init)
       * [Build](#build)
    * [Project Structure](#project-structure)
    * [How to run the microgateway distribution](#how-to-run-the-microgateway-distribution)
    * [Invoke API exposed via microgateway](#invoke-api-exposed-via-microgateway)
-   * [Micro gateway supported open API extensions](#micro-gateway-supported-open-api-extensions)
-   * [Micro gateway open API extension usages](#micro-gateway-open-api-extension-usages)
+   * [Microgateway supported open API extensions](#microgateway-supported-open-api-extensions)
+   * [Microgateway open API extension usages](#microgateway-open-api-extension-usages)
       * [1. Override endpoint per API resource](#1-override-endpoint-per-api-resource)
       * [2. Add API/resource level request and response interceptors](#2-add-apiresource-level-request-and-response-interceptors)
       * [3. Add API/resource level throttling policies](#3-add-apiresource-level-throttling-policies)
@@ -40,7 +40,7 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
       * [5. Define backend security parameters](#5-define-backend-security-parameters)
       * [6. Override backend service connection URLS](#6-override-backend-service-connection-urls)
       * [7. Disable security for resources](#7-disable-security-for-resources)
-   * [Micro gateway securing APIs](#micro-gateway-securing-apis)
+   * [Microgateway securing APIs](#microgateway-securing-apis)
    * [Import APIs from WSO2 API Manager](#import-apis-from-wso2-api-manager)
 
 
@@ -50,7 +50,7 @@ services and microservices. In traditional monolithic architectures, common func
 multiple services. Functionalities like Authentication, rate limiting, transformations are duplicated in each service. This where the WSO2 API microgateway comes handy
 where the duplicated functionality is supported via gateway layer and acts as a single entry point to all the services.
 
-#### Micro gateway quick start
+#### Microgateway quick start
 Lets see how we can expose pet store API using microgatway using the open API definition
 
 1. First download the microgateway toolkit related to latest release from product [release page](https://github.com/wso2/product-microgateway/releases)
@@ -72,13 +72,16 @@ Lets copy the [open API definition](samples/petstore_basic.yaml) to the **api_de
 ```
 micro-gw build petstore-project
 ```
-Executable file will be created inside the target folder of the project.
+Executable file will be created inside the target directory of the project.
 
-6. Lets run the executable file using the micro gateway runtime docker image
+6. Lets run the executable file using the microgateway runtime docker image
 ```
 docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0
 
 <PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
+
+Note: We actually need to mount the file created with .balx extension into the docker imgage. The target dirctory contains other generated files not required for docker image. 
+So we can copy the .balx file to seperate directory and mount that directory
 ```
  this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
 
@@ -101,7 +104,7 @@ curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/x
 - **Scalable** : Distributed nature allows to scale horizontally.
 
 #### Microgateway Components
-- **Toolkit** : The toolkit is used to initiate micro gateway projects. Once the project is initialized API developer can
+- **Toolkit** : The toolkit is used to initiate microgateway projects. Once the project is initialized API developer can
 add(copy) open API definitions of the APIs to the  project or import APIs from WSO2 API Manager. Once the all the APIs are added the toolkit can be used
 to build the project and create and executable file.
 
@@ -124,28 +127,28 @@ The following diagram illustrates how the WSO2 API Microgateway expose micro ser
 #### Running the microgateway
 
 Running the WSO2 API Microgateway is a 3 step process. The first two steps are involved in building the executable using the toolkit and the last
-step is to run that executable file using the micro gateway runtime component.
+step is to run that executable file using the microgateway runtime component.
 
  1. Initializing a WSO2 API Microgateway project.
  1. Building the WSO2 API Microgateway project and creating a executable file
  1. Running the WSO2 API Microgateway distribution.
 
-##### Initializing a WSO2 API Microgateway project
+##### Initializing a microgateway project
 
-Initializing a WSO2 API Microgateway project creates the default folder structure at the location where the command is run.
-Empty `api_definitions` folder will be created inside the main folder. API developer can add multiple open API definitions inside the
+Initializing a WSO2 API Microgateway project creates the default directory structure at the location where the command is run.
+Empty `api_definitions` directory will be created inside the root project directory. API developer can add multiple open API definitions inside the
 api_definitions file and define endpoints and interceptors for the resources  by adding open API extensions.
 API developer can specify the  back end endpoint details, request and response interceptors, throttle policies, CORS config and etc using open API
 vendor specific extensions.
 
 
-##### Building the WSO2 API Microgateway project
+##### Building the microgateway project
 
 Once the project has been created, the next step is to build the project sources. This output of this operation is a
 executable file(.balx) which later provided as an input to the runtime
 
-##### Running the WSO2 API Microgateway
-The output(.balx file) of toolkit build process is used to run the micro gateway runtime component.
+##### Running the microgateway
+The output(.balx file) of toolkit build process is used to run the microgateway runtime component.
 
 #### WSO2 API Microgateway toolkit commands
 
@@ -157,9 +160,9 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 `$ micro-gw init <project_name>`
 
-The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  folder.
+The "micro-gw init" command is used to initialize a project structure with artifacts required in generating a WSO2 API Microgateway distribution. This will create a **api_definitions**  directory.
 
-* **api_defintions** - API developer should copy all the open API definitions of microservices inside this folder
+* **api_defintions** - API developer should copy all the open API definitions of microservices inside this directory
 
 If the project already exists, a warning will be prompted requesting permission to override existing project.
 
@@ -224,8 +227,8 @@ Once the **init, build** commands are executed, an executable file with extensio
 pizzashack-project.balx
 ```
 
-Then use the micro gateway runtime component to run this executable file.
-* Go to the <MG_RUNTIME_HOME>/bin folder and execute the following command
+Then use the microgateway runtime component to run this executable file.
+* Go to the <MG_RUNTIME_HOME>/bin directory and execute the following command
 
 `$ bash gateway <path_to_the_excutable_file>`
 
@@ -239,7 +242,7 @@ ballerina: started HTTPS/WSS endpoint localhost:9096
 
 #### Invoke API exposed via microgateway
 Once APIs are exposed we can invoke API with an valid jwt token or an opaque access token.
-In order to use jwt tokens micro gateway should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
+In order to use jwt tokens microgateway should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
 
 1. Any third party secure token service
 The public certificate of the token service which used to sign the token should be added to the trust store of the microgateway.
@@ -256,7 +259,7 @@ curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=availabl
 Please note that the jwt provided in the command is a jwt toke retrieved from WSO2 API Manager with higher expiry time which can be used with any API not protected with scopes.
 This token works with any API because, default  microgateway config uses the public certificate of WSO2 API Manager to validate the signature.
 
-### Micro gateway supported open API extensions
+### Microgateway supported open API extensions
 | Extension                     | Description                                               | Required/Not Required |
 | -------------                 | -------------                                             | ----------------------|
 | x-mgw-basePath                | Base path which gateway exposes the API                   | **Required** -> API level only
@@ -267,7 +270,7 @@ This token works with any API because, default  microgateway config uses the pub
 | x-mgw-endpoints               | Define endpoint configs globally which can be then referred with  x-mgw-production-endpoints or x-mgw-sandbox-endpoints extensions | Not Required
 | x-mgw-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
 
-### Micro gateway open API extension usages
+### Microgateway open API extension usages
 #### 1. Override endpoint per API resource
 API developer can specify endpoints per resource by adding the **x-mgw-production-endpoints** extension under the respective resource in open API definition.
 If a specific resource have an endpoint which requires different back end rather than the global back end defined for the API, then it can be overridden as below.
@@ -332,7 +335,7 @@ Interceptors can be used to do request and response transformations and mediatio
 response interceptors are engaged before responding to the client.
 API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the open API definition using extensions
 
-In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` folder inside the project. This interceptors will only be enagged for that particular resource only
+In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` directory inside the project. This interceptors will only be enagged for that particular resource only
 ```
 paths:
   "/pet/findByStatus":
@@ -503,7 +506,7 @@ x-mgw-endpoints:
 
 Complete sample can be found [here](samples/endpoint_by_reference_sample.yaml)
 
-When running the micro gateway we can provide the password as an environment variable.
+When running the microgateway we can provide the password as an environment variable.
 The variable format is **\<epName\>_\<epType\>_basic_password**
 - epName : Name specified in the open API definition under x-mgw-endpoints
 - epType : either prod or sand
@@ -528,7 +531,7 @@ bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excu
 ```
 
 #### 7. Disable security for resources
-By default the APIs and resources are protected via oauth2 in micro gateway. API consumer need a valid oauth2 access token(jwt or opaque)
+By default the APIs and resources are protected via oauth2 in microgateway. API consumer need a valid oauth2 access token(jwt or opaque)
 to invoke the APIs. But API developer can expose APIs without any authentication using the open API extension **x-mgw-disable-security**.
 This extension is only supported at resource level only
 
@@ -544,9 +547,9 @@ paths:
       x-mgw-disable-security: true
 ```
 
-#### Micro gateway securing APIs
+#### Microgateway securing APIs
 The gateway supports the "securitySchemes" keyword in open API specifications.
-Currently micro gateway supports oauth2 and basic authentication for APIs which can be defined via open API extensions.
+Currently microgateway supports oauth2 and basic authentication for APIs which can be defined via open API extensions.
 If none of the securitySchemes are defined the gateway by default applies oauth2 security.
 
 1. Define scopes for the resources and API using oauth2 security type.
@@ -580,7 +583,7 @@ securityDefinitions:
 Complete sample can be found [here](samples/security_sample.yaml)
 
 #### Import APIs from WSO2 API Manager
-The published apis from [WSO2 API Manager](https://wso2.com/api-management/) can be exposed via micro gateway as well.
+The published apis from [WSO2 API Manager](https://wso2.com/api-management/) can be exposed via microgateway as well.
 We can import API from WSO2 API Manager by specifying the API name and version.
 The **import** command of the toolkit can be used to fetch APIs.
 
