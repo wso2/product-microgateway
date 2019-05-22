@@ -93,10 +93,11 @@ public class BuildCmd implements GatewayLauncherCmd {
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
 
-        File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIDefinitionsDirectoryPath(projectName));
+        File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
         File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
 
-        if (importedAPIDefLocation.list() != null && importedAPIDefLocation.list().length == 0
+        if (((importedAPIDefLocation.list() != null && importedAPIDefLocation.list().length == 0) ||
+                importedAPIDefLocation.list() == null)
                 && addedAPIDefLocation.list() != null && addedAPIDefLocation.list().length == 0) {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
         }
