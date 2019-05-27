@@ -180,6 +180,8 @@
  public const string KM_SERVER_URL = "serverUrl";
  public const string KM_TOKEN_CONTEXT = "/oauth2";
  public const string TIMESTAMP_SKEW = "timestampSkew";
+
+ public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
  public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
 
 
@@ -211,7 +213,7 @@
  public const string AUDIENCE = "audience";
  public const string CERTIFICATE_ALIAS = "certificateAlias";
  public const string TRUST_STORE_PATH = "trustStore.path";
- public const string TRSUT_STORE_PASSWORD = "trustStore.password";
+ public const string TRUST_STORE_PASSWORD = "trustStore.password";
 
  public const string CACHING_ID = "caching";
  public const string TOKEN_CACHE_ENABLED = "enabled";
