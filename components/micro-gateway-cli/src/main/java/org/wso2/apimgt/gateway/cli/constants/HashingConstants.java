@@ -23,4 +23,5 @@ public class HashingConstants {
     public static final String HASH_SEPARATOR = "::";
     public static final String HASH_ALGORITHM = "SHA-256";
     public static final int BASE_16 = 16;
+    public static final String API = "api_";
 }
