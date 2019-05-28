@@ -14,6 +14,7 @@
     }
   },
   "x-mgw-basePath": "petstore/v1",
+  "x-mgw-throttling-tier": "Unlimited",
   "x-mgw-production-endpoints": {
     "urls": [
       "https://localhost:2379/pet/v1",

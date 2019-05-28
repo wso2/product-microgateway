@@ -270,8 +270,6 @@ public class ImportCmd implements GatewayLauncherCmd {
         }
 
         if (apis.isEmpty()) {
-            // Delete folder
-            GatewayCmdUtils.deleteProject(File.separator + projectName);
             String errorMsg;
             if (label != null) {
                 errorMsg = "No APIs found for the given label: " + label;
