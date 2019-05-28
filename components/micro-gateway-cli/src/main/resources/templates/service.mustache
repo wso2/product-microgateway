@@ -90,6 +90,9 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
+    if(!urlPostfix.hasPrefix("/")) {
+        urlPostfix = "/" + urlPostfix;
+    }
         http:Response|error clientResponse;
         http:Response r = new;
         clientResponse = r;
