@@ -2,11 +2,8 @@ import ballerina/log;
 import ballerina/http;
 import ballerina/config;
 import ballerina/time;
-
 {{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
-
 import wso2/gateway;
-
 {{#equals endpointConfig.prodEndpoints.type "http"}}
     {{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{/equals}}
@@ -136,12 +133,12 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 {{else}}
                     {{>noSandAvailableError}}
                 {{/if}}
-                    }
+                }
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
-                    if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                 {{#if hasSandEpConfig}}
                     {{>useResourceSandEp}}
                 {{else}}
@@ -153,21 +150,21 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 {{else}}
                             {{>noProdAvailableError}}
                 {{/if}}
-                    }
+                }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 {{#if hasSandEpConfig}}
-                        if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     {{>useResourceSandEp}}
                         } else {
                     {{#if hasProdEpConfig}}
                     {{else}}
                         {{>noProdAvailableError}}
-                        }
+                    }
                     {{/if}}
                 {{else}}
                     {{#if hasProdEpConfig}}
-                            if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
                     {{/if}}
                 {{/if}}
                 {{#if hasProdEpConfig}}
@@ -185,16 +182,13 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
-            runtime:getInvocationContext().attributes["destination"] = clientResponse.resolvedRequestedURI;
             {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
             {{#if apiResponseInterceptor}}{{apiResponseInterceptor}} (outboundEp, clientResponse);{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);
             }
-        }
-
-        else {
+        } else {
             http:Response res = new;
             res.statusCode = 500;
             string errorMessage = clientResponse.reason();
