@@ -39,6 +39,7 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -46,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -93,12 +95,12 @@ public class BuildCmd implements GatewayLauncherCmd {
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
 
-        File importedAPIDefLocation = new File(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
-        File addedAPIDefLocation = new File(GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName));
+        String importedAPIDefLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
+        String addedAPIDefLocation = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+        boolean isImportedAPIsAvailable = checkFolderContentAvailablity(importedAPIDefLocation);
+        boolean isAddedAPIsAvailable = checkFolderContentAvailablity(addedAPIDefLocation);
 
-        if (((importedAPIDefLocation.list() != null && importedAPIDefLocation.list().length == 0) ||
-                importedAPIDefLocation.list() == null)
-                && addedAPIDefLocation.list() != null && addedAPIDefLocation.list().length == 0) {
+        if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
         }
 
@@ -126,6 +128,17 @@ public class BuildCmd implements GatewayLauncherCmd {
                         "Error occurred while generating source code for the open API definitions.", e);
             }
         }
+    }
+
+    private boolean checkFolderContentAvailablity(String fileLocation) {
+        File file = new File(fileLocation);
+        FilenameFilter filter = (f, name) -> (name.endsWith(".yaml") || name.endsWith(".json"));
+        if (file.list() == null) {
+            return false;
+        } else if (file.list() != null && file.list(filter).length == 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override
