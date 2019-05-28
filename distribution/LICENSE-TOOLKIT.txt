@@ -126,8 +126,8 @@ org.eclipse.lsp4j.jsonrpc-0.6.0.jar                                             
 org.wso2.carbon.core-5.1.0.jar                                                  bundle         apache2   11763
 org.wso2.carbon.messaging-2.3.7.jar                                             bundle         apache2   12373
 org.wso2.carbon.metrics.core-2.3.7.jar                                          bundle         apache2   16765
-org.wso2.micro.gateway.cli-3.0.0.jar                                            bundle         apache2   20415
-org.wso2.micro.gateway.core-3.0.0.jar                                           bundle         apache2   20414
+org.wso2.micro.gateway.cli-3.0.1.jar                                            bundle         apache2   20415
+org.wso2.micro.gateway.core-3.0.1.jar                                           bundle         apache2   20414
 org.wso2.securevault-1.0.0-wso2v2.jar                                           bundle         apache2   3537
 org.wso2.transport.http.netty-6.0.259.jar                                       bundle         apache2   20416
 org.wso2.transport.local-file-system-6.0.53.jar                                 bundle         apache2   16767
