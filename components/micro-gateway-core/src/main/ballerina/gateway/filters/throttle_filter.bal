@@ -73,7 +73,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
                 tier + "' exist.");
         string? resourceLevelPolicyName = getResourceLevelPolicy(context);
         if(resourceLevelPolicyName is string) {
-            if(resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
+            if(resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
                 printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
                         + "' does not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
@@ -129,7 +129,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         if (keyvalidationResult.applicationTier != UNLIMITED_TIER &&
             !isPolicyExist(deployedPolicies, keyvalidationResult.applicationTier)) {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
-                    + keyvalidationResult.applicationTier + "' is not exist.");
+                    + keyvalidationResult.applicationTier + "' does not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
                 INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
                 INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);

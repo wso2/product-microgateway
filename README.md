@@ -20,6 +20,7 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
    * [Why WSO2 API Microgateway](#why-wso2-api-microgateway)
    * [Microgateway quick start](#microgateway-quick-start)
    * [Features](#features)
+   * [Microgateway Components](#microgateway-components)
    * [Architecture](#architecture)
    * [Running the microgateway](#running-the-microgateway)
       * [Initializing a microgateway project](#initializing-a-microgateway-project)
@@ -76,7 +77,7 @@ Executable file will be created inside the target directory of the project.
 
 6. Lets run the executable file using the microgateway runtime docker image
 ```
-docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.0
+docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.1
 
 <PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
 
