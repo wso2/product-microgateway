@@ -269,6 +269,8 @@ This token works with any API because, default  microgateway config uses the pub
 | x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
 | x-mgw-endpoints               | Define endpoint configs globally which can be then referred with  x-mgw-production-endpoints or x-mgw-sandbox-endpoints extensions | Not Required
 | x-mgw-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
+| x-mgw-request-interceptor     | Custom ballerina functions can be written in order to do transformations before dispatching the request      | Not Required -> API/Resource level
+| x-mgw-response-interceptor    | Custom ballerina functions can be written in order to do transformations before dispatching the response     | Not Required -> API/Resource level
 
 ### Microgateway open API extension usages
 #### 1. Override endpoint per API resource
@@ -596,11 +598,11 @@ Then import the API. Toolkit will prompt for API manager url, user name and pass
 If url, trust store location and password is not provided default values will be used
 
 ```
-micro-gw import <PROJECT_NAME> -a <API-NAME> -v <API_VERSION>
+micro-gw import -a <API-NAME> -v <API_VERSION> <PROJECT_NAME>
 
-ex: micro-gw import pizza-api -a PizzaShackAPI -v 1.0.0
+ex: micro-gw import -a PizzaShackAPI -v 1.0.0 pizza-api
 
-$ micro-gw import pizza-api -a PizzaShackAPI -v 1.0.0
+$ micro-gw import -a PizzaShackAPI -v 1.0.0 pizza-api
 Enter Username:
 admin
 Enter Password for admin:

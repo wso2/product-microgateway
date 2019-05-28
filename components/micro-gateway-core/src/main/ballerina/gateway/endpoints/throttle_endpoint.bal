@@ -26,7 +26,12 @@ string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, 
 http:Client throttleEndpoint = new(throttleEndpointUrl, config =
     {cache: { enabled: false },
         secureSocket:{
-            verifyHostname:getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+            trustStore: {
+                  path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                      "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                  password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
         }
     });
 

@@ -125,7 +125,7 @@ public function getAuthProviders() returns http:AuthProvider[] {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
         }
     };
     http:AuthProvider basicAuthProvider = {
@@ -155,7 +155,7 @@ public function getJWTAuthProvider() returns http:AuthProvider[] {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
         }
     };
     return [jwtAuthProvider];

@@ -16,24 +16,20 @@
 
 import ballerina/http;
 
-http:Client conditionRetrievalEndpoint = new (
-    "https://localhost:9443",config = {
-        retryConfig: {
-            interval: 3000,
-            count: 5,
-            backOffFactor: 0.5
-        }
-    }
-);
 
 http:Client keyValidationEndpoint = new (
     getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
     config =
     {cache: { enabled: false },
-                secureSocket:{
-                verifyHostname:getConfigBooleanValue(KM_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
-                }
-            }
+        secureSocket:{
+            trustStore: {
+                  path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                      "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                  password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        }
+    }
 );
 
 http:Client analyticsFileUploadEndpoint = new (
@@ -41,7 +37,12 @@ http:Client analyticsFileUploadEndpoint = new (
     config =
     {cache: { enabled: false },
       secureSocket:{
-          verifyHostname:getConfigBooleanValue(ANALYTICS, ENABLE_HOSTNAME_VERIFICATION, true)
+          trustStore: {
+              path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                  "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+              password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+          },
+          verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
       }
     }
 );

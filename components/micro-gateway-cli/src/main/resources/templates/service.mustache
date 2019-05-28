@@ -234,7 +234,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         }
     }
 
-function getUrlOfEtcdKeyForReInit(string defaultUrlRef,string etcdRef, string defaultUrl, string etcdKey) returns string {
+function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string defaultUrlRef,string etcdRef, string defaultUrl, string etcdKey) returns string {
     string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
     gateway:urlChanged[<string> retrievedEtcdKey] = false;
     string url = <string> gateway:etcdUrls[retrievedEtcdKey];
