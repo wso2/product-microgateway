@@ -6,3 +6,4 @@
 {{else}}
     clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
 {{/if}}
+runtime:getInvocationContext().attributes["destination"] = "{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}";

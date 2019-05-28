@@ -23,18 +23,17 @@ import com.beust.jcommander.Parameters;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.PrintStream;
-import java.util.List;
 
 /**
  * This class represents the "help" command and it holds arguments and flags specified by the user.
  */
-@Parameters(commandNames = "help", commandDescription = "print usage information")
+@Parameters(commandNames = "help", commandDescription = "display command help")
 public class HelpCmd implements GatewayLauncherCmd {
     private static PrintStream outStream = System.err;
 
     @SuppressWarnings("unused")
-    @Parameter(description = "Command name")
-    private List<String> helpCommands;
+    @Parameter(description = "command", required = true)
+    private String helpCommand;
 
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
@@ -43,20 +42,16 @@ public class HelpCmd implements GatewayLauncherCmd {
     private JCommander parentCmdParser;
 
     public void execute() {
-        if (helpCommands == null) {
-            printUsageInfo(GatewayCliCommands.HELP);
+        if (helpCommand == null) {
+            printUsageInfo(null);
             return;
-
-        } else if (helpCommands.size() > 1) {
-            throw GatewayCmdUtils.createUsageException("too many arguments given");
         }
 
-        String userCommand = helpCommands.get(0);
-        if (parentCmdParser.getCommands().get(userCommand) == null) {
-            throw GatewayCmdUtils.createUsageException("unknown help topic `" + userCommand + "`");
+        if (parentCmdParser.getCommands().get(helpCommand) == null) {
+            throw GatewayCmdUtils.createUsageException("unknown help topic `" + helpCommand + "`");
         }
 
-        String commandUsageInfo = getCommandUsageInfo(userCommand);
+        String commandUsageInfo = getCommandUsageInfo(helpCommand);
         outStream.println(commandUsageInfo);
     }
 

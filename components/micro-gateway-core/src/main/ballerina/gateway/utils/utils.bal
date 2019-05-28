@@ -294,6 +294,7 @@ public function extractAccessToken(http:Request req, string authHeaderName) retu
 public function handleError(string message) returns (error) {
     return error(message);
 }
+
 public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
@@ -305,14 +306,16 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
         return SUPER_TENANT_DOMAIN_NAME;
     }
 }
+
 public function getApiName(http:FilterContext context) returns (string) {
-    string qualifiedName = "";
     string serviceName = context.serviceName;
     string apiName = serviceName.split("__")[0];
+
     if (apiName.contains("_")) {
-        qualifiedName = apiName.replaceAll("_", "-");
+        apiName = apiName.replaceAll("_", "-");
     }
-    return qualifiedName;
+
+    return apiName;
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {

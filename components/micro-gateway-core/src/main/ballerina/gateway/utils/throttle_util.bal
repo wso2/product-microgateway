@@ -134,3 +134,11 @@ public function putThrottleData(GlobalThrottleStreamDTO throttleEvent) {
 public function removeThrottleData(string key) {
     _ = throttleDataMap.remove(key);
 }
+
+//check whether the throttle policy is available if in built throttling is used
+public function isPolicyExist(map<boolean> deployedPolicies, string policyName) returns boolean {
+    if(!enabledGlobalTMEventPublishing) {
+        return deployedPolicies.hasKey(policyName);
+    }
+    return true;
+}

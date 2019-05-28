@@ -38,12 +38,13 @@ import java.nio.file.Paths;
 @Parameters(commandNames = "reset", commandDescription = "reset configurations")
 public class ResetCmd implements GatewayLauncherCmd {
     private static PrintStream outStream = System.err;
+
+    @Parameter(names = {"-c", "--config"}, description = "external config file path")
+    private String configPath;
+
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
-
-    @Parameter(names = { "-c", "--config" }, hidden = true)
-    private String configPath;
 
     public void execute() {
         // Reset the configuration of the provided config path. If path is not given use the default config file

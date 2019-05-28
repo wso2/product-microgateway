@@ -198,44 +198,6 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         Assert.assertEquals(responseCode, 200, "Request should not throttled out");
     }
 
-    @Test(description = "test throttling with non exist subscription policy")
-    public void testThrottlingWithNonExistSubscriptionPolicy() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyJWT);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in JWT.");
-
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noSubPolicyToken);
-        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in oauth.");
-    }
-
-    @Test(description = "test throttling with non exist application policy")
-    public void testThrottlingWithNonExistApplicationPolicy() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyJWT);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with JWT.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in JWT.");
-
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noAppPolicyToken);
-        response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 500, "Request should not successful with oauth.");
-        Assert.assertTrue(response.getData().contains("\"code\":900809"),
-                "Error response should have errorcode 900809 in oauth.");
-    }
-
     public int invokeAndAssert2(String token, String url) throws Exception {
         Map<String, String> headers = new HashMap<>();
 

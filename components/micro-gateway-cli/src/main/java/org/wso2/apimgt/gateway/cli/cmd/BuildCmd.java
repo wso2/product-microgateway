@@ -34,7 +34,6 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
@@ -46,36 +45,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
  */
-@Parameters(commandNames = "build", commandDescription = "micro gateway build information")
+@Parameters(commandNames = "build", commandDescription = "build a project")
 public class BuildCmd implements GatewayLauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
     private static PrintStream outStream = System.out;
 
     @SuppressWarnings("unused")
-    @Parameter(names = "--java.debug", hidden = true)
-    private String javaDebugPort;
+    @Parameter(description = "project", required = true)
+    private String projectName;
 
     @SuppressWarnings("unused")
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"--compiled"}, hidden = true, arity = 0)
-    private boolean isCompiled;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
+    @Parameter(names = {"-d", "--deployment-config"}, description = "deployment-config file for docker/k8s")
     private String deploymentConfigPath;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
+    @Parameter(names = {"--help", "-h", "?"}, description = "print command help", help = true)
     private boolean helpFlag;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--java.debug", hidden = true)
+    private String javaDebugPort;
 
     public void execute() {
         if (helpFlag) {
@@ -85,8 +78,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             System.exit(1);
         }
 
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
-        projectName = projectName.replaceAll("[/\\\\]", "");
+        String projectName = this.projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
@@ -104,29 +96,26 @@ public class BuildCmd implements GatewayLauncherCmd {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
         }
 
-        //first phase of the build command; generation of ballerina code
-        if(!isCompiled){
-            try{
-                String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
-                init(projectName, toolkitConfigPath, deploymentConfigPath);
+        try {
+            String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
+            init(projectName, toolkitConfigPath, deploymentConfigPath);
 
-                CodeGenerator codeGenerator = new CodeGenerator();
-                ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-                GatewayCmdUtils
-                        .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
-                policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                        + GatewayCliConstants.POLICY_DIR, projectName);
-                GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
-                        GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
-                codeGenerator.generate(projectName, true);
+            CodeGenerator codeGenerator = new CodeGenerator();
+            ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
+            GatewayCmdUtils
+                    .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
+            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
+                    + GatewayCliConstants.POLICY_DIR, projectName);
+            GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
+                    GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
+            codeGenerator.generate(projectName, true);
 
-                //Initializing the ballerina project and creating .bal folder.
-                InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
-                        new ArrayList<>(), null);
-            } catch (IOException e) {
-                throw new CLIInternalException(
-                        "Error occurred while generating source code for the open API definitions.", e);
-            }
+            //Initializing the ballerina project and creating .bal folder.
+            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
+                    new ArrayList<>(), null);
+        } catch (IOException e) {
+            throw new CLIInternalException(
+                    "Error occurred while generating source code for the open API definitions.", e);
         }
     }
 
@@ -162,9 +151,9 @@ public class BuildCmd implements GatewayLauncherCmd {
                 logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
             }
-            if(deploymentConfig != null){
+            if (deploymentConfig != null) {
                 Path deploymentConfigFile = Paths.get(deploymentConfig);
-                if(Files.exists(deploymentConfigFile)){
+                if (Files.exists(deploymentConfigFile)) {
                     GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfig);
                 }
             }
@@ -178,7 +167,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         } catch (ConfigParserException e) {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new CLIInternalException("Error occured while reading the deployment configuration", e);
         }
     }

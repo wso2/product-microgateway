@@ -31,7 +31,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * This command is used to initialize a new microgateway project.
@@ -43,23 +42,24 @@ public class InitCmd implements GatewayLauncherCmd {
     private static final PrintStream OUT = System.out;
 
     @SuppressWarnings("unused")
-    @Parameter(hidden = true, required = true)
-    private List<String> mainArgs;
+    @Parameter(description = "project", required = true)
+    private String projectName;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-f", "--force"}, description = "replace existing projects having same name", arity = 0)
+    private boolean isForceful;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-d", "--deployment-config"}, description = "deployment-config file for docker/k8s")
+    private String deploymentConfigPath;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"--help", "-h", "?"}, description = "print command help", help = true)
+    private boolean helpFlag;
 
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"-f", "--force"}, hidden = true, arity = 0)
-    private boolean isForceful;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"-d", "--deployment-config"}, hidden = true)
-    private String deploymentConfigPath;
-
-    @Parameter(names = {"--help", "-h", "?"}, hidden = true, description = "for more information", help = true)
-    private boolean helpFlag;
 
     @Override
     public void execute() {
@@ -70,7 +70,6 @@ public class InitCmd implements GatewayLauncherCmd {
         }
 
         String workspace = GatewayCmdUtils.getUserDir();
-        String projectName = GatewayCmdUtils.getSingleArgument(mainArgs);
         Path projectLocation = Paths.get(workspace + File.separator + projectName);
         boolean isDirectory = Files.isDirectory(projectLocation);
 

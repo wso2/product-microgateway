@@ -50,7 +50,7 @@ function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration c
     string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID,
         TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12");
     string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-        TRSUT_STORE_PASSWORD, "ballerina");
+        TRUST_STORE_PASSWORD, "ballerina");
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
         MTSL_CONF_PROTOCOL_NAME, "TLS");
     string defaultProtocolVersions = "TLSv1.2,TLSv1.1";

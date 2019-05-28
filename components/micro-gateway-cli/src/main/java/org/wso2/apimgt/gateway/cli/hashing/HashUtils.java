@@ -253,7 +253,7 @@ public class HashUtils {
     public static String generateAPIId(String apiName, String version){
         String concatString = apiName + ":" + version;
         try{
-            return getMD5Hex(concatString);
+            return HashingConstants.API + getMD5Hex(concatString);
         } catch (HashingException e){
             throw new CLIInternalException("Error while generating md5 hash for API");
         }
