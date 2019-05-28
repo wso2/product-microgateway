@@ -96,7 +96,13 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
     requestResponseExecutionDTO.apiVersion = <string>apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
-    requestResponseExecutionDTO.apiContext = getContext(context);
+
+    // apim analytics requires context to be '<basePath>/<version>'
+    string mgContext = getContext(context);
+    mgContext = mgContext.split("/(?=$)")[0]; //split from last '/'
+    string analyticsContext = mgContext + "/" + requestResponseExecutionDTO.apiVersion;
+
+    requestResponseExecutionDTO.apiContext = analyticsContext;
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
 
     var res = response.cacheControl.noCache;

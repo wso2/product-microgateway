@@ -312,7 +312,7 @@ public function getApiName(http:FilterContext context) returns (string) {
     if (apiName.contains("_")) {
         qualifiedName = apiName.replaceAll("_", "-");
     }
-    return qualifiedName;
+    return apiName;
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {
