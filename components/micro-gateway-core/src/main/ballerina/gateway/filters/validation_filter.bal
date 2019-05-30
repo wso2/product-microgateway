@@ -40,8 +40,8 @@ boolean enableResponseValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTA
 
 string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGGER_ABSOLUTE_PATH, " ");
 
-public type ValidationFilter object {
 
+public type ValidationFilter object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         int startingTime = getCurrentTime();
@@ -83,7 +83,8 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         } else if (swagger.definitions != null) {//In swagger 2.0 models are defined under the definitions
             //getting all models defined in the schema
             models = swagger.definitions;
-            //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
+        }
+        //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
             //request
             foreach var i in pathKeys {
                 if (requestPath == i) {
@@ -110,7 +111,6 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                     }
                 }
             }
-        }
 
         //payload can be of type json or error
         if(payload is json) {
