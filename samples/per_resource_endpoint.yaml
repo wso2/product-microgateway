@@ -28,8 +28,8 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
 paths:
@@ -55,7 +55,7 @@ paths:
             - pending
             - sold
             default: available
-      x-mgw-production-endpoints:
+      x-wso2-production-endpoints:
         urls:
         - http://www.mocky.io/v2/5cd28cd73100008628339802
         - https://petstore.swagger.io/v2
@@ -90,7 +90,7 @@ paths:
         schema:
           type: integer
           format: int64
-      x-mgw-production-endpoints:
+      x-wso2-production-endpoints:
         urls:
         - http://www.mocky.io/v2/5cd28b9a310000bf293397f9
       responses:

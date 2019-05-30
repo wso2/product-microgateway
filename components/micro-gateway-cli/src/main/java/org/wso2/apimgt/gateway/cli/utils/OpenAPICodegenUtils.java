@@ -470,8 +470,8 @@ public class OpenAPICodegenUtils {
                         } catch (IllegalArgumentException e) {
                             throw new CLIRuntimeException(
                                     "Error while parsing the referenced endpoint object " + endpointExtensionObjectValue
-                                            + ". The endpoint \"" + referencePath + "\" defined under x-mgw-endpoints "
-                                            + "is incompatible : " + value.get(referencePath).toString());
+                                            + ". The endpoint \"" + referencePath + "\" defined under " +  OpenAPIConstants.ENDPOINTS
+                                            + " is incompatible : " + value.get(referencePath).toString());
                         }
                     }
                 }
@@ -484,7 +484,7 @@ public class OpenAPICodegenUtils {
                             .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
                 } catch (IllegalArgumentException e) {
                     throw new CLIRuntimeException("Error while parsing the endpoint object. The "
-                            + "x-mgw-production-endpoints or x-mgw-sandbox-endpoints format is incompatible : "
+                            + OpenAPIConstants.PRODUCTION_ENDPOINTS +  " or " + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
                             + endpointExtensionObjectValue);
                 }
             }

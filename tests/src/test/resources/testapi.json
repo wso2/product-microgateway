@@ -13,9 +13,9 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
-  "x-mgw-basePath": "petstore/v1",
-  "x-mgw-throttling-tier": "Unlimited",
-  "x-mgw-production-endpoints": {
+  "x-wso2-basePath": "petstore/v1",
+  "x-wso2-throttling-tier": "Unlimited",
+  "x-wso2-production-endpoints": {
     "urls": [
       "https://localhost:2379/pet/v1",
       "https://localhost:2379/pet/v1"
@@ -26,7 +26,7 @@
       "petstore_auth": []
     }
   ],
-  "x-mgw-sandbox-endpoints": {
+  "x-wso2-sandbox-endpoints": {
     "urls": [
       "https://localhost:2379/pet/v1"
     ]
@@ -108,12 +108,12 @@
         "summary": "Update an existing pet",
         "description": "",
         "operationId": "updatePet",
-        "x-mgw-sandbox-endpoints": {
+        "x-wso2-sandbox-endpoints": {
           "urls": [
             "https://localhost:2379/pet/v1"
           ]
         },
-        "x-mgw-throttling-tier": "50kPerMin",
+        "x-wso2-throttling-tier": "50kPerMin",
         "consumes": [
           "application/json",
           "application/xml"
