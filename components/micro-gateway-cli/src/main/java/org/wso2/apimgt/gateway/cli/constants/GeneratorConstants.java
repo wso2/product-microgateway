@@ -24,6 +24,7 @@ public class GeneratorConstants {
 
     public static final String SERVICE_TEMPLATE_NAME = "service";
     public static final String MAIN_TEMPLATE_NAME = "main";
+    public static final String OPEN_API_JSON_CONSTANTS = "openAPIJsonConstants";
     public static final String GENERATESWAGGER_TEMPLATE_NAME = "generateSwagger";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String LISTENERS_TEMPLATE_NAME = "listeners";

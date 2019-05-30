@@ -42,32 +42,40 @@ string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGG
 
 public type ValidationFilter object {
 
+    public map<json> openAPIs = {};
+
+    public function __init(map<json> openAPIs) {
+        self.openAPIs = openAPIs;
+    }
+
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
-        boolean result =  doValidationFilterRequest(caller, request, filterContext);
+        boolean result =  doValidationFilterRequest(caller, request, filterContext, self.openAPIs);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
-        boolean result = doValidationFilterResponse(response, context);
+        boolean result = doValidationFilterResponse(response, context, self.openAPIs);
         setLatency(startingTime, context, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
 };
 
-function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
+function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext, map<json> openAPIs)
              returns boolean {
     if (enableRequestValidation) {
         //getting the payload of the request
         var payload = request.getJsonPayload();
         isType = false;
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
-        json swagger = read(swaggerAbsolutePath);
+        string serviceName = getServiceName(filterContext.serviceName);
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+        json swagger = openAPIs[serviceName];
+        printDebug(KEY_VALIDATION_FILTER, "The swagger content found in map : " + swagger.toString());
         json model = {};
         json models = {};
         string modelName = "";
@@ -116,6 +124,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         if(payload is json) {
             //do the validation if only there is a payload and a model available
             if (model != null && payload != null)  {
+                printDebug(KEY_VALIDATION_FILTER, "The swagger models : " + swagger.toString());
                 //validate the payload against the model and return the result
                 Result finalResult = validate(modelName, payload, model, models);
                 if (!finalResult.valid) {
@@ -132,12 +141,14 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     return true;
 }
 
-public function doValidationFilterResponse(http:Response response, http:FilterContext context) returns boolean {
+public function doValidationFilterResponse(http:Response response, http:FilterContext context, map<json> openAPIs) returns boolean {
     if (enableResponseValidation) {
         //getting the payload of the response
         var payload = response.getJsonPayload();
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
-        json swagger = read(swaggerAbsolutePath);
+        string serviceName = getServiceName(context.serviceName);
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+        json swagger = openAPIs[serviceName];
+        io:println(swagger);
         json model = {};
         json models = {};
         string modelName = "";

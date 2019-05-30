@@ -160,6 +160,7 @@ public class CodeGenerator {
             }
         });
         genFiles.add(generateMainBal(serviceList));
+        genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
@@ -195,6 +196,19 @@ public class CodeGenerator {
     private GenSrcFile generateMainBal(List<BallerinaService> services) throws IOException {
         String srcFile = GeneratorConstants.MAIN_TEMPLATE_NAME + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(services, GeneratorConstants.MAIN_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Generate bal file with open API definitions as ballerina json variables.
+     *
+     * @param services list of model context to be used by the templates
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateOpenAPIJsonConstantsBal(List<BallerinaService> services) throws IOException {
+        String srcFile = GeneratorConstants.OPEN_API_JSON_CONSTANTS + GeneratorConstants.BALLERINA_EXTENSION;
+        String mainContent = getContent(services, GeneratorConstants.OPEN_API_JSON_CONSTANTS);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 

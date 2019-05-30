@@ -59,7 +59,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project);
+        super.init(project, "testapi.json");
     }
 
     @Test(description = "Test API invocation with a JWT token")

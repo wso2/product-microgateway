@@ -230,6 +230,7 @@ public class OpenAPICodegenUtils {
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
         api.setTransport(Arrays.asList("http", "https"));
+        api.setApiDefinition(Json.pretty(openAPI));
         return api;
     }
 
