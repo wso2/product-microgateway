@@ -79,7 +79,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition( String project)
+    public void generateFromDefinition( String project, String openAPIFileName)
             throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
@@ -90,14 +90,14 @@ public class CLIExecutor {
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
-        File swaggerFilePath = new File(getClass().getClassLoader().getResource("testapi.json").getPath());
+        File swaggerFilePath = new File(getClass().getClassLoader().getResource(openAPIFileName).getPath());
         File resDefYaml =  new File(getClass().getClassLoader().getResource("definition.yaml").getPath());
 
         File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
 
         String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
         File swagerDesPath = new File( path + "/apimTestProject"+ File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + "/testapi.json");
+                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator +  openAPIFileName);
         File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
 
         System.setProperty("user.dir", path.toString());
@@ -120,7 +120,7 @@ public class CLIExecutor {
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
 
-        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
+        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project,};
         Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
 
         new ServerLogReader("errorStream", process.getErrorStream()).start();

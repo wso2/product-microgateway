@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -165,6 +166,34 @@ public class OpenAPICodegenUtils {
         }
     }
 
+    /**
+     * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format
+     * v2/YAML -> v2/JSON
+     * v3/YAML -> v3/JSON
+     * @param openAPIContent open API as a string content
+     * @return openAPI definition as a JSON String
+     */
+    public static String getOpenAPIAsJson(OpenAPI openAPI, String openAPIContent, Path openAPIPath) {
+        String jsonOpenAPI = Json.pretty(openAPI);
+        String openAPIVersion;
+        if(openAPIPath.getFileName().toString().endsWith("json")) {
+            openAPIVersion = findSwaggerVersion(openAPIContent, false);
+        } else {
+            openAPIVersion = findSwaggerVersion(jsonOpenAPI, false);
+        }
+
+        switch (openAPIVersion) {
+            case "2":
+                Swagger swagger = new SwaggerParser().parse(openAPIContent);
+                return Json.pretty(swagger);
+            case "3":
+                return jsonOpenAPI;
+
+            default:
+                throw new CLIRuntimeException("Error: Swagger version is not identified");
+        }
+    }
+
     private static Map<String, Object> getExtensionMap(ExtendedAPI api, RouteEndpointConfig mgwEndpointConfigDTO) {
         Map<String, Object> extensionsMap = new HashMap<>();
         String basePath = api.getContext() + "/" + api.getVersion();
@@ -222,7 +251,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      * @return Extended API object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI) {
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, Path openAPIPath) throws IOException {
 
         String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
         ExtendedAPI api = new ExtendedAPI();
@@ -230,6 +259,9 @@ public class OpenAPICodegenUtils {
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
         api.setTransport(Arrays.asList("http", "https"));
+        //open API content should be set in json in order to validation filter to work.
+        String openAPIContent = new String(Files.readAllBytes(openAPIPath), StandardCharsets.UTF_8);
+        api.setApiDefinition(getOpenAPIAsJson(openAPI, openAPIContent, openAPIPath));
         return api;
     }
 
@@ -470,8 +502,8 @@ public class OpenAPICodegenUtils {
                         } catch (IllegalArgumentException e) {
                             throw new CLIRuntimeException(
                                     "Error while parsing the referenced endpoint object " + endpointExtensionObjectValue
-                                            + ". The endpoint \"" + referencePath + "\" defined under x-mgw-endpoints "
-                                            + "is incompatible : " + value.get(referencePath).toString());
+                                            + ". The endpoint \"" + referencePath + "\" defined under " +  OpenAPIConstants.ENDPOINTS
+                                            + " is incompatible : " + value.get(referencePath).toString());
                         }
                     }
                 }
@@ -484,7 +516,7 @@ public class OpenAPICodegenUtils {
                             .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
                 } catch (IllegalArgumentException e) {
                     throw new CLIRuntimeException("Error while parsing the endpoint object. The "
-                            + "x-mgw-production-endpoints or x-mgw-sandbox-endpoints format is incompatible : "
+                            + OpenAPIConstants.PRODUCTION_ENDPOINTS +  " or " + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
                             + endpointExtensionObjectValue);
                 }
             }

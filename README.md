@@ -180,8 +180,8 @@ Lets add the basic microgateway Open API extension to the petstore OAS file.
 
 
 ```
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
 
@@ -263,19 +263,19 @@ This token works with any API because, default  microgateway config uses the pub
 ### Microgateway supported open API extensions
 | Extension                     | Description                                               | Required/Not Required |
 | -------------                 | -------------                                             | ----------------------|
-| x-mgw-basePath                | Base path which gateway exposes the API                   | **Required** -> API level only
-| x-mgw-production-endpoints    | Specify the actual back end of the service                | **Required** -> API level/ Not required -> Resource level
-| x-mgw-sandbox-endpoints       | Specify the sandbox endpoint of the service if available  | Not Required -> API/Resource level
-| x-mgw-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
-| x-mgw-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
-| x-mgw-endpoints               | Define endpoint configs globally which can be then referred with  x-mgw-production-endpoints or x-mgw-sandbox-endpoints extensions | Not Required
-| x-mgw-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
-| x-mgw-request-interceptor     | Custom ballerina functions can be written in order to do transformations before dispatching the request      | Not Required -> API/Resource level
-| x-mgw-response-interceptor    | Custom ballerina functions can be written in order to do transformations before dispatching the response     | Not Required -> API/Resource level
+| x-wso2-basePath                | Base path which gateway exposes the API                   | **Required** -> API level only
+| x-wso2-production-endpoints    | Specify the actual back end of the service                | **Required** -> API level/ Not required -> Resource level
+| x-wso2-sandbox-endpoints       | Specify the sandbox endpoint of the service if available  | Not Required -> API/Resource level
+| x-wso2-throttling-tier         | Specify the rate limiting for the API or resource         | Not Required -> API/Resource level
+| x-wso2-cors                    | Specify CORS configuration for the API                    | Not Required -> API level only
+| x-wso2-endpoints               | Define endpoint configs globally which can be then referred with  x-wso2-production-endpoints or x-wso2-sandbox-endpoints extensions | Not Required
+| x-wso2-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
+| x-wso2-request-interceptor     | Custom ballerina functions can be written in order to do transformations before dispatching the request      | Not Required -> API/Resource level
+| x-wso2-response-interceptor    | Custom ballerina functions can be written in order to do transformations before dispatching the response     | Not Required -> API/Resource level
 
 ### Microgateway open API extension usages
 #### 1. Override endpoint per API resource
-API developer can specify endpoints per resource by adding the **x-mgw-production-endpoints** extension under the respective resource in open API definition.
+API developer can specify endpoints per resource by adding the **x-wso2-production-endpoints** extension under the respective resource in open API definition.
 If a specific resource have an endpoint which requires different back end rather than the global back end defined for the API, then it can be overridden as below.
 
 In following example `/pet/findByStatus` resource endpoint is overridden with load balance endpoint and `pet/{petId}` resource overridden with another http endpoint
@@ -304,7 +304,7 @@ In following example `/pet/findByStatus` resource endpoint is overridden with lo
          - pending
          - sold
          default: available
-   x-mgw-production-endpoints:
+   x-wso2-production-endpoints:
      urls:
      - http://www.mocky.io/v2/5cd28cd73100008628339802
      - https://petstore.swagger.io/v2
@@ -325,7 +325,7 @@ In following example `/pet/findByStatus` resource endpoint is overridden with lo
      schema:
        type: integer
        format: int64
-   x-mgw-production-endpoints:
+   x-wso2-production-endpoints:
      urls:
      - http://www.mocky.io/v2/5cd28b9a310000bf293397f9
 
@@ -348,8 +348,8 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-request-interceptor: validateRequest
-      x-mgw-response-interceptor: validateResponse
+      x-wso2-request-interceptor: validateRequest
+      x-wso2-response-interceptor: validateResponse
       parameters:
       - name: status
         in: query
@@ -393,10 +393,10 @@ openapi: 3.0.0
   version: 1.0.0
   title: Swagger Petstore New
   termsOfService: http://swagger.io/terms/
-x-mgw-basePath: /petstore/v1
-x-mgw-request-interceptor: validateRequest
-x-mgw-response-interceptor: validateResponse
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-request-interceptor: validateRequest
+x-wso2-response-interceptor: validateResponse
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
 ```
@@ -407,9 +407,9 @@ API developer can specify the rate limiting policies for each resource or global
 By default set of policies are available, but user can add more policies to the file and later refer them by name in the open API definition
 Following samples show how throttling policies can be added to API level
 ```
-x-mgw-basePath: /petstore/v1
-x-mgw-throttling-tier: 10kPerMin
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-throttling-tier: 10kPerMin
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
 ```
@@ -431,19 +431,19 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-throttling-tier: 20kPerMin
+      x-wso2-throttling-tier: 20kPerMin
 ```
 Complete sample can be found [here](samples/policies_sample.yaml)
 
 #### 4. Add API level CORS configuration
 
-CORS configurations can be added to each API using the open API extension **x-mgw-cors**
+CORS configurations can be added to each API using the open API extension **x-wso2-cors**
 ```
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-mgw-cors:
+x-wso2-cors:
   access-control-allow-origins:
       - test.com
       - example.com
@@ -461,8 +461,8 @@ Complete sample can be found [here](samples/cors_sample.yaml)
 There might be occasions where the actual back end service of the API might be protected using
 basic authentication. In those scenarios we need to send the basic authentication parameters(username and password) to the back end service.
 We can specify the endpoint security parameters in the openAPI definition using extensions.
-The supported way to define endpoint security is to define endpoints under the **x-mgw-endpoints** parameter and then refer them in the API level or resource level endpoint.
-When we define the endpoint under extension "x-mgw-endpoints" then endpoint should have a name. This name(myEndpoint in below sample) is used to pass the password when running the microgateway
+The supported way to define endpoint security is to define endpoints under the **x-wso2-endpoints** parameter and then refer them in the API level or resource level endpoint.
+When we define the endpoint under extension "x-wso2-endpoints" then endpoint should have a name. This name(myEndpoint in below sample) is used to pass the password when running the microgateway
 Under the endpoint config we can define security parameters as below
 
 ```
@@ -472,8 +472,8 @@ securityConfig:
 ```
 
 ```
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint"
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint"
 paths:
   "/pet/findByStatus":
     get:
@@ -482,14 +482,14 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint3"
+      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint3"
       .
       .
       .
       .
 
 
-x-mgw-endpoints:
+x-wso2-endpoints:
  - myEndpoint:
     urls:
     - https://petstore.swagger.io/v2
@@ -511,7 +511,7 @@ Complete sample can be found [here](samples/endpoint_by_reference_sample.yaml)
 
 When running the microgateway we can provide the password as an environment variable.
 The variable format is **\<epName\>_\<epType\>_basic_password**
-- epName : Name specified in the open API definition under x-mgw-endpoints
+- epName : Name specified in the open API definition under x-wso2-endpoints
 - epType : either prod or sand
 So the complete command for the above sample is like
 ```
@@ -521,10 +521,10 @@ bash gateway -e myEndpoint3_prod_basic_password=123456 <path_to_the_excutable_fi
 #### 6. Override backend service connection URLS
 There can be use cases where we want to override the back end connection url provided in the open API definition
 during the run time. We can override endpoints that are used as references similar to previous topic.
-In order to override the endpoint url we need to define endpoint in **x-mgw-endpoints** extension and refer them in the API level or resource level.
+In order to override the endpoint url we need to define endpoint in **x-wso2-endpoints** extension and refer them in the API level or resource level.
 Lets use the same example we have used in previous topic. So we can override the *myEndpoint3* url during the runtime as follows.
 The variable format is **\<epName\>\_\<epType\>\_endpoint_\<epIndex\>**
-- epName : Name specified in the open API definition under x-mgw-endpoints
+- epName : Name specified in the open API definition under x-wso2-endpoints
 - epType : either prod or sand
 - epIndex : Index starting from 0. If there are many URLS(load balanced or fail over) we can override them using indexes 1,2,3 and etc
 So the complete command for the above sample is like
@@ -535,7 +535,7 @@ bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excu
 
 #### 7. Disable security for resources
 By default the APIs and resources are protected via oauth2 in microgateway. API consumer need a valid oauth2 access token(jwt or opaque)
-to invoke the APIs. But API developer can expose APIs without any authentication using the open API extension **x-mgw-disable-security**.
+to invoke the APIs. But API developer can expose APIs without any authentication using the open API extension **x-wso2-disable-security**.
 This extension is only supported at resource level only
 
 ```
@@ -547,7 +547,7 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-disable-security: true
+      x-wso2-disable-security: true
 ```
 
 #### Microgateway securing APIs

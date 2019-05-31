@@ -4,6 +4,7 @@
       "post": {
         "x-auth-type": "Application & Application User",
         "x-throttling-tier": "Unlimited",
+
         "description": "Create a new Order",
         "parameters": [
           {
@@ -45,15 +46,7 @@
             },
             "description": "Unsupported Media Type. The entity of the request was in a not supported format."
           }
-        },
-        "security": [
-          {
-            "pizzashack_auth": [
-              "write:order",
-              "read:order"
-            ]
-          }
-        ]
+        }
       }
     },
     "/menu": {
@@ -82,14 +75,7 @@
             },
             "description": "Not Acceptable. The requested media type is not supported"
           }
-        },
-        "security": [
-          {
-            "pizzashack_auth": [
-              "read:menu"
-            ]
-          }
-        ]
+        }
       }
     },
     "/order/{orderId}": {
@@ -151,15 +137,7 @@
             },
             "description": "Precondition Failed. The request has not been performed because one of the preconditions is not met."
           }
-        },
-        "security": [
-          {
-            "pizzashack_auth": [
-              "write:order",
-              "read:order"
-            ]
-          }
-        ]
+        }
       },
       "get": {
         "x-auth-type": "Application & Application User",
@@ -198,15 +176,7 @@
             },
             "description": "Not Acceptable. The requested media type is not supported"
           }
-        },
-        "security": [
-          {
-            "pizzashack_auth": [
-              "write:order",
-              "read:order"
-            ]
-          }
-        ]
+        }
       },
       "delete": {
         "x-auth-type": "Application & Application User",
@@ -238,15 +208,8 @@
             },
             "description": "Precondition Failed. The request has not been performed because one of the preconditions is not met."
           }
-        },
-        "security": [
-          {
-            "pizzashack_auth": [
-              "write:order",
-              "read:order"
-            ]
-          }
-        ]
+        }
+
       }
     }
   },
@@ -394,5 +357,12 @@
     "version": "1.0.0"
   },
   "host": "10.100.4.205:8243",
-  "basePath": "/pizzashack/1.0.0"
+  "basePath": "/pizzashack/1.0.0",
+  "x-wso2-basePath" : "/pizzashack/1.0.0",
+  "x-wso2-production-endpoints" : {
+    "urls" : ["https://localhost:9443/echo"]
+  },
+  "x-wso2-sandbox-endpoints" : {
+    "urls" : ["https://localhost:9443/echo/invalidResponse"]
+  }
 }

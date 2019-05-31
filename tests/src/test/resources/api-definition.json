@@ -315,7 +315,7 @@
     "application/json"
   ],
   "swagger": "2.0",
-  "x-mgw-throttling-tier": "10MinAppPolicy",
+  "x-wso2-throttling-tier": "10MinAppPolicy",
   "securityDefinitions": {
     "pizzashack_auth": {
       "type": "oauth2",

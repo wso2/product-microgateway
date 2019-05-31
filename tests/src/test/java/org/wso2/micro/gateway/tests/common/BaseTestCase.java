@@ -72,7 +72,7 @@ public class BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
     }
 
-    protected void init(String project) throws Exception {
+    protected void init(String project, String openAPIFileName) throws Exception {
         CLIExecutor cliExecutor;
 
         microGWServer = ServerInstance.initMicroGwServer();
@@ -85,7 +85,7 @@ public class BaseTestCase {
         //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generateFromDefinition(project);
+        cliExecutor.generateFromDefinition(project, openAPIFileName);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()

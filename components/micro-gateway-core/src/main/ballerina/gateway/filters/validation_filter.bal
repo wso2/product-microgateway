@@ -42,32 +42,40 @@ string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGG
 
 public type ValidationFilter object {
 
+    public map<json> openAPIs = {};
+
+    public function __init(map<json> openAPIs) {
+        self.openAPIs = openAPIs;
+    }
+
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
-        boolean result =  doValidationFilterRequest(caller, request, filterContext);
+        boolean result =  doValidationFilterRequest(caller, request, filterContext, self.openAPIs);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
-        boolean result = doValidationFilterResponse(response, context);
+        boolean result = doValidationFilterResponse(response, context, self.openAPIs);
         setLatency(startingTime, context, SECURITY_LATENCY_VALIDATION);
         return result;
     }
 
 };
 
-function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
+function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext, map<json> openAPIs)
              returns boolean {
     if (enableRequestValidation) {
         //getting the payload of the request
         var payload = request.getJsonPayload();
         isType = false;
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.serviceName)];
-        json swagger = read(swaggerAbsolutePath);
+        string serviceName = getServiceName(filterContext.serviceName);
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+        json swagger = openAPIs[serviceName];
+        printDebug(KEY_VALIDATION_FILTER, "The swagger content found in map : " + swagger.toString());
         json model = {};
         json models = {};
         string modelName = "";
@@ -83,29 +91,29 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         } else if (swagger.definitions != null) {//In swagger 2.0 models are defined under the definitions
             //getting all models defined in the schema
             models = swagger.definitions;
-            //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
-            //request
-            foreach var i in pathKeys {
-                if (requestPath == i) {
-                    json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
-                    //go through each item in parameters array and find the schema property
-                    //go through each item in parameters array and find the schema property
-                    json[] para = <json[]>parameters;
-                    foreach var k in para {
-                        if (k[SCHEMA] != null) {
-                            if (k[SCHEMA][REFERENCE] != null)  {
-                                //getting the reference to the model
-                                string modelReference = k[SCHEMA][REFERENCE].toString();
-                                //getting the model name
-                                modelName = untaint replaceModelPrefix(modelReference);
-                                //check whether there is a model available from the assigned model name
-                                if (models[modelName] != null) {
-                                    model = models[modelName];
-                                }
-                            } else {
-                                //getting inline model
-                                model = k[SCHEMA];
+        }
+        //loop each key defined under the paths in swagger and compare whether it contain the path hit by the
+        //request
+        foreach var i in pathKeys {
+            if (requestPath == i) {
+                json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
+                //go through each item in parameters array and find the schema property
+                //go through each item in parameters array and find the schema property
+                json[] para = <json[]>parameters;
+                foreach var k in para {
+                    if (k[SCHEMA] != null) {
+                        if (k[SCHEMA][REFERENCE] != null)  {
+                            //getting the reference to the model
+                            string modelReference = k[SCHEMA][REFERENCE].toString();
+                            //getting the model name
+                            modelName = untaint replaceModelPrefix(modelReference);
+                            //check whether there is a model available from the assigned model name
+                            if (models[modelName] != null) {
+                                model = models[modelName];
                             }
+                        } else {
+                            //getting inline model
+                            model = k[SCHEMA];
                         }
                     }
                 }
@@ -116,6 +124,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         if(payload is json) {
             //do the validation if only there is a payload and a model available
             if (model != null && payload != null)  {
+                printDebug(KEY_VALIDATION_FILTER, "The swagger models : " + swagger.toString());
                 //validate the payload against the model and return the result
                 Result finalResult = validate(modelName, payload, model, models);
                 if (!finalResult.valid) {
@@ -132,12 +141,13 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     return true;
 }
 
-public function doValidationFilterResponse(http:Response response, http:FilterContext context) returns boolean {
+public function doValidationFilterResponse(http:Response response, http:FilterContext context, map<json> openAPIs) returns boolean {
     if (enableResponseValidation) {
         //getting the payload of the response
         var payload = response.getJsonPayload();
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
-        json swagger = read(swaggerAbsolutePath);
+        string serviceName = getServiceName(context.serviceName);
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+        json swagger = openAPIs[serviceName];
         json model = {};
         json models = {};
         string modelName = "";
@@ -146,53 +156,54 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
             models = swagger.components.schemas;
         } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
             models = swagger.definitions;
-            foreach var i in pathKeys {
-                if (requestPath == i) {
-                    string modelReference;
-                    if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
-                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null)
-                        {
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
-                            REFERENCE] != null) {
-                                //getting referenced model
-                                modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                                SCHEMA][ITEMS][REFERENCE].toString();
-                                modelName = replaceModelPrefix(modelReference);
-                                if (models[modelName] != null) {
-                                    model = models[modelName];
-                                }
-                            } else {
-                                //getting inline model defined under the items
-                                model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][
-                                ITEMS];
+        }
+        foreach var i in pathKeys {
+            if (requestPath == i) {
+                string modelReference;
+                if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
+                    if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null)
+                    {
+                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
+                        REFERENCE] != null) {
+                            //getting referenced model
+                            modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                            SCHEMA][ITEMS][REFERENCE].toString();
+                            modelName = replaceModelPrefix(modelReference);
+                            if (models[modelName] != null) {
+                                model = models[modelName];
                             }
                         } else {
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
-                            [REFERENCE] != null) {
-                                //getting referenced model
-                                modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                                SCHEMA]
-                                [REFERENCE].toString();
-                                modelName = replaceModelPrefix(modelReference);
-                                if (models[modelName] != null) {
-                                    model = models[modelName];
-                                }
-                            } else {
-                                //getting inline model defined under the schema
-                                model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA];
+                            //getting inline model defined under the items
+                            model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][
+                            ITEMS];
+                        }
+                    } else {
+                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
+                        [REFERENCE] != null) {
+                            //getting referenced model
+                            modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                            SCHEMA]
+                            [REFERENCE].toString();
+                            modelName = replaceModelPrefix(modelReference);
+                            if (models[modelName] != null) {
+                                model = models[modelName];
                             }
+                        } else {
+                            //getting inline model defined under the schema
+                            model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA];
                         }
-                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
-                            isType = true;
-                            pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
-                            SCHEMA][
-                            TYPE].toString();
-                        }
+                    }
+                    if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
+                        isType = true;
+                        pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                        SCHEMA][
+                        TYPE].toString();
                     }
                 }
             }
-
         }
+
+
         //payload can be of type json or error
         if(payload is json) {
             //do the validation if only there is a payload and a model available. prevent validating error

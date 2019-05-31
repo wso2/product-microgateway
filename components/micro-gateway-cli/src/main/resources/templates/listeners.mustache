@@ -27,8 +27,10 @@ gateway:SubscriptionFilter subscriptionFilter = new;
 map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
 gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
+//get open API definition map
+map<json> openAPIs = getOpenAPIs();
 // Validation filter
-gateway:ValidationFilter validationFilter = new;
+gateway:ValidationFilter validationFilter = new(openAPIs);
 // Analytics filter
 gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
