@@ -148,6 +148,7 @@
 //validation_filter related constatnts
  public const string PATHS = "paths";
  public const string PARAMETERS = "parameters";
+ public const string REQUESTBODY = "requestBody";
  public const string REFERENCE = "$ref";
  public const string RESPONSES = "responses";
  public const string SCHEMA = "schema";
@@ -168,6 +169,8 @@
  public const string INT_64 = "int64";
  public const string DEFINITIONS = "#/definitions/";
  public const string COMPONENTS_SCHEMAS = "#/components/schemas/";
+ public const string COMPONENTS_REQUESTBODIES = "#/components/requestBodies/";
+ public const string CONTENT = "content";
  public const string YYYY_MM_DD = "yyyy-MM-dd";
  public const string DISCRIMINATOR = "discriminator";
  public const string SWAGGER = "_swagger";
