@@ -46,10 +46,10 @@ Also we've a small utility component based on Go-lang located at [micro-gateway-
 1. JDK 8
 1. Maven 3(Tested on 3.6.0)
 1. Go
-1. IntelliJ IDEA ot VSCode (Ballerina plugins currently support these two IDEs)
+1. IntelliJ IDEA or VSCode (Ballerina plugins currently support these two IDEs)
 
 #### Implementing solution
-Pick the correct component from above. Go through the compoenent code and find where you should add your solution. Implement it and use maven command `mvn clean install` to build the product.
+Pick the correct component from above. Go through the component code and find where you should add your solution. Implement it and use maven command `mvn clean install` to build the product.
 
 #### Debugging the toolkit
 1. Add remote debug configuration to your IDE.
