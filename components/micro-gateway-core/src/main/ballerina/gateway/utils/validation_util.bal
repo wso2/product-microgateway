@@ -906,5 +906,8 @@ public function replaceModelPrefix(string name) returns (string) {
     if (name.contains(COMPONENTS_SCHEMAS)) {
         newName = name.replace(COMPONENTS_SCHEMAS, "");
     }
+    if (name.contains(COMPONENTS_REQUESTBODIES)) {
+        newName = name.replace(COMPONENTS_REQUESTBODIES, "");
+    }
     return newName;
 }
