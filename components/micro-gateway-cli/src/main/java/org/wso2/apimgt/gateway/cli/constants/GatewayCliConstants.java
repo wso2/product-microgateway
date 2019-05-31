@@ -63,6 +63,7 @@ public class GatewayCliConstants {
     public static final String GW_DIST_POLICIES_FILE = PROJECT_POLICIES_FILE;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_TOKEN_REVOCATION_EXTENSION = "token_revocation_extension.bal";
+    public static final String GW_DIST_START_UP_EXTENSION = "startup_extension.bal";
     public static final String K8S_DEPLOYMENT = "-deployment-";
     public static final String K8S_SERVICE = "-rest-";
     public static final String K8S_INGRESS = "ingress";

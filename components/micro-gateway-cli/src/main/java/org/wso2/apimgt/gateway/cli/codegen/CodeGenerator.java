@@ -170,6 +170,9 @@ public class CodeGenerator {
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
                 projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
+                        + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION,
+                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION);
     }
 
     /**

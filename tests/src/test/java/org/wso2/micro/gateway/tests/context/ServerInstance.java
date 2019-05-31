@@ -405,7 +405,7 @@ public class ServerInstance implements Server {
                 process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
 
             } else {
-                cmdArray = new String[]{"bash", "bin/" + scriptName, "run" ,"-e", "b7a.log.level=TRACE"};
+                cmdArray = new String[]{"bash", "bin/" + scriptName, "run"};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
                 process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
