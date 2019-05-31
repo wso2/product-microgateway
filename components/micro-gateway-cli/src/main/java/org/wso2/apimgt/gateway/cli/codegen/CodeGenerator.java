@@ -138,12 +138,13 @@ public class CodeGenerator {
                         .endsWith(".json") ||
                         path.getFileName().toString().endsWith(".yaml")))
                         .forEach( path -> {
-                            OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-                            OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
-                            ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI);
-                            BallerinaService definitionContext;
-                            OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
                             try {
+                                OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
+                                OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
+                                ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, path);
+                                BallerinaService definitionContext;
+                                OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
+
                                 definitionContext = new BallerinaService().buildContext(openAPI, api);
                                 genFiles.add(generateService(definitionContext));
 

@@ -120,7 +120,7 @@ public class CLIExecutor {
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
 
-        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
+        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project,};
         Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
 
         new ServerLogReader("errorStream", process.getErrorStream()).start();
