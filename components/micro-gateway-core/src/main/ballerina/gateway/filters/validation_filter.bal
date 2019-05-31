@@ -91,6 +91,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                     json parameters = swagger[PATHS][i][requestMethod][PARAMETERS];
                     //go through each item in parameters array and find the schema property
                     //go through each item in parameters array and find the schema property
+                    if (parameters != null) {
                     json[] para = <json[]>parameters;
                     foreach var k in para {
                         if (k[SCHEMA] != null) {
@@ -109,8 +110,17 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                             }
                         }
                     }
+                    } else {
+                     string requestReference = swagger[PATHS][i][requestMethod][REQUESTBODY][REFERENCE].toString();
+                     //getting the model name
+                      modelName = untaint replaceModelPrefix(requestReference);
+                      //check whether there is a model available from the assigned model name
+                       if (models[modelName] != null) {
+                           model = models[modelName];
+                       }
+                   }
                 }
-            }
+        }
 
         //payload can be of type json or error
         if(payload is json) {
@@ -142,17 +152,17 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
         json models = {};
         string modelName = "";
         string responseStatusCode = string.convert(response.statusCode);
-        if (swagger.components.schemas != null){//getting the schemas from a swagger 3.0 version file
+        if (swagger.components.schemas != null) {//getting the schemas from a swagger 3.0 version file
             models = swagger.components.schemas;
-        } else if (swagger.definitions != null){//getting schemas from a swagger 2.0 version file
+        } else if (swagger.definitions != null) {//getting schemas from a swagger 2.0 version file
             models = swagger.definitions;
-            foreach var i in pathKeys {
-                if (requestPath == i) {
-                    string modelReference;
-                    if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
-                        if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null)
-                        {
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
+        }
+        foreach var i in pathKeys {
+           if (requestPath == i) {
+               string modelReference;
+               if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA] != null) {
+                   if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS] != null) {
+                         if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][ITEMS][
                             REFERENCE] != null) {
                                 //getting referenced model
                                 modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
@@ -161,13 +171,13 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                                 if (models[modelName] != null) {
                                     model = models[modelName];
                                 }
-                            } else {
+                         } else {
                                 //getting inline model defined under the items
                                 model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][
                                 ITEMS];
-                            }
-                        } else {
-                            if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
+                         }
+                   } else {
+                         if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA]
                             [REFERENCE] != null) {
                                 //getting referenced model
                                 modelReference = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
@@ -177,21 +187,54 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                                 if (models[modelName] != null) {
                                     model = models[modelName];
                                 }
-                            } else {
+                         } else {
                                 //getting inline model defined under the schema
                                 model = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA];
-                            }
-                        }
+                         }
+                   }
                         if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
                             isType = true;
                             pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
                             SCHEMA][
                             TYPE].toString();
                         }
-                    }
-                }
-            }
-
+               } else {
+                   if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][CONTENT][APPLICATION_JSON]
+                   [SCHEMA] != null) {
+                       json schema = swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][CONTENT]
+                       [APPLICATION_JSON][SCHEMA];
+                           if (schema[ITEMS] != null) {
+                               if (schema[ITEMS][REFERENCE] != null) {
+                                   //getting referenced model
+                                   modelReference = schema[ITEMS][REFERENCE].toString();
+                                   modelName = replaceModelPrefix(modelReference);
+                                   if (models[modelName] != null) {
+                                       model = models[modelName];
+                                   }
+                               } else {
+                                   //getting inline model defined under the items
+                                     model = schema[ITEMS];
+                               }
+                           } else {
+                               if (schema[REFERENCE] != null) {
+                                  //getting referenced model
+                                  modelReference = schema[REFERENCE].toString();
+                                  modelName = replaceModelPrefix(modelReference);
+                                  if (models[modelName] != null) {
+                                      model = models[modelName];
+                                  }
+                               } else {
+                                         //getting inline model defined under the schema
+                                           model = schema;
+                               }
+                           }
+                             if (schema[TYPE] != null) {
+                               isType = true;
+                               pathType = untaint schema[TYPE].toString();
+                             }
+                   }
+               }
+           }
         }
         //payload can be of type json or error
         if(payload is json) {
