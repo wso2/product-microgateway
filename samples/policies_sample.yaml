@@ -28,11 +28,11 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-mgw-throttling-tier: 10kPerMin
+x-wso2-throttling-tier: 10kPerMin
 paths:
   "/pet/findByStatus":
     get:
@@ -41,7 +41,7 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-throttling-tier: 20kPerMin
+      x-wso2-throttling-tier: 20kPerMin
       parameters:
       - name: status
         in: query

@@ -28,11 +28,11 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-mgw-cors:
+x-wso2-cors:
   access-control-allow-origins:
       - test.com
       - example.com

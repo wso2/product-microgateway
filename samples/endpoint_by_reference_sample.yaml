@@ -28,8 +28,8 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint"
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint"
 paths:
   "/pet/findByStatus":
     get:
@@ -38,7 +38,7 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-production-endpoints: "#/x-mgw-endpoints/myEndpoint3"
+      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint3"
       parameters:
       - name: status
         in: query
@@ -169,7 +169,7 @@ components:
             "$ref": "#/components/schemas/Pet"
       description: Pet object that needs to be added to the store
       required: true
-x-mgw-endpoints:
+x-wso2-endpoints:
  - myEndpoint:
     urls:
     - https://petstore.swagger.io/v2

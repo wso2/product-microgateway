@@ -28,8 +28,8 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-mgw-basePath: /petstore/v1
-x-mgw-production-endpoints:
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
 paths:
@@ -40,8 +40,8 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-mgw-request-interceptor: validateRequest
-      x-mgw-response-interceptor: validateResponse
+      x-wso2-request-interceptor: validateRequest
+      x-wso2-response-interceptor: validateResponse
       parameters:
       - name: status
         in: query
