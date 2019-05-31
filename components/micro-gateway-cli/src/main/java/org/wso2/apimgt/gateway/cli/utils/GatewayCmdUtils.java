@@ -309,6 +309,12 @@ public class GatewayCmdUtils {
         File tokenRevocationFile = new File(extensionsPath + File.separator +
                 GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
 
+        String startUpExtensionResourcePath = getFiltersFolderLocation() + File.separator +
+                GatewayCliConstants.GW_DIST_START_UP_EXTENSION;
+        File startUpExtensionResFile = new File(startUpExtensionResourcePath);
+        File startUpExtensionFile = new File(extensionsPath + File.separator +
+                GatewayCliConstants.GW_DIST_START_UP_EXTENSION);
+
         if (Files.exists(extensionResFile.toPath())) {
             FileUtils.copyFile(extensionResFile, extensionFile);
         } else {
@@ -318,6 +324,11 @@ public class GatewayCmdUtils {
             FileUtils.copyFile(tokenRevocationResFile, tokenRevocationFile);
         } else {
             throw new CLIRuntimeException("Token revocation extension not Found in CLI_HOME");
+        }
+        if (Files.exists(startUpExtensionResFile.toPath())) {
+            FileUtils.copyFile(startUpExtensionResFile, startUpExtensionFile);
+        } else {
+            throw new CLIRuntimeException("Start up extension not Found in CLI_HOME");
         }
         if (Files.exists(policyResFile.toPath())) {
             FileUtils.copyFile(policyResFile, policesFile);
