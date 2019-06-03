@@ -141,14 +141,15 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
     return errorMessage;
 }
 
-public function getFailureMessageDetailDescription(int errorCode, string errorMessage) returns string {
+public function getFailureMessageDetailDescription(http:FilterContext context, int errorCode, string errorMessage) returns string {
     string errorDescription = errorMessage;
     if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION;
     } else if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION;
     } else if (API_AUTH_MISSING_CREDENTIALS == errorCode) {
-        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
+        string authHeaderName = getAuthorizationHeader(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
+        errorDescription += DESCRIPTION_SEPARATOR + "Make sure your API invocation call has a header: \"" + authHeaderName + " : Bearer ACCESS_TOKEN\"";
     } else if (API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
     } else if (API_AUTH_INVALID_CREDENTIALS == errorCode) {

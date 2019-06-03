@@ -41,6 +41,7 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
       * [5. Define backend security parameters](#5-define-backend-security-parameters)
       * [6. Override backend service connection URLS](#6-override-backend-service-connection-urls)
       * [7. Disable security for resources](#7-disable-security-for-resources)
+      * [8. Override API Authorization Header](#8-override-api-authorization-header)
    * [Microgateway securing APIs](#microgateway-securing-apis)
    * [Import APIs from WSO2 API Manager](#import-apis-from-wso2-api-manager)
 
@@ -272,6 +273,8 @@ This token works with any API because, default  microgateway config uses the pub
 | x-wso2-disable-security        | Resource can be invoked without any authentication        | Not Required -> Resource level only
 | x-wso2-request-interceptor     | Custom ballerina functions can be written in order to do transformations before dispatching the request      | Not Required -> API/Resource level
 | x-wso2-response-interceptor    | Custom ballerina functions can be written in order to do transformations before dispatching the response     | Not Required -> API/Resource level
+| x-wso2-auth-header             | Specify the authorization header for the API in which either bearer or basic token is sent                   | Not Required -> API level only
+
 
 ### Microgateway open API extension usages
 #### 1. Override endpoint per API resource
@@ -550,6 +553,13 @@ paths:
       x-wso2-disable-security: true
 ```
 
+#### 8. Override API Authorization Header
+By default the APIs exposed via microgateway requires a valid token sent with "Authorization" header. By sepecifying the
+"x-wso2-auth-header" users can set custom header name for this.
+
+```
+x-wso2-auth-header: Authx
+```
 #### Microgateway securing APIs
 The gateway supports the "securitySchemes" keyword in open API specifications.
 Currently microgateway supports oauth2 and basic authentication for APIs which can be defined via open API extensions.
