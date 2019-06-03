@@ -38,8 +38,6 @@ boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTAN
 boolean enableResponseValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, RESPONSE_VALIDATION_ENABLED,
     false);
 
-string swaggerAbsolutePath = getConfigValue(VALIDATION_CONFIG_INSTANCE_ID, SWAGGER_ABSOLUTE_PATH, " ");
-
 public type ValidationFilter object {
 
     public map<json> openAPIs = {};
