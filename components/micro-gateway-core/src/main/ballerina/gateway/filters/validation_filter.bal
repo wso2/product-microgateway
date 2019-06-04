@@ -73,6 +73,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         string serviceName = getServiceName(filterContext.serviceName);
         APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
         json swagger = openAPIs[serviceName];
+        printDebug(KEY_VALIDATION_FILTER, "The swagger content found in map : " + swagger.toString());
         json model = {};
         json models = {};
         string modelName = "";
