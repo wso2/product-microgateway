@@ -207,7 +207,7 @@ public class OpenAPICodegenUtils {
         if (api.getCorsConfiguration() != null) {
             extensionsMap.put(OpenAPIConstants.CORS, api.getCorsConfiguration());
         }
-        if(api.getAuthorizationHeader() != null) {
+        if (api.getAuthorizationHeader() != null) {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
         }
         return extensionsMap;
@@ -463,9 +463,9 @@ public class OpenAPICodegenUtils {
                 api.getCorsConfiguration().setCorsConfigurationEnabled(true);
             }
             // set authorization header from the open API extension
-            if (openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER) != null) {
-                api.setAuthorizationHeader(
-                        openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER).toString());
+            Object authHeader = openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER);
+            if (authHeader != null) {
+                api.setAuthorizationHeader(authHeader.toString());
             }
         } catch (IllegalArgumentException e) {
             throw new CLIRuntimeException("'" + OpenAPIConstants.CORS + "' property is not properly set for the " +
