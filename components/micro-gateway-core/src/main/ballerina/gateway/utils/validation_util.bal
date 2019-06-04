@@ -41,6 +41,7 @@ function read(string path) returns json {
 
 //validate all data types related attributes
 public function valueValidator(string key, json value, json field) returns (error?[]) {
+    printDebug(KEY_UTILS, "Validate all data types related attributes");
     error?[] errors = [];
     if (field[TYPE].toString() == STRING && field.format == null) {
         int min = 0;
