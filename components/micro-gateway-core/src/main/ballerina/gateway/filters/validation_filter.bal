@@ -67,7 +67,7 @@ public type ValidationFilter object {
 function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext, map<json> openAPIs)
              returns boolean {
     if (enableRequestValidation) {
-        printDebug(KEY_VALIDATION_FILTER, "Request validation is enabled..");
+        printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled..");
         //getting the payload of the request
         var payload = request.getJsonPayload();
         isType = false;
@@ -154,7 +154,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
 
 public function doValidationFilterResponse(http:Response response, http:FilterContext context, map<json> openAPIs) returns boolean {
     if (enableResponseValidation) {
-        printDebug(KEY_VALIDATION_FILTER, "Response validation is enabled..");
+        printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled..");
         //getting the payload of the response
         var payload = response.getJsonPayload();
         string serviceName = getServiceName(context.serviceName);
@@ -263,7 +263,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                     //getting attributes from the context
                     int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
                     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
-                    string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
+                    string errorMsg = <string>context.attributes[ERROR_MESSAGE];
                     int errorCode = <int>context.attributes[ERROR_CODE];
                     //changing the response
                     response.statusCode = statusCode;
@@ -271,7 +271,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                     //creating a new payload which is having the error message
                     json newPayload = { fault: {
                         code: errorCode,
-                        message: errorMesssage,
+                        message: errorMsg,
                         description: errorDescription
                     } };
                     //setting the new payload to the response
