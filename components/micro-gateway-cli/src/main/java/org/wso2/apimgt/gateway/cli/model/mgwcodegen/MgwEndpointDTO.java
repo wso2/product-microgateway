@@ -46,7 +46,7 @@ public class MgwEndpointDTO {
             }
             isEtcdEnabled = true;
             etcdKey = entries[0];
-            endpointUrl = entries[1];
+            this.endpointUrl = entries[1];
         } else {
             this.endpointUrl = endpointUrl;
         }
