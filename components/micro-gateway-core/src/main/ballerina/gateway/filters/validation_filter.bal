@@ -67,6 +67,7 @@ public type ValidationFilter object {
 function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext, map<json> openAPIs)
              returns boolean {
     if (enableRequestValidation) {
+        printDebug(KEY_VALIDATION_FILTER, "Request validation is enabled..");
         //getting the payload of the request
         var payload = request.getJsonPayload();
         isType = false;
@@ -153,6 +154,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
 
 public function doValidationFilterResponse(http:Response response, http:FilterContext context, map<json> openAPIs) returns boolean {
     if (enableResponseValidation) {
+        printDebug(KEY_VALIDATION_FILTER, "Response validation is enabled..");
         //getting the payload of the response
         var payload = response.getJsonPayload();
         string serviceName = getServiceName(context.serviceName);
