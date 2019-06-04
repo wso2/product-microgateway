@@ -26,6 +26,11 @@ public type MutualSSLFilter object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
+        if (request.hasHeader(HOST_HEADER_NAME)) {
+            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
+        } else {
+            context.attributes[HOSTNAME_PROPERTY] = "localhost";
+        }
         if(request.mutualSslHandshake["status"] == PASSED) {
             return doMTSLFilterRequest(caller, request, context);
         }
