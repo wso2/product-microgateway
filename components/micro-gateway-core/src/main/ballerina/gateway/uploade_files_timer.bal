@@ -29,9 +29,14 @@ string analyticsPassword = "";
 function searchFilesToUpload() returns (error?) {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
-    internal:Path ex = new(fileLocation);
-    
-    internal:Path[]|error pathList = ex.list();
+    internal:Path path = new(fileLocation);
+
+    if (!path.exists()) {
+        printDebug(KEY_UPLOAD_TASK, "Usage data directory not found");
+        return ();
+    }
+
+    internal:Path[]|error pathList = path.list();
 
     if(pathList is error){
         printError(KEY_UPLOAD_TASK, "Error occured in getting path lists");
