@@ -313,11 +313,6 @@
                 <version>${broker.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.everit.json</groupId>
-                <artifactId>org.everit.json.schema</artifactId>
-                <version>${json.schema.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.ballerina.jre.artifacts</groupId>
                 <artifactId>ballerina-jre-artifacts</artifactId>
                 <version>${ballerina.jre.artifacts.version}</version>
@@ -449,7 +444,6 @@
         <project.scm.id>scm-server</project.scm.id>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
         <andes.version>3.2.47</andes.version>
-        <json.schema.version>1.5.0</json.schema.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
