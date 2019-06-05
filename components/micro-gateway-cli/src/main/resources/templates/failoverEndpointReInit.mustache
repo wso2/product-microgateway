@@ -3,8 +3,8 @@ var err = trap
 {{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}.__init{{/equals}}
 ({
 targets: [
-{{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{endpointUrl}}")}{{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}")}{{/if}}{{#unless @last}},
+{{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{endpointUrl}}") {{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}") {{/if}} {{>secureSocket}} }{{#unless @last}},
 {{/unless}}{{/endpoints}}
 
 ]
-{{>basicAuth}} });
+{{>caching}}{{>basicAuth}} });

@@ -359,7 +359,7 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     context.attributes[ERROR_CODE] = errorCode;
     string errorMessage = getAuthenticationFailureMessage(errorCode);
     context.attributes[ERROR_MESSAGE] = errorMessage;
-    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
+    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(context, errorCode, errorMessage);
 }
 
 # Default error response sender with json error response
