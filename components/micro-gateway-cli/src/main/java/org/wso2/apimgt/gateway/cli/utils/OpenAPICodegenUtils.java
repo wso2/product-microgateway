@@ -149,7 +149,7 @@ public class OpenAPICodegenUtils {
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
 
         RouteEndpointConfig mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
-        Map<String, Object> extensionsMap = new HashMap<>();
+
         switch (swaggerVersion) {
         case "2":
             Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
@@ -210,6 +210,7 @@ public class OpenAPICodegenUtils {
         if (api.getAuthorizationHeader() != null) {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
         }
+
         return extensionsMap;
     }
 
