@@ -24,11 +24,6 @@ public type AnalyticsRequestFilter object {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
-            if (request.hasHeader(HOST_HEADER_NAME)) {
-                context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
-            } else {
-                context.attributes[HOSTNAME_PROPERTY] = "localhost";
-            }
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }
