@@ -38,10 +38,10 @@ function searchFilesToUpload() returns (error?) {
 
     internal:Path[]|error pathList = path.list();
 
-    if(pathList is error){
+    if (pathList is error) {
         printError(KEY_UPLOAD_TASK, "Error occured in getting path lists");
         return pathList;
-    }else{
+    } else {
         foreach var pathEntry in pathList {
             string fileName = pathEntry.getName();
             if (fileName.contains(ZIP_EXTENSION)) {
