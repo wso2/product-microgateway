@@ -15,25 +15,26 @@
 // under the License.
 
 import ballerina/http;
+import wso2/gateway;
 
 @http:ServiceConfig {
-    basePath:"/userinfo"
+    basePath:"/token"
 }
-service userInfoService on tokenListenerEndpoint {
+service tokenService on tokenListenerEndpoint {
 
     @http:ResourceConfig {
         path: "/*"
     }
-    resource function userInfoResource(http:Caller caller, http:Request req) {
-        checkExpectHeaderPresent(req);
-        var response = keyValidationEndpoint->forward(getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, "/oauth2") +
+    resource function tokenResource(http:Caller caller, http:Request req) {
+        gateway:checkExpectHeaderPresent(req);
+        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
                 untaint req.rawPath, req);
         if(response is http:Response) {
             _ = caller->respond(response);
         }
         else {
             http:Response errorResponse = new;
-            json errMsg = { "error": "error occurred while invoking the user info endpoint" };
+            json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
             _ = caller->respond(errorResponse);
         }

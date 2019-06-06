@@ -29,6 +29,7 @@ public class GatewayCliConstants {
     public static final String PROJECT_GRPC_CLIENT_DIR = "client";
     public static final String PROJECT_EXTENSIONS_DIR = "extensions";
     public static final String PROJECT_API_DEFINITIONS_DIR = "api_definitions";
+    public static final String PROJECT_SERVICES_DIR = "services";
     public static final String PROJECT_DEFINITION_FILE = "definition.yaml";
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
     public static final String PROJECT_TARGET_DIR = "target";
