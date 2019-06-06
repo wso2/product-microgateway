@@ -67,7 +67,7 @@ public class ToolkitLibExtractionUtils {
                     + GatewayCliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
             //todo: remove this segment in next release
             new File(destination + File.separator + breLibPath + File.separator +
-                    "swagger-to-ballerina-generator-0.990.4.jar").delete();
+                    "swagger-to-ballerina-generator-0.990.5.jar").delete();
         }
     }
 }
