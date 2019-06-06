@@ -222,7 +222,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>ballerina-runtime-linux</id>
+                        <id>ballerina-runtime</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>attached</goal>
@@ -232,43 +232,9 @@
                                 <filter>${basedir}/src/main/assembly/filter.properties</filter>
                             </filters>
                             <descriptors>
-                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_linux_zip.xml</descriptor>
+                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_zip.xml</descriptor>
                             </descriptors>
-                            <finalName>runtime-linux</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>ballerina-runtime-macos</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>attached</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_macos_zip.xml</descriptor>
-                            </descriptors>
-                            <finalName>runtime-macos</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>ballerina-runtime-windows</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>attached</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_windows_zip.xml</descriptor>
-                            </descriptors>
-                            <finalName>runtime-windows</finalName>
+                            <finalName>runtime</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
@@ -337,6 +303,23 @@
                                 <descriptor>src/main/assembly/gw_runtimes/gw_runtime_windows.xml</descriptor>
                             </descriptors>
                             <finalName>wso2am-micro-gw-windows-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-runtime</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
