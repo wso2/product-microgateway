@@ -48,17 +48,28 @@
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/extracted-jre-windows
+            </directory>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
     </fileSets>
 
     <files>
         <file>
-            <source>${basedir}/target/runtime-windows.zip</source>
+            <source>${basedir}/target/runtime.zip</source>
             <outputDirectory>wso2am-micro-gw-windows-${project.version}/</outputDirectory>
             <destName>runtime.zip</destName>
         </file>
         <file>
         <source>${basedir}/resources/bin/gateway.bat</source>
         <outputDirectory>wso2am-micro-gw-windows-${project.version}/bin</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/bin/gateway</source>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/bin</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../README.md</source>

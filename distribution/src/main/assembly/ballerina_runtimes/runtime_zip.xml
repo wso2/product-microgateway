@@ -30,13 +30,6 @@
             <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>
-                ${project.build.directory}/extracted-jre-linux
-            </directory>
-            <outputDirectory>bre/lib/</outputDirectory>
-            <fileMode>0755</fileMode>
-        </fileSet>
     </fileSets>
 
     <files>
