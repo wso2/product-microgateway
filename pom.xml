@@ -443,7 +443,7 @@
         <awaitility.version>3.0.0</awaitility.version>
         <project.scm.id>scm-server</project.scm.id>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
-        <andes.version>3.2.47</andes.version>
+        <andes.version>3.2.99</andes.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
