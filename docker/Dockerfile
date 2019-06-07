@@ -19,6 +19,7 @@ LABEL maintainer="dev@wso2.org"
 
 COPY runtime/ /ballerina/runtime/bre/lib/
 COPY security/ /ballerina/runtime/bre/security/
+COPY license/ /home/ballerina/
 ADD conf/ /home/ballerina/conf/
 
 CMD ballerina run --config /home/ballerina/conf/micro-gw.conf /home/exec/${project}.balx
