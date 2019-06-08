@@ -107,7 +107,7 @@ goto end
 		echo [%date% %time%] WARN: Can't find powershell in the system!
 		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
 		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
-		%GWHOME%\runtime\bin\ballerina run -e b7a.http.worker.nonblocking=true -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
+		%GWHOME%\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
 	) else (
 		REM Change Java heap Xmx and Xmx values
 		powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
@@ -125,10 +125,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e b7a.http.worker.nonblocking=true -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e b7a.http.worker.nonblocking=true -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
