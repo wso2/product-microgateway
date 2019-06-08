@@ -17,6 +17,9 @@ package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class MgwEndpointDTO {
     private String endpointUrl;
     private boolean isEtcdEnabled = false;
@@ -42,7 +45,7 @@ public class MgwEndpointDTO {
             String[] entries = temp.split(",");
             if (entries.length != 2) {
                 throw new CLIRuntimeException("'etcd' key containing string should be provided as 'etcd " +
-                        "( etcd_key, url)'.");
+                        "(etcd_key, default_url)'.");
             }
             isEtcdEnabled = true;
             etcdKey = entries[0];
@@ -50,9 +53,18 @@ public class MgwEndpointDTO {
         } else {
             this.endpointUrl = endpointUrl;
         }
+        validateURL(this.endpointUrl);
     }
 
     public boolean isEtcdEnabled() {
         return isEtcdEnabled;
+    }
+
+    private void validateURL(String urlString) {
+        try {
+            new URL(urlString);
+        } catch (MalformedURLException e) {
+            throw new CLIRuntimeException("Malformed URL is provided: '" + urlString + "'.");
+        }
     }
 }
