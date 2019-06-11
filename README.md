@@ -1,18 +1,28 @@
 # WSO2 API Microgateway
 [![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway)
 
-The WSO2 API Microgateway is a lightweight, gateway distribution (WSO2 API Microgateway) which can be used with single or multiple APIs.
+The WSO2 API Microgateway is a Cloud Native API Gateway which can be used to expose one or many microservices as APIs.
 
-In summary, the WSO2 API Microgateway is a specialized form of the WSO2 API Gateway with characteristics below:
+Here is a short summary of the features it hosts.
 
-1. Able to execute in isolation without mandatory connections to other components (Secure Token Service, Rate limiting component , Analytics).
-1. Capable of exposing micro services directly from Open API definitions
-1. Able to host a subset of APIs of choice (defined on the WSO2 API Manager's API Publisher) instead of all.
-1. Immutable. The gateway runtime is immutable. If APIs or Policies change after the WSO2 API Microgateway has been built, a rebuild process is required to capture the changes.
-1. Seamless integration with deployment automation tools and techniques.
-1. Easy integration with CI/CD processes.
+1. Exposing one or more microservices as APIs using the Open API Specification.
+1. Authentication and Authorization of API requests based on OAuth2.0 (opaque tokens and JWTs), Basic Auth and Mutual TLS.
+1. Rate Limiting of API requests based on numerous policies.
+1. Business Insights through API Analytics.
+1. Service discovery features.
+1. Request and Response transformations.
+1. Load balancing, failover and circuit breaking capabilities of API requests.
+1. Seamless integration with Docker and Kubernetes.
+1. Integration with WSO2 API Manager to support design first APIs, API Analytics and shared rate limiting. 
+1. Grouping APIs by labels. 
 
-WSO2 API Microgateway acts as a proxy that is capable of performing security validations (Signed JWT, OAuth), in-memory (local) rate limiting and Analytics.
+It also has the following characteristics that makes it a perfect fit for microservice architectures
+
+1. Less than 1s startup time, allowing for faster scaling.
+1. Built on a stateless architecture, allowing for infinite scaling.
+1. Has an immutable runtime, making it heavily robust.
+1. Easy integration with CI/CD processes and tools.
+1. Runs in isolation with no dependencies to other components
 
 #### Table of Contents
 
@@ -47,52 +57,86 @@ WSO2 API Microgateway acts as a proxy that is capable of performing security val
 
 
 #### Why WSO2 API Microgateway
-WSO2 API Microgateway  can be explained as as enrichment  layer for
-services and microservices. In traditional monolithic architectures, common functionality seems to be duplicated among
-multiple services. Functionalities like Authentication, rate limiting, transformations are duplicated in each service. This where the WSO2 API microgateway comes handy
-where the duplicated functionality is supported via gateway layer and acts as a single entry point to all the services.
+Microservices have become the norm for modern application architecture. Workloads of modern applications are spread 
+across many groups of microservices, cloud services and legacy services. The characteristics and behaviors of such 
+heterogeneous services have a massive diversity. Such as authentication mechanisms, message formats, high availability 
+factors and so on.
+The WSO2 API Microgateway is designed to expose heterogeneous microservices as APIs to end consumers using a common API 
+interface based on the Open API Specification. This helps expose microservices using a unified interface to external 
+consumers, internal consumers and partners. It applies the common quality of service attributes on API requests such as 
+security, rate limiting and analytics and also offers a wide range of features which helps organizations to deploy APIs 
+microservice architectures efficiently.
 
 #### Microgateway quick start
-Lets see how we can expose pet store API using microgatway using the open API definition
+Let host our first API on a Microgateway.
 
-1. First download the microgateway toolkit related to latest release from product [release page](https://github.com/wso2/product-microgateway/releases)
+1. First download the microgateway toolkit related to latest release from product [release page](https://github.com/wso2/product-microgateway/releases) 
+and extract it to a folder of your choice.
 
-1. Then extract the toolkit and set the environmental variable "MICROGW_HOME"
+1. Using your command line client tool add the 'bin' directory of the extracted folder to your PATH variable.
 ```
-export MICROGW_HOME=<TOOLKIT_EXTRACTED_LOCATION>
-```
-
-3. Now lets create the project with name "petstore-project"
-```
-micro-gw init petstore-project
+export PATH=$PATH:<TOOLKIT_EXTRACTED_LOCATION>/bin
 ```
 
-4. Now the project is initialized. There will be directory with name "petstore-project" in the location where we executed the command.
-Lets copy the [open API definition](samples/petstore_basic.yaml) to the **api_definitions** directory inside the project.
+1. We are now ready to execute the Microgateway toolkit commands to initialize and build our Microgateway. Lets create 
+our first project with name "petstore". You can do that by executing the following command using your command line tool.
+```
+micro-gw init petstore
+```
 
-1. Lets execute the following command to build the project.
-```
-micro-gw build petstore-project
-```
-Executable file will be created inside the target directory of the project.
+1. The project is now initialized. You should notice a directory with name "petstore" being created in the location 
+where you executed the command. Next, lets download and copy the OAS (Open API Specification) document of our Petstore 
+API into our project directory. To do that, download the [open API definition](samples/petstore_basic.yaml) file and 
+copy it to the **api_definitions** directory inside the "petstore" directory.
 
-6. Lets run the executable file using the microgateway runtime docker image
+If you open the OAS document of the Petstore API using a text editor you will notice the resource (path) definitions 
+of the API following the standard Open API standard. You will also see the target server (back-end) URL of the API under 
+the "x-wso2-production-endpoints" OAS vendor extension. We use this interface definition and the target server URL to 
+generate a gateway proxy for our Petstore API.
+ 
+1. Next, use your command line tool navigate back to where the project directory ("petstore") was created and execute 
+the following command to build the project.
 ```
-docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore-project"  wso2/wso2micro-gw:3.0.1
+micro-gw build petstore
+```
+
+Once the build is successful the executable file of our project will be created inside the target directory of the 
+petstore project.
+
+1. We can now use the Docker image of our Microgateway runtime to run our project. You will need to have Docker 
+installed to execute the steps below. In case you do not have Docker you can still run the Microgateway using the 
+standard VM by following the steps mentioned in the section [How to run the microgateway distribution][].
+
+Execute the command below to run the Microgateway for our Petstore project.
+
+```
+docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore"  wso2/wso2micro-gw:3.0.1
 
 <PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
 
-Note: We actually need to mount the file created with .balx extension into the docker imgage. The target dirctory contains other generated files not required for docker image. 
-So we can copy the .balx file to seperate directory and mount that directory
+Note: We actually need to mount the file created with .balx extension into the docker imgage. The target dirctory 
+contains other generated files not required for docker image. So we can copy the .balx file to seperate directory and 
+mount that directory as well
 ```
- this will expose https endpoint with port 9095 and the context of the API will be as "/petstore/v1"
 
-7. Lets invoke the API with below commands
+The above will expose an https endpoint on port 9095. The context of the API will be "/petstore/v1".
+
+1. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured 
+using OAuth2.0 we first need a valid OAuth 2.0 access token to invoke this API. Execute the command below to set a self 
+contained OAuth2.0 access token in the JWT format as a variable on your terminal session. This token has been signed 
+using the default private key of the WSO2 API Manager. When you are deploying the Microgateway in production note to 
+change its default certificates.
+
 ```
-curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
+TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==
+``` 
+
+1. We can now invoke the API running on the Microgateway using cURL as below.
+```
+curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer $TOKEN" -k
 
 
-curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
+curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/xml" -H "Authorization:Bearer $TOKEN" -k
 ```
 
 
@@ -173,7 +217,7 @@ Execute `micro-gw help init` to get more detailed information regarding the setu
 Example
 
 
-    $ micro-gw init petstore-project
+    $ micro-gw init petstore
 
 Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw.
 
@@ -200,14 +244,14 @@ Execute `micro-gw help build` to get more detailed information regarding the bui
 
 Example
 
-	$ micro-gw build petstore-project
+	$ micro-gw build petstore
 
 #### Project Structure
 
 Following is the structure of a project generated when running micro-gw init command.
 
 ```
-petstore-project/
+petstore/
 ├── api_definitions
 ├── conf
 │   └── deployment-config.toml
@@ -225,8 +269,8 @@ petstore-project/
 Once the **init, build** commands are executed, an executable file with extension .balx will be created under target directory inside the project.
 
 ```
-../petstore-project/target$ ls
-pizzashack-project.balx
+../petstore/target$ ls
+petstore.balx
 ```
 
 Then use the microgateway runtime component to run this executable file.
@@ -235,8 +279,8 @@ Then use the microgateway runtime component to run this executable file.
 `$ bash gateway <path_to_the_excutable_file>`
 
 ```
-micro-gw-internal/bin$ bash gateway /home/user/petstore-project/target/petstore-project.balx
-ballerina: initiating service(s) in '/home/user/petstore-project/target/petstore-project.balx'
+micro-gw-internal/bin$ bash gateway /home/user/petstore/target/petstore.balx
+ballerina: initiating service(s) in '/home/user/petstore/target/petstore.balx'
 ballerina: started HTTPS/WSS endpoint localhost:9095
 ballerina: started HTTP/WS endpoint localhost:9090
 ballerina: started HTTPS/WSS endpoint localhost:9096
