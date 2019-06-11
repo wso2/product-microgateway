@@ -112,10 +112,10 @@ Execute the command below to run the Microgateway for our Petstore project.
 ```
 docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore"  wso2/wso2micro-gw:3.0.1
 
-<PROJECT_TARGET_PATH> - The path of the target directoy created inside the project directory
+<PROJECT_TARGET_PATH> - The path of the target directory created inside the project directory
 
 Note: We actually need to mount the file created with .balx extension into the docker imgage. The target dirctory 
-contains other generated files not required for docker image. So we can copy the .balx file to seperate directory and 
+contains other generated files not required for docker image. So we can copy the .balx file to separate directory and 
 mount that directory as well
 ```
 
@@ -159,7 +159,7 @@ Then this run time will expose all the APIs which were included in the particula
 
 #### Architecture
 
-The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API defintion.
+The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API definition.
 
 ![Alt text](architecture-new.png?raw=true "Title")
 
@@ -176,7 +176,7 @@ Running the WSO2 API Microgateway is a 3 step process. The first two steps are i
 step is to run that executable file using the microgateway runtime component.
 
  1. Initializing a WSO2 API Microgateway project.
- 1. Building the WSO2 API Microgateway project and creating a executable file
+ 1. Building the WSO2 API Microgateway project and creating an executable file
  1. Running the WSO2 API Microgateway distribution.
 
 ##### Initializing a microgateway project
@@ -287,7 +287,7 @@ ballerina: started HTTPS/WSS endpoint localhost:9096
 ```
 
 #### Invoke API exposed via microgateway
-Once APIs are exposed we can invoke API with an valid jwt token or an opaque access token.
+Once APIs are exposed we can invoke API with a valid jwt token or an opaque access token.
 In order to use jwt tokens microgateway should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
 
 1. Any third party secure token service
@@ -302,8 +302,8 @@ The following sample command can be used to invoke the "/pet/findByStatus" resou
 ```
 curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==" -k
 ```
-Please note that the jwt provided in the command is a jwt toke retrieved from WSO2 API Manager with higher expiry time which can be used with any API not protected with scopes.
-This token works with any API because, default  microgateway config uses the public certificate of WSO2 API Manager to validate the signature.
+Please note that the jwt provided in the command is a jwt token retrieved from WSO2 API Manager with higher expiry time which can be used with any API not protected with scopes.
+This token works with any API since by default the microgateway config uses the public certificate of WSO2 API Manager to validate the signature.
 
 ### Microgateway supported open API extensions
 | Extension                     | Description                                               | Required/Not Required |
@@ -385,7 +385,7 @@ Interceptors can be used to do request and response transformations and mediatio
 response interceptors are engaged before responding to the client.
 API developer can write his own request and response interceptors using ballerina and add it to the project and define them in the open API definition using extensions
 
-In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` directory inside the project. This interceptors will only be enagged for that particular resource only
+In the sample below user can write the validateRequest and validateResponse methods in ballerina and add it to the `interceptors` directory inside the project. This interceptor will only be engaged for that particular resource only
 ```
 paths:
   "/pet/findByStatus":
@@ -451,8 +451,8 @@ x-wso2-production-endpoints:
 Sample open API definition for interceptors can be found [here](samples/interceptors_sample.yaml).
 #### 3. Add API/resource level throttling policies
 API developer can specify the rate limiting policies for each resource or globally for the API. These policies should be defined in the policies.yaml file in the project directory
-By default set of policies are available, but user can add more policies to the file and later refer them by name in the open API definition
-Following samples show how throttling policies can be added to API level
+A default set of policies are already available, but users can add more policies to the file and later refer them by name in the open API definition
+Following samples show how throttling policies can be added to an API
 ```
 x-wso2-basePath: /petstore/v1
 x-wso2-throttling-tier: 10kPerMin
@@ -569,7 +569,7 @@ bash gateway -e myEndpoint3_prod_basic_password=123456 <path_to_the_excutable_fi
 There can be use cases where we want to override the back end connection url provided in the open API definition
 during the run time. We can override endpoints that are used as references similar to previous topic.
 In order to override the endpoint url we need to define endpoint in **x-wso2-endpoints** extension and refer them in the API level or resource level.
-Lets use the same example we have used in previous topic. So we can override the *myEndpoint3* url during the runtime as follows.
+Let's use the same example we have used in previous topic. So we can override the *myEndpoint3* url during the runtime as follows.
 The variable format is **\<epName\>\_\<epType\>\_endpoint_\<epIndex\>**
 - epName : Name specified in the open API definition under x-wso2-endpoints
 - epType : either prod or sand
@@ -598,7 +598,7 @@ paths:
 ```
 
 #### 8. Override API Authorization Header
-By default the APIs exposed via microgateway requires a valid token sent with "Authorization" header. By sepecifying the
+By default the APIs exposed via microgateway requires a valid token sent with "Authorization" header. By specifying the
 "x-wso2-auth-header" users can set custom header name for this.
 
 ```
@@ -644,12 +644,12 @@ The published apis from [WSO2 API Manager](https://wso2.com/api-management/) can
 We can import API from WSO2 API Manager by specifying the API name and version.
 The **import** command of the toolkit can be used to fetch APIs.
 
-First init the project
+First initialize the project using the command below.
 ```
 micro-gw init pizza-api
 ```
 
-Then import the API. Toolkit will prompt for API manager url, user name and password of a valid user in API manager, trust store location and password of toolkit.
+Then import the API. The toolkit will prompt for API manager url, username and password of a valid user in API manager, trust store location and password of toolkit.
 If url, trust store location and password is not provided default values will be used
 
 ```
@@ -693,4 +693,4 @@ pizza-api/
 
 ```
 
-And then this project can be build and run in the same manner.
+This project can then be built and run using the same approaches we have discussed above. 
