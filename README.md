@@ -70,7 +70,7 @@ microservice architectures efficiently.
 #### Microgateway quick start
 Let host our first API on a Microgateway.
 
-1. First download the microgateway toolkit related to latest release from product [release page](https://github.com/wso2/product-microgateway/releases) 
+1. First download the microgateway toolkit related to latest release from the product [release page](https://github.com/wso2/product-microgateway/releases) 
 and extract it to a folder of your choice.
 
 1. Using your command line client tool add the 'bin' directory of the extracted folder to your PATH variable.
@@ -78,13 +78,13 @@ and extract it to a folder of your choice.
 export PATH=$PATH:<TOOLKIT_EXTRACTED_LOCATION>/bin
 ```
 
-1. We are now ready to execute the Microgateway toolkit commands to initialize and build our Microgateway. Lets create 
+3. We are now ready to execute the Microgateway toolkit commands to initialize and build our Microgateway. Lets create 
 our first project with name "petstore". You can do that by executing the following command using your command line tool.
 ```
 micro-gw init petstore
 ```
 
-1. The project is now initialized. You should notice a directory with name "petstore" being created in the location 
+4. The project is now initialized. You should notice a directory with name "petstore" being created in the location 
 where you executed the command. Next, lets download and copy the OAS (Open API Specification) document of our Petstore 
 API into our project directory. To do that, download the [open API definition](samples/petstore_basic.yaml) file and 
 copy it to the **api_definitions** directory inside the "petstore" directory.
@@ -94,7 +94,7 @@ of the API following the standard Open API standard. You will also see the targe
 the "x-wso2-production-endpoints" OAS vendor extension. We use this interface definition and the target server URL to 
 generate a gateway proxy for our Petstore API.
  
-1. Next, use your command line tool navigate back to where the project directory ("petstore") was created and execute 
+5. Next, use your command line tool navigate back to where the project directory ("petstore") was created and execute 
 the following command to build the project.
 ```
 micro-gw build petstore
@@ -103,7 +103,7 @@ micro-gw build petstore
 Once the build is successful the executable file of our project will be created inside the target directory of the 
 petstore project.
 
-1. We can now use the Docker image of our Microgateway runtime to run our project. You will need to have Docker 
+6. We can now use the Docker image of our Microgateway runtime to run our project. You will need to have Docker 
 installed to execute the steps below. In case you do not have Docker you can still run the Microgateway using the 
 standard VM by following the steps mentioned in the section [How to run the microgateway distribution][].
 
@@ -121,7 +121,7 @@ mount that directory as well
 
 The above will expose an https endpoint on port 9095. The context of the API will be "/petstore/v1".
 
-1. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured 
+7. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured 
 using OAuth2.0 we first need a valid OAuth 2.0 access token to invoke this API. Execute the command below to set a self 
 contained OAuth2.0 access token in the JWT format as a variable on your terminal session. This token has been signed 
 using the default private key of the WSO2 API Manager. When you are deploying the Microgateway in production note to 
@@ -131,7 +131,7 @@ change its default certificates.
 TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UQXhabU14TkRNeVpEZzNNVFUxWkdNME16RXpPREpoWldJNE5ETmxaRFUxT0dGa05qRmlNUSJ9.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbiIsImFwcGxpY2F0aW9uIjp7ImlkIjoyLCJuYW1lIjoiSldUX0FQUCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJvd25lciI6ImFkbWluIn0sInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6Ilg5TGJ1bm9oODNLcDhLUFAxbFNfcXF5QnRjY2EiLCJleHAiOjM3MDMzOTIzNTMsImlhdCI6MTU1NTkwODcwNjk2MSwianRpIjoiMjI0MTMxYzQtM2Q2MS00MjZkLTgyNzktOWYyYzg5MWI4MmEzIn0=.b_0E0ohoWpmX5C-M1fSYTkT9X4FN--_n7-bEdhC3YoEEk6v8So6gVsTe3gxC0VjdkwVyNPSFX6FFvJavsUvzTkq528mserS3ch-TFLYiquuzeaKAPrnsFMh0Hop6CFMOOiYGInWKSKPgI-VOBtKb1pJLEa3HvIxT-69X9CyAkwajJVssmo0rvn95IJLoiNiqzH8r7PRRgV_iu305WAT3cymtejVWH9dhaXqENwu879EVNFF9udMRlG4l57qa2AaeyrEguAyVtibAsO0Hd-DFy5MW14S6XSkZsis8aHHYBlcBhpy2RqcP51xRog12zOb-WcROy6uvhuCsv-hje_41WQ==
 ``` 
 
-1. We can now invoke the API running on the Microgateway using cURL as below.
+8. We can now invoke the API running on the Microgateway using cURL as below.
 ```
 curl -X GET "https://localhost:9095/petstore/v1/pet/findByStatus?status=available" -H "accept: application/xml" -H "Authorization:Bearer $TOKEN" -k
 
