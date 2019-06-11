@@ -90,7 +90,7 @@ API into our project directory. To do that, download the [open API definition](s
 copy it to the **api_definitions** directory inside the "petstore" directory.
 
 If you open the OAS document of the Petstore API using a text editor you will notice the resource (path) definitions 
-of the API following the standard Open API standard. You will also see the target server (back-end) URL of the API under 
+of the API following the standard Open API Specification. You will also see the target server (back-end) URL of the API under 
 the "x-wso2-production-endpoints" OAS vendor extension. We use this interface definition and the target server URL to 
 generate a gateway proxy for our Petstore API.
  
@@ -105,7 +105,7 @@ petstore project.
 
 6. We can now use the Docker image of our Microgateway runtime to run our project. You will need to have Docker 
 installed to execute the steps below. In case you do not have Docker you can still run the Microgateway using the 
-standard VM by following the steps mentioned in the section [How to run the microgateway distribution][].
+standard VM by following the steps mentioned in the section [How to run the microgateway distribution](#How-to-run-the-microgateway-distribution).
 
 Execute the command below to run the Microgateway for our Petstore project.
 
