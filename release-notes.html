@@ -1,126 +1,57 @@
 <!DOCTYPE html
-   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-   <head>
-      <meta content="text/html; charset=iso-8859-1" http-equiv="content-type"/>
-      <title>WSO2 API Manager Microgateway v2.6.0 - 15th September 2018</title>
-   </head>
-   <body>
-      <h1>WSO2 API Manager Microgateway 2.6.0 Released!</h1>
-   
-      <p>
-         The WSO2 API Manager team is pleased to announce the release of version 2.6.0 of
-         the Open Source API Manager Microgateway v2.6.0.
-      </p>
-   
-      <h2>Introduction</h2>
-      <p>
-         The Microgateway Toolkit provides the capability to create&nbsp;specialized gateway distribution (microgateway
-         distributions) where only a single API&nbsp;or a group of APIs are included.&nbsp;Once a microgateway distribution
-         is started, it will start serving those specific API(s) right away.&nbsp;
-      </p>
-      <p>
-         In summary, a microgateway&nbsp;is a&nbsp;specialized form of the WSO2 API Gateway by having below main
-         characteristics:
-      </p>
-      <ul>
-         <li>Its ability to execute in isolation without mandatory connections to other components
-            (Key Manager, Traffic Manager, etc).
-         </li>
-         <li>Ability to host a subset of APIs of choice (defined on the API
-            Publisher) instead of all.
-         </li>
-         <li>Immutability - if you update an API you need to re-create the
-            container/instance, no hot deployment.<br>microgateway offers you a proxy that is capable of performing security
-            validations (OAuth, Basic Auth, Signed JWT), in-memory (local) rate limiting and operational analytics.
-         </li>
-      </ul>
-      <h2>
-         Design Goals
-      </h2>
-      <p>
-         Following are some of its main expectations of microgateway
-      </p>
-      <p></p>
-      <ul>
-         <li>Ability to host just one or a selected set (subset) of APIs only.&nbsp;<br></li>
-         <li>Ability to execute in complete isolation once setup, without having the need to
-            contact the Management or Security components.&nbsp;<br>
-         </li>
-         <li>Easy integration with CI/CD processes.&nbsp;<br></li>
-         <li>Seamless integration with deployment automation tools and techniques</li>
-      </ul>
-      <h2>
-         Setting up Microgateway Toolkit
-      </h2>
-      <p>
-         This product will include a CLI, the B7a platform distribution and a few B7a extensions (Endpoints and Filters). The
-         Toolkit will have two main responsibilities.
-      </p>
-      <ul>
-         <li>Setting up a microgateway project.</li>
-         <li>Running the microgateway project.</li>
-      </ul>
-      <p>
-         These two steps will be treated as two phases. One will first complete the "setup" phase and move on to the "build"
-         phase. The reason for treating them as phases is to make it possible for developers to take control of the runtime
-         if and when required. For example, what gets run as default on a microgateway is a simple API proxy. If a developer
-         needs to perform some sort of an integration or change the source files for some other reason, he could
-         engage with the project after the setup phase and do the required modifications before the distribution is
-         built.
-      </p>
-      <p>
-         For more information on WSO2 API Manager please visit <a href="http://wso2.com/products/api-manager">
-         http://wso2.com/products/api-manager</a>. Also take a look at the online product
-         <a href="https://docs.wso2.com/display/AM2xx/Configuring+the+API+Microgateway">documentation</a>.
-      </p>
-      <h2>
-         Bug Fixes And Improvements
-      </h2>
-      <ul>
-         <li>GitHub (<a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aclosed+milestone%3A2.6.0" target="_blank" >Product-Microgateway</a>)</li>
-      </ul>
-      <h2>
-         Known Issues
-      </h2>
-      <p>
-         All the open issues pertaining to WSO2 API Manager Microgateway Toolkit are reported at the following location:
-      </p>
-      <ul>
-         <li>GitHub (<a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aopen+is%3Aissue" target="_blank"">Product-Microgateway</a>)
-         </li>
-      </ul>
-      <h2>
-         How You Can Contribute
-      </h2>
-      <h2>
-         Mailing Lists
-      </h2>
-      <p>
-         Join our mailing list and correspond with the developers directly.
-      </p>
-      <ul>
-         <li>
-            <p>Developer List:&nbsp;<a
-               href="mailto:dev@wso2.org" target="_blank">dev@wso2.org</a>&nbsp;|
-               Subscribe | Mail Archive
+<head>
+    <meta content="text/html; charset=iso-8859-1" http-equiv="content-type"/>
+    <title>WSO2 API Manager Microgateway v3.0.1</title>
+</head>
+<body>
+    <h1>WSO2 API Manager Microgateway 3.0.1 Released!</h1>
+
+    <h3>Bug Fixes And Improvements in 3.0.1</h3>
+    <p>
+        <a href="https://github.com/wso2/product-microgateway/issues?utf8=%E2%9C%93&q=is%3Aissue+closed%3A2018-10-12..2019-06-09">Fixed Issues</a>
+    </p>
+
+    <h3>Known Issues</h3>
+    <p>
+        <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aopen">Open Issues</a>
+    </p>
+
+    <h3>Try it</h3>
+    <p>
+        <a href="https://github.com/wso2/product-microgateway#microgateway-quick-start">https://github.com/wso2/product-microgateway#microgateway-quick-start</a>
+    </p>
+
+    <h3>Documentation</h3>
+    <p>
+        <a href="https://docs.wso2.com/display/MG301/" rel="nofollow">https://docs.wso2.com/display/MG301/</a>
+    </p>
+    <h3>How You Can Contribute</h3>
+    <ul>
+        <li>
+            <p>
+                <strong>Reporting Issues</strong>
+                <br />
+                We encourage you to report issues, documentation faults, and feature requests regarding WSO2 API Microgateway through the <a href="https://github.com/wso2/product-microgateway/issues">Github Issues</a>.
             </p>
-         </li>
-         <li>
-            <p>User List:&nbsp;<a
-               href="mailto:user@wso2.org" target="_blank">user@wso2.org</a>&nbsp;|
-               Subscribe | Mail Archive
+        </li>
+        <li>
+            <p>
+                <strong>Contributing Code</strong>
+                <br />
+                Read through project <a href="https://github.com/wso2/product-microgateway/blob/master/CONTRIBUTING.md">Contribution Guidelines</a> to learn how to contribute with code.
             </p>
-         </li>
-      </ul>
-      <h2>
-         Reporting Issues
-      </h2>
-      <p>
-         We encourage you to report issues, documentation faults, and feature requests regarding WSO2 API Manager Micro
-         Gateway through the public&nbsp;<a href="https://github.com/wso2/product-microgateway/issues" target="_blank">API Manager Micro Gateway Git Repo</a>.
-      </p>
-      <h2>-- The WSO2 API Manager Team --</h2>
-   </body>
+        </li>
+        <li>
+            <p>
+                <strong>Mailing Lists</strong>
+                <br />
+                Join our mailing list and receive updates on product development. Developer List: <a href="mailto:dev@wso2.org">dev@wso2.org</a>
+            </p>
+        </li>
+    </ul>
+    <p><strong>--WSO2 API Manager Team--</strong></p>
+</body>
 </html>
