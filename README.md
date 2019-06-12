@@ -68,7 +68,7 @@ security, rate limiting and analytics and also offers a wide range of features w
 microservice architectures efficiently.
 
 #### Microgateway quick start
-Let host our first API on a Microgateway.
+Let's host our first API on a Microgateway.
 
 1. First download the microgateway toolkit related to latest release from the product [release page](https://github.com/wso2/product-microgateway/releases) 
 and extract it to a folder of your choice.
@@ -78,7 +78,7 @@ and extract it to a folder of your choice.
 export PATH=$PATH:<TOOLKIT_EXTRACTED_LOCATION>/bin
 ```
 
-3. We are now ready to execute the Microgateway toolkit commands to initialize and build our Microgateway. Lets create 
+3. We are now ready to execute the Microgateway toolkit commands to initialize and build our Microgateway. Let's create 
 our first project with name "petstore". You can do that by executing the following command using your command line tool.
 ```
 micro-gw init petstore
@@ -219,9 +219,9 @@ Example
 
     $ micro-gw init petstore
 
-Lets see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw.
+Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw.
 
-Lets add the basic microgateway Open API extension to the petstore OAS file.
+Let's add the basic microgateway Open API extension to the petstore OAS file.
 
 
 ```
