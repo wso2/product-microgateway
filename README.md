@@ -114,7 +114,7 @@ docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e 
 
 <PROJECT_TARGET_PATH> - The path of the target directory created inside the project directory
 
-Note: We actually need to mount the file created with .balx extension into the docker imgage. The target dirctory 
+Note: We actually need to mount the file created with .balx extension into the docker imgage. The target directory 
 contains other generated files not required for docker image. So we can copy the .balx file to separate directory and 
 mount that directory as well
 ```
