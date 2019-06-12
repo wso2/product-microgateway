@@ -31,8 +31,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
@@ -58,15 +56,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OpenAPICodegenUtils {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
-
-    private static final Logger logger = LoggerFactory.getLogger(OpenAPICodegenUtils.class);
 
     private static final String openAPISpec2 = "2";
     private static final String openAPISpec3 = "3";
@@ -81,23 +76,6 @@ public class OpenAPICodegenUtils {
     enum APISecurity {
         basic,
         oauth2
-    }
-
-    /**
-     * Generate API Id for a given OpenAPI definition.
-     *
-     * @param apiDefPath path to OpenAPI definition
-     * @return API Id
-     */
-    public static String generateAPIdForSwagger(String apiDefPath) {
-
-        //another purpose in here is to validate the openAPI definition
-        OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
-
-        String apiName = openAPI.getInfo().getTitle();
-        String apiVersion = openAPI.getInfo().getVersion();
-
-        return HashUtils.generateAPIId(apiName, apiVersion);
     }
 
     /**
@@ -220,37 +198,6 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * get API name and version from the given openAPI definition.
-     *
-     * @param apiDefPath path to openAPI definition
-     * @return String array {API_name, Version}
-     */
-    static String[] getAPINameVersionFromSwagger(String apiDefPath) {
-        OpenAPI openAPI = new OpenAPIV3Parser().read(apiDefPath);
-        return new String[]{openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion()};
-
-    }
-
-    /**
-     * get basePath from the openAPI definition
-     *
-     * @param apiDefPath path to openAPI definition
-     * @return basePath (if the swagger version is 2 and it includes )
-     */
-    public static String getBasePathFromSwagger(String apiDefPath) {
-        String swaggerVersion = findSwaggerVersion(apiDefPath, true);
-
-        //openAPI version 2 contains basePath
-        if (swaggerVersion.equals(openAPISpec2)) {
-            Swagger swagger = new SwaggerParser().read(apiDefPath);
-            if (!StringUtils.isEmpty(swagger.getBasePath())) {
-                return swagger.getBasePath();
-            }
-        }
-        return null;
-    }
-
-    /**
      * generate ExtendedAPI object from openAPI definition
      *
      * @param openAPI {@link OpenAPI} object
@@ -315,30 +262,6 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * List all the resources available in the project
-     *
-     * @param projectName project Name
-     * @return String[] Arraylist with all the available resources
-     */
-    public static List<ResourceRepresentation> getAllResources(String projectName) {
-
-        List<ResourceRepresentation> resourcesList = new ArrayList<>();
-
-        String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        try {
-            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> path.getFileName().toString().equals("swagger.json"))
-                    .forEach(path -> {
-                        JsonNode openApiNode = generateJsonNode(path.toString(), true);
-                        OpenAPICodegenUtils.addResourcesToListFromSwagger(openApiNode, resourcesList);
-                    });
-            return resourcesList;
-        } catch (IOException e) {
-            throw new CLIInternalException("Error while navigating API Files directory.");
-        }
-
-    }
-
-    /**
      * get the resource related information if the resource_id is given
      *
      * @param projectName project name
@@ -374,49 +297,6 @@ public class OpenAPICodegenUtils {
             return null;
         }
         return resource;
-    }
-
-    /**
-     * read openAPI definition
-     *
-     * @param filePath path to openAPI definition
-     * @return openAPI as a String
-     */
-    public static String readJson(String filePath) {
-        String responseStr;
-        try {
-            responseStr = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error("Error while reading api definition.", e);
-            throw new CLIInternalException("Error while reading api definition.");
-        }
-        return responseStr;
-    }
-
-    /**
-     * set additional configurations for an api for code generation process (basePath and CORS configuration)
-     *
-     * @param api API object
-     */
-    public static void setAdditionalConfigsDevFirst(ExtendedAPI api) {
-        String basePath = MgwDefinitionBuilder.getBasePath(api.getName(), api.getVersion());
-        MgwEndpointConfigDTO mgwEndpointConfigDTO =
-                RouteUtils.convertToMgwServiceMap(MgwDefinitionBuilder.getProdEndpointList(basePath),
-                        MgwDefinitionBuilder.getSandEndpointList(basePath));
-        api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
-        // 0th element represents the specific basepath
-        api.setSpecificBasepath(basePath);
-        String security = MgwDefinitionBuilder.getSecurity(basePath);
-        if (security == null) {
-            security = "oauth2";
-        }
-        api.setMgwApiSecurity(security);
-        api.setCorsConfiguration(MgwDefinitionBuilder.getCorsConfiguration(basePath));
-        if(api.getCorsConfiguration() != null) {
-            //Setting the value true here so user do not need to add the "corsConfigurationEnabled" property to the
-            // definition.yaml
-            api.getCorsConfiguration().setCorsConfigurationEnabled(true);
-        }
     }
 
     public static void setAdditionalConfig(ExtendedAPI api) {
