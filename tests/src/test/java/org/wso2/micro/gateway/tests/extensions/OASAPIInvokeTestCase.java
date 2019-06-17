@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.tests.toolkit;
+package org.wso2.micro.gateway.tests.extensions;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
@@ -24,7 +24,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.MockBackEndServer;
-import org.wso2.micro.gateway.tests.common.MockETCDServer;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;

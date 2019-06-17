@@ -27,7 +27,7 @@
     <test name="micro-gw-serviceDiscovery" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.micro.gateway.tests.serviceDiscovery.EtcdSupportTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.services.PreRequisites" />
+            <class name="org.wso2.micro.gateway.tests.throttling.PreRequisites" />
         </classes>
     </test>
 </suite>

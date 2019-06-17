@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.tests.services;
+package org.wso2.micro.gateway.tests.throttling;
 
 import org.testng.annotations.BeforeSuite;
 import org.wso2.micro.gateway.tests.common.JMSPublisher;

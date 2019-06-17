@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.tests.services;
+package org.wso2.micro.gateway.tests.security;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.IOUtils;
