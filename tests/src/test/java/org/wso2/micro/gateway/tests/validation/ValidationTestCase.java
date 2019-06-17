@@ -101,7 +101,7 @@ public class ValidationTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generateFromDefinition(project, "PizzaShackAPI_swagger.json");
+        cliExecutor.generateFromDefinition(project, "validation" + File.separator + "PizzaShackAPI_swagger.json");
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()

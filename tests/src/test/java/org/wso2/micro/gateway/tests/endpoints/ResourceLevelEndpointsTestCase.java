@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,51 +15,60 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.tests.extensions;
+package org.wso2.micro.gateway.tests.endpoints;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.ResponseConstants;
-import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
+import org.wso2.micro.gateway.tests.util.TokenUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class OASAPIInvokeTestCase extends BaseTestCase {
+/**
+ * This test class is used to test the per endpoint resource feature.
+ */
+public class ResourceLevelEndpointsTestCase extends BaseTestCase {
     private String jwtTokenProd;
+
 
     @BeforeClass
     public void start() throws Exception {
-        
-        String project = "apimTestProject";
-        API api = new API();
-        api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
 
+        String project = "resourceEndpointProject";
         //Define application info
         ApplicationDTO application = new ApplicationDTO();
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
         super.init(project, "common_api.yaml");
     }
 
-    @Test(description = "Test API invocation with a JWT token")
-    public void testApiInvokeWithJWT() throws Exception {
+    @Test(description = "Test Invoking the resource which  endpoint defined at resource level")
+    public void testPerResourceEndpoint() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v1/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBodyV1);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
+
+    @Test(description = "Test Invoking the resource which endpoint defined at API level")
+    public void testPerAPIEndpoint() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -73,8 +82,6 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
-        mockHttpServer.stopIt();
         super.finalize();
     }
-
 }
