@@ -35,4 +35,6 @@ public class Constants {
     public static final String DEFINITION_FOLDER = "definitions";
     //resources folder location in the cli
     public static final String RESOURCES_FOLDER = "resources";
+    // open API folder name
+    public static final String OPEN_APIS = "openAPIs";
 }

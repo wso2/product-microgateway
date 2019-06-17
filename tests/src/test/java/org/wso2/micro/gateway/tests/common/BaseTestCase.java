@@ -26,6 +26,7 @@ import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.TestConstant;
+import org.wso2.micro.gateway.tests.util.TokenUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +50,7 @@ public class BaseTestCase {
     protected ServerInstance microGWServer;
     protected MockHttpServer mockHttpServer;
     protected final static int MOCK_SERVER_PORT = 9443;
+    private String projectPath;
 
     protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
@@ -111,49 +113,12 @@ public class BaseTestCase {
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
 
         JSONObject jwtTokenInfo = new JSONObject();
-        jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
-        jwtTokenInfo.put("sub", "admin");
-        jwtTokenInfo.put("application", new JSONObject(applicationDTO));
-        jwtTokenInfo.put("scope", "am_application_scope default");
-        jwtTokenInfo.put("iss", "https://localhost:8244/token");
-        jwtTokenInfo.put("keytype", keyType);
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
-        jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
-        jwtTokenInfo.put("iat", System.currentTimeMillis());
-        jwtTokenInfo.put("jti", UUID.randomUUID());
+        return TokenUtil.getBasicJWT(applicationDTO,jwtTokenInfo,keyType, validityPeriod);
 
-        String payload = jwtTokenInfo.toString();
-
-        JSONObject head = new JSONObject();
-        head.put("typ", "JWT");
-        head.put("alg", "RS256");
-        head.put("x5t", "UB_BQy2HFV3EMTgq64Q-1VitYbE");
-        String header = head.toString();
-
-        String base64UrlEncodedHeader = Base64.getUrlEncoder()
-                .encodeToString(header.getBytes(Charset.defaultCharset()));
-        String base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(payload.getBytes(Charset.defaultCharset()));
-
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        String jksPath = getClass().getClassLoader().getResource("wso2carbon.jks").getPath();
-        FileInputStream is = new FileInputStream(jksPath);
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keystore.load(is, "wso2carbon".toCharArray());
-        String alias = "wso2carbon";
-        Key key = keystore.getKey(alias, "wso2carbon".toCharArray());
-        Key privateKey = null;
-        if (key instanceof PrivateKey) {
-            privateKey = key;
-        }
-        signature.initSign((PrivateKey) privateKey);
-        String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
-        byte[] dataInBytes = assertion.getBytes(StandardCharsets.UTF_8);
-        signature.update(dataInBytes);
-        //sign the assertion and return the signature
-        byte[] signedAssertion = signature.sign();
-        String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
-        return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
     }
+
+
 
     protected String getServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath).toString();
