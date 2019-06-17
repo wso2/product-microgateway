@@ -126,6 +126,10 @@ paths:
       description: Multiple tags can be provided with comma separated strings. Use tag1,
         tag2, tag3 for testing.
       operationId: findPetsByTags
+      x-wso2-production-endpoints:
+        urls:
+          - https://localhost:2380/v1
+          - https://localhost:2380/v2
       parameters:
         - name: tags
           in: query
@@ -152,10 +156,6 @@ paths:
                   $ref: "#/components/schemas/Pet"
         "400":
           description: Invalid tag value
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
       deprecated: true
   "/pet/{petId}":
     get:
@@ -295,6 +295,11 @@ paths:
       summary: Returns pet inventories by status
       description: Returns a map of status codes to quantities
       operationId: getInventory
+      x-wso2-production-endpoints:
+        urls:
+          - https://non.existant.host:2380/v1
+          - https://localhost:2380/v2
+        type: failover
       responses:
         "200":
           description: successful operation
