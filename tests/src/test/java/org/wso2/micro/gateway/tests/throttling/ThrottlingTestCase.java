@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.tests.toolkit;
+package org.wso2.micro.gateway.tests.throttling;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;

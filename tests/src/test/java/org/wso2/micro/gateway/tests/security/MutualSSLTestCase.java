@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.tests.services;
+package org.wso2.micro.gateway.tests.security;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
