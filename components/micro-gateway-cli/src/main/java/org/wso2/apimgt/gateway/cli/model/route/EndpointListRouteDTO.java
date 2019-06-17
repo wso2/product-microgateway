@@ -60,7 +60,6 @@ public class EndpointListRouteDTO {
         this.name = name;
     }
 
-    //todo: add "add endpoint" method
     public void addEndpoint(String endpoint){
         if(endpoints == null){
             endpoints = new ArrayList<>();
