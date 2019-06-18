@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -79,7 +80,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition( String project, String openAPIFileName)
+    public void generateFromDefinition( String project, String[] openAPIFileNames)
             throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
@@ -89,24 +90,23 @@ public class CLIExecutor {
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
-
-        File swaggerFilePath = new File(getClass().getClassLoader().getResource(
-                Constants.OPEN_APIS + File.separator + openAPIFileName).getPath());
-        File resDefYaml = new File(getClass().getClassLoader().getResource("definition.yaml").getPath());
-
-        File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
-
         String apiDefinitionPath = path + File.separator + project + File.separator;
-        File swagerDesPath = new File(
-                path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR
-                        + File.separator + openAPIFileName.substring(openAPIFileName.lastIndexOf(File.separator) + 1));
-        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
-
         System.setProperty("user.dir", path.toString());
         String[] initArgs = {"init", project};
         main.main(initArgs);
+        for(String openAPIFileName : openAPIFileNames) {
 
-        FileUtils.copyFile(swaggerFilePath,swagerDesPath);
+            File swaggerFilePath = new File(
+                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator + openAPIFileName).getPath());
+
+            File swagerDesPath = new File(
+                    path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                            .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+
+            FileUtils.copyFile(swaggerFilePath, swagerDesPath);
+        }
+        File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
+        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
 
        if (policyYamlFile.exists()) {
            policyYamlFile.delete();
@@ -114,6 +114,7 @@ public class CLIExecutor {
        } else {
            FileUtils.copyFile(policyYamlResouce, policyYamlFile);
        }
+
 
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
