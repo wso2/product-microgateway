@@ -35,4 +35,6 @@ public class ResponseConstants {
             + "  \"photoUrls\": [" + "    \"string\"" + "  ]," + "  \"tags\": [" + "    {"
             + "      \"id\": 0," + "      \"name\": \"string\"" + "    }" + "  ],"
             + "  \"status\": \"available\"" + "}";
+    public static final String storeInventoryResponse = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
+            + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
 }
