@@ -94,7 +94,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
             Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
-            scopes.ifPresent(value -> this.scope = value.toString());
+            scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
             Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
