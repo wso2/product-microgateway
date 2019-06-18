@@ -38,8 +38,8 @@
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP1BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP2BackEndTestCase" />
-            <class name="org.wso2.micro.gateway.tests.endpoints.ResourceLevelEndpointsTestCase"></class>
-            <class name="org.wso2.micro.gateway.tests.endpoints.MultipleEndpointsTestCase"></class>
+            <class name="org.wso2.micro.gateway.tests.endpoints.ResourceLevelEndpointsTestCase" />
+            <class name="org.wso2.micro.gateway.tests.endpoints.MultipleEndpointsTestCase" />
         </classes>
     </test>
 

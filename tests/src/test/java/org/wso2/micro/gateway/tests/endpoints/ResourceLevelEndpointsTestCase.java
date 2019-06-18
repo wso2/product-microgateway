@@ -30,6 +30,7 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public class ResourceLevelEndpointsTestCase extends BaseTestCase {
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, "common_api.yaml");
+        super.init(project, new String[]{"common_api.yaml"});
     }
 
     @Test(description = "Test Invoking the resource which  endpoint defined at resource level")

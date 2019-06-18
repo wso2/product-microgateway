@@ -31,6 +31,7 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,11 +53,12 @@ public class MultipleEndpointsTestCase extends BaseTestCase {
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, "common_api.yaml");
+        super.init(project, new String[] { "common_api.yaml", "endpoints" + File.separator + "load_balance.yaml",
+                "endpoints" + File.separator + "fail_over.yaml" });
     }
 
-    @Test(description = "Test Invoking the load balanced endpoints")
-    public void testLoadBalancedEndpoint() throws Exception {
+    @Test(description = "Test Invoking the load balanced endpoints in resource level")
+    public void testLoadBalancedEndpointResourceLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -71,8 +73,24 @@ public class MultipleEndpointsTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
+    @Test(description = "Test Invoking the load balanced endpoints in API level")
+    public void testLoadBalancedEndpointAPILevel() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v2/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBodyV1);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v2/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBody);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
+
     @Test(description = "Test Invoking the fail over endpoints")
-    public void testFailOverEndpoint() throws Exception {
+    public void testFailOverEndpointResourceLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -80,6 +98,19 @@ public class MultipleEndpointsTestCase extends BaseTestCase {
                 .doGet(getServiceURLHttp("petstore/v1/store/inventory"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.storeInventoryResponse);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+    }
+
+    @Test(description = "Test Invoking the load balanced endpoints in API level")
+    public void testFailOverEndpointAPILevel() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v3/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBody);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
 
     }

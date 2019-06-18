@@ -29,19 +29,9 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Base test class for CLI based tests
@@ -74,7 +64,7 @@ public class BaseTestCase {
         microGWServer.startMicroGwServer(balPath, args);
     }
 
-    protected void init(String project, String openAPIFileName) throws Exception {
+    protected void init(String project, String[] openAPIFileNames) throws Exception {
         CLIExecutor cliExecutor;
 
         microGWServer = ServerInstance.initMicroGwServer();
@@ -87,7 +77,7 @@ public class BaseTestCase {
         //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generateFromDefinition(project, openAPIFileName);
+        cliExecutor.generateFromDefinition(project, openAPIFileNames);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
         String configPath = getClass().getClassLoader()
