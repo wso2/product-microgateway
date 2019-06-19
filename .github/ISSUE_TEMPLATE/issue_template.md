@@ -1,7 +1,7 @@
 ---
-name: Report a bug
-about: Report an issue in released/development version
-labels: 'Priority/Normal'
+name: "\U0001f41b Report a bug"
+about: "If something doesn't work as it is suppose to. \U0001f615"
+labels: 'Priority/Normal, Type/Bug'
 
 ---
 

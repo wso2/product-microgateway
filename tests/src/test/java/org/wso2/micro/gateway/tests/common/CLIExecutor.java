@@ -27,7 +27,11 @@ import org.wso2.micro.gateway.tests.context.ServerLogReader;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Execute APIM CLI functions.
@@ -79,7 +83,7 @@ public class CLIExecutor {
 
         File policyYamlResource = new File(Objects.requireNonNull(getClass().getClassLoader()
                 .getResource("policies.yaml")).getPath());
-        String apiDefinitionPath = path + "/apimTestProject" + File.separator;
+        String apiDefinitionPath = path + File.separator + project + File.separator;
         File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
         FileUtils.copyFile(policyYamlResource, policyYamlFile);
 
@@ -94,7 +98,7 @@ public class CLIExecutor {
         }
     }
 
-    public void generateFromDefinition( String project, String openAPIFileName)
+    public void generateFromDefinition( String project, String[] openAPIFileNames)
             throws Exception {
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
@@ -103,18 +107,6 @@ public class CLIExecutor {
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
-
-        File openAPIFilePath = new File(Objects.requireNonNull(getClass().getClassLoader().getResource(openAPIFileName))
-                .getPath());
-
-        File policyYamlResource = new File(Objects.requireNonNull(getClass().getClassLoader()
-                .getResource("policies.yaml")).getPath());
-
-        String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
-        File openAPIDefPath = new File( path + "/apimTestProject"+ File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator +  openAPIFileName);
-        File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
-
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
 
@@ -126,11 +118,26 @@ public class CLIExecutor {
         if (initExitCode != 0) {
             throw new RuntimeException("Error occurred when building.");
         }
+        
+        String apiDefinitionPath = path + File.separator + project + File.separator;
+        for(String openAPIFileName : openAPIFileNames) {
 
-        FileUtils.copyFile(openAPIFilePath,openAPIDefPath);
+            File swaggerFilePath = new File(
+                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator +
+                            openAPIFileName).getPath());
+
+            File swaggerDesPath = new File(
+                    path + File.separator + project + File.separator +
+                            GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                            .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+
+            FileUtils.copyFile(swaggerFilePath, swaggerDesPath);
+        }
+        File policyYamlResource = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
+        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
         FileUtils.copyFile(policyYamlResource, policyYamlFile);
 
-        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project,};
+        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project};
         Process process = Runtime.getRuntime().exec(buildCmdArray, null, new File(homeDirectory));
         new ServerLogReader("errorStream", process.getErrorStream()).start();
         new ServerLogReader("inputStream", process.getInputStream()).start();

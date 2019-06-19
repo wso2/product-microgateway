@@ -33,4 +33,6 @@ public class Constants {
     public static final String GATEWAY_SCRIPT_NAME = "gateway";
     //File extension the the ballerina rest file
     public static final String SERVICE_FILE_EXTENSION = ".bal";
+    // open API folder name
+    public static final String OPEN_APIS = "openAPIs";
 }
