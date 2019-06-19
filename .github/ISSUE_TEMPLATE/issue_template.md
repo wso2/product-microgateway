@@ -1,7 +1,7 @@
 ---
-name: Report a bug
-about: Report an issue in released/development version
-labels: 'Priority/Normal'
+name: ":bug: Report a bug"
+about: "If something doesn't work as it is suppose to. :confused:"
+labels: 'Priority/Normal, Type/Bug'
 
 ---
 
