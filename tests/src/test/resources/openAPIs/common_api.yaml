@@ -13,7 +13,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 x-wso2-basePath: /petstore/v1
-x-wso2-throttling-tier: Unlimited
+x-wso2-throttling-tier: 8PerMin
 x-wso2-production-endpoints:
   urls:
     - https://localhost:2380/v2
@@ -164,6 +164,7 @@ paths:
       summary: Find pet by ID
       description: Returns a single pet
       operationId: getPetById
+      x-wso2-throttling-tier: 3PerMin
       parameters:
         - name: petId
           in: path
@@ -346,6 +347,7 @@ paths:
       description: For valid response try integer IDs with value >= 1 and <= 10. Other
         values will generated exceptions
       operationId: getOrderById
+      x-wso2-throttling-tier: NonExistingPolicy
       parameters:
         - name: orderId
           in: path
