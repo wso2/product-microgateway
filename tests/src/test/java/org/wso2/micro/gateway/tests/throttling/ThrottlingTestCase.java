@@ -36,14 +36,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ThrottlingTestCase extends BaseTestCase {
-    private String jwtToken, jwtToken2, jwtToken3, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
+    private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
 
     @BeforeClass
     public void start() throws Exception {
         String label = "apimTestLabel";
-        String project = "apimTestProject";
+        String project = "ThrottlingProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();

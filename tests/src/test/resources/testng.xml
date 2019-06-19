@@ -53,6 +53,7 @@
             <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithOAuthTestCase"/>
 
             <class name="org.wso2.micro.gateway.tests.throttling.ThrottlingTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.extensions.OASAPIInvokeTestCase"/>
             <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>
