@@ -1,6 +1,6 @@
 ---
-name: ":sunny: Feature or Improvement request"
-about: "If you need to suggest new functionality or saw a place we can improve :+1:"
+name: "\U0001f31e Feature or Improvement request"
+about: "If you need to suggest new functionality or saw a place we can improve \U0001f44d"
 labels: 'Priority/Normal, Type/New Feature'
 
 ---
