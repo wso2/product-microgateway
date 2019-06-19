@@ -61,6 +61,7 @@ paths:
         urls:
           - https://localhost:2380/v2
       x-wso2-throttling-tier: 50kPerMin
+      x-wso2-disable-security: true
       requestBody:
         $ref: "#/components/requestBodies/Pet"
       responses:
