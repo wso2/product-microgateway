@@ -31,6 +31,8 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
@@ -54,12 +56,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OpenAPICodegenUtils {
+    private static final Logger logger = LoggerFactory.getLogger(OpenAPICodegenUtils.class);
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -154,7 +158,11 @@ public class OpenAPICodegenUtils {
     public static String getOpenAPIAsJson(OpenAPI openAPI, String openAPIContent, Path openAPIPath) {
         String jsonOpenAPI = Json.pretty(openAPI);
         String openAPIVersion;
-        if(openAPIPath.getFileName().toString().endsWith("json")) {
+        Path fileName = openAPIPath.getFileName();
+
+        if (fileName == null) {
+            throw new CLIRuntimeException("Error: Couldn't resolve OpenAPI file name.");
+        } else if (fileName.toString().endsWith("json")) {
             openAPIVersion = findSwaggerVersion(openAPIContent, false);
         } else {
             openAPIVersion = findSwaggerVersion(jsonOpenAPI, false);
@@ -272,24 +280,26 @@ public class OpenAPICodegenUtils {
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         ResourceRepresentation resource = new ResourceRepresentation();
         try {
-            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> path.getFileName().toString().equals("swagger.json"))
-                    .forEach(path -> {
-                        JsonNode openApiNode = generateJsonNode(path.toString(), true);
-                        String apiName = openApiNode.get("info").get("title").asText();
-                        String apiVersion = openApiNode.get("info").get("version").asText();
+            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> {
+                Path fileName = path.getFileName();
+                return fileName != null && fileName.toString().equals("swagger.json");
+            }).forEach(path -> {
+                JsonNode openApiNode = generateJsonNode(path.toString(), true);
+                String apiName = openApiNode.get("info").get("title").asText();
+                String apiVersion = openApiNode.get("info").get("version").asText();
 
-                        openApiNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames()
-                                .forEachRemaining(operation -> {
-                                    if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
-                                            .equals(resource_id)) {
-                                        resource.setId(resource_id);
-                                        resource.setName(e.getKey());
-                                        resource.setMethod(operation);
-                                        resource.setApi(apiName);
-                                        resource.setVersion(apiVersion);
-                                    }
-                                }));
-                    });
+                openApiNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames()
+                        .forEachRemaining(operation -> {
+                            if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
+                                    .equals(resource_id)) {
+                                resource.setId(resource_id);
+                                resource.setName(e.getKey());
+                                resource.setMethod(operation);
+                                resource.setApi(apiName);
+                                resource.setVersion(apiVersion);
+                            }
+                        }));
+            });
         } catch (IOException e) {
             throw new CLIInternalException("Error while navigating API Files directory.");
         }
@@ -442,8 +452,10 @@ public class OpenAPICodegenUtils {
      */
     public static void setInterceptors(String projectName) throws IOException {
         String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName);
-        Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> path.getFileName().toString()
-                .endsWith(GatewayCliConstants.EXTENSION_BAL)).forEach(path -> {
+        Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> {
+            Path fileName = path.getFileName();
+            return fileName != null && fileName.toString().endsWith(GatewayCliConstants.EXTENSION_BAL);
+        }).forEach(path -> {
             String balSrcCode = null;
             try {
                 balSrcCode = GatewayCmdUtils.readFileAsString(path.toString(), false);
@@ -698,14 +710,27 @@ public class OpenAPICodegenUtils {
                 }
             }));
             //generate security schema String
+            StringBuilder secSchemaBuilder = new StringBuilder();
+            StringBuilder scopeBuilder = new StringBuilder();
             for (String schema : securitySchemaList) {
-                securitySchemas = StringUtils.isEmpty(securitySchemas) ? schema : securitySchemas + "," + schema;
+                if (secSchemaBuilder.length() == 0) {
+                    secSchemaBuilder.append(schema);
+                } else {
+                     secSchemaBuilder.append(',' + schema);
+                }
             }
             //generate scopes string
             for (String scope : scopeList) {
                 scope = "\"" + scope + "\"";
-                scopes = StringUtils.isEmpty(scopes) ? scope : scopes + "," + scope;
+                if (scopeBuilder.length() == 0) {
+                    scopeBuilder.append(scope);
+                } else {
+                    scopeBuilder.append(',' + scope);
+                }
             }
+
+            securitySchemas = secSchemaBuilder.toString();
+            scopes = scopeBuilder.toString();
         }
         return new String[]{securitySchemas, scopes};
     }
@@ -806,7 +831,7 @@ public class OpenAPICodegenUtils {
         }
         openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
             if (value1.getType() == SecurityScheme.Type.OAUTH2 ||
-                    (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("jwt"))) {
+                    (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase(Locale.getDefault()).equals("jwt"))) {
                 oauthSecuritySchemaList.add(key);
             }
         });
@@ -824,7 +849,7 @@ public class OpenAPICodegenUtils {
             return;
         }
         openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
-            if (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase().equals("basic")) {
+            if (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
                 basicSecuritySchemaList.add(key);
             }
         });

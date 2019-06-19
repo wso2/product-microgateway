@@ -15,6 +15,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 
 import java.net.MalformedURLException;
@@ -23,6 +24,8 @@ import java.net.URL;
 public class MgwEndpointDTO {
     private String endpointUrl;
     private boolean isEtcdEnabled = false;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private String etcdKey = "";
 
     public MgwEndpointDTO(String endpointUrl){

@@ -38,11 +38,13 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -709,10 +711,10 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     public static void writeContent(String content, File file) throws IOException {
-        FileWriter writer = null;
-        writer = new FileWriter(file);
-        writer.write(content);
-        writer.flush();
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            writer.write(content);
+            writer.flush();
+        }
     }
 
     /**
@@ -843,7 +845,12 @@ public class GatewayCmdUtils {
     }
 
     private static void delete(File file) throws IOException {
-        for (File childFile : file.listFiles()) {
+        File[] fileList = file.listFiles();
+        if (fileList == null) {
+            logger.debug("No files to delete in: {}", file.getAbsolutePath());
+            return;
+        }
+        for (File childFile : fileList) {
             if (childFile.isDirectory()) {
                 delete(childFile);
             } else {

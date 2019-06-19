@@ -29,8 +29,6 @@ import java.util.List;
 public class ThrottlePolicyInitializer {
     private List<String> policyInitNames;
     private List<String> policyNames;
-    private String srcPackage;
-    private String modelPackage;
 
     public ThrottlePolicyInitializer() {
         policyInitNames = new ArrayList<>();
@@ -88,17 +86,4 @@ public class ThrottlePolicyInitializer {
         return this;
     }
 
-    public ThrottlePolicyInitializer srcPackage(String srcPackage) {
-        if (srcPackage != null) {
-            this.srcPackage = srcPackage.replaceFirst("\\.", "/");
-        }
-        return this;
-    }
-
-    public ThrottlePolicyInitializer modelPackage(String modelPackage) {
-        if (modelPackage != null) {
-            this.modelPackage = modelPackage.replaceFirst("\\.", "/");
-        }
-        return this;
-    }
 }

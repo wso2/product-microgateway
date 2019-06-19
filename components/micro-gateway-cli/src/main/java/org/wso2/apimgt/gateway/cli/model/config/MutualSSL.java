@@ -17,20 +17,27 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import com.google.gson.JsonArray;
 
 import java.util.List;
 
 public class MutualSSL {
 
     private List<ClientCertMetadataDTO> clientCertificates;
-    JsonArray certificateDetails;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    private JsonArray certificateDetails;
 
     public List<ClientCertMetadataDTO> getClientCertificates() {
         return clientCertificates;
+    }
+
+    public MutualSSL() {
+        this.clientCertificates = null;
     }
 
     public void setClientCertificates(List<ClientCertMetadataDTO> clientCertificates) {
@@ -38,6 +45,11 @@ public class MutualSSL {
     }
 
     public JsonArray getCertificateDetails() {
+
+        if (clientCertificates == null) {
+            return null;
+        }
+
         int count = clientCertificates.size();
         JsonArray certificateData = new JsonArray();
         for (int i = 0; i < count; i++) {
