@@ -19,8 +19,8 @@
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
 import org.wso2.apimgt.gateway.cli.model.config.Config;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 public class ListenerEndpoint {
     private ContainerConfig containerConfig;
