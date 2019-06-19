@@ -37,13 +37,14 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Base test class for CLI based tests
+ * Base test class for CLI based tests.
  */
 public class BaseTestCase {
     protected ServerInstance microGWServer;
@@ -52,46 +53,40 @@ public class BaseTestCase {
 
     protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
-
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = Objects.requireNonNull(getClass().getClassLoader()
+                .getResource("confs" + File.separator + "default-test-config.conf")).getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
-        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args);
+        microGWServer.startMicroGwServer(balPath);
     }
 
     protected void init(String project, String openAPIFileName) throws Exception {
         CLIExecutor cliExecutor;
-
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = Objects.requireNonNull(getClass().getClassLoader()
+                .getResource("confs" + File.separator + "default-test-config.conf")).getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
-        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
         cliExecutor.generateFromDefinition(project, openAPIFileName);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args);
+        microGWServer.startMicroGwServer(balPath);
     }
 
     public void finalize() throws Exception {
@@ -117,7 +112,7 @@ public class BaseTestCase {
         jwtTokenInfo.put("scope", "am_application_scope default");
         jwtTokenInfo.put("iss", "https://localhost:8244/token");
         jwtTokenInfo.put("keytype", keyType);
-        jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
+        jwtTokenInfo.put("subscribedAPIs", new JSONArray(Collections.singletonList(subscribedApiDTO)));
         jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("iat", System.currentTimeMillis());
         jwtTokenInfo.put("jti", UUID.randomUUID());
@@ -135,7 +130,7 @@ public class BaseTestCase {
         String base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(payload.getBytes(Charset.defaultCharset()));
 
         Signature signature = Signature.getInstance("SHA256withRSA");
-        String jksPath = getClass().getClassLoader().getResource("wso2carbon.jks").getPath();
+        String jksPath = Objects.requireNonNull(getClass().getClassLoader().getResource("wso2carbon.jks")).getPath();
         FileInputStream is = new FileInputStream(jksPath);
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(is, "wso2carbon".toCharArray());

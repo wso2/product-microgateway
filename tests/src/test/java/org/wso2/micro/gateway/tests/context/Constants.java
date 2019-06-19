@@ -19,20 +19,18 @@
 package org.wso2.micro.gateway.tests.context;
 
 public class Constants {
-    //Name of the system property define the location of the rest distribution
-    public static final String SYSTEM_PROP_SERVER_ZIP = "server.zip";
+    //Name of the system property define the location of the toolkit distribution
+    public static final String SYSTEM_PROP_TOOLKIT = "toolkit";
     //Name of the system property define the current dir of maven execution
     public static final String SYSTEM_PROP_BASE_DIR = "basedir";
-
-    public static final String BALLERINA_PLATFORM_DIR = "/lib/platform/";
-    //Name of the script file which start the server
-    public static final String BALLERINA_SERVER_SCRIPT_NAME = "ballerina";
+    //Name of the system property define the location of the mac OS runtime distribution
+    public static final String SYSTEM_PROP_MACOS_RUNTIME = "runtime_macos";
+    //Name of the system property define the location of the windows runtime distribution
+    public static final String SYSTEM_PROP_WINDOWS_RUNTIME = "runtime_windows";
+    //Name of the system property define the location of the linux runtime distribution
+    public static final String SYSTEM_PROP_LINUX_RUNTIME = "runtime_linux";
+    //Microgateway runtime executable file name
+    public static final String GATEWAY_SCRIPT_NAME = "gateway";
     //File extension the the ballerina rest file
     public static final String SERVICE_FILE_EXTENSION = ".bal";
-    //policies file name
-    public static final String POLICIES_FILE = "policies.yaml";
-    //definitions folder location in the cli
-    public static final String DEFINITION_FOLDER = "definitions";
-    //resources folder location in the cli
-    public static final String RESOURCES_FOLDER = "resources";
 }

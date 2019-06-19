@@ -90,8 +90,10 @@ public class CookieAuthTestCase extends BaseTestCase {
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -99,13 +101,11 @@ public class CookieAuthTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
         String cookie = "Cookie=" + jwtTokenProd;
-        String[] args = {"--config", configPath, "-e", cookie};
+        String[] args = {"-e", cookie};
         microGWServer.startMicroGwServer(balPath, args);
     }
 

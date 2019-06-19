@@ -48,8 +48,10 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     protected void init(String label, String project, String security) throws Exception {
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "throttle-test-config.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -57,13 +59,10 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath1 = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "throttle-test-config.conf").getPath();
-        String[] args1 = {"--config", configPath1, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args1);
+        microGWServer.startMicroGwServer(balPath);
     }
 
     @BeforeClass

@@ -21,19 +21,16 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.micro.gateway.tests.context.Constants;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 /**
- * Execute APIM CLI functions
+ * Execute APIM CLI functions.
  */
 public class CLIExecutor {
     private static final Logger log = LoggerFactory.getLogger(CLIExecutor.class);
@@ -41,32 +38,50 @@ public class CLIExecutor {
     private String cliHome;
     private static CLIExecutor instance;
 
-    public void generate(String label, String project, String security) throws Exception {
-        org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
+    public void generate(String label, String project) throws Exception {
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
+        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
         log.info("CLI Project Home: " + path.toString());
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
         String config = new File(
-                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
-                        .getPath()).getAbsolutePath();
+                Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
+                        "default-cli-test-config.toml")).getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-
-        String[] initArgs = {"init", project};
-        main.main(initArgs);
-
-        String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
-                "admin", "--server-url", "http://localhost:9443", "--truststore",
-                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config};
-        main.main(args);
 
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
+
+        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
+        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
+        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
+        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
+        int initExitCode = initProcess.waitFor();
+        if (initExitCode != 0) {
+            throw new RuntimeException("Error occurred when intializing.");
+        }
+
+        String[] importCmdArray = {"bash", mgwCommand, "import", project, "--label", label, "--username", "admin",
+                "--password", "admin", "--server-url", "http://localhost:9443", "--truststore",
+                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
+                config};
+
+        Process importProcess = Runtime.getRuntime().exec(importCmdArray, null, new File(homeDirectory));
+        new ServerLogReader("errorStream", importProcess.getErrorStream()).start();
+        new ServerLogReader("inputStream", importProcess.getInputStream()).start();
+        int importExitCode = importProcess.waitFor();
+        if (importExitCode != 0) {
+            throw new RuntimeException("Error occurred when importing.");
+        }
+
+        File policyYamlResource = new File(Objects.requireNonNull(getClass().getClassLoader()
+                .getResource("policies.yaml")).getPath());
+        String apiDefinitionPath = path + "/apimTestProject" + File.separator;
+        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
+        FileUtils.copyFile(policyYamlResource, policyYamlFile);
 
         String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
         Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
@@ -81,48 +96,42 @@ public class CLIExecutor {
 
     public void generateFromDefinition( String project, String openAPIFileName)
             throws Exception {
-        org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
+        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
         log.info("CLI Project Home: " + path.toString());
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
-        File swaggerFilePath = new File(getClass().getClassLoader().getResource(openAPIFileName).getPath());
-        File resDefYaml =  new File(getClass().getClassLoader().getResource("definition.yaml").getPath());
+        File openAPIFilePath = new File(Objects.requireNonNull(getClass().getClassLoader().getResource(openAPIFileName))
+                .getPath());
 
-        File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
+        File policyYamlResource = new File(Objects.requireNonNull(getClass().getClassLoader()
+                .getResource("policies.yaml")).getPath());
 
         String apiDefinitionPath = path + "/apimTestProject"+ File.separator;
-        File swagerDesPath = new File( path + "/apimTestProject"+ File.separator +
+        File openAPIDefPath = new File( path + "/apimTestProject"+ File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator +  openAPIFileName);
         File policyYamlFile = new File (apiDefinitionPath + "/policies.yaml");
-
-        System.setProperty("user.dir", path.toString());
-        String[] initArgs = {"init", project};
-        main.main(initArgs);
-
-        FileUtils.copyFile(swaggerFilePath,swagerDesPath);
-
-       if (policyYamlFile.exists()) {
-           policyYamlFile.delete();
-           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
-       } else {
-           FileUtils.copyFile(policyYamlResouce, policyYamlFile);
-       }
-
-        String[] buildargs = {"build", project};
-        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
-        main.main(buildargs);
 
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
 
-        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project,};
-        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
+        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
+        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
+        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
+        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
+        int initExitCode = initProcess.waitFor();
+        if (initExitCode != 0) {
+            throw new RuntimeException("Error occurred when building.");
+        }
 
+        FileUtils.copyFile(openAPIFilePath,openAPIDefPath);
+        FileUtils.copyFile(policyYamlResource, policyYamlFile);
+
+        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project,};
+        Process process = Runtime.getRuntime().exec(buildCmdArray, null, new File(homeDirectory));
         new ServerLogReader("errorStream", process.getErrorStream()).start();
         new ServerLogReader("inputStream", process.getInputStream()).start();
         int exitCode = process.waitFor();
@@ -132,33 +141,43 @@ public class CLIExecutor {
     }
 
     public void generatePassingFlag(String label, String project, String additionalFlag) throws Exception {
-        org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
 
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
+        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
         log.info("CLI Project Home: " + path.toString());
 
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
 
         String config = new File(
-                getClass().getClassLoader().getResource("confs" + File.separator + "default-cli-test-config.toml")
-                        .getPath()).getAbsolutePath();
+                Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
+                        "default-cli-test-config.toml")).getPath()).getAbsolutePath();
         System.setProperty("user.dir", path.toString());
-
-        String[] initArgs = {"init", project};
-        main.main(initArgs);
-
-        String[] args = {"import", project, "--label", label, "--username", "admin", "--password",
-                "admin", "--server-url", "http://localhost:9443", "--truststore",
-                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config, "--security", "oauth2", additionalFlag};
-
-        main = new org.wso2.apimgt.gateway.cli.cmd.Main();
-        main.main(args);
 
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
+
+        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
+        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
+        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
+        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
+        int initExitCode = initProcess.waitFor();
+        if (initExitCode != 0) {
+            throw new RuntimeException("Error occurred when intializing.");
+        }
+
+        String[] importCmdArray = {"bash", mgwCommand, "import", project, "--label", label, "--username", "admin",
+                "--password", "admin", "--server-url", "http://localhost:9443", "--truststore",
+                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
+                config, additionalFlag};
+        Process importProcess = Runtime.getRuntime().exec(importCmdArray, null, new File(homeDirectory));
+        new ServerLogReader("errorStream", importProcess.getErrorStream()).start();
+        new ServerLogReader("inputStream", importProcess.getInputStream()).start();
+        int importExitCode = importProcess.waitFor();
+        if (importExitCode != 0) {
+            throw new RuntimeException("Error occurred when importing.");
+        }
+
 
         String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
         Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
@@ -171,14 +190,6 @@ public class CLIExecutor {
         }
     }
 
-    public String getHomeDirectory() {
-        return homeDirectory;
-    }
-
-    public void setHomeDirectory(String homeDirectory) {
-        this.homeDirectory = homeDirectory;
-    }
-
     private CLIExecutor() {
     }
 
@@ -189,15 +200,12 @@ public class CLIExecutor {
         return instance;
     }
 
-    public String getCliHome() {
-        return cliHome;
-    }
-
     public void setCliHome(String cliHome) {
         this.cliHome = cliHome;
     }
 
     public String getLabelBalx(String project) {
-        return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project + ".balx";
+        return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project +
+                ".balx";
     }
 }

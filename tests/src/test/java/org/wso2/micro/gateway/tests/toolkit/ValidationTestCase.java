@@ -46,7 +46,6 @@ public class ValidationTestCase extends BaseTestCase {
     public void start() throws Exception {
         String label = "apimTestLabel";
         String project = "apimTestProject";
-        String security = "oauth2";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -92,8 +91,10 @@ public class ValidationTestCase extends BaseTestCase {
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "validation.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -104,10 +105,7 @@ public class ValidationTestCase extends BaseTestCase {
         cliExecutor.generateFromDefinition(project, "PizzaShackAPI_swagger.json");
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "validation.conf").getPath();
-        String[] args = {"--config", configPath};
-        microGWServer.startMicroGwServer(balPath, args);
+        microGWServer.startMicroGwServer(balPath);
     }
 
     @Test(description = "Test valid request and valid response with a JWT token")

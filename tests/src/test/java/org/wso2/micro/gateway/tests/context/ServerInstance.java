@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.tests.context;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mina.util.ConcurrentHashSet;
 import org.slf4j.Logger;
@@ -30,9 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -44,7 +42,8 @@ import java.util.stream.Stream;
 public class ServerInstance implements Server {
     private static final Logger log = LoggerFactory.getLogger(ServerInstance.class);
     private String serverHome;
-    private String serverDistribution;
+    private String toolkitDir;
+    private String configPath;
     private String[] args;
     private Process process;
     private ServerLogReader serverInfoLogReader;
@@ -55,19 +54,17 @@ public class ServerInstance implements Server {
     private int httpServerPortToken = TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT;
     private ConcurrentHashSet<LogLeecher> tmpLeechers = new ConcurrentHashSet<>();
 
-    /**
-     * The parent directory which the micro-gw runtime will be extracted to.
-     */
-    private String extractDir;
-
-    public ServerInstance(String serverDistributionPath) throws MicroGWTestException {
-        this.serverDistribution = serverDistributionPath;
+    public ServerInstance(String toolkitDistribution, String serverDistributionPath) throws MicroGWTestException {
+        this.toolkitDir = toolkitDistribution;
+        this.serverHome = serverDistributionPath;
         initialize();
     }
 
-    public ServerInstance(String serverDistributionPath, int serverHttpPort, int serverHttpsPort,
-            int serverHttpsTokenPort) throws MicroGWTestException {
-        this.serverDistribution = serverDistributionPath;
+    public ServerInstance(String toolkitDistribution, String serverDistributionPath, String configPath,
+                          int serverHttpPort, int serverHttpsPort, int serverHttpsTokenPort) {
+        this.configPath = configPath;
+        this.toolkitDir = toolkitDistribution;
+        this.serverHome = serverDistributionPath;
         this.httpServerPort = serverHttpPort;
         this.httpsServerPort = serverHttpsPort;
         this.httpServerPortToken = serverHttpsTokenPort;
@@ -83,11 +80,19 @@ public class ServerInstance implements Server {
      * @return microGWServer      Started server instance.
      * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost)
+    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost, String configPath)
             throws MicroGWTestException {
-        String serverZipPath = System.getProperty(Constants.SYSTEM_PROP_SERVER_ZIP);
-        ServerInstance microGWServer = new ServerInstance(serverZipPath, httpPort, httpsPort, tokenHttpsPost);
-        return microGWServer;
+        String toolkitZipPath = System.getProperty(Constants.SYSTEM_PROP_TOOLKIT);
+        String serverRuntimePath;
+        String osName = Utils.getOSName().toLowerCase();
+        if (osName.contains("windows")) {
+            serverRuntimePath = System.getProperty(Constants.SYSTEM_PROP_WINDOWS_RUNTIME);
+        } else if (osName.contains("mac")) {
+            serverRuntimePath = System.getProperty(Constants.SYSTEM_PROP_MACOS_RUNTIME);
+        } else {
+            serverRuntimePath = System.getProperty(Constants.SYSTEM_PROP_LINUX_RUNTIME);
+        }
+        return new ServerInstance(toolkitZipPath, serverRuntimePath, configPath, httpPort, httpsPort, tokenHttpsPost);
     }
 
     /**
@@ -96,12 +101,17 @@ public class ServerInstance implements Server {
      * @return microGWServer      Started server instance.
      * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer() throws MicroGWTestException {
+    public static ServerInstance initMicroGwServer(String configPath) throws MicroGWTestException {
         return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
-                TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT);
+                TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, configPath);
     }
 
-    public void startMicroGwServer(String balFile) throws MicroGWTestException {
+    public static ServerInstance initMicroGwServer() throws MicroGWTestException {
+        return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
+                TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, null);
+    }
+
+    public void startMicroGwServerWithDebugLog(String balFile) throws MicroGWTestException {
         String[] args = {balFile, "-e", "b7a.log.level=DEBUG"};
         setArguments(args);
 
@@ -112,7 +122,12 @@ public class ServerInstance implements Server {
         String[] newArgs = {balFile};
         newArgs = ArrayUtils.addAll(args, newArgs);
         setArguments(newArgs);
+        startServer();
+    }
 
+    public void startMicroGwServer(String balFile) throws MicroGWTestException {
+        String[] newArgs = {balFile};
+        setArguments(newArgs);
         startServer();
     }
 
@@ -149,8 +164,7 @@ public class ServerInstance implements Server {
         Utils.checkPortAvailability(httpServerPortToken);
 
         log.info("Starting server..");
-
-        startServer(args);
+        startServerRuntime(args);
 
         serverInfoLogReader = new ServerLogReader("inputStream", process.getInputStream());
         tmpLeechers.forEach(leacher -> serverInfoLogReader.addLeecher(leacher));
@@ -165,11 +179,9 @@ public class ServerInstance implements Server {
 
     /**
      * Initialize the server instance with properties.
-     * @throws MicroGWTestException when an exception is thrown while initializing the server
      */
-    private void initialize() throws MicroGWTestException {
+    private void initialize() {
         if (serverHome == null) {
-            setUpServerHome(serverDistribution);
             log.info("Server Home " + serverHome);
             configServer();
         }
@@ -212,9 +224,6 @@ public class ServerInstance implements Server {
             //wait until port to close
             Utils.waitForPortToClosed(httpServerPort, 30000);
             log.info("Server Stopped Successfully");
-            if(deleteExtractedDir) {
-                deleteWorkDir();
-            }
         }
     }
 
@@ -231,58 +240,6 @@ public class ServerInstance implements Server {
         log.info("Server Restarted Successfully");
     }
 
-    /**
-     * Run main with args.
-     *
-     * @param args string arguments
-     * @throws MicroGWTestException if the main could not be started
-     */
-    public void runMain(String[] args) throws MicroGWTestException {
-        runMain(args, null, "run");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runMain(String[] args, String [] envVariables, String command) throws MicroGWTestException {
-
-        initialize();
-
-        String scriptName = Constants.BALLERINA_SERVER_SCRIPT_NAME;
-        String[] cmdArray;
-        File commandDir = new File(serverHome);
-
-        Process process;
-
-        try {
-            if (Utils.getOSName().toLowerCase().contains("windows")) {
-                commandDir = new File(serverHome + File.separator + "bin");
-                cmdArray = new String[]{"cmd.exe", "/c", scriptName + ".bat", command};
-                String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
-                        .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, envVariables, commandDir);
-
-            } else {
-                cmdArray = new String[]{"bash", "bin/" + scriptName, command};
-                String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
-                        .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, envVariables, commandDir);
-            }
-            serverInfoLogReader = new ServerLogReader("inputStream", process.getInputStream());
-            tmpLeechers.forEach(leacher -> serverInfoLogReader.addLeecher(leacher));
-            serverInfoLogReader.start();
-            serverErrorLogReader = new ServerLogReader("errorStream", process.getErrorStream());
-            serverErrorLogReader.start();
-
-            process.waitFor();
-            deleteWorkDir();
-        } catch (IOException e) {
-            throw new MicroGWTestException("Error executing micro-gw", e);
-        } catch (InterruptedException e) {
-            throw new MicroGWTestException("Error waiting for execution to finish", e);
-        }
-    }
 
     /**
      * Checking whether server instance is up and running.
@@ -307,16 +264,16 @@ public class ServerInstance implements Server {
      * to change the server configuration if required. This method can be overriding when initialising
      * the object of this class.
      */
-    protected void configServer() throws MicroGWTestException {
+    protected void configServer() {
     }
 
     /**
-     * Return server home path.
+     * Return toolkit directory path.
      *
      * @return absolute path of the server location
      */
-    public String getServerHome() {
-        return serverHome;
+    public String getToolkitDir() {
+        return toolkitDir;
     }
 
     /**
@@ -343,69 +300,29 @@ public class ServerInstance implements Server {
     }
 
     /**
-     * Unzip carbon zip file and return the carbon home. Based on the coverage configuration
-     * in automation.xml.
-     * This method will inject jacoco agent to the carbon server startup scripts.
-     *
-     * @param serverZipFile - Carbon zip file, which should be specified in test module pom
-     * @throws MicroGWTestException if setting up the server fails
-     */
-    private void setUpServerHome(String serverZipFile)
-            throws MicroGWTestException {
-        if (process != null) { // An instance of the server is running
-            return;
-        }
-        int indexOfZip = serverZipFile.lastIndexOf(".zip");
-        if (indexOfZip == -1) {
-            throw new IllegalArgumentException(serverZipFile + " is not a zip file");
-        }
-        String fileSeparator = (File.separator.equals("\\")) ? "\\" : "/";
-        if (fileSeparator.equals("\\")) {
-            serverZipFile = serverZipFile.replace("/", "\\");
-        }
-        String extractedServerDir =
-                serverZipFile.substring(serverZipFile.lastIndexOf(fileSeparator) + 1,
-                        indexOfZip);
-        String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-
-        extractDir = new File(baseDir).getAbsolutePath() + File.separator + "micro-gwtmp" + System.currentTimeMillis();
-
-        log.info("Extracting micro-gw zip file.. ");
-
-        try {
-            Utils.extractFile(serverZipFile, extractDir);
-            this.serverHome = extractDir + File.separator + extractedServerDir;
-            //copies the policies.yaml to run test cases.
-            Files.copy(Paths.get(getClass().getClassLoader().getResource(Constants.POLICIES_FILE).getPath()), Paths.get(
-                    serverHome + File.separator + Constants.RESOURCES_FOLDER + File.separator
-                            + Constants.DEFINITION_FOLDER + File.separator + Constants.POLICIES_FILE),
-                    StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new MicroGWTestException("Error extracting server zip file", e);
-        }
-    }
-
-    /**
      * Executing the sh or bat file to start the server.
      *
      * @param args - command line arguments to pass when executing the sh or bat file
      * @throws MicroGWTestException if starting services failed
      */
-    private void startServer(String[] args) throws MicroGWTestException {
-        String scriptName = Constants.BALLERINA_SERVER_SCRIPT_NAME;
+    private void startServerRuntime(String[] args) throws MicroGWTestException {
+        String scriptName = Constants.GATEWAY_SCRIPT_NAME;
         String[] cmdArray;
-        File commandDir = new File(serverHome+ Constants.BALLERINA_PLATFORM_DIR);
-
+        File commandDir = new File(serverHome + File.separator + "bin");
+        //Overwrite the config file
+        if (configPath != null) {
+            copyFile(configPath, serverHome + File.separator + "conf" + File.separator + "micro-gw.conf");
+        }
+        //run the server
         try {
             if (Utils.getOSName().toLowerCase().contains("windows")) {
                 commandDir = new File(serverHome + File.separator + "bin");
-                cmdArray = new String[]{"cmd.exe", "/c", scriptName + ".bat", "run"};
+                cmdArray = new String[]{"cmd.exe", "/c", scriptName + ".bat"};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
                 process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
-
             } else {
-                cmdArray = new String[]{"bash", "bin/" + scriptName, "run"};
+                cmdArray = new String[]{"bash" , scriptName};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
                 process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
@@ -519,14 +436,6 @@ public class ServerInstance implements Server {
     }
 
     /**
-     * Delete the working directory with the extracted micro-gw instance to cleanup data after execution is complete.
-     */
-    private void deleteWorkDir() {
-        File workDir = new File(extractDir);
-        Utils.deleteFolder(workDir);
-    }
-
-    /**
      * This method returns the pid of the service which is using the provided port.
      * @param httpServerPort port of the service running
      * @return the pid of the service
@@ -548,5 +457,15 @@ public class ServerInstance implements Server {
             }
         }
         return pid;
+    }
+
+    private static void copyFile(String sourceLocation, String destLocation) throws MicroGWTestException {
+        File source = new File(sourceLocation);
+        File destination = new File(destLocation);
+        try {
+            FileUtils.copyFile(source, destination);
+        } catch (IOException e) {
+            throw new MicroGWTestException("error while copying config file. ");
+        }
     }
 }

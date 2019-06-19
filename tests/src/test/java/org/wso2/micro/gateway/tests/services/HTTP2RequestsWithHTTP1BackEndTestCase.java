@@ -80,8 +80,10 @@ public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
 
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "http2-test.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -90,13 +92,10 @@ public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
 
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "http2-test.conf").getPath();
-        String[] args = {"--config", configPath, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args);
+        microGWServer.startMicroGwServer(balPath);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
     }

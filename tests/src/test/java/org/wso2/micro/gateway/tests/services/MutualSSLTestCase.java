@@ -76,8 +76,10 @@ public class MutualSSLTestCase extends BaseTestCase {
 
         CLIExecutor cliExecutor;
         System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        String configPath = getClass().getClassLoader()
+                .getResource("confs" + File.separator + "mutualSSL-test.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -85,14 +87,11 @@ public class MutualSSLTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "mutualSSL-test.conf").getPath();
-        String[] args = {"--config", configPath};
         System.out.println("MTSL TEST CASE");
-        microGWServer.startMicroGwServer(balPath, args);
+        microGWServer.startMicroGwServer(balPath);
     }
 
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
@@ -200,7 +199,8 @@ public class MutualSSLTestCase extends BaseTestCase {
 
         } catch (IOException e) {
             String x = e.toString();
-            if (x.equalsIgnoreCase("javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate")) {
+            if (x.equalsIgnoreCase("javax.net.ssl.SSLHandshakeException: Received fatal alert: " +
+                    "bad_certificate")) {
                 log.info("Test is working properly");
             }
         }

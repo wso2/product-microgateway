@@ -45,6 +45,7 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -72,9 +73,14 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
+        String trustStorePath = new File(
+                getClass().getClassLoader().getResource("keyStores" + File.separator + "ballerinaTruststore.p12")
+                        .getPath()).getAbsolutePath();
+        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+        System.setProperty("javax.net.ssl.trustStoreType", "PKCS12");
+        System.setProperty("javax.net.ssl.trustStorePassword", "ballerina");
         initializeEtcdServer();
 
-        String security = "oauth2";
         String balPath, configPath = "";
         String label = "apimTestLabel";
         String project = "apimTestProject";
@@ -125,9 +131,11 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
 
+        configPath = Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
+                "default-test-config.conf")).getPath();
         //Initialize the Micro-Gateway Server
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
@@ -135,20 +143,14 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
         cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
+        cliExecutor.generate(label, project);
 
         balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        try {
-            configPath = getClass().getClassLoader().getResource("confs" + File.separator + "default-test-config.conf")
-                    .getPath();
-        } catch (NullPointerException e) {
-            Assert.fail("Should not throw any exceptions" + e);
-        }
 
         String ballerinaLogging = "b7a.log.level=TRACE";
 
         //Starting the Micro-Gateway Server
-        String[] args = { "--config", configPath, "-e", ballerinaLogging };
+        String[] args = {"-e", ballerinaLogging};
         microGWServer.startMicroGwServer(balPath, args);
 
         //Send Extracted JTI to the jwtRevocation Topic
@@ -251,8 +253,8 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     private void publishMessage() throws NamingException, JMSException {
 
         String topicName = "jwtRevocation";
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin", "localhost", "5672")
-                .withTopic(topicName).build();
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
+                "localhost", "5672").withTopic(topicName).build();
         ConnectionFactory connectionFactory = (ConnectionFactory) initialContext
                 .lookup(ClientHelper.CONNECTION_FACTORY);
         Connection connection = connectionFactory.createConnection();
@@ -275,8 +277,8 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     private void createSubscriberJMSConnection() throws JMSException, NamingException {
 
         String topicName = "jwtRevocation";
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin", "localhost", "5672")
-                .withTopic(topicName).build();
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
+                "localhost", "5672").withTopic(topicName).build();
         ConnectionFactory connectionFactory = (ConnectionFactory) initialContext
                 .lookup(ClientHelper.CONNECTION_FACTORY);
         Connection connection = connectionFactory.createConnection();
