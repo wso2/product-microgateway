@@ -312,9 +312,6 @@
                                 <PORT>2379</PORT>
                             </environmentVariables>
                             <systemPropertyVariables>
-                                <toolkit>
-                                    ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${project.version}
-                                </toolkit>
                                 <runtime_macos>
                                     ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-macos-${project.version}
                                 </runtime_macos>
