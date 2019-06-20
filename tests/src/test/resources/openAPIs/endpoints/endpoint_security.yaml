@@ -707,16 +707,27 @@ components:
 x-wso2-endpoints:
   - myEndpoint1:
       urls:
-        - https://non.existant.host:2380/v1
+        - https://localhost:2380/v1Basic
+      securityConfig:
+        type: basic
+        username: admin
   - myEndpoint2:
       urls:
-        - https://non.existant.host:2380/v1
+        - https://localhost:2380/v2Basic
+      securityConfig:
+        type: basic
+        username: admin
   - myEndpoint3:
       urls:
-        - https://non.existant.host:2380/v1
-        - https://non.existant.host:2380/v2
+        - https://localhost:2380/v1Basic
+        - https://localhost:2380/v2Basic
+      securityConfig:
+        type: basic
+        username: admin
   - myEndpoint4:
       urls:
-        - https://non.existant.host:2380/v1
-        - https://non.existant.host:2380/v2
-      type: failover
+        - https://non.existant.host:2380/v1Basic
+        - https://localhost:2380/v2Basic
+      securityConfig:
+        type: basic
+        username: admin

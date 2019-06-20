@@ -43,4 +43,6 @@ public class ResponseConstants {
             "\"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
     public static final String NONEXISTING_THROTTLEPOLICY_RESPONSE = "{\"fault\":{\"code\":900809, " +
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
+    public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
+            "provided.\"}";
 }
