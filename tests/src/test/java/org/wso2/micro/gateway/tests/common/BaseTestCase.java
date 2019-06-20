@@ -62,7 +62,7 @@ public class BaseTestCase {
         microGWServer.startMicroGwServer(balPath);
     }
 
-    protected void init(String project, String[] openAPIFileNames) throws Exception {
+    protected void init(String project, String[] openAPIFileNames, String[] args) throws Exception {
         CLIExecutor cliExecutor;
         String configPath = Objects.requireNonNull(getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf")).getPath();
@@ -78,7 +78,11 @@ public class BaseTestCase {
         cliExecutor.generateFromDefinition(project, openAPIFileNames);
 
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        microGWServer.startMicroGwServer(balPath);
+        microGWServer.startMicroGwServer(balPath, args);
+    }
+
+    protected void init(String project, String[] openAPIFileNames) throws Exception {
+        init(project,openAPIFileNames, null);
     }
 
     public void finalize() throws Exception {
