@@ -21,13 +21,13 @@ import java.util.Map;
  * This test class is used to test endpoints when provided as references
  */
 public class EndpointsByReferenceTestCase extends BaseTestCase {
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
 
 
     @BeforeClass
     public void start() throws Exception {
 
-        String project = "resourceEndpointProject";
+        String project = "EndpointReferenceProject";
         //Define application info
         ApplicationDTO application = new ApplicationDTO();
         application.setName("jwtApp");
@@ -63,7 +63,7 @@ public class EndpointsByReferenceTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
-    @Test(description = "Test Invoking the load balanced endpoints in resource level  using references")
+    @Test(description = "Test Invoking the load balanced endpoints in resource level using references")
     public void testLoadBalancedEndpointResourceLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
@@ -79,7 +79,7 @@ public class EndpointsByReferenceTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
-    @Test(description = "Test Invoking the fail over endpoints")
+    @Test(description = "Test Invoking the fail over endpoints using references")
     public void testFailOverEndpointResourceLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token

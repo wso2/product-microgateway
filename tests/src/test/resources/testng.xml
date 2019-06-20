@@ -40,6 +40,7 @@
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP2BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.endpoints.ResourceLevelEndpointsTestCase" />
             <class name="org.wso2.micro.gateway.tests.endpoints.EndpointsByReferenceTestCase" />
+            <class name="org.wso2.micro.gateway.tests.endpoints.EndpointOverrideTestCase" />
             <class name="org.wso2.micro.gateway.tests.endpoints.MultipleEndpointsTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.ScopesTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.DisableSecurityAndCustomAuthHeaderTestCase" />
