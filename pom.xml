@@ -410,6 +410,7 @@
                             <suppressionsLocation>
                                 https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/suppressions.xml
                             </suppressionsLocation>
+                            <includes>org/wso2/apimgt/gateway/cli/utils/*.java</includes>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>

@@ -33,28 +33,32 @@ import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class RouteUtils {
+/**
+ * Utility functions for handling endpoints.
+ */
+public final class RouteUtils {
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
 
     /**
      * To parse the Endpoint Configuration received from API Manager to RouteEndpointConfig Object
-     * @param endpointConfigJson    Endpoint Configuration Json received from Publisher API
-     * @param endpointSecurity      Endpoint Security details received from Publisher API
-     * @return                      RouteEndpointConfig object
+     *
+     * @param epConfigJson Endpoint Configuration Json received from Publisher API
+     * @param epSecurity   Endpoint Security details received from Publisher API
+     * @return RouteEndpointConfig object
      */
-    public static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity){
+    public static RouteEndpointConfig parseEndpointConfig(String epConfigJson, APIEndpointSecurityDTO epSecurity) {
 
         RouteEndpointConfig endpointConfig = new RouteEndpointConfig();
         EndpointListRouteDTO prodEndpointConfig = new EndpointListRouteDTO();
         EndpointListRouteDTO sandEndpointConfig = new EndpointListRouteDTO();
 
         //set securityConfig to the both environments
-        prodEndpointConfig.setSecurityConfig(endpointSecurity);
-        sandEndpointConfig.setSecurityConfig(endpointSecurity);
+        prodEndpointConfig.setSecurityConfig(epSecurity);
+        sandEndpointConfig.setSecurityConfig(epSecurity);
 
         JsonNode rootNode;
         try {
-            rootNode = OBJECT_MAPPER_JSON.readTree(endpointConfigJson);
+            rootNode = OBJECT_MAPPER_JSON.readTree(epConfigJson);
         } catch (IOException e) {
             throw new CLIRuntimeException("Error while parsing the endpointConfig JSON string");
         }
@@ -97,8 +101,7 @@ public class RouteUtils {
                         sandEndpointConfig.addEndpoint(node.get(RESTServiceConstants.URL).asText());
                     }
                 }
-            }
-            else{
+            } else {
                 prodEndpointConfig.setType(EndpointType.http);
                 sandEndpointConfig.setType(EndpointType.http);
             }
@@ -122,11 +125,11 @@ public class RouteUtils {
             }
         }
 
-        if(prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size()>0){
+        if (prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size() > 0) {
             endpointConfig.setProdEndpointList(prodEndpointConfig);
         }
 
-        if(sandEndpointConfig.getEndpoints() != null && sandEndpointConfig.getEndpoints().size()>0){
+        if (sandEndpointConfig.getEndpoints() != null && sandEndpointConfig.getEndpoints().size() > 0) {
             endpointConfig.setSandboxEndpointList(sandEndpointConfig);
         }
 
@@ -135,8 +138,9 @@ public class RouteUtils {
 
     /**
      * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation
+     *
      * @param
-     * @return                      MgeEndpointConfig Object corresponding to provided routeEndpointConfig
+     * @return MgeEndpointConfig Object corresponding to provided routeEndpointConfig
      */
     static MgwEndpointConfigDTO convertToMgwServiceMap(EndpointListRouteDTO prodEpListDTO, EndpointListRouteDTO
             sandEpListDTO) {
@@ -225,7 +229,7 @@ public class RouteUtils {
         }
         //if any etcd enabled key is available, update the destObject for the usage of ballerina code generation
         for (MgwEndpointDTO mgwEndpointDTO : mgwEpList) {
-            if(mgwEndpointDTO.isEtcdEnabled()){
+            if (mgwEndpointDTO.isEtcdEnabled()) {
                 destObject.setEndpointListEtcdEnabled(true);
                 break;
             }
