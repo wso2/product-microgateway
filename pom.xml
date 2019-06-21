@@ -368,6 +368,11 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${maven.spotbugsplugin.version}</version>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -449,6 +454,7 @@
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
         <ballerina.jre.artifacts.version>2.0.0</ballerina.jre.artifacts.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
+        <maven.spotbugsplugin.version>3.1.1</maven.spotbugsplugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
