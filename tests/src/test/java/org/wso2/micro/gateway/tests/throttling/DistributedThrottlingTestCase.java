@@ -45,32 +45,16 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
 
-    protected void init(String label, String project, String security) throws Exception {
-        CLIExecutor cliExecutor;
-
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "throttle-test-config.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        microGWServer.startMicroGwServer(balPath);
+    @Override
+    protected void init(String label, String project) throws Exception {
+        String configPath = "confs" + File.separator + "throttle-test-config.conf";
+        super.init(label,project, configPath);
     }
 
     @BeforeClass
     private void start() throws Exception {
         String label = "apimTestLabel";
         String project = "apimTestProject";
-        //set security schemas
-        String security = "oauth2";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -161,7 +145,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
 
         //generate apis with CLI and start the micro gateway server
-        init(label, project, security);
+        init(label, project);
     }
 
 

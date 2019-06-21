@@ -104,15 +104,13 @@ public class EtcdSupportTestCase extends BaseTestCase {
         configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "default-test-config.conf").getPath();
         microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generatePassingFlag(label, project, "--enable-etcd");
+        cliExecutor.generate(label, project);
 
         balPath = CLIExecutor.getInstance().getLabelBalx(project);
 

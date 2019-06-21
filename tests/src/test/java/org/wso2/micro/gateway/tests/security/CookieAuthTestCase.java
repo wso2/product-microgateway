@@ -70,8 +70,6 @@ public class CookieAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
-        //set security schemas
-        String security = "oauth2";
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -87,26 +85,11 @@ public class CookieAuthTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
 
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        String configPath = "confs" + File.separator + "default-test-config.conf";
         String cookie = "Cookie=" + jwtTokenProd;
         String[] args = {"-e", cookie};
-        microGWServer.startMicroGwServer(balPath, args);
+        super.init(label, project, args, configPath);
     }
 
     @Test(description = "Test API invocation with a valid Cookie token")

@@ -18,20 +18,19 @@
 package org.wso2.micro.gateway.tests.common;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.context.Constants;
+import org.wso2.micro.gateway.tests.context.MicroGWTestException;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Execute APIM CLI functions.
@@ -42,162 +41,171 @@ public class CLIExecutor {
     private String cliHome;
     private static CLIExecutor instance;
 
-    public void generate(String label, String project) throws Exception {
-
-        String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
-        log.info("CLI Project Home: " + path.toString());
-
-        System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
-        log.info("CLI Home: " + this.cliHome);
-
-        String config = new File(
-                Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
-                        "default-cli-test-config.toml")).getPath()).getAbsolutePath();
-        System.setProperty("user.dir", path.toString());
-
+    /**
+     * Generate Microgateway project using import Cmd.
+     *
+     * @param label   label
+     * @param project project name
+     * @throws MicroGWTestException
+     */
+    public void generate(String label, String project) throws MicroGWTestException {
+        createBackgroundEnv();
+        //This config file is relevant to the publisher API
+        String config = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("confs" +
+                File.separator + "default-cli-test-config.toml")).getPath()).getAbsolutePath();
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
-        homeDirectory = path.toString();
+        runInitCmd(mgwCommand, project);
+        //todo: check using prompt as well
+        String[] importCmdArray = {"--label", label, "--username", "admin", "--password", "admin", "--server-url",
+                "https://localhost:9443", "--truststore", "lib/platform/bre/security/ballerinaTruststore.p12",
+                "--truststore-pass", "ballerina", "--config", config};
+        runImportCmd(mgwCommand, project, importCmdArray);
+        copyCustomizedPolicyFileFromResources(project);
+        //todo: check the availability of balx
+        runBuildCmd(mgwCommand, project);
+    }
 
-        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
-        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
-        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
-        int initExitCode = initProcess.waitFor();
-        if (initExitCode != 0) {
-            throw new RuntimeException("Error occurred when intializing.");
-        }
-
-        String[] importCmdArray = {"bash", mgwCommand, "import", project, "--label", label, "--username", "admin",
-                "--password", "admin", "--server-url", "http://localhost:9443", "--truststore",
-                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config};
-
-        Process importProcess = Runtime.getRuntime().exec(importCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", importProcess.getErrorStream()).start();
-        new ServerLogReader("inputStream", importProcess.getInputStream()).start();
-        int importExitCode = importProcess.waitFor();
-        if (importExitCode != 0) {
-            throw new RuntimeException("Error occurred when importing.");
-        }
-
-        File policyYamlResource = new File(Objects.requireNonNull(getClass().getClassLoader()
-                .getResource("policies.yaml")).getPath());
-        String apiDefinitionPath = path + File.separator + project + File.separator;
-        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
-        FileUtils.copyFile(policyYamlResource, policyYamlFile);
-
-        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
-        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
-
-        new ServerLogReader("errorStream", process.getErrorStream()).start();
-        new ServerLogReader("inputStream", process.getInputStream()).start();
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("Error occurred when building.");
+    /**
+     * Run the process.
+     *
+     * @param cmdArray      array containing all the commandline arguments
+     * @param homeDirectory home directory for the process
+     * @param errorMessage  error message needs to be printed if any error is occurred
+     * @throws MicroGWTestException
+     */
+    private void runProcess(String[] cmdArray, String homeDirectory, String errorMessage) throws MicroGWTestException {
+        try {
+            Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
+            new ServerLogReader("errorStream", process.getErrorStream()).start();
+            new ServerLogReader("inputStream", process.getInputStream()).start();
+            int importExitCode = process.waitFor();
+            if (importExitCode != 0) {
+                throw new RuntimeException(errorMessage);
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new MicroGWTestException(errorMessage, e);
         }
     }
 
-    public void generateFromDefinition( String project, String[] openAPIFileNames)
-            throws Exception {
+    /**
+     * Generate the project using developer first approach (Using OpenAPI definitions).
+     *
+     * @param project          project name
+     * @param openAPIFileNames relative paths of openAPI definitions stored in resources directory.
+     * @throws MicroGWTestException
+     */
+    public void generateFromDefinition(String project, String[] openAPIFileNames)
+            throws MicroGWTestException {
 
+        createBackgroundEnv();
+        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        runInitCmd(mgwCommand, project);
+        copyOpenAPIDefinitionsToProject(project, openAPIFileNames);
+        copyCustomizedPolicyFileFromResources(project);
+        runBuildCmd(mgwCommand, project);
+    }
+
+    private void createBackgroundEnv() throws MicroGWTestException {
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
+        Path path = null;
+        try {
+            path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
+        } catch (IOException e) {
+            throw new MicroGWTestException("The directory " + baseDir + " doesnot exist.", e);
+        }
         log.info("CLI Project Home: " + path.toString());
-
         System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
-        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        System.setProperty("user.dir", path.toString());
         homeDirectory = path.toString();
+    }
 
-        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
-        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
-        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
-        int initExitCode = initProcess.waitFor();
-        if (initExitCode != 0) {
-            throw new RuntimeException("Error occurred when building.");
+    /**
+     * Initialize the project.
+     *
+     * @param mgwCommand the path of microgateway executable
+     * @param project    project name
+     * @throws MicroGWTestException
+     */
+    private void runInitCmd(String mgwCommand, String project) throws MicroGWTestException {
+        String[] initCmdArray = {"bash", mgwCommand, "init", project};
+        String initErrorMsg = "Error occurred during initializing the project.";
+        runProcess(initCmdArray, homeDirectory, initErrorMsg);
+    }
+
+    /**
+     * Import apis to the project from API Manager publisher.
+     *
+     * @param mgwCommand the path of microgateway executable
+     * @param project    project name
+     * @param cmdArgs    commandline arguments that needs to be provided by the user.
+     * @throws MicroGWTestException
+     */
+    private void runImportCmd(String mgwCommand, String project, String[] cmdArgs) throws MicroGWTestException {
+        String[] importCmdArgs = {"bash", mgwCommand, "import", project};
+        importCmdArgs = ArrayUtils.addAll(importCmdArgs, cmdArgs);
+        String importErrorMsg = "Error occurred during importing the api.";
+        runProcess(importCmdArgs, homeDirectory, importErrorMsg);
+    }
+
+    /**
+     * Build the project.
+     *
+     * @param mgwCommand the path of microgateway executable
+     * @param project    project name
+     * @throws MicroGWTestException
+     */
+    private void runBuildCmd(String mgwCommand, String project) throws MicroGWTestException {
+        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project};
+        String buildErrorMsg = "Error occurred when building the project.";
+        runProcess(buildCmdArray, homeDirectory, buildErrorMsg);
+    }
+
+    /**
+     * Copy the customized policies definition for testing purposes.
+     *
+     * @param project project name
+     * @throws MicroGWTestException
+     */
+    private void copyCustomizedPolicyFileFromResources(String project) throws MicroGWTestException {
+        String projectDir = homeDirectory + File.separator + project + File.separator;
+        File policyYamlResource = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
+        File policyYamlFile = new File(projectDir + "/policies.yaml");
+        try {
+            FileUtils.copyFile(policyYamlResource, policyYamlFile);
+        } catch (IOException e) {
+            throw new MicroGWTestException("Error while copying policies.yaml.", e);
         }
-        
-        String apiDefinitionPath = path + File.separator + project + File.separator;
-        for(String openAPIFileName : openAPIFileNames) {
+    }
 
-            File swaggerFilePath = new File(
+    /**
+     * Copy the openAPI definitions' relative paths (compared to resources directory) to project directory.
+     *
+     * @param project          project name
+     * @param openAPIFileNames array of openAPI definitions' relative paths stored in the resources directory
+     * @throws MicroGWTestException
+     */
+    private void copyOpenAPIDefinitionsToProject(String project, String[] openAPIFileNames)
+            throws MicroGWTestException{
+        for (String openAPIFileName : openAPIFileNames) {
+            File swaggerSrcPath = new File(
                     getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator +
                             openAPIFileName).getPath());
-
             File swaggerDesPath = new File(
-                    path + File.separator + project + File.separator +
+                    homeDirectory + File.separator + project + File.separator +
                             GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
                             .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
-
-            FileUtils.copyFile(swaggerFilePath, swaggerDesPath);
-        }
-        File policyYamlResource = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
-        File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
-        FileUtils.copyFile(policyYamlResource, policyYamlFile);
-
-        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project};
-        Process process = Runtime.getRuntime().exec(buildCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", process.getErrorStream()).start();
-        new ServerLogReader("inputStream", process.getInputStream()).start();
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("Error occurred when building.");
-        }
-    }
-
-    public void generatePassingFlag(String label, String project, String additionalFlag) throws Exception {
-
-        String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
-        Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject");
-        log.info("CLI Project Home: " + path.toString());
-
-        System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
-        log.info("CLI Home: " + this.cliHome);
-
-        String config = new File(
-                Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
-                        "default-cli-test-config.toml")).getPath()).getAbsolutePath();
-        System.setProperty("user.dir", path.toString());
-
-        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
-        homeDirectory = path.toString();
-
-        String[] initCmdArray = {"bash", mgwCommand, "init", project, "-f"};
-        Process initProcess = Runtime.getRuntime().exec(initCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", initProcess.getErrorStream()).start();
-        new ServerLogReader("inputStream", initProcess.getInputStream()).start();
-        int initExitCode = initProcess.waitFor();
-        if (initExitCode != 0) {
-            throw new RuntimeException("Error occurred when intializing.");
-        }
-
-        String[] importCmdArray = {"bash", mgwCommand, "import", project, "--label", label, "--username", "admin",
-                "--password", "admin", "--server-url", "http://localhost:9443", "--truststore",
-                "lib/platform/bre/security/ballerinaTruststore.p12", "--truststore-pass", "ballerina", "--config",
-                config, additionalFlag};
-        Process importProcess = Runtime.getRuntime().exec(importCmdArray, null, new File(homeDirectory));
-        new ServerLogReader("errorStream", importProcess.getErrorStream()).start();
-        new ServerLogReader("inputStream", importProcess.getInputStream()).start();
-        int importExitCode = importProcess.waitFor();
-        if (importExitCode != 0) {
-            throw new RuntimeException("Error occurred when importing.");
-        }
-
-
-        String[] cmdArray = new String[]{"bash", mgwCommand, "build", project};
-        Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
-
-        new ServerLogReader("errorStream", process.getErrorStream()).start();
-        new ServerLogReader("inputStream", process.getInputStream()).start();
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("Error occurred when building.");
+            try {
+                FileUtils.copyFile(swaggerSrcPath, swaggerDesPath);
+            } catch (IOException e) {
+                throw new MicroGWTestException("Error while copying the openAPI definition from " + swaggerSrcPath +
+                        " to " + swaggerDesPath + ".", e);
+            }
         }
     }
 
     private CLIExecutor() {
+        cliHome = System.getProperty(Constants.SYSTEM_PROP_TOOLKIT);
     }
 
     public static CLIExecutor getInstance() {
@@ -207,10 +215,12 @@ public class CLIExecutor {
         return instance;
     }
 
-    public void setCliHome(String cliHome) {
-        this.cliHome = cliHome;
-    }
-
+    /**
+     * Get the absolute path for the compiled ballerina project executable (balx file).
+     *
+     * @param project project name
+     * @return the absolute path of the project's executable
+     */
     public String getLabelBalx(String project) {
         return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project +
                 ".balx";

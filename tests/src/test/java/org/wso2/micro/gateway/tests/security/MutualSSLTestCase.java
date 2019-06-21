@@ -71,27 +71,9 @@ public class MutualSSLTestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
-        //set security schemas
-        String security = "oauth2";
 
-        CLIExecutor cliExecutor;
-        System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "mutualSSL-test.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        System.out.println("MTSL TEST CASE");
-        microGWServer.startMicroGwServer(balPath);
+        String configPath = "confs" + File.separator + "mutualSSL-test.conf";
+        super.init(label, project, configPath);
     }
 
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
