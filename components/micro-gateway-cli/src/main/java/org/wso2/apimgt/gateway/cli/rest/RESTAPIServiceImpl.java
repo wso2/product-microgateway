@@ -160,7 +160,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     }
                     //set additional configs such as CORS configs from the toolkit configuration
                     setAdditionalConfigs(matchedAPI);
-                }else {
+                } else {
                     throw new CLIInternalException("No proper response received for get API request.");
                 }
             } else if (responseCode == 401) {
