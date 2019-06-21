@@ -449,7 +449,7 @@
         <project.scm.id>scm-server</project.scm.id>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
         <andes.version>3.2.47</andes.version>
-        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
         <ballerina.jre.artifacts.version>2.0.0</ballerina.jre.artifacts.version>
