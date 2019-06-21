@@ -62,6 +62,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Utility functions to be used by MGW code generation related component.
+ */
 public class OpenAPICodegenUtils {
     private static final Logger logger = LoggerFactory.getLogger(OpenAPICodegenUtils.class);
 
@@ -73,7 +76,7 @@ public class OpenAPICodegenUtils {
     private static Map<String, String> requestInterceptorMap = new HashMap<>();
     private static Map<String, String> responseInterceptorMap = new HashMap<>();
     private static Map<String, String> apiNameVersionMap = new HashMap<>();
-    private static List<Map<Object, Object>> endPointReferenceExtensions ;
+    private static List<Map<Object, Object>> endPointReferenceExtensions;
     private static List<String> oauthSecuritySchemaList = new ArrayList<>();
     private static List<String> basicSecuritySchemaList = new ArrayList<>();
 
@@ -133,18 +136,18 @@ public class OpenAPICodegenUtils {
         RouteEndpointConfig mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
 
         switch (swaggerVersion) {
-        case "2":
-            Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-            swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
-            return Json.pretty(swagger);
-        case "3":
-            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
-            OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-            openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
-            return Yaml.pretty(openAPI);
+            case "2":
+                Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
+                swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                return Json.pretty(swagger);
+            case "3":
+                SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
+                OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+                openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                return Yaml.pretty(openAPI);
 
-        default:
-            throw new CLIRuntimeException("Error: Swagger version is not identified");
+            default:
+                throw new CLIRuntimeException("Error: Swagger version is not identified");
         }
     }
 
@@ -152,6 +155,7 @@ public class OpenAPICodegenUtils {
      * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format
      * v2/YAML -> v2/JSON
      * v3/YAML -> v3/JSON
+     *
      * @param openAPIContent open API as a string content
      * @return openAPI definition as a JSON String
      */
@@ -273,10 +277,10 @@ public class OpenAPICodegenUtils {
      * get the resource related information if the resource_id is given
      *
      * @param projectName project name
-     * @param resource_id resource id
+     * @param resourceId  resource id
      * @return resource object with api name, version, method and key
      */
-    public static ResourceRepresentation getResource(String projectName, String resource_id) {
+    public static ResourceRepresentation getResource(String projectName, String resourceId) {
         String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         ResourceRepresentation resource = new ResourceRepresentation();
         try {
@@ -291,8 +295,8 @@ public class OpenAPICodegenUtils {
                 openApiNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames()
                         .forEachRemaining(operation -> {
                             if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
-                                    .equals(resource_id)) {
-                                resource.setId(resource_id);
+                                    .equals(resourceId)) {
+                                resource.setId(resourceId);
                                 resource.setName(e.getKey());
                                 resource.setMethod(operation);
                                 resource.setApi(apiName);
@@ -400,10 +404,10 @@ public class OpenAPICodegenUtils {
                             endpointListRouteDTO.setName(referencePath);
                             return endpointListRouteDTO;
                         } catch (IllegalArgumentException e) {
-                            throw new CLIRuntimeException(
-                                    "Error while parsing the referenced endpoint object " + endpointExtensionObjectValue
-                                            + ". The endpoint \"" + referencePath + "\" defined under " +  OpenAPIConstants.ENDPOINTS
-                                            + " is incompatible : " + value.get(referencePath).toString());
+                            throw new CLIRuntimeException("Error while parsing the referenced endpoint object "
+                                    + endpointExtensionObjectValue + ". The endpoint \"" + referencePath
+                                    + "\" defined under " + OpenAPIConstants.ENDPOINTS + " is incompatible : "
+                                    + value.get(referencePath).toString());
                         }
                     }
                 }
@@ -416,7 +420,8 @@ public class OpenAPICodegenUtils {
                             .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
                 } catch (IllegalArgumentException e) {
                     throw new CLIRuntimeException("Error while parsing the endpoint object. The "
-                            + OpenAPIConstants.PRODUCTION_ENDPOINTS +  " or " + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
+                            + OpenAPIConstants.PRODUCTION_ENDPOINTS + " or "
+                            + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
                             + endpointExtensionObjectValue);
                 }
             }
@@ -460,7 +465,7 @@ public class OpenAPICodegenUtils {
             try {
                 balSrcCode = GatewayCmdUtils.readFileAsString(path.toString(), false);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error occurred while reading interceptors", e);
             }
             findRequestInterceptors(balSrcCode, path.toString());
             findResponseInterceptors(balSrcCode, path.toString());
@@ -716,7 +721,7 @@ public class OpenAPICodegenUtils {
                 if (secSchemaBuilder.length() == 0) {
                     secSchemaBuilder.append(schema);
                 } else {
-                     secSchemaBuilder.append(',' + schema);
+                    secSchemaBuilder.append(',' + schema);
                 }
             }
             //generate scopes string
@@ -737,7 +742,7 @@ public class OpenAPICodegenUtils {
 
     public static BasicAuth getMgwResourceBasicAuth(Operation operation) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
-        if(StringUtils.isEmpty(securitySchemas)){
+        if (StringUtils.isEmpty(securitySchemas)) {
             return null;
         }
         return generateBasicAuthFromSecurity(securitySchemas);
@@ -760,7 +765,7 @@ public class OpenAPICodegenUtils {
      * @param schemas comma separated security security schema types (ex. basic,oauth2)
      * @return {@link BasicAuth} object
      */
-    public static BasicAuth generateBasicAuthFromSecurity(String schemas){
+    public static BasicAuth generateBasicAuthFromSecurity(String schemas) {
         BasicAuth basicAuth = new BasicAuth();
         boolean basic = false;
         boolean oauth2 = false;
@@ -829,9 +834,10 @@ public class OpenAPICodegenUtils {
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
         }
-        openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
-            if (value1.getType() == SecurityScheme.Type.OAUTH2 ||
-                    (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase(Locale.getDefault()).equals("jwt"))) {
+        openAPI.getComponents().getSecuritySchemes().forEach((key, val) -> {
+            if (val.getType() == SecurityScheme.Type.OAUTH2 ||
+                    (val.getType() == SecurityScheme.Type.HTTP &&
+                            val.getScheme().toLowerCase(Locale.getDefault()).equals("jwt"))) {
                 oauthSecuritySchemaList.add(key);
             }
         });
@@ -848,8 +854,9 @@ public class OpenAPICodegenUtils {
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
         }
-        openAPI.getComponents().getSecuritySchemes().forEach((key, value1) -> {
-            if (value1.getType() == SecurityScheme.Type.HTTP && value1.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
+        openAPI.getComponents().getSecuritySchemes().forEach((key, val) -> {
+            if (val.getType() == SecurityScheme.Type.HTTP &&
+                    val.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
                 basicSecuritySchemaList.add(key);
             }
         });
@@ -889,8 +896,10 @@ public class OpenAPICodegenUtils {
                 openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) != null) {
             return;
         }
-        boolean EpsUnavailableForAll = openAPI.getPaths().entrySet().stream().anyMatch(path ->
-                isResourceEpUnavailable(path.getValue().getGet()) || isResourceEpUnavailable(path.getValue().getPost()) ||
+
+        boolean epsUnavailableForAll = openAPI.getPaths().entrySet().stream().anyMatch(path ->
+                isResourceEpUnavailable(path.getValue().getGet()) ||
+                        isResourceEpUnavailable(path.getValue().getPost()) ||
                         isResourceEpUnavailable(path.getValue().getPut()) ||
                         isResourceEpUnavailable(path.getValue().getTrace()) ||
                         isResourceEpUnavailable(path.getValue().getHead()) ||
@@ -898,7 +907,8 @@ public class OpenAPICodegenUtils {
                         isResourceEpUnavailable(path.getValue().getPatch()) ||
                         isResourceEpUnavailable(path.getValue().getOptions())
         );
-        if (EpsUnavailableForAll) {
+
+        if (epsUnavailableForAll) {
             throw new CLIRuntimeException("'" + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' and '" +
                     OpenAPIConstants.SANDBOX_ENDPOINTS + "' properties are not included under API Level in openAPI " +
                     "definition '" + openAPIFilePath + "'. Please include at least one of them under API Level or " +
