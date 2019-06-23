@@ -151,10 +151,10 @@ curl -X GET "https://localhost:9095/petstore/v1/pet/1" -H "accept: application/x
 
 #### Microgateway Components
 - **Toolkit** : The toolkit is used to initiate microgateway projects. Once the project is initialized API developer can
-add(copy) open API definitions of the APIs to the  project or import APIs from WSO2 API Manager. Once the all the APIs are added the toolkit can be used
+add(copy) open API definitions of the APIs to the  project or import APIs from WSO2 API Manager. Once all the APIs are added the toolkit can be used
 to build the project and create and executable file.
 
-- **Runtime** : The gateway run time can expose the APIS and servees the API requests. The executable output of the toolkit should be provided as an input when running the microgateway runtime.
+- **Runtime** : The gateway run time can expose the APIS and serves the API requests. The executable output of the toolkit should be provided as an input when running the microgateway runtime.
 Then this run time will expose all the APIs which were included in the particular project which used to create the executable file
 
 #### Architecture
