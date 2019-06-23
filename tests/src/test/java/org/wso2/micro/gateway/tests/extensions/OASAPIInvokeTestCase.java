@@ -37,7 +37,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
-        
+
         String project = "apimTestProject";
         API api = new API();
         api.setName("PetStoreAPI");

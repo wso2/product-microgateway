@@ -23,16 +23,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
-import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
@@ -48,7 +44,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     @Override
     protected void init(String label, String project) throws Exception {
         String configPath = "confs" + File.separator + "throttle-test-config.conf";
-        super.init(label,project, configPath);
+        super.init(label, project, configPath);
     }
 
     @BeforeClass
@@ -194,7 +190,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
-                if(responseCode ==429) {
+                if (responseCode == 429) {
                     return responseCode;
                 }
                 retry--;
@@ -202,6 +198,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         }
         return responseCode;
     }
+
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
         microGWServer.stopServer(false);

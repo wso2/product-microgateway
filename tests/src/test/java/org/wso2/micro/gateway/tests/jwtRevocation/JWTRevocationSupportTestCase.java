@@ -209,6 +209,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to retry ETCD all jti request
+     *
      * @param responseData Expected resoponse data
      * @param responseCode Expected resoponse code
      * @throws Exception Error while sending GET request
@@ -239,8 +240,9 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to publish a messege to JwtRevocation topic
+     *
      * @throws NamingException Error thrown while handling initial context
-     * @throws JMSException Error thrown while creating JMS connection
+     * @throws JMSException    Error thrown while creating JMS connection
      */
     private void publishMessage() throws NamingException, JMSException {
 
@@ -263,7 +265,8 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to create a subscriber for jwtRevocation topic
-     * @throws JMSException Error thrown while creating JMS connection
+     *
+     * @throws JMSException    Error thrown while creating JMS connection
      * @throws NamingException Error thrown while handling initial context
      */
     private void createSubscriberJMSConnection() throws JMSException, NamingException {

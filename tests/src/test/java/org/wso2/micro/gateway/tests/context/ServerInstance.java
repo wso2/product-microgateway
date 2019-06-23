@@ -91,8 +91,9 @@ public class ServerInstance implements Server {
     }
 
     /**
-     * Method to start Micro-GW server in default port 9092 with given bal file.
+     * Method to start Micro-GW server in default port 9092 with given bal file and the given config file.
      *
+     * @param configPath the absolute path of the config file
      * @return microGWServer      Started server instance.
      */
     public static ServerInstance initMicroGwServer(String configPath) {
@@ -100,6 +101,11 @@ public class ServerInstance implements Server {
                 TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, configPath);
     }
 
+    /**
+     * Method to start Micro-GW server in default port 9092 with given bal file and the default config file.
+     *
+     * @return microGWServer      Started server instance.
+     */
     public static ServerInstance initMicroGwServer() {
         return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
                 TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, null);
@@ -112,6 +118,13 @@ public class ServerInstance implements Server {
         startServer();
     }
 
+    /**
+     * Start microgateway server with the given set of additional arguments and the given bal file.
+     *
+     * @param balFile the path of the bal File
+     * @param args    additional commandline arguments
+     * @throws MicroGWTestException
+     */
     public void startMicroGwServer(String balFile, String[] args) throws MicroGWTestException {
         String[] newArgs = {balFile};
         newArgs = ArrayUtils.addAll(args, newArgs);
@@ -119,6 +132,10 @@ public class ServerInstance implements Server {
         startServer();
     }
 
+    /**
+     * @param balFile
+     * @throws MicroGWTestException
+     */
     public void startMicroGwServer(String balFile) throws MicroGWTestException {
         String[] newArgs = {balFile};
         setArguments(newArgs);
@@ -250,7 +267,7 @@ public class ServerInstance implements Server {
      *
      * @param args list of service files
      */
-    public void setArguments(String[] args) {
+    private void setArguments(String[] args) {
         this.args = args;
     }
 
@@ -258,7 +275,7 @@ public class ServerInstance implements Server {
      * to change the server configuration if required. This method can be overriding when initialising
      * the object of this class.
      */
-    protected void configServer() {
+    private void configServer() {
     }
 
 //    /**
@@ -285,6 +302,7 @@ public class ServerInstance implements Server {
      *
      * @param leecher The Leecher instance
      */
+    @SuppressWarnings("unused")
     public void addLogLeecher(LogLeecher leecher) {
         if (serverInfoLogReader == null) {
             tmpLeechers.add(leecher);

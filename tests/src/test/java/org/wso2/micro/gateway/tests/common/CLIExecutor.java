@@ -186,7 +186,7 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void copyOpenAPIDefinitionsToProject(String project, String[] openAPIFileNames)
-            throws MicroGWTestException{
+            throws MicroGWTestException {
         for (String openAPIFileName : openAPIFileNames) {
             File swaggerSrcPath = new File(
                     getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator +

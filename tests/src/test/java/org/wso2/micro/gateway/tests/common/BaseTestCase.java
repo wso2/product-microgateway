@@ -55,8 +55,8 @@ public class BaseTestCase {
      *
      * @param configFilePath the relative path of config file (stored inside resources directory) if the default config
      *                       file needs to be overwritten.
-     * @param balPath the absolute path of the compiled ballerina project executable(balx file).
-     * @param args commandline arguments.
+     * @param balPath        the absolute path of the compiled ballerina project executable(balx file).
+     * @param args           commandline arguments.
      * @throws MicroGWTestException
      */
     private void initAndStartMicroGWServer(String configFilePath, String balPath, String[] args)
@@ -79,14 +79,14 @@ public class BaseTestCase {
     /**
      * Initialize the project by importing APIs from the API Manager publisher.
      *
-     * @param label label
-     * @param project project name
-     * @param args additional commandline arguments
+     * @param label          label
+     * @param project        project name
+     * @param args           additional commandline arguments
      * @param configFilePath relative path of the config file
-     * @throws MicroGWTestException
+     * @throws Exception
      */
     protected void init(String label, String project, String[] args, String configFilePath)
-            throws MicroGWTestException {
+            throws Exception {
         initHttpServer();
         CLIExecutor cliExecutor = CLIExecutor.getInstance();
         cliExecutor.generate(label, project);
@@ -97,37 +97,37 @@ public class BaseTestCase {
     /**
      * Initialize the project by importing APIs from the API Manager publisher.
      *
-     * @param label label
-     * @param project project name
+     * @param label          label
+     * @param project        project name
      * @param configFilePath relative path of the config file
-     * @throws MicroGWTestException
+     * @throws Exception
      */
-    protected void init(String label, String project, String configFilePath) throws MicroGWTestException {
+    protected void init(String label, String project, String configFilePath) throws Exception {
         init(label, project, null, configFilePath);
     }
 
     /**
      * Initialize the project by importing APIs from the API Manager publisher.
      *
-     * @param label label
+     * @param label   label
      * @param project project name
-     * @throws MicroGWTestException
+     * @throws Exception
      */
-    protected void init(String label, String project) throws MicroGWTestException {
+    protected void init(String label, String project) throws Exception {
         init(label, project, null);
     }
 
     /**
      * Initialize the project using developer first approach (Using openAPI definitions).
      *
-     * @param project project name
+     * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
-     * @param args additional commandline arguments
-     * @param configFilePath relative path of the config file
-     * @throws MicroGWTestException
+     * @param args             additional commandline arguments
+     * @param configFilePath   relative path of the config file
+     * @throws Exception
      */
     protected void init(String project, String[] openAPIFileNames, String[] args, String configFilePath)
-            throws MicroGWTestException {
+            throws Exception {
         initHttpServer();
         CLIExecutor cliExecutor = CLIExecutor.getInstance();
         cliExecutor.generateFromDefinition(project, openAPIFileNames);
@@ -138,23 +138,23 @@ public class BaseTestCase {
     /**
      * Initialize the project using developer first approach (Using openAPI definitions).
      *
-     * @param project project name
+     * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
-     * @param args additional commandline arguments
-     * @throws MicroGWTestException
+     * @param args             additional commandline arguments
+     * @throws Exception
      */
-    protected void init(String project, String[] openAPIFileNames, String[] args) throws MicroGWTestException {
+    protected void init(String project, String[] openAPIFileNames, String[] args) throws Exception {
         init(project, openAPIFileNames, args, null);
     }
 
     /**
      * Initialize the project using developer first approach (Using openAPI definitions).
      *
-     * @param project project name
+     * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
      * @throws MicroGWTestException
      */
-    protected void init(String project, String[] openAPIFileNames) throws MicroGWTestException {
+    protected void init(String project, String[] openAPIFileNames) throws Exception {
         init(project, openAPIFileNames, null);
     }
 

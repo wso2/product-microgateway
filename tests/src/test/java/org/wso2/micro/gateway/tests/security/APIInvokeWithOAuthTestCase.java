@@ -31,7 +31,6 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
