@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -51,19 +52,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private ExternalDocumentation externalDocs;
     private String operationId;
     private List<BallerinaParameter> parameters;
-    private List<String> methods;
     private String scope;
     private boolean isSecured = true;
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
-    private boolean hasProdEpConfig = false;
-    private boolean hasSandEpConfig = false;
     private MgwEndpointConfigDTO epConfig;
     private String requestInterceptor;
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
     private BasicAuth basicAuth;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    private boolean hasProdEpConfig = false;
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    private boolean hasSandEpConfig = false;
 
     // Not static since handlebars can't see static variables
     private final List<String> allMethods =
@@ -84,7 +87,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.description = operation.getDescription();
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
-        this.methods = null;
         //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
         //to set resource level scopes in dev-first approach
@@ -141,14 +143,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         return buildContext(operation, null);
     }
 
-    private String getTrimmedOperationId (String operationId) {
-        if (operationId == null) {
-            return null;
-        }
-
-        return operationId.replaceAll(" ", "_");
-    }
-
     @Override
     public BallerinaOperation getDefaultValue() {
         return new BallerinaOperation();
@@ -176,10 +170,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
-    }
-
-    public List<String> getMethods() {
-        return methods;
     }
 
     public List<String> getAllMethods() {
@@ -229,13 +219,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     private void setEpConfigDTO(Operation operation) {
         this.epConfig = OpenAPICodegenUtils.getResourceEpConfigForCodegen(operation);
-        if (epConfig != null) {
-            if (epConfig.getProdEndpointList() != null) {
-                hasProdEpConfig = true;
-            }
-            if (epConfig.getSandboxEndpointList() != null) {
-                hasSandEpConfig = true;
-            }
+
+        if (epConfig.getProdEndpointList() != null) {
+            hasProdEpConfig = true;
+        }
+        if (epConfig.getSandboxEndpointList() != null) {
+            hasSandEpConfig = true;
         }
     }
 
