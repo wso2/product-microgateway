@@ -37,13 +37,18 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyL
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
+/**
+ * Implementation of {@link RESTAPIService} to communication with
+ * WSO2 API Publisher.
+ */
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
 
