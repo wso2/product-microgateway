@@ -114,7 +114,7 @@ public class BaseTestCase {
      * @throws Exception
      */
     protected void init(String label, String project) throws Exception {
-        init(label, project, null);
+        init(label, project, null, null);
     }
 
     /**
@@ -155,7 +155,7 @@ public class BaseTestCase {
      * @throws MicroGWTestException
      */
     protected void init(String project, String[] openAPIFileNames) throws Exception {
-        init(project, openAPIFileNames, null);
+        init(project, openAPIFileNames, null, null);
     }
 
     /**
