@@ -215,9 +215,9 @@
                         <configuration>
                             <tasks>
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
-                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-macos-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
-                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-macos-${project.version}/bin/*" perm="+x"/>
-                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-macos-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x"/>
+                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x"/>
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -235,6 +235,40 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <host.os>macos</host.os>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <host.os>linux</host.os>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <host.os>windows</host.os>
+            </properties>
+        </profile>
         <profile>
             <id>local-etcd</id>
             <build>
