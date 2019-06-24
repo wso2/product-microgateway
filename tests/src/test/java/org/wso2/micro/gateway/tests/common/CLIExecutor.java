@@ -103,15 +103,12 @@ public class CLIExecutor {
                 desPath = new File(path + File.separator + project + File.separator +
                         GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
                         openAPIFileName.substring(openAPIFileName.lastIndexOf(File.separator) + 1));
-
             } else {
-
                 desPath = new File(
                         path + File.separator + project + File.separator +
                                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
                                 .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
             }
-
             FileUtils.copyFile(filePath, desPath);
         }
         File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
@@ -123,8 +120,7 @@ public class CLIExecutor {
        } else {
            FileUtils.copyFile(policyYamlResouce, policyYamlFile);
        }
-
-
+       
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         homeDirectory = path.toString();
 
