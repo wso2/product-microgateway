@@ -63,8 +63,7 @@ public class ThrottlePolicyInitializer {
         return this;
     }
 
-    public ThrottlePolicyInitializer buildPolicyContext(List<ThrottlePolicyMapper> policies, GeneratorConstants
-            .POLICY_TYPE type) {
+    public ThrottlePolicyInitializer buildPolicyContext(List<ThrottlePolicyMapper> policies, GeneratorConstants.PolicyType type) {
         for (ThrottlePolicyMapper policyDTO : policies) {
             String escapedPolicyName = CodegenUtils.trim(policyDTO.getName());
             switch (type) {

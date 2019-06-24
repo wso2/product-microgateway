@@ -820,10 +820,10 @@ public final class GatewayCmdUtils {
     public static APICorsConfigurationDTO getDefaultCorsConfig() {
         APICorsConfigurationDTO corsConfigurationDTO = new APICorsConfigurationDTO();
         corsConfigurationDTO.setCorsConfigurationEnabled(true);
-        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.accessControlAllowOrigins);
-        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.accessControlAllowMethods);
-        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.accessControlAllowHeaders);
-        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.accessControlAllowCredentials);
+        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.ACCESS_CONTROL_ALLOW_ORIGINS);
+        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.ACCESS_CONTROL_ALLOW_METHODS);
+        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.ACCESS_CONTROL_ALLOW_HEADERS);
+        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS);
         return corsConfigurationDTO;
     }
 

@@ -124,8 +124,8 @@ public class ImportCmd implements GatewayLauncherCmd {
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
-            throw GatewayCmdUtils.createUsageException("Project " + projectName + " does not exist. Please execute the command '" +
-                    "micro-gw init " + projectName + "' to initialize the project.");
+            throw GatewayCmdUtils.createUsageException("Project " + projectName + " does not exist. " +
+                    "Please execute the command '" + "micro-gw init " + projectName + "' to initialize the project.");
         }
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
@@ -175,8 +175,9 @@ public class ImportCmd implements GatewayLauncherCmd {
         if (StringUtils.isEmpty(configuredTrustStore)) {
             if (StringUtils.isEmpty(trustStoreLocation)) {
                 isOverwriteRequired = true;
-                if ((trustStoreLocation = GatewayCmdUtils.promptForTextInput(outStream,
-                        "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + "]")).trim().isEmpty()) {
+                String tsPrompt = "Enter Trust store location: [" + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH + ']';
+                String trustStorePath = GatewayCmdUtils.promptForTextInput(outStream, tsPrompt);
+                if (trustStorePath.trim().isEmpty()) {
                     trustStoreLocation = RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
                 }
             }
@@ -424,7 +425,7 @@ public class ImportCmd implements GatewayLauncherCmd {
                 }
 
                 //cli command to ask user to accept the baseURL or enter a new base url
-                String userInputURL = getBaseURLfromCmd(baseURL);
+                String userInputURL = getBaseURLFromCmd(baseURL);
                 if (!userInputURL.isEmpty()) {
                     baseURL = userInputURL;
                     isOverwriteRequired = true;
@@ -439,7 +440,7 @@ public class ImportCmd implements GatewayLauncherCmd {
             if (StringUtils.isEmpty(restVersion)) {
                 restVersion = RESTServiceConstants.CONFIG_REST_VERSION;
             }
-            informRestVersiontoUser(restVersion);
+            informRestVersionToUser(restVersion);
             configTokenValues.setRestVersion(restVersion);
         }
 
@@ -484,7 +485,7 @@ public class ImportCmd implements GatewayLauncherCmd {
      *
      * @param restVersion API Manager's REST version
      */
-    private void informRestVersiontoUser(String restVersion) {
+    private void informRestVersionToUser(String restVersion) {
         outStream.println(
                 "You are using REST version - " + restVersion + " of API Manager. (If you want to change this, go to "
                         + "<MICROGW_HOME>/conf/toolkit-config.toml)");
@@ -493,7 +494,7 @@ public class ImportCmd implements GatewayLauncherCmd {
     /**
      * prompt to get the base URL
      */
-    private String getBaseURLfromCmd(String defaultBaseURL) {
+    private String getBaseURLFromCmd(String defaultBaseURL) {
         String userInputURL;
         userInputURL = promptForTextInput("Enter APIM base URL [" + defaultBaseURL + "]: ").trim();
         return userInputURL;
