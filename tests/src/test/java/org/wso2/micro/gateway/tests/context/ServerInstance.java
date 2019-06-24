@@ -31,7 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -315,6 +318,7 @@ public class ServerInstance implements Server {
     private void startServerRuntime(String[] args) throws MicroGWTestException {
         String scriptName = Constants.GATEWAY_SCRIPT_NAME;
         String[] cmdArray;
+        String[] envp = getEnvironmentVariablesAsArray();
         File commandDir = new File(serverHome + File.separator + "bin");
         //Overwrite the config file
         if (configPath != null) {
@@ -327,12 +331,12 @@ public class ServerInstance implements Server {
                 cmdArray = new String[]{"cmd.exe", "/c", scriptName + ".bat"};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
+                process = Runtime.getRuntime().exec(cmdArgs, envp, commandDir);
             } else {
                 cmdArray = new String[]{"bash", scriptName};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
+                process = Runtime.getRuntime().exec(cmdArgs, envp, commandDir);
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Error starting services", e);
@@ -475,5 +479,17 @@ public class ServerInstance implements Server {
         } catch (IOException e) {
             throw new MicroGWTestException("error while copying config file. ");
         }
+    }
+
+    private String[] getEnvironmentVariablesAsArray() {
+        Map<String, String> envVariableMap = System.getenv();
+        int arrayLength = envVariableMap.size();
+        if (arrayLength == 0) {
+            return null;
+        }
+        List<String> envVariableList = new ArrayList<>();
+        envVariableMap.forEach((k, v) -> envVariableList.add(k + "=" + v));
+        String[] envVariableArray = new String[arrayLength];
+        return envVariableList.toArray(envVariableArray);
     }
 }
