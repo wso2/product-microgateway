@@ -54,6 +54,7 @@ public class ServerInstance implements Server {
     private int httpServerPortToken = TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT;
     private ConcurrentHashSet<LogLeecher> tmpLeechers = new ConcurrentHashSet<>();
 
+    @SuppressWarnings("unused")
     public ServerInstance(String serverDistributionPath) {
         this.serverHome = serverDistributionPath;
         initialize();
@@ -111,8 +112,9 @@ public class ServerInstance implements Server {
                 TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, null);
     }
 
+    @SuppressWarnings("unused")
     public void startMicroGwServerWithDebugLog(String balFile) throws MicroGWTestException {
-        String[] args = {balFile, "-e", "b7a.log.level=DEBUG"};
+        String[] args = {"-e", "b7a.log.level=DEBUG", balFile};
         setArguments(args);
 
         startServer();
@@ -121,7 +123,7 @@ public class ServerInstance implements Server {
     /**
      * Start microgateway server with the given set of additional arguments and the given bal file.
      *
-     * @param balFile the path of the bal File
+     * @param balFile the path of the balx File
      * @param args    additional commandline arguments
      * @throws MicroGWTestException
      */
@@ -133,7 +135,9 @@ public class ServerInstance implements Server {
     }
 
     /**
-     * @param balFile
+     * Start microgateway under the default configuration
+     *
+     * @param balFile the absolute path of the balx file.
      * @throws MicroGWTestException
      */
     public void startMicroGwServer(String balFile) throws MicroGWTestException {
@@ -151,8 +155,8 @@ public class ServerInstance implements Server {
      */
     public void startMicroGwServerWithConfigPath(String balFile, String gwConfPath) throws
             MicroGWTestException {
-        String gwConfigPathArg = "--config ";
-        String[] args = {gwConfigPathArg, gwConfPath, balFile};
+        copyFile(gwConfPath, serverHome + File.separator + "conf" + File.separator + "micro-gw.conf");
+        String[] args = {balFile};
         setArguments(args);
 
         startServer();
@@ -277,15 +281,6 @@ public class ServerInstance implements Server {
      */
     private void configServer() {
     }
-
-//    /**
-//     * Return toolkit directory path.
-//     *
-//     * @return absolute path of the server location
-//     */
-//    public String getToolkitDir() {
-//        return toolkitDir;
-//    }
 
     /**
      * Return the service URL.
