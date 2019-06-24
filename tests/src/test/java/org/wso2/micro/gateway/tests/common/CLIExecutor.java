@@ -83,7 +83,8 @@ public class CLIExecutor {
     public void generateFromDefinition( String project, String[] openAPIFileNames)
             throws Exception {
         org.wso2.apimgt.gateway.cli.cmd.Main main = new org.wso2.apimgt.gateway.cli.cmd.Main();
-
+        File filePath;
+        File desPath;
         String baseDir = (System.getProperty(Constants.SYSTEM_PROP_BASE_DIR, ".")) + File.separator + "target";
         Path path = Files.createTempDirectory(new File(baseDir).toPath(), "userProject", new FileAttribute[0]);
         log.info("CLI Project Home: " + path.toString());
@@ -94,16 +95,24 @@ public class CLIExecutor {
         System.setProperty("user.dir", path.toString());
         String[] initArgs = {"init", project};
         main.main(initArgs);
-        for(String openAPIFileName : openAPIFileNames) {
+        for (String openAPIFileName : openAPIFileNames) {
+            filePath = new File(
+                    getClass().getClassLoader().getResource(Constants.OPEN_APIS +
+                            File.separator + openAPIFileName).getPath());
 
-            File swaggerFilePath = new File(
-                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator + openAPIFileName).getPath());
+            if (openAPIFileName.contains(".bal")) {
+                     desPath = new File(path + File.separator + project + File.separator +
+                             GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator + openAPIFileName.substring(openAPIFileName.lastIndexOf(File.separator)+1));
 
-            File swagerDesPath = new File(
-                    path + File.separator + project + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                            .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+            } else {
 
-            FileUtils.copyFile(swaggerFilePath, swagerDesPath);
+                desPath = new File(
+                        path + File.separator + project + File.separator +
+                                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+            }
+
+            FileUtils.copyFile(filePath, desPath);
         }
         File policyYamlResouce = new File(getClass().getClassLoader().getResource("policies.yaml").getPath());
         File policyYamlFile = new File(apiDefinitionPath + "/policies.yaml");
