@@ -22,8 +22,9 @@
     ]{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerHost}},
     dockerHost:"{{containerConfig.kubernetes.kubernetesDeployment.dockerHost}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}},
     dockerCertPath:"{{containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.push}},
-    push:{{containerConfig.kubernetes.kubernetesDeployment.push}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.password}},
-    password:"{{containerConfig.kubernetes.kubernetesDeployment.password}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.baseImage}},
+    push:{{containerConfig.kubernetes.kubernetesDeployment.push}},
+    username:"$env{DOCKER_USERNAME}",
+    password:"$env{DOCKER_PASSWORD}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.baseImage}},
     baseImage:"{{containerConfig.kubernetes.kubernetesDeployment.baseImage}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.singleYAML}},
     singleYAML:{{containerConfig.kubernetes.kubernetesDeployment.singleYAML}}{{/if}}
 }
