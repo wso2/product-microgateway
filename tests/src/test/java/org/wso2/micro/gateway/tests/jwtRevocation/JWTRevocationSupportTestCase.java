@@ -28,14 +28,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockETCDServer;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.ClientHelper;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
@@ -45,7 +42,6 @@ import org.wso2.micro.gateway.tests.util.TestConstant;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -122,28 +118,8 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         //broker = new EmbeddedBroker();
         //startMessageBroker();
 
-        //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
-
-        configPath = Objects.requireNonNull(getClass().getClassLoader().getResource("confs" + File.separator +
-                "default-test-config.conf")).getPath();
-        //Initialize the Micro-Gateway Server
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.generate(label, project);
-
-        balPath = CLIExecutor.getInstance().getLabelBalx(project);
-
-        String ballerinaLogging = "b7a.log.level=TRACE";
-
-        //Starting the Micro-Gateway Server
-        String[] args = {"-e", ballerinaLogging};
-        microGWServer.startMicroGwServer(balPath, args);
+        configPath = "confs" + File.separator + "default-test-config.conf";
+        super.init(label, project, configPath);
 
         //Send Extracted JTI to the jwtRevocation Topic
         publishMessage();
