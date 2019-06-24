@@ -22,6 +22,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.model.oauth.DCRRequest;
 
+/**
+ * Builds a new request to communicate with DCR endpoint.
+ */
 public class DCRRequestBuilder {
     private DCRRequest dcrRequest;
     private ObjectNode request;

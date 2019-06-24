@@ -18,10 +18,10 @@
 package org.wso2.apimgt.gateway.cli.exception;
 
 /**
- * Exception class to throw when runtime exception happen and to exit the system
+ * Exception class to throw when runtime exception happen and to exit the system.
  */
 public class CLIInternalException extends RuntimeException {
-    private final static int DEFAULT_EXIT_CODE = 1;
+    private static final int DEFAULT_EXIT_CODE = 1;
     private int exitCode;
 
     public CLIInternalException(String message) {
