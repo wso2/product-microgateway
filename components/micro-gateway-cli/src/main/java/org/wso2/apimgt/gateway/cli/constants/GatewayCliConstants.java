@@ -30,7 +30,6 @@ public class GatewayCliConstants {
     public static final String PROJECT_EXTENSIONS_DIR = "extensions";
     public static final String PROJECT_API_DEFINITIONS_DIR = "api_definitions";
     public static final String PROJECT_SERVICES_DIR = "services";
-    public static final String PROJECT_DEFINITION_FILE = "definition.yaml";
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
     public static final String PROJECT_TARGET_DIR = "target";
     public static final String PROJECT_GEN_DIR = "gen";
@@ -40,7 +39,6 @@ public class GatewayCliConstants {
     public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String RESOURCE_HASH_HOLDER_FILE_NAME = "hashes.json";
-    public static final String LIB_HASH_HOLDER_FILE_NAME = "hashes";
     public static final String DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME = "default-deployment-config.toml";
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
@@ -60,7 +58,6 @@ public class GatewayCliConstants {
     public static final String GW_DIST_RESOURCES = "resources";
     public static final String GW_DIST_FILTERS = "filters";
     public static final String GW_DIST_DEFINITIONS = "definitions";
-    public static final String GW_DIST_POLICIES = "policies";
     public static final String GW_DIST_POLICIES_FILE = PROJECT_POLICIES_FILE;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_TOKEN_REVOCATION_EXTENSION = "token_revocation_extension.bal";
@@ -76,22 +73,17 @@ public class GatewayCliConstants {
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
     public static final String SYS_PROP_SECURITY = "security";
     public static final String MICRO_GW = "micro-gw";
-    
+
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
     public static final List<String> accessControlAllowOrigins = Collections.singletonList("*");
-    public static final List<String> accessControlAllowMethods = Arrays
-            .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS");
-    public static final List<String> accessControlAllowHeaders = Arrays
-            .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction");
+    public static final List<String> accessControlAllowMethods = Collections.unmodifiableList(Arrays
+            .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"));
+    public static final List<String> accessControlAllowHeaders = Collections.unmodifiableList(Arrays
+            .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"));
     public static final boolean accessControlAllowCredentials = false;
 
-    public static final String SUBSCRIPTION_THROTTLE_POLICIES_FILE = "subscription-throttle-policies.json";
-    public static final String APPLICATION_THROTTLE_POLICIES_FILE = "application-throttle-policies.json";
-    public static final String CLIENT_CERT_METADATA_FILE = "client-cert-metadata.json";
-    public static final String API_METADATA_FILE = "api-metadata.yaml";
     public static final String API_SWAGGER = "swagger.json";
     public static final String API_OPENAPI_YAML = "openAPI.yaml";
-    public static final String PROJECT_FILE_NAME = ".PROJECT";
 }

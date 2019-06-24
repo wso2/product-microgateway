@@ -34,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -200,8 +201,8 @@ public class HashUtils {
             return false;
         }
 
-        for (String map1Key : map1.keySet()) {
-            if (map1.get(map1Key) == null || !map1.get(map1Key).equals(map2.get(map1Key))) {
+        for (Map.Entry<String, String> entry : map1.entrySet()) {
+            if (entry.getValue() == null || !entry.getValue().equals(map2.get(entry.getKey()))) {
                 return false;
             }
         }
@@ -220,7 +221,7 @@ public class HashUtils {
         byte[] digest;
         try {
             md = MessageDigest.getInstance(HashingConstants.HASH_ALGORITHM);
-            md.update(inputString.getBytes());
+            md.update(inputString.getBytes(StandardCharsets.UTF_8));
             digest = md.digest();
         } catch (NoSuchAlgorithmException e) {
             throw new HashingException("Error getting md5 hash of " + inputString, e);

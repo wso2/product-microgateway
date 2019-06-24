@@ -162,7 +162,7 @@
                         <id>distribution</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <descriptorSourceDirectory>${basedir}/assembly</descriptorSourceDirectory>

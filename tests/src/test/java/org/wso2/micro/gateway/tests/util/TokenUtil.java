@@ -11,6 +11,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,6 @@ public class TokenUtil {
         jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
         jwtTokenInfo.put("sub", "admin");
         jwtTokenInfo.put("application", new JSONObject(applicationDTO));
-        jwtTokenInfo.put("scope", "am_application_scope default");
         jwtTokenInfo.put("iss", "https://localhost:8244/token");
         jwtTokenInfo.put("keytype", keyType);
         jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
@@ -60,5 +60,13 @@ public class TokenUtil {
         byte[] signedAssertion = signature.sign();
         String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
         return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
+    }
+
+    public static String getJwtWithCustomClaims(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType, int validityPeriod, Map<String, String > claims)
+            throws Exception {
+        for(Map.Entry<String, String> entry : claims.entrySet()) {
+            jwtTokenInfo.put(entry.getKey(), entry.getValue());
+        }
+        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
     }
 }
