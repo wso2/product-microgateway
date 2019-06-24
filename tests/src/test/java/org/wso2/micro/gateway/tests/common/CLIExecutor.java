@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Execute APIM CLI functions.
@@ -61,7 +62,6 @@ public class CLIExecutor {
                 "--truststore-pass", "ballerina", "--config", config};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
-        //todo: check the availability of balx
         runBuildCmd(mgwCommand, project);
     }
 
@@ -78,8 +78,12 @@ public class CLIExecutor {
             Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
             new ServerLogReader("errorStream", process.getErrorStream()).start();
             new ServerLogReader("inputStream", process.getInputStream()).start();
-            int importExitCode = process.waitFor();
-            if (importExitCode != 0) {
+            boolean isCompleted = process.waitFor(2, TimeUnit.MINUTES);
+            if (!isCompleted) {
+                throw new RuntimeException(errorMessage);
+            }
+            int processExitCode = process.exitValue();
+            if (processExitCode != 0) {
                 throw new RuntimeException(errorMessage);
             }
         } catch (IOException | InterruptedException e) {
