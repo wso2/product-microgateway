@@ -28,13 +28,17 @@ import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
 import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.xml.bind.DatatypeConverter;
+
+/**
+ * Implementation of {@link OAuthService} to communicate with WSO2 Key manager services.
+ */
 public class OAuthServiceImpl implements OAuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);

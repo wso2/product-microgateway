@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.oauth;
 
+/**
+ * Exposes functionalities required to communicate with oauth secured web service.
+ */
 public interface OAuthService {
 
     /**
@@ -35,7 +38,8 @@ public interface OAuthService {
 
     /**
      * Generate OAuth application via DCR
-     *  @param dcrEndpoint DCR endpoint
+     *
+     * @param dcrEndpoint DCR endpoint
      * @param username    user
      * @param password    password password of the user
      * @param inSecure
