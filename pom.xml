@@ -410,7 +410,14 @@
                             <suppressionsLocation>
                                 https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/suppressions.xml
                             </suppressionsLocation>
-                            <includes>org/wso2/apimgt/gateway/cli/utils/*.java</includes>
+                            <includes>
+                                org/wso2/apimgt/gateway/cli/logging/**/*.java,
+                                org/wso2/apimgt/gateway/cli/config/**/*.java,
+                                org/wso2/apimgt/gateway/cli/exception/**/*.java,
+                                org/wso2/apimgt/gateway/cli/hashing/**/*.java,
+                                org/wso2/apimgt/gateway/cli/oauth/**/*.java,
+                                org/wso2/apimgt/gateway/cli/cipher/**/*.java
+                            </includes>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
