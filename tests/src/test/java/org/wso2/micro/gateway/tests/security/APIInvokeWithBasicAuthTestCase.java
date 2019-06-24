@@ -67,8 +67,6 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
-        //set security schemas
-        String security = "basic";
 
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
@@ -86,7 +84,7 @@ public class APIInvokeWithBasicAuthTestCase extends BaseTestCase {
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
         //generate apis with CLI and start the micro gateway server only supports basic Auth
-        super.init(label, project, security);
+        super.init(label, project);
     }
 
     @Test(description = "Test API invocation with a JWT token")

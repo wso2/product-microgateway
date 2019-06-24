@@ -71,10 +71,8 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         KeyValidationInfo info1 = new KeyValidationInfo();
         info1.setStringResponse(response1);
         invalidScopeToken = pub.getAndRegisterAccessToken(info1);
-        //set security schemas
-        String security = "oauth2";
 
-        super.init(label, project, security);
+        super.init(label, project);
     }
 
     @Test(description = "Test without auth header")

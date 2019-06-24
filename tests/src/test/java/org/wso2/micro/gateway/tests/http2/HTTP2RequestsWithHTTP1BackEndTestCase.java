@@ -20,19 +20,14 @@ package org.wso2.micro.gateway.tests.http2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
-import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HTTP2Client.Http2ClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
@@ -61,8 +56,6 @@ public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
         api.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
-        //set security schemas
-        String security = "oauth2";
 
         //Define application info
         ApplicationDTO application = new ApplicationDTO();
@@ -78,24 +71,8 @@ public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
 
-        CLIExecutor cliExecutor;
-
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "http2-test.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        microGWServer.startMicroGwServer(balPath);
+        String configPath = "confs" + File.separator + "http2-test.conf";
+        super.init(label, project, configPath);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
     }

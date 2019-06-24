@@ -21,6 +21,7 @@ import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.RequestCountLimitDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottleLimitDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
@@ -154,7 +155,14 @@ public class ThrottlePolicy {
     public ThrottlePolicy buildContext(ApplicationThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
         this.name = CodegenUtils.trim(applicationPolicy.getPolicyName());
-        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
+        ThrottleLimitDTO limit = applicationPolicy.getDefaultLimit();
+
+        if (!(limit instanceof RequestCountLimitDTO)) {
+            // returning null for the moment. since we don't use other type policies.
+            return null;
+        }
+
+        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) limit;
         this.count = requestCountLimitDTO.getRequestCount();
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
         this.funcName =
@@ -168,7 +176,14 @@ public class ThrottlePolicy {
     public ThrottlePolicy buildContext(SubscriptionThrottlePolicyDTO applicationPolicy) {
         this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
         this.name = CodegenUtils.trim(applicationPolicy.getPolicyName());
-        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) applicationPolicy.getDefaultLimit();
+        ThrottleLimitDTO limit = applicationPolicy.getDefaultLimit();
+
+        if (!(limit instanceof RequestCountLimitDTO)) {
+            // returning null for the moment. since we don't use other type policies.
+            return null;
+        }
+
+        RequestCountLimitDTO requestCountLimitDTO = (RequestCountLimitDTO) limit;
         this.count = requestCountLimitDTO.getRequestCount();
         this.unitTime = getTimeInMilliSeconds(requestCountLimitDTO.getUnitTime(), requestCountLimitDTO.getTimeUnit());
         this.funcName =

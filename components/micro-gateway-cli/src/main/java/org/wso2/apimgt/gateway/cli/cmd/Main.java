@@ -48,8 +48,9 @@ public class Main {
             optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
-            if (e.getCause() instanceof ParameterException) {
-                ParameterException paramEx = (ParameterException) e.getCause();
+            Throwable cause = e.getCause();
+            if (cause instanceof ParameterException) {
+                ParameterException paramEx = (ParameterException) cause;
                 paramEx.usage();
             }
             logger.error(MICRO_GW + "Error occurred while executing command.", e);

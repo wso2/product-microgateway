@@ -20,8 +20,8 @@ package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
-import java.util.LinkedHashMap;
 import javax.validation.constraints.NotNull;
+import java.util.LinkedHashMap;
 
 public class ThrottlePolicyMapper {
     @NotNull

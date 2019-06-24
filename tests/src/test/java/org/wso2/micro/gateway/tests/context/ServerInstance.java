@@ -31,7 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -41,8 +44,8 @@ import java.util.stream.Stream;
  */
 public class ServerInstance implements Server {
     private static final Logger log = LoggerFactory.getLogger(ServerInstance.class);
+    //todo: remove toolkitDir to cliexecutor
     private String serverHome;
-    private String toolkitDir;
     private String configPath;
     private String[] args;
     private Process process;
@@ -54,16 +57,15 @@ public class ServerInstance implements Server {
     private int httpServerPortToken = TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT;
     private ConcurrentHashSet<LogLeecher> tmpLeechers = new ConcurrentHashSet<>();
 
-    public ServerInstance(String toolkitDistribution, String serverDistributionPath) throws MicroGWTestException {
-        this.toolkitDir = toolkitDistribution;
+    @SuppressWarnings("unused")
+    public ServerInstance(String serverDistributionPath) {
         this.serverHome = serverDistributionPath;
         initialize();
     }
 
-    public ServerInstance(String toolkitDistribution, String serverDistributionPath, String configPath,
-                          int serverHttpPort, int serverHttpsPort, int serverHttpsTokenPort) {
+    public ServerInstance(String serverDistributionPath, String configPath, int serverHttpPort, int serverHttpsPort,
+                          int serverHttpsTokenPort) {
         this.configPath = configPath;
-        this.toolkitDir = toolkitDistribution;
         this.serverHome = serverDistributionPath;
         this.httpServerPort = serverHttpPort;
         this.httpsServerPort = serverHttpsPort;
@@ -76,13 +78,10 @@ public class ServerInstance implements Server {
      *
      * @param httpPort       http server port
      * @param httpsPort      https server port
-     * @param tokenHttpsPost https server token endpoint port
+     * @param tokenHttpsPort https server token endpoint port
      * @return microGWServer      Started server instance.
-     * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPost, String configPath)
-            throws MicroGWTestException {
-        String toolkitZipPath = System.getProperty(Constants.SYSTEM_PROP_TOOLKIT);
+    public static ServerInstance initMicroGwServer(int httpPort, int httpsPort, int tokenHttpsPort, String configPath) {
         String serverRuntimePath;
         String osName = Utils.getOSName().toLowerCase();
         if (osName.contains("windows")) {
@@ -92,32 +91,45 @@ public class ServerInstance implements Server {
         } else {
             serverRuntimePath = System.getProperty(Constants.SYSTEM_PROP_LINUX_RUNTIME);
         }
-        return new ServerInstance(toolkitZipPath, serverRuntimePath, configPath, httpPort, httpsPort, tokenHttpsPost);
+        return new ServerInstance(serverRuntimePath, configPath, httpPort, httpsPort, tokenHttpsPort);
     }
 
     /**
-     * Method to start Micro-GW server in default port 9092 with given bal file.
+     * Method to start Micro-GW server in default port 9092 with given bal file and the given config file.
      *
+     * @param configPath the absolute path of the config file
      * @return microGWServer      Started server instance.
-     * @throws MicroGWTestException
      */
-    public static ServerInstance initMicroGwServer(String configPath) throws MicroGWTestException {
+    public static ServerInstance initMicroGwServer(String configPath) {
         return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
                 TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, configPath);
     }
 
-    public static ServerInstance initMicroGwServer() throws MicroGWTestException {
+    /**
+     * Method to start Micro-GW server in default port 9092 with given bal file and the default config file.
+     *
+     * @return microGWServer      Started server instance.
+     */
+    public static ServerInstance initMicroGwServer() {
         return initMicroGwServer(TestConstant.GATEWAY_LISTENER_HTTP_PORT, TestConstant.GATEWAY_LISTENER_HTTPS_PORT,
                 TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT, null);
     }
 
+    @SuppressWarnings("unused")
     public void startMicroGwServerWithDebugLog(String balFile) throws MicroGWTestException {
-        String[] args = {balFile, "-e", "b7a.log.level=DEBUG"};
+        String[] args = {"-e", "b7a.log.level=DEBUG", balFile};
         setArguments(args);
 
         startServer();
     }
 
+    /**
+     * Start microgateway server with the given set of additional arguments and the given bal file.
+     *
+     * @param balFile the path of the balx File
+     * @param args    additional commandline arguments
+     * @throws MicroGWTestException
+     */
     public void startMicroGwServer(String balFile, String[] args) throws MicroGWTestException {
         String[] newArgs = {balFile};
         newArgs = ArrayUtils.addAll(args, newArgs);
@@ -125,6 +137,12 @@ public class ServerInstance implements Server {
         startServer();
     }
 
+    /**
+     * Start microgateway under the default configuration
+     *
+     * @param balFile the absolute path of the balx file.
+     * @throws MicroGWTestException
+     */
     public void startMicroGwServer(String balFile) throws MicroGWTestException {
         String[] newArgs = {balFile};
         setArguments(newArgs);
@@ -134,14 +152,14 @@ public class ServerInstance implements Server {
     /**
      * Start the server pointing to the ballerina.conf path.
      *
-     * @param balFile ballerina file path
+     * @param balFile    ballerina file path
      * @param gwConfPath ballerina.conf file path
      * @throws MicroGWTestException if an error occurs while starting the server
      */
     public void startMicroGwServerWithConfigPath(String balFile, String gwConfPath) throws
             MicroGWTestException {
-        String gwConfigPathArg = "--config ";
-        String[] args = {gwConfigPathArg, gwConfPath, balFile};
+        copyFile(gwConfPath, serverHome + File.separator + "conf" + File.separator + "micro-gw.conf");
+        String[] args = {balFile};
         setArguments(args);
 
         startServer();
@@ -256,7 +274,7 @@ public class ServerInstance implements Server {
      *
      * @param args list of service files
      */
-    public void setArguments(String[] args) {
+    private void setArguments(String[] args) {
         this.args = args;
     }
 
@@ -264,16 +282,7 @@ public class ServerInstance implements Server {
      * to change the server configuration if required. This method can be overriding when initialising
      * the object of this class.
      */
-    protected void configServer() {
-    }
-
-    /**
-     * Return toolkit directory path.
-     *
-     * @return absolute path of the server location
-     */
-    public String getToolkitDir() {
-        return toolkitDir;
+    private void configServer() {
     }
 
     /**
@@ -291,6 +300,7 @@ public class ServerInstance implements Server {
      *
      * @param leecher The Leecher instance
      */
+    @SuppressWarnings("unused")
     public void addLogLeecher(LogLeecher leecher) {
         if (serverInfoLogReader == null) {
             tmpLeechers.add(leecher);
@@ -308,6 +318,7 @@ public class ServerInstance implements Server {
     private void startServerRuntime(String[] args) throws MicroGWTestException {
         String scriptName = Constants.GATEWAY_SCRIPT_NAME;
         String[] cmdArray;
+        String[] envp = getEnvironmentVariablesAsArray();
         File commandDir = new File(serverHome + File.separator + "bin");
         //Overwrite the config file
         if (configPath != null) {
@@ -320,12 +331,12 @@ public class ServerInstance implements Server {
                 cmdArray = new String[]{"cmd.exe", "/c", scriptName + ".bat"};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
+                process = Runtime.getRuntime().exec(cmdArgs, envp, commandDir);
             } else {
-                cmdArray = new String[]{"bash" , scriptName};
+                cmdArray = new String[]{"bash", scriptName};
                 String[] cmdArgs = Stream.concat(Arrays.stream(cmdArray), Arrays.stream(args))
                         .toArray(String[]::new);
-                process = Runtime.getRuntime().exec(cmdArgs, null, commandDir);
+                process = Runtime.getRuntime().exec(cmdArgs, envp, commandDir);
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Error starting services", e);
@@ -368,8 +379,8 @@ public class ServerInstance implements Server {
             //reading the process id from ss
             Process tmp = null;
             try {
-                String[] cmd = { "bash", "-c",
-                        "ss -ltnp \'sport = :" + httpServerPort + "\' | grep LISTEN | awk \'{print $6}\'" };
+                String[] cmd = {"bash", "-c",
+                        "ss -ltnp \'sport = :" + httpServerPort + "\' | grep LISTEN | awk \'{print $6}\'"};
                 tmp = Runtime.getRuntime().exec(cmd);
                 String outPut = readProcessInputStream(tmp.getInputStream());
                 log.info("Output of the PID extraction command : " + outPut);
@@ -437,6 +448,7 @@ public class ServerInstance implements Server {
 
     /**
      * This method returns the pid of the service which is using the provided port.
+     *
      * @param httpServerPort port of the service running
      * @return the pid of the service
      * @throws MicroGWTestException if pid could not be retrieved
@@ -445,7 +457,7 @@ public class ServerInstance implements Server {
         String pid;
         Process tmp = null;
         try {
-            String[] cmd = { "bash", "-c", "lsof -Pi tcp:" + httpServerPort + " | grep LISTEN | awk \'{print $2}\'" };
+            String[] cmd = {"bash", "-c", "lsof -Pi tcp:" + httpServerPort + " | grep LISTEN | awk \'{print $2}\'"};
             tmp = Runtime.getRuntime().exec(cmd);
             pid = readProcessInputStream(tmp.getInputStream());
 
@@ -467,5 +479,17 @@ public class ServerInstance implements Server {
         } catch (IOException e) {
             throw new MicroGWTestException("error while copying config file. ");
         }
+    }
+
+    private String[] getEnvironmentVariablesAsArray() {
+        Map<String, String> envVariableMap = System.getenv();
+        int arrayLength = envVariableMap.size();
+        if (arrayLength == 0) {
+            return null;
+        }
+        List<String> envVariableList = new ArrayList<>();
+        envVariableMap.forEach((k, v) -> envVariableList.add(k + "=" + v));
+        String[] envVariableArray = new String[arrayLength];
+        return envVariableList.toArray(envVariableArray);
     }
 }

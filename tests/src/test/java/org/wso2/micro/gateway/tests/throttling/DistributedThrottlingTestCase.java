@@ -23,16 +23,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
-import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
@@ -45,32 +41,16 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
 
-    protected void init(String label, String project, String security) throws Exception {
-        CLIExecutor cliExecutor;
-
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "throttle-test-config.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        microGWServer.startMicroGwServer(balPath);
+    @Override
+    protected void init(String label, String project) throws Exception {
+        String configPath = "confs" + File.separator + "throttle-test-config.conf";
+        super.init(label, project, configPath);
     }
 
     @BeforeClass
     private void start() throws Exception {
         String label = "apimTestLabel";
         String project = "apimTestProject";
-        //set security schemas
-        String security = "oauth2";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -161,7 +141,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
 
         //generate apis with CLI and start the micro gateway server
-        init(label, project, security);
+        init(label, project);
     }
 
 
@@ -210,7 +190,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
-                if(responseCode ==429) {
+                if (responseCode == 429) {
                     return responseCode;
                 }
                 retry--;
@@ -218,6 +198,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         }
         return responseCode;
     }
+
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
         microGWServer.stopServer(false);

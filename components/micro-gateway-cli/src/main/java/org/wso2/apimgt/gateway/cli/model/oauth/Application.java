@@ -42,11 +42,14 @@ public class Application {
     }
 
     public char[] getClientSecret() {
-        return clientSecret;
+        if (clientSecret == null) {
+            return new char[0];
+        }
+        return clientSecret.clone();
     }
 
     public void setClientSecret(char[] clientSecret) {
-        this.clientSecret = clientSecret;
+        this.clientSecret = clientSecret.clone();
     }
 
     public String getRedirectUris() {

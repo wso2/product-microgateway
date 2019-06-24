@@ -94,14 +94,12 @@ public class ValidationTestCase extends BaseTestCase {
         String configPath = getClass().getClassLoader()
                 .getResource("confs" + File.separator + "validation.conf").getPath();
         microGWServer = ServerInstance.initMicroGwServer(configPath);
-        String cliHome = microGWServer.getToolkitDir();
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
         cliExecutor.generateFromDefinition(project,
                 new String[] { "validation" + File.separator + "PizzaShackAPI_swagger.json" });
 

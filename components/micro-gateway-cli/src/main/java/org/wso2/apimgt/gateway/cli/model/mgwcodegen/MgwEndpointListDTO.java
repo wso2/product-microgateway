@@ -1,5 +1,6 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
@@ -14,6 +15,8 @@ public class MgwEndpointListDTO {
     private List<MgwEndpointDTO> endpoints = null;
     private EndpointUrlTypeEnum endpointUrlType = null;
     private String name = null;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private boolean endpointListEtcdEnabled = false;
 
     public APIEndpointSecurityDTO getSecurityConfig() {

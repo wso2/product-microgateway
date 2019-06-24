@@ -208,7 +208,7 @@
                         <id>ballerina-platform</id>
                         <phase>prepare-package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -225,7 +225,7 @@
                         <id>ballerina-runtime</id>
                         <phase>prepare-package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -242,7 +242,7 @@
                         <id>micro-gateway-toolkit</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -259,7 +259,7 @@
                         <id>micro-gateway-runtime-linux</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -276,7 +276,7 @@
                         <id>micro-gateway-runtime-mac-os</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -293,7 +293,7 @@
                         <id>micro-gateway-runtime-windows</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>
@@ -310,7 +310,7 @@
                         <id>micro-gateway-runtime</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
                             <filters>

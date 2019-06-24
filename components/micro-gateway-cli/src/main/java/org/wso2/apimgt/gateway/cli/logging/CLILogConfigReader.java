@@ -36,8 +36,7 @@ public class CLILogConfigReader {
     public CLILogConfigReader() {
         CLILogManager logManager = (CLILogManager) LogManager.getLogManager();
         String initialFile = GatewayCmdUtils.getLoggingPropertiesFileLocation();
-        try {
-            InputStream configStream = new FileInputStream(initialFile);
+        try (InputStream configStream = new FileInputStream(initialFile)) {
             logManager.readConfiguration(configStream);
         } catch (IOException var4) {
             stderr.println("Failed to initialize logging");
