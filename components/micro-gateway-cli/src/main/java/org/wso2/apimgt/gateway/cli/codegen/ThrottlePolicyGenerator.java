@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class generates Ballerina Services/Clients for a provided OAS definition.
+ * Helper for generating ballerina based throttle policies.
  */
 public class ThrottlePolicyGenerator {
 

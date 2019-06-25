@@ -20,9 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * List of {@link ApplicationThrottlePolicyDTO}.
+ */
 public class ApplicationThrottlePolicyListDTO {
-
-
     private Integer count = null;
     private List<ApplicationThrottlePolicyDTO> list = new ArrayList<ApplicationThrottlePolicyDTO>();
 

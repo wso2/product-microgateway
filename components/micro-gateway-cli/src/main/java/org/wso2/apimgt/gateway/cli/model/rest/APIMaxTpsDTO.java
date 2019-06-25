@@ -18,6 +18,9 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Data holder for WSO2 APIM hard throttling limits.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIMaxTpsDTO {
 

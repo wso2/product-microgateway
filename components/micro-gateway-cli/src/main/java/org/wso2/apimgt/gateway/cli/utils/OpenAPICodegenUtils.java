@@ -35,13 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
-import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ResourceRepresentation;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
@@ -227,90 +225,6 @@ public class OpenAPICodegenUtils {
         String openAPIContent = new String(Files.readAllBytes(openAPIPath), StandardCharsets.UTF_8);
         api.setApiDefinition(getOpenAPIAsJson(openAPI, openAPIContent, openAPIPath));
         return api;
-    }
-
-    /**
-     * list all the available resources from openAPI definition
-     *
-     * @param projectName project Name
-     * @param apiId       api Id
-     * @return list of string arrays {resource_id, resource name, method}
-     */
-    @SuppressWarnings("unused")
-    public static List<ResourceRepresentation> listResourcesFromSwaggerForAPI(String projectName, String apiId) {
-
-        List<ResourceRepresentation> resourceList = new ArrayList<>();
-        JsonNode openApiNode = generateJsonNode(GatewayCmdUtils.getProjectSwaggerFilePath(projectName, apiId),
-                true);
-        addResourcesToListFromSwagger(openApiNode, resourceList);
-        return resourceList;
-    }
-
-
-    private static void addResourcesToList(List<ResourceRepresentation> resourcesList, String apiName,
-                                           String apiVersion, String resourceName, String method) {
-        ResourceRepresentation resource = new ResourceRepresentation();
-        resource.setId(HashUtils.generateResourceId(apiName, apiVersion, resourceName, method));
-        resource.setName(resourceName);
-        resource.setMethod(method);
-        resource.setApi(apiName);
-        resource.setVersion(apiVersion);
-        resourcesList.add(resource);
-    }
-
-    /**
-     * Add resources from the provided openAPI definition to existing array list
-     *
-     * @param apiDefNode    Api Definition as a JsonNode
-     * @param resourcesList String[] arrayList
-     */
-    private static void addResourcesToListFromSwagger(JsonNode apiDefNode, List<ResourceRepresentation> resourcesList) {
-
-        String apiName = apiDefNode.get("info").get("title").asText();
-        String apiVersion = apiDefNode.get("info").get("version").asText();
-
-        apiDefNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames().forEachRemaining(operation ->
-                addResourcesToList(resourcesList, apiName, apiVersion, e.getKey(), operation)));
-    }
-
-    /**
-     * get the resource related information if the resource_id is given
-     *
-     * @param projectName project name
-     * @param resourceId  resource id
-     * @return resource object with api name, version, method and key
-     */
-    public static ResourceRepresentation getResource(String projectName, String resourceId) {
-        String projectAPIFilesPath = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        ResourceRepresentation resource = new ResourceRepresentation();
-        try {
-            Files.walk(Paths.get(projectAPIFilesPath)).filter(path -> {
-                Path fileName = path.getFileName();
-                return fileName != null && fileName.toString().equals("swagger.json");
-            }).forEach(path -> {
-                JsonNode openApiNode = generateJsonNode(path.toString(), true);
-                String apiName = openApiNode.get("info").get("title").asText();
-                String apiVersion = openApiNode.get("info").get("version").asText();
-
-                openApiNode.get("paths").fields().forEachRemaining(e -> e.getValue().fieldNames()
-                        .forEachRemaining(operation -> {
-                            if (HashUtils.generateResourceId(apiName, apiVersion, e.getKey(), operation)
-                                    .equals(resourceId)) {
-                                resource.setId(resourceId);
-                                resource.setName(e.getKey());
-                                resource.setMethod(operation);
-                                resource.setApi(apiName);
-                                resource.setVersion(apiVersion);
-                            }
-                        }));
-            });
-        } catch (IOException e) {
-            throw new CLIInternalException("Error while navigating API Files directory.");
-        }
-        if (resource.getId() == null) {
-            return null;
-        }
-        return resource;
     }
 
     public static void setAdditionalConfig(ExtendedAPI api) {

@@ -420,7 +420,8 @@
                                 org/wso2/apimgt/gateway/cli/constants/**/*.java,
                                 org/wso2/apimgt/gateway/cli/rest/**/*.java,
                                 org/wso2/apimgt/gateway/cli/cmd/**/*.java,
-                                org/wso2/apimgt/gateway/cli/codegen/**/*.java
+                                org/wso2/apimgt/gateway/cli/codegen/**/*.java,
+                                org/wso2/apimgt/gateway/cli/model/**/*.java
                             </includes>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>

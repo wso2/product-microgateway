@@ -30,10 +30,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link APIInfoDTO} with extended set of
+ * attributes.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(description = "")
 public class APIDetailedDTO extends APIInfoDTO {
 
+    /**
+     * API Type.
+     */
+    public enum TypeEnum {
+        HTTP, WS, SOAPTOREST,
+    }
+
+    /**
+     * API Visibility level. Not used in MGW as of 3.0.1.
+     */
+    public enum VisibilityEnum {
+        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
+    }
+
+    /**
+     * Subscription availability in WSO2 APIM.
+     */
+    public enum SubscriptionAvailabilityEnum {
+        current_tenant, all_tenants, specific_tenants,
+    }
+
+    /**
+     * WSO2 APIM access control level.
+     */
+    public enum AccessControlEnum {
+        NONE, RESTRICTED,
+    }
+    
     private String apiDefinition = null;
     private String wsdlUri = null;
     private String responseCaching = null;
@@ -44,12 +76,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private Json apiSwagger = null;
 
-    public enum TypeEnum {
-        HTTP, WS, SOAPTOREST,
-    }
-
-    ;
-
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
     private List<String> tags = new ArrayList<String>();
@@ -58,12 +84,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     private String authorizationHeader = null;
     private String apiSecurity = null;
     private APIMaxTpsDTO maxTps = null;
-
-    public enum VisibilityEnum {
-        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
-    }
-
-    ;
 
     private VisibilityEnum visibility = null;
     private List<String> visibleRoles = new ArrayList<String>();
@@ -74,21 +94,10 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
 
-    public enum SubscriptionAvailabilityEnum {
-        current_tenant, all_tenants, specific_tenants,
-    }
-
-    ;
-
     private SubscriptionAvailabilityEnum subscriptionAvailability = null;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     private Map<String, String> additionalProperties = new HashMap<String, String>();
 
-    public enum AccessControlEnum {
-        NONE, RESTRICTED,
-    }
-
-    ;
 
     private AccessControlEnum accessControl = null;
     private List<String> accessControlRoles = new ArrayList<String>();
