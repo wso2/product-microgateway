@@ -90,7 +90,6 @@ public class InterceptorTestCase extends BaseTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(key, ResponseConstants.RESPONSE_INTERCEPTOR_RESPONSE_HEDAER);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
-
     }
 
     @Test(description = "Test per API request interceptor")
