@@ -144,6 +144,7 @@ public class MockBackEndServer extends Thread {
                 exchange.close();
             });
             httpServer.createContext(base + "/pet/", exchange -> {
+
                 byte[] response = ResponseConstants.petByIdResponseV1.getBytes();
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
