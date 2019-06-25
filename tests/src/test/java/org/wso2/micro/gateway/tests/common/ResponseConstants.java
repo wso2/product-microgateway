@@ -43,4 +43,12 @@ public class ResponseConstants {
             "\"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
     public static final String NONEXISTING_THROTTLEPOLICY_RESPONSE = "{\"fault\":{\"code\":900809, " +
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
+    public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
+            "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
+    public static final String RESPONSE_INTERCEPTOR_RESPONSE_HEDAER = "ResponseHeader";
+    public static final String API_REQUEST_INTERCEPTOR_RESPONSE = "{\"APIIntercept\":{\"RequestCode\":\"e123\", " +
+            "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
+    public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
+    public static final String PAYLOAD = "payload";
+
 }

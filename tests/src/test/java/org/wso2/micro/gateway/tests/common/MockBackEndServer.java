@@ -17,12 +17,15 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
@@ -143,6 +146,52 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/", exchange -> {
 
                 byte[] response = ResponseConstants.petByIdResponseV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(base + "/store/inventory", exchange -> {
+
+                byte[] response = ResponseConstants.storeInventoryResponse.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            String contextV3 = "/v3";
+            httpServer.createContext(contextV3 + "/pet/findByStatus", exchange -> {
+
+                byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/store/order", exchange -> {
+
+                int length;
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+                InputStream is =  exchange.getRequestBody();
+                byte[] buffer = new byte[1024];
+                while ((length = is.read(buffer)) != -1 ) {
+                    os.write(buffer, 0, length);
+                }
+                byte [] response  = os.toByteArray();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/pet/", exchange -> {
+
+                InputStream is =  exchange.getRequestBody();
+                byte [] response = IOUtils.toByteArray(is);
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
