@@ -121,7 +121,7 @@ public class ThrottlePolicy {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
-    public ThrottlePolicy buildContext(ThrottlePolicyMapper policy, GeneratorConstants.POLICY_TYPE type) {
+    public ThrottlePolicy buildContext(ThrottlePolicyMapper policy, GeneratorConstants.PolicyType type) {
         this.name = CodegenUtils.trim(policy.getName());
         this.count = policy.getCount();
         this.unitTime = getTimeInMilliSeconds(policy.getUnitTime(), policy.getTimeUnit());

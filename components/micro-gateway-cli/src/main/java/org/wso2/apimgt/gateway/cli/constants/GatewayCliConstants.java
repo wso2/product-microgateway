@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Constants used by toolkit CLI.
+ */
 public class GatewayCliConstants {
     public static final String PROJECT_CONF_DIR = "conf";
     public static final String PROJECT_INTERCEPTORS_DIR = "interceptors";
@@ -77,12 +80,12 @@ public class GatewayCliConstants {
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
-    public static final List<String> accessControlAllowOrigins = Collections.singletonList("*");
-    public static final List<String> accessControlAllowMethods = Collections.unmodifiableList(Arrays
+    public static final List<String> ACCESS_CONTROL_ALLOW_ORIGINS = Collections.singletonList("*");
+    public static final List<String> ACCESS_CONTROL_ALLOW_METHODS = Collections.unmodifiableList(Arrays
             .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"));
-    public static final List<String> accessControlAllowHeaders = Collections.unmodifiableList(Arrays
+    public static final List<String> ACCESS_CONTROL_ALLOW_HEADERS = Collections.unmodifiableList(Arrays
             .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"));
-    public static final boolean accessControlAllowCredentials = false;
+    public static final boolean ACCESS_CONTROL_ALLOW_CREDENTIALS = false;
 
     public static final String API_SWAGGER = "swagger.json";
     public static final String API_OPENAPI_YAML = "openAPI.yaml";

@@ -416,7 +416,10 @@
                                 org/wso2/apimgt/gateway/cli/exception/**/*.java,
                                 org/wso2/apimgt/gateway/cli/hashing/**/*.java,
                                 org/wso2/apimgt/gateway/cli/oauth/**/*.java,
-                                org/wso2/apimgt/gateway/cli/cipher/**/*.java
+                                org/wso2/apimgt/gateway/cli/cipher/**/*.java,
+                                org/wso2/apimgt/gateway/cli/constants/**/*.java,
+                                org/wso2/apimgt/gateway/cli/rest/**/*.java,
+                                org/wso2/apimgt/gateway/cli/cmd/**/*.java
                             </includes>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>

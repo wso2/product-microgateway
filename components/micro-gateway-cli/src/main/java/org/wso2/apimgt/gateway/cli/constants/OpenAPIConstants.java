@@ -1,5 +1,8 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
+/**
+ * Constants for wso2 OpenAPI extensions.
+ */
 public class OpenAPIConstants {
     public static final String BASEPATH = "x-wso2-basePath";
     public static final String REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";

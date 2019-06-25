@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
+/**
+ * Constants used by the API token management utilities.
+ */
 public class TokenManagementConstants {
     public static final String CALLBACK_URL = "callbackUrl";
     public static final String CLIENT_NAME = "clientName";

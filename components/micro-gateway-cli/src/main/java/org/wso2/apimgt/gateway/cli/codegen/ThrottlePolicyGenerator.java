@@ -96,7 +96,7 @@ public class ThrottlePolicyGenerator {
         List<GenSrcFile> genFiles = new ArrayList<>();
         if (applicationPolicies != null) {
             List<GenSrcFile> genAppFiles = generateGenericPolicies(applicationPolicies,
-                    GeneratorConstants.POLICY_TYPE.APPLICATION);
+                    GeneratorConstants.PolicyType.APPLICATION);
             genFiles.addAll(genAppFiles);
         } else {
             //declare empty object to avoid null pointer issue
@@ -105,7 +105,7 @@ public class ThrottlePolicyGenerator {
 
         if (subscriptionPolicies != null) {
             List<GenSrcFile> genSubsFiles = generateGenericPolicies(subscriptionPolicies,
-                    GeneratorConstants.POLICY_TYPE.SUBSCRIPTION);
+                    GeneratorConstants.PolicyType.SUBSCRIPTION);
             genFiles.addAll(genSubsFiles);
         } else {
             //declare empty object to avoid null pointer issue
@@ -114,7 +114,7 @@ public class ThrottlePolicyGenerator {
 
         if (resourcePolicies != null) {
             List<GenSrcFile> genSubsFiles = generateGenericPolicies(resourcePolicies,
-                    GeneratorConstants.POLICY_TYPE.RESOURCE);
+                    GeneratorConstants.PolicyType.RESOURCE);
             genFiles.addAll(genSubsFiles);
         } else {
             //declare empty object to avoid null pointer issue
@@ -134,8 +134,7 @@ public class ThrottlePolicyGenerator {
      * @return list of {@code GenSrcFile}
      * @throws IOException when file operations fail
      */
-    private List<GenSrcFile> generateGenericPolicies(List<ThrottlePolicyMapper> policies, GeneratorConstants
-            .POLICY_TYPE type)
+    private List<GenSrcFile> generateGenericPolicies(List<ThrottlePolicyMapper> policies, GeneratorConstants.PolicyType type)
             throws IOException {
         ThrottlePolicy policyContext;
 
@@ -232,13 +231,13 @@ public class ThrottlePolicyGenerator {
         ThrottlePolicyInitializer context = new ThrottlePolicyInitializer();
 
         if(applicationPolicies != null) {
-            context = context.buildPolicyContext(applicationPolicies,GeneratorConstants.POLICY_TYPE.APPLICATION);
+            context = context.buildPolicyContext(applicationPolicies, GeneratorConstants.PolicyType.APPLICATION);
         }
         if(subscriptionPolicies != null){
-            context = context.buildPolicyContext(subscriptionPolicies,GeneratorConstants.POLICY_TYPE.SUBSCRIPTION);
+            context = context.buildPolicyContext(subscriptionPolicies, GeneratorConstants.PolicyType.SUBSCRIPTION);
         }
         if(resourcePolicies != null){
-            context = context.buildPolicyContext(resourcePolicies,GeneratorConstants.POLICY_TYPE.RESOURCE);
+            context = context.buildPolicyContext(resourcePolicies, GeneratorConstants.PolicyType.RESOURCE);
         }
 
         return generateInitBalFile(context);
