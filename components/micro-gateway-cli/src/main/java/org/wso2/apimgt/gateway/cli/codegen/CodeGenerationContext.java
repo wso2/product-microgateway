@@ -16,6 +16,9 @@
 
 package org.wso2.apimgt.gateway.cli.codegen;
 
+/**
+ * Used by k8s helper classes to derive conde generator's context.
+ */
 public class CodeGenerationContext {
     private String projectName;
 
