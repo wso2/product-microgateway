@@ -27,6 +27,9 @@ import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Throttle policy definition passed into mustache templates.
+ */
 public class ThrottlePolicy {
 
     private String policyType;
@@ -127,27 +130,27 @@ public class ThrottlePolicy {
         this.unitTime = getTimeInMilliSeconds(policy.getUnitTime(), policy.getTimeUnit());
         this.stopOnQuotaReach = true;
         switch (type) {
-        case RESOURCE:
-            this.policyType = GeneratorConstants.RESOURCE_POLICY_TYPE;
-            this.funcName =
-                    GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
-            this.policyKey = GeneratorConstants.RESOURCE_KEY;
-            this.tierType = GeneratorConstants.RESOURCE_TIER_TYPE;
-            break;
-        case APPLICATION:
-            this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
-            this.funcName =
-                    GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
-            this.policyKey = GeneratorConstants.APPLICATION_KEY;
-            this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
-            break;
-        case SUBSCRIPTION:
-            this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
-            this.funcName =
-                    GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
-            this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
-            this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
-            break;
+            case RESOURCE:
+                this.policyType = GeneratorConstants.RESOURCE_POLICY_TYPE;
+                this.funcName =
+                        GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + this.name + GeneratorConstants.INIT_FUNC_SUFFIX;
+                this.policyKey = GeneratorConstants.RESOURCE_KEY;
+                this.tierType = GeneratorConstants.RESOURCE_TIER_TYPE;
+                break;
+            case APPLICATION:
+                this.policyType = GeneratorConstants.APPLICATION_POLICY_TYPE;
+                this.funcName = GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + this.name
+                        + GeneratorConstants.INIT_FUNC_SUFFIX;
+                this.policyKey = GeneratorConstants.APPLICATION_KEY;
+                this.tierType = GeneratorConstants.APPLICATION_TIER_TYPE;
+                break;
+            case SUBSCRIPTION:
+                this.policyType = GeneratorConstants.SUBSCRIPTION_POLICY_TYPE;
+                this.funcName = GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + this.name
+                        + GeneratorConstants.INIT_FUNC_SUFFIX;
+                this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
+                this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
+                break;
         }
         return this;
     }

@@ -26,51 +26,56 @@ import java.util.List;
  * CORS configuration for the APIDetailedDTO\n
  **/
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class APICorsConfigurationDTO  {
+public class APICorsConfigurationDTO {
 
-  private List<String> accessControlAllowOrigins = new ArrayList<String>();
-  private Boolean accessControlAllowCredentials = false;
-  private Boolean corsConfigurationEnabled = false;
-  private List<String> accessControlAllowHeaders = new ArrayList<String>();
-  private List<String> accessControlAllowMethods = new ArrayList<String>();
-  
-  @JsonAlias({"accessControlAllowOrigins","access_control_allow_origins","access-control-allow-origins"})
-  public List<String> getAccessControlAllowOrigins() {
-    return accessControlAllowOrigins;
-  }
-  public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
-    this.accessControlAllowOrigins = accessControlAllowOrigins;
-  }
+    private List<String> accessControlAllowOrigins = new ArrayList<String>();
+    private Boolean accessControlAllowCredentials = false;
+    private Boolean corsConfigurationEnabled = false;
+    private List<String> accessControlAllowHeaders = new ArrayList<String>();
+    private List<String> accessControlAllowMethods = new ArrayList<String>();
 
-  @JsonAlias({"accessControlAllowCredentials","access_control_allow_credentials","access-control-allow-credentials"})
-  public Boolean getAccessControlAllowCredentials() {
-    return accessControlAllowCredentials;
-  }
-  public void setAccessControlAllowCredentials(Boolean accessControlAllowCredentials) {
-    this.accessControlAllowCredentials = accessControlAllowCredentials;
-  }
+    @JsonAlias({"accessControlAllowOrigins", "access_control_allow_origins", "access-control-allow-origins"})
+    public List<String> getAccessControlAllowOrigins() {
+        return accessControlAllowOrigins;
+    }
 
-  @JsonAlias ("corsConfigurationEnabled")
-  public Boolean getCorsConfigurationEnabled() {
-    return corsConfigurationEnabled;
-  }
-  public void setCorsConfigurationEnabled(Boolean corsConfigurationEnabled) {
-    this.corsConfigurationEnabled = corsConfigurationEnabled;
-  }
+    public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
+        this.accessControlAllowOrigins = accessControlAllowOrigins;
+    }
 
-  @JsonAlias({"accessControlAllowHeaders","access_control_allow_headers","access-control-allow-headers"})
-  public List<String> getAccessControlAllowHeaders() {
-    return accessControlAllowHeaders;
-  }
-  public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
-    this.accessControlAllowHeaders = accessControlAllowHeaders;
-  }
+    @JsonAlias({"accessControlAllowCredentials", "access_control_allow_credentials", "access-control-allow-credentials"})
+    public Boolean getAccessControlAllowCredentials() {
+        return accessControlAllowCredentials;
+    }
 
-  @JsonAlias({"accessControlAllowMethods","access_control_allow_methods","access-control-allow-methods"})
-  public List<String> getAccessControlAllowMethods() {
-    return accessControlAllowMethods;
-  }
-  public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
-    this.accessControlAllowMethods = accessControlAllowMethods;
-  }
+    public void setAccessControlAllowCredentials(Boolean accessControlAllowCredentials) {
+        this.accessControlAllowCredentials = accessControlAllowCredentials;
+    }
+
+    @JsonAlias("corsConfigurationEnabled")
+    public Boolean getCorsConfigurationEnabled() {
+        return corsConfigurationEnabled;
+    }
+
+    public void setCorsConfigurationEnabled(Boolean corsConfigurationEnabled) {
+        this.corsConfigurationEnabled = corsConfigurationEnabled;
+    }
+
+    @JsonAlias({"accessControlAllowHeaders", "access_control_allow_headers", "access-control-allow-headers"})
+    public List<String> getAccessControlAllowHeaders() {
+        return accessControlAllowHeaders;
+    }
+
+    public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
+        this.accessControlAllowHeaders = accessControlAllowHeaders;
+    }
+
+    @JsonAlias({"accessControlAllowMethods", "access_control_allow_methods", "access-control-allow-methods"})
+    public List<String> getAccessControlAllowMethods() {
+        return accessControlAllowMethods;
+    }
+
+    public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
+        this.accessControlAllowMethods = accessControlAllowMethods;
+    }
 }

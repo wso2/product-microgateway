@@ -22,17 +22,24 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
+/**
+ * Mustache template context for gateway listeners.
+ */
 public class ListenerEndpoint {
     private ContainerConfig containerConfig;
     private Config config;
 
     public ListenerEndpoint buildContext() {
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        this.config= GatewayCmdUtils.getConfig();
+        this.config = GatewayCmdUtils.getConfig();
         return this;
     }
 
-     public ContainerConfig getContainerConfig() { return containerConfig; }
+    public ContainerConfig getContainerConfig() {
+        return containerConfig;
+    }
 
-     public  Config getConfig(){ return config; }
+    public Config getConfig() {
+        return config;
+    }
 }

@@ -19,6 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
+/**
+ * Base definition of an API.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIInfoDTO {
 

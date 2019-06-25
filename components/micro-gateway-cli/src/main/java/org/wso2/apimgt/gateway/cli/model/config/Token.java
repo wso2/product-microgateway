@@ -20,7 +20,11 @@ package org.wso2.apimgt.gateway.cli.model.config;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
+import java.io.PrintStream;
 
+/**
+ *
+ */
 public class Token {
 
     private String baseURL;
@@ -46,7 +50,8 @@ public class Token {
             absoluteTrustoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
             file = new File(absoluteTrustoreLocation);
             if (!file.exists()) {
-                System.err.println("Error while loading trust store location: " + absoluteTrustoreLocation);
+                PrintStream err = System.err;
+                err.println("Error while loading trust store location: " + absoluteTrustoreLocation);
                 Runtime.getRuntime().exit(1);
             }
         }
