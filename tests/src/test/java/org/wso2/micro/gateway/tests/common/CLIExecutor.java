@@ -25,6 +25,7 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.context.Constants;
 import org.wso2.micro.gateway.tests.context.MicroGWTestException;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
+import org.wso2.micro.gateway.tests.context.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -132,7 +133,7 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runInitCmd(String mgwCommand, String project) throws MicroGWTestException {
-        String[] initCmdArray = {"bash", mgwCommand, "init", project};
+        String[] initCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "init", project);
         String initErrorMsg = "Error occurred during initializing the project.";
         runProcess(initCmdArray, homeDirectory, initErrorMsg);
     }
@@ -146,10 +147,17 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runImportCmd(String mgwCommand, String project, String[] cmdArgs) throws MicroGWTestException {
-        String[] importCmdArgs = {"bash", mgwCommand, "import", project};
+        String[] importCmdArgs = generateBasicCmdArgsBasedOnOS(mgwCommand, "import", project);
         importCmdArgs = ArrayUtils.addAll(importCmdArgs, cmdArgs);
         String importErrorMsg = "Error occurred during importing the api.";
         runProcess(importCmdArgs, homeDirectory, importErrorMsg);
+    }
+
+    private String[] generateBasicCmdArgsBasedOnOS(String mgwCommand, String mainCommand, String project) {
+        if (Utils.getOSName().equalsIgnoreCase("windows")) {
+            return new String[]{"cmd.exe", "/c", mgwCommand.trim() + ".bat", mainCommand, project};
+        }
+        return new String[]{"bash", mgwCommand, mainCommand, project};
     }
 
     /**
@@ -160,7 +168,7 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runBuildCmd(String mgwCommand, String project) throws MicroGWTestException {
-        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project};
+        String[] buildCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "build", project);
         String buildErrorMsg = "Error occurred when building the project.";
         runProcess(buildCmdArray, homeDirectory, buildErrorMsg);
     }
