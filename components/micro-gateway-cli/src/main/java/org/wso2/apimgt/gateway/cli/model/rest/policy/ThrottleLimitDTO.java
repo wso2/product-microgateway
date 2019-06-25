@@ -21,24 +21,23 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.validation.constraints.NotNull;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
+/**
+ * Data mapper for WSO2 APIM throttle limits.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type",
+        visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = RequestCountLimitDTO.class, name = "RequestCountLimit"),
         @JsonSubTypes.Type(value = BandwidthLimitDTO.class, name = "BandwidthLimit"),
 })
 public class ThrottleLimitDTO {
 
+    /**
+     * Throttle limit type.
+     */
     public enum TypeEnum {
         RequestCountLimit, BandwidthLimit,
-    };
-
-    @NotNull
-    private TypeEnum type = null;
-    @NotNull
-    private String timeUnit = null;
-    @NotNull
-    private Integer unitTime = null;
-
+    }
 
     /**
      * Type of the throttling limit. Allowed values are \"RequestCountLimit\" and \"BandwidthLimit\".\n
@@ -48,6 +47,13 @@ public class ThrottleLimitDTO {
     public TypeEnum getType() {
         return type;
     }
+
+    @NotNull
+    private TypeEnum type = null;
+    @NotNull
+    private String timeUnit = null;
+    @NotNull
+    private Integer unitTime = null;
 
     public void setType(TypeEnum type) {
         this.type = type;

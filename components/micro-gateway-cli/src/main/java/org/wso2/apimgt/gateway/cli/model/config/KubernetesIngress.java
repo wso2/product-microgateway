@@ -34,7 +34,7 @@ public class KubernetesIngress {
     public String getName() {
         if (name == null) {
             CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
-            return codeGenerationContext.getProjectName() + "-" + GatewayCliConstants.K8S_INGRESS ;
+            return codeGenerationContext.getProjectName() + "-" + GatewayCliConstants.K8S_INGRESS;
         } else {
             return name;
         }

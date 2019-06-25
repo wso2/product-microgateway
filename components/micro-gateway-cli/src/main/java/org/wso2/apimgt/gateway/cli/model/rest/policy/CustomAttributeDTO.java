@@ -19,6 +19,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * Data mapper for WSO2 APIM custom API attribute.
+ * Not used for MGW as of 3.0.1
+ */
 public class CustomAttributeDTO {
 
 

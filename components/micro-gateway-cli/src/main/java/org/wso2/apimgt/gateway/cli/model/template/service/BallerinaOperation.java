@@ -37,7 +37,6 @@ import java.util.UUID;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
- *
  */
 public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOperation, Operation> {
 
@@ -91,8 +90,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
-        Map<String, Object> extensions =  operation.getExtensions();
-        if(extensions != null){
+        Map<String, Object> extensions = operation.getExtensions();
+        if (extensions != null) {
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
             Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
@@ -114,7 +113,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
             responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
             //set dev-first resource level throttle policy
-            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions.get(OpenAPIConstants.THROTTLING_TIER));
+            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
+                    .get(OpenAPIConstants.THROTTLING_TIER));
             devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
             Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.DISABLE_SECURITY));
