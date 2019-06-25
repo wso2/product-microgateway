@@ -172,17 +172,16 @@ public class MockBackEndServer extends Thread {
                 exchange.close();
             });
             httpServer.createContext(contextV3 + "/store/order", exchange -> {
-                InputStream is =  exchange.getRequestBody();
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
+
                 int length;
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+                InputStream is =  exchange.getRequestBody();
+                byte[] buffer = new byte[1024];
                 while ((length = is.read(buffer)) != -1 ) {
                     os.write(buffer, 0, length);
                 }
                 byte [] response  = os.toByteArray();
-
-                Headers headers = exchange.getRequestHeaders();
-
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,response.length);
@@ -193,10 +192,8 @@ public class MockBackEndServer extends Thread {
 
                 InputStream is =  exchange.getRequestBody();
                 byte [] response = IOUtils.toByteArray(is);
-
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
-
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
                 exchange.close();
