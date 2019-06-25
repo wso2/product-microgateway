@@ -32,7 +32,6 @@ import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
 
     @Override
     protected void init(String label, String project) throws Exception {
-        String configPath = "confs" + File.separator + "throttle-test-config.conf";
+        String configPath = "confs/throttle-test-config.conf";
         super.init(label, project, configPath);
     }
 

@@ -92,7 +92,7 @@ public class ValidationTestCase extends BaseTestCase {
         CLIExecutor cliExecutor;
 
         String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "validation.conf").getPath();
+                .getResource("confs/validation.conf").getPath();
         microGWServer = ServerInstance.initMicroGwServer(configPath);
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);

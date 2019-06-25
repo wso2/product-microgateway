@@ -103,7 +103,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         CLIExecutor cliExecutor;
 
         configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+                .getResource("confs/default-test-config.conf").getPath();
         microGWServer = ServerInstance.initMicroGwServer(configPath);
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);

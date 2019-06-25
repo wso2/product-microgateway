@@ -64,7 +64,7 @@ public class BaseTestCase {
         String configPath;
         if (configFilePath == null) {
             configPath = Objects.requireNonNull(getClass().getClassLoader()
-                    .getResource("confs" + File.separator + "default-test-config.conf")).getPath();
+                    .getResource("confs/default-test-config.conf")).getPath();
         } else {
             configPath = Objects.requireNonNull(getClass().getClassLoader().getResource(configFilePath)).getPath();
         }

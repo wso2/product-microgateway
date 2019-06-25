@@ -54,7 +54,7 @@ public class CLIExecutor {
         createBackgroundEnv();
         //This config file is relevant to the publisher API
         String config = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("confs" +
-                File.separator + "default-cli-test-config.toml")).getPath()).getAbsolutePath();
+                "/default-cli-test-config.toml")).getPath()).getAbsolutePath();
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
         //todo: check using prompt as well
@@ -154,7 +154,7 @@ public class CLIExecutor {
     }
 
     private String[] generateBasicCmdArgsBasedOnOS(String mgwCommand, String mainCommand, String project) {
-        if (Utils.getOSName().equalsIgnoreCase("windows")) {
+        if (Utils.getOSName().toLowerCase().contains("windows")) {
             return new String[]{"cmd.exe", "/c", mgwCommand.trim() + ".bat", mainCommand, project};
         }
         return new String[]{"bash", mgwCommand, mainCommand, project};
@@ -201,7 +201,7 @@ public class CLIExecutor {
             throws MicroGWTestException {
         for (String openAPIFileName : openAPIFileNames) {
             File swaggerSrcPath = new File(
-                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator +
+                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" +
                             openAPIFileName).getPath());
             File swaggerDesPath = new File(
                     homeDirectory + File.separator + project + File.separator +
