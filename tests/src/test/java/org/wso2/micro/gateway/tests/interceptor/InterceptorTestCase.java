@@ -29,6 +29,7 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
 
 import java.io.File;
 import java.util.HashMap;
@@ -63,8 +64,8 @@ public class InterceptorTestCase extends BaseTestCase {
     public void testPerResourceRequestInterceptor() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/petstore/v1/store/order"), ResponseConstants.PAYLOAD, headers);
+        HttpResponse response = HttpClientRequest
+                .doPost(getServiceURLHttp("/petstore/v1/store/order"), "{}", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
@@ -77,7 +78,7 @@ public class InterceptorTestCase extends BaseTestCase {
         String key = null;
 
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+        HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/petstore/v1/pet/findByStatus"),
                         headers);
         responseHeaders = response.getHeaders();
@@ -97,8 +98,8 @@ public class InterceptorTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/petstore/v3/store/order"), ResponseConstants.PAYLOAD, headers);
+        HttpResponse response = HttpClientRequest
+                .doPost(getServiceURLHttp("/petstore/v3/store/order"), "{}", headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.API_REQUEST_INTERCEPTOR_RESPONSE);
@@ -112,7 +113,7 @@ public class InterceptorTestCase extends BaseTestCase {
         String key = null;
 
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+        HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/petstore/v3/pet/findByStatus"),
                         headers);
         responseHeaders = response.getHeaders();
