@@ -53,8 +53,8 @@ public class MultipleEndpointsTestCase extends BaseTestCase {
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"common_api.yaml", "endpoints" + File.separator + "load_balance.yaml",
-                "endpoints" + File.separator + "fail_over.yaml"});
+        super.init(project, new String[]{"common_api.yaml", "endpoints/load_balance.yaml",
+                "endpoints/fail_over.yaml"});
     }
 
     @Test(description = "Test Invoking the load balanced endpoints in resource level")

@@ -54,7 +54,7 @@ public class BaseTestCase {
      * Initialize and Start the microgateway server.
      *
      * @param configFilePath the relative path of config file (stored inside resources directory) if the default config
-     *                       file needs to be overwritten.
+     *                       file needs to be overwritten. (use forward slash to mention the path)
      * @param balPath        the absolute path of the compiled ballerina project executable(balx file).
      * @param args           commandline arguments.
      * @throws MicroGWTestException
@@ -82,7 +82,7 @@ public class BaseTestCase {
      * @param label          label
      * @param project        project name
      * @param args           additional commandline arguments
-     * @param configFilePath relative path of the config file
+     * @param configFilePath relative path of the config file (use forward slash to mention the path)
      * @throws Exception
      */
     protected void init(String label, String project, String[] args, String configFilePath)
@@ -99,7 +99,7 @@ public class BaseTestCase {
      *
      * @param label          label
      * @param project        project name
-     * @param configFilePath relative path of the config file
+     * @param configFilePath relative path of the config file (use forward slash to mention the path)
      * @throws Exception
      */
     protected void init(String label, String project, String configFilePath) throws Exception {
@@ -122,8 +122,9 @@ public class BaseTestCase {
      *
      * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
      * @param args             additional commandline arguments
-     * @param configFilePath   relative path of the config file
+     * @param configFilePath   relative path of the config file (use forward slash to mention the path)
      * @throws Exception
      */
     protected void init(String project, String[] openAPIFileNames, String[] args, String configFilePath)
@@ -140,6 +141,7 @@ public class BaseTestCase {
      *
      * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
      * @param args             additional commandline arguments
      * @throws Exception
      */
@@ -152,6 +154,7 @@ public class BaseTestCase {
      *
      * @param project          project name
      * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
      * @throws MicroGWTestException
      */
     protected void init(String project, String[] openAPIFileNames) throws Exception {

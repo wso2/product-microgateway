@@ -206,7 +206,7 @@ public class CLIExecutor {
             File swaggerDesPath = new File(
                     homeDirectory + File.separator + project + File.separator +
                             GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                            .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+                            .substring(openAPIFileName.lastIndexOf("/") + 1));
             try {
                 FileUtils.copyFile(swaggerSrcPath, swaggerDesPath);
             } catch (IOException e) {
