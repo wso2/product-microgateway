@@ -684,7 +684,7 @@ public class OpenAPICodegenUtils {
             if (path != null && operation != null) {
                 errorMsg += "under path:'" + path + "' operation:'" + operation + "' ";
             }
-            errorMsg += "is not available in any function in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR +
+            errorMsg += "is not available as a function name in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR +
                     " directory.";
             throw new CLIRuntimeException(errorMsg);
         }
