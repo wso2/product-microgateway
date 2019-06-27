@@ -33,7 +33,11 @@ import java.util.UUID;
 /**
  * Utilities used by ballerina code generator.
  */
-public class CodegenUtils {
+public final class CodegenUtils {
+
+    private CodegenUtils() {
+
+    }
 
     /**
      * Writes a file with content to specified {@code filePath}.
@@ -102,7 +106,8 @@ public class CodegenUtils {
      * @param overwrite whether existing files overwrite or not
      * @throws IOException if file write went wrong
      */
-    public static void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, boolean overwrite) throws IOException {
+    public static void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, boolean overwrite)
+            throws IOException {
         Path filePath;
         for (GenSrcFile file : sources) {
             filePath = srcPath.resolve(file.getFileName());

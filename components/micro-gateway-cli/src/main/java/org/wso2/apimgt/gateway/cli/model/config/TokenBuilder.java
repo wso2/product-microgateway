@@ -18,7 +18,7 @@
 package org.wso2.apimgt.gateway.cli.model.config;
 
 /**
- * Builder class for Token class
+ * Builder class for Token class.
  */
 public class TokenBuilder {
     private Token token;

@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * Docker deployment descriptor.
+ */
 public class Docker {
     private DockerConfig dockerConfig;
     private CopyFileConfig dockerCopyFiles;

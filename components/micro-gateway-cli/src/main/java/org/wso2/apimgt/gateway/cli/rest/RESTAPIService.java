@@ -24,6 +24,11 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyD
 
 import java.util.List;
 
+/**
+ * Interface to communicate with Third party rest API for fetching
+ * APIs. As an example usage, Implementations of this interface will
+ * be used by import command to communicate with API Provider.
+ */
 public interface RESTAPIService {
 
     /**

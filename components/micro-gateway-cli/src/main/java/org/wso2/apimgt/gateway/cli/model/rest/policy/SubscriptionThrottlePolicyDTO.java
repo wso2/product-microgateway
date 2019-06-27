@@ -21,6 +21,9 @@ import org.wso2.apimgt.gateway.cli.hashing.Hash;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data mapper for WSO2 APIM subscription throttle policy.
+ */
 public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
     private ThrottleLimitDTO defaultLimit = null;

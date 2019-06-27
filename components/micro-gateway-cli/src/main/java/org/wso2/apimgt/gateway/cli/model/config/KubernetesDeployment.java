@@ -23,6 +23,9 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.util.UUID;
 
+/**
+ * K8s deployment descriptor.
+ */
 public class KubernetesDeployment {
 
     private String name;

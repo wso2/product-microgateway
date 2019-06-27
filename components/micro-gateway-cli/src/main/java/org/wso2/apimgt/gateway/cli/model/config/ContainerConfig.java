@@ -17,6 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * Configuration for containerized deployment.
+ * Docker and k8s.
+ */
 public class ContainerConfig {
     private Docker docker;
     private Kubernetes kubernetes;

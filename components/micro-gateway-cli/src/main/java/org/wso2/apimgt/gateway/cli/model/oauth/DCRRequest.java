@@ -19,6 +19,9 @@ package org.wso2.apimgt.gateway.cli.model.oauth;
 
 import org.quartz.utils.FindbugsSuppressWarnings;
 
+/**
+ * Dynamic Client Registration request definition.
+ */
 public class DCRRequest {
     private String callbackUrl;
     private String clientName;
