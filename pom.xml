@@ -410,22 +410,9 @@
                             <suppressionsLocation>
                                 https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/suppressions.xml
                             </suppressionsLocation>
-                            <includes>
-                                org/wso2/apimgt/gateway/cli/logging/**/*.java,
-                                org/wso2/apimgt/gateway/cli/config/**/*.java,
-                                org/wso2/apimgt/gateway/cli/exception/**/*.java,
-                                org/wso2/apimgt/gateway/cli/hashing/**/*.java,
-                                org/wso2/apimgt/gateway/cli/oauth/**/*.java,
-                                org/wso2/apimgt/gateway/cli/cipher/**/*.java,
-                                org/wso2/apimgt/gateway/cli/constants/**/*.java,
-                                org/wso2/apimgt/gateway/cli/rest/**/*.java,
-                                org/wso2/apimgt/gateway/cli/cmd/**/*.java,
-                                org/wso2/apimgt/gateway/cli/codegen/**/*.java,
-                                org/wso2/apimgt/gateway/cli/model/**/*.java
-                            </includes>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
                         </configuration>
                         <goals>
                             <goal>check</goal>
