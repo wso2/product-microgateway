@@ -857,7 +857,16 @@ public class GatewayCmdUtils {
     }
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
+        overrideContainerConfigs(containerConfig);
         GatewayCmdUtils.containerConfig = containerConfig;
+    }
+
+    private static void overrideContainerConfigs(ContainerConfig containerConfig) {
+        if (containerConfig != null && containerConfig.getKubernetes() != null
+                && containerConfig.getKubernetes().getSecureKubernetesIngress() != null) {
+            containerConfig.getKubernetes().getSecureKubernetesIngress().setKeyStorePassword(CodegenUtils
+                    .resolveValue(containerConfig.getKubernetes().getSecureKubernetesIngress().getKeyStorePassword()));
+        }
     }
 
     public static void saveConfig(Config config, String configPath) {
