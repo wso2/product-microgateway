@@ -28,6 +28,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Utility class to parse or update a TOML based configuration file.
+ * Parse methods(s) can be used to parse the config file to any supported object model.
+ */
 public class TOMLConfigParser {
 
     /**
@@ -40,17 +44,17 @@ public class TOMLConfigParser {
      * @throws ConfigParserException if cannot read or parse the content of the specified TOML file
      */
     public static <T> T parse(String configFilePath, Class<T> type) throws ConfigParserException {
-        Path configurationFile = Paths.get(configFilePath);
-        if (!Files.exists(configurationFile)) {
-            throw new ConfigParserException("Mandatory configuration file '" + configurationFile + "' does not exists.");
+        Path configPath = Paths.get(configFilePath);
+        if (!Files.exists(configPath)) {
+            throw new ConfigParserException("Mandatory configuration file '" + configPath + "' does not exists.");
         }
 
         T loadedBean;
         String content;
         try {
-            content = new String(Files.readAllBytes(configurationFile), StandardCharsets.UTF_8);
+            content = new String(Files.readAllBytes(configPath), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new ConfigParserException("Cannot read the content of configuration file '" + configurationFile + "'.",
+            throw new ConfigParserException("Cannot read the content of configuration file '" + configPath + "'.",
                     e);
         }
         loadedBean = parseString(content, type);
@@ -61,19 +65,19 @@ public class TOMLConfigParser {
      * Write the given config type to a file.
      *
      * @param configFilePath path to toml file
-     * @param content            type of the config class to be used when de-serializing
+     * @param content        type of the config class to be used when de-serializing
      * @throws ConfigParserException if cannot write the content to file or specified file does not exist
      */
     public static void write(String configFilePath, Object content) throws ConfigParserException {
-        Path configurationFile = Paths.get(configFilePath);
-        if (!Files.exists(configurationFile)) {
-            throw new ConfigParserException("Mandatory configuration file '" + configurationFile + "' does not exists.");
+        Path configPath = Paths.get(configFilePath);
+        if (!Files.exists(configPath)) {
+            throw new ConfigParserException("Mandatory configuration file '" + configPath + "' does not exists.");
         }
         TomlWriter tomlWriter = new TomlWriter();
         try {
             tomlWriter.write(content, new File(configFilePath));
         } catch (IOException e) {
-            throw new ConfigParserException("Cannot write the content to configuration file '" + configurationFile + "'.",
+            throw new ConfigParserException("Cannot write the content to configuration file '" + configPath + "'.",
                     e);
         }
     }

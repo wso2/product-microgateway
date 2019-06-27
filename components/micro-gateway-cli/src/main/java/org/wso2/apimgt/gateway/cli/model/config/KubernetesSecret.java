@@ -20,6 +20,9 @@ package org.wso2.apimgt.gateway.cli.model.config;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * K8s Secret descriptor.
+ */
 public class KubernetesSecret {
 
     private boolean enable = false;

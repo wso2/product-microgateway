@@ -30,7 +30,6 @@ import java.util.regex.Matcher;
 /**
  * Java util logging manager for micro-gw CLI which overrides the readConfiguration method to replace placeholders
  * having system or environment variables.
- * 
  */
 public class CLILogManager extends LogManager {
 
@@ -39,8 +38,8 @@ public class CLILogManager extends LogManager {
         Properties properties = new Properties();
         properties.load(ins);
         properties.forEach((k, v) -> {
-            String val = this.substituteVariables((String)v);
-            properties.setProperty((String)k, val);
+            String val = this.substituteVariables((String) v);
+            properties.setProperty((String) k, val);
         });
         super.readConfiguration(this.propertiesToInputStream(properties));
     }

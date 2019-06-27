@@ -25,6 +25,9 @@ import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 
 import java.util.List;
 
+/**
+ * Mutual SSL data holder for Client -> GW connection.
+ */
 public class MutualSSL {
 
     private List<ClientCertMetadataDTO> clientCertificates;

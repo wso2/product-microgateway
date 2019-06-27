@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * K8s deployment descriptor.
+ */
 public class Kubernetes {
     private KubernetesConfigMap kubernetesConfigMap;
     private KubernetesDeployment kubernetesDeployment;

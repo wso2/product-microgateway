@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.cmd;
 
+/**
+ * Constants for gateway toolkit commands.
+ */
 public class GatewayCliCommands {
 
     public static final String HELP = "help";

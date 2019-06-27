@@ -26,15 +26,19 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
-import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
+import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.xml.bind.DatatypeConverter;
+
+/**
+ * Implementation of {@link OAuthService} to communicate with WSO2 Key manager services.
+ */
 public class OAuthServiceImpl implements OAuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuthServiceImpl.class);
@@ -69,7 +73,7 @@ public class OAuthServiceImpl implements OAuthService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 JsonNode rootNode = mapper.readTree(responseStr);
                 return rootNode.path(TokenManagementConstants.ACCESS_TOKEN).asText();
             } else {
@@ -120,7 +124,7 @@ public class OAuthServiceImpl implements OAuthService {
             logger.trace("Request body for DCR call: {}", requestBody);
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 logger.debug("Received response status code for DCR call: {}", responseCode);
                 logger.trace("Received response body for DCR call: {}", responseStr);
                 JsonNode rootNode = mapper.readTree(responseStr);

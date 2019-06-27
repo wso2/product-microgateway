@@ -17,6 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * Definition of basic authentication passed in to mustache
+ * templates.
+ */
 public class BasicAuth {
 
     boolean isOptional;
