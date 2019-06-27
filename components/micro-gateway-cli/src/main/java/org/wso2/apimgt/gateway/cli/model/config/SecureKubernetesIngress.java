@@ -21,9 +21,11 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
+
 /**
  * Secured K8s ingress descriptor.
  */
+
 public class SecureKubernetesIngress {
     private String name;
     private String labels;
@@ -34,6 +36,8 @@ public class SecureKubernetesIngress {
     private String ingressClass;
     private boolean enableTLS = true;
     private boolean enable = false;
+    private String keyStorePath;
+    private String keyStorePassword;
 
     public String getName() {
         if (name == null) {
@@ -110,6 +114,22 @@ public class SecureKubernetesIngress {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public String getKeyStorePath() {
+        return keyStorePath;
+    }
+
+    public void setKeyStorePath(String keyStorePath) {
+        this.keyStorePath = keyStorePath;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
     }
 }
 
