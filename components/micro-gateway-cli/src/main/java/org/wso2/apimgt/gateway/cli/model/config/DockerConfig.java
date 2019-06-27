@@ -17,6 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * Docker configurations required to build proper docker based
+ * ballerina service.
+ */
 public class DockerConfig {
     private String name;
     private String registry;

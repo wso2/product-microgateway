@@ -20,6 +20,11 @@ package org.wso2.apimgt.gateway.cli.model.config;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Configuration holder for ballerina CopyFile annotation.
+ * This configuration has to be enabled to add CopyFiles
+ * annotation to be populated into generated ballerina service.
+ */
 public class CopyFileConfig {
 
     private boolean enable = false;

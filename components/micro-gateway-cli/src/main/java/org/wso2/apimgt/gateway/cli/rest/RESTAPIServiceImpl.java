@@ -304,6 +304,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     }
 
     /**
+     * @see RESTAPIService#getClientCertificates(String)
      */
     public List<ClientCertMetadataDTO> getClientCertificates(String accessToken) {
         Config config = GatewayCmdUtils.getConfig();

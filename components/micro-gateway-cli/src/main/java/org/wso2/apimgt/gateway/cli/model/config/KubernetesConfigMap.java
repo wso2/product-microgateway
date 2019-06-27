@@ -20,6 +20,9 @@ package org.wso2.apimgt.gateway.cli.model.config;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * K8s config map descriptor.
+ */
 public class KubernetesConfigMap {
     private String ballerinaConf;
     private boolean enable = false;
