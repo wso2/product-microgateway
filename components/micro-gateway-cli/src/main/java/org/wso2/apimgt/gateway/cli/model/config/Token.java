@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 /**
- * Represents 'Token' table in toolkit-config.toml
+ * Represents 'Token' table in toolkit-config.toml.
  */
 public class Token {
 
