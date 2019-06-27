@@ -134,7 +134,7 @@ goto :end
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
                 call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
-goto end
+goto :end
 
 :commandDebug
 	if %verbose%==T ECHO Running commandDebug
