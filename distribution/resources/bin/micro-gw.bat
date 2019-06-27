@@ -134,17 +134,7 @@ goto :end
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
                 call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
-
-            if %verbose%==T ECHO Ballerina build completed
-            SET originalArgs=%originalArgs% --compiled
-
-            REM Check for a debug param by looping through the remaining args list
-            :checkDebug
-                SHIFT
-                if ""%1""=="""" goto passToJar
-                if ""%1""==""--java.debug""  goto commandDebug
-            goto checkDebug
-goto :passToJar
+goto :end
 
 :commandDebug
 	if %verbose%==T ECHO Running commandDebug
