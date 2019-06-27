@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data holder/mapper for list of {@link ClientCertMetadataDTO}
- *
- * help is on the way.
+ * Data holder/mapper for list of {@link ClientCertMetadataDTO}.
  */
 public class ClientCertificatesDTO {
 
