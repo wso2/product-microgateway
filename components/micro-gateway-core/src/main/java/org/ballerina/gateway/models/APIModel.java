@@ -19,7 +19,7 @@
 package org.ballerina.gateway.models;
 
 /**
- * API Model class
+ * API Model class.
  */
 public class APIModel {
 

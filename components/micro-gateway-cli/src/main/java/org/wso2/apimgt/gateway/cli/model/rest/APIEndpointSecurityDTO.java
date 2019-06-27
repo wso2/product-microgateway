@@ -25,6 +25,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class APIEndpointSecurityDTO {
     private String password = null;
 
+    /**
+     * WSO2 APIM supported endpoint security types.
+     */
     public enum TypeEnum {
         basic, digest,
     }

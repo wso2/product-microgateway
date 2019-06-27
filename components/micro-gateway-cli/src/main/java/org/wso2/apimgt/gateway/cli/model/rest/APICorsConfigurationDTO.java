@@ -21,10 +21,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * CORS configuration for the APIDetailedDTO\n
- **/
+ * CORS configuration for the APIDetailedDTO.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APICorsConfigurationDTO {
 
@@ -43,7 +42,8 @@ public class APICorsConfigurationDTO {
         this.accessControlAllowOrigins = accessControlAllowOrigins;
     }
 
-    @JsonAlias({"accessControlAllowCredentials", "access_control_allow_credentials", "access-control-allow-credentials"})
+    @JsonAlias({"accessControlAllowCredentials", "access_control_allow_credentials",
+            "access-control-allow-credentials"})
     public Boolean getAccessControlAllowCredentials() {
         return accessControlAllowCredentials;
     }
