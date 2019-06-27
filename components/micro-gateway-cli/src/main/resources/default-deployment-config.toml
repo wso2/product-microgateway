@@ -69,6 +69,8 @@
     #path = ''
     #targetPath = ''
     #ingressClass = ''
+    #keyStorePath = '${ballerina.home}/bre/security/ballerinaKeystore.p12'
+    #keyStorePassword = '$env{Keystore_Password}'
   [kubernetes.kubernetesHpa]
     enable = false
     #name = ''
