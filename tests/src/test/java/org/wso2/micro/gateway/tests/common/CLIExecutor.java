@@ -203,15 +203,22 @@ public class CLIExecutor {
             File swaggerSrcPath = new File(
                     getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" +
                             openAPIFileName).getPath());
-            File swaggerDesPath = new File(
-                    homeDirectory + File.separator + project + File.separator +
-                            GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                            .substring(openAPIFileName.lastIndexOf("/") + 1));
+            File desPath;
+            if (openAPIFileName.contains(".bal")) {
+                desPath = new File(homeDirectory + File.separator + project + File.separator +
+                        GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
+                        openAPIFileName.substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+            } else {
+                desPath = new File(
+                        homeDirectory + File.separator + project + File.separator +
+                                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+            }
             try {
-                FileUtils.copyFile(swaggerSrcPath, swaggerDesPath);
+                FileUtils.copyFile(swaggerSrcPath, desPath);
             } catch (IOException e) {
-                throw new MicroGWTestException("Error while copying the openAPI definition from " + swaggerSrcPath +
-                        " to " + swaggerDesPath + ".", e);
+                throw new MicroGWTestException("Error while copying the file from " + swaggerSrcPath +
+                        " to " + desPath + ".", e);
             }
         }
     }

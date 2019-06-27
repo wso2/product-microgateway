@@ -28,14 +28,14 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/ballerina/ballerina-runtime-${ballerina.platform.version}</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
         </fileSet>
     </fileSets>
 
     <files>
         <file>
             <source>${basedir}/resources/ballerinaTruststore.p12</source>
-            <outputDirectory>/bre/security/</outputDirectory>
+            <outputDirectory>bre/security/</outputDirectory>
         </file>
     </files>
 </assembly>
