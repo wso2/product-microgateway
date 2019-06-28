@@ -21,6 +21,9 @@ import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * Data mapper for WSO2 APIM response's throttle policy section.
+ */
 @ApiModel(description = "")
 public class ThrottlePolicyDTO {
 

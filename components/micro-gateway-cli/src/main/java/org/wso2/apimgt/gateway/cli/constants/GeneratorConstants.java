@@ -54,6 +54,9 @@ public class GeneratorConstants {
     public static final String THROTTLE_POLICY_INITIALIZER = "throttle_policy_initializer";
     public static final String UTF_8 = "UTF-8";
 
-    public enum POLICY_TYPE {RESOURCE, APPLICATION, SUBSCRIPTION}
+    /**
+     * Enum defining the available types of throttle policies.
+     */
+    public enum PolicyType { RESOURCE, APPLICATION, SUBSCRIPTION }
 
 }

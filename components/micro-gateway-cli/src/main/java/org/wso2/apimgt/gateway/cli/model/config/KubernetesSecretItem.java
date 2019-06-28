@@ -20,6 +20,9 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 import org.quartz.utils.FindbugsSuppressWarnings;
 
+/**
+ * Descriptor for one secret item in {@link KubernetesSecret}.
+ */
 public class KubernetesSecretItem {
 
     private String name;

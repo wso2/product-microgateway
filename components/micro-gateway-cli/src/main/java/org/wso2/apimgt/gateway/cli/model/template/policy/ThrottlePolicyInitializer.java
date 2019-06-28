@@ -26,6 +26,9 @@ import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Throttle policy initializer context used by mustache templates.
+ */
 public class ThrottlePolicyInitializer {
     private List<String> policyInitNames;
     private List<String> policyNames;
@@ -63,23 +66,23 @@ public class ThrottlePolicyInitializer {
         return this;
     }
 
-    public ThrottlePolicyInitializer buildPolicyContext(List<ThrottlePolicyMapper> policies, GeneratorConstants
-            .POLICY_TYPE type) {
+    public ThrottlePolicyInitializer buildPolicyContext(List<ThrottlePolicyMapper> policies,
+                                                        GeneratorConstants.PolicyType type) {
         for (ThrottlePolicyMapper policyDTO : policies) {
             String escapedPolicyName = CodegenUtils.trim(policyDTO.getName());
             switch (type) {
-            case RESOURCE:
-                policyInitNames.add(GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + escapedPolicyName
-                        + GeneratorConstants.INIT_FUNC_SUFFIX);
-                break;
-            case APPLICATION:
-                policyInitNames.add(GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + escapedPolicyName
-                        + GeneratorConstants.INIT_FUNC_SUFFIX);
-                break;
-            case SUBSCRIPTION:
-                policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + escapedPolicyName
-                        + GeneratorConstants.INIT_FUNC_SUFFIX);
-                break;
+                case RESOURCE:
+                    policyInitNames.add(GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + escapedPolicyName
+                            + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    break;
+                case APPLICATION:
+                    policyInitNames.add(GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + escapedPolicyName
+                            + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    break;
+                case SUBSCRIPTION:
+                    policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + escapedPolicyName
+                            + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    break;
             }
             policyNames.add(escapedPolicyName);
         }

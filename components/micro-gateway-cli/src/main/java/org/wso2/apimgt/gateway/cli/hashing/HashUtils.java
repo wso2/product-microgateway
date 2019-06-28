@@ -43,8 +43,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Utility class used for hashing functionality
- * 
+ * Utility class used for hashing functionality.
  */
 public class HashUtils {
 
@@ -52,19 +51,20 @@ public class HashUtils {
 
     /**
      * Generate hashes for the specified apis, subscription and application policies, then compare with the previously
-     *  generated hashes and detect if there are changes with them.
-     * 
-     * @param apis APIs list
+     * generated hashes and detect if there are changes with them.
+     *
+     * @param apis                 APIs list
      * @param subscriptionPolicies Subscription Policies list
-     * @param appPolicies Application policies list
-     * @param projectName Name of the project
+     * @param appPolicies          Application policies list
+     * @param projectName          Name of the project
      * @return true if there are changes detected vs the previous check
      * @throws HashingException error while change detection
      */
     public static boolean detectChanges(List<ExtendedAPI> apis,
-            List<SubscriptionThrottlePolicyDTO> subscriptionPolicies,
-            List<ApplicationThrottlePolicyDTO> appPolicies, String projectName) throws HashingException {
-        
+                                        List<SubscriptionThrottlePolicyDTO> subscriptionPolicies,
+                                        List<ApplicationThrottlePolicyDTO> appPolicies,
+                                        String projectName) throws HashingException {
+
         boolean hasChanges = true;
         Map<String, String> allHashesMap = new HashMap<>();
         Map<String, String> apiHashesMap = getMapOfHashes(apis);
@@ -97,9 +97,8 @@ public class HashUtils {
 
     /**
      * Loads the stored resource hashes
-     * 
+     *
      * @param projectName name of the project
-     * 
      * @return a map with id to hash mapping loaded from the CLI temp
      * @throws IOException error while loading the stored hashes
      */
@@ -115,8 +114,8 @@ public class HashUtils {
 
     /**
      * Store the calculated hashes of API/policy resources in CLI temp folder
-     * 
-     * @param hashesMap map of id against hashes to be stored
+     *
+     * @param hashesMap   map of id against hashes to be stored
      * @param projectName name of the project
      * @throws IOException error while storing hash values
      */
@@ -127,8 +126,8 @@ public class HashUtils {
     }
 
     /**
-     * Calculate the hashes of the given list of APIs or Throttle policies and return as a map with id -> hash mapping 
-     * 
+     * Calculate the hashes of the given list of APIs or Throttle policies and return as a map with id -> hash mapping
+     *
      * @param objects List of APIs
      * @return map with id -> hash mapping
      * @throws HashingException error while calculating hashes of the APIs
@@ -139,9 +138,9 @@ public class HashUtils {
             for (Object obj : objects) {
                 String hash = getAnnotatedHash(obj);
                 if (obj instanceof ExtendedAPI) {
-                    hashes.put(((ExtendedAPI)obj).getId(), hash);
+                    hashes.put(((ExtendedAPI) obj).getId(), hash);
                 } else if (obj instanceof ThrottlePolicyDTO) {
-                    hashes.put(((ThrottlePolicyDTO)obj).getPolicyId(), hash);
+                    hashes.put(((ThrottlePolicyDTO) obj).getPolicyId(), hash);
                 } else {
                     logger.warn("Incompatible type for generating hash: " + obj + ", class: " + obj.getClass());
                 }
@@ -152,8 +151,8 @@ public class HashUtils {
 
     /**
      * Calculates the hash of the object using the Hash annotations added to the getter methods of the object.
-     * 
-     * @param obj object whose hash needs to be calculated. 
+     *
+     * @param obj object whose hash needs to be calculated.
      * @return calculated hash value
      * @throws HashingException error while calculating hash
      */
@@ -165,7 +164,7 @@ public class HashUtils {
                 try {
                     Object value = method.invoke(obj);
                     String stringifiedField = mapper.writeValueAsString(value);
-                    
+
                     //The method name needs to be added here. The reason is, the array of methods returned from 
                     // getClass().getMethods() is not always in a particular order. If the order changes, this would 
                     // result in change of the hash even through the object didn't change. To fix this, a TreeSet is 
@@ -187,11 +186,11 @@ public class HashUtils {
     }
 
     /**
-     * Iterate through the given maps and check if they are both having equal entries 
-     * 
+     * Iterate through the given maps and check if they are both having equal entries
+     *
      * @param map1 First map
      * @param map2 Second map
-     * @return true if both maps are having equal entries 
+     * @return true if both maps are having equal entries
      */
     private static boolean equalMaps(Map<String, String> map1, Map<String, String> map2) {
         if (map1 == null || map2 == null) {
@@ -211,7 +210,7 @@ public class HashUtils {
 
     /**
      * Calculates the MD5 hash for a given String
-     * 
+     *
      * @param inputString input string
      * @return calculated md5 hash value
      * @throws HashingException error while calculating the md5 hash value
@@ -232,7 +231,7 @@ public class HashUtils {
 
     /**
      * Convert the given byte array to a hex string
-     * 
+     *
      * @param byteData byte array
      * @return converted hex string for the byte array
      */
@@ -247,32 +246,34 @@ public class HashUtils {
 
     /**
      * Get the MD5 hash for an API.
+     *
      * @param apiName API name
      * @param version API version
      * @return md5 hash value for concatenated string (apiName:version)
      */
-    public static String generateAPIId(String apiName, String version){
+    public static String generateAPIId(String apiName, String version) {
         String concatString = apiName + ":" + version;
-        try{
+        try {
             return HashingConstants.API + getMD5Hex(concatString);
-        } catch (HashingException e){
+        } catch (HashingException e) {
             throw new CLIInternalException("Error while generating md5 hash for API");
         }
     }
 
     /**
      * Get the MD5 hash for the given specific resource of an API.
-     * @param apiName API name
-     * @param version API version
+     *
+     * @param apiName  API name
+     * @param version  API version
      * @param resource Resource name
-     * @param method  operation associated with the resource
+     * @param method   operation associated with the resource
      * @return md5 hash value for concatenated string (apiName:version:resource:method)
      */
-    public static String generateResourceId(String apiName, String version, String resource, String method){
+    public static String generateResourceId(String apiName, String version, String resource, String method) {
         String concatString = apiName + ":" + version + ":" + resource + ":" + method;
-        try{
+        try {
             return getMD5Hex(concatString);
-        } catch (HashingException e){
+        } catch (HashingException e) {
             throw new CLIInternalException("Error while generating md5 hash for API resource");
         }
     }

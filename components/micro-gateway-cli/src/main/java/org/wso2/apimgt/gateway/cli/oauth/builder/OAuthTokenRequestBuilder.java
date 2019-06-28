@@ -19,6 +19,9 @@ package org.wso2.apimgt.gateway.cli.oauth.builder;
 
 import org.wso2.apimgt.gateway.cli.model.oauth.OAuthTokenRequest;
 
+/**
+ * Builds a new token request to communicate with oauth token endpoint.
+ */
 public class OAuthTokenRequestBuilder {
 
     private OAuthTokenRequest oAuthTokenRequest;

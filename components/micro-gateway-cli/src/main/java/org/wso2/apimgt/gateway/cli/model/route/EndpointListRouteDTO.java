@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //todo: add constants
+
 /**
  * This class hold the available endpoints and securityConfig details (in the routes.yaml)
  */
@@ -60,12 +61,12 @@ public class EndpointListRouteDTO {
         this.name = name;
     }
 
-    public void addEndpoint(String endpoint){
-        if(endpoints == null){
+    public void addEndpoint(String endpoint) {
+        if (endpoints == null) {
             endpoints = new ArrayList<>();
         }
         //todo: indicate if a duplicate has occurred ?
-        if(!endpoints.contains(endpoint)){
+        if (!endpoints.contains(endpoint)) {
             endpoints.add(endpoint);
         }
     }

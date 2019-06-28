@@ -1,5 +1,10 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+/**
+ * Production and Sandbox endpoints holder.
+ * Instance of this class consists of {@link MgwEndpointListDTO}
+ * type production and sandbox endpoint definitions.
+ */
 public class MgwEndpointConfigDTO {
 
     private MgwEndpointListDTO prodEndpoints = null;

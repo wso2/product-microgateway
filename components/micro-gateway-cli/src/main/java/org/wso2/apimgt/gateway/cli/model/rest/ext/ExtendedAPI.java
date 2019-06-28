@@ -18,6 +18,9 @@ package org.wso2.apimgt.gateway.cli.model.rest.ext;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 
+/**
+ * Data mapper object defining a MGW API using OpenApi definition.
+ */
 public class ExtendedAPI extends APIDetailedDTO {
     //API Level endpoint configuration
     private MgwEndpointConfigDTO endpointConfigRepresentation = null;

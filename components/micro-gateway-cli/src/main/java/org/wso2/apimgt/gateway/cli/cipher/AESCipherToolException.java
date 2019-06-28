@@ -20,6 +20,9 @@ package org.wso2.apimgt.gateway.cli.cipher;
 
 import java.security.GeneralSecurityException;
 
+/**
+ * Signals that some error has occurred related to AESCipherTool.
+ */
 public class AESCipherToolException extends GeneralSecurityException {
     public AESCipherToolException(String msg) {
         super(msg);

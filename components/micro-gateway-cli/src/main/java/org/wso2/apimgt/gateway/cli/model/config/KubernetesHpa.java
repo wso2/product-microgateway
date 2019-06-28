@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * K8s Horizontal Pod Autoscaler (HPA) descriptor.
+ */
 public class KubernetesHpa {
     private String name;
     private String labels;
