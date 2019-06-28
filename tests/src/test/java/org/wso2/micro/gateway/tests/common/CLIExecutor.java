@@ -58,9 +58,9 @@ public class CLIExecutor {
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
         //todo: check using prompt as well
-        String[] importCmdArray = {"--label", label, "--username", "admin", "--password", "admin", "--server-url",
-                "https://localhost:9443", "--truststore", "lib/platform/bre/security/ballerinaTruststore.p12",
-                "--truststore-pass", "ballerina", "--config", config};
+        String[] importCmdArray = {"-l", label, "-u", "admin", "-p", "admin", "-s", "https://localhost:9443",
+                "--truststore", "lib/platform/bre/security/ballerinaTruststore.p12",
+                "--truststore-pass", "ballerina"};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
         runBuildCmd(mgwCommand, project);

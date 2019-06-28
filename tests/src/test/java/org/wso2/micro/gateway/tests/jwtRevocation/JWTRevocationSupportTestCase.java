@@ -71,7 +71,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     public void start() throws Exception {
         initializeEtcdServer();
 
-        String balPath, configPath = "";
+        String configPath = "";
         String label = "apimTestLabel";
         String project = "apimTestProject";
         //get mock APIM Instance
