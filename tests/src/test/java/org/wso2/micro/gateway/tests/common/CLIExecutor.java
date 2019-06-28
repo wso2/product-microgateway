@@ -208,12 +208,12 @@ public class CLIExecutor {
             if (openAPIFileName.contains(".bal")) {
                 desPath = new File(homeDirectory + File.separator + project + File.separator +
                         GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
-                        openAPIFileName.substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+                        openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
             } else {
                 desPath = new File(
                         homeDirectory + File.separator + project + File.separator +
                                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                                .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+                                .substring(openAPIFileName.lastIndexOf("/") + 1));
             }
             try {
                 FileUtils.copyFile(swaggerSrcPath, desPath);
