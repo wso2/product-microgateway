@@ -90,7 +90,7 @@ public function etcdAllRevokedTokenLookup() returns map<string> {
             int i = 0;
             while (i < length) {
                 string revokedTokenReceived = nodes[i].key.toString();
-                string revokedTokenTTL = nodes[i].ttl.toString();
+                string revokedTokenTTL = nodes[i].ttl.toS   tring();
                 int tokenLength = revokedTokenReceived.length();
                 int lastIndexOfSlash = revokedTokenReceived.lastIndexOf("/") + 1;
                 string revokedToken = revokedTokenReceived.substring(lastIndexOfSlash, tokenLength);

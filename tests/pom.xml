@@ -142,7 +142,6 @@
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
         </dependency>
-        </dependency>
         <dependency>
             <groupId>io.ballerina.messaging</groupId>
             <artifactId>broker-launcher</artifactId>
