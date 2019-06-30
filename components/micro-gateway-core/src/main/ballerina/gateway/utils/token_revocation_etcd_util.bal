@@ -28,7 +28,7 @@ string etcdPasswordTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_
 string etcdUsernameTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_USERNAME, "");
 
 #value:"Query etcd by passing the revoked token and retrieves relevant value"
-# + return - string
+# + return - string 
 public function etcdRevokedTokenLookup(string tokenKey) returns string {
     http:Request req = new;
     string finalResponse = "";
