@@ -28,7 +28,7 @@ string etcdPasswordTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_
 string etcdUsernameTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_USERNAME, "");
 
 #value:"Query etcd by passing the revoked token and retrieves relevant value"
-# + return - string 
+# + return - string
 public function etcdRevokedTokenLookup(string tokenKey) returns string {
     http:Request req = new;
     string finalResponse = "";
@@ -90,7 +90,7 @@ public function etcdAllRevokedTokenLookup() returns map<string> {
             int i = 0;
             while (i < length) {
                 string revokedTokenReceived = nodes[i].key.toString();
-                string revokedTokenTTL = nodes[i].ttl.toS   tring();
+                string revokedTokenTTL = nodes[i].ttl.toString();
                 int tokenLength = revokedTokenReceived.length();
                 int lastIndexOfSlash = revokedTokenReceived.lastIndexOf("/") + 1;
                 string revokedToken = revokedTokenReceived.substring(lastIndexOfSlash, tokenLength);
