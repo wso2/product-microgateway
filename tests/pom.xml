@@ -143,7 +143,6 @@
             <artifactId>andes-client</artifactId>
             <version>3.2.85</version>
         </dependency>
-        </dependency>
         <dependency>
             <groupId>io.ballerina.messaging</groupId>
             <artifactId>broker-launcher</artifactId>
