@@ -37,12 +37,13 @@ import java.util.UUID;
  */
 public final class CodegenUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(CodegenUtils.class);
+    public static final String ENV = "$env{";
+
     private CodegenUtils() {
 
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(CodegenUtils.class);
-    public static final String ENV = "$env{";
 
     /**
      * Writes a file with content to specified {@code filePath}.

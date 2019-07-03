@@ -25,7 +25,6 @@ import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 /**
  * Secured K8s ingress descriptor.
  */
-
 public class SecureKubernetesIngress {
     private String name;
     private String labels;
