@@ -36,13 +36,12 @@ import java.util.UUID;
  * Utilities used by ballerina code generator.
  */
 public final class CodegenUtils {
+    private static final Logger logger = LoggerFactory.getLogger(CodegenUtils.class);
+    public static final String ENV = "$env{";
 
     private CodegenUtils() {
 
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(CodegenUtils.class);
-    public static final String ENV = "$env{";
 
     /**
      * Writes a file with content to specified {@code filePath}.
@@ -151,7 +150,6 @@ public final class CodegenUtils {
             //extract variable name
             final String envVariable = variable.substring(variable.lastIndexOf(ENV) + 5, variable.lastIndexOf("}"));
             //resolve value
-
             String value;
             if ((value = System.getenv(envVariable)) != null) {
                 return value;

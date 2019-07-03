@@ -21,7 +21,6 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
-
 /**
  * Secured K8s ingress descriptor.
  */
