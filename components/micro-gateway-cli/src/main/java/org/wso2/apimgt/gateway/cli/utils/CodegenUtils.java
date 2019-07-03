@@ -44,7 +44,6 @@ public final class CodegenUtils {
 
     }
 
-
     /**
      * Writes a file with content to specified {@code filePath}.
      *
