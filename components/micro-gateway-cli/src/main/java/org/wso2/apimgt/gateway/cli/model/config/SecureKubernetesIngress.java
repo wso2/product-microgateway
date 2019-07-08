@@ -34,6 +34,8 @@ public class SecureKubernetesIngress {
     private String ingressClass;
     private boolean enableTLS = true;
     private boolean enable = false;
+    private String keyStorePath;
+    private String keyStorePassword;
 
     public String getName() {
         if (name == null) {
@@ -110,6 +112,22 @@ public class SecureKubernetesIngress {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public String getKeyStorePath() {
+        return keyStorePath;
+    }
+
+    public void setKeyStorePath(String keyStorePath) {
+        this.keyStorePath = keyStorePath;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
     }
 }
 

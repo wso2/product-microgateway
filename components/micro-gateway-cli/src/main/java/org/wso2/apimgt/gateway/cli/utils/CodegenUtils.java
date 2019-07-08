@@ -20,6 +20,8 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 
@@ -34,6 +36,8 @@ import java.util.UUID;
  * Utilities used by ballerina code generator.
  */
 public final class CodegenUtils {
+    private static final Logger logger = LoggerFactory.getLogger(CodegenUtils.class);
+    public static final String ENV = "$env{";
 
     private CodegenUtils() {
 
@@ -131,5 +135,29 @@ public final class CodegenUtils {
             key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
         }
         return key;
+    }
+
+    /**
+     * Resolve variable value from environment variable if $env{} is used. Else return the value.
+     *
+     * @param variable variable value
+     * @return Resolved variable
+     */
+    public static String resolveValue(String variable) {
+        if (variable != null && variable.contains(ENV)) {
+            //remove white spaces
+            variable = variable.replace(" ", "");
+            //extract variable name
+            final String envVariable = variable.substring(variable.lastIndexOf(ENV) + 5, variable.lastIndexOf("}"));
+            //resolve value
+            String value;
+            if ((value = System.getenv(envVariable)) != null) {
+                return value;
+            }
+            logger.warn("Environment variable for keystore password : \"" + envVariable
+                    + "\" is not set. Setting the value provided, starting with \"" + ENV + "\"");
+
+        }
+        return variable;
     }
 }
