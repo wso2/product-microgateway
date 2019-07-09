@@ -59,9 +59,9 @@ public final class MockHttp2Server extends Thread {
 
         SslContext sslCtx = null;
         File cert = new File(getClass().getClassLoader()
-                .getResource("keyStores" + File.separator + "certificate.pem").getPath());
+                .getResource("keyStores/certificate.pem").getPath());
         File key = new File(getClass().getClassLoader()
-                .getResource("keyStores" + File.separator + "key.pem").getPath());
+                .getResource("keyStores/key.pem").getPath());
 
         log.debug("SSL: " + SSL);
         log.debug("PORT: " + PORT);

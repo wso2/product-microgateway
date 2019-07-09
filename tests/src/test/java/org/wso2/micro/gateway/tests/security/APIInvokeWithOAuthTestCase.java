@@ -31,7 +31,6 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,8 +66,6 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
-        //set security schemas
-        String security = "oauth2";
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -85,7 +82,7 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
         //generate apis with CLI and start the micro gateway server
-        super.init(label, project, security);
+        super.init(label, project);
     }
 
     @Test(description = "Test API invocation with a oauth token")

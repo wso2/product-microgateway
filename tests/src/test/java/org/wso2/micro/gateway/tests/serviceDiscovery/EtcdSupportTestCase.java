@@ -61,7 +61,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String base64EncodedPizzaShackProdNewValue;
     private String base64EncodedPizzaShackSandNewValue;
     private String servicePath = "/pizzashack/1.0.0/menu";
-    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101503\", \"message\":\"Runtime Error\", \"description\":\"Error connecting to the back end\"}}";
+    private final static String INVALID_URL_AT_ETCD_RESPONSE = "{\"fault\":{\"code\":\"101503\", \"message\":\"" +
+            "Runtime Error\", \"description\":\"Error connecting to the back end\"}}";
     private EtcdClient etcdClient;
     private boolean etcdAuthenticationEnabled = true;
 
@@ -101,20 +102,18 @@ public class EtcdSupportTestCase extends BaseTestCase {
         //generate apis with CLI and start the micro gateway server
         CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+        configPath = getClass().getClassLoader()
+                .getResource("confs/default-test-config.conf").getPath();
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
 
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
         cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generatePassingFlag(label, project, "--enable-etcd");
+        cliExecutor.generate(label, project);
 
         balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
 
         encodeValuesToBase64();
         prepareConfigValues();
@@ -190,7 +189,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
     @Test(description = "Test Etcd Support Providing all correct arguments")
     public void testEtcdSupport() throws Exception {
 
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
@@ -202,7 +202,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support by changing the api url at the etcd node")
     public void testEtcdSupportApiUrlChanged() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
@@ -219,7 +220,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support Providing all correct arguments but provided keys not defined in Etcd Node")
     public void testMissingKeysInEtcd() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //sandbox key is not present at etcd. So invoke the sandbox endpoint
@@ -236,7 +238,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support without providing relevant etcd keys")
     public void testWithoutProvidingKeys() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", etcdTimerParameter };
+        String[] args = { "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter,
+                "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
@@ -247,7 +250,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
     public void testEtcdAuthenticationFailure() throws Exception {
         String invalidetcdusername = "etcdusername=invalid";
         String invalidetcdpassword = "etcdpassword=invalid";
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", invalidetcdusername, "-e", invalidetcdpassword, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = { "-e", etcdUrlParameter, "-e", invalidetcdusername, "-e", invalidetcdpassword, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
@@ -259,7 +263,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
     @Test(description = "Test Etcd Support when incorrect Etcd URL is provided")
     public void testWithIncorrectEtcdUrl() throws Exception {
         String incorrectetcdUrl = "etcdurl=http://127.0.0.1:2389";
-        String[] args = { "--config", configPath, "-e", incorrectetcdUrl, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
+        String[] args = { "-e", incorrectetcdUrl, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
         microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
@@ -270,7 +275,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support without providing Etcd URL")
     public void testWithoutEtcdUrl() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = { "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e",
+                pizzaShackSandParameter, "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
@@ -281,7 +287,9 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support by changing the api url at the etcd node")
     public void testOverridingEndpointUrl() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter, "-e", overridingEndpointParameter };
+        String[] args = { "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
+                pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter, "-e",
+                overridingEndpointParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //test sand endpoint
@@ -298,7 +306,9 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @Test(description = "Test Etcd Support when the URL defined at etcd corresponding to a key is invalid")
     public void testInvalidUrlAtEtcd() throws Exception {
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e",
+                etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e",
+                etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //insert an invalid url for the pizzashackprod key at etcd node
@@ -317,7 +327,9 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.disableAuthentication(token);
         etcdAuthenticationEnabled = false;
 
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e",
+                etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e",
+                etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
@@ -338,7 +350,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.disableAuthentication(token);
         etcdAuthenticationEnabled = false;
 
-        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
+        String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", pizzaShackProdParameter, "-e",
+                pizzaShackSandParameter, "-e", etcdTimerParameter };
         microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint

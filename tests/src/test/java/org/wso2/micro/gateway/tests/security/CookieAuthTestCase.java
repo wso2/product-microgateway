@@ -23,14 +23,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
-import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
@@ -70,8 +67,6 @@ public class CookieAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
-        //set security schemas
-        String security = "oauth2";
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -87,26 +82,11 @@ public class CookieAuthTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
+        String configPath = "confs/default-test-config.conf";
         String cookie = "Cookie=" + jwtTokenProd;
-        String[] args = {"--config", configPath, "-e", cookie};
-        microGWServer.startMicroGwServer(balPath, args);
+        String[] args = {"-e", cookie};
+        super.init(label, project, args, configPath);
     }
 
     @Test(description = "Test API invocation with a valid Cookie token")

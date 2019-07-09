@@ -30,7 +30,6 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -53,11 +53,9 @@ public class InterceptorTestCase extends BaseTestCase {
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(),
                 TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"interceptor" + File.separator + "interceptor.yaml", "interceptor" +
-                File.separator + "validateRequest.bal", "interceptor" + File.separator +
-                "interceptPerAPIRequest.bal", "interceptor" + File.separator + "interceptPerAPIResponse.bal",
-                "interceptor" + File.separator + "validateResponse.bal", "interceptor" + File.separator +
-                "PerAPIInterceptor.yaml"});
+        super.init(project, new String[]{"interceptor/interceptor.yaml", "interceptor/validateRequest.bal",
+                "interceptor/interceptPerAPIRequest.bal", "interceptor/interceptPerAPIResponse.bal",
+                "interceptor/validateResponse.bal", "interceptor/PerAPIInterceptor.yaml"});
     }
 
     @Test(description = "Test per API throttling")

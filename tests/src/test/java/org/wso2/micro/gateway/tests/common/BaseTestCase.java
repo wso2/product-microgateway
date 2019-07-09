@@ -23,6 +23,7 @@ import org.testng.Assert;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.common.model.SubscribedApiDTO;
+import org.wso2.micro.gateway.tests.context.MicroGWTestException;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.TestConstant;
@@ -32,60 +33,139 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * Base test class for CLI based tests
+ * Base test class for CLI based tests.
  */
 public class BaseTestCase {
     protected ServerInstance microGWServer;
     protected MockHttpServer mockHttpServer;
     protected final static int MOCK_SERVER_PORT = 9443;
-    private String projectPath;
 
-    protected void init(String label, String project, String security) throws Exception {
-        CLIExecutor cliExecutor;
-
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
-
+    private void initHttpServer() {
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
         mockHttpServer.start();
-        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args);
     }
 
-    protected void init(String project, String[] openAPIFileNames) throws Exception {
-        CLIExecutor cliExecutor;
+    /**
+     * Initialize and Start the microgateway server.
+     *
+     * @param configFilePath the relative path of config file (stored inside resources directory) if the default config
+     *                       file needs to be overwritten. (use forward slash to mention the path)
+     * @param balPath        the absolute path of the compiled ballerina project executable(balx file).
+     * @param args           commandline arguments.
+     * @throws MicroGWTestException
+     */
+    private void initAndStartMicroGWServer(String configFilePath, String balPath, String[] args)
+            throws MicroGWTestException {
+        String configPath;
+        if (configFilePath == null) {
+            configPath = Objects.requireNonNull(getClass().getClassLoader()
+                    .getResource("confs/default-test-config.conf")).getPath();
+        } else {
+            configPath = Objects.requireNonNull(getClass().getClassLoader().getResource(configFilePath)).getPath();
+        }
+        microGWServer = ServerInstance.initMicroGwServer(configPath);
+        if (args == null) {
+            microGWServer.startMicroGwServer(balPath);
+        } else {
+            microGWServer.startMicroGwServer(balPath, args);
+        }
+    }
 
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
+    /**
+     * Initialize the project by importing APIs from the API Manager publisher.
+     *
+     * @param label          label
+     * @param project        project name
+     * @param args           additional commandline arguments
+     * @param configFilePath relative path of the config file (use forward slash to mention the path)
+     * @throws Exception
+     */
+    protected void init(String label, String project, String[] args, String configFilePath)
+            throws Exception {
+        initHttpServer();
+        CLIExecutor cliExecutor = CLIExecutor.getInstance();
+        cliExecutor.generate(label, project);
+        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        initAndStartMicroGWServer(configFilePath, balPath, args);
+    }
 
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        //System.setProperty(GatewayCliConstants.SYS_PROP_SECURITY, "oauth2");
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
+    /**
+     * Initialize the project by importing APIs from the API Manager publisher.
+     *
+     * @param label          label
+     * @param project        project name
+     * @param configFilePath relative path of the config file (use forward slash to mention the path)
+     * @throws Exception
+     */
+    protected void init(String label, String project, String configFilePath) throws Exception {
+        init(label, project, null, configFilePath);
+    }
+
+    /**
+     * Initialize the project by importing APIs from the API Manager publisher.
+     *
+     * @param label   label
+     * @param project project name
+     * @throws Exception
+     */
+    protected void init(String label, String project) throws Exception {
+        init(label, project, null, null);
+    }
+
+    /**
+     * Initialize the project using developer first approach (Using openAPI definitions).
+     *
+     * @param project          project name
+     * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
+     * @param args             additional commandline arguments
+     * @param configFilePath   relative path of the config file (use forward slash to mention the path)
+     * @throws Exception
+     */
+    protected void init(String project, String[] openAPIFileNames, String[] args, String configFilePath)
+            throws Exception {
+        initHttpServer();
+        CLIExecutor cliExecutor = CLIExecutor.getInstance();
         cliExecutor.generateFromDefinition(project, openAPIFileNames);
-
         String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "default-test-config.conf").getPath();
-        String[] args = {"--config", configPath, "--experimental"};
-        microGWServer.startMicroGwServer(balPath, args);
+        initAndStartMicroGWServer(configFilePath, balPath, args);
     }
 
+    /**
+     * Initialize the project using developer first approach (Using openAPI definitions).
+     *
+     * @param project          project name
+     * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
+     * @param args             additional commandline arguments
+     * @throws Exception
+     */
+    protected void init(String project, String[] openAPIFileNames, String[] args) throws Exception {
+        init(project, openAPIFileNames, args, null);
+    }
+
+    /**
+     * Initialize the project using developer first approach (Using openAPI definitions).
+     *
+     * @param project          project name
+     * @param openAPIFileNames relative paths of the openAPI definitions stored inside resources directory.
+     *                         (use forward slash to mention the path)
+     * @throws MicroGWTestException
+     */
+    protected void init(String project, String[] openAPIFileNames) throws Exception {
+        init(project, openAPIFileNames, null, null);
+    }
+
+    /**
+     * Stop HTTP server, stop microgateway server and clear the API publisher.
+     *
+     * @throws Exception if exception is occurred while stopping the microgateway server.
+     */
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
         microGWServer.stopServer(true);
@@ -99,19 +179,18 @@ public class BaseTestCase {
         subscribedApiDTO.setName(api.getName());
         subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");
+
         subscribedApiDTO.setSubscriptionTier(tier);
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
 
         JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
-        return TokenUtil.getBasicJWT(applicationDTO,jwtTokenInfo,keyType, validityPeriod);
-
+        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
     }
 
-
-
     protected String getServiceURLHttp(String servicePath) throws MalformedURLException {
-        return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath).toString();
+        return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath)
+                .toString();
     }
 
     protected String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
