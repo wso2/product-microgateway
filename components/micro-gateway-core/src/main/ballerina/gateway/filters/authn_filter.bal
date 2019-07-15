@@ -44,7 +44,8 @@ public type AuthnFilter object {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
-            boolean result = doAuthnFilterRequest(caller, request, context, self.oauthAuthenticator, self.authnHandlerChain);
+            setHostHeaderToFilterContext(request, context);
+            boolean result = doAuthnFilterRequest(caller, request, untaint context, self.oauthAuthenticator, self.authnHandlerChain);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
         } else {
