@@ -532,3 +532,21 @@ public function decodeValueToBase10(string value) returns string {
     }
     return decodedValue;
 }
+
+# Extracts host header from request and set it to the filter context
+public function setHostHeaderToFilterContext(http:Request request, http:FilterContext context) {
+    if(context.attributes[HOSTNAME_PROPERTY] == ()) {
+        printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
+        if (request.hasHeader(HOST_HEADER_NAME)) {
+            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
+
+        } else {
+            context.attributes[HOSTNAME_PROPERTY] = "localhost";
+        }
+        printDebug(KEY_UTILS, "Hostname attribute of the filter context is set to : " +
+                    <string>context.attributes[HOSTNAME_PROPERTY]);
+    } else {
+        printDebug(KEY_UTILS, "Hostname attribute of the filter context is already set to : " +
+                            <string>context.attributes[HOSTNAME_PROPERTY]);
+    }
+}
