@@ -118,8 +118,7 @@ goto :end
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
-        SET ERRORCODE="%ERRORLEVEL%"
-		if "%ERRORCODE%"=="1" exit /b %ERRORCODE%
+		if ERRORLEVEL 1 goto :end
 
         :continueBuild
             call :passToJar
@@ -195,9 +194,8 @@ goto end
 	REM Jump to GW-CLI exec location when running the jar
 	CD %MICROGW_HOME%
 	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
-	SET ERRORCODE="%ERRORLEVEL%"
-	if "%ERRORCODE%"=="121" goto runJava
-	if "%ERRORCODE%"=="1" exit /b %ERRORCODE%
+	if "%ERRORLEVEL%"=="121" goto runJava
+	if ERRORLEVEL 1 goto :end
 :end
 goto endlocal
 
