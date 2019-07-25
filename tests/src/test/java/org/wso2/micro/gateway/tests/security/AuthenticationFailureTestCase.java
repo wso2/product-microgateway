@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.tests.services;
+package org.wso2.micro.gateway.tests.security;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.IOUtils;
@@ -60,21 +60,19 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         pub.addApi(label, api);
 
         String response = IOUtils.toString(new FileInputStream(
-                getClass().getClassLoader().getResource("keyManager" + File.separator + "invalid_subscription.xml")
+                getClass().getClassLoader().getResource("keyManager/invalid_subscription.xml")
                         .getPath()));
         KeyValidationInfo info = new KeyValidationInfo();
         info.setStringResponse(response);
         invalidSubscriptionToken = pub.getAndRegisterAccessToken(info);
 
         String response1 = IOUtils.toString(new FileInputStream(
-                getClass().getClassLoader().getResource("keyManager" + File.separator + "unauthorized.xml").getPath()));
+                getClass().getClassLoader().getResource("keyManager/unauthorized.xml").getPath()));
         KeyValidationInfo info1 = new KeyValidationInfo();
         info1.setStringResponse(response1);
         invalidScopeToken = pub.getAndRegisterAccessToken(info1);
-        //set security schemas
-        String security = "oauth2";
 
-        super.init(label, project, security);
+        super.init(label, project);
     }
 
     @Test(description = "Test without auth header")

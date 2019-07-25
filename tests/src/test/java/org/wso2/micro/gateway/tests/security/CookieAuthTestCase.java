@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.tests.toolkit;
+package org.wso2.micro.gateway.tests.security;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
@@ -31,11 +31,11 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.util.Base64;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class APIInvokeWithOAuthTestCase extends BaseTestCase {
+public class CookieAuthTestCase extends BaseTestCase {
     private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
@@ -67,8 +67,6 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
-        //set security schemas
-        String security = "oauth2";
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -84,40 +82,36 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
-        //generate apis with CLI and start the micro gateway server
-        super.init(label, project, security);
+
+        String configPath = "confs/default-test-config.conf";
+        String cookie = "Cookie=" + jwtTokenProd;
+        String[] args = {"-e", cookie};
+        super.init(label, project, args, configPath);
     }
 
-    @Test(description = "Test API invocation with a oauth token")
-    public void testApiInvoke() throws Exception {
-        //test prod endpoint
-        invoke(prodToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-
-        //test sand endpoint
-        invoke(sandToken, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
-    }
-
-    @Test(description = "Test API invocation with a JWT token")
-    public void testApiInvokeWithJWT() throws Exception {
-        //test prod endpoint with jwt token
-        invoke(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-
-        //test sand endpoint
-        invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
+    @Test(description = "Test API invocation with a valid Cookie token")
+    public void testApiInvokeWithCookie() throws Exception {
+        //test prod endpoint with Oauth token
+        invokePass(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }
-        //test invoking with an expired JWT token
-        invoke(expiringJwtTokenProd, 401);
     }
 
-    private void invoke(String token, String responseData, int responseCode) throws Exception {
+    @Test(description = "Test API invocation with a invalid Cookie token")
+    public void testApiInvokeFailWithCookie() throws Exception {
+
+        //test invoking with an expired Oauth token
+        invokeFail(expiringJwtTokenProd, 401);
+    }
+
+    private void invokePass(String token, String responseData, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        headers.put(HttpHeaderNames.COOKIE.toString(), "JSONID=" + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
@@ -125,41 +119,15 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
 
-    private void invoke(String token, int responseCode) throws Exception {
+    private void invokeFail(String token, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        headers.put(HttpHeaderNames.COOKIE.toString(), "JSONID=" + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
-
-//    @Test(description = "Test API invocation with Basic Auth")
-//    public void testApiInvokeFailWithBasicAuth() throws Exception {
-//        //Valid Credentials
-//        String originalInput = "generalUser1:password";
-//        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
-//
-//        //test endpoint
-//        invokeBasic(basicAuthToken, 401);
-//
-//        try {
-//            Thread.sleep(2000);
-//        } catch (InterruptedException ex) {
-//            Assert.fail("thread sleep interrupted!");
-//        }
-//    }
-//
-//    private void invokeBasic(String token, int responseCode) throws Exception {
-//        Map<String, String> headers = new HashMap<>();
-//        //test endpoint with token
-//        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
-//        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-//                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-//        Assert.assertNotNull(response);
-//        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
-//    }
 
     @AfterClass
     public void stop() throws Exception {
