@@ -269,7 +269,8 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
     -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
     org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 
-    if [ $? -eq 0 ]
+    exit_code=$?
+    if [ $exit_code -eq 0 ]
     then
         # Ballerina path is updated as ballerina platform is extracted
         BALLERINA_HOME="$MICROGW_HOME/lib/platform"
@@ -286,7 +287,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
             BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
 
         fi
-        
+
         update_cli_classpath
         MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
         pushd $MICRO_GW_LABEL_PROJECT_DIR/target/gen > /dev/null
@@ -297,6 +298,8 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
             # build the ballerina source code for the label
             ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
         popd > /dev/null
+     else
+        exit $exit_code
      fi
 else
   $JAVACMD \
