@@ -824,6 +824,7 @@ public class OpenAPICodegenUtils {
             }
             //generate scopes string
             for (String scope : scopeList) {
+                scope = "\"" + scope + "\"";
                 scopes = StringUtils.isEmpty(scopes) ? scope : scopes + "," + scope;
             }
         }

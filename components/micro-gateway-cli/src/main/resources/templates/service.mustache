@@ -77,7 +77,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         authProviders:["jwt","oauth2"]
     {{/if}} {{#unless isSecured}},
             authentication:{enabled:false} {{/unless}} {{#if scope}},
-            scopes: ["{{scope}}"] {{/if}}
+            scopes: [{{{scope}}}] {{/if}}
 
         }
     }
