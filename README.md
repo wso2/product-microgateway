@@ -70,7 +70,8 @@ microservice architectures efficiently.
 #### Microgateway quick start
 Let's host our first API on a Microgateway.
 
-1. First download the microgateway toolkit related to latest release from the product [release page](https://github.com/wso2/product-microgateway/releases) 
+1. First download the microgateway toolkit related to latest release from the product [official page](https://wso2.com/api-management/api-microgateway/) or 
+[github release page](https://github.com/wso2/product-microgateway/releases)
 and extract it to a folder of your choice.
 
 1. Using your command line client tool add the 'bin' directory of the extracted folder to your PATH variable.
