@@ -44,7 +44,9 @@ if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 REM Check if path to runtime executable is available
 set last=""
 for %%a in (%*) do set last=%%a
-if "%last%"=="" set isInvalidPath=T
+echo %last%
+if %last%=="" set isInvalidPath=T
+echo %last%
 if not exist %last% set isInvalidPath=T
 if "%isInvalidPath%"=="T" (
 	echo Path to executable balx file is invalid
@@ -53,10 +55,10 @@ if "%isInvalidPath%"=="T" (
 
 REM Extract ballerina runtime
 if not exist %GW_HOME%\runtime\ (
-    call %PRGDIR%\tools.exe
+    call "%PRGDIR%\tools.exe"
     if ERRORLEVEL 0 (
-        xcopy /y %GWHOME%\lib\gateway\*.jar %GWHOME%\runtime\bre\lib\ >nul
-        xcopy /sy %GWHOME%\lib\gateway\balo\wso2 %GWHOME%\runtime\lib\repo\wso2\ >nul
+        xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul
+        xcopy /sy "%GWHOME%\lib\gateway\balo\wso2" "%GWHOME%\runtime\lib\repo\wso2\" >nul
     )
 )
 
@@ -107,13 +109,13 @@ goto end
 		echo [%date% %time%] WARN: Can't find powershell in the system!
 		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
 		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
-		%GWHOME%\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
+		"%GWHOME%\runtime\bin\ballerina" run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
 	) else (
 		REM Change Java heap Xmx and Xmx values
-		powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
-		powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
-		powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
-		CD %GWHOME%
+		powershell -Command "(Get-Content \"%GWHOME%\runtime\bin\ballerina.bat\") | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content \"%GWHOME%\runtime\bin\ballerina_1.bat\""
+		powershell -Command "Remove-Item \"%GWHOME%\runtime\bin\ballerina.bat\""
+		powershell -Command "Rename-Item -path \"%GWHOME%\runtime\bin\ballerina_1.bat\" -newName ballerina.bat"
+		CD "%GWHOME%"
 		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
 			set /a n=!n!+1
 			set c=%%A
@@ -125,10 +127,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf \"%*\" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf \"%*\" | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
