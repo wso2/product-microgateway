@@ -118,10 +118,11 @@ goto :end
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
-		if ERRORLEVEL 1 goto :end
+        if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
 
         :continueBuild
             call :passToJar
+            if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%PATH%;%BALLERINA_HOME%\bin\
@@ -194,8 +195,8 @@ goto end
 	REM Jump to GW-CLI exec location when running the jar
 	CD %MICROGW_HOME%
 	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
-	if "%ERRORLEVEL%"=="121" goto runJava
-	if ERRORLEVEL 1 goto :end
+	if ERRORLEVEL 121 goto runJava
+	if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
 :end
 goto endlocal
 
