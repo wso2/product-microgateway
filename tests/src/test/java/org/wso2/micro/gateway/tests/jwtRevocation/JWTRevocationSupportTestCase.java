@@ -28,14 +28,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockETCDServer;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.ClientHelper;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
@@ -74,8 +71,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     public void start() throws Exception {
         initializeEtcdServer();
 
-        String security = "oauth2";
-        String balPath, configPath = "";
+        String configPath = "";
         String label = "apimTestLabel";
         String project = "apimTestProject";
         //get mock APIM Instance
@@ -122,34 +118,8 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         //broker = new EmbeddedBroker();
         //startMessageBroker();
 
-        //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
-
-        //Initialize the Micro-Gateway Server
-        microGWServer = ServerInstance.initMicroGwServer();
-        String cliHome = microGWServer.getServerHome();
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.setCliHome(cliHome);
-        cliExecutor.generate(label, project, security);
-
-        balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        try {
-            configPath = getClass().getClassLoader().getResource("confs" + File.separator + "default-test-config.conf")
-                    .getPath();
-        } catch (NullPointerException e) {
-            Assert.fail("Should not throw any exceptions" + e);
-        }
-
-        String ballerinaLogging = "b7a.log.level=TRACE";
-
-        //Starting the Micro-Gateway Server
-        String[] args = { "--config", configPath, "-e", ballerinaLogging };
-        microGWServer.startMicroGwServer(balPath, args);
+        configPath = "confs/default-test-config.conf";
+        super.init(label, project, configPath);
 
         //Send Extracted JTI to the jwtRevocation Topic
         publishMessage();
@@ -215,6 +185,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to retry ETCD all jti request
+     *
      * @param responseData Expected resoponse data
      * @param responseCode Expected resoponse code
      * @throws Exception Error while sending GET request
@@ -245,14 +216,15 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to publish a messege to JwtRevocation topic
+     *
      * @throws NamingException Error thrown while handling initial context
-     * @throws JMSException Error thrown while creating JMS connection
+     * @throws JMSException    Error thrown while creating JMS connection
      */
     private void publishMessage() throws NamingException, JMSException {
 
         String topicName = "jwtRevocation";
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin", "localhost", "5672")
-                .withTopic(topicName).build();
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
+                "localhost", "5672").withTopic(topicName).build();
         ConnectionFactory connectionFactory = (ConnectionFactory) initialContext
                 .lookup(ClientHelper.CONNECTION_FACTORY);
         Connection connection = connectionFactory.createConnection();
@@ -269,14 +241,15 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
     /**
      * Method to create a subscriber for jwtRevocation topic
-     * @throws JMSException Error thrown while creating JMS connection
+     *
+     * @throws JMSException    Error thrown while creating JMS connection
      * @throws NamingException Error thrown while handling initial context
      */
     private void createSubscriberJMSConnection() throws JMSException, NamingException {
 
         String topicName = "jwtRevocation";
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin", "localhost", "5672")
-                .withTopic(topicName).build();
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
+                "localhost", "5672").withTopic(topicName).build();
         ConnectionFactory connectionFactory = (ConnectionFactory) initialContext
                 .lookup(ClientHelper.CONNECTION_FACTORY);
         Connection connection = connectionFactory.createConnection();
