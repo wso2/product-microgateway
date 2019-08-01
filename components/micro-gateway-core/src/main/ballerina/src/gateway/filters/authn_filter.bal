@@ -45,7 +45,7 @@ public type AuthnFilter object {
             context.attributes[REQUEST_TIME] = startingTime;
             checkOrSetMessageID(context);
             setHostHeaderToFilterContext(request, context);
-            boolean result = doAuthnFilterRequest(caller, request, untaint context, self.oauthAuthenticator, self.authnHandlerChain);
+            boolean result = doAuthnFilterRequest(caller, request, <@untainted>  context, self.oauthAuthenticator, self.authnHandlerChain);
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
             return result;
         } else {
@@ -73,7 +73,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     runtime:getInvocationContext().attributes[RESOURCE_NAME_ATTR] = context.resourceName;
     // get auth config for this resource
     boolean authenticated;
-    var (isSecured, authProvidersIds) = getResourceAuthConfig(context);
+    var [isSecured, authProvidersIds] = getResourceAuthConfig(context);
     context.attributes[IS_SECURED] = isSecured;
     AuthenticationContext authenticationContext = {};
     boolean isAuthorized = false;
@@ -169,7 +169,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
             //     // todo: need to check log:printError(errMsg, err = err);. Currently doesn't give any useful information.
             //     printError(KEY_AUTHN_FILTER, "Error occurred while authenticating via JWT token.");
             //     setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            //     sendErrorResponse(caller, request, untaint context);
+            //     sendErrorResponse(caller, request, <@untainted>  context);
             //     return false;
             // }
 
@@ -183,7 +183,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                 runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR] = extractedToken;
                 printDebug(KEY_AUTHN_FILTER, "Successfully extracted the OAuth token from header : " +
                         authHeaderName);
-                var apiKeyValidationDto = oauthnHandler.handle(request, context);
+                var apiKeyValidationDto = oauthnHandler.process(request, context);
                 if (apiKeyValidationDto is APIKeyValidationDto){
                     isAuthorized = boolean.convert(apiKeyValidationDto.authorized);
                     printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
@@ -236,13 +236,13 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                         printDebug(KEY_AUTHN_FILTER,
                                 "Authentication handler returned with validation status : " + errorStatus);
                         setErrorMessageToFilterContext(context, errorStatus);
-                        sendErrorResponse(caller, request, untaint context);
+                        sendErrorResponse(caller, request, <@untainted>  context);
                         return false;
                     }
                 } else {
                     log:printError(<string>apiKeyValidationDto.reason(), err = apiKeyValidationDto);
                     setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
-                    sendErrorResponse(caller, request, untaint context);
+                    sendErrorResponse(caller, request, <@untainted>  context);
                     return false;
                 }
 
@@ -251,12 +251,12 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                 if (isCookie) {
                     log:printError(<string>extractedToken.detail().message, err = extractedToken);
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
-                    sendErrorResponse(caller, request, untaint context);
+                    sendErrorResponse(caller, request, <@untainted>  context);
                     return false;
                 } else {
                     log:printError(<string>extractedToken.detail().message, err = extractedToken);
                     setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-                    sendErrorResponse(caller, request, untaint context);
+                    sendErrorResponse(caller, request, <@untainted>  context);
                     return false;
                 }
             }
@@ -265,7 +265,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
             //Basic auth valiadation
             printDebug(KEY_AUTHN_FILTER, "Basic auth token found. Calling the auth scheme : " + providerId);
             BasicAuthUtils basicAuthentication = new(authnHandlerChain);
-            boolean isValidated = basicAuthentication.processRequest(caller, request, untaint context);
+            boolean isValidated = basicAuthentication.processRequest(caller, request, <@untainted>  context);
             return isValidated;
 
         } else {
@@ -274,14 +274,14 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         }
         if (!isAuthorized) {
             setErrorMessageToFilterContext(context, API_AUTH_INVALID_CREDENTIALS);
-            sendErrorResponse(caller, request, untaint context);
+            sendErrorResponse(caller, request, <@untainted>  context);
         }
         return isAuthorized;
     }
     return true;
 }
 
-function getResourceAuthConfig(http:FilterContext context) returns (boolean, string[]) {
+function getResourceAuthConfig(http:FilterContext context) returns [boolean, string[]] {
     boolean resourceSecured;
     string[] authProviderIds = [];
     // get authn details from the resource level
@@ -293,7 +293,7 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
     resourceSecured = isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further
     if (!resourceSecured) {
-        return (resourceSecured, authProviderIds);
+        return [resourceSecured, authProviderIds];
     }
     // check if auth providers are given at resource level
     var providers = resourceLevelAuthAnn.authProviders;
@@ -313,7 +313,7 @@ function getResourceAuthConfig(http:FilterContext context) returns (boolean, str
             // no auth providers found
         }
     }
-    return (resourceSecured, authProviderIds);
+    return [resourceSecured, authProviderIds];
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {

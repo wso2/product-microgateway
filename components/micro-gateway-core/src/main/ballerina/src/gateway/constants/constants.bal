@@ -47,7 +47,7 @@
  public const string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
  public const string AUTHENTICATION_CONTEXT = "AUTHENTICATION_CONTEXT";
  public const string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
- public int SUPER_TENANT_ID = -1234;
+ public const int SUPER_TENANT_ID = -1234;
  public const string THROTTLE_KEY = "throttleKey";
  public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
  public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
@@ -271,11 +271,11 @@
  public  const string UNPROCESSABLE_ENTITY_DESCRIPTION = "Unable to process the given entity. Please check whether the provided entity is correct.";
 
 // http codes
- public int INTERNAL_SERVER_ERROR = 500;
- public int FORBIDDEN = 403;
- public int UNAUTHORIZED = 401;
- public int THROTTLED_OUT = 429;
- public int UNPROCESSABLE_ENTITY = 422;
+ public const int INTERNAL_SERVER_ERROR = 500;
+ public const int FORBIDDEN = 403;
+ public const int UNAUTHORIZED = 401;
+ public const int THROTTLED_OUT = 429;
+ public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
 
@@ -310,8 +310,8 @@
  const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 
 
- public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
- public int DEFAULT_ETCD_TRIGGER_TIME = 10000; //10 seconds
+ public const int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
+ public const int DEFAULT_ETCD_TRIGGER_TIME = 10000; //10 seconds
 
 //jwt claims
  const string APPLICATION = "application";

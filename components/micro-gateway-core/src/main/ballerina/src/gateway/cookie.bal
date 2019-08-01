@@ -30,7 +30,7 @@ public type CookieBasedAuth object {
     public function processRequest( http:Request request) returns string|error {
 
         //get required cookie as config value
-        string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
+        string requiredCookie = config:getAsString(COOKIE_HEADER, "");
 
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
@@ -50,7 +50,7 @@ public type CookieBasedAuth object {
     public function isCookieAuthed( http:Request request) returns boolean {
 
         //get required cookie as config value
-        string requiredCookie = config:getAsString(COOKIE_HEADER, default = "");
+        string requiredCookie = config:getAsString(COOKIE_HEADER, "");
 
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);

@@ -27,12 +27,12 @@ import ballerina/system;
 import ballerina/task;
 import ballerina/encoding;
 
-public map<string> etcdUrls = {};
-public map<any> urlChanged = {};
+map<string> etcdUrls = {};
+map<any> urlChanged = {};
 map<string> defaultUrls ={};
 string etcdToken ="";
 boolean etcdPeriodicQueryInitialized = false;
-public boolean etcdConnectionEstablished = false;
+boolean etcdConnectionEstablished = false;
 boolean etcdConnectionAttempted = false;
 boolean credentialsProvided = false;
 boolean etcdAuthenticationEnabled = true;
@@ -43,7 +43,7 @@ string etcdAuthBasePath = "/v3alpha/auth";
 # Setting up etcd timer task
 public function initiateEtcdTimerTask() {
     printDebug(KEY_ETCD_UTIL, "initiateEtcdTimerTask Called");
-    int etcdTriggerTime = config:getAsInt("etcdtimer", default = DEFAULT_ETCD_TRIGGER_TIME);
+    int etcdTriggerTime = config:getAsInt("etcdtimer", DEFAULT_ETCD_TRIGGER_TIME);
     string|error trigTime = string.convert(etcdTriggerTime);
     (function() returns error?) onTriggerFunction = etcdTimerTask;
     function(error) onErrorFunction = etcdError;
@@ -60,7 +60,7 @@ public function etcdTimerTask() returns error? {
     printDebug(KEY_ETCD_UTIL,"Etcd Periodic Query Initiated");
     if (etcdUrls.count() > 0) {
         printDebug(KEY_ETCD_UTIL, "etcdurl map values - start");
-        foreach var (key, value) in etcdUrls {
+        foreach var [key, value] in etcdUrls.entries() {
             string currentUrl = <string>value;
             string fetchedUrl = etcdLookup(<string>key);
 
@@ -87,7 +87,7 @@ public function etcdError(error e) {
 
 # Setting up etcd requirements
 # + return - ....
-public function etcdSetup(string key, string etcdConfigKey, string default, string defaultEtcdKey) returns string {
+public function etcdSetup(string key, string etcdConfigKey, string defaultUrl, string defaultEtcdKey) returns string {
     string endpointUrl;
 
     if (!etcdConnectionAttempted) {
@@ -101,25 +101,25 @@ public function etcdSetup(string key, string etcdConfigKey, string default, stri
             etcdPeriodicQueryInitialized = true;
             initiateEtcdTimerTask();
         }
-        string etcdKey = config:getAsString(etcdConfigKey, default="");
+        string etcdKey = config:getAsString(etcdConfigKey, "");
         if (etcdKey == "") {
             config:setConfig(etcdConfigKey, defaultEtcdKey);
             etcdKey = defaultEtcdKey;
         }
         if (etcdKey == "") {
             printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
-            endpointUrl = config:getAsString(key, default=default);
+            endpointUrl = config:getAsString(key, defaultUrl);
         }
         else {
             printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + key);
-            defaultUrls[etcdKey] = config:getAsString(key, default=default);
+            defaultUrls[etcdKey] = config:getAsString(key, defaultUrl);
             urlChanged[etcdKey] = false;
             etcdUrls[etcdKey] = etcdLookup(etcdKey);
             endpointUrl = <string>etcdUrls[etcdKey];
         }
     }
     else {
-        endpointUrl = config:getAsString(key,default=default);
+        endpointUrl = config:getAsString(key, defaultUrl);
     }
     return endpointUrl;
 }
@@ -127,7 +127,7 @@ public function etcdSetup(string key, string etcdConfigKey, string default, stri
 # Establish etcd connection by authenticating etcd
 public function establishEtcdConnection(string defaultEtcdKey) {
     printDebug(KEY_ETCD_UTIL, "Establishing Etcd Connection");
-    string etcdurl = config:getAsString("etcdurl", default=defaultEtcdKey);
+    string etcdurl = config:getAsString("etcdurl", defaultEtcdKey);
     if (etcdurl != "") {
         printDebug(KEY_ETCD_UTIL, "etcdurl CLI parameter has been provided");
         etcdAuthenticate();
@@ -147,7 +147,7 @@ public function etcdLookup(string base10EncodedKey) returns string {
     boolean valueNotFound = false;
 
     base64EncodedKey = encoding:encodeBase64(base10EncodedKey.toByteArray("UTF-8"));
-    req.setPayload({"key": untaint base64EncodedKey});
+    req.setPayload({"key": <@untainted>  base64EncodedKey});
 
     if (etcdAuthenticationEnabled) {
         printDebug(KEY_ETCD_UTIL, "Setting authorization header for etcd requests");
@@ -192,8 +192,8 @@ public function etcdAuthenticate() {
     printDebug(KEY_ETCD_UTIL, "Authenticating Etcd");
     http:Request req = new;
 
-    string username = config:getAsString("etcdusername", default="");
-    string password = config:getAsString("etcdpassword", default="");
+    string username = config:getAsString("etcdusername", "");
+    string password = config:getAsString("etcdpassword", "");
 
     if (username == "" && password == "") {
         printDebug(KEY_ETCD_UTIL, "etcdusername and etcdpassword CLI parameters has not been provided");
@@ -203,7 +203,7 @@ public function etcdAuthenticate() {
         credentialsProvided = true;
     }
 
-    req.setPayload({ "name": untaint username, "password": untaint password });
+    req.setPayload({ "name": <@untainted>  username, "password": <@untainted>  password });
 
     var response = etcdEndpoint->post(etcdAuthBasePath + "/authenticate", req);
     if (response is http:Response ) {
@@ -215,7 +215,7 @@ public function etcdAuthenticate() {
                 printDebug(KEY_ETCD_UTIL, "etcd has responded with a token");
                 string|error token = <string>payload.token;
                 if(token is string) {
-                    etcdToken = untaint token;
+                    etcdToken = <@untainted>  token;
                     etcdConnectionEstablished = true;
                     printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
                 }

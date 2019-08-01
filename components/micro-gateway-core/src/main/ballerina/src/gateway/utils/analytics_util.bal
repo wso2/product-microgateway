@@ -132,6 +132,6 @@ function initStreamPublisher() {
     eventStream.subscribe(writeEventToFile);
 }
 
-public function retrieveHostname(string key, string default) returns string {
-    return config:getAsString(key, default = default);
+public function retrieveHostname(string key, string defaultHost) returns string {
+    return config:getAsString(key, defaultHost);
 }

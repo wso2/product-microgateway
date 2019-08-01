@@ -15,12 +15,12 @@
 // under the License.
 
 
- public int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
- public int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
- public int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
- public int INTERNAL_ERROR_CODE = 900808;
- public int INTERNAL_ERROR_CODE_POLICY_NOT_FOUND = 900809;
- public int BLOCKING_ERROR_CODE = 900805;
+ public const int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
+ public const int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
+ public const int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
+ public const int INTERNAL_ERROR_CODE = 900808;
+ public const int INTERNAL_ERROR_CODE_POLICY_NOT_FOUND = 900809;
+ public const int BLOCKING_ERROR_CODE = 900805;
 
  public const string THROTTLE_OUT_MESSAGE = "Message throttled out";
  public const string THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";

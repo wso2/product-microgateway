@@ -21,15 +21,15 @@ public function getRevokedTokenMap() returns map<string>{
 }
 
 public function addToRevokedTokenMap(map<string> revokedTokens) returns (boolean|()){
-    foreach var (revokedTokenKey,revokedTokenValue) in revokedTokens{
+    foreach var [revokedTokenKey,revokedTokenValue] in revokedTokens.entries() {
         revokedTokenMap[<string>revokedTokenKey]=<string>revokedTokenValue;
     }
     return true;
 }
 
 public function retrieveFromRevokedTokenMap(string token) returns (boolean|()){
-    foreach var (revokedTokenKey,revokedTokenValue) in revokedTokenMap{
-        if(token==revokedTokenKey){
+    foreach var [revokedTokenKey,revokedTokenValue] in revokedTokenMap.entries() {
+        if(token==revokedTokenKey) {
             return true;
         }
     }

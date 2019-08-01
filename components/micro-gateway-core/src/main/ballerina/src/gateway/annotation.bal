@@ -19,7 +19,7 @@ public type TierConfiguration record {
 
 };
 
-public annotation <resource> RateLimit TierConfiguration;
+public annotation TierConfiguration RateLimit on resource function;
 
 public type APIConfiguration record {
     string apiVersion;
@@ -29,6 +29,6 @@ public type APIConfiguration record {
 
 };
 
-public annotation <service> API APIConfiguration;
+public annotation APIConfiguration API on service;
 
 

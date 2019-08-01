@@ -21,9 +21,9 @@ import ballerina/log;
 
 map<string> blockConditions = {};
 map<any> throttleDataMap = {};
-public stream<RequestStreamDTO> requestStream = new;
-public stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
-public boolean isStreamsInitialized = false;
+stream<RequestStreamDTO> requestStream = new;
+stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
+boolean isStreamsInitialized = false;
 future<()> ftr = start initializeThrottleSubscription();
 
 boolean blockConditionExist = false;
@@ -52,7 +52,7 @@ public function putBlockCondition(map<any> m) {
 }
 
 //check whether throttle event is in the local map(request is throttled or not)
-public function isRequestThrottled(string key) returns (boolean, boolean) {
+public function isRequestThrottled(string key) returns [boolean, boolean] {
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
         int currentTime = time:currentTime().time;
@@ -63,13 +63,13 @@ public function isRequestThrottled(string key) returns (boolean, boolean) {
             stopOnQuota = true;
         }
         if (timeStamp >= currentTime) {
-            return (isThrottled, stopOnQuota);
+            return [isThrottled, stopOnQuota];
         } else {
             boolean status = throttleDataMap.remove(key);
-            return (false, stopOnQuota);
+            return [false, stopOnQuota];
         }
     }
-    return (isThrottled, false);
+    return [isThrottled, false];
 }
 
 public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {

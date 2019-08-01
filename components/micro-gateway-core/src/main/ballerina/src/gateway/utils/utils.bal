@@ -26,11 +26,10 @@ import ballerina/internal;
 import ballerina/system;
 import ballerina/encoding;
 
-public map<reflect:annotationData[]> resourceAnnotationMap = {};
-public map<reflect:annotationData[]> serviceAnnotationMap = {};
-public map<TierConfiguration?> resourceTierAnnotationMap = {};
-public map<APIConfiguration?> apiConfigAnnotationMap = {};
-
+map<reflect:annotationData[]> resourceAnnotationMap = {};
+map<reflect:annotationData[]> serviceAnnotationMap = {};
+map<TierConfiguration?> resourceTierAnnotationMap = {};
+map<APIConfiguration?> apiConfigAnnotationMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -319,19 +318,19 @@ public function getApiName(http:FilterContext context) returns (string) {
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {
-    return config:getAsString(instanceId + "." + property, default = defaultValue);
+    return config:getAsString(instanceId + "." + property,  defaultValue);
 }
 
 public function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
-    return config:getAsInt(instanceId + "." + property, default = defaultValue);
+    return config:getAsInt(instanceId + "." + property, defaultValue);
 }
 
 public function getConfigBooleanValue(string instanceId, string property, boolean defaultValue) returns boolean {
-    return config:getAsBoolean(instanceId + "." + property, default = defaultValue);
+    return config:getAsBoolean(instanceId + "." + property, defaultValue);
 }
 
 public function getConfigFloatValue(string instanceId, string property, float defaultValue) returns float {
-    return config:getAsFloat(instanceId + "." + property, default = defaultValue);
+    return config:getAsFloat(instanceId + "." + property, defaultValue);
 }
 
 public function getConfigMapValue(string property) returns map<any> {
@@ -430,8 +429,8 @@ public function rotateFile(string fileName) returns string|error {
 # Retrieve external configurations defined against a key
 #
 # + return - Returns the confif value as a string
-public function retrieveConfig(string key, string default) returns string {
-    return config:getAsString(key, default = default);
+public function retrieveConfig(string key, string defaultConfig) returns string {
+    return config:getAsString(key, defaultConfig);
 }
 
 # mask all letters with given text except last 4 charactors.

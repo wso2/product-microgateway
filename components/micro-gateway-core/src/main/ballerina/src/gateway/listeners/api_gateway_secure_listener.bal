@@ -17,9 +17,10 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/config;
+import ballerina/'lang\.object as lang;
 
 public type APIGatewaySecureListener object {
-    *AbstractListener;
+    *lang:AbstractListener;
     APIGatewayListener apiGatewayListener;
 
     public function __init(int port, http:ServiceEndpointConfiguration config) {

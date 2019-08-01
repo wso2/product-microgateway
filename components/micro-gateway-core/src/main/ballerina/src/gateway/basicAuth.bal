@@ -27,8 +27,6 @@ import ballerina/crypto;
 import ballerina/encoding;
 
 public type BasicAuthUtils object {
-
-
     http:AuthnHandlerChain authnHandlerChain;
 
     public function __init(http:AuthnHandlerChain authnHandlerChain) {
@@ -52,12 +50,10 @@ public type BasicAuthUtils object {
         string userName;
         string passWord;
         if(decodedCredentials is byte[]){
-        string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
-
-
+            string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
             if (!decodedCredentialsString.contains(":")) {
                 setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
-                sendErrorResponse(caller, request, untaint context);
+                sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }
             string[] decodedCred = decodedCredentialsString.trim().split(":");
@@ -91,7 +87,7 @@ public type BasicAuthUtils object {
         printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized);
         if (!isAuthorized) {
             setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-            sendErrorResponse(caller, request, untaint context);
+            sendErrorResponse(caller, request, <@untainted> context);
             return false;
         }
 

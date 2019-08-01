@@ -22,9 +22,10 @@ import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
+import ballerina/'lang\.object as lang;
 
 public type APIGatewayListener object {
-    *AbstractListener;
+    *lang:AbstractListener;
 
     private int listenerPort = 0;
     private string listenerType = "HTTP";

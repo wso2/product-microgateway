@@ -320,7 +320,7 @@ public function getMergedModel(json model, json models) returns (json) {
     map<json> mapModels = <map<json>>map<json>.convert(models);
     if (model.allOf != null) {
         json merged = ();
-        foreach var (k, v) in mapModels {
+        foreach var [k, v] in mapModels.entries() {
             if (v[REFERENCE] != null) {
                 var modelReference = models[replaceModelPrefix(v[REFERENCE].toString())];
                 //if there is allOf property defined in the referenced model, again call the getMergedModel method
@@ -390,25 +390,25 @@ public function getReferencedModel(json model, json models) returns (json) {
     return outModel;
 }
 //merge details of a source model to another given model
-public function merge(json target, json source) returns (json) {
-    foreach var key in source.getKeys() {
-        var sourceProperty = source[key];
-        if (target[key] == null) {//if there are no such property in the target add it
-            target[key] = sourceProperty;
+public function merge(json targetModel, json sourceModel) returns (json) {
+    foreach var key in sourceModel.getKeys() {
+        var sourceProperty = sourceModel[key];
+        if (targetModel[key] == null) {//if there are no such property in the targetModel add it
+            targetModel[key] = sourceProperty;
         } else {
             //if there is a value available for this property in the source model, check whether there are any
             //exceptional keys inside that property
             if (sourceProperty.getKeys().length() > 0) {
                 foreach var proprtyKey in sourceProperty.getKeys() {
-                    if (target[key][proprtyKey] == null) {
-                        target[key][proprtyKey] = sourceProperty[proprtyKey];
+                    if (targetModel[key][proprtyKey] == null) {
+                        targetModel[key][proprtyKey] = sourceProperty[proprtyKey];
 
                     }
                 }
             }
         }
     }
-    return target;
+    return targetModel;
 }
 
 //creating a return object
@@ -687,13 +687,13 @@ public function isNumberType(json value, string format) returns (boolean) {
 }
 //return whether the type of the value is same as the expected type
 public function isExpectedType(json value, string expectedType) returns (boolean) {
-    string typeof = "";
-    if (value is int) {typeof = INTEGER;}
-    else if (value is float) {typeof = NUMBER;}
-    else if (value is string) {typeof = STRING;}
-    else if (value is boolean) {typeof = BOOLEAN;}
-    else { typeof = JSON;}
-    if (expectedType == typeof) {
+    string actualType = "";
+    if (value is int) {actualType = INTEGER;}
+    else if (value is float) {actualType = NUMBER;}
+    else if (value is string) {actualType = STRING;}
+    else if (value is boolean) {actualType = BOOLEAN;}
+    else { actualType = JSON;}
+    if (expectedType == actualType) {
         return true;
     } else {
         return false;
@@ -759,7 +759,7 @@ public function validateSpecification(string name, json target, json model, json
                 }
             }
         } else {
-            foreach var (k, v) in mapValue {
+            foreach var [k, v] in mapValue.entries() {
                 errorArray = validateProperties(v, model, models);
                 foreach var key in properties.getKeys() {
                     var field = properties[key];
@@ -783,19 +783,19 @@ public function validateSpecification(string name, json target, json model, json
 }
 //return the type of the target object
 public function typeOf(json target) returns (string) {
-    string typeof = "";
+    string actualType = "";
     if (target is int) {
-        typeof = INTEGER;
+        actualType = INTEGER;
     }
     else if (target is float) {
-        typeof = NUMBER;
+        actualType = NUMBER;
     }
-    else if (target is string) {typeof = STRING;
+    else if (target is string) {actualType = STRING;
     }
-    else if (target is boolean) {typeof = BOOLEAN;}
-    else if (target is json[]) {typeof = ARRAY;}
-    else { typeof = OBJECT;}
-    return typeof;
+    else if (target is boolean) {actualType = BOOLEAN;}
+    else if (target is json[]) {actualType = ARRAY;}
+    else { actualType = OBJECT;}
+    return actualType;
 }
 
 public function validate(string name, json target, json swaggerModel, json swaggerModels) returns (Result) {
@@ -862,7 +862,7 @@ public function validateRequiredFields(json target, json fields, json modelField
         var property = fields[i].toString();
         //if the target object is an array check whether each item includes required fields
         if (<string>typeOf(target) == ARRAY) {
-            foreach var (k, v) in mapValue {
+            foreach var [k, v] in mapValue.entries() {
                 if (v[property] == null || modelFields[property] == null) {
                     error err = error(property + " is a required field");
                     errorArray[j] = err;

@@ -26,12 +26,12 @@ import ballerina/io;
 import ballerina/reflect;
 import ballerina/internal;
 
-public int errorItem = 0;
-public string? requestPath = "";
-public string requestMethod = "";
-public boolean isType = false;
-public string[] pathKeys = [];
-public string pathType = "";
+int errorItem = 0;
+string? requestPath = "";
+string requestMethod = "";
+boolean isType = false;
+string[] pathKeys = [];
+string pathType = "";
 
 boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, REQUEST_VALIDATION_ENABLED, false
 );
@@ -79,7 +79,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         json models = {};
         string modelName = "";
         //getting all the keys defined under the paths in the swagger
-        pathKeys = untaint swagger[PATHS].getKeys();
+        pathKeys = <@untainted>  swagger[PATHS].getKeys();
         //getting the method of the request
         requestMethod = request.method.toLower();
         //getting the path hit by the request
@@ -105,7 +105,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                                 //getting the reference to the model
                                 string modelReference = k[SCHEMA][REFERENCE].toString();
                                 //getting the model name
-                                modelName = untaint replaceModelPrefix(modelReference);
+                                modelName = <@untainted>  replaceModelPrefix(modelReference);
                                 //check whether there is a model available from the assigned model name
                                 if (models[modelName] != null) {
                                     model = models[modelName];
@@ -122,7 +122,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                     } else {
                      string requestReference = swagger[PATHS][i][requestMethod][REQUESTBODY][REFERENCE].toString();
                      //getting the model name
-                      modelName = untaint replaceModelPrefix(requestReference);
+                      modelName = <@untainted>  replaceModelPrefix(requestReference);
                       //check whether there is a model available from the assigned model name
                        if (models[modelName] != null) {
                            model = models[modelName];
@@ -141,7 +141,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
                 if (!finalResult.valid) {
                     //setting the error message to the context
                     setErrorMessageToFilterContext(filterContext, INVALID_ENTITY);
-                    filterContext.attributes[ERROR_DESCRIPTION] = untaint finalResult.resultErr[0].reason();
+                    filterContext.attributes[ERROR_DESCRIPTION] = <@untainted>  finalResult.resultErr[0].reason();
                     //sending the error response to the client
                     sendErrorResponse(caller, request, filterContext);
                     return false;//avoid sending the invalid request to the backend by returning false.
@@ -206,7 +206,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                    }
                         if (swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][SCHEMA][TYPE] != null) {
                             isType = true;
-                            pathType = untaint swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
+                            pathType = <@untainted>  swagger[PATHS][i][requestMethod][RESPONSES][responseStatusCode][
                             SCHEMA][
                             TYPE].toString();
                         }
@@ -242,7 +242,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                            }
                              if (schema[TYPE] != null) {
                                isType = true;
-                               pathType = untaint schema[TYPE].toString();
+                               pathType = <@untainted>  schema[TYPE].toString();
                              }
                    }
                }
@@ -259,7 +259,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                 if (!finalResult.valid) {
                     //setting the error message to the context
                     setErrorMessageToFilterContext(context, INVALID_RESPONSE);
-                    context.attributes[ERROR_DESCRIPTION] = untaint finalResult.resultErr[0].reason();
+                    context.attributes[ERROR_DESCRIPTION] = <@untainted>  finalResult.resultErr[0].reason();
                     //getting attributes from the context
                     int statusCode = <int>context.attributes[HTTP_STATUS_CODE];
                     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
@@ -275,7 +275,7 @@ public function doValidationFilterResponse(http:Response response, http:FilterCo
                         description: errorDescription
                     } };
                     //setting the new payload to the response
-                    response.setJsonPayload(untaint newPayload);
+                    response.setJsonPayload(<@untainted>  newPayload);
                     return true;//send the changed response(error response) to the user
                 }
             }
