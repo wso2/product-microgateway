@@ -21,6 +21,7 @@ import com.beust.jcommander.JCommander;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * {@code GatewayLauncherCmd} represents a micro gateway cli launcher command.
@@ -47,7 +48,8 @@ public interface GatewayLauncherCmd {
     }
 
     default void printUsageInfo(String commandName) {
+        PrintStream err = System.err;
         String usageInfo = getCommandUsageInfo(commandName);
-        System.err.println(usageInfo);
+        err.println(usageInfo);
     }
 }

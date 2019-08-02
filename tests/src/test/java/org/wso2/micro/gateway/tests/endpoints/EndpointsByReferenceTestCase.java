@@ -23,7 +23,6 @@ import java.util.Map;
 public class EndpointsByReferenceTestCase extends BaseTestCase {
     protected String jwtTokenProd;
 
-
     @BeforeClass
     public void start() throws Exception {
 

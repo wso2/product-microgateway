@@ -19,6 +19,9 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 import org.quartz.utils.FindbugsSuppressWarnings;
 
+/**
+ * Descriptor for one config map item in {@link KubernetesConfigMap}.
+ */
 public class KubernetesConfigMapConfigItem {
     private String name;
     private String mountPath;

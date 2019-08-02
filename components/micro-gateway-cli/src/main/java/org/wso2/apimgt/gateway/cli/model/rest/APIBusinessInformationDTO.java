@@ -19,6 +19,9 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Data holder/mapper class for business info in WSO2 APIM APIs.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIBusinessInformationDTO  {
 

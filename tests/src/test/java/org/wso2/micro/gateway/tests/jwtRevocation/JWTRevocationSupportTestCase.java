@@ -71,7 +71,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
     public void start() throws Exception {
         initializeEtcdServer();
 
-        String balPath, configPath = "";
+        String configPath = "";
         String label = "apimTestLabel";
         String project = "apimTestProject";
         //get mock APIM Instance
@@ -118,7 +118,7 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         //broker = new EmbeddedBroker();
         //startMessageBroker();
 
-        configPath = "confs" + File.separator + "default-test-config.conf";
+        configPath = "confs/default-test-config.conf";
         super.init(label, project, configPath);
 
         //Send Extracted JTI to the jwtRevocation Topic

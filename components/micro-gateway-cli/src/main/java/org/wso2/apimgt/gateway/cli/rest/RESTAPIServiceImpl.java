@@ -35,15 +35,20 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyLi
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
+import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
+/**
+ * Implementation of {@link RESTAPIService} to communication with
+ * WSO2 API Publisher.
+ */
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
 
@@ -85,7 +90,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
@@ -144,7 +149,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
 
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
@@ -222,7 +227,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);
                 List<ApplicationThrottlePolicyDTO> policyDTOS = appsList.getList();
@@ -272,7 +277,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 subsList = mapper.readValue(responseStr, SubscriptionThrottlePolicyListDTO.class);
                 List<SubscriptionThrottlePolicyDTO> policyDTOS = subsList.getList();
@@ -323,7 +328,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 certList = mapper.readValue(responseStr, ClientCertificatesDTO.class);
                 List<ClientCertMetadataDTO> certDTOS = certList.getCertificates();

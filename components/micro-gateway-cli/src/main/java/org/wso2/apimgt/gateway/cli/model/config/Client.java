@@ -17,6 +17,12 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * HTTP Client configurations for toolkit.
+ *
+ * Currently in use for defining connection parameters for
+ * API import endpoint.
+ */
 public class Client {
     private int httpRequestTimeout;
 

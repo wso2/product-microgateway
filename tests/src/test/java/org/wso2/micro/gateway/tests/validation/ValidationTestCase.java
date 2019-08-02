@@ -89,22 +89,9 @@ public class ValidationTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 360000);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 360000);
         //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
-
-        String configPath = getClass().getClassLoader()
-                .getResource("confs" + File.separator + "validation.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.generateFromDefinition(project,
-                new String[] { "validation" + File.separator + "PizzaShackAPI_swagger.json" });
-
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
-        microGWServer.startMicroGwServer(balPath);
+        String configPath = "confs/validation.conf";
+        String[] openAPIFiles = new String[] { "validation/PizzaShackAPI_swagger.json" };
+        super.init(project, openAPIFiles, null, configPath);
     }
 
     @Test(description = "Test valid request and valid response with a JWT token")

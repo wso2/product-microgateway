@@ -66,7 +66,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         //Register API with label
         pub.addApi(label, api);
 
-        String configPath = "confs" + File.separator + "mutualSSL-test.conf";
+        String configPath = "confs/mutualSSL-test.conf";
         super.init(label, project, configPath);
     }
 
@@ -74,7 +74,7 @@ public class MutualSSLTestCase extends BaseTestCase {
     public void mutualSSLEstablished() throws Exception {
 
         String trustStorePath = getClass().getClassLoader()
-                .getResource("keyStores" + File.separator + "ballerinaTruststore.p12").getPath();
+                .getResource("keyStores/ballerinaTruststore.p12").getPath();
         Properties systemProps = System.getProperties();
         systemProps.put("javax.net.debug", "ssl");
         systemProps.put("javax.net.ssl.trustStore", trustStorePath);
@@ -89,7 +89,7 @@ public class MutualSSLTestCase extends BaseTestCase {
         try {
 
             String keyPath = getClass().getClassLoader()
-                    .getResource("keyStores" + File.separator + "ballerinaKeystore.p12").getPath();
+                    .getResource("keyStores/ballerinaKeystore.p12").getPath();
             final InputStream is = new FileInputStream(keyPath);
             keyStore = KeyStore.getInstance("pkcs12");
             keyStore.load(is, P12_PASSWORD);
@@ -132,7 +132,7 @@ public class MutualSSLTestCase extends BaseTestCase {
     public void mutualSSLfail() throws Exception {
 
         String trustStorePath = getClass().getClassLoader()
-                .getResource("keyStores" + File.separator + "ballerinaTruststore.p12").getPath();
+                .getResource("keyStores/ballerinaTruststore.p12").getPath();
         Properties systemProps = System.getProperties();
         systemProps.put("javax.net.debug", "ssl");
         systemProps.put("javax.net.ssl.trustStore", trustStorePath);
@@ -145,7 +145,7 @@ public class MutualSSLTestCase extends BaseTestCase {
 
         try {
             String keyPath = getClass().getClassLoader()
-                    .getResource("keyStores" + File.separator + "mtsltestFail.p12").getPath();
+                    .getResource("keyStores/mtsltestFail.p12").getPath();
             final InputStream is = new FileInputStream(keyPath);
             keyStore = KeyStore.getInstance("pkcs12");
             keyStore.load(is, P12_PASSWORD);

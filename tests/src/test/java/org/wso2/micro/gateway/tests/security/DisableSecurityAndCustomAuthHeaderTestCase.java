@@ -52,7 +52,7 @@ public class DisableSecurityAndCustomAuthHeaderTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
-        super.init(project, new String[]{"common_api.yaml", "security" + File.separator + "disable_security.yaml"});
+        super.init(project, new String[]{"common_api.yaml", "security/disable_security.yaml"});
     }
 
     @Test(description = "Test Invoking un secured resource which is specified at API level without token")

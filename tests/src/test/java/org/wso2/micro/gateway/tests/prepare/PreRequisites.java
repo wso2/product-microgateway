@@ -36,7 +36,7 @@ public class PreRequisites {
     @BeforeSuite
     public void setTrustStore() {
         String trustStorePath = new File(
-                getClass().getClassLoader().getResource("keyStores" + File.separator + "ballerinaTruststore.p12")
+                getClass().getClassLoader().getResource("keyStores/ballerinaTruststore.p12")
                         .getPath()).getAbsolutePath();
         System.setProperty("javax.net.ssl.trustStore", trustStorePath);
         System.setProperty("javax.net.ssl.trustStoreType", "PKCS12");

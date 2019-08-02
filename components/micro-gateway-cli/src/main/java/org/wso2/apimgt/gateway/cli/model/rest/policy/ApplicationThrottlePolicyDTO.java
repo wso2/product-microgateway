@@ -18,6 +18,9 @@ package org.wso2.apimgt.gateway.cli.model.rest.policy;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
+/**
+ * Data mapper for WSO2 APIM application throttle policy.
+ */
 public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO {
 
     private ThrottleLimitDTO defaultLimit = null;

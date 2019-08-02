@@ -230,8 +230,8 @@ public class CodeGenerator {
      */
     private GenSrcFile generateCommonEndpoints() throws IOException {
         String srcFile = GeneratorConstants.LISTENERS + GeneratorConstants.BALLERINA_EXTENSION;
-        ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
-        String endpointContent = getContent(listnerEndpoint, GeneratorConstants.LISTENERS_TEMPLATE_NAME);
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint().buildContext();
+        String endpointContent = getContent(listenerEndpoint, GeneratorConstants.LISTENERS_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 

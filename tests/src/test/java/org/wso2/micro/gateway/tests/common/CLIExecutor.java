@@ -25,6 +25,7 @@ import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.micro.gateway.tests.context.Constants;
 import org.wso2.micro.gateway.tests.context.MicroGWTestException;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
+import org.wso2.micro.gateway.tests.context.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,13 +54,13 @@ public class CLIExecutor {
         createBackgroundEnv();
         //This config file is relevant to the publisher API
         String config = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("confs" +
-                File.separator + "default-cli-test-config.toml")).getPath()).getAbsolutePath();
+                "/default-cli-test-config.toml")).getPath()).getAbsolutePath();
         String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
         //todo: check using prompt as well
-        String[] importCmdArray = {"--label", label, "--username", "admin", "--password", "admin", "--server-url",
-                "https://localhost:9443", "--truststore", "lib/platform/bre/security/ballerinaTruststore.p12",
-                "--truststore-pass", "ballerina", "--config", config};
+        String[] importCmdArray = {"-l", label, "-u", "admin", "-p", "admin", "-s", "https://localhost:9443",
+                "--truststore", "lib/platform/bre/security/ballerinaTruststore.p12",
+                "--truststore-pass", "ballerina"};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
         runBuildCmd(mgwCommand, project);
@@ -75,7 +76,8 @@ public class CLIExecutor {
      */
     private void runProcess(String[] cmdArray, String homeDirectory, String errorMessage) throws MicroGWTestException {
         try {
-            Process process = Runtime.getRuntime().exec(cmdArray, null, new File(homeDirectory));
+            Process process = Runtime.getRuntime().exec(cmdArray, new String[] {"MICROGW_HOME=" + cliHome, "JAVA_HOME="
+                    + System.getenv("JAVA_HOME")}, new File(homeDirectory));
             new ServerLogReader("errorStream", process.getErrorStream()).start();
             new ServerLogReader("inputStream", process.getInputStream()).start();
             boolean isCompleted = process.waitFor(2, TimeUnit.MINUTES);
@@ -132,7 +134,7 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runInitCmd(String mgwCommand, String project) throws MicroGWTestException {
-        String[] initCmdArray = {"bash", mgwCommand, "init", project};
+        String[] initCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "init", project);
         String initErrorMsg = "Error occurred during initializing the project.";
         runProcess(initCmdArray, homeDirectory, initErrorMsg);
     }
@@ -146,10 +148,17 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runImportCmd(String mgwCommand, String project, String[] cmdArgs) throws MicroGWTestException {
-        String[] importCmdArgs = {"bash", mgwCommand, "import", project};
+        String[] importCmdArgs = generateBasicCmdArgsBasedOnOS(mgwCommand, "import", project);
         importCmdArgs = ArrayUtils.addAll(importCmdArgs, cmdArgs);
         String importErrorMsg = "Error occurred during importing the api.";
         runProcess(importCmdArgs, homeDirectory, importErrorMsg);
+    }
+
+    private String[] generateBasicCmdArgsBasedOnOS(String mgwCommand, String mainCommand, String project) {
+        if (Utils.getOSName().toLowerCase().contains("windows")) {
+            return new String[]{"cmd.exe", "/c", mgwCommand.trim() + ".bat", mainCommand, project};
+        }
+        return new String[]{"bash", mgwCommand, mainCommand, project};
     }
 
     /**
@@ -160,7 +169,7 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     private void runBuildCmd(String mgwCommand, String project) throws MicroGWTestException {
-        String[] buildCmdArray = new String[]{"bash", mgwCommand, "build", project};
+        String[] buildCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "build", project);
         String buildErrorMsg = "Error occurred when building the project.";
         runProcess(buildCmdArray, homeDirectory, buildErrorMsg);
     }
@@ -193,17 +202,24 @@ public class CLIExecutor {
             throws MicroGWTestException {
         for (String openAPIFileName : openAPIFileNames) {
             File swaggerSrcPath = new File(
-                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + File.separator +
+                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" +
                             openAPIFileName).getPath());
-            File swaggerDesPath = new File(
-                    homeDirectory + File.separator + project + File.separator +
-                            GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                            .substring(openAPIFileName.lastIndexOf(File.separator) + 1));
+            File desPath;
+            if (openAPIFileName.contains(".bal")) {
+                desPath = new File(homeDirectory + File.separator + project + File.separator +
+                        GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
+                        openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
+            } else {
+                desPath = new File(
+                        homeDirectory + File.separator + project + File.separator +
+                                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                .substring(openAPIFileName.lastIndexOf("/") + 1));
+            }
             try {
-                FileUtils.copyFile(swaggerSrcPath, swaggerDesPath);
+                FileUtils.copyFile(swaggerSrcPath, desPath);
             } catch (IOException e) {
-                throw new MicroGWTestException("Error while copying the openAPI definition from " + swaggerSrcPath +
-                        " to " + swaggerDesPath + ".", e);
+                throw new MicroGWTestException("Error while copying the file from " + swaggerSrcPath +
+                        " to " + desPath + ".", e);
             }
         }
     }

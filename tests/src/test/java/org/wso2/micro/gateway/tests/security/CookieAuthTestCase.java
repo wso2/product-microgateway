@@ -83,7 +83,7 @@ public class CookieAuthTestCase extends BaseTestCase {
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
 
-        String configPath = "confs" + File.separator + "default-test-config.conf";
+        String configPath = "confs/default-test-config.conf";
         String cookie = "Cookie=" + jwtTokenProd;
         String[] args = {"-e", cookie};
         super.init(label, project, args, configPath);

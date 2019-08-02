@@ -24,7 +24,7 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/go-tools</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>**</include>
             </includes>

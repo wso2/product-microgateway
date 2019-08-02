@@ -19,6 +19,9 @@ package org.wso2.apimgt.gateway.cli.model.oauth;
 
 import org.quartz.utils.FindbugsSuppressWarnings;
 
+/**
+ * OAuth token request definition.
+ */
 public class OAuthTokenRequest {
 
     private char[] clientSecret;

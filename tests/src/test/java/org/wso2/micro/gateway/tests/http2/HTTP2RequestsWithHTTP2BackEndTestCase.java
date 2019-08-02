@@ -83,7 +83,7 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
 
-        String configPath = "confs" + File.separator + "http2-test.conf";
+        String configPath = "confs/http2-test.conf";
         super.init(label, project, configPath);
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);

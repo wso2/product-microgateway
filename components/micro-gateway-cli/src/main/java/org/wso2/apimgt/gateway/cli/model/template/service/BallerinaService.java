@@ -70,7 +70,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      *
      * @param openAPI {@link OpenAPI} type object to be converted
      * @return Converted {@link BallerinaService} object
-     * @throws BallerinaServiceGenException when OpenAPI to BallerinaService parsing failed
      */
     @Override
     public BallerinaService buildContext(OpenAPI openAPI) {
@@ -264,7 +263,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 
-    public void setIsDevFirst(boolean value){
+    public void setIsDevFirst(boolean value) {
         isDevFirst = value;
     }
 }
