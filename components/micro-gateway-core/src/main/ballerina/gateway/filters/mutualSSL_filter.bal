@@ -26,16 +26,7 @@ public type MutualSSLFilter object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
-        printDebug(KEY_AUTHN_FILTER, "Setting hostname to populate the throttle analytics");
-        if (request.hasHeader(HOST_HEADER_NAME)) {
-            context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
-            printDebug(KEY_AUTHN_FILTER, "Hostname attribute of the filter context is set to : " +
-            <string>context.attributes[HOSTNAME_PROPERTY]);
-        } else {
-            context.attributes[HOSTNAME_PROPERTY] = "localhost";
-            printDebug(KEY_AUTHN_FILTER, "Hostname attribute of the filter context is set to : " +
-                       <string>context.attributes[HOSTNAME_PROPERTY]);
-        }
+        setHostHeaderToFilterContext(request, context);
         if(request.mutualSslHandshake["status"] == PASSED) {
             return doMTSLFilterRequest(caller, request, context);
         }
