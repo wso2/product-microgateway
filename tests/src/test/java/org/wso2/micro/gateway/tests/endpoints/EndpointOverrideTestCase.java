@@ -28,6 +28,6 @@ public class EndpointOverrideTestCase extends EndpointsByReferenceTestCase {
                 "myEndpoint3_prod_endpoint_1=https://localhost:2380/v2", "-e",
                 "myEndpoint4_prod_endpoint_1=https://localhost:2380/v2",
         };
-        super.init(project, new String[]{"endpoints" + File.separator + "endpoint_override.yaml"}, args);
+        super.init(project, new String[]{"endpoints/endpoint_override.yaml"}, args);
     }
 }

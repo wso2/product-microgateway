@@ -35,7 +35,7 @@ public class EndpointsByReferenceTestCase extends BaseTestCase {
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"endpoints" + File.separator + "endpoints_by_reference.yaml"});
+        super.init(project, new String[]{"endpoints/endpoints_by_reference.yaml"});
     }
 
     @Test(description = "Test Invoking the resource which  endpoint defined at resource level")

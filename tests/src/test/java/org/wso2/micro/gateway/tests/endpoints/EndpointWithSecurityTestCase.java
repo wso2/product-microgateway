@@ -24,6 +24,6 @@ public class EndpointWithSecurityTestCase extends EndpointsByReferenceTestCase {
         //generate apis with CLI and start the micro gateway server
         String[] args = {"-e", "myEndpoint1_prod_basic_password=admin", "-e", "myEndpoint2_prod_basic_password=admin",
                 "-e", "myEndpoint3_prod_basic_password=admin", "-e", "myEndpoint4_prod_basic_password=admin"};
-        super.init(project, new String[]{"endpoints" + File.separator + "endpoint_security.yaml"}, args);
+        super.init(project, new String[]{"endpoints/endpoint_security.yaml"}, args);
     }
 }
