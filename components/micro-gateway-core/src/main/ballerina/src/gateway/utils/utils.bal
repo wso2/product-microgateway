@@ -25,6 +25,7 @@ import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
 import ballerina/encoding;
+import ballerina/oauth2;
 
 map<reflect:annotationData[]> resourceAnnotationMap = {};
 map<reflect:annotationData[]> serviceAnnotationMap = {};
@@ -176,12 +177,14 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 # Retrieve the key validation request dto from filter context
 #
 # + return - api key validation request dto
-public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
+public function getKeyValidationRequestObject(runtime:InvocationContext context) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
-    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(resourceAnnotationMap[context.resourceName] ?: []);
+    string serviceName = <string>context.serviceName;
+    string resourceName = <string>context.resourceName; 
+    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(serviceName)] ?: []);
+    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(resourceAnnotationMap[resourceName] ?: []);
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
     string apiVersion = <string>apiConfig.apiVersion;
     apiKeyValidationRequest.apiVersion = apiVersion;
     if (!apiContext.contains(apiVersion)){
@@ -549,3 +552,19 @@ public function setHostHeaderToFilterContext(http:Request request, http:FilterCo
                             <string>context.attributes[HOSTNAME_PROPERTY]);
     }
 }
+
+# Logs, prepares, and returns the `AuthenticationError`.
+#
+# + message -The error message.
+# + err - The `error` instance.
+# + return - Returns the prepared `AuthenticationError` instance.
+function prepareAuthenticationError(string message, error? err = ()) returns AuthenticationError {
+    log:printDebug(function () returns string { return message; });
+    if (err is error) {
+        AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
+        return preparedError;
+    }
+    AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
+    return preparedError;
+}
+
