@@ -56,7 +56,7 @@ fi
 args=""
 for c in $*
 do
-    if [ "$c" = "--debug" ] || [ "$c" = "-debug" ] || [ "$c" = "debug" ]; then
+    if [ "$c" = "--debug" ]; then
           CMD="--debug"
           continue
     elif [ "$CMD" = "--debug" ]; then
