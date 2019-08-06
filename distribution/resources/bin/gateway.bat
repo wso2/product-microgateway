@@ -67,30 +67,29 @@ REM The path of executable should be provided as \"<path>\" to avoid ballerina w
 REM BAL_ARGS variable is used to store formatted string
 set BAL_ARGS=
 :formatAndValidateCmdArgs
-if "%~1"=="-e" (
-	set "BAL_ARGS=%BAL_ARGS% %1 %2=%3"
-	shift
-	shift
-	shift
-	goto :formatAndValidateCmdArgs
-) else (
-	if "%~2"=="" (
-	    set "BAL_ARGS=%BAL_ARGS% \"%~1\""
-        goto :callBallerina
-	) else (
+    if "%~1"=="-e" (
+        set "BAL_ARGS=%BAL_ARGS% %1 %2=%3"
+        shift
+        shift
+        shift
+        goto :formatAndValidateCmdArgs
+    ) else (
+        if "%~2"=="" (
+            set "BAL_ARGS=%BAL_ARGS% \"%~1\""
+            goto :callBallerina
+        ) else (
             if "%~1"=="--debug" (
-                set "BAL_ARGS=%BAL_ARGS% %1 %2"
-                shift
-                shift
-                goto :formatAndValidateCmdArgs
+                 set "BAL_ARGS=%BAL_ARGS% %1 %2"
+                 shift
+                 shift
+                 goto :formatAndValidateCmdArgs
             ) else (
-				echo %~1
-                echo %*
-                echo "Provided set of arguments are invalid."
-                goto end
+                 echo %*
+                 echo "Provided set of arguments are invalid."
+                 goto end
             )
-	)
-)
+        )
+    )
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
