@@ -25,152 +25,20 @@ import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
 import ballerina/encoding;
+import ballerina/lang.'string;
 
-map<reflect:annotationData[]> resourceAnnotationMap = {};
-map<reflect:annotationData[]> serviceAnnotationMap = {};
+map<http:HttpResourceConfig?> resourceAnnotationMap = {};
+map<http:HttpServiceConfig?> serviceAnnotationMap = {};
 map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
-        resourceAnnotationMap[resourceFunction] = reflect:getResourceAnnotations(s, resourceFunction);
-        resourceTierAnnotationMap[resourceFunction] = getResourceLevelTier(reflect:getResourceAnnotations
-            (s, resourceFunction));
+        resourceAnnotationMap[resourceFunction] = <http:HttpResourceConfig?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_ANN_NAME,ANN_PACKAGE);
+        resourceTierAnnotationMap[resourceFunction] = <TierConfiguration?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_ANN_NAME, ANN_PACKAGE);
     }
-    serviceAnnotationMap[serviceName] = reflect:getServiceAnnotations(s);
-    apiConfigAnnotationMap[serviceName] = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
-}
-
-public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
-    serviceLevelAuthAnn) returns boolean {
-    boolean isSecured = true;
-    var authn =  resourceLevelAuthAnn.authentication;
-        if(authn is http:Authentication)  {
-            isSecured = authn.enabled;
-        }
-        else {
-            // if not found at resource level, check in the service level
-            var serviceAuthn =  serviceLevelAuthAnn.authentication;
-            if(serviceAuthn is http:Authentication) {
-                isSecured = serviceAuthn.enabled;
-            }
-            else {
-                // by default if no value given, we think auth is enabled in gateway
-                isSecured = true;
-            }
-        }
-    return isSecured;
-}
-
-
-# Tries to retrieve the annotation value for authentication hierarchically - first from the resource
-# level and then from the service level, if its not there in the resource level
-#
-# + annotationPackage - annotation package name
-# + annotationName - annotation name
-# + annData - array of annotationData instances
-# + return - ListenerAuthConfig: ListenerAuthConfig instance if its defined, else nil
-public function getAuthAnnotation(string annotationPackage, string annotationName, reflect:annotationData[] annData)
-                    returns (http:ListenerAuthConfig?) {
-    if (annData.length() == 0) {
-        return ();
-    }
-    reflect:annotationData|() authAnn = ();
-    foreach var ann in annData {
-        if (ann.name == annotationName && ann.moduleName == annotationPackage) {
-            authAnn = ann;
-            break;
-        }
-    }
-    if(authAnn is reflect:annotationData)  {
-        if (annotationName == RESOURCE_ANN_NAME) {
-            http:HttpResourceConfig resourceConfig =  <http:HttpResourceConfig>authAnn.value;
-            return resourceConfig.authConfig;
-        } else if (annotationName == SERVICE_ANN_NAME) {
-            http:HttpServiceConfig serviceConfig =  <http:HttpServiceConfig>authAnn.value;
-            return serviceConfig.authConfig;
-        } else {
-            return ();
-        }
-    } else {
-        return ();
-    }
-}
-
-
-# Retrieve the annotation related to resources
-#
-# + annData - array of annotationData instances
-# + return - HttpResourceConfig: HttpResourceConfig instance if its defined, else nil
-public function getResourceConfigAnnotation(reflect:annotationData[] annData)
-                    returns (http:HttpResourceConfig?) {
-    if (annData.length() == 0) {
-        return ();
-    }
-    reflect:annotationData|() authAnn = ();
-    foreach var ann in annData {
-        if (ann.name == RESOURCE_ANN_NAME && ann.moduleName == ANN_PACKAGE) {
-            authAnn = ann;
-            break;
-        }
-    }
-    if(authAnn is reflect:annotationData) {
-        http:HttpResourceConfig resourceConfig =  <http:HttpResourceConfig>authAnn.value;
-        return resourceConfig;
-    }
-    else {
-        return ();
-    }
-}
-
-# Retrieve the annotation related to resource level Tier
-#
-# + annData - array of annotationData instances
-# + return - TierConfiguration: TierConfiguration instance if its defined, else nil
-public function getResourceLevelTier(reflect:annotationData[] annData)
-                    returns (TierConfiguration?) {
-    if (annData.length() == 0) {
-        return ();
-    }
-    reflect:annotationData|() tierAnn = ();
-    foreach var ann in annData {
-        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.moduleName == GATEWAY_ANN_PACKAGE) {
-            tierAnn = ann;
-            break;
-        }
-    }
-    if(tierAnn is reflect:annotationData) {
-        TierConfiguration resourceLevelTier =  <TierConfiguration>tierAnn.value;
-        return resourceLevelTier;
-    }
-    else {
-        return ();
-    }
-}
-
-# Retrieve the annotation related to service
-#
-# + annData - array of annotationData instances
-# + return - HttpServiceConfig: HttpResourceConfig instance if its defined, else nil
-public function getServiceConfigAnnotation(reflect:annotationData[] annData)
-                    returns (http:HttpServiceConfig?) {
-    if (annData.length() == 0) {
-        return ();
-    }
-    reflect:annotationData|() authAnn = ();
-    foreach var ann in annData {
-        if (ann.name == SERVICE_ANN_NAME && ann.moduleName == ANN_PACKAGE) {
-            authAnn = ann;
-            break;
-        }
-    }
-    if(authAnn is reflect:annotationData) {
-        http:HttpServiceConfig serviceConfig =  <http:HttpServiceConfig>authAnn.value;
-        return serviceConfig;
-    }
-    else {
-        return ();
-    }
+    serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, RESOURCE_ANN_NAME, ANN_PACKAGE);
+    apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
 }
 
 # Retrieve the key validation request dto from filter context
@@ -178,11 +46,18 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
 # + return - api key validation request dto
 public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
-    http:HttpResourceConfig? httpResourceConfig = getResourceConfigAnnotation(resourceAnnotationMap[context.resourceName] ?: []);
+    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(context.getServiceName())];
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.getResourceName()];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+       apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
+       apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
+    }
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.serviceName)];
-    string apiVersion = <string>apiConfig.apiVersion;
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    string apiVersion;
+    if (apiConfig is APIConfiguration) {
+     apiVersion = <string>apiConfig.apiVersion;
+     }
     apiKeyValidationRequest.apiVersion = apiVersion;
     if (!apiContext.contains(apiVersion)){
         if (apiContext.hasSuffix(PATH_SEPERATOR)) {
@@ -194,8 +69,7 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
-    apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
-    apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
+    
     apiKeyValidationRequest.accessToken = <string>runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR];
     printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
             + ", resource: " + apiKeyValidationRequest.matchingResource
@@ -212,35 +86,14 @@ public function getServiceName(string serviceObjectName) returns string {
     return serviceObjectName.split("\\$")[0];
 }
 
-
-public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annData) returns APIConfiguration? {
-    if (annData.length() == 0) {
-        return ();
-    }
-    reflect:annotationData|() apiAnn = ();
-    foreach var ann in annData {
-        if (ann.name == API_ANN_NAME && ann.moduleName == GATEWAY_ANN_PACKAGE) {
-            apiAnn = ann;
-            break;
-        }
-    }
-    if(apiAnn is reflect:annotationData) {
-        APIConfiguration apiConfig =  <APIConfiguration>apiAnn.value;
-        return apiConfig;
-    } else {
-        return ();
-    }
-}
-
 public function getTenantFromBasePath(string basePath) returns string {
     string[] splittedArray = basePath.split("/");
     return splittedArray[splittedArray.length() - 1];
 }
 
-
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
-    int|error validityPeriod =  int.convert(apiKeyValidationDto.validityPeriod);
-    int|error issuedTime = int.convert(apiKeyValidationDto.issuedTime);
+    int|error validityPeriod =  int.toInt(apiKeyValidationDto.validityPeriod);
+    int|error issuedTime = int.toInt(apiKeyValidationDto.issuedTime);
     int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
@@ -262,7 +115,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     return false;
 }
 public function getContext(http:FilterContext context) returns (string) {
-    http:HttpServiceConfig? httpServiceConfig = getServiceConfigAnnotation(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
+    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(context.getServiceName())];
     return <string>httpServiceConfig.basePath;
 
 }
@@ -307,7 +160,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
 }
 
 public function getApiName(http:FilterContext context) returns (string) {
-    string serviceName = context.serviceName;
+    string serviceName = context.getServiceName();
     string apiName = serviceName.split("__")[0];
 
     if (apiName.contains("_")) {
@@ -381,8 +234,8 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     }
 }
 
-public function getAuthorizationHeader(reflect:annotationData[] annData) returns string {
-    APIConfiguration? apiConfig = getAPIDetailsFromServiceAnnotation(annData);
+public function getAuthorizationHeader() returns string {
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
     if(annotatedHeadeName is string) {
@@ -407,15 +260,13 @@ public function rotateFile(string fileName) returns string|error {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp + "." + uuid + ZIP_EXTENSION;
-    internal:Path zipLocation = new(fileLocation + zipName);
-    internal:Path fileToZip = new(fileLocation + fileName);
-    var compressResult = internal:compress(fileToZip, zipLocation);
+    var compressResult = internal:compress(fileName, zipName);
     if(compressResult is error) {
         printFullError(KEY_UTILS, compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = fileToZip.delete();
+        var deleteResult = zipName.delete();
             if(deleteResult is ()) {
                 printInfo(KEY_UTILS, "Existing file deleted successfully");
             }
