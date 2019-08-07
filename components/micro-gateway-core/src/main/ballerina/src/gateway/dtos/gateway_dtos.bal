@@ -29,9 +29,9 @@ public type APIKeyValidationDto record {
     string endUserName="";
     string endUserToken?;
     string issuedTime?;
-    string spikeArrestLimit = 0;
+    string spikeArrestLimit = "0";
     string spikeArrestUnit="";
-    string stopOnQuotaReach = false;
+    string stopOnQuotaReach = "false";
     string subscriber= UNKNOWN_VALUE;
     string subscriberTenantDomain = UNKNOWN_VALUE;
     string throttlingDataList?;

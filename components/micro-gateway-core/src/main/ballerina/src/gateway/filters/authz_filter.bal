@@ -30,8 +30,9 @@ public type OAuthzFilter object {
 
     public http:AuthzFilter authzFilter;
 
-    public function __init(http:AuthzFilter authzFilter) {
-        self.authzFilter = authzFilter;
+    public function __init(cache:Cache positiveAuthzCache, cache:Cache negativeAuthzCache, string[][]? scopes) {
+        AuthzHandler authzHandler = new(positiveAuthzCache, negativeAuthzCache);
+        self.authzFilter = new(authzHandler,scopes);
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns

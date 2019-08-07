@@ -18,7 +18,7 @@ import ballerina/log;
 //Get mutualSSL filter
 gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
-gateway:AuthnFilter authnFilter = getAuthenticationFilter();
+//TODO: add pre authentication filter
 // Subscription validation filter
 // Authorization filter
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
@@ -38,6 +38,9 @@ ExtensionFilter extensionFilter = new;
 
 http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
+                                                                           auth: {
+                                                                                authHandlers: gateway:getAuthHandlers()
+                                                                           },
                                                                            filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
                                                                            extensionFilter]
                                                                        };
@@ -48,6 +51,9 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
 listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
 http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
+                                                                     auth: {
+                                                                        authHandlers: gateway:getAuthHandlers()
+                                                                     },
                                                                      filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
                                                                      extensionFilter]
                                                                  };
@@ -103,24 +109,5 @@ listener http:Listener tokenListenerEndpoint = new (
 );
 
 
-function getAuthenticationFilter() returns gateway:AuthnFilter {
-    http:AuthHandlerRegistry registry = new;
-    // Getting basic and JWT authentication providers
-    http:AuthProvider[] authProviders = gateway:getAuthProviders();
-    int i = 1;
-    foreach var provider in authProviders {
-        if ( provider.id.length() > 0) {
-            registry.add(provider.id, gateway:createAuthHandler(provider));
-        } else {
-            registry.add(provider.scheme + "-" + i, gateway:createAuthHandler(provider));
-        }
-        i= i +1;
-    }
-    // Adding basic and JWT authentication providers to a the handler chain
-    http:AuthnHandlerChain authnHandlerChain = new(registry);
-    // OAuth authentication handler
-    gateway:OAuthnAuthenticator oauthAuthenticator = new;
-    // Register OAuth authentication handler,basic and JWT authentication providers to the authentication filter
-    return new gateway:AuthnFilter(oauthAuthenticator, authnHandlerChain);
-}
+
 

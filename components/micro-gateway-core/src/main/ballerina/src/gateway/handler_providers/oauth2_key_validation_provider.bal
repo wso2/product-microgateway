@@ -35,7 +35,6 @@ public type OAuth2KeyValidationProvider object {
     *auth:InboundAuthProvider;
 
     public http:Client keyValidationClient;
-    public OAuthAuthProvider oAuthAuthenticator = new;
     public APIGatewayCache gatewayCache= new;
     string encodedBasicAuthHeader;
 

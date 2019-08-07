@@ -22,6 +22,7 @@ import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
+import ballerina/jwt;
 import ballerina/'lang\.object as lang;
 
 public type APIGatewayListener object {
@@ -39,18 +40,18 @@ public type APIGatewayListener object {
             self.listenerType = "HTTPS";
         }
         initiateGatewayConfigurations(config);
-        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort);
+        printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort.toString());
 
         self.httpListener = new(self.listenerPort, config = config);
 
-        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort);
+        printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort.toString());
     }
 
 
     public function __start() returns error? {
         error? gwListener = self.httpListener.__start();
 
-        log:printInfo(self.listenerType + " listener is active on port " + self.listenerPort);
+        log:printInfo(self.listenerType + " listener is active on port " + self.listenerPort.toString());
         return gwListener;
     }
 
@@ -58,47 +59,13 @@ public type APIGatewayListener object {
         return self.httpListener.__stop();
     }
 
-    public function __attach(service s, map<any> annotationData) returns error? {
-        return self.httpListener.__attach(s, annotationData);
+    public function __attach(service s, string? name = ()) returns error? {
+        return self.httpListener.__attach(s, name);
     }
 
 
 };
 
-public function createAuthHandler(http:AuthProvider authProvider) returns http:HttpAuthnHandler {
-    if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
-        auth:AuthStoreProvider authStoreProvider;
-        if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
-            auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-            authStoreProvider = configAuthStoreProvider;
-        } else {
-            // other auth providers are unsupported yet
-            string errMessage = "Invalid auth provider: " + <string>authProvider.authStoreProvider;
-            error e = error("Invalid auth provider: " + authProvider.authStoreProvider);
-            panic e;
-        }
-        http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
-        return basicAuthHandler;
-    } else if (authProvider.scheme == AUTH_SCHEME_JWT) {
-        auth:JWTAuthProviderConfig jwtConfig = {};
-        jwtCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-                900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-            evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-        jwtConfig.issuer = authProvider.issuer;
-        jwtConfig.audience = authProvider.audience;
-        jwtConfig.certificateAlias = authProvider.certificateAlias;
-        jwtConfig.trustStoreFilePath = authProvider.trustStore.path  ?: "";
-        jwtConfig.trustStorePassword = authProvider.trustStore.password ?: "";
-        jwtConfig.jwtCache = jwtCache;
-        auth:JWTAuthProvider jwtAuthProvider = new(jwtConfig);
-        JwtAuthenticationHandler jwtAuthenticationHandler = new(jwtAuthProvider, jwtConfig);
-        return <JwtAuthenticationHandler>jwtAuthenticationHandler;
-    } else {
-        // TODO: create other HttpAuthnHandlers
-        error e = error( "Invalid auth scheme: " + authProvider.scheme);
-        panic e;
-    }
-}
 
 public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
@@ -116,66 +83,58 @@ public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration 
     }
 }
 
-public function getAuthProviders() returns http:AuthProvider[] {
-    http:AuthProvider jwtAuthProvider = {
-        id: AUTH_SCHEME_JWT,
-        scheme: AUTH_SCHEME_JWT,
+public function getAuthHandlers() returns http:InboundAuthHandler[] {
+    //Initializes jwt handler
+    jwt:JwtValidatorConfig jwtValidatorConfig = {
         issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        clockSkewInSeconds: 60,
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
         }
     };
-    http:AuthProvider basicAuthProvider = {
-        id: AUTHN_SCHEME_BASIC,
-        scheme: AUTHN_SCHEME_BASIC,
-        authStoreProvider: AUTH_PROVIDER_CONFIG
-    };
-    return [jwtAuthProvider, basicAuthProvider];
-}
+    JwtAuthProvider jwtAuthProvider = new(jwtValidatorConfig);
+    http:BearerAuthHandler jwtAuthHandler = new (jwtAuthProvider); //TODO: use separate jwt handler on gateway level
 
-public function getBasicAuthProvider() returns http:AuthProvider[] {
-    http:AuthProvider basicAuthProvider = {
-        id: AUTHN_SCHEME_BASIC,
-        scheme: AUTHN_SCHEME_BASIC,
-        authStoreProvider: AUTH_PROVIDER_CONFIG
-    };
-    return [basicAuthProvider];
-}
-
-public function getJWTAuthProvider() returns http:AuthProvider[] {
-    http:AuthProvider jwtAuthProvider = {
-        id: AUTH_SCHEME_JWT,
-        scheme: AUTH_SCHEME_JWT,
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
-        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
-        trustStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+    // Initializes the key validation handler
+    KeyValidationServerConfig keyValidationServerConfig = {url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+        clientConfig :
+        {cache: { enabled: false },
+            secureSocket:{
+                trustStore: {
+                      path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                          "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                      password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                },
+                verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+            }
         }
     };
-    return [jwtAuthProvider];
+    OAuth2KeyValidationProvider oauth2KeyValidationProvider = new(keyValidationServerConfig);
+    KeyValidationHandler keyValidationHandler = new(oauth2KeyValidationProvider);
+
+    // Initializes the basic auth handler
+    auth:BasicAuthConfig basicAuthConfig = {tableName : CONFIG_USER_SECTION};
+    BasicAuthProvider configBasicAuthProvider = new(basicAuthConfig);
+    http:BasicAuthHandler basicAuthHandler = new(configBasicAuthProvider);
+
+    //Initializes the mutual ssl handler
+    MutualSSLHandler mutualSSLHandler = new;
+
+    return [mutualSSLHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
 }
+
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter {
     int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
     int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
     float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
-    cache:Cache positiveAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
-        capacity = cacheSize, evictionFactor = evictionFactor);
-    cache:Cache negativeAuthzCache = new(expiryTimeMillis = cacheExpiryTime,
-        capacity = cacheSize, evictionFactor = evictionFactor);
-
-    auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
-    auth:AuthStoreProvider authStoreProvider = configAuthStoreProvider;
-    http:HttpAuthzHandler authzHandler = new(authStoreProvider, positiveAuthzCache, negativeAuthzCache);
-    http:AuthzFilter authzFilter = new(authzHandler);
-    OAuthzFilter authzFilterWrapper = new(authzFilter);
+    cache:Cache positiveAuthzCache = new(cacheExpiryTime, cacheSize, evictionFactor);
+    cache:Cache negativeAuthzCache = new(cacheExpiryTime, cacheSize, evictionFactor);
+    OAuthzFilter authzFilterWrapper = new(positiveAuthzCache, negativeAuthzCache, ());//TODO: set the proper scopes
     return authzFilterWrapper;
 }
 
