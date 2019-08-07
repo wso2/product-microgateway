@@ -23,95 +23,77 @@ cache:Cache invalidTokenCache= new;
 cache:Cache jwtCache = new;
 
 public function initGatewayCaches() {
-    gatewayTokenCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-            900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-    gatewayKeyValidationCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-            900000), capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-    invalidTokenCache = new(expiryTimeMillis = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
-        capacity = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+    gatewayTokenCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+            900000), getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+    gatewayKeyValidationCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
+            900000), getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+    invalidTokenCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
+        getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
+        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
 }
 
 public type APIGatewayCache object {
 
+   public function authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns
+(APIKeyValidationDto|()) {
+        var apikeyValidationDto = gatewayKeyValidationCache.get(tokenCacheKey);
+        if(apikeyValidationDto is APIKeyValidationDto){
+            return apikeyValidationDto;
+        } else {
+            return ();
+        }
 
-   public function authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns (APIKeyValidationDto|());
+    }
 
-   public function addToGatewayKeyValidationCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) ;
+    public function addToGatewayKeyValidationCache (string tokenCacheKey, APIKeyValidationDto
+        apiKeyValidationDto) {
+        gatewayKeyValidationCache.put(tokenCacheKey, apiKeyValidationDto);
+        printDebug(KEY_GW_CACHE, "Added key validation information to the key validation cache. key: " + mask(tokenCacheKey));
+    }
 
-   public function removeFromGatewayKeyValidationCache (string tokenCacheKey);
+    public function removeFromGatewayKeyValidationCache (string tokenCacheKey) {
+        gatewayKeyValidationCache.remove(tokenCacheKey);
+        printDebug(KEY_GW_CACHE, "Removed key validation information from the key validation cache. key: " + mask(tokenCacheKey));
+    }
 
-   public function retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |());
+    public function retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |()) {
+        var authorize = invalidTokenCache.get(tokenCacheKey);
+        if(authorize is APIKeyValidationDto){
+            return authorize;
+        } else {
+            return ();
+        }
+    }
 
-   public function removeFromInvalidTokenCache (string tokenCacheKey);
+    public function addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
+        invalidTokenCache.put(tokenCacheKey, apiKeyValidationDto);
+        printDebug(KEY_GW_CACHE, "Added key validation information to the invalid token cache. key: " + mask(tokenCacheKey));
+    }
 
-   public function addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) ;
+    public function removeFromInvalidTokenCache (string tokenCacheKey) {
+        invalidTokenCache.remove(tokenCacheKey);
+        printDebug(KEY_GW_CACHE, "Removed from the invalid key validation cache. key: " + mask(tokenCacheKey));
+    }
 
-   public function retrieveFromTokenCache(string accessToken) returns (boolean|());
+    public function retrieveFromTokenCache(string accessToken) returns (boolean|()) {
+        var authorize = gatewayTokenCache.get(accessToken);
+        if(authorize is boolean){
+            return authorize;
+        } else {
+            return ();
+        }
+    }
 
-   public function removeFromTokenCache (string accessToken);
+    public function addToTokenCache (string accessToken, boolean isValid) {
+        gatewayTokenCache.put(accessToken, isValid);
+        printDebug(KEY_GW_CACHE, "Added validity information to the token cache. key: " + mask(accessToken));
+    }
 
-   public function addToTokenCache (string accessToken, boolean isValid) ;
+    public function removeFromTokenCache (string accessToken) {
+        gatewayTokenCache.remove(accessToken);
+        printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
+    }
 };
 
-public function APIGatewayCache.authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns
-(APIKeyValidationDto|()) {
-    var apikeyValidationDto = gatewayKeyValidationCache.get(tokenCacheKey);
-    if(apikeyValidationDto is APIKeyValidationDto){
-        return apikeyValidationDto;
-    } else {
-        return ();
-    }
-
-}
-
-public function APIGatewayCache.addToGatewayKeyValidationCache (string tokenCacheKey, APIKeyValidationDto
-    apiKeyValidationDto) {
-    gatewayKeyValidationCache.put(tokenCacheKey, apiKeyValidationDto);
-    printDebug(KEY_GW_CACHE, "Added key validation information to the key validation cache. key: " + mask(tokenCacheKey));
-}
-
-public function APIGatewayCache.removeFromGatewayKeyValidationCache (string tokenCacheKey) {
-    gatewayKeyValidationCache.remove(tokenCacheKey);
-    printDebug(KEY_GW_CACHE, "Removed key validation information from the key validation cache. key: " + mask(tokenCacheKey));
-}
-
-public function APIGatewayCache.retrieveFromInvalidTokenCache(string tokenCacheKey) returns (APIKeyValidationDto |()) {
-    var authorize = invalidTokenCache.get(tokenCacheKey);
-    if(authorize is APIKeyValidationDto){
-        return authorize;
-    } else {
-        return ();
-    }
-}
-
-public function APIGatewayCache.addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
-    invalidTokenCache.put(tokenCacheKey, apiKeyValidationDto);
-    printDebug(KEY_GW_CACHE, "Added key validation information to the invalid token cache. key: " + mask(tokenCacheKey));
-}
-
-public function APIGatewayCache.removeFromInvalidTokenCache (string tokenCacheKey) {
-    invalidTokenCache.remove(tokenCacheKey);
-    printDebug(KEY_GW_CACHE, "Removed from the invalid key validation cache. key: " + mask(tokenCacheKey));
-}
-
-public function APIGatewayCache.retrieveFromTokenCache(string accessToken) returns (boolean|()) {
-    var authorize = gatewayTokenCache.get(accessToken);
-    if(authorize is boolean){
-        return authorize;
-    } else {
-        return ();
-    }
-}
-
-public function APIGatewayCache.addToTokenCache (string accessToken, boolean isValid) {
-    gatewayTokenCache.put(accessToken, isValid);
-    printDebug(KEY_GW_CACHE, "Added validity information to the token cache. key: " + mask(accessToken));
-}
-
-public function APIGatewayCache.removeFromTokenCache (string accessToken) {
-    gatewayTokenCache.remove(accessToken);
-    printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
-}

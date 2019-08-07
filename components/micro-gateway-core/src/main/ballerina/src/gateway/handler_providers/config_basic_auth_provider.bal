@@ -21,7 +21,7 @@ import ballerina/internal;
 import ballerina/runtime;
 import ballerina/lang.'string;
 
-public const string CONFIG_USER_SECTION = "b7a.users";
+
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 #

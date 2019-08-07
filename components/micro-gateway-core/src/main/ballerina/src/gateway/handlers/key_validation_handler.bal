@@ -27,9 +27,11 @@ public type KeyValidationHandler object {
     *http:InboundAuthHandler;
 
     public http:BearerAuthHandler bearerAuthHandler;
+    public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
 
-    public function __init(http:BearerAuthHandler bearerAuthHandler) {
-        self.bearerAuthHandler = bearerAuthHandler;
+    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider) {
+        self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
+        self.bearerAuthHandler = new(oauth2KeyValidationProvider);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -42,12 +44,12 @@ public type KeyValidationHandler object {
 
     # Authenticates the incoming request with the use of credentials passed as the Bearer Auth header.
     #
-    # + request - The `Request` instance.
+    # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
-    public function process(http:Request request) returns boolean|http:AuthenticationError {
+    public function process(http:Request req) returns boolean|http:AuthenticationError {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        var authenticationResult = self.bearerAuthHandler.process(request);
+        var authenticationResult = self.bearerAuthHandler.process(req);
         if(authenticationResult is boolean && authenticationResult) {
             AuthenticationContext authenticationContext = {};
             authenticationContext = <AuthenticationContext>invocationContext.attributes[
@@ -57,10 +59,10 @@ public type KeyValidationHandler object {
                 printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
                             callerToken);
                 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
-                request.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
+                req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
             }
             string authHeaderName = getAuthorizationHeader(serviceAnnotationMap[getServiceName(<string>invocationContext.attributes["serviceName"])] ?: []);
-            checkAndRemoveAuthHeaders(request, authHeaderName);
+            checkAndRemoveAuthHeaders(req, authHeaderName);
         }
         return authenticationResult;
     }

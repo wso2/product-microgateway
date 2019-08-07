@@ -20,28 +20,39 @@ import ballerina/auth;
 import ballerina/config;
 import ballerina/io;
 
-// MutualSSL filter
-public type MutualSSLFilter object {
+# Representation of the mutual ssl handler
+#
+public type MutualSSLHandler object {
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        int startingTime = getCurrentTime();
-        checkOrSetMessageID(context);
-        setHostHeaderToFilterContext(request, context);
-        if(request.mutualSslHandshake["status"] == PASSED) {
-            return doMTSLFilterRequest(caller, request, context);
+    *http:InboundAuthHandler;    
+
+    # Checks if the request can be authenticated with the Bearer Auth header.
+    #
+    # + req - The `Request` instance.
+    # + return - Returns `true` if can be authenticated. Else, returns `false`.
+    public function canProcess(http:Request req) returns @tainted boolean {
+        if(req.mutualSslHandshake["status"] == PASSED) {
+            return true;
         }
-        return true;
+        return false;
     }
 
-
-
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        return true;
+    # Authenticates the incoming request knowing that mutual ssl has happened at the trasnport layer.
+    #
+    # + request - The `Request` instance.
+    # + return - Returns `true` if authenticated successfully. Else, returns `false`
+    # or the `AuthenticationError` in case of an error.
+    public function process(http:Request req) returns boolean|http:AuthenticationError {
+        int startingTime = getCurrentTime();
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();  
+        return doMTSLFilterRequest(req, invocationContext);
     }
+
 };
 
-function doMTSLFilterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-    boolean isAuthenticated = true;
+
+function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean|http:AuthenticationError {
+    boolean|http:AuthenticationError isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
     boolean isSecured = true;
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
