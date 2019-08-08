@@ -20,7 +20,11 @@ boolean configsRead = false;
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
-    var api_Version = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
+    var api_Version = "";
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    if (apiConfiguration is APIConfiguration) {
+      api_Version = apiConfiguration.apiVersion;
+    }
     string apiVersion = (api_Version is string) ? api_Version : "";
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;

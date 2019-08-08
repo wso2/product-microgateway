@@ -25,7 +25,7 @@ public function getFaultPayloadData(FaultDTO dto) returns string {
     return dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
         dto.resourcePath + OBJ + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ + dto.userTenantDomain + OBJ +
         dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
-        dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode + OBJ + dto.errorMessage + OBJ + dto.faultTime;
+        dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ + dto.faultTime.toString();
 }
 
 public function getEventFromFaultData(FaultDTO dto) returns EventDTO {
