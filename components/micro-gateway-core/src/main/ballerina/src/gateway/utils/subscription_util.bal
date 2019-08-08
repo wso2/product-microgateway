@@ -16,9 +16,10 @@
 
 public function getDecodedJWTPayload(string encodedJWTPayload) returns (json|error) {
     string jwtPayload = encoding:byteArrayToString(check encoding:decodeBase64(urlDecode(encodedJWTPayload)));
+    io:StringReader reader = new (jwtPayload);
     json jwtPayloadJson = {};
 
-    var result = internal:parseJson(jwtPayload);
+    var result = reader.readJson();
     if(result is json) {
         jwtPayloadJson = result;
     }
@@ -29,13 +30,13 @@ public function getDecodedJWTPayload(string encodedJWTPayload) returns (json|err
 }
 
 public function urlDecode(string encodedString) returns (string) {
-    string decodedString = encodedString.replaceAll("-", "+");
-    decodedString = decodedString.replaceAll("_", "/");
+    string decodedString = replaceAll(encodedString, "-", "+");
+    decodedString = replaceAll(decodedString, "_", "/");
     return decodedString;
 }
 
 public function getEncodedJWTPayload(string jwtToken) returns (string)|error {
-    string[] jwtPayload = jwtToken.split("\\.");
+    string[] jwtPayload = split(jwtToken, "\\.");
     if (jwtPayload.length() != 3) {
         log:printDebug("Invalid JWT token :" + jwtToken);
         error err = error("Invalid JWT token");

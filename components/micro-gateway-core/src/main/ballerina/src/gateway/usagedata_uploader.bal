@@ -36,7 +36,7 @@ public function multipartSender(string location, string file, string username, s
 
         if(returnResponse is error) {
             http:Response response = new;
-            string errorMessage = "Error occurred while sending multipart request: SC " + 500;
+            string errorMessage = "Error occurred while sending multipart request: SC 500";
             response.setPayload(errorMessage);
             response.statusCode = 500;
             printFullError(KEY_UPLOAD_TASK, returnResponse);

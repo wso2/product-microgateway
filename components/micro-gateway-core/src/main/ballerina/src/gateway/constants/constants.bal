@@ -258,6 +258,8 @@
  public const string PERSISTENT_MESSAGE_USERNAME = "username";
  public const string PERSISTENT_MESSAGE_PASSWORD = "password";
 
+ public const string CONFIG_USER_SECTION = "b7a.users";
+
 // end of config constants
 
  public const string IS_THROTTLED = "isThrottled";

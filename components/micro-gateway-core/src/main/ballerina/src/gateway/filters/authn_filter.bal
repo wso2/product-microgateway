@@ -24,35 +24,20 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 
-// Authentication filter
+// Pre Authentication filter
 
-public type AuthnFilter object {
-
-    // public variables in order to satisfy filter interface
-    public OAuthnAuthenticator oauthAuthenticator;
-    public http:AuthnHandlerChain authnHandlerChain;
-
-    public function __init(OAuthnAuthenticator oauthAuthenticator, http:AuthnHandlerChain authnHandlerChain) {
-        self.oauthAuthenticator = oauthAuthenticator;
-        self.authnHandlerChain = authnHandlerChain;
-    }
+public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
         //Setting UUID
-        if(request.mutualSslHandshake["status"] != PASSED) {
-            int startingTime = getCurrentTime();
-            context.attributes[REQUEST_TIME] = startingTime;
-            checkOrSetMessageID(context);
-            setHostHeaderToFilterContext(request, context);
-            boolean result = doAuthnFilterRequest(caller, request, <@untainted>  context, self.oauthAuthenticator, self.authnHandlerChain);
-            setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
-            return result;
-        } else {
-            // Skip this filter is mutualSSL is enabled.
-            return true;
-        }
-
+        int startingTime = getCurrentTime();
+        context.attributes[REQUEST_TIME] = startingTime;
+        checkOrSetMessageID(context);
+        setHostHeaderToFilterContext(request, context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
+        return result;
+        
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -65,7 +50,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
              returns boolean {
     boolean isOauth2Enabled = false;
     runtime:getInvocationContext().attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
-    printDebug(KEY_AUTHN_FILTER, "Processing request via Authentication filter.");
+    printDebug(KEY_AUTHN_FILTER, "Processing request via Pre Authentication filter.");
 
     context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
     context.attributes[FILTER_FAILED] = false;

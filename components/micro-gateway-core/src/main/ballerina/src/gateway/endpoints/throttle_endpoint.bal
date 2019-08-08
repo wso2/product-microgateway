@@ -72,10 +72,9 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
 
     var response = throttleEndpoint->post("/throttleEventReceiver", clientRequest);
 
-    if(response is http:Response) {
+    if (response is http:Response) {
         log:printDebug("\nStatus Code: " + response.statusCode);
-    }
-    else if(response is error){
+    } else {
         log:printError(response.reason(), err = response);
     }
 

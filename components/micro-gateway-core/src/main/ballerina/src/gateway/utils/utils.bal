@@ -26,6 +26,7 @@ import ballerina/internal;
 import ballerina/system;
 import ballerina/encoding;
 import ballerina/lang.'string;
+import ballerina/lang.'int;
 
 map<http:HttpResourceConfig?> resourceAnnotationMap = {};
 map<http:HttpServiceConfig?> serviceAnnotationMap = {};
@@ -44,23 +45,25 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
 # Retrieve the key validation request dto from filter context
 #
 # + return - api key validation request dto
-public function getKeyValidationRequestObject(http:FilterContext context) returns APIRequestMetaDataDto {
+public function getKeyValidationRequestObject(runtime:InvocationContext context) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(context.getServiceName())];
-    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.getResourceName()];
+    string serviceName = runtime:getInvocationContext().attributes["ServiceName"].toString();
+    string resourceName = runtime:getInvocationContext().attributes["ResourceName"].toString();
+    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(serviceName)];
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
        apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
        apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
     }
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
     string apiVersion;
     if (apiConfig is APIConfiguration) {
      apiVersion = <string>apiConfig.apiVersion;
      }
     apiKeyValidationRequest.apiVersion = apiVersion;
-    if (!apiContext.contains(apiVersion)){
-        if (apiContext.hasSuffix(PATH_SEPERATOR)) {
+    if (!contains(apiContext,apiVersion)) {
+        if (hasSuffix(apiContext,PATH_SEPERATOR)) {
             apiContext = apiContext + apiVersion;
         } else {
             apiContext = apiContext + PATH_SEPERATOR + apiVersion;
@@ -83,17 +86,25 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
 #
 # + return - service name
 public function getServiceName(string serviceObjectName) returns string {
-    return serviceObjectName.split("\\$")[0];
+    return split(serviceObjectName, "\\$")[0];
 }
 
 public function getTenantFromBasePath(string basePath) returns string {
-    string[] splittedArray = basePath.split("/");
+    string[] splittedArray = split(basePath, "/");
     return splittedArray[splittedArray.length() - 1];
 }
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
-    int|error validityPeriod =  int.toInt(apiKeyValidationDto.validityPeriod);
-    int|error issuedTime = int.toInt(apiKeyValidationDto.issuedTime);
+    int|error validityPeriod;
+    int|error issuedTime;
+    string? validPeriod = apiKeyValidationDto?.validityPeriod;
+    string? issueTime = apiKeyValidationDto?.issuedTime;
+    if (validityPeriod is string) {
+        validityPeriod =  'int:fromString(validityPeriod);
+    }
+    if (issueTime is string ) {
+        issuedTime = 'int:fromString(issueTime);
+    }
     int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
@@ -124,8 +135,8 @@ public function getClientIp(http:Request request, http:Caller caller) returns (s
     string clientIp;
     if (request.hasHeader(X_FORWARD_FOR_HEADER)) {
         clientIp = request.getHeader(X_FORWARD_FOR_HEADER);
-        int idx = clientIp.indexOf(",");
-        if (idx > -1) {
+        int? idx = clientIp.indexOf(",");
+        if (idx is int) {
             clientIp = clientIp.substring(0, idx);
         }
     } else {
@@ -136,7 +147,7 @@ public function getClientIp(http:Request request, http:Caller caller) returns (s
 
 public function extractAccessToken(http:Request req, string authHeaderName) returns (string|error) {
     string authHeader = req.getHeader(authHeaderName);
-    string[] authHeaderComponents = authHeader.split(" ");
+    string[] authHeaderComponents = split(authHeader, " ");
     if (authHeaderComponents.length() != 2){
         return handleError("Incorrect bearer authentication header format");
     }
@@ -150,7 +161,7 @@ public function handleError(string message) returns (error) {
 public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
-    string[] splittedContext = apiContext.split("/");
+    string[] splittedContext = split(apiContext, "/");
     if (splittedContext.length() > 3){
         // this check if basepath have /t/domain in
         return splittedContext[2];
@@ -161,10 +172,10 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
 
 public function getApiName(http:FilterContext context) returns (string) {
     string serviceName = context.getServiceName();
-    string apiName = serviceName.split("__")[0];
+    string apiName = split(serviceName, "__")[0];
 
-    if (apiName.contains("_")) {
-        apiName = apiName.replaceAll("_", "-");
+    if (contains(apiName, "_")) {
+        apiName = replaceAll(apiName, "_", "-");
     }
 
     return apiName;
@@ -234,8 +245,9 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     }
 }
 
-public function getAuthorizationHeader() returns string {
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
+    string serviceName = runtime:getInvocationContext().attributes["ServiceName"].toString();
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
     if(annotatedHeadeName is string) {
@@ -259,14 +271,14 @@ public function rotateFile(string fileName) returns string|error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileName + "." + rotatingTimeStamp + "." + uuid + ZIP_EXTENSION;
+    string zipName = fileName + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
     var compressResult = internal:compress(fileName, zipName);
     if(compressResult is error) {
         printFullError(KEY_UTILS, compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = zipName.delete();
+        var deleteResult = system:remove(fileName);
             if(deleteResult is ()) {
                 printInfo(KEY_UTILS, "Existing file deleted successfully");
             }
@@ -290,7 +302,7 @@ public function retrieveConfig(string key, string defaultConfig) returns string 
 public function mask(string text) returns string {
     if (text.length() > 4) {
         string last = text.substring(text.length() - 4, text.length());
-        string first = text.substring(0, text.length() - 4).replaceAll(".", "x");
+        string first = replaceAll(text.substring(0, text.length() - 4), ".", "x");
         return first + last;
     } else {
         return "xxxx";
@@ -343,7 +355,8 @@ public function printFullError(string key, error message) {
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
-    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + (ending - starting) + "ms");
+    int latency = ending - starting;
+    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + latency.toString() + "ms");
 }
 
 # Check MESSAGE_ID in context and set if it is not
@@ -365,7 +378,7 @@ public function checkExpectHeaderPresent(http:Request request) {
 #
 # + return - Returns a string in base64 format
 public function encodeValueToBase64(string value) returns string {
-    return encoding:encodeBase64(value.toByteArray("UTF-8"));
+    return encoding:encodeBase64(value.toBytes());
 }
 
 # Decode a given base64value to base10 format
@@ -400,3 +413,19 @@ public function setHostHeaderToFilterContext(http:Request request, http:FilterCo
                             <string>context.attributes[HOSTNAME_PROPERTY]);
     }
 }
+
+# Logs, prepares, and returns the `AuthenticationError`.
+#
+# + message -The error message.
+# + err - The `error` instance.
+# + return - Returns the prepared `AuthenticationError` instance.
+function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
+    log:printDebug(function () returns string { return message; });
+    if (err is error) {
+        http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
+        return preparedError;
+    }
+    http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
+    return preparedError;
+}
+

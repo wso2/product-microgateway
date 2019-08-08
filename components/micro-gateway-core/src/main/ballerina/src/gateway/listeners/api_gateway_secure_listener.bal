@@ -17,6 +17,8 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/config;
+import ballerina/internal;
+import ballerina/crypto;
 import ballerina/'lang\.object as lang;
 
 public type APIGatewaySecureListener object {
@@ -37,8 +39,8 @@ public type APIGatewaySecureListener object {
         return self.apiGatewayListener.__stop();
     }
 
-    public function __attach(service s, map<any> annotationData) returns error? {
-        return self.apiGatewayListener.__attach(s, annotationData);
+    public function __attach(service s, string? name = ()) returns error? {
+        return self.apiGatewayListener.__attach(s, name);
     }
 
 };
@@ -71,13 +73,13 @@ function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration c
     TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
     SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
-    string[] protocolVersions = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
-    defaultProtocolVersions).split(",");
-    string[] ciphers = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers).split(",");
+    string[] protocolVersions = internal:split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
+    defaultProtocolVersions), ",");
+    string[] ciphers = internal:split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers), ",");
     string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
-    http:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
-    http:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
+    crypto:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
+    crypto:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
     http:Protocols protocol = { name: protocolName, versions: protocolVersions };
     http:ServiceSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
         sslVerifyClient: sslVerifyClient, ciphers: ciphers };
