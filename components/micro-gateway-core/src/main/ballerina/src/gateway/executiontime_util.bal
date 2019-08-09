@@ -42,7 +42,7 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
     executionTimeDTO["correleationID"] = <string>context.attributes[MESSAGE_ID];
 
     executionTimeDTO.securityLatency = getSecurityLatency(context);
-    executionTimeDTO.eventTime = getCurrentTime();
+    executionTimeDTO["eventTime"] = getCurrentTime();
     executionTimeDTO.throttlingLatency =  <int>context.attributes[THROTTLE_LATENCY];
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
