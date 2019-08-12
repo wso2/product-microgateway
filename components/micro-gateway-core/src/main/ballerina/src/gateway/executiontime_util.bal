@@ -23,26 +23,26 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
     boolean isSecured =  <boolean>context.attributes[IS_SECURED];
     if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext =  <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
-        executionTimeDTO["provider"] = authContext.apiPublisher;
-        executionTimeDTO["keyType"] = authContext.keyType;
+        executionTimeDTO.provider = authContext.apiPublisher;
+        executionTimeDTO.keyType = authContext.keyType;
     } else {
         APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
         if (apiConfig is APIConfiguration) {
-        executionTimeDTO["provider"] = apiConfig.publisher;
+        executionTimeDTO.provider = apiConfig.publisher;
         }
-        executionTimeDTO["keyType"]= PRODUCTION_KEY_TYPE;
+        executionTimeDTO.keyType= PRODUCTION_KEY_TYPE;
     }
-    executionTimeDTO["apiName"] = getApiName(context);
+    executionTimeDTO.apiName = getApiName(context);
      APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
     if (apiConfig is APIConfiguration) {
-       executionTimeDTO["apiVersion"] = apiConfig.apiVersion;  
+       executionTimeDTO.apiVersion = apiConfig.apiVersion;  
     }
-    executionTimeDTO["tenantDomain"] = getTenantDomain(context);
-    executionTimeDTO["context"] = getContext(context);
-    executionTimeDTO["correleationID"] = <string>context.attributes[MESSAGE_ID];
+    executionTimeDTO.tenantDomain = getTenantDomain(context);
+    executionTimeDTO.context = getContext(context);
+    executionTimeDTO.correleationID = <string>context.attributes[MESSAGE_ID];
 
     executionTimeDTO.securityLatency = getSecurityLatency(context);
-    executionTimeDTO["eventTime"] = getCurrentTime();
+    executionTimeDTO.eventTime = getCurrentTime();
     executionTimeDTO.throttlingLatency =  <int>context.attributes[THROTTLE_LATENCY];
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
