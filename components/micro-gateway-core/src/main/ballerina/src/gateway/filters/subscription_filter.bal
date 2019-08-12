@@ -45,14 +45,14 @@ public type SubscriptionFilter object {
 function doSubscriptionFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
              returns boolean {
     runtime:AuthenticationContext? authContext= runtime:getInvocationContext()?.authenticationContext;
-    if(authContext is runtime:AuthenticationContext) {
+    if (authContext is runtime:AuthenticationContext) {
         string authScheme = authContext.scheme;
         printDebug(KEY_SUBSCRIPTION_FILTER, "Auth scheme: " + authScheme);
         if (authScheme != AUTH_SCHEME_JWT){
             printDebug(KEY_SUBSCRIPTION_FILTER, "Skipping since auth scheme != jwt.");
             return true;
         }
-    
+
         string jwtToken = authContext.authToken;
         string currentAPIContext = getContext(filterContext);
         AuthenticationContext authenticationContext = {};
@@ -98,7 +98,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
             }
         }
 
-        if(decodedPayload is json) {
+        if (decodedPayload is json) {
             printTrace(KEY_SUBSCRIPTION_FILTER, "Decoded JWT payload: " + decodedPayload.toString());
             json[] subscribedAPIList = [];
             json|error jsonSubscribedApis = decodedPayload.subscribedAPIs;
@@ -142,38 +142,40 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
                             apiVersion = apiConfig?.apiVersion;
                         }
                     }
-                    if (subscription.name.toString() == apiName &&
-                        subscription.'version.toString() == apiVersion) {
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
-                                subscription.name.toString() + " version:" + subscription.'version.
-                                toString());
-                        authenticationContext.authenticated = true;
-                        authenticationContext.tier = subscription.subscriptionTier.toString();
-                        authenticationContext.apiKey = jwtToken;
-                        authenticationContext.username = decodedPayload.sub.toString();
-                        authenticationContext.callerToken = jwtToken;
-                        authenticationContext.applicationId = decodedPayload.application.id.toString();
-                        authenticationContext.applicationName = decodedPayload.application.name.toString
-                        ();
-                        authenticationContext.applicationTier = decodedPayload.application.tier.toString
-                        ();
-                        authenticationContext.subscriber = decodedPayload.application.owner.toString();
-                        authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
-                        authenticationContext.apiTier = subscription.subscriptionTier.toString();
-                        authenticationContext.apiPublisher = subscription.publisher.toString();
-                        authenticationContext.subscriberTenantDomain = subscription
-                        .subscriberTenantDomain.toString();
-                        authenticationContext.keyType = decodedPayload.keytype.toString();
-                        // setting keytype to invocationContext
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Setting key type as " +
-                                authenticationContext.keyType);
-                        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
-                        .keyType;
-                        filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                        printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
-                        return true;
+                    if (subscription.name.toString() != apiName &&
+                        subscription.'version.toString() != apiVersion) {
+                            index = index + 1;
+                            continue;
                     }
-                    index = index + 1;
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
+                            subscription.name.toString() + " version:" + subscription.'version.
+                            toString());
+                    authenticationContext.authenticated = true;
+                    authenticationContext.tier = subscription.subscriptionTier.toString();
+                    authenticationContext.apiKey = jwtToken;
+                    authenticationContext.username = decodedPayload.sub.toString();
+                    authenticationContext.callerToken = jwtToken;
+                    authenticationContext.applicationId = decodedPayload.application.id.toString();
+                    authenticationContext.applicationName = decodedPayload.application.name.toString
+                    ();
+                    authenticationContext.applicationTier = decodedPayload.application.tier.toString
+                    ();
+                    authenticationContext.subscriber = decodedPayload.application.owner.toString();
+                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                    authenticationContext.apiTier = subscription.subscriptionTier.toString();
+                    authenticationContext.apiPublisher = subscription.publisher.toString();
+                    authenticationContext.subscriberTenantDomain = subscription
+                    .subscriberTenantDomain.toString();
+                    authenticationContext.keyType = decodedPayload.keytype.toString();
+                    // setting keytype to invocationContext
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Setting key type as " +
+                            authenticationContext.keyType);
+                    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext
+                    .keyType;
+                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                    printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
+                    return true;
+                    
                 }
             } else {
                 authenticationContext.authenticated = true;
@@ -196,3 +198,4 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, h
     }
 
 }
+
