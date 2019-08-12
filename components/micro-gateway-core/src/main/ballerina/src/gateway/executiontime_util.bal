@@ -30,10 +30,10 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
         if (apiConfig is APIConfiguration) {
         executionTimeDTO.provider = apiConfig.publisher;
         }
-        executionTimeDTO.keyType= PRODUCTION_KEY_TYPE;
+        executionTimeDTO.keyType = PRODUCTION_KEY_TYPE;
     }
     executionTimeDTO.apiName = getApiName(context);
-     APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
     if (apiConfig is APIConfiguration) {
        executionTimeDTO.apiVersion = apiConfig.apiVersion;  
     }
