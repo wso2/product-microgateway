@@ -21,9 +21,8 @@ import ballerina/http;
 
 http:Client analyticsFileUploadEndpoint = new (
     getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
-    config =
     {cache: { enabled: false },
-      secureSocket:{
+        secureSocket:{
           trustStore: {
               path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
                   "${ballerina.home}/bre/security/ballerinaTruststore.p12"),

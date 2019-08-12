@@ -19,7 +19,7 @@ import ballerina/http;
 import ballerina/config;
 
 http:Client etcdEndpoint = new (
-    retrieveConfig("etcdurl", "http://127.0.0.1:2379"), config = {
+    retrieveConfig("etcdurl", "http://127.0.0.1:2379"), {
         secureSocket: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
