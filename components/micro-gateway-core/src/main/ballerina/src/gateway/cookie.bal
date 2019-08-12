@@ -34,10 +34,10 @@ public type CookieBasedAuth object {
 
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
-        string[] cookies = authHead.trim().split(";");
+        string[] cookies = split(authHead.trim(), ";");
         foreach var cookie in cookies {
-            string converted = cookie.replaceFirst("=", "::");
-            string[] splitedStrings = converted.trim().split("::");
+            string converted = replaceFirst(cookie, "=", "::");
+            string[] splitedStrings = split(converted.trim(), "::");
             string sessionId = splitedStrings[1];
             if (sessionId == requiredCookie) {
                 return sessionId;
@@ -54,10 +54,10 @@ public type CookieBasedAuth object {
 
         //extract cookies from the incoming request
         string authHead = request.getHeader(COOKIE_HEADER);
-        string[] cookies = authHead.trim().split(";");
+        string[] cookies = split(authHead.trim(), ";");
         foreach var cookie in cookies {
-            string converted = cookie.replaceFirst("=", "::");
-            string[] splitedStrings = converted.trim().split("::");
+            string converted = replaceFirst(cookie, "=", "::");
+            string[] splitedStrings = split(converted.trim(), "::");
             string sessionId = splitedStrings[1];
             if (sessionId == requiredCookie) {
                 return true;
