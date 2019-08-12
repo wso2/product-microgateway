@@ -31,7 +31,7 @@ public type OAuthzFilter object {
     public http:AuthzFilter authzFilter;
 
     public function __init(cache:Cache positiveAuthzCache, cache:Cache negativeAuthzCache, string[][]? scopes) {
-        AuthzHandler authzHandler = new(positiveAuthzCache, negativeAuthzCache);
+        http:AuthzHandler authzHandler = new(positiveAuthzCache, negativeAuthzCache);
         self.authzFilter = new(authzHandler,scopes);
     }
 
@@ -46,14 +46,17 @@ public type OAuthzFilter object {
             int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
             printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
-            string authScheme = runtime:getInvocationContext().authContext.scheme;
+            runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
             boolean result = true;
-            // scope validation is done in authn filter for oauth2, hence we only need to
-            //validate scopes if auth scheme is jwt.
-            if (authScheme == AUTH_SCHEME_JWT){
-                result = self.authzFilter.filterRequest(caller, request, context);
+            if(authContext is AuthenticationContext){
+                string authScheme = authContext.scheme;
+                // scope validation is done in authn filter for oauth2, hence we only need to
+                //validate scopes if auth scheme is jwt.
+                if (authScheme == AUTH_SCHEME_JWT){
+                    result = self.authzFilter.filterRequest(caller, request, context);
+                }
             }
-            printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result);
+            printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
             return result;
         } else {
