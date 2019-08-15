@@ -148,7 +148,7 @@ public function getFailureMessageDetailDescription(http:FilterContext context, i
     } else if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION;
     } else if (API_AUTH_MISSING_CREDENTIALS == errorCode) {
-        string authHeaderName = getAuthorizationHeader(serviceAnnotationMap[getServiceName(context.serviceName)] ?: []);
+        string authHeaderName = getAuthorizationHeader(runtime:getInvocationContext());
         errorDescription += DESCRIPTION_SEPARATOR + "Make sure your API invocation call has a header: \"" + authHeaderName + "\"";
     } else if (API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
