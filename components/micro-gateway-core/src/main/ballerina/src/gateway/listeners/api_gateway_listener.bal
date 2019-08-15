@@ -124,7 +124,10 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes the mutual ssl handler
     MutualSSLHandler mutualSSLHandler = new;
 
-    return [mutualSSLHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
+    //Initializes the cookie based handler
+    CookieAuthHandler cookieBasedHandler = new;
+
+    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
 }
 
 

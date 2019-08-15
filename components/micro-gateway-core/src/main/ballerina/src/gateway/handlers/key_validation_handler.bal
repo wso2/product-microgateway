@@ -61,7 +61,7 @@ public type KeyValidationHandler object {
                 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
                 req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
             }
-            string authHeaderName = getAuthorizationHeader(serviceAnnotationMap[getServiceName(<string>invocationContext.attributes["serviceName"])] ?: []);
+            string authHeaderName = getAuthorizationHeader(invocationContext);
             checkAndRemoveAuthHeaders(req, authHeaderName);
         }
         return authenticationResult;
