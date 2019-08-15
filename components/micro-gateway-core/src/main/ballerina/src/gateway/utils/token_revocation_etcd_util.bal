@@ -36,7 +36,7 @@ public function etcdRevokedTokenLookup(string tokenKey) returns string {
     string payloadValue = "";
 
     string key = etcdUsernameTokenRevocation + ":" + etcdPasswordTokenRevocation;
-    string encodedKey = encoding:encodeBase64(key.toByteArray(UTF_8));
+    string encodedKey = encoding:encodeBase64(key.toBytes());
     string basicAuthHeader = BASIC_PREFIX_WITH_SPACE + encodedKey;
     printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Setting authorization header for etcd requests");
     req.setHeader(AUTHORIZATION_HEADER, etcdToken);
@@ -72,7 +72,7 @@ public function etcdAllRevokedTokenLookup() returns map<string> {
     string payloadValue;
 
     string key = etcdUsernameTokenRevocation + ":" + etcdPasswordTokenRevocation;
-    string encodedKey = encoding:encodeBase64(key.toByteArray(UTF_8));
+    string encodedKey = encoding:encodeBase64(key.toBytes());
     string basicAuthHeader = BASIC_PREFIX_WITH_SPACE + encodedKey;
     printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Setting authorization header for etcd requests");
     req.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
@@ -89,10 +89,10 @@ public function etcdAllRevokedTokenLookup() returns map<string> {
             int length = nodes.length();
             int i = 0;
             while (i < length) {
-                string revokedTokenReceived = nodes[i].key.toString();
-                string revokedTokenTTL = nodes[i].ttl.toString();
+                string revokedTokenReceived = nodes.i.key.toString();
+                string revokedTokenTTL = nodes.i.ttl.toString();
                 int tokenLength = revokedTokenReceived.length();
-                int lastIndexOfSlash = revokedTokenReceived.lastIndexOf("/") + 1;
+                int lastIndexOfSlash = lastIndexOf(revokedTokenReceived, "/") + 1;
                 string revokedToken = revokedTokenReceived.substring(lastIndexOfSlash, tokenLength);
                 finalResponse[revokedToken] = revokedTokenTTL;
                 i = i + 1;
@@ -117,7 +117,7 @@ public function etcdRevokedTokenRetrieverTask() {
     if (enabledPersistentMessage) {
         printInfo(KEY_TOKEN_REVOCATION_ETCD_UTIL, "One time ETCD revoked token retriever task initiated");
         map<string> response = etcdAllRevokedTokenLookup();
-        if (response.count() > 0) {
+        if (response.length() > 0) {
             var status = addToRevokedTokenMap(response);
             if (status is boolean) {
                 printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Revoked tokens are successfully added to cache");
