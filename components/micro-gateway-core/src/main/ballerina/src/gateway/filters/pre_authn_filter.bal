@@ -37,7 +37,6 @@ public type PreAuthnFilter object {
         setHostHeaderToFilterContext(request, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return doAuthnFilterRequest(caller, request, context);
-        
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -66,9 +65,9 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     string[] authProvidersIds = getAuthProviders(context.getServiceName());
 
     if (request.hasHeader(authHeaderName)) {
-            authHeader = request.getHeader(authHeaderName);
-    } else if (request.hasHeader(COOKIE_HEADER)){
-            //Authentiction with HTTP cookies
+        authHeader = request.getHeader(authHeaderName);
+    } else if (request.hasHeader(COOKIE_HEADER)) {
+        //Authentiction with HTTP cookies
         isCookie = config:contains(COOKIE_HEADER);
         if (isCookie) {
             authCookie = getAuthCookieIfPresent(request);
@@ -77,7 +76,6 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
             }
         }
     }
-    
     string providerId;
     if (!isCookie) {
         providerId = getAuthenticationProviderType(authHeader);
@@ -86,12 +84,12 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     }
     boolean canHandleAuthentication = false;
     foreach string provider in authProvidersIds {
-        if(provider == providerId) {
+        if (provider == providerId) {
             canHandleAuthentication = true;
         }
     }
 
-    if(!canHandleAuthentication) {
+    if (!canHandleAuthentication) {
         setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
         return false;
@@ -138,20 +136,19 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
 function getAuthCookieIfPresent(http:Request request) returns string? {
     //get required cookie as config value
     string? authCookie = ();
-        if (request.hasHeader(COOKIE_HEADER)){
-            string requiredCookie = config:getAsString(COOKIE_HEADER, "");
-
-            //extract cookies from the incoming request
-            string authHead = request.getHeader(COOKIE_HEADER);
-            string[] cookies = split(authHead.trim(), ";");
-            foreach var cookie in cookies {
-                string converted = replaceFirst(cookie, "=", "::");
-                string[] splitedStrings = split(converted.trim(), "::");
-                string sessionId = splitedStrings[1];
-                if (sessionId == requiredCookie) {
-                    authCookie = sessionId;
-                }
+    if (request.hasHeader(COOKIE_HEADER)) {
+        string requiredCookie = config:getAsString(COOKIE_HEADER, "");
+        //extract cookies from the incoming request
+        string authHead = request.getHeader(COOKIE_HEADER);
+        string[] cookies = split(authHead.trim(), ";");
+        foreach var cookie in cookies {
+            string converted = replaceFirst(cookie, "=", "::");
+            string[] splitedStrings = split(converted.trim(), "::");
+            string sessionId = splitedStrings[1];
+            if (sessionId == requiredCookie) {
+                authCookie = sessionId;
             }
         }
-        return authCookie;
+    }
+    return authCookie;
 }

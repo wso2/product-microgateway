@@ -18,7 +18,7 @@ import ballerina/log;
 //Get mutualSSL filter
 gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
-gateway PreAuthnFilter preAuthnFilter = new;
+gateway:PreAuthnFilter preAuthnFilter = new;
 // Subscription validation filter
 // Authorization filter
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();

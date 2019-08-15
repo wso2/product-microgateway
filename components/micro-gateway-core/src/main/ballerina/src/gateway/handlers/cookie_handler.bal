@@ -32,7 +32,7 @@ public type CookieAuthHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        if (req.hasHeader(COOKIE_HEADER)){
+        if (req.hasHeader(COOKIE_HEADER)) {
             string requiredCookie = config:getAsString(COOKIE_HEADER, "");
 
             //extract cookies from the incoming request
