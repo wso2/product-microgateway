@@ -414,18 +414,66 @@ public function setHostHeaderToFilterContext(http:Request request, http:FilterCo
     }
 }
 
-# Logs, prepares, and returns the `AuthenticationError`.
-#
-# + message -The error message.
-# + err - The `error` instance.
-# + return - Returns the prepared `AuthenticationError` instance.
-function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    log:printDebug(function () returns string { return message; });
-    if (err is error) {
-        http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
-        return preparedError;
+public function isSecured(string serviceName, string resourceName) returns boolean{
+    http:ServiceResourceAuth? resourceLevelAuthAnn = ();
+    http:ServiceResourceAuth? serviceLevelAuthAnn = ();
+    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
+    http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        resourceLevelAuthAnn = httpResourceConfig?.auth;
+        boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
+        // if resource is not secured, no need to check further
+        if (!resourceSecured) {
+            log:printWarn("Resource is not secured. `enabled: false`.");
+            return false;
+        }
     }
-    http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
-    return preparedError;
+    if (httpServiceConfig is http:HttpServiceConfig) {
+        serviceLevelAuthAnn = httpResourceConfig?.auth;
+        boolean serviceSecured = isServiceResourceSecured(serviceLevelAuthAnn);
+        if (!serviceSecured) {
+            log:printWarn("Service is not secured. `enabled: false`.");
+            return true;
+        }
+    }
+    return true;
 }
+
+# Check for the service or the resource is secured by evaluating the enabled flag configured by the user.
+#
+# + serviceResourceAuth - Service or resource auth annotation
+# + return - Whether the service or resource secured or not
+function isServiceResourceSecured(http:ServiceResourceAuth? serviceResourceAuth) returns boolean {
+    boolean secured = true;
+    if (serviceResourceAuth is http:ServiceResourceAuth) {
+        secured = serviceResourceAuth.enabled;
+    }
+    return secured;
+}
+
+public function getAuthProviders(string serviceName) returns string[] {
+    string[] authProviders = [];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if(apiConfig is APIConfiguration) {
+        authProviders = apiConfig.authProviders;
+    }
+    return authProviders;
+}
+
+# Log and prepare `error` as a `Error`.
+#
+# + message - Error message
+# + err - `error` instance
+# + return - Prepared `Error` instance
+public function prepareError(string message, error? err = ()) returns Error {
+    log:printError(message, err);
+    auth:Error authError;
+    if (err is error) {
+        authError = error(auth:AUTH_ERROR, message = message, cause = err);
+    } else {
+        authError = error(auth:AUTH_ERROR, message = message);
+    }
+    return authError;
+}
+
 

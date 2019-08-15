@@ -37,15 +37,7 @@ import wso2/gateway;
 
 @http:ServiceConfig {
     basePath: "{{basepath}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
-    authConfig:{
-    {{#if basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}}
-    }{{#api.corsConfiguration.corsConfigurationEnabled}},
+   {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
@@ -59,7 +51,13 @@ import wso2/gateway;
     publisher:"{{api.provider}}",
     name:"{{api.name}}",
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
-    authorizationHeader : "{{api.authorizationHeader}}" {{/if}}
+    authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
+    {{#if basicAuth.isOptional}}
+        authProviders:["basic","oauth2","jwt"]
+    {{else if basicAuth.isRequired}}
+        authProviders:["basic"]
+    {{else}}
+        authProviders:["jwt","oauth2"]
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -69,13 +67,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         authConfig:{
-    {{#if basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}} {{#unless isSecured}},
+    {{/if}} {{#unless isSecured}}
             authentication:{enabled:false} {{/unless}} {{#if scope}},
             scopes: [{{{scope}}}] {{/if}}
 

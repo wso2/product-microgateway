@@ -18,7 +18,7 @@ import ballerina/log;
 //Get mutualSSL filter
 gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
-//TODO: add pre authentication filter
+gateway:PreAuthnFilter preAuthnFilter = new;
 // Subscription validation filter
 // Authorization filter
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
@@ -41,7 +41,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers()
                                                                            },
-                                                                           filters:[mtslFilter, authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                           filters:[mtslFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
                                                                            extensionFilter]
                                                                        };
 
@@ -54,7 +54,7 @@ http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                      auth: {
                                                                         authHandlers: gateway:getAuthHandlers()
                                                                      },
-                                                                     filters:[authnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
                                                                      extensionFilter]
                                                                  };
 
