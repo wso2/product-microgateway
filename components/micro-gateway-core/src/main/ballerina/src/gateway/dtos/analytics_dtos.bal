@@ -60,6 +60,14 @@ public type ExecutionTimeDTO record {
     int responseMediationLatency=0;
     int backEndLatency=0;
     int otherLatency=0;
+    int eventTime?=0;
+    string provider?="";
+    string keyType?="";
+    string apiName?="";
+    string apiVersion?="";
+    string tenantDomain?="";
+    string context?="";
+    string correleationID?="";
 };
 
 
