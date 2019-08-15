@@ -27,9 +27,6 @@ public type APIConfiguration record {
     string publisher;
     string authorizationHeader?;
     string[] authProviders = [];
-
 };
 
 public annotation APIConfiguration API on service;
-
-

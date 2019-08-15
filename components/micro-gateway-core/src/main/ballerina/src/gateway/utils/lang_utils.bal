@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerinax/java;
 
 public function split(string str, string delimeter) returns string[] {
@@ -38,6 +37,15 @@ public function replaceAll(string str, string regex, string replacement) returns
     handle rep = java:fromString(replacement);
     handle rec = java:fromString(str);
     handle newStr = jReplaceAll(rec, reg, rep);
+
+    return newStr.toString();
+}
+
+public function replaceFirst(string str, string regex, string replacement) returns string {
+    handle reg = java:fromString(regex);
+    handle rep = java:fromString(replacement);
+    handle rec = java:fromString(str);
+    handle newStr = jReplaceFirst(rec, reg, rep);
 
     return newStr.toString();
 }
@@ -77,6 +85,11 @@ function jSplit(handle receiver, handle delimeter) returns handle = @java:Method
 
 function jReplaceAll(handle receiver, handle regex, handle replacement) returns handle = @java:Method {
     name: "replaceAll",
+    class: "java.lang.String"
+} external;
+
+function jReplaceFirst(handle receiver, handle regex, handle replacement) returns handle = @java:Method {
+    name: "replaceFirst",
     class: "java.lang.String"
 } external;
 

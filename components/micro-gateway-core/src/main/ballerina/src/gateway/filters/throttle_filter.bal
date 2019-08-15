@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -35,8 +35,6 @@ public type ThrottleFilter object {
         return result;
     }
 
-
-
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }
@@ -53,7 +51,6 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     boolean isThrottled = false;
     boolean stopOnQuota;
     string apiContext = getContext(context);
-    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
     context.attributes[IS_THROTTLE_OUT] = false;
@@ -108,7 +105,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
         [isThrottled, stopOnQuota] = isSubscriptionLevelThrottled(context, keyvalidationResult);
         printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
-                + isThrottled + ", stopOnQuota:" + stopOnQuota);
+                + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
         if (isThrottled) {
             if (stopOnQuota) {
                 printDebug(KEY_THROTTLE_FILTER, "Sending throttled out responses.");
@@ -167,7 +164,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         }
         [isThrottled, stopOnQuota] = isUnauthenticateLevelThrottled(context);
         printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
-                + isThrottled + ", stopOnQuota:" + stopOnQuota);
+                + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
         if (isThrottled) {
             if (stopOnQuota) {
                 printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
@@ -228,7 +225,7 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
         return [false, false];
     }
 
-    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
+    string? apiVersion = getVersion(context);
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext(context);
     if (apiVersion is string) {
         subscriptionLevelThrottleKey += ":" + apiVersion;
@@ -253,8 +250,10 @@ function isResourceLevelThrottled(http:FilterContext context,AuthenticationConte
         if (policy == UNLIMITED_TIER) {
             return false;
         }
-        string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
-        string resourceLevelThrottleKey = context.resourceName.replaceAll("_", "");
+        
+        // TODO: Need to discuss if we should valdate the () case of apiVersion property
+        string? apiVersion = getVersion(context);
+        string resourceLevelThrottleKey = replaceAll(context.getResourceName(), "_", "");
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
@@ -267,13 +266,13 @@ function isResourceLevelThrottled(http:FilterContext context,AuthenticationConte
 }
 
 function getResourceLevelPolicy(http:FilterContext context) returns string? {
-    TierConfiguration? tier = resourceTierAnnotationMap[context.resourceName];
-    return tier.policy;
+    TierConfiguration? tier = resourceTierAnnotationMap[context.getResourceName()];
+    return (tier is TierConfiguration) ? tier.policy : ();
 }
 
 function isUnauthenticateLevelThrottled(http:FilterContext context) returns [boolean, boolean] {
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
-    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
+    string? apiVersion = getVersion(context);
     string throttleKey = clientIp + ":" + getContext(context);
     if (apiVersion is string) {
         throttleKey += ":" + apiVersion;
@@ -298,7 +297,7 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
     returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDto = {};
-    string? apiVersion = apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;
+    string? apiVersion = getVersion(context);
     requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDto.apiKey = getContext(context);
     requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
@@ -306,10 +305,10 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.appTier = keyValidationDto.applicationTier;
     requestStreamDto.apiTier = keyValidationDto.apiTier;
     requestStreamDto.subscriptionTier = keyValidationDto.tier;
-    string resourcekey = context.resourceName;
-    requestStreamDto.resourceKey = resourcekey.replaceAll("_", "");
-    TierConfiguration? tier = resourceTierAnnotationMap[context.resourceName];
-    string? policy = tier.policy;
+    string resourcekey = context.getResourceName();
+    requestStreamDto.resourceKey = replaceAll(resourcekey, "_", "");
+    TierConfiguration? tier = resourceTierAnnotationMap[resourcekey];
+    string? policy = (tier is TierConfiguration) ? tier.policy : ();
     if (policy is string) {
        requestStreamDto.resourceTier = policy;
     }
@@ -333,4 +332,14 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     json properties = {};
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
+}
+
+function getVersion(http:FilterContext context) returns string|() {
+    var apiVersion = "";
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    if (apiConfiguration is APIConfiguration) {
+        apiVersion = apiConfiguration.apiVersion;
+    }
+
+    return (apiVersion is string) ? apiVersion : ();
 }

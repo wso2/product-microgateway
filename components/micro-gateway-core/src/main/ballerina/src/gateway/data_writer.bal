@@ -52,7 +52,7 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
 }
 
 public function getEventData(EventDTO dto) returns string {
-    string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp + EVS +
+    string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp.toString() + EVS +
         "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
         "payLoadData" + KVT + dto.payloadData + "\n";
     return output;
@@ -60,9 +60,14 @@ public function getEventData(EventDTO dto) returns string {
 
 function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
-    io:WritableCharacterChannel charChannel = new(io:openWritableFile(fileLocation + API_USAGE_FILE, append = true), "UTF-8");
+    // errors from 'openWritableFile' will be 'panicked'
+    var writableChannel = <io:WritableByteChannel>io:openWritableFile(fileLocation + API_USAGE_FILE, true);
+    io:WritableCharacterChannel charChannel = new(writableChannel, "UTF-8");
     var result = charChannel.write(getEventData(eventDTO), 0);
-    if(result is error ) {
+    if (result is io:GenericError) {
+        closeWC(charChannel);
+        panic result;
+    } else if (result is io:ConnectionTimedOutError) {
         closeWC(charChannel);
         panic result;
     } else  {
