@@ -246,7 +246,7 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
-    string serviceName = runtime:getInvocationContext().attributes["ServiceName"].toString();
+    string serviceName = context.attributes["ServiceName"].toString();
     APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];

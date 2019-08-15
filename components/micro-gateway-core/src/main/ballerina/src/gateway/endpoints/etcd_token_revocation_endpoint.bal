@@ -19,7 +19,7 @@ import ballerina/http;
 import ballerina/config;
 
 http:Client etcdTokenRevocationEndpoint = new (
-    getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, "https://localhost:2379/v2/keys/jti/"), config = {
+    getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, "https://localhost:2379/v2/keys/jti/"), {
         secureSocket: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
