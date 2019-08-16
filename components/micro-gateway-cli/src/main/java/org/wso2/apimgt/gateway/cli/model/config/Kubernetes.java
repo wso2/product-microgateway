@@ -27,6 +27,9 @@ public class Kubernetes {
     private KubernetesPersistentVolumeClaim kubernetesPersistentVolumeClaim;
     private KubernetesSecret kubernetesSecret;
     private KubernetesService kubernetesService;
+    private KubernetesService kubernetesServiceHttps;
+    private KubernetesService kubernetesServiceHttp;
+    private KubernetesService kubernetesServiceToken;
 
     public KubernetesConfigMap getKubernetesConfigMap() {
         return kubernetesConfigMap;
@@ -98,5 +101,29 @@ public class Kubernetes {
 
     public void setSecureKubernetesIngress(SecureKubernetesIngress secureKubernetesIngress) {
         this.secureKubernetesIngress = secureKubernetesIngress;
+    }
+
+    public KubernetesService getKubernetesServiceHttps() {
+        return kubernetesServiceHttps;
+    }
+
+    public void setKubernetesServiceHttps(KubernetesService kubernetesServiceHttps) {
+        this.kubernetesServiceHttps = kubernetesServiceHttps;
+    }
+
+    public KubernetesService getKubernetesServiceToken() {
+        return kubernetesServiceToken;
+    }
+
+    public void setKubernetesServiceToken(KubernetesService kubernetesServiceToken) {
+        this.kubernetesServiceToken = kubernetesServiceToken;
+    }
+
+    public KubernetesService getKubernetesServiceHttp() {
+        return kubernetesServiceHttp;
+    }
+
+    public void setKubernetesServiceHttp(KubernetesService kubernetesServiceHttp) {
+        this.kubernetesServiceHttp = kubernetesServiceHttp;
     }
 }
