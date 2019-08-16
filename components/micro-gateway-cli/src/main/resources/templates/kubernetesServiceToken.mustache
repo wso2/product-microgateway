@@ -6,12 +6,12 @@
     serviceType:"{{containerConfig.kubernetes.kubernetesService.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.port}},
     port:{{containerConfig.kubernetes.kubernetesService.port}}{{/if}}
 }
-{{else if containerConfig.kubernetes.kubernetesServiceHttp.enable}}
+{{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
 @kubernetes:Service {
-    {{#if containerConfig.kubernetes.kubernetesServiceHttp.name}}
-    name:"{{containerConfig.kubernetes.kubernetesServiceHttp.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesServiceHttp.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.serviceType}},
-    serviceType:"{{containerConfig.kubernetes.kubernetesServiceHttp.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.port}},
-    port:{{containerConfig.kubernetes.kubernetesServiceHttp.port}}{{/if}}
+    {{#if containerConfig.kubernetes.kubernetesServiceToken.name}}
+    name:"{{containerConfig.kubernetes.kubernetesServiceToken.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceToken.labels}},
+    labels:"{{containerConfig.kubernetes.kubernetesServiceToken.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceToken.serviceType}},
+    serviceType:"{{containerConfig.kubernetes.kubernetesServiceToken.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceToken.port}},
+    port:{{containerConfig.kubernetes.kubernetesServiceToken.port}}{{/if}}
 }
 {{/if}}
