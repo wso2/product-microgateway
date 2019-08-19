@@ -24,8 +24,8 @@ import ballerina/lang.'string;
 
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
-#
 # + basicAuthConfig - The Basic Auth provider configurations.
+# + inboundBasicAuthProvider - The InboundBasicAUthProvider.
 public type BasicAuthProvider object {
 
     *auth:InboundAuthProvider;
@@ -130,7 +130,7 @@ public type BasicAuthProvider object {
             isAuthenticated = true;
             return isAuthenticated;
         } else {
-            return prepareAuthenticationError("Failed to authenticate with basic auth hanndler.", isAuthorized);
+            return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
         
         

@@ -43,10 +43,7 @@ public type JwtAuthProvider object {
         self.inboundJwtAuthProvider = new(jwtValidatorConfig);
     }
 
-    # Authenticate with a JWT token.
-    #
-    # + credential - Jwt token extracted from the authentication header
-    # + return - `true` if authentication is successful, othewise `false` or `auth:Error` occurred during JWT validation
+ 
     public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         if(handleVar is boolean) {
@@ -55,7 +52,7 @@ public type JwtAuthProvider object {
             string? jti = "";
             runtime:InvocationContext invocationContext= runtime:getInvocationContext();
             runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
-            if(authContext is AuthenticationContext){
+            if(authContext is runtime:AuthenticationContext){
                 string jwtToken = authContext.authToken;
                 var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
                 if (cachedJwt is jwt:CachedJwt) {
@@ -97,11 +94,12 @@ public type JwtAuthProvider object {
                     return handleVar;
                 }
             }
+            return handleVar;
         } else {
             return handleVar;
         }
     } else {
-        return prepareAuthenticationError("Failed to authenticate with jwt auth provider.", handleVar);
+        return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
         }
 
     }    

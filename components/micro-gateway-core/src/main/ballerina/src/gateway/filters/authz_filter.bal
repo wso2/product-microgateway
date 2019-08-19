@@ -48,7 +48,7 @@ public type OAuthzFilter object {
             printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
             runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
             boolean result = true;
-            if(authContext is AuthenticationContext){
+            if(authContext is runtime:AuthenticationContext){
                 string authScheme = authContext.scheme;
                 // scope validation is done in authn filter for oauth2, hence we only need to
                 //validate scopes if auth scheme is jwt.
