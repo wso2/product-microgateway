@@ -28,7 +28,8 @@ xmlns "http://dto.impl.apimgt.carbon.wso2.org/xsd" as apim;
 # Represents inbound OAuth2 provider, which calls the key validation service of the WSO2 Key manager
 #
 # + keyValidationClient - key validation client endpoint
-# + tokenTypeHint - A hint about the type of the token submitted for introspection
+# + gatewayCache - the `APIGatewayCache instence`
+# + encodedBasicAuthHeader - encode Header
 # 
 public type OAuth2KeyValidationProvider object {
 
@@ -45,11 +46,8 @@ public type OAuth2KeyValidationProvider object {
         self.keyValidationClient = new(config.url, config.clientConfig);
     }
 
-    # Attempts to authenticate with credential.
-    #
-    # + credential - Credential
-    # + return - `true` if authentication is successful, otherwise `false` or `auth:Error` if an error occurred
-    public function authenticate(string credential) returns boolean|auth:Error {
+  
+    public function authenticate(string credential) returns (boolean|auth:Error) {
         AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -95,6 +93,7 @@ public type OAuth2KeyValidationProvider object {
                 .keyType;
                 runtime:AuthenticationContext authContext = {scheme:AUTH_SCHEME_OAUTH2,authToken: credential};
                 invocationContext.authenticationContext = authContext;
+                return isAuthorized;
             } else {
                 int|error status = 'int:fromString(apiKeyValidationDto.validationStatus);
                 int errorStatus = (status is int)?status:INTERNAL_SERVER_ERROR;
@@ -198,7 +197,7 @@ public type OAuth2KeyValidationProvider object {
         printDebug(KEY_OAUTH_PROVIDER, "Total time taken for the key validation service call : " + timeDiff.toString() + "ms");
         if(result is http:Response) {
             keyValidationResponse = result;
-        } else if(result is error) {
+        } else {
             string message = "Error occurred while reading the key validation response";
             log:printError(message ,err =result);
             return result;
@@ -207,7 +206,7 @@ public type OAuth2KeyValidationProvider object {
         if(responseXml is xml) {
             printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responseXml.getTextValue());
 
-        } else if(responseXml is error){
+        } else {
             string message = "Error occurred while getting the key validation service XML response payload";
             log:printError(message,err=responseXml);
         }
@@ -243,7 +242,7 @@ public type OAuth2KeyValidationProvider object {
                     self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
                 }
             }
-        } else if(keyValidationResponseXML is error){
+        } else {
             string errorMessage = "Error occurred while the key validation request";
             log:printError(errorMessage, err=keyValidationResponseXML);
             panic error(errorMessage);

@@ -39,7 +39,7 @@ public type MutualSSLHandler object {
 
     # Authenticates the incoming request knowing that mutual ssl has happened at the trasnport layer.
     #
-    # + request - The `Request` instance.
+    # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean|http:AuthenticationError {

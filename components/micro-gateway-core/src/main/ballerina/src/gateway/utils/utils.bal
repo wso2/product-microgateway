@@ -57,7 +57,7 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context)
     }
     string apiContext = <string>httpServiceConfig.basePath;
     APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
-    string apiVersion;
+    string apiVersion="";
     if (apiConfig is APIConfiguration) {
      apiVersion = <string>apiConfig.apiVersion;
      }
@@ -95,12 +95,12 @@ public function getTenantFromBasePath(string basePath) returns string {
 }
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
-    int|error validityPeriod;
-    int|error issuedTime;
+    int|error validityPeriod=0;
+    int|error issuedTime=0;
     string? validPeriod = apiKeyValidationDto?.validityPeriod;
     string? issueTime = apiKeyValidationDto?.issuedTime;
-    if (validityPeriod is string) {
-        validityPeriod =  'int:fromString(validityPeriod);
+    if (validPeriod is string) {
+        validityPeriod =  'int:fromString(validPeriod);
     }
     if (issueTime is string ) {
         issuedTime = 'int:fromString(issueTime);
@@ -428,13 +428,11 @@ public function isSecured(string serviceName, string resourceName) returns boole
             return false;
         }
     }
-    if (httpServiceConfig is http:HttpServiceConfig) {
-        serviceLevelAuthAnn = httpResourceConfig?.auth;
-        boolean serviceSecured = isServiceResourceSecured(serviceLevelAuthAnn);
-        if (!serviceSecured) {
-            log:printWarn("Service is not secured. `enabled: false`.");
-            return true;
-        }
+    serviceLevelAuthAnn = httpResourceConfig?.auth;
+    boolean serviceSecured = isServiceResourceSecured(serviceLevelAuthAnn);
+    if (!serviceSecured) {
+        log:printWarn("Service is not secured. `enabled: false`.");
+        return true;
     }
     return true;
 }
@@ -465,7 +463,7 @@ public function getAuthProviders(string serviceName) returns string[] {
 # + message - Error message
 # + err - `error` instance
 # + return - Prepared `Error` instance
-public function prepareError(string message, error? err = ()) returns Error {
+public function prepareError(string message, error? err = ()) returns auth:Error {
     log:printError(message, err);
     auth:Error authError;
     if (err is error) {
