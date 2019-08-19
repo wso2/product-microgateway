@@ -1,4 +1,3 @@
-{{#if containerConfig.kubernetes.kubernetesService.enable}}
 @kubernetes:Service {
     {{#if containerConfig.kubernetes.kubernetesService.name}}
     name:"{{containerConfig.kubernetes.kubernetesService.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.labels}},
@@ -6,12 +5,3 @@
     serviceType:"{{containerConfig.kubernetes.kubernetesService.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesService.port}},
     port:{{containerConfig.kubernetes.kubernetesService.port}}{{/if}}
 }
-{{else if containerConfig.kubernetes.kubernetesServiceHttp.enable}}
-@kubernetes:Service {
-    {{#if containerConfig.kubernetes.kubernetesServiceHttp.name}}
-    name:"{{containerConfig.kubernetes.kubernetesServiceHttp.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesServiceHttp.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.serviceType}},
-    serviceType:"{{containerConfig.kubernetes.kubernetesServiceHttp.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.port}},
-    port:{{containerConfig.kubernetes.kubernetesServiceHttp.port}}{{/if}}
-}
-{{/if}}
