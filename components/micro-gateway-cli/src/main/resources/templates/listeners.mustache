@@ -15,8 +15,6 @@ import ballerina/log;
 
 
 
-//Get mutualSSL filter
-gateway: MutualSSLFilter  mtslFilter= new;
 // Get authentication filter
 gateway:PreAuthnFilter preAuthnFilter = new;
 // Subscription validation filter
@@ -26,13 +24,13 @@ gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
 map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
-gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
+//gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 //get open API definition map
 map<json> openAPIs = getOpenAPIs();
 // Validation filter
-gateway:ValidationFilter validationFilter = new(openAPIs);
+//gateway:ValidationFilter validationFilter = new(openAPIs);
 // Analytics filter
-gateway:AnalyticsRequestFilter analyticsFilter = new;
+//gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
 ExtensionFilter extensionFilter = new;
 
@@ -41,7 +39,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers()
                                                                            },
-                                                                           filters:[mtslFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                           filters:[mtslFilter, preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                            extensionFilter]
                                                                        };
 
@@ -54,7 +52,7 @@ http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                      auth: {
                                                                         authHandlers: gateway:getAuthHandlers()
                                                                      },
-                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter, analyticsFilter,
+                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                      extensionFilter]
                                                                  };
 

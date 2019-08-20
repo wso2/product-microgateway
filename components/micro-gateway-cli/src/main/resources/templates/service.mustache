@@ -36,7 +36,7 @@ import wso2/gateway;
 {{>kubernetes}}
 
 @http:ServiceConfig {
-    basePath: "{{basepath}}",{{!-- {{only one base path is allowed for all  endpoints}} --}}
+    basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}}
    {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -58,6 +58,7 @@ import wso2/gateway;
         authProviders:["basic"]
     {{else}}
         authProviders:["jwt","oauth2"]
+    {{/if}}
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -66,9 +67,9 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @http:ResourceConfig {
         methods:["{{upper key}}"],
         path:"{{../../key}}",
-        authConfig:{
-    {{/if}} {{#unless isSecured}}
-            authentication:{enabled:false} {{/unless}} {{#if scope}},
+        auth:{
+        {{#unless isSecured}}
+            enabled:false {{/unless}} {{#if scope}},
             scopes: [{{{scope}}}] {{/if}}
 
         }
@@ -78,7 +79,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
-    string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
+    string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
     if(!urlPostfix.hasPrefix("/")) {
         urlPostfix = "/" + urlPostfix;
     }
@@ -187,11 +188,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             int errorCode = 101503;
             string errorDescription = "Error connecting to the back end";
 
-            if(errorMessage.contains("connection timed out") || errorMessage.contains("Idle timeout triggered")) {
+            if(gateway:contains(errorMessage, "connection timed out") || gateway:contains(errorMessage,"Idle timeout triggered")) {
                 errorCode = 101504;
                 errorDescription = "Connection timed out";
             }
-            if(errorMessage.contains("Malformed URL")) {
+            if(gateway:contains(errorMessage, "Malformed URL")) {
                 errorCode = 101505;
                 errorDescription = "Malformed URL";
             }
@@ -225,8 +226,12 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string defaultUrlRef,string etcdRef, string defaultUrl, string etcdKey) returns string {
     string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
-    gateway:urlChanged[<string> retrievedEtcdKey] = false;
-    string url = <string> gateway:etcdUrls[retrievedEtcdKey];
+    //TODO set the correct value from gateway module
+    //gateway:urlChanged[<string> retrievedEtcdKey] = false;
+
+    //TODO: get the correct url valus from gateway module
+    string url = "";
+    //string url = <string> gateway:etcdUrls[retrievedEtcdKey];
     if (url == "") {
         return <string> gateway:retrieveConfig(defaultUrlRef, defaultUrl);
     } else {

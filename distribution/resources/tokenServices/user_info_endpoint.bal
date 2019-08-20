@@ -28,7 +28,7 @@ service userInfoService on tokenListenerEndpoint {
     resource function userInfoResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
-                untaint req.rawPath, req);
+                 req.rawPath, req);
         if(response is http:Response) {
             _ = caller->respond(response);
         }
