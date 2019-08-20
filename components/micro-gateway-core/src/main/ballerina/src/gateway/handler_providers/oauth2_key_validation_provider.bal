@@ -47,7 +47,7 @@ public type OAuth2KeyValidationProvider object {
     }
 
   
-    public function authenticate(string credential) returns (boolean|auth:Error) {
+    public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
         AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -113,7 +113,8 @@ public type OAuth2KeyValidationProvider object {
         }
     }
 
-    public function checkCacheAndAuthenticate (APIRequestMetaDataDto apiRequestMetaDataDto, runtime:InvocationContext invocationContext) returns (APIKeyValidationDto) {
+    public function checkCacheAndAuthenticate (APIRequestMetaDataDto apiRequestMetaDataDto, @tainted runtime:InvocationContext invocationContext)
+                returns @tainted (APIKeyValidationDto) {
         printDebug(KEY_OAUTH_PROVIDER, "Authenticating request using the request metadata.");
         string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
         string accessToken = apiRequestMetaDataDto.accessToken;
@@ -169,7 +170,7 @@ public type OAuth2KeyValidationProvider object {
         return apiKeyValidationDto;
     }
 
-    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns (xml | error) {
+    public function doKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns @tainted (xml | error) {
         http:Request keyValidationRequest = new;
         http:Response keyValidationResponse = new;
         xml soapEnvelope = xml `<soapenv:Envelope>
@@ -214,7 +215,7 @@ public type OAuth2KeyValidationProvider object {
 
     }
 
-    public function invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns [boolean,
+    public function invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns @tainted [boolean,
                 APIKeyValidationDto] {
         APIKeyValidationDto apiKeyValidationDto = {};
         string accessToken = apiRequestMetaDataDto.accessToken;

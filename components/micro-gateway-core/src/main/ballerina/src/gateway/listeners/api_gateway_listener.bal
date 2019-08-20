@@ -74,7 +74,8 @@ public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration 
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
-    initializeAnalytics();
+    //TODO : migrate this method and re enable
+    //initializeAnalytics();
 
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {

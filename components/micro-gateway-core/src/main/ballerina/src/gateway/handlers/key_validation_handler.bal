@@ -21,7 +21,8 @@ import ballerina/http;
 
 # Representation of the key validation  handler
 #
-# + BearerAuthHandler - The reference to the 'BearerAuthHandler' instance
+# + bearerAuthHandler - The reference to the 'BearerAuthHandler' instance
+# + oauth2KeyValidationProvider - The reference to the key validation provider instance
 public type KeyValidationHandler object {
 
     *http:InboundAuthHandler;
