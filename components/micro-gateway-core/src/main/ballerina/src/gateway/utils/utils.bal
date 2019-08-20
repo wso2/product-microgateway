@@ -397,7 +397,7 @@ public function decodeValueToBase10(string value) returns string {
 }
 
 # Extracts host header from request and set it to the filter context
-public function setHostHeaderToFilterContext(http:Request request, http:FilterContext context) {
+public function setHostHeaderToFilterContext(http:Request request, @tainted http:FilterContext context) {
     if(context.attributes[HOSTNAME_PROPERTY] == ()) {
         printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
         if (request.hasHeader(HOST_HEADER_NAME)) {

@@ -28,7 +28,7 @@ import ballerina/reflect;
 
 public type PreAuthnFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
+    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context)
                         returns boolean {
         //Setting UUID
         int startingTime = getCurrentTime();
@@ -95,7 +95,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         return false;
     }
     // if auth providers are there, use those to authenticate
-    
+
         //TODO: Move this to post authentication handler
         //checkAndRemoveAuthHeaders(request, authHeaderName);
     return true;
