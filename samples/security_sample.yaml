@@ -175,7 +175,7 @@ components:
             write: Grants write access
             admin: Grants access to admin operations
     mybasic:
-      type: http:
+      type: http
       scheme: basic
   requestBodies:
     Pet:

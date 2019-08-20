@@ -16,12 +16,13 @@
 package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.JsonSyntaxException;
 import io.swagger.annotations.ApiModel;
 import io.swagger.util.Json;
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
@@ -29,23 +30,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link APIInfoDTO} with extended set of
+ * attributes.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(description = "")
 public class APIDetailedDTO extends APIInfoDTO {
 
+    /**
+     * API Type.
+     */
+    public enum TypeEnum {
+        HTTP, WS, SOAPTOREST,
+    }
+
+    /**
+     * API Visibility level. Not used in MGW as of 3.0.1.
+     */
+    public enum VisibilityEnum {
+        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
+    }
+
+    /**
+     * Subscription availability in WSO2 APIM.
+     */
+    public enum SubscriptionAvailabilityEnum {
+        current_tenant, all_tenants, specific_tenants,
+    }
+
+    /**
+     * WSO2 APIM access control level.
+     */
+    public enum AccessControlEnum {
+        NONE, RESTRICTED,
+    }
+    
     private String apiDefinition = null;
     private String wsdlUri = null;
     private String responseCaching = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean isDefaultVersion = null;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private Json apiSwagger = null;
-
-    public enum TypeEnum {
-        HTTP, WS, SOAPTOREST,
-    }
-
-    ;
 
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<String>();
@@ -56,12 +85,6 @@ public class APIDetailedDTO extends APIInfoDTO {
     private String apiSecurity = null;
     private APIMaxTpsDTO maxTps = null;
 
-    public enum VisibilityEnum {
-        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
-    }
-
-    ;
-
     private VisibilityEnum visibility = null;
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
@@ -71,21 +94,10 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
 
-    public enum SubscriptionAvailabilityEnum {
-        current_tenant, all_tenants, specific_tenants,
-    }
-
-    ;
-
     private SubscriptionAvailabilityEnum subscriptionAvailability = null;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     private Map<String, String> additionalProperties = new HashMap<String, String>();
 
-    public enum AccessControlEnum {
-        NONE, RESTRICTED,
-    }
-
-    ;
 
     private AccessControlEnum accessControl = null;
     private List<String> accessControlRoles = new ArrayList<String>();

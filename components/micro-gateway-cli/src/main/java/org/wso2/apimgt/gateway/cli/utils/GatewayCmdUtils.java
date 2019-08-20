@@ -38,11 +38,13 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +52,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-public class GatewayCmdUtils {
+/**
+ * Utility functions providing tasks related to MGW toolkit.
+ */
+public final class GatewayCmdUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
     private static Config config;
@@ -58,6 +63,12 @@ public class GatewayCmdUtils {
     private static CodeGenerationContext codeGenerationContext;
     private static boolean verboseLogsEnabled = setVerboseEnabled();
     private static final String openAPISpec2 = "2";
+    private static final PrintStream OUT = System.out;
+    private static final PrintStream ERR = System.err;
+
+    private GatewayCmdUtils() {
+
+    }
 
     public static Config getConfig() {
         return config;
@@ -341,7 +352,7 @@ public class GatewayCmdUtils {
         try {
             Path genPath = Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName));
             Path apiDefPath = Paths.get(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
-            if(Files.notExists(genPath)){
+            if (Files.notExists(genPath)) {
                 Files.createDirectory(genPath);
                 Files.createDirectory(apiDefPath);
             }
@@ -355,7 +366,7 @@ public class GatewayCmdUtils {
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
-                ? GatewayCliConstants.API_SWAGGER: GatewayCliConstants.API_OPENAPI_YAML;
+                ? GatewayCliConstants.API_SWAGGER : GatewayCliConstants.API_OPENAPI_YAML;
         GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
     }
 
@@ -368,7 +379,8 @@ public class GatewayCmdUtils {
     public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis) {
         for (ExtendedAPI api : apis) {
             saveSwaggerDefinitionForSingleAPI(projectName, api);
-            System.out.println("ID for API with name " + api.getName() +  " : " + HashUtils.generateAPIId(api.getName(), api.getVersion()));
+            OUT.println("ID for API with name " + api.getName() + " : "
+                    + HashUtils.generateAPIId(api.getName(), api.getVersion()));
         }
     }
 
@@ -534,8 +546,8 @@ public class GatewayCmdUtils {
     /**
      * Returns path to the /gen/api-definition of a given project in the current working directory
      *
-     * @param projectName name of the project
-     * @param apiId  md5 hash value of apiName:apiVersion
+     * @param projectName   name of the project
+     * @param apiId         md5 hash value of apiName:apiVersion
      * @param extensionType The file extension type. (ex : yaml or json)
      * @return path to the /gen/api-definition of a given project in the current working directory
      */
@@ -550,8 +562,8 @@ public class GatewayCmdUtils {
      * Returns path to the /gen/api-definition of a given project in the current working directory
      *
      * @param projectName name of the project
-     * @param apiId  md5 hash value of apiName:apiVersion
-     *                    * @return path to the /gen/api-definition of a given project in the current working directory
+     * @param apiId       md5 hash value of apiName:apiVersion
+     * @return path to the /gen/api-definition of a given project in the current working directory
      */
     public static String getProjectGenSwaggerPath(String projectName, String apiId) {
         return getProjectDirectoryPath(projectName) + File.separator +
@@ -566,7 +578,7 @@ public class GatewayCmdUtils {
      * @param projectName name of the project
      * @return path to the /gen/api-definition of a given project in the current working directory
      */
-    public static String getProjectGenAPIDefinitionPath(String projectName ) {
+    public static String getProjectGenAPIDefinitionPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator +
                 GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
@@ -709,10 +721,10 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     public static void writeContent(String content, File file) throws IOException {
-        FileWriter writer = null;
-        writer = new FileWriter(file);
-        writer.write(content);
-        writer.flush();
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            writer.write(content);
+            writer.flush();
+        }
     }
 
     /**
@@ -783,8 +795,8 @@ public class GatewayCmdUtils {
                 writeContent(inputConfigContent, file);
             } else {
                 throw new CLIRuntimeException(
-                        "Error while reading deployment configuration file. Probably the file path '" + deploymentConfPath
-                                + "' is invalid.");
+                        "Error while reading deployment configuration file. Probably the file path '"
+                                + deploymentConfPath + "' is invalid.");
             }
         }
     }
@@ -794,24 +806,33 @@ public class GatewayCmdUtils {
     }
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
+        overrideContainerConfigs(containerConfig);
         GatewayCmdUtils.containerConfig = containerConfig;
+    }
+
+    private static void overrideContainerConfigs(ContainerConfig containerConfig) {
+        if (containerConfig != null && containerConfig.getKubernetes() != null
+                && containerConfig.getKubernetes().getSecureKubernetesIngress() != null) {
+            containerConfig.getKubernetes().getSecureKubernetesIngress().setKeyStorePassword(CodegenUtils
+                    .resolveValue(containerConfig.getKubernetes().getSecureKubernetesIngress().getKeyStorePassword()));
+        }
     }
 
     public static void saveConfig(Config config, String configPath) {
         try {
             TOMLConfigParser.write(configPath, config);
         } catch (ConfigParserException e) {
-            System.err.println("Error occurred while parsing configuration, when persisting.");
+            ERR.println("Error occurred while parsing configuration, when persisting.");
         }
     }
 
     public static APICorsConfigurationDTO getDefaultCorsConfig() {
         APICorsConfigurationDTO corsConfigurationDTO = new APICorsConfigurationDTO();
         corsConfigurationDTO.setCorsConfigurationEnabled(true);
-        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.accessControlAllowOrigins);
-        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.accessControlAllowMethods);
-        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.accessControlAllowHeaders);
-        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.accessControlAllowCredentials);
+        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.ACCESS_CONTROL_ALLOW_ORIGINS);
+        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.ACCESS_CONTROL_ALLOW_METHODS);
+        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.ACCESS_CONTROL_ALLOW_HEADERS);
+        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS);
         return corsConfigurationDTO;
     }
 
@@ -843,7 +864,12 @@ public class GatewayCmdUtils {
     }
 
     private static void delete(File file) throws IOException {
-        for (File childFile : file.listFiles()) {
+        File[] fileList = file.listFiles();
+        if (fileList == null) {
+            logger.debug("No files to delete in: {}", file.getAbsolutePath());
+            return;
+        }
+        for (File childFile : fileList) {
             if (childFile.isDirectory()) {
                 delete(childFile);
             } else {
@@ -887,6 +913,7 @@ public class GatewayCmdUtils {
 
     /**
      * Returns path to the /API-Files of a given project in the current working directory
+     *
      * @param projectName name of the project
      * @return path to the /API-Files of a given project in the current working directory
      */
@@ -897,8 +924,9 @@ public class GatewayCmdUtils {
 
     /**
      * Returns the path to the swagger for a defined version of an API
+     *
      * @param projectName name of the project
-     * @param apiId md5 hash value of apiName:apiVersion
+     * @param apiId       md5 hash value of apiName:apiVersion
      * @return path to the swagger for a defined version of an API
      */
     public static String getProjectSwaggerFilePath(String projectName, String apiId) {
@@ -913,7 +941,7 @@ public class GatewayCmdUtils {
      */
     public static void printVerbose(String msg) {
         if (verboseLogsEnabled) {
-            System.out.println("micro-gw: [verbose] " + msg);
+            OUT.println("micro-gw: [verbose] " + msg);
         }
     }
 

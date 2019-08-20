@@ -51,6 +51,24 @@
     #labels = ''
     #serviceType = ''
     #port = ''
+  #[kubernetes.kubernetesServiceHttps]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
+  #[kubernetes.kubernetesServiceHttp]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
+  #[kubernetes.kubernetesServiceToken]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
   [kubernetes.kubernetesIngress]
     enable = false
     #name = ''
@@ -69,6 +87,8 @@
     #path = ''
     #targetPath = ''
     #ingressClass = ''
+    #keyStorePath = '${ballerina.home}/bre/security/ballerinaKeystore.p12'
+    #keyStorePassword = '$env{Keystore_Password}'
   [kubernetes.kubernetesHpa]
     enable = false
     #name = ''

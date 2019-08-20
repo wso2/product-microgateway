@@ -21,6 +21,9 @@ package org.wso2.apimgt.gateway.cli.model.rest.policy;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data holder/mapper for all available throttle policy types.
+ */
 public class ThrottlePolicyListMapper {
 
     private List<ThrottlePolicyMapper> resourcePolicies = new ArrayList<>();

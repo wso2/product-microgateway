@@ -23,7 +23,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.ResponseConstants;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
@@ -38,7 +37,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
-        
+
         String project = "apimTestProject";
         API api = new API();
         api.setName("PetStoreAPI");
@@ -55,7 +54,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, "common_api.yaml");
+        super.init(project, new String[]{"common_api.yaml"});
     }
 
     @Test(description = "Test API invocation with a JWT token")

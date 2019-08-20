@@ -1,5 +1,6 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
@@ -7,6 +8,20 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 import java.util.List;
 
 
+/**
+ * List of {@link MgwEndpointDTO} definitions with other endpoint
+ * related details such as endpoint security.
+ * <p>
+ *     Instance of this class always represent a single endpoint
+ *     declaration wso2 OpenAPI extension.
+ * </p>
+ * <p>
+ *     Ex:
+ *        x-wso2-production-endpoints:
+ *          urls:
+ *            - http://www.mocky.io/v2/5cd28b9a310000bf293397f9
+ * </p>
+ */
 public class MgwEndpointListDTO {
 
     private APIEndpointSecurityDTO securityConfig = null;
@@ -14,6 +29,8 @@ public class MgwEndpointListDTO {
     private List<MgwEndpointDTO> endpoints = null;
     private EndpointUrlTypeEnum endpointUrlType = null;
     private String name = null;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private boolean endpointListEtcdEnabled = false;
 
     public APIEndpointSecurityDTO getSecurityConfig() {

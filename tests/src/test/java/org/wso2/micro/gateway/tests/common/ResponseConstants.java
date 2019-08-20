@@ -35,4 +35,20 @@ public class ResponseConstants {
             + "  \"photoUrls\": [" + "    \"string\"" + "  ]," + "  \"tags\": [" + "    {"
             + "      \"id\": 0," + "      \"name\": \"string\"" + "    }" + "  ],"
             + "  \"status\": \"available\"" + "}";
+    public static final String storeInventoryResponse = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
+            + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
+    public static final String PER_API_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900802," +
+            " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
+    public static final String PER_RESOURCE_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900804, " +
+            "\"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
+    public static final String NONEXISTING_THROTTLEPOLICY_RESPONSE = "{\"fault\":{\"code\":900809, " +
+            "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
+    public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
+            "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
+    public static final String RESPONSE_INTERCEPTOR_RESPONSE_HEDAER = "ResponseHeader";
+    public static final String API_REQUEST_INTERCEPTOR_RESPONSE = "{\"APIIntercept\":{\"RequestCode\":\"e123\", " +
+            "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
+    public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
+    public static final String PAYLOAD = "payload";
+
 }

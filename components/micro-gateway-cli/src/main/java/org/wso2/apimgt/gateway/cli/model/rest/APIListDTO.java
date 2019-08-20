@@ -22,6 +22,9 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data holder for {@link ExtendedAPI} type API list definition.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIListDTO  {
 

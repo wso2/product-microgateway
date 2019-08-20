@@ -45,14 +45,6 @@ public interface Server {
     public void restartServer() throws MicroGWTestException;
 
     /**
-     * Executes main function of micro-gw files.
-     *
-     * @param args Micro-GW files to be passed as arguments
-     * @throws MicroGWTestException if any exception is thrown when running the main function
-     */
-    public void runMain(String[] args, String[] envVariables, String command) throws MicroGWTestException;
-
-    /**
      * Checks if the server is already running.
      *
      * @return True if the server is running

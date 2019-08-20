@@ -17,6 +17,11 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
+
+/**
+ * Descriptor for one config map item in {@link KubernetesConfigMap}.
+ */
 public class KubernetesConfigMapConfigItem {
     private String name;
     private String mountPath;
@@ -47,10 +52,12 @@ public class KubernetesConfigMapConfigItem {
         this.readOnly = readOnly;
     }
 
+    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP")
     public String[] getData() {
         return data;
     }
 
+    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP2")
     public void setData(String[] data) {
         this.data = data;
     }

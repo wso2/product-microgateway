@@ -17,6 +17,11 @@
  */
 package org.wso2.apimgt.gateway.cli.model.oauth;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
+
+/**
+ * OAuth token request definition.
+ */
 public class OAuthTokenRequest {
 
     private char[] clientSecret;
@@ -27,11 +32,15 @@ public class OAuthTokenRequest {
     private String grantType;
 
     public char[] getClientSecret() {
-        return clientSecret;
+        if (clientSecret == null) {
+            return new char[0];
+        }
+
+        return clientSecret.clone();
     }
 
     public void setClientSecret(char[] clientSecret) {
-        this.clientSecret = clientSecret;
+        this.clientSecret = clientSecret.clone();
     }
 
     public String getClientKey() {
@@ -42,20 +51,25 @@ public class OAuthTokenRequest {
         this.clientKey = clientKey;
     }
 
+    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP")
     public String[] getScopes() {
         return scopes;
     }
 
+    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP2")
     public void setScopes(String[] scopes) {
         this.scopes = scopes;
     }
 
     public char[] getPassword() {
-        return password;
+        if (password == null) {
+            return new char[0];
+        }
+        return password.clone();
     }
 
     public void setPassword(char[] password) {
-        this.password = password;
+        this.password = password.clone();
     }
 
     public String getUsername() {

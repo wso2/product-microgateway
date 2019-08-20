@@ -7,6 +7,8 @@ import org.wso2.micro.gateway.tests.common.JMSPublisher;
 import org.wso2.micro.gateway.tests.common.MockBackEndServer;
 import org.wso2.micro.gateway.tests.context.Utils;
 
+import java.io.File;
+
 public class PreRequisites {
     private MockBackEndServer mockBackEndServer;
     @BeforeSuite
@@ -29,6 +31,15 @@ public class PreRequisites {
     public void stop() throws Exception {
         //Stop all the mock servers
         mockBackEndServer.stopIt();
+    }
 
+    @BeforeSuite
+    public void setTrustStore() {
+        String trustStorePath = new File(
+                getClass().getClassLoader().getResource("keyStores/ballerinaTruststore.p12")
+                        .getPath()).getAbsolutePath();
+        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+        System.setProperty("javax.net.ssl.trustStoreType", "PKCS12");
+        System.setProperty("javax.net.ssl.trustStorePassword", "ballerina");
     }
 }

@@ -16,17 +16,17 @@
 package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * List of {@link SubscriptionThrottlePolicyDTO}.
+ */
 public class SubscriptionThrottlePolicyListDTO {
 
     private Integer count = null;
     private List<SubscriptionThrottlePolicyDTO> list = new ArrayList<SubscriptionThrottlePolicyDTO>();
-
 
     /**
      * Number of Subscription Throttling Policies returned.\n
@@ -40,9 +40,6 @@ public class SubscriptionThrottlePolicyListDTO {
         this.count = count;
     }
 
-
-    /**
-     **/
     @JsonProperty("list")
     public List<SubscriptionThrottlePolicyDTO> getList() {
         return list;

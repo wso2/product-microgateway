@@ -16,18 +16,17 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.Etcd;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
@@ -48,7 +47,6 @@ import java.util.UUID;
  */
 public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService, OpenAPI> {
     private String name;
-    private ExtendedAPI api;
     private ContainerConfig containerConfig;
     private Config config;
     private MgwEndpointConfigDTO endpointConfig;
@@ -56,14 +54,14 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private String modelPackage;
     private String qualifiedServiceName;
     private Info info = null;
-    private ExternalDocumentation externalDocs = null;
-    private Set<Map.Entry<String, String>> security = null;
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
-    private Etcd etcd;
     private String basepath;
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
+
+    @FindbugsSuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
+    private ExtendedAPI api;
 
     /**
      * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
@@ -72,18 +70,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      *
      * @param openAPI {@link OpenAPI} type object to be converted
      * @return Converted {@link BallerinaService} object
-     * @throws BallerinaServiceGenException when OpenAPI to BallerinaService parsing failed
      */
     @Override
-    public BallerinaService buildContext(OpenAPI openAPI) throws BallerinaServiceGenException {
+    public BallerinaService buildContext(OpenAPI openAPI) {
         this.info = openAPI.getInfo();
-        this.externalDocs = openAPI.getExternalDocs();
         this.tags = openAPI.getTags();
         this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        //todo: fix this properly
-        setSecuritySchemas(api.getMgwApiSecurity());
         this.config = GatewayCmdUtils.getConfig();
-        setPaths(openAPI);
         return this;
     }
 
@@ -95,6 +88,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.setBasepath(api.getSpecificBasepath());
+        setSecuritySchemas(api.getMgwApiSecurity());
+        setPaths(definition);
 
         return buildContext(definition);
     }
@@ -130,10 +125,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return info;
     }
 
-    public Set<Map.Entry<String, String>> getSecurity() {
-        return security;
-    }
-
     public List<Tag> getTags() {
         return tags;
     }
@@ -151,8 +142,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      * @throws BallerinaServiceGenException when context building fails
      */
     private void setPaths(OpenAPI openAPI) throws BallerinaServiceGenException {
-        //todo: remove comment
-        if (openAPI.getPaths() == null) {
+        if (openAPI.getPaths() == null || this.api == null) {
             return;
         }
 
@@ -166,7 +156,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.getValue().setOperationId(operationId);
                 //to set BasicAuth property corresponding to the security schema in API-level
                 operation.getValue().setBasicAuth(OpenAPICodegenUtils
-                        .generateBasicAuthFromSecurity(api.getMgwApiSecurity()));
+                        .generateBasicAuthFromSecurity(this.api.getMgwApiSecurity()));
                 //if it is the developer first approach
                 if (isDevFirst) {
                     //to add API level request interceptor
@@ -273,7 +263,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 
-    public void setIsDevFirst(boolean value){
+    public void setIsDevFirst(boolean value) {
         isDevFirst = value;
     }
 }

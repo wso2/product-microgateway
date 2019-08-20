@@ -21,8 +21,12 @@ package org.wso2.apimgt.gateway.cli.model.rest.policy;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
 import java.util.LinkedHashMap;
+
 import javax.validation.constraints.NotNull;
 
+/**
+ * Policy definition mapper for WSO2 APIM throttle policy.
+ */
 public class ThrottlePolicyMapper {
     @NotNull
     private String name = null;
@@ -66,8 +70,7 @@ public class ThrottlePolicyMapper {
     }
 
     @JsonAnySetter
-    public void setValues(String key, LinkedHashMap<String,String> value)
-    {
+    public void setValues(String key, LinkedHashMap<String, String> value) {
         this.name = key;
         this.count = Long.parseLong(value.get("count"));
         this.timeUnit = value.get("timeUnit");

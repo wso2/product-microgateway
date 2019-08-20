@@ -38,7 +38,10 @@
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP1BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP2BackEndTestCase" />
-            <class name="org.wso2.micro.gateway.tests.endpoints.ResourceLevelEndpointsTestCase"></class>
+            <class name="org.wso2.micro.gateway.tests.endpoints.ResourceLevelEndpointsTestCase" />
+            <class name="org.wso2.micro.gateway.tests.endpoints.MultipleEndpointsTestCase" />
+            <class name="org.wso2.micro.gateway.tests.security.ScopesTestCase" />
+            <class name="org.wso2.micro.gateway.tests.security.DisableSecurityAndCustomAuthHeaderTestCase" />
         </classes>
     </test>
 
@@ -52,9 +55,11 @@
             <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithOAuthTestCase"/>
 
             <class name="org.wso2.micro.gateway.tests.throttling.ThrottlingTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.extensions.OASAPIInvokeTestCase"/>
             <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.interceptor.InterceptorTestCase"/>
         </classes>
     </test>
 </suite>

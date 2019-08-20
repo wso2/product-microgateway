@@ -118,10 +118,11 @@ goto :end
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
-		if ERRORLEVEL 1 goto :end
+        if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
 
         :continueBuild
             call :passToJar
+            if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%PATH%;%BALLERINA_HOME%\bin\
@@ -134,17 +135,7 @@ goto :end
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
                 call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
             POPD
-
-            if %verbose%==T ECHO Ballerina build completed
-            SET originalArgs=%originalArgs% --compiled
-
-            REM Check for a debug param by looping through the remaining args list
-            :checkDebug
-                SHIFT
-                if ""%1""=="""" goto passToJar
-                if ""%1""==""--java.debug""  goto commandDebug
-            goto checkDebug
-goto :passToJar
+goto :end
 
 :commandDebug
 	if %verbose%==T ECHO Running commandDebug
@@ -204,8 +195,8 @@ goto end
 	REM Jump to GW-CLI exec location when running the jar
 	CD %MICROGW_HOME%
 	"%JAVA_HOME%\bin\java" %JAVACMD% org.wso2.apimgt.gateway.cli.cmd.Main %originalArgs%
-	if "%ERRORLEVEL%"=="121" goto runJava
-	if ERRORLEVEL 1 goto :end
+	if ERRORLEVEL 121 goto runJava
+	if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
 :end
 goto endlocal
 

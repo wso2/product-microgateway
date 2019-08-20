@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * K8s persistent volume claim descriptor.
+ */
 public class KubernetesPersistentVolumeClaim {
     private String name;
     private String mountPath;

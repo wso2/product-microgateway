@@ -254,7 +254,7 @@
  public const string PERSISTENT_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.persistent";
  public const string PERSISTENT_MESSAGE_ENABLED = "enablePersistentStorageRetrieval";
  public const string PERSISTENT_USE_DEFAULT = "useDefault";
- public const string PERSISTENT_MESSAGE_HOSTNAME = "hotsname";
+ public const string PERSISTENT_MESSAGE_HOSTNAME = "hostname";
  public const string PERSISTENT_MESSAGE_USERNAME = "username";
  public const string PERSISTENT_MESSAGE_PASSWORD = "password";
 

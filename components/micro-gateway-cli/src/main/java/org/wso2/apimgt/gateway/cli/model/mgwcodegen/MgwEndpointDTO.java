@@ -15,17 +15,38 @@
  */
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
+import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * DTO built by parsing endpoint details in OpenAPI definition.
+ * This object is then passed in to mustache templates to build
+ * gateway sources.
+ * <p>
+ *     Instance of this class refers to a single url
+ *     of a endpoint definition in OpenAPI definition.
+ * </p>
+ * Ex: In following load balance endpoint definition,
+ *    x-wso2-production-endpoints:
+ *      urls:
+ *      - http://www.mocky.io/v2/5cd28cd73100008628339802
+ *      - https://petstore.swagger.io/v2
+ * <p>
+ *     two {@link MgwEndpointDTO} instances will be created to
+ *     represent two load balance URLs.
+ * </p>
+ */
 public class MgwEndpointDTO {
     private String endpointUrl;
     private boolean isEtcdEnabled = false;
+
+    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
     private String etcdKey = "";
 
-    public MgwEndpointDTO(String endpointUrl){
+    public MgwEndpointDTO(String endpointUrl) {
         setEndpointUrl(endpointUrl);
     }
 

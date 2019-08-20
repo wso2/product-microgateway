@@ -17,6 +17,11 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * Definition of ballerina CopyFile annotation.
+ * This is used by mustache templates to configure CopyFile
+ * annotation.
+ */
 public class CopyFile {
     private String source;
     private String target;

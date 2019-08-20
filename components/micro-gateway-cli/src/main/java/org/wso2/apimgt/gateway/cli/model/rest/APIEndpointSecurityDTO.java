@@ -18,20 +18,22 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Defines different types of Endpoint security.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIEndpointSecurityDTO {
-
     private String password = null;
 
+    /**
+     * WSO2 APIM supported endpoint security types.
+     */
     public enum TypeEnum {
         basic, digest,
     }
 
-    ;
-
     private TypeEnum type = null;
     private String username = null;
-
 
     @JsonProperty("password")
     public String getPassword() {

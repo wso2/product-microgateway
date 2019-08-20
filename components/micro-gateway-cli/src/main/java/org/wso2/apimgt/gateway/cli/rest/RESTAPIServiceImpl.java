@@ -17,7 +17,6 @@
  */
 package org.wso2.apimgt.gateway.cli.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,23 +26,29 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
-import org.wso2.apimgt.gateway.cli.model.rest.*;
+import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
-import org.wso2.apimgt.gateway.cli.utils.RouteUtils;
-import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
+import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.net.ssl.HttpsURLConnection;
 
+/**
+ * Implementation of {@link RESTAPIService} to communication with
+ * WSO2 API Publisher.
+ */
 public class RESTAPIServiceImpl implements RESTAPIService {
     private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
 
@@ -85,7 +90,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
@@ -141,9 +146,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     RESTServiceConstants.BEARER + " " + accessToken);
             int responseCode = urlConn.getResponseCode();
             logger.debug("Response code: {}", responseCode);
+
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
@@ -155,16 +161,16 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                         }
                     }
                     if (matchedAPI == null) {
-                        return matchedAPI;
+                        return null;
                     }
                     //set additional configs such as CORS configs from the toolkit configuration
                     setAdditionalConfigs(matchedAPI);
-                } else if (responseCode == 401) {
-                    throw new CLIRuntimeException(
-                            "Invalid user credentials or the user does not have required permissions");
                 } else {
                     throw new CLIInternalException("No proper response received for get API request.");
                 }
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
             } else {
                 throw new CLIInternalException("Error occurred while getting the token. Status code: " + responseCode);
             }
@@ -180,8 +186,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         return matchedAPI;
     }
 
-    private void setAdditionalConfigs(ExtendedAPI api) throws IOException {
-        String endpointConfig = api.getEndpointConfig();
+    private void setAdditionalConfigs(ExtendedAPI api) {
         //todo: remove the comment
         //api.setEndpointConfigRepresentation((endpointConfig));
         // set default values from config if per api cors is not enabled
@@ -222,7 +227,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 appsList = mapper.readValue(responseStr, ApplicationThrottlePolicyListDTO.class);
                 List<ApplicationThrottlePolicyDTO> policyDTOS = appsList.getList();
@@ -272,7 +277,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 subsList = mapper.readValue(responseStr, SubscriptionThrottlePolicyListDTO.class);
                 List<SubscriptionThrottlePolicyDTO> policyDTOS = subsList.getList();
@@ -323,7 +328,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 ObjectMapper mapper = new ObjectMapper();
-                String responseStr = TokenManagementUtil.getResponseString(urlConn.getInputStream());
+                String responseStr = RESTAPIUtils.getResponseString(urlConn.getInputStream());
                 //convert json string to object
                 certList = mapper.readValue(responseStr, ClientCertificatesDTO.class);
                 List<ClientCertMetadataDTO> certDTOS = certList.getCertificates();
