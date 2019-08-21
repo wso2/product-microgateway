@@ -318,6 +318,16 @@
                 <version>${ballerina.jre.artifacts.version}</version>
                 <type>zip</type>
             </dependency>
+            <dependency>
+                <groupId>net.jcip</groupId>
+                <artifactId>jcip-annotations</artifactId>
+                <version>${jcip.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${maven.spotbugs.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -508,9 +518,10 @@
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
         <ballerina.jre.artifacts.version>2.0.0</ballerina.jre.artifacts.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
-        <maven.spotbugsplugin.version>3.1.1</maven.spotbugsplugin.version>
+        <maven.spotbugs.version>3.1.1</maven.spotbugs.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
+        <jcip.annotations.version>1.0</jcip.annotations.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
