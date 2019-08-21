@@ -18,7 +18,7 @@
 
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import org.quartz.utils.FindbugsSuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Descriptor for one secret item in {@link KubernetesSecret}.
@@ -54,12 +54,12 @@ public class KubernetesSecretItem {
         this.readOnly = readOnly;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP")
     public String[] getData() {
         return data;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP2")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
     public void setData(String[] data) {
         this.data = data;
     }

@@ -19,7 +19,7 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.quartz.utils.FindbugsSuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 
@@ -32,7 +32,7 @@ public class MutualSSL {
 
     private List<ClientCertMetadataDTO> clientCertificates;
 
-    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private JsonArray certificateDetails;
 
     public List<ClientCertMetadataDTO> getClientCertificates() {
