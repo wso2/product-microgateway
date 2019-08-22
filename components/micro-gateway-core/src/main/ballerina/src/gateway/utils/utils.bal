@@ -38,7 +38,7 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
         resourceAnnotationMap[resourceFunction] = <http:HttpResourceConfig?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_ANN_NAME, ANN_PACKAGE);
         resourceTierAnnotationMap[resourceFunction] = <TierConfiguration?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_TIER_ANN_NAME, GATEWAY_ANN_PACKAGE);
     }
-    serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, RESOURCE_ANN_NAME, ANN_PACKAGE);
+    serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, SERVICE_ANN_NAME, ANN_PACKAGE);
     apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
 }
 
@@ -450,6 +450,7 @@ function isServiceResourceSecured(http:ServiceResourceAuth? serviceResourceAuth)
 }
 
 public function getAuthProviders(string serviceName) returns string[] {
+    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
     string[] authProviders = [];
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     if(apiConfig is APIConfiguration) {

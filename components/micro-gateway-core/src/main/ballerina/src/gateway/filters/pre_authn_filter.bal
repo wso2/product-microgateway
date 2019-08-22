@@ -64,6 +64,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     invocationContext.attributes[AUTH_HEADER] = authHeaderName;
     string[] authProvidersIds = getAuthProviders(context.getServiceName());
 
+
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);
     } else if (request.hasHeader(COOKIE_HEADER)) {
@@ -82,6 +83,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     } else {
         providerId = getAuthenticationProviderTypeWithCookie(authHeader);
     }
+    printDebug(KEY_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
     boolean canHandleAuthentication = false;
     foreach string provider in authProvidersIds {
         if (provider == providerId) {
