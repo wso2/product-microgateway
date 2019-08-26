@@ -16,10 +16,10 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -62,9 +62,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String apiResponseInterceptor;
     private BasicAuth basicAuth;
 
-    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
-    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasSandEpConfig = false;
 
     // Not static since handlebars can't see static variables
