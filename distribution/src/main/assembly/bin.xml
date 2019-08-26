@@ -41,6 +41,10 @@
             <directory>${basedir}/resources/tokenServices</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/services</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+        </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>

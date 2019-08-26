@@ -1,0 +1,42 @@
+syntax = "proto3";
+package org.wso2.apimgt.gateway.cli.protobuf;
+
+import "google/protobuf/descriptor.proto";
+
+//service level extensions
+extend google.protobuf.ServiceOptions {
+  Endpoints x_wso2_production_endpoints = 50001;
+  Endpoints x_wso2_sandbox_endpoints = 50002;
+  repeated Security x_wso2_security = 50003;
+  string x_wso2_throttling_tier = 50004;
+  string x_wso2_scopes = 50005;
+}
+
+//method level extensions
+extend google.protobuf.MethodOptions {
+  	string x_wso2_method_throttling_tier = 50006;
+  	string x_wso2_method_scopes = 50007;
+}
+
+
+//to define endpoints
+message Endpoints {
+	repeated Endpoint urls = 1;
+	EndpointType type = 2;
+}
+
+message Endpoint {
+	string url = 1;
+}
+
+enum EndpointType {
+	DEFAULT = 0;
+	FAILOVER = 1;
+}
+
+enum Security {
+	NONE = 0;
+	BASIC = 1;
+	OAUTH2 = 2;
+	JWT = 3;
+}
