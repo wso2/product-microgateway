@@ -15,14 +15,8 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/auth;
 import ballerina/config;
 import ballerina/runtime;
-import ballerina/system;
-import ballerina/time;
-import ballerina/io;
-import ballerina/reflect;
 
 
 public type CookieAuthHandler object {
@@ -32,6 +26,7 @@ public type CookieAuthHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         if (req.hasHeader(COOKIE_HEADER)) {
             string requiredCookie = config:getAsString(COOKIE_HEADER, "");
 
@@ -43,7 +38,7 @@ public type CookieAuthHandler object {
                 string[] splitedStrings = split(converted.trim(), "::");
                 string sessionId = splitedStrings[1];
                 if (sessionId == requiredCookie) {
-                    runtime:getInvocationContext().attributes[COOKIE_HEADER]=sessionId;
+                    invocationContext.attributes[COOKIE_HEADER]=sessionId;
                     return true;
                 }
             }

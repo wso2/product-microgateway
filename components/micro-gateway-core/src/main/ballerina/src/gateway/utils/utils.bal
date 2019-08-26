@@ -24,8 +24,8 @@ import ballerina/io;
 import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
+import ballerina/file;
 import ballerina/encoding;
-import ballerina/lang.'string;
 import ballerina/lang.'int;
 
 map<http:HttpResourceConfig?> resourceAnnotationMap = {};
@@ -49,14 +49,15 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context)
     APIRequestMetaDataDto apiKeyValidationRequest = {};
     string serviceName = runtime:getInvocationContext().attributes["ServiceName"].toString();
     string resourceName = runtime:getInvocationContext().attributes["ResourceName"].toString();
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(serviceName)];
+    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+    io:println(httpServiceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
        apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
        apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
     }
     string apiContext = <string>httpServiceConfig.basePath;
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     string apiVersion="";
     if (apiConfig is APIConfiguration) {
      apiVersion = <string>apiConfig.apiVersion;
@@ -278,7 +279,7 @@ public function rotateFile(string fileName) returns string|error {
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = system:remove(fileName);
+        var deleteResult = file:remove(fileName);
             if(deleteResult is ()) {
                 printInfo(KEY_UTILS, "Existing file deleted successfully");
             }
@@ -333,6 +334,12 @@ public function printError(string key, string message) {
 # Add a debug log with provided key (class) and message ID
 public function printDebug(string key, string message) {
     log:printDebug(function() returns string {
+            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
+}
+
+# Add a warn log with provided key (class) and message ID
+public function printWarn(string key, string message) {
+    log:printWarn(function() returns string {
             return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 

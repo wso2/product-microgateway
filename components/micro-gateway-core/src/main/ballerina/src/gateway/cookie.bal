@@ -15,14 +15,7 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/auth;
 import ballerina/config;
-import ballerina/runtime;
-import ballerina/system;
-import ballerina/time;
-import ballerina/io;
-import ballerina/reflect;
 
 
 public type CookieBasedAuth object {

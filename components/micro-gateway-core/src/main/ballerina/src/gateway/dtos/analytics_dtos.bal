@@ -15,7 +15,6 @@
 // under the License.
 
 
-import ballerina/io;
 
 public type RequestResponseExecutionDTO record {
     string metaClientType="";

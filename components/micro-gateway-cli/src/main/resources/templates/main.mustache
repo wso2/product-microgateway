@@ -6,7 +6,7 @@ public function main() {
     gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
     {{/each}}
 
-    initThrottlePolicies();
+    //initThrottlePolicies();
 
     {{>jwtRevocation}}
     startupExtension();

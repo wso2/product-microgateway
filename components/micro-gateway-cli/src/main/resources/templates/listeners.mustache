@@ -39,7 +39,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers()
                                                                            },
-                                                                           filters:[mtslFilter, preAuthnFilter, authorizationFilter, subscriptionFilter,
+                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                            extensionFilter]
                                                                        };
 

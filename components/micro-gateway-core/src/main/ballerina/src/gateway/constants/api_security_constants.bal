@@ -14,6 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
+import ballerina/runtime;
+
  public const string API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
  public const int API_AUTH_GENERAL_ERROR = 900900;
  public const string API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
