@@ -45,6 +45,11 @@
             <directory>${basedir}/resources/grpc</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/resources/grpc</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>755</fileMode>
+        </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>

@@ -40,7 +40,7 @@ public class ProtoOpenAPIGenerator {
         openAPI.addExtension(OpenAPIConstants.SANDBOX_ENDPOINTS, endpointListRouteDTO);
     }
 
-    private void addAPISecurity(OpenAPI openAPI, String[] security) {
+    private void addAPISecurity(OpenAPI openAPI, String[] security, String scopes) {
         //todo:
     }
 

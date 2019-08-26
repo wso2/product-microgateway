@@ -95,6 +95,47 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>copy-protoc</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.google.protobuf</groupId>
+                                    <artifactId>protoc</artifactId>
+                                    <version>3.9.1</version>
+                                    <classifier>windows-x86_64</classifier>
+                                    <type>exe</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/resources/grpc</outputDirectory>
+                                    <destFileName>protoc-windows.exe</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.google.protobuf</groupId>
+                                    <artifactId>protoc</artifactId>
+                                    <version>3.9.1</version>
+                                    <classifier>osx-x86_64</classifier>
+                                    <type>exe</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/resources/grpc</outputDirectory>
+                                    <destFileName>protoc-osx.exe</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.google.protobuf</groupId>
+                                    <artifactId>protoc</artifactId>
+                                    <version>3.9.1</version>
+                                    <classifier>linux-x86_64</classifier>
+                                    <type>exe</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/resources/grpc</outputDirectory>
+                                    <destFileName>protoc-linux.exe</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
                        <id>unpack-gw-tools</id>
                        <phase>generate-resources</phase>
                        <goals>
