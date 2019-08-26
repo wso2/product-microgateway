@@ -14,6 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/encoding;
+import ballerina/io;
+import ballerina/log;
+
 public function getDecodedJWTPayload(string encodedJWTPayload) returns @tainted (json|error) {
     string jwtPayload = encoding:byteArrayToString(check encoding:decodeBase64(urlDecode(encodedJWTPayload)));
     io:StringReader reader = new (jwtPayload);

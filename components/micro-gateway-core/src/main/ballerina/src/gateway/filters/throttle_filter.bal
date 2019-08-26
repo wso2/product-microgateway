@@ -15,10 +15,7 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/cache;
-import ballerina/config;
-import ballerina/time;
+import ballerina/runtime;
 
 public type ThrottleFilter object {
     public map<boolean> deployedPolicies = {};
@@ -43,6 +40,7 @@ public type ThrottleFilter object {
 // TODO: need to refactor this function.
 function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context,map<boolean>
     deployedPolicies) returns boolean {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
     //Throttle Tiers
     string applicationLevelTier;
@@ -149,7 +147,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     } else if (!isSecured) {
         printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
         // setting keytype to invocationContext
-        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
+        invocationContext.attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
 
         printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
                 + "' exist.");
@@ -189,7 +187,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         keyvalidationResult.applicationId = clientIp;
         keyvalidationResult.keyType = PRODUCTION_KEY_TYPE;
         // setting keytype to invocationContext
-        runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
+        invocationContext.attributes[KEY_TYPE_ATTR] = keyvalidationResult.keyType;
     } else {
         printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
         setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
@@ -335,11 +333,11 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 }
 
 function getVersion(http:FilterContext context) returns string|() {
-    var apiVersion = "";
+    string? apiVersion = "";
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
     if (apiConfiguration is APIConfiguration) {
         apiVersion = apiConfiguration.apiVersion;
     }
 
-    return (apiVersion is string) ? apiVersion : ();
+    return apiVersion;
 }

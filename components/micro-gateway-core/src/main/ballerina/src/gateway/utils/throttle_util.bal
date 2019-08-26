@@ -14,17 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/time;
-import ballerina/io;
-import ballerina/log;
 
 map<string> blockConditions = {};
 map<any> throttleDataMap = {};
 stream<RequestStreamDTO> requestStream = new;
 stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 boolean isStreamsInitialized = false;
-future<()> ftr = start initializeThrottleSubscription();
+//future<()> ftr = start initializeThrottleSubscription();
 
 boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
@@ -91,9 +88,9 @@ public function initializeThrottleSubscription() {
     printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
 }
 
-public function getInitThrottleSubscriptionFuture() returns future<()>{
-    return ftr;
-}
+//public function getInitThrottleSubscriptionFuture() returns future<()>{
+    //return ftr;
+//}
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey: " + throttleEvent.throttleKey + 
             " ,isThrottled:" + throttleEvent.isThrottled.toString() + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp.toString());

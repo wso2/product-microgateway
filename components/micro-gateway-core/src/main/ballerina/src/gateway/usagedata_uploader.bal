@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 import ballerina/mime;
 
 //stream<string> filesToUpload = new;
