@@ -303,8 +303,8 @@ public final class GatewayCmdUtils {
                 GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE;
         createFolderIfNotExist(grpcDefinitionsPath);
         createFolderIfNotExist(grpcCustomOptionDirPath);
-        FileUtils.copyFile(new File(getGrpcFolderLocation() + "/" + GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE),
-                new File(grpcCustomOptionsFilePath));
+        FileUtils.copyFile(new File(getGrpcFolderLocation() + File.separator +
+                        GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE), new File(grpcCustomOptionsFilePath));
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
