@@ -223,11 +223,11 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Get grpc folder location inside Resources Directory.
+     * Get grpc directory location inside Resources Directory.
      *
-     * @return grpc folder location
+     * @return grpc directory location
      */
-    public static String getGrpcFolderLocation() {
+    public static String getGrpcDirLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.RESOURCES_GRPC_DIR;
     }
 
@@ -303,7 +303,7 @@ public final class GatewayCmdUtils {
                 GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE;
         createFolderIfNotExist(grpcDefinitionsPath);
         createFolderIfNotExist(grpcCustomOptionDirPath);
-        FileUtils.copyFile(new File(getGrpcFolderLocation() + File.separator +
+        FileUtils.copyFile(new File(getGrpcDirLocation() + File.separator +
                         GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE), new File(grpcCustomOptionsFilePath));
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
