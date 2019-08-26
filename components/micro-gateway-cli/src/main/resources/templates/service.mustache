@@ -80,7 +80,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
-    if(!urlPostfix.hasPrefix("/")) {
+    if(!gateway:hasPrefix(urlPostfix,"/")) {
         urlPostfix = "/" + urlPostfix;
     }
         http:Response|error clientResponse;

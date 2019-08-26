@@ -27,16 +27,21 @@ service tokenService on tokenListenerEndpoint {
     }
     resource function tokenResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
-        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+        http:Client tokenEndpointClient = gateway:getTokenEndpoint();
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
                  req.rawPath, req);
+        http:Response forwardedResponse = new;
         if(response is http:Response) {
-            _ = caller->respond(response);
-        }
-        else {
+            forwardedResponse = response;
+        } else {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
-            _ = caller->respond(errorResponse);
+            forwardedResponse = errorResponse;
+        }
+        var result = caller->respond(forwardedResponse);
+        if (result is error) {
+           log:printError("Error when responding during the token endpoint request", err = result);
         }
     }
 }

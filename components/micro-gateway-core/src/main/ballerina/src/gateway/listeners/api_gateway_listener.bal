@@ -18,10 +18,6 @@ import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
 import ballerina/cache;
-import ballerina/config;
-import ballerina/runtime;
-import ballerina/time;
-import ballerina/io;
 import ballerina/jwt;
 import ballerina/'lang\.object as lang;
 
@@ -32,7 +28,7 @@ public type APIGatewayListener object {
     private string listenerType = "HTTP";
     public http:Listener httpListener;
 
-    public function __init(int port, http:ServiceEndpointConfiguration config) {
+    public function __init(int port, http:ListenerConfiguration config) {
         if ((config.secureSocket is ())) {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
         } else {
@@ -55,19 +51,27 @@ public type APIGatewayListener object {
         return gwListener;
     }
 
-    public function __stop() returns error? {
-        return self.httpListener.__stop();
+    public function __gracefulStop() returns error? {
+        return self.httpListener.__gracefulStop();
     }
 
     public function __attach(service s, string? name = ()) returns error? {
         return self.httpListener.__attach(s, name);
     }
 
+    public function __immediateStop() returns error? {
+            return self.httpListener.__immediateStop();
+    }
+
+    public function __detach(service s) returns error? {
+        return self.httpListener.__detach(s);
+    }
+
 
 };
 
 
-public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration config) {
+public function initiateGatewayConfigurations(http:ListenerConfiguration config) {
     // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
     initiateKeyManagerConfigurations();
@@ -88,13 +92,15 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes jwt handler
     jwt:JwtValidatorConfig jwtValidatorConfig = {
         issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
         audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
         clockSkewInSeconds: 60,
-        trustStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+        trustStoreConfig : {
+            trustStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                    "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
         }
     };
     JwtAuthProvider jwtAuthProvider = new(jwtValidatorConfig);

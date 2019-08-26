@@ -14,9 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/http;
-import ballerina/config;
 
 http:Client etcdEndpoint = new (
     retrieveConfig("etcdurl", "http://127.0.0.1:2379"), {

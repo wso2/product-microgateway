@@ -15,10 +15,7 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/auth;
-import ballerina/config;
-import ballerina/io;
+import ballerina/runtime;
 
 # Representation of the mutual ssl handler
 #
@@ -52,6 +49,7 @@ public type MutualSSLHandler object {
 
 
 function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean|http:AuthenticationError {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     boolean|http:AuthenticationError isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
     boolean isSecured = true;
@@ -64,7 +62,7 @@ function doMTSLFilterRequest(http:Request request, runtime:InvocationContext con
     //Set authenticationContext data
     authenticationContext.authenticated = true;
     authenticationContext.username = USER_NAME_UNKNOWN;
-    runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
     return isAuthenticated;

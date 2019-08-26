@@ -49,7 +49,7 @@ public type APIGatewayCache object {
 
     public function addToGatewayKeyValidationCache (string tokenCacheKey, APIKeyValidationDto
         apiKeyValidationDto) {
-        gatewayKeyValidationCache.put(tokenCacheKey, apiKeyValidationDto);
+        gatewayKeyValidationCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
         printDebug(KEY_GW_CACHE, "Added key validation information to the key validation cache. key: " + mask(tokenCacheKey));
     }
 
@@ -68,7 +68,7 @@ public type APIGatewayCache object {
     }
 
     public function addToInvalidTokenCache (string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
-        invalidTokenCache.put(tokenCacheKey, apiKeyValidationDto);
+        invalidTokenCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
         printDebug(KEY_GW_CACHE, "Added key validation information to the invalid token cache. key: " + mask(tokenCacheKey));
     }
 

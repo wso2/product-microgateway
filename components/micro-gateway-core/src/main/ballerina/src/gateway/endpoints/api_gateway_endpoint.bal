@@ -17,7 +17,19 @@
 import ballerina/http;
 
 
-
+http:Client tokenEndpoint = new (
+    getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+    {cache: { enabled: false },
+        secureSocket:{
+            trustStore: {
+                  path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                      "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                  password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        }
+    }
+);
 
 http:Client analyticsFileUploadEndpoint = new (
     getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
@@ -33,16 +45,7 @@ http:Client analyticsFileUploadEndpoint = new (
     }
 );
 
-listener http:Listener tokenListenerEndpoint = new (
-    getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096), config = {
-        host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "localhost"),
-        secureSocket: {
-            keyStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                    LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
-            }
-        }
-    }
-);
+
+public function getTokenEndpoint() returns http:Client {
+    return tokenEndpoint;
+}

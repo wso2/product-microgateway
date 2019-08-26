@@ -14,10 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/auth;
-import ballerina/log;
-import ballerina/internal;
 import ballerina/http;
+import ballerina/runtime;
 
 # Representation of the key validation  handler
 #

@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
-import ballerina/io;
+
 import ballerina/http;
+import ballerina/runtime;
 
 public function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
     ExecutionTimeDTO executionTimeDTO = {};

@@ -14,9 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/http;
-import ballerina/config;
 
 http:Client etcdTokenRevocationEndpoint = new (
     getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, "https://localhost:2379/v2/keys/jti/"), {

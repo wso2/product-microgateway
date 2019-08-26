@@ -15,14 +15,8 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/auth;
 import ballerina/cache;
-import ballerina/config;
 import ballerina/runtime;
-import ballerina/time;
-import ballerina/io;
-import ballerina/reflect;
 
 // authorization filter which wraps the ballerina in built authorization filter.
 
@@ -49,10 +43,10 @@ public type OAuthzFilter object {
             runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
             boolean result = true;
             if(authContext is runtime:AuthenticationContext){
-                string authScheme = authContext.scheme;
+                string? authScheme = authContext?.scheme;
                 // scope validation is done in authn filter for oauth2, hence we only need to
                 //validate scopes if auth scheme is jwt.
-                if (authScheme == AUTH_SCHEME_JWT){
+                if (authScheme is string && authScheme == AUTH_SCHEME_JWT){
                     result = self.authzFilter.filterRequest(caller, request, context);
                 }
             }

@@ -22,7 +22,7 @@ gateway:PreAuthnFilter preAuthnFilter = new;
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
-map<boolean> deployedPolicies = getDeployedPolicies();
+//map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
 //gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 //get open API definition map
@@ -39,7 +39,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers()
                                                                            },
-                                                                           filters:[mtslFilter, preAuthnFilter, authorizationFilter, subscriptionFilter,
+                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                            extensionFilter]
                                                                        };
 
@@ -49,9 +49,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
 listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
 http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
-                                                                     auth: {
-                                                                        authHandlers: gateway:getAuthHandlers()
-                                                                     },
+
                                                                      filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                      extensionFilter]
                                                                  };
