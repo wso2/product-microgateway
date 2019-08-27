@@ -42,13 +42,14 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/services</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${basedir}/resources/grpc</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/resources/grpc</directory>
+            <directory>${project.build.directory}/resources/grpc/protoc</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
             <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
         </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
@@ -97,6 +98,11 @@
         <file>
             <source>${basedir}/target/platform.zip</source>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2CustomOptions.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw</source>

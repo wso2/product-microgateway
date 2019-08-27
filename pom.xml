@@ -258,6 +258,11 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${com.google.protobuf.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.jknack</groupId>
                 <artifactId>handlebars</artifactId>
                 <version>${handlebars.version}</version>
@@ -511,6 +516,7 @@
         <maven.spotbugsplugin.version>3.1.1</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
+        <com.google.protobuf.version>3.7.1</com.google.protobuf.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
