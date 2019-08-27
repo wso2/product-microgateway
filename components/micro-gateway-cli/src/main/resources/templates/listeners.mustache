@@ -1,6 +1,6 @@
 import wso2/gateway;
 import ballerina/http;
-import ballerina/log;
+import ballerina/config;
 
 {{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
@@ -34,7 +34,7 @@ map<json> openAPIs = getOpenAPIs();
 // Extension filter
 ExtensionFilter extensionFilter = new;
 
-http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http2}},
+http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers()
@@ -48,7 +48,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
 {{>kubernetesService}}
 listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
-http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
+http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
 
                                                                      filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
                                                                      extensionFilter]
