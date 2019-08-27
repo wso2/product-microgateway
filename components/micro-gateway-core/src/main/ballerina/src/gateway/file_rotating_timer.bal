@@ -14,20 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-import ballerina/internal;
 import ballerina/task;
-import ballerina/math;
-import ballerina/runtime;
-import ballerina/log;
-import ballerina/system;
+import ballerina/file;
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
-    string path = fileLocation + API_USAGE_FILE;
-    
-    if (system:exists(path)) {
+    string path = fileLocation + API_USAGE_FILE; 
+    if (file:exists(path)) {
         var result = rotateFile(API_USAGE_FILE);
         if(result is string) {
             printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
@@ -63,11 +57,8 @@ function rotatingTask() {
 }
 
 service fileRotating = service {
-    resource function onTrigger(Person person) {
-    (function() returns error?) triggerFunction = sendFileRotatingEvent;
-     if (triggerFunction is error) {
-        printError(KEY_ROTATE_TASK, "Error occurred while closing the channel: "
-                    + triggerFunction.reason());
-     }
+    resource function onTrigger() {
+    function () returns (error?) triggerFunction = sendFileRotatingEvent;
+        printError(KEY_ROTATE_TASK, "Error occurred while rotating Event");
     }
 };

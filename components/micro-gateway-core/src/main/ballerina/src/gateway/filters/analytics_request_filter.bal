@@ -14,9 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/http;
-import ballerina/time;
 
 public type AnalyticsRequestFilter object {
 
@@ -76,7 +74,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 
 function doFilterAll(http:Response response, http:FilterContext context) {
     // TODO: refactor the logic. error does not belong to type any
-    var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
+    var code = context.attributes[ERROR_RESPONSE];
     if (code is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);

@@ -14,12 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-import ballerina/internal;
 import ballerina/task;
-import ballerina/math;
-import ballerina/runtime;
-import ballerina/log;
+import ballerina/file;
+import ballerina/http;
 
 string uploadingUrl = "";
 string analyticsUsername = "";
@@ -29,14 +26,13 @@ string analyticsPassword = "";
 function searchFilesToUpload() returns (error?) {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR);
-    internal:Path path = new(fileLocation);
 
-    if (!path.exists()) {
+    if (!file:exists(fileLocation)) {
         printDebug(KEY_UPLOAD_TASK, "Usage data directory not found");
         return ();
     }
 
-    internal:Path[]|error pathList = path.list();
+    file:FileInfo[]|error pathList = file:readDir(fileLocation);
 
     if (pathList is error) {
         printError(KEY_UPLOAD_TASK, "Error occured in getting path lists");
@@ -44,12 +40,12 @@ function searchFilesToUpload() returns (error?) {
     } else {
         foreach var pathEntry in pathList {
             string fileName = pathEntry.getName();
-            if (fileName.contains(ZIP_EXTENSION)) {
+            if (contains(fileName, ZIP_EXTENSION)) {
                 http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
                     analyticsUsername, analyticsPassword);
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
-                    var result = pathEntry.delete();
+                    var result = file:remove(fileLocation + "/" + fileName);
                 } else {
                     printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
                 }
@@ -78,7 +74,7 @@ function timerTask() {
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
         int|error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
-        (function() returns error?) onTriggerFunction = searchFilesToUpload;
+       
         function(error) onErrorFunction = informError;
         if(timeSpan is int){
             // The Task Timer configuration record to configure the Task Listener.
@@ -86,7 +82,7 @@ function timerTask() {
         intervalInMillis: timeSpan,
         initialDelayInMillis: 5000
         };
-        
+         task:Scheduler timer = new(timerConfiguration);
         } else {
             printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
         }
@@ -96,12 +92,9 @@ function timerTask() {
 }
 
 // Creating a service on the task Listener.
-service timerService on timer {
-    // This resource triggers when the timer goes off.
+service SearchFiles = service {
     resource function onTrigger() {
-        count = count + 1;
-        log:printInfo("Cleaning up...");
-        log:printInfo(count.toString());
+         (function() returns error?) onTriggerFunction = searchFilesToUpload;
     }
-}
+};
 

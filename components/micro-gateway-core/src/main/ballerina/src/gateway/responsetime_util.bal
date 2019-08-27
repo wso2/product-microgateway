@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
-import ballerina/io;
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/lang.'int;
@@ -73,7 +71,7 @@ function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDT
 }
 
 public function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
-                                                                                                           RequestResponseExecutionDTO
+                                                                                 @tainted RequestResponseExecutionDTO
 {
     RequestResponseExecutionDTO requestResponseExecutionDTO = {};
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -116,11 +114,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     http:ResponseCacheControl? responseCacheControl = response.cacheControl;
     if (responseCacheControl is http:ResponseCacheControl) {
       var res = responseCacheControl.noCache;
-        if(res is boolean) {
-           requestResponseExecutionDTO.cacheHit = res;
-        } else {
-        //todo: cacheHit does not gives boolean
-        }
+      requestResponseExecutionDTO.cacheHit = res;
     }
 
     requestResponseExecutionDTO.apiHostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
