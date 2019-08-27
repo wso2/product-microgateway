@@ -47,7 +47,7 @@ http:ServiceEndpointConfiguration secureServiceEndpointConfiguration = { {{>http
 
 {{>docker}}
 {{>secureKubernetesIngress}}
-{{>kubernetesService}}
+{{>kubernetesServiceHttps}}
 listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
 http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
@@ -59,12 +59,12 @@ http:ServiceEndpointConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                  };
 
 {{>kubernetesIngress}}
-{{>kubernetesService}}
+{{>kubernetesServiceHttp}}
 listener gateway:APIGatewayListener apiListener = new(9090, serviceEndpointConfiguration);
 
 
 {{>secureKubernetesIngress}}
-{{>kubernetesService}}
+{{>kubernetesServiceToken}}
 listener http:Listener tokenListenerEndpoint = new (
     {{#if containerConfig.kubernetes.secureKubernetesIngress.enable}}
         9096, config = {
@@ -93,6 +93,17 @@ listener http:Listener tokenListenerEndpoint = new (
                     gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
             }
         }
+    {{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
+            9096, config = {
+            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
+            secureSocket: {
+                keyStore: {
+                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                        "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+                    password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
+                        gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                }
+            }
     {{else}}
         gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TOKEN_LISTENER_PORT, 9096), config = {
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
