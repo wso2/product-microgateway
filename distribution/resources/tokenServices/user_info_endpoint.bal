@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import wso2/gateway;
+import ballerina/log;
 
 @http:ServiceConfig {
     basePath:"/userinfo"
@@ -29,7 +30,7 @@ service userInfoService on tokenListenerEndpoint {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
         var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
-                 req.rawPath, req);
+                 <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;

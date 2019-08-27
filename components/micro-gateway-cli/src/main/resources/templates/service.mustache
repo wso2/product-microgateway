@@ -1,7 +1,7 @@
 import ballerina/log;
 import ballerina/http;
-import ballerina/config;
 import ballerina/time;
+import ballerina/runtime;
 {{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
 import wso2/gateway;
 {{#equals endpointConfig.prodEndpoints.type "http"}}
@@ -80,6 +80,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if(!gateway:hasPrefix(urlPostfix,"/")) {
         urlPostfix = "/" + urlPostfix;
     }
@@ -87,7 +88,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         http:Response r = new;
         clientResponse = r;
         string destination_attribute;
-        runtime:getInvocationContext().attributes["timeStampRequestOut"] = time:currentTime().time;
+        invocationContext.attributes["timeStampRequestOut"] = time:currentTime().time;
         boolean reinitRequired = false;
         string failedEtcdKey = "";
         string failedEtcdKeyConfigValue = "";
@@ -99,7 +100,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         map<string> endpointEtcdConfigValues = {};
         {{#endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
-                if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
                 {{#if hasProdEpConfig}}
                     {{>useResourceProdEp}}
                 {{else}}
@@ -114,7 +115,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 }
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
-                if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
                 {{#if hasProdEpConfig}}
                     {{>useResourceProdEp}}
                 {{else}}
@@ -131,7 +132,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{/endpointConfig.prodEndpoints}}
         {{^endpointConfig.prodEndpoints}}
             {{#endpointConfig.sandEndpoints}}
-                if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                if("SANDBOX" == <string>invocationContext.attributes["KEY_TYPE"]) {
                 {{#if hasSandEpConfig}}
                     {{>useResourceSandEp}}
                 {{else}}
@@ -147,7 +148,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             {{/endpointConfig.sandEndpoints}}
             {{^endpointConfig.sandEndpoints}}
                 {{#if hasSandEpConfig}}
-                    if("SANDBOX" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    if("SANDBOX" == <string>invocationContext.attributes["KEY_TYPE"]) {
                     {{>useResourceSandEp}}
                         } else {
                     {{#if hasProdEpConfig}}
@@ -157,7 +158,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                     {{/if}}
                 {{else}}
                     {{#if hasProdEpConfig}}
-                    if("PRODUCTION" == <string>runtime:getInvocationContext().attributes["KEY_TYPE"]) {
+                    if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
                     {{/if}}
                 {{/if}}
                 {{#if hasProdEpConfig}}
@@ -171,7 +172,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 {{/if}}
             {{/endpointConfig.sandEndpoints}}
         {{/endpointConfig.prodEndpoints}}
-        runtime:getInvocationContext().attributes["timeStampResponseIn"] = time:currentTime().time;
+        invocationContext.attributes["timeStampResponseIn"] = time:currentTime().time;
 
 
         if(clientResponse is http:Response) {
@@ -197,7 +198,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 errorDescription = "Malformed URL";
             }
             // Todo: error is not type any -> runtime:getInvocationContext().attributes["error_response"] =  clientResponse;
-            runtime:getInvocationContext().attributes["error_response_code"] = errorCode;
+            invocationContext.attributes["error_response_code"] = errorCode;
             json payload = {fault : {
                 code : errorCode,
                 message : "Runtime Error",

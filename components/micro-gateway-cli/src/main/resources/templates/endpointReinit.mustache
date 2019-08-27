@@ -40,7 +40,7 @@
                                         "description": "Error connecting to the back end"
                                     }
                                 };
-                                runtime:getInvocationContext().attributes["error_code"] = "101503";
+                                invocationContext.attributes["error_code"] = "101503";
                                 res.setPayload(payload);
                                 clientResponse = res;
                                 log:printError("URL defined at etcd for key " + config:getAsString(failedEtcdKeyConfigValue) + " is invalid");
