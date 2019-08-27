@@ -1,3 +1,4 @@
+import wso2/gateway;
 
 public function main() {
     {{#each this}}
@@ -6,7 +7,7 @@ public function main() {
     gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
     {{/each}}
 
-    initThrottlePolicies();
+    //initThrottlePolicies();
 
     {{>jwtRevocation}}
     startupExtension();

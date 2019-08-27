@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.oauth;
 
-import org.quartz.utils.FindbugsSuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Dynamic Client Registration request definition.
@@ -54,12 +54,12 @@ public class DCRRequest {
         this.owner = owner;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP")
     public String[] getGrantTypes() {
         return grantTypes;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP2")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
     public void setGrantTypes(String[] grantTypes) {
         this.grantTypes = grantTypes;
     }

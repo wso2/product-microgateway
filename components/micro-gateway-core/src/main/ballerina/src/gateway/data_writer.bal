@@ -16,6 +16,7 @@
 
 import ballerina/io;
 import ballerina/http;
+import ballerina/time;
 
 
 public const string KVT = "-KS-";
@@ -25,7 +26,7 @@ public const string OBJ = "-OS-";
 int initializingTime = 0;
 int rotatingTime = 0;
 //streams associated with DTOs
-stream<EventDTO> eventStream = new;
+//stream<EventDTO> eventStream = new;
 
 
 function setRequestAttributesToContext(http:Request request, http:FilterContext context) {

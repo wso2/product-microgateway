@@ -15,10 +15,9 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 import ballerina/mime;
 
-stream<string> filesToUpload = new;
+//stream<string> filesToUpload = new;
 
 
 public function multipartSender(string location, string file, string username, string password) returns http:Response {

@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import wso2/gateway;
+import ballerina/log;
 
 @http:ServiceConfig {
     basePath:"/userinfo"
@@ -27,16 +28,21 @@ service userInfoService on tokenListenerEndpoint {
     }
     resource function userInfoResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
-        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
-                untaint req.rawPath, req);
+        http:Client tokenEndpointClient = gateway:getTokenEndpoint();
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+                 <@untainted>req.rawPath, req);
+        http:Response forwardedResponse = new;
         if(response is http:Response) {
-            _ = caller->respond(response);
-        }
-        else {
+            forwardedResponse = response;
+        } else {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the user info endpoint" };
             errorResponse.setJsonPayload(errMsg);
-            _ = caller->respond(errorResponse);
+            forwardedResponse = errorResponse;
+        }
+        var result = caller->respond(forwardedResponse);
+        if (result is error) {
+           log:printError("Error when responding during the user info endpoint request", err = result);
         }
     }
 }

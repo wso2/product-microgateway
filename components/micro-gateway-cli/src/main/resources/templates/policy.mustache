@@ -1,14 +1,10 @@
-import ballerina/io;
-import ballerina/runtime;
-import ballerina/http;
-import ballerina/log;
 import wso2/gateway;
 
 stream<gateway:IntermediateStream> s{{name}}intermediateStream = new;
 stream<gateway:GlobalThrottleStreamDTO> s{{name}}resultStream = new;
 stream<gateway:EligibilityStreamDTO> s{{name}}eligibilityStream = new;
-stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:requestStream;
-stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:globalThrottleStream;
+stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:getRequestStream();
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:getGlobalThrottleStream();
 
 function {{funcName}}() {
 

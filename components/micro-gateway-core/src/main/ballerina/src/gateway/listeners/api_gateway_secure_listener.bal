@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-import ballerina/config;
 import ballerina/internal;
 import ballerina/crypto;
 import ballerina/'lang\.object as lang;
@@ -25,7 +23,7 @@ public type APIGatewaySecureListener object {
     *lang:AbstractListener;
     APIGatewayListener apiGatewayListener;
 
-    public function __init(int port, http:ServiceEndpointConfiguration config) {
+    public function __init(int port, http:ListenerConfiguration config) {
         initiateGatewaySecureConfigurations(config);
         self.apiGatewayListener = new(getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port), config);
     }
@@ -35,17 +33,25 @@ public type APIGatewaySecureListener object {
         return self.apiGatewayListener.__start();
     }
 
-    public function __stop() returns error? {
-        return self.apiGatewayListener.__stop();
-    }
-
     public function __attach(service s, string? name = ()) returns error? {
         return self.apiGatewayListener.__attach(s, name);
     }
 
+    public function __gracefulStop() returns error? {
+            return self.apiGatewayListener.__gracefulStop();
+    }
+
+    public function __immediateStop() returns error? {
+            return self.apiGatewayListener.__immediateStop();
+    }
+
+    public function __detach(service s) returns error? {
+        return self.apiGatewayListener.__detach(s);
+    }
+
 };
 
-function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration config) {
+function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) {
     string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
         "${ballerina.home}/bre/security/ballerinaKeystore.p12");
     string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
@@ -81,7 +87,7 @@ function initiateGatewaySecureConfigurations(http:ServiceEndpointConfiguration c
     crypto:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
     crypto:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
     http:Protocols protocol = { name: protocolName, versions: protocolVersions };
-    http:ServiceSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
+    http:ListenerSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
         sslVerifyClient: sslVerifyClient, ciphers: ciphers };
     config.secureSocket = secureSocket;
 }

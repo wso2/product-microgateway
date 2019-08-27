@@ -28,6 +28,7 @@ import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
+import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
@@ -84,7 +85,12 @@ public class CookieAuthTestCase extends BaseTestCase {
         expiringJwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 1);
 
         String configPath = "confs/default-test-config.conf";
-        String cookie = "Cookie=" + jwtTokenProd;
+        String cookie;
+        if (Utils.getOSName().toLowerCase().contains("windows")) {
+            cookie = "Cookie=\"" + jwtTokenProd + "\"";
+        } else {
+            cookie = "Cookie=" + jwtTokenProd;
+        }
         String[] args = {"-e", cookie};
         super.init(label, project, args, configPath);
     }

@@ -27,7 +27,7 @@
  public const string SERVICE_ANN_NAME = "ServiceConfig";
  public const string API_ANN_NAME = "API";
  public const string SKIP_FILTERS_ANN_NAME = "SkipFilters";
- public const string GATEWAY_ANN_PACKAGE = "wso2/gateway";
+ public const string GATEWAY_ANN_PACKAGE = "wso2/gateway:3.1.0";
 
  public const string BASIC_PREFIX_WITH_SPACE = "Basic ";
  public const string AUTHORIZATION_HEADER = "Authorization";
@@ -142,7 +142,7 @@
  public const string TS_RESPONSE_IN = "timeStampResponseIn";
  public const string API_USAGE_PATH = "api.usage.data.path";
  public const string API_USAGE_DIR = "api-usage-data";
- public const string FILE_UPLOAD_TASK = "task.uploadFiles";
+ public const string FILE_UPLOAD_TASK = "taskUploadFiles";
  public const string DESTINATION = "destination";
 
 //validation_filter related constatnts
@@ -196,8 +196,8 @@
  public const string LISTENER_CONF_HOST = "host";
  public const string LISTENER_CONF_HTTP_PORT = "httpPort";
  public const string LISTENER_CONF_HTTPS_PORT = "httpsPort";
- public const string LISTENER_CONF_KEY_STORE_PATH = "keyStore.path";
- public const string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
+ public const string LISTENER_CONF_KEY_STORE_PATH = "keyStorePath";
+ public const string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStorePassword";
  public const string TOKEN_LISTENER_PORT = "tokenListenerPort";
  public const string FILTERS = "filters";
 
@@ -215,14 +215,14 @@
  public const string ISSUER = "issuer";
  public const string AUDIENCE = "audience";
  public const string CERTIFICATE_ALIAS = "certificateAlias";
- public const string TRUST_STORE_PATH = "trustStore.path";
- public const string TRUST_STORE_PASSWORD = "trustStore.password";
+ public const string TRUST_STORE_PATH = "trustStorePath";
+ public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 
  public const string CACHING_ID = "caching";
  public const string TOKEN_CACHE_ENABLED = "enabled";
- public const string TOKEN_CACHE_EXPIRY = "tokenCache.expiryTime";
- public const string TOKEN_CACHE_CAPACITY = "tokenCache.capacity";
- public const string TOKEN_CACHE_EVICTION_FACTOR = "tokenCache.evictionFactor";
+ public const string TOKEN_CACHE_EXPIRY = "tokenCacheExpiryTime";
+ public const string TOKEN_CACHE_CAPACITY = "tokenCacheCapacity";
+ public const string TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvictionFactor";
 
  public const string JWT_CONFIG_INSTANCE_ID = "jwtConfig";
  public const string JWT_HEADER = "header";

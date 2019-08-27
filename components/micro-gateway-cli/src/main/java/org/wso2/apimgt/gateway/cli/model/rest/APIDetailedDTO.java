@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.annotations.ApiModel;
 import io.swagger.util.Json;
-import org.quartz.utils.FindbugsSuppressWarnings;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private String destinationStatsEnabled = null;
     private Boolean isDefaultVersion = null;
 
-    @FindbugsSuppressWarnings(value = "URF_UNREAD_FIELD")
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private Json apiSwagger = null;
 
     private TypeEnum type = TypeEnum.HTTP;

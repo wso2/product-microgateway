@@ -6,4 +6,4 @@
 {{else}}
     clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
 {{/if}}
-runtime:getInvocationContext().attributes["destination"] = "{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}";
+invocationContext.attributes["destination"] = "{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}";
