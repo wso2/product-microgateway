@@ -51,6 +51,24 @@
     #labels = ''
     #serviceType = ''
     #port = ''
+  #[kubernetes.kubernetesServiceHttps]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
+  #[kubernetes.kubernetesServiceHttp]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
+  #[kubernetes.kubernetesServiceToken]
+      #enable = false
+      #name = ''
+      #labels = ''
+      #serviceType = ''
+      #port = ''
   [kubernetes.kubernetesIngress]
     enable = false
     #name = ''

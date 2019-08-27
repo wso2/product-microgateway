@@ -17,7 +17,6 @@
  */
 package org.wso2.micro.gateway.tests.common;
 
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
@@ -149,6 +148,117 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            //to test endpoints with security
+            String contextWithSecurity2 = "/v2Basic";
+            httpServer.createContext(contextWithSecurity2 + "/pet/findByStatus", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.responseBody.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextWithSecurity2 + "/pet/", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.petByIdResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextWithSecurity2 + "/pet/findByTags", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.petByIdResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextWithSecurity2 + "/store/inventory", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.storeInventoryResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            String contextWithSecurity1 = "/v1Basic";
+            httpServer.createContext(contextWithSecurity1 + "/pet/findByStatus", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.responseBodyV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextWithSecurity1 + "/pet/findByTags", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                {
+                    response = ResponseConstants.petByIdResponseV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });

@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.oauth;
 
-import org.quartz.utils.FindbugsSuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * OAuth token request definition.
@@ -51,12 +51,12 @@ public class OAuthTokenRequest {
         this.clientKey = clientKey;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP")
     public String[] getScopes() {
         return scopes;
     }
 
-    @FindbugsSuppressWarnings(value = "EI_EXPOSE_REP2")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
     public void setScopes(String[] scopes) {
         this.scopes = scopes;
     }
