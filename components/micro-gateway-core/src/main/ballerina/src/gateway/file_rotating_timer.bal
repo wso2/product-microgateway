@@ -35,16 +35,15 @@ function sendFileRotatingEvent() returns error? {
     }
 }
 
-function errorOnRotating(error e) {
-    printDebug(KEY_ROTATE_TASK, "File not present to rotate:" + e.reason());
-}
-
 function rotatingTask() {
     map<any> vals = getConfigMapValue(ANALYTICS);
-    // Todo: handle error if it returns one.
     int timeSpan =  <int> vals[ROTATING_TIME];
-    function(error) onErrorFunction = errorOnRotating;
-    task:Scheduler timer = new({ intervalInMillis: timeSpan });
+    int delay = <int> vals[INITIAL_DELAY];
+    task:TimerConfiguration timerConfiguration = {
+            intervalInMillis: timeSpan,
+            initialDelayInMillis: delay
+    };
+    task:Scheduler timer = new(timerConfiguration);
     var attachResult = timer.attach(fileRotating);
     if (attachResult is error) {
         printError(KEY_ROTATE_TASK, attachResult.toString());
