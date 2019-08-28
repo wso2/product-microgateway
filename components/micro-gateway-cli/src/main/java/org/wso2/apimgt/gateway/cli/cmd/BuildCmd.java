@@ -105,7 +105,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             GatewayCmdUtils
                     .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
             policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                    + GatewayCliConstants.POLICY_DIR, projectName);
+                    + GatewayCliConstants.GEN_POLICIES_DIR, projectName);
             GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                     GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
             GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
@@ -146,7 +146,6 @@ public class BuildCmd implements GatewayLauncherCmd {
     //todo: implement this method properly
     private void init(String projectName, String configPath, String deploymentConfig) {
         try {
-
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
