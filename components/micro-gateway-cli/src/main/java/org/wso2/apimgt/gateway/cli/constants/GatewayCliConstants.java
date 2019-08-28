@@ -52,7 +52,6 @@ public class GatewayCliConstants {
     public static final String CLI_GATEWAY = "gateway";
     public static final String CLI_BALO = "balo";
     public static final String CLI_BRE = "bre";
-    public static final String POLICY_DIR = "policies";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_JAR = ".jar";
     public static final String EXTENSION_BAL = ".bal";
@@ -76,6 +75,7 @@ public class GatewayCliConstants {
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
     public static final String SYS_PROP_SECURITY = "security";
     public static final String MICRO_GW = "micro-gw";
+    public static final String KEEP_FILE = ".keep";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");

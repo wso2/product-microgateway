@@ -270,6 +270,7 @@ public final class GatewayCmdUtils {
 
         String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
         createDirectory(interceptorsPath, false);
+        createFile(interceptorsPath, GatewayCliConstants.KEEP_FILE, true);
 
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
         createDirectory(extensionsPath, false);
@@ -285,7 +286,7 @@ public final class GatewayCmdUtils {
                 getResourceFolderLocation() + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         copyFolder(resourceServicesDirectory, projectServicesDirectory);
 
-        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
+        createFile(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE, true);
 
         String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;
         File policyResFile = new File(policyResPath);
@@ -692,7 +693,8 @@ public final class GatewayCmdUtils {
      * @param path folder path
      * @param overwrite if `true` existing directory will be removed
      *                  and new directory will be created in {@code path}.
-     * @return File object for the created folder
+     * @return created directory
+     * @throws IOException Failed delete or create the directory in {@code path}
      */
     public static File createDirectory(String path, boolean overwrite) throws IOException {
         File dir = new File(path);
@@ -713,6 +715,37 @@ public final class GatewayCmdUtils {
     }
 
     /**
+     * Create new file in a given location.
+     *
+     * @param path location of the new file.
+     * @param overwrite if `true` existing file with the same name will be replaced.
+     * @param fileName name of the new file.
+     * @return created file
+     * @throws IOException Failed delete or create the file in {@code path}
+     */
+    public static File createFile(String path, String fileName, boolean overwrite) throws IOException {
+        String filePath = path + File.separator + fileName;
+        File file = new File(filePath);
+        if (overwrite && file.exists() && file.isFile()) {
+            boolean isDeleted = file.delete();
+            if (!isDeleted) {
+                throw new CLIInternalException("Failed to overwrite file: " + filePath);
+            }
+        }
+
+        if (!file.exists() && !file.isFile()) {
+            boolean isCreated = file.createNewFile();
+            if (isCreated) {
+                logger.trace("File: {} created.", filePath);
+            } else {
+                throw new CLIInternalException("Failed to create file: " + filePath);
+            }
+        }
+
+        return file;
+    }
+
+    /**
      * Write content to a specified file
      *
      * @param content content to be written
@@ -723,31 +756,6 @@ public final class GatewayCmdUtils {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             writer.write(content);
             writer.flush();
-        }
-    }
-
-    /**
-     * Creates file if not exist
-     *
-     * @param path     folder path
-     * @param fileName name of the file
-     */
-    private static void createFileIfNotExist(String path, String fileName) {
-        String filePath = path + File.separator + fileName;
-        File file = new File(filePath);
-        if (!file.exists()) {
-            try {
-                boolean created = file.createNewFile();
-                if (created) {
-                    logger.trace("File: {} created. ", path);
-                } else {
-                    logger.error("Failed to create file: {} ", path);
-                    throw new CLIInternalException("Error occurred while setting up the workspace structure");
-                }
-            } catch (IOException e) {
-                logger.error("Failed to create file: {} ", path, e);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
-            }
         }
     }
 
