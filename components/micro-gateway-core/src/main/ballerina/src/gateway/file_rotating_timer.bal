@@ -16,10 +16,11 @@
 
 import ballerina/task;
 import ballerina/file;
+import ballerina/filepath;
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
-    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
+    string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + filepath:getPathSeparator();
     string path = fileLocation + API_USAGE_FILE; 
     if (file:exists(path)) {
         var result = rotateFile(API_USAGE_FILE);
