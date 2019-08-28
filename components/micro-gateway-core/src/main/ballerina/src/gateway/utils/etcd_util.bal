@@ -15,17 +15,9 @@
 // // under the License.
 
 // import ballerina/http;
-// import ballerina/log;
-// import ballerina/auth;
-// import ballerina/config;
-// import ballerina/runtime;
-// import ballerina/time;
-// import ballerina/io;
-// import ballerina/reflect;
-// import ballerina/internal;
-// import ballerina/system;
 // import ballerina/task;
 // import ballerina/encoding;
+// import ballerina/timer;
 
 // map<string> etcdUrls = {};
 // map<any> urlChanged = {};
@@ -45,7 +37,7 @@
 //     printDebug(KEY_ETCD_UTIL, "initiateEtcdTimerTask Called");
 //     int etcdTriggerTime = config:getAsInt("etcdtimer", DEFAULT_ETCD_TRIGGER_TIME);
 //     string|error trigTime = string.convert(etcdTriggerTime);
-//     (function() returns error?) onTriggerFunction = etcdTimerTask;
+//    (function() returns error?) onTriggerFunction = etcdTimerTask;
 //     function(error) onErrorFunction = etcdError;
 //     etcdTimer = new task:Timer(onTriggerFunction, onErrorFunction, etcdTriggerTime, delay = 1000);
 //     etcdTimer.start();

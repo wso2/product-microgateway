@@ -46,10 +46,11 @@ public type RequestResponseExecutionDTO record {
     string protocol="";
     int responseCode=0;
     string destination="";
-    ExecutionTimeDTO executionTime?;
+    ExecutionTimeDTO executionTime={};
     string gatewayType="";
     string label="";
     string correlationId="";
+    boolean cacheHit=false;
 };
 
 public type ExecutionTimeDTO record {
