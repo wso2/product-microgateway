@@ -47,20 +47,20 @@ function rotatingTask() {
     task:Scheduler timer = new({ intervalInMillis: timeSpan });
     var attachResult = timer.attach(fileRotating);
     if (attachResult is error) {
-        printError(KEY_ROTATE_TASK, attachResult.reason());
+        printError(KEY_ROTATE_TASK, attachResult.toString());
     }
     var startResult = timer.start();
     if (startResult is error) {
-        printError(KEY_ROTATE_TASK, "Starting the task is failed.");
+        printError(KEY_ROTATE_TASK, "Starting the task is failed: " + startResult.toString());
     }
-    printDebug(KEY_ROTATE_TASK, "File rotating task initialized");
+    printDebug(KEY_ROTATE_TASK, "File rotating task initialized.");
 }
 
 service fileRotating = service {
     resource function onTrigger() {
     error? triggerFunction = sendFileRotatingEvent();
-    if (triggerFunction is error) {
-       printError(KEY_ROTATE_TASK, "Error occurred while rotating Event");
-      }
+     if (triggerFunction is error) {
+       printError(KEY_ROTATE_TASK, "Error occurred while rotating event.");
+     }
     }
 };

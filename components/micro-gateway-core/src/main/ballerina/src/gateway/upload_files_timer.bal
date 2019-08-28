@@ -17,6 +17,7 @@
 import ballerina/task;
 import ballerina/file;
 import ballerina/http;
+import ballerina/filepath;
 
 string uploadingUrl = "";
 string analyticsUsername = "";
@@ -45,7 +46,7 @@ function searchFilesToUpload() returns (error?) {
                     analyticsUsername, analyticsPassword);
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
-                    var result = file:remove(fileLocation + "/" + fileName);
+                    var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
                 } else {
                     printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
                 }
@@ -74,23 +75,22 @@ function timerTask() {
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
         int|error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
-        if (timeSpan is int) {
+        int delay = <int>vals[INITIAL_DELAY];
+        if (timeSpan is int ) {
             // The Task Timer configuration record to configure the Task Listener.
           task:TimerConfiguration timerConfiguration = {
-          intervalInMillis: timeSpan,
-          initialDelayInMillis: 5000
-        };
+            intervalInMillis: timeSpan,
+            initialDelayInMillis: delay
+          };
           task:Scheduler timer = new(timerConfiguration);
           var searchResult = timer.attach(searchFiles);
           if (searchResult is error) {
-             printError(KEY_UPLOAD_TASK, searchResult.reason());
+             printError(KEY_UPLOAD_TASK, searchResult.toString());
           }
           var startResult = timer.start();
           if (startResult is error) {
-             printError(KEY_ROTATE_TASK, "Starting the task is failed.");
-          } else {
-             printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
-          }
+             printError(KEY_UPLOAD_TASK, "Starting the uploading task is failed.");
+          } 
         }
     } else {
         printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
@@ -102,7 +102,7 @@ service searchFiles = service {
     resource function onTrigger() {
      error? onTriggerFunction = searchFilesToUpload();
      if (onTriggerFunction is error) {
-       printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.reason());
+       printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.toString());
      }
     }
 };

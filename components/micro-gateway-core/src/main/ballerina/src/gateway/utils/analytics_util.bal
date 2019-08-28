@@ -24,13 +24,11 @@ boolean configsRead = false;
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
-    var api_Version = "";
 
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
     if (apiConfiguration is APIConfiguration) {
-      api_Version = apiConfiguration.apiVersion;
+      eventDto.apiVersion = apiConfiguration.apiVersion;
     }
-    string apiVersion ="";
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
@@ -65,7 +63,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
     }
-    eventDto.apiVersion =  apiVersion;
+    
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
     return eventDto;
