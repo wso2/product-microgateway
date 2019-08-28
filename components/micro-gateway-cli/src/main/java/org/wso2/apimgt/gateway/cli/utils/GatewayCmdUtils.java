@@ -274,13 +274,6 @@ public final class GatewayCmdUtils {
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
         createDirectory(extensionsPath, false);
 
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
-        createFolderIfNotExist(targetDirPath);
-
-        String targetGenDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR;
-        createFolderIfNotExist(targetGenDirPath);
-
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
         createDirectory(confDirPath, false);
 
@@ -899,22 +892,6 @@ public final class GatewayCmdUtils {
     public static String promptForTextInput(PrintStream outStream, String msg) {
         outStream.println(msg);
         return System.console().readLine();
-    }
-
-    /**
-     * Create directory structure for projects /gen directory.
-     *
-     * @param genDirPath path to project's /gen directory
-     */
-    public static void createGenDirectoryStructure(String genDirPath) throws IOException {
-        Path genPath = Paths.get(genDirPath);
-        FileUtils.deleteDirectory(new File(genDirPath));
-        Files.createDirectory(genPath);
-        String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
-        createFolderIfNotExist(genSrcPath);
-
-        String genPoliciesPath = genSrcPath + File.separator + GatewayCliConstants.GEN_POLICIES_DIR;
-        createFolderIfNotExist(genPoliciesPath);
     }
 
     /**
