@@ -266,13 +266,13 @@ public final class GatewayCmdUtils {
      * @param projectName name of the project
      */
     public static void createProjectStructure(String projectName) throws IOException {
-        File projectDir = createFolderIfNotExist(getUserDir() + File.separator + projectName);
+        File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
-        createFolderIfNotExist(interceptorsPath);
+        createDirectory(interceptorsPath, false);
 
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
-        createFolderIfNotExist(extensionsPath);
+        createDirectory(extensionsPath, false);
 
         String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
         createFolderIfNotExist(targetDirPath);
@@ -282,10 +282,10 @@ public final class GatewayCmdUtils {
         createFolderIfNotExist(targetGenDirPath);
 
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
-        createFolderIfNotExist(confDirPath);
+        createDirectory(confDirPath, false);
 
         String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-        createFolderIfNotExist(definitionsPath);
+        createDirectory(definitionsPath, false);
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -409,7 +409,7 @@ public final class GatewayCmdUtils {
      */
     public static void storeResourceHashesFileContent(String content, String projectName) throws IOException {
         String tempDirPath = getProjectTempFolderLocation(projectName);
-        createFolderIfNotExist(tempDirPath);
+        createDirectory(tempDirPath, false);
 
         String resourceHashesFileLocation = getResourceHashHolderFileLocation(projectName);
         File pathFile = new File(resourceHashesFileLocation);
@@ -697,20 +697,26 @@ public final class GatewayCmdUtils {
      * Creates a new folder if not exists
      *
      * @param path folder path
+     * @param overwrite if `true` existing directory will be removed
+     *                  and new directory will be created in {@code path}.
      * @return File object for the created folder
      */
-    private static File createFolderIfNotExist(String path) {
-        File folder = new File(path);
-        if (!folder.exists() && !folder.isDirectory()) {
-            boolean created = folder.mkdir();
+    public static File createDirectory(String path, boolean overwrite) throws IOException {
+        File dir = new File(path);
+        if (overwrite && dir.exists() && dir.isDirectory()) {
+            FileUtils.deleteDirectory(dir);
+        }
+
+        if (!dir.exists() && !dir.isDirectory()) {
+            boolean created = dir.mkdir();
             if (created) {
                 logger.trace("Directory: {} created. ", path);
             } else {
-                logger.error("Failed to create directory: {} ", path);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
+                throw new CLIInternalException("Failed to create directory: " + path);
             }
         }
-        return folder;
+
+        return dir;
     }
 
     /**
