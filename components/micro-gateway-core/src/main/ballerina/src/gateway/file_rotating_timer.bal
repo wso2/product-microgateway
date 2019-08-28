@@ -58,7 +58,9 @@ function rotatingTask() {
 
 service fileRotating = service {
     resource function onTrigger() {
-    function () returns (error?) triggerFunction = sendFileRotatingEvent;
-        printError(KEY_ROTATE_TASK, "Error occurred while rotating Event");
+    error? triggerFunction = sendFileRotatingEvent();
+    if (triggerFunction is error) {
+       printError(KEY_ROTATE_TASK, "Error occurred while rotating Event");
+      }
     }
 };
