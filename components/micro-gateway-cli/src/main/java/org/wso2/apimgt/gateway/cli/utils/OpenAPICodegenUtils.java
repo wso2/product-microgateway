@@ -370,7 +370,7 @@ public class OpenAPICodegenUtils {
      * @throws IOException if an error occurred while reading the bal files inside interceptor directory
      */
     public static void setInterceptors(String projectName) throws IOException {
-        String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName);
+        String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsPath(projectName);
         Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> {
             Path fileName = path.getFileName();
             return fileName != null && fileName.toString().endsWith(GatewayCliConstants.EXTENSION_BAL);

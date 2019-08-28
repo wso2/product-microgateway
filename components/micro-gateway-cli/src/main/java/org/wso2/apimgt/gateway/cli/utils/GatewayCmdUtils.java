@@ -482,14 +482,16 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /target/gen of a given project in the current working directory
+     * Returns the path to ballerina project module inside of a given mgw project
+     * in the current working directory.
      *
-     * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @param projectName name of the mgw project
+     * @return path to ballerina project module
      */
-    public static String getProjectTargetGenDirectoryPath(String projectName) {
+    public static String getProjectTargetModulePath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
+                GatewayCliConstants.GEN_SRC_DIR + File.separator + projectName;
     }
 
     /**
@@ -515,26 +517,26 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /interceptors of a given project in the current working directory
+     * Returns the path to mgw project's 'interceptors' directory.
+     * Project should be located in the current directory.
      *
      * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @return path to project interceptors directory
      */
-    public static String getProjectInterceptorsDirectoryPath(String projectName) {
+    public static String getProjectInterceptorsPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
-     * Returns path to the /gen/src/interceptors of a given project in the current working directory
+     * Returns the path to target ballerina project's 'interceptors' directory, inside of a
+     * given mgw project in the current working directory.
      *
      * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @return path to target interceptors directory
      */
-    public static String getProjectGenSrcInterceptorsDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator
-                + GatewayCliConstants.GEN_SRC_DIR + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+    public static String getProjectTargetInterceptorsPath(String projectName) {
+        return getProjectTargetModulePath(projectName) + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
@@ -624,7 +626,7 @@ public final class GatewayCmdUtils {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         if (destinationFolder.exists()) {
-            delete(destinationFolder);
+            FileUtils.deleteDirectory(destinationFolder);
         }
         copyFolder(sourceFolder, destinationFolder);
     }
@@ -861,32 +863,11 @@ public final class GatewayCmdUtils {
     public static void deleteProject(String projectPath) {
         File file = new File(projectPath);
         try {
-            // Deleting the directory recursively.
-            delete(file);
+            FileUtils.deleteDirectory(file);
         } catch (IOException e) {
-            // not throwing the error because deleting faild project is not
+            // not throwing the error because deleting failed project is not
             // a critical task. This can be deleted manually if not used.
             logger.error("Failed to delete project : {} ", projectPath, e);
-        }
-    }
-
-    private static void delete(File file) throws IOException {
-        File[] fileList = file.listFiles();
-        if (fileList == null) {
-            logger.debug("No files to delete in: {}", file.getAbsolutePath());
-            return;
-        }
-        for (File childFile : fileList) {
-            if (childFile.isDirectory()) {
-                delete(childFile);
-            } else {
-                if (!childFile.delete()) {
-                    throw new IOException();
-                }
-            }
-        }
-        if (!file.delete()) {
-            throw new IOException();
         }
     }
 

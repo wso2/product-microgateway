@@ -21,7 +21,7 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.ballerinalang.packerina.init.InitHandler;
+import org.ballerinalang.packerina.cmd.CommandUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
@@ -44,7 +44,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -99,21 +98,23 @@ public class BuildCmd implements GatewayLauncherCmd {
             String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
 
-            CodeGenerator codeGenerator = new CodeGenerator();
+            // Create policies directory
+            String genPoliciesPath = GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
+                    + GatewayCliConstants.GEN_POLICIES_DIR;
+            GatewayCmdUtils.createDirectory(genPoliciesPath, false);
+
+            // Generate policy definitions
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
-            policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                    + GatewayCliConstants.POLICY_DIR, projectName);
-            GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
-                    GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
+            policyGenerator.generate(genPoliciesPath, projectName);
+
+            // Copy static source files
+            GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsPath(projectName),
+                    GatewayCmdUtils.getProjectTargetInterceptorsPath(projectName));
             GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
                             + GatewayCliConstants.PROJECT_SERVICES_DIR,
-                    GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
+                    GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
                             + GatewayCliConstants.PROJECT_SERVICES_DIR);
-            codeGenerator.generate(projectName, true);
-
-            //Initializing the ballerina project and creating .bal folder.
-            InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
-                    new ArrayList<>(), null);
+            new CodeGenerator().generate(projectName, true);
         } catch (IOException e) {
             throw new CLIInternalException(
                     "Error occurred while generating source code for the open API definitions.", e);
@@ -140,8 +141,8 @@ public class BuildCmd implements GatewayLauncherCmd {
     //todo: implement this method properly
     private void init(String projectName, String configPath, String deploymentConfig) {
         try {
-
             Path configurationFile = Paths.get(configPath);
+
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
                 GatewayCmdUtils.setConfig(config);
@@ -185,5 +186,10 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         String targetGenDir = targetDirPath + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
         GatewayCmdUtils.createDirectory(targetGenDir, true);
+        
+        //Initializing the ballerina project.
+        CommandUtil.initProject(Paths.get(targetGenDir));
+        String projectModuleDir = GatewayCmdUtils.getProjectTargetModulePath(projectName);
+        GatewayCmdUtils.createDirectory(projectModuleDir, true);
     }
 }
