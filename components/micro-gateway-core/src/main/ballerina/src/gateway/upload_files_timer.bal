@@ -74,17 +74,23 @@ function timerTask() {
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
         int|error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
-       
-        function(error) onErrorFunction = informError;
-        if(timeSpan is int){
+        if (timeSpan is int) {
             // The Task Timer configuration record to configure the Task Listener.
-        task:TimerConfiguration timerConfiguration = {
-        intervalInMillis: timeSpan,
-        initialDelayInMillis: 5000
+          task:TimerConfiguration timerConfiguration = {
+          intervalInMillis: timeSpan,
+          initialDelayInMillis: 5000
         };
-         task:Scheduler timer = new(timerConfiguration);
-        } else {
-            printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
+          task:Scheduler timer = new(timerConfiguration);
+          var searchResult = timer.attach(searchFiles);
+          if (searchResult is error) {
+             printError(KEY_UPLOAD_TASK, searchResult.reason());
+          }
+          var startResult = timer.start();
+          if (startResult is error) {
+             printError(KEY_ROTATE_TASK, "Starting the task is failed.");
+          } else {
+             printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
+          }
         }
     } else {
         printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
@@ -92,9 +98,12 @@ function timerTask() {
 }
 
 // Creating a service on the task Listener.
-service SearchFiles = service {
+service searchFiles = service {
     resource function onTrigger() {
-         (function() returns error?) onTriggerFunction = searchFilesToUpload;
+     error? onTriggerFunction = searchFilesToUpload();
+     if (onTriggerFunction is error) {
+       printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.reason());
+     }
     }
 };
 
