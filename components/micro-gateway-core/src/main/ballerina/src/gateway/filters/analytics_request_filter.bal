@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/runtime;
 
 public type AnalyticsRequestFilter object {
 
@@ -74,7 +75,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 
 function doFilterAll(http:Response response, http:FilterContext context) {
     // TODO: refactor the logic. error does not belong to type any
-    var code = context.attributes[ERROR_RESPONSE];
+    var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
     if (code is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);

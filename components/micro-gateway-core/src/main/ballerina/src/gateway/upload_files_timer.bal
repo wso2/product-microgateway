@@ -62,11 +62,6 @@ function searchFilesToUpload() returns (error?) {
     }
 }
 
-
-function informError(error e) {
-    printDebug(KEY_UPLOAD_TASK, "Files not present for upload:" + e.reason());
-}
-
 function timerTask() {
     map<any> vals= getConfigMapValue(ANALYTICS);
     boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];

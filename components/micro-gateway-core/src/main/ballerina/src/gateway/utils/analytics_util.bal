@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/time;
 import ballerina/config;
+import ballerina/runtime;
 
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
@@ -89,7 +90,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
         eventDto.resourcePath = resource_Path;
     }
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
-    eventDto.errorCode = <int>context.attributes[ERROR_RESPONSE_CODE];
+    eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
     eventDto.errorMessage = err.reason();
     eventDto.faultTime = currentTimeMills;
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
