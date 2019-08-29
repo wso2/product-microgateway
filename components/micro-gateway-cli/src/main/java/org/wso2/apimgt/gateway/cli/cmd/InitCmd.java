@@ -92,7 +92,7 @@ public class InitCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.INIT;
+        return CliCommands.INIT;
     }
 
     @Override

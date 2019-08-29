@@ -36,7 +36,7 @@ public interface GatewayLauncherCmd {
 
     default String getCommandUsageInfo(String commandName) {
         if (commandName == null) {
-            commandName = GatewayCliCommands.DEFAULT;
+            commandName = CliCommands.DEFAULT;
         }
 
         String fileName = "cli-help/cli-" + commandName + ".help";

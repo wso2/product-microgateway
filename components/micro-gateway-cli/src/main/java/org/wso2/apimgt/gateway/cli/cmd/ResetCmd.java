@@ -75,7 +75,7 @@ public class ResetCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.RESET;
+        return CliCommands.RESET;
     }
 
     @Override

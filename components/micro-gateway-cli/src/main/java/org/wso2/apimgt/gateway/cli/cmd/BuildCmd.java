@@ -131,7 +131,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.BUILD;
+        return CliCommands.BUILD;
     }
 
     @Override

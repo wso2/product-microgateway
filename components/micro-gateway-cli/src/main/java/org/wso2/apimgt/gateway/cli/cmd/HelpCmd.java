@@ -59,7 +59,7 @@ public class HelpCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.HELP;
+        return CliCommands.HELP;
     }
 
     @Override

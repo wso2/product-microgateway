@@ -86,11 +86,11 @@ public class Main {
             ImportCmd importCmd = new ImportCmd();
 
             JCommander cmdParser = JCommander.newBuilder()
-                    .addCommand(GatewayCliCommands.HELP, helpCmd)
-                    .addCommand(GatewayCliCommands.INIT, initCmd)
-                    .addCommand(GatewayCliCommands.BUILD, buildCmd)
-                    .addCommand(GatewayCliCommands.RESET, resetCmd)
-                    .addCommand(GatewayCliCommands.IMPORT, importCmd)
+                    .addCommand(CliCommands.HELP, helpCmd)
+                    .addCommand(CliCommands.INIT, initCmd)
+                    .addCommand(CliCommands.BUILD, buildCmd)
+                    .addCommand(CliCommands.RESET, resetCmd)
+                    .addCommand(CliCommands.IMPORT, importCmd)
                     .build();
             cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
 
