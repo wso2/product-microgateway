@@ -133,7 +133,15 @@ goto :end
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
-                call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
+                call ballerina build %project_name% --experimental
+
+                if ERRORLEVEL 0 (
+                    REM move all executable ballerina build outputs to MGW_PROJECT/target directory
+                    MOVE /y %TARGET_DIR%\gen\target\bin\*  %TARGET_DIR%\
+                    ECHO
+                    ECHO "Target: %TARGET_DIR%\%project_name%-executable.jar"
+                    ECHO "BUILD SUCCESSFUL"
+                )
             POPD
 goto :end
 
