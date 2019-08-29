@@ -27,9 +27,7 @@ public type EmitOnStateChange object {
 
     public function (streams:StreamEvent[])? nextProcessPointer;
 
-    public function __init(function (streams:StreamEvent?[])?  nextProcessPointer, any[] stateParameters) {
-
-
+    public function __init(function (streams:StreamEvent?[])? nextProcessPointer, any[] stateParameters) {
         self.nextProcessPointer = nextProcessPointer;
         self.stateParameters = stateParameters;
         self.initParameters(stateParameters);
@@ -65,7 +63,6 @@ public type EmitOnStateChange object {
             // do nothing;
         return [[(), ()]];
     }
-
 
     public function process(streams:StreamEvent?[] streamEvents) {
         streams:StreamEvent[] streamEventsCopy = [];
