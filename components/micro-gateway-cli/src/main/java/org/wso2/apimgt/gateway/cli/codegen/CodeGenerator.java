@@ -25,7 +25,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
@@ -103,12 +103,12 @@ public class CodeGenerator {
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
 
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+                        + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
 
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+                        + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
 
     }
 
@@ -128,7 +128,7 @@ public class CodeGenerator {
         List<String> openAPIDirectoryLocations = new ArrayList<>();
         String projectAPIDefGenLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
         openAPIDirectoryLocations.add(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR);
+                + CliConstants.PROJECT_API_DEFINITIONS_DIR);
 
         if (Files.exists(Paths.get(projectAPIDefGenLocation))) {
             openAPIDirectoryLocations.add(projectAPIDefGenLocation);
@@ -171,14 +171,14 @@ public class CodeGenerator {
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+                        + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+                        + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION);
+                        + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION);
     }
 
     /**
@@ -278,11 +278,11 @@ public class CodeGenerator {
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
 
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+                        + CliConstants.GW_DIST_EXTENSION_FILTER,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
         GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getFiltersFolderLocation() + File.separator
-                        + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+                        + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
+                projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
 
         File[] fileList = dir.listFiles();
         if (fileList == null) {

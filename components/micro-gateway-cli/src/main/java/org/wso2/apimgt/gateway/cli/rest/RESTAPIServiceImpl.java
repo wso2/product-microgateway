@@ -20,7 +20,7 @@ package org.wso2.apimgt.gateway.cli.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -74,8 +74,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + RESTServiceConstants.APIS_GET_URI
-                    .replace(GatewayCliConstants.LABEL_PLACEHOLDER,
-                            URLEncoder.encode(labelName, GatewayCliConstants.CHARSET_UTF8));
+                    .replace(CliConstants.LABEL_PLACEHOLDER, URLEncoder.encode(labelName, CliConstants.CHARSET_UTF8));
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
@@ -129,10 +128,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + RESTServiceConstants.API_GET_BY_NAME_VERSION_URI
-                    .replace(GatewayCliConstants.API_NAME_PLACEHOLDER,
-                            URLEncoder.encode(apiName, GatewayCliConstants.CHARSET_UTF8))
-                    .replace(GatewayCliConstants.VERSION_PLACEHOLDER,
-                            URLEncoder.encode(version, GatewayCliConstants.CHARSET_UTF8));
+                    .replace(CliConstants.API_NAME_PLACEHOLDER, URLEncoder.encode(apiName, CliConstants.CHARSET_UTF8))
+                    .replace(CliConstants.VERSION_PLACEHOLDER, URLEncoder.encode(version, CliConstants.CHARSET_UTF8));
             logger.debug("GET API URL: {}", urlStr);
             url = new URL(urlStr);
 

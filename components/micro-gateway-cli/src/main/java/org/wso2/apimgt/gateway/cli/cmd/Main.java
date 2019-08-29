@@ -22,7 +22,7 @@ import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.ParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
@@ -92,7 +92,7 @@ public class Main {
                     .addCommand(CliCommands.RESET, resetCmd)
                     .addCommand(CliCommands.IMPORT, importCmd)
                     .build();
-            cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
+            cmdParser.setProgramName(CliConstants.MICRO_GW);
 
             helpCmd.setParentCmdParser(cmdParser);
             initCmd.setParentCmdParser(cmdParser);

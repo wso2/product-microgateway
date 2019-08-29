@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
@@ -248,7 +248,7 @@ public class MockHttpServer extends Thread {
                 public void handle(HttpExchange exchange) throws IOException {
 
                     String query = parseParas(exchange.getRequestURI()).get("query");
-                    String[] paras = URLDecoder.decode(query, GatewayCliConstants.CHARSET_UTF8).split(" ");
+                    String[] paras = URLDecoder.decode(query, CliConstants.CHARSET_UTF8).split(" ");
                     String label = null;
                     for (String para : paras) {
                         String[] searchQuery = para.split(":");

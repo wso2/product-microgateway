@@ -28,7 +28,7 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
@@ -100,7 +100,7 @@ public class BuildCmd implements GatewayLauncherCmd {
 
             // Create policies directory
             String genPoliciesPath = GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
-                    + GatewayCliConstants.GEN_POLICIES_DIR;
+                    + CliConstants.GEN_POLICIES_DIR;
             GatewayCmdUtils.createDirectory(genPoliciesPath, false);
 
             // Generate policy definitions
@@ -111,9 +111,9 @@ public class BuildCmd implements GatewayLauncherCmd {
             GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsPath(projectName),
                     GatewayCmdUtils.getProjectTargetInterceptorsPath(projectName));
             GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                            + GatewayCliConstants.PROJECT_SERVICES_DIR,
+                            + CliConstants.PROJECT_SERVICES_DIR,
                     GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
-                            + GatewayCliConstants.PROJECT_SERVICES_DIR);
+                            + CliConstants.PROJECT_SERVICES_DIR);
             new CodeGenerator().generate(projectName, true);
         } catch (IOException e) {
             throw new CLIInternalException(
@@ -181,10 +181,10 @@ public class BuildCmd implements GatewayLauncherCmd {
      */
     private void initTarget(String projectName) throws IOException {
         String projectDir = GatewayCmdUtils.getProjectDirectoryPath(projectName);
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
+        String targetDirPath = projectDir + File.separator + CliConstants.PROJECT_TARGET_DIR;
         GatewayCmdUtils.createDirectory(targetDirPath, true);
 
-        String targetGenDir = targetDirPath + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        String targetGenDir = targetDirPath + File.separator + CliConstants.PROJECT_GEN_DIR;
         GatewayCmdUtils.createDirectory(targetGenDir, true);
         
         //Initializing the ballerina project.

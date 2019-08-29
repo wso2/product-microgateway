@@ -24,7 +24,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -80,7 +80,7 @@ public class ThrottlePolicyGenerator {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         String policyFileLocation = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.GW_DIST_POLICIES_FILE;
+                + CliConstants.GW_DIST_POLICIES_FILE;
         ThrottlePolicyListMapper throttlePolicyListMapper = mapper
                 .readValue(new File(policyFileLocation), ThrottlePolicyListMapper.class);
 

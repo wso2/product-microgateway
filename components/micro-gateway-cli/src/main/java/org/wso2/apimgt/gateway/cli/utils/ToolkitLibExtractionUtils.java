@@ -18,7 +18,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 
 import java.io.File;
@@ -38,10 +38,10 @@ public class ToolkitLibExtractionUtils {
     public static void extractPlatformAndRuntime() {
         try {
             String libPath = GatewayCmdUtils.getCLILibPath();
-            String baloPath = GatewayCliConstants.CLI_GATEWAY + File.separator + GatewayCliConstants.CLI_BALO;
-            String breLibPath = GatewayCliConstants.CLI_BRE + File.separator + GatewayCliConstants.CLI_LIB;
+            String baloPath = CliConstants.CLI_GATEWAY + File.separator + CliConstants.CLI_BALO;
+            String breLibPath = CliConstants.CLI_BRE + File.separator + CliConstants.CLI_LIB;
             String platformExtractedPath =
-                    GatewayCmdUtils.getCLILibPath() + File.separator + GatewayCliConstants.CLI_PLATFORM;
+                    GatewayCmdUtils.getCLILibPath() + File.separator + CliConstants.CLI_PLATFORM;
 
             extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
         } catch (IOException e) {
@@ -54,17 +54,17 @@ public class ToolkitLibExtractionUtils {
     private static void extractBallerinaDist(String destination, String libPath, String baloPath, String breLibPath,
                                              Boolean isAddToClasspath) throws IOException {
         if (!Files.exists(Paths.get(destination))) {
-            ZipUtils.unzip(destination + GatewayCliConstants.EXTENSION_ZIP, destination,
+            ZipUtils.unzip(destination + CliConstants.EXTENSION_ZIP, destination,
                     isAddToClasspath);
 
             // Copy balo to the platform
             GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
-                    destination + File.separator + GatewayCliConstants.CLI_LIB + File.separator
-                            + GatewayCliConstants.CLI_REPO);
+                    destination + File.separator + CliConstants.CLI_LIB + File.separator
+                            + CliConstants.CLI_REPO);
 
             // Copy gateway jars to platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + GatewayCliConstants.CLI_GATEWAY + File.separator
-                    + GatewayCliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
+            GatewayCmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator
+                    + CliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
 
             //todo: remove this segment in next release
             File b7aSwaggerJar = new File(destination + File.separator + breLibPath + File.separator +

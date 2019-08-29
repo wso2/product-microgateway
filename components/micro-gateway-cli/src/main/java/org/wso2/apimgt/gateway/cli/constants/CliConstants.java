@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 /**
  * Constants used by toolkit CLI.
  */
-public class GatewayCliConstants {
+public class CliConstants {
     public static final String PROJECT_CONF_DIR = "conf";
     public static final String PROJECT_INTERCEPTORS_DIR = "interceptors";
     public static final String PROJECT_GRPC_SERVICE_DIR = "grpc_service";
