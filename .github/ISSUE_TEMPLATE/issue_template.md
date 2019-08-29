@@ -10,14 +10,12 @@ labels: 'Priority/Normal, Type/Bug'
 
 ### Steps to reproduce:
 
-
 ### Affected Product Version:
 <!-- Committers can use Affected/*** labels -->
 
-### OS, DB, other environment details and versions:
+### OS and other environment details and versions:
 - OS:
 - Client:
-- DB:
 - Env (Docker/K8s):
 
 ---
