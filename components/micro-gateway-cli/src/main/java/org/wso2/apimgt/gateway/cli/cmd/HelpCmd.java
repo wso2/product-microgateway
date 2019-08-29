@@ -29,7 +29,7 @@ import java.io.PrintStream;
  * This class represents the "help" command and it holds arguments and flags specified by the user.
  */
 @Parameters(commandNames = "help", commandDescription = "display command help")
-public class HelpCmd implements GatewayLauncherCmd {
+public class HelpCmd implements LauncherCmd {
     private static PrintStream outStream = System.err;
 
     @SuppressWarnings("unused")

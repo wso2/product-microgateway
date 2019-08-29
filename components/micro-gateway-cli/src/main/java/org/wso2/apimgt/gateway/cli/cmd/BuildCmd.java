@@ -49,7 +49,7 @@ import java.nio.file.Paths;
  * This class represents the "build" command and it holds arguments and flags specified by the user.
  */
 @Parameters(commandNames = "build", commandDescription = "build a project")
-public class BuildCmd implements GatewayLauncherCmd {
+public class BuildCmd implements LauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(BuildCmd.class);
     private static PrintStream outStream = System.out;
 

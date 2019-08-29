@@ -44,8 +44,8 @@ public class Main {
 
     public static void main(String... args) {
         try {
-            Optional<GatewayLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
-            optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
+            Optional<LauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
+            optionalInvokedCmd.ifPresent(LauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
             Throwable cause = e.getCause();
@@ -77,7 +77,7 @@ public class Main {
      * @param args list of arguments
      * @return invoked CMD
      */
-    private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
+    private static Optional<LauncherCmd> getInvokedCmd(String... args) {
         try {
             HelpCmd helpCmd = new HelpCmd();
             InitCmd initCmd = new InitCmd();
@@ -111,7 +111,7 @@ public class Main {
                 throw paramEx;
             }
             commanderMap = cmdParser.getCommands();
-            return Optional.of((GatewayLauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
+            return Optional.of((LauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";
             throw GatewayCmdUtils.createUsageException(errorMsg);

@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * {@code GatewayLauncherCmd} represents a micro gateway cli launcher command.
+ * {@code LauncherCmd} represents a micro gateway cli launcher command.
  */
-public interface GatewayLauncherCmd {
+public interface LauncherCmd {
 
     void execute();
 

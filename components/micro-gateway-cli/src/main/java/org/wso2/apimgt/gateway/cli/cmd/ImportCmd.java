@@ -56,7 +56,7 @@ import java.util.List;
  * This class represents the "import" command and it pull the swagger and generate the source code
  */
 @Parameters(commandNames = "import", commandDescription = "pull APIs from API Publisher")
-public class ImportCmd implements GatewayLauncherCmd {
+public class ImportCmd implements LauncherCmd {
     private static final Logger logger = LoggerFactory.getLogger(ImportCmd.class);
     private static PrintStream outStream = System.out;
 

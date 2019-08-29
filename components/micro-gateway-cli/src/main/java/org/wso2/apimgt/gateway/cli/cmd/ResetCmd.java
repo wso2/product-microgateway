@@ -36,7 +36,7 @@ import java.nio.file.Paths;
  * This class represents the "reset" command and it holds arguments and flags specified by the user.
  */
 @Parameters(commandNames = "reset", commandDescription = "reset configurations")
-public class ResetCmd implements GatewayLauncherCmd {
+public class ResetCmd implements LauncherCmd {
     private static PrintStream outStream = System.err;
 
     @Parameter(names = {"-c", "--config"}, description = "external config file path")

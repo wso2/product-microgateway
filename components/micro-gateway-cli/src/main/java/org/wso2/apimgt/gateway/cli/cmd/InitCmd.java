@@ -37,7 +37,7 @@ import java.nio.file.Paths;
  * Command will create the basic directory structure for a microgateway project.
  */
 @Parameters(commandNames = "init", commandDescription = "initialize a new project")
-public class InitCmd implements GatewayLauncherCmd {
+public class InitCmd implements LauncherCmd {
     private static final Logger LOGGER = LoggerFactory.getLogger(InitCmd.class);
     private static final PrintStream OUT = System.out;
 
