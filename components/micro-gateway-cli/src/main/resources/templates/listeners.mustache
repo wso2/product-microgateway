@@ -22,9 +22,9 @@ gateway:PreAuthnFilter preAuthnFilter = new;
 gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
 gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
-//map<boolean> deployedPolicies = getDeployedPolicies();
+map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
-//gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
+gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
 //get open API definition map
 map<json> openAPIs = getOpenAPIs();
 // Validation filter

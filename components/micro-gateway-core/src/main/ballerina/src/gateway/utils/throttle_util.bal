@@ -147,3 +147,7 @@ public function getGlobalThrottleStream() returns stream<GlobalThrottleStreamDTO
     return globalThrottleStream;
 }
 
+public function getIsStreamsInitialized() returns boolean {
+    return isStreamsInitialized;
+}
+
