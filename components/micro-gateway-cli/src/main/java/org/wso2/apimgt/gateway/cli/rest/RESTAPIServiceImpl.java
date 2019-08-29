@@ -34,7 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDT
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyListDTO;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
 import java.io.IOException;
@@ -187,10 +187,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         //todo: remove the comment
         //api.setEndpointConfigRepresentation((endpointConfig));
         // set default values from config if per api cors is not enabled
-        Config config = GatewayCmdUtils.getConfig();
+        Config config = CmdUtils.getConfig();
         if (config == null) {
             if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
-                api.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+                api.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
             }
         } else {
             if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
@@ -304,7 +304,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
      * @see RESTAPIService#getClientCertificates(String)
      */
     public List<ClientCertMetadataDTO> getClientCertificates(String accessToken) {
-        Config config = GatewayCmdUtils.getConfig();
+        Config config = CmdUtils.getConfig();
         URL url;
         HttpsURLConnection urlConn = null;
         ClientCertificatesDTO certList;

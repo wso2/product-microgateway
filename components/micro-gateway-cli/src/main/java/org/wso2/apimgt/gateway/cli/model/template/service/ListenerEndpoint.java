@@ -20,7 +20,7 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 /**
  * Mustache template context for gateway listeners.
@@ -30,8 +30,8 @@ public class ListenerEndpoint {
     private Config config;
 
     public ListenerEndpoint buildContext() {
-        this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        this.config = GatewayCmdUtils.getConfig();
+        this.containerConfig = CmdUtils.getContainerConfig();
+        this.config = CmdUtils.getConfig();
         return this;
     }
 

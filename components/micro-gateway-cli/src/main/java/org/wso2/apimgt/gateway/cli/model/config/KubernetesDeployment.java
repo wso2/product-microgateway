@@ -19,7 +19,7 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.util.UUID;
 
@@ -51,7 +51,7 @@ public class KubernetesDeployment {
 
     public String getName() {
         if (name == null) {
-            CodeGenerationContext codeGenerationContext = GatewayCmdUtils.getCodeGenerationContext();
+            CodeGenerationContext codeGenerationContext = CmdUtils.getCodeGenerationContext();
             return codeGenerationContext.getProjectName() + CliConstants.K8S_DEPLOYMENT + UUID.randomUUID()
                     .toString();
         } else {

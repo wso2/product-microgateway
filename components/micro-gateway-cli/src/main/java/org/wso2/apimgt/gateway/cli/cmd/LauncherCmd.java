@@ -18,7 +18,7 @@
 package org.wso2.apimgt.gateway.cli.cmd;
 
 import com.beust.jcommander.JCommander;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -41,9 +41,9 @@ public interface LauncherCmd {
 
         String fileName = "cli-help/cli-" + commandName + ".help";
         try {
-            return GatewayCmdUtils.readFileAsString(fileName, true);
+            return CmdUtils.readFileAsString(fileName, true);
         } catch (IOException e) {
-            throw GatewayCmdUtils.createUsageException("Usage info not available for command: " + commandName);
+            throw CmdUtils.createUsageException("Usage info not available for command: " + commandName);
         }
     }
 

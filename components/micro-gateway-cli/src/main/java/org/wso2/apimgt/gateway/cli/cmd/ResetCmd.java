@@ -25,7 +25,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -49,7 +49,7 @@ public class ResetCmd implements LauncherCmd {
     public void execute() {
         // Reset the configuration of the provided config path. If path is not given use the default config file
         if (StringUtils.isEmpty(configPath)) {
-            configPath = GatewayCmdUtils.getMainConfigLocation();
+            configPath = CmdUtils.getMainConfigLocation();
         }
 
         Path configurationFile = Paths.get(configPath);
@@ -69,8 +69,8 @@ public class ResetCmd implements LauncherCmd {
                 .setUsername(StringUtils.EMPTY).setClientId(StringUtils.EMPTY).setClientSecret(StringUtils.EMPTY)
                 .setTrustStoreLocation(StringUtils.EMPTY).setTrustStorePassword(StringUtils.EMPTY).build();
         newConfig.setToken(token);
-        newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-        GatewayCmdUtils.saveConfig(newConfig, configPath);
+        newConfig.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
+        CmdUtils.saveConfig(newConfig, configPath);
     }
 
     @Override

@@ -370,14 +370,14 @@ public class OpenAPICodegenUtils {
      * @throws IOException if an error occurred while reading the bal files inside interceptor directory
      */
     public static void setInterceptors(String projectName) throws IOException {
-        String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsPath(projectName);
+        String interceptorsDirectoryPath = CmdUtils.getProjectInterceptorsPath(projectName);
         Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> {
             Path fileName = path.getFileName();
             return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_BAL);
         }).forEach(path -> {
             String balSrcCode = null;
             try {
-                balSrcCode = GatewayCmdUtils.readFileAsString(path.toString(), false);
+                balSrcCode = CmdUtils.readFileAsString(path.toString(), false);
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }

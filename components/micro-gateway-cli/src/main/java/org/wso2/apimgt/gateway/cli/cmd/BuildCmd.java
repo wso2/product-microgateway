@@ -34,7 +34,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -77,7 +77,7 @@ public class BuildCmd implements LauncherCmd {
         }
 
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
-        File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
+        File projectLocation = new File(CmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
             throw new CLIRuntimeException("Project " + projectName + " does not exist.");
@@ -85,8 +85,8 @@ public class BuildCmd implements LauncherCmd {
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
 
-        String importedAPIDefLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
-        String addedAPIDefLocation = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+        String importedAPIDefLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
+        String addedAPIDefLocation = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
         boolean isImportedAPIsAvailable = checkDirContentAvailability(importedAPIDefLocation);
         boolean isAddedAPIsAvailable = checkDirContentAvailability(addedAPIDefLocation);
 
@@ -95,24 +95,24 @@ public class BuildCmd implements LauncherCmd {
         }
 
         try {
-            String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
+            String toolkitConfigPath = CmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
 
             // Create policies directory
-            String genPoliciesPath = GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
+            String genPoliciesPath = CmdUtils.getProjectTargetModulePath(projectName) + File.separator
                     + CliConstants.GEN_POLICIES_DIR;
-            GatewayCmdUtils.createDirectory(genPoliciesPath, false);
+            CmdUtils.createDirectory(genPoliciesPath, false);
 
             // Generate policy definitions
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             policyGenerator.generate(genPoliciesPath, projectName);
 
             // Copy static source files
-            GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsPath(projectName),
-                    GatewayCmdUtils.getProjectTargetInterceptorsPath(projectName));
-            GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
+            CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
+                    CmdUtils.getProjectTargetInterceptorsPath(projectName));
+            CmdUtils.copyFolder(CmdUtils.getProjectDirectoryPath(projectName) + File.separator
                             + CliConstants.PROJECT_SERVICES_DIR,
-                    GatewayCmdUtils.getProjectTargetModulePath(projectName) + File.separator
+                    CmdUtils.getProjectTargetModulePath(projectName) + File.separator
                             + CliConstants.PROJECT_SERVICES_DIR);
             new CodeGenerator().generate(projectName, true);
         } catch (IOException e) {
@@ -145,7 +145,7 @@ public class BuildCmd implements LauncherCmd {
 
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
-                GatewayCmdUtils.setConfig(config);
+                CmdUtils.setConfig(config);
             } else {
                 logger.error("Configuration: {} Not found.", configPath);
                 throw new CLIInternalException("Error occurred while loading configurations.");
@@ -153,16 +153,16 @@ public class BuildCmd implements LauncherCmd {
             if (deploymentConfig != null) {
                 Path deploymentConfigFile = Paths.get(deploymentConfig);
                 if (Files.exists(deploymentConfigFile)) {
-                    GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfig);
+                    CmdUtils.createDeploymentConfig(projectName, deploymentConfig);
                 }
             }
-            String deploymentConfigPath = GatewayCmdUtils.getDeploymentConfigLocation(projectName);
+            String deploymentConfigPath = CmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            GatewayCmdUtils.setContainerConfig(containerConfig);
+            CmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
             codeGenerationContext.setProjectName(projectName);
-            GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+            CmdUtils.setCodeGenerationContext(codeGenerationContext);
 
             initTarget(projectName);
         } catch (ConfigParserException e) {
@@ -180,16 +180,16 @@ public class BuildCmd implements LauncherCmd {
      * @throws IOException Error occurred while creating target directory structure.
      */
     private void initTarget(String projectName) throws IOException {
-        String projectDir = GatewayCmdUtils.getProjectDirectoryPath(projectName);
+        String projectDir = CmdUtils.getProjectDirectoryPath(projectName);
         String targetDirPath = projectDir + File.separator + CliConstants.PROJECT_TARGET_DIR;
-        GatewayCmdUtils.createDirectory(targetDirPath, true);
+        CmdUtils.createDirectory(targetDirPath, true);
 
         String targetGenDir = targetDirPath + File.separator + CliConstants.PROJECT_GEN_DIR;
-        GatewayCmdUtils.createDirectory(targetGenDir, true);
+        CmdUtils.createDirectory(targetGenDir, true);
         
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
-        String projectModuleDir = GatewayCmdUtils.getProjectTargetModulePath(projectName);
-        GatewayCmdUtils.createDirectory(projectModuleDir, true);
+        String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
+        CmdUtils.createDirectory(projectModuleDir, true);
     }
 }

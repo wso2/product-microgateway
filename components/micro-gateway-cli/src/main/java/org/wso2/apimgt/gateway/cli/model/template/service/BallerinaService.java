@@ -29,8 +29,8 @@ import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.AbstractMap;
@@ -75,8 +75,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     public BallerinaService buildContext(OpenAPI openAPI) {
         this.info = openAPI.getInfo();
         this.tags = openAPI.getTags();
-        this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        this.config = GatewayCmdUtils.getConfig();
+        this.containerConfig = CmdUtils.getContainerConfig();
+        this.config = CmdUtils.getConfig();
         return this;
     }
 
@@ -259,7 +259,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     }
 
     private void setSecuritySchemas(String schemas) {
-        Config config = GatewayCmdUtils.getConfig();
+        Config config = CmdUtils.getConfig();
         config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 

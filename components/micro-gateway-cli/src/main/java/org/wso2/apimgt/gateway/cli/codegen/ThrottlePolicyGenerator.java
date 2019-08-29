@@ -33,8 +33,8 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicyInitializer;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class ThrottlePolicyGenerator {
     public void generate(String outPath, String projectName) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        String policyFileLocation = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
+        String policyFileLocation = CmdUtils.getProjectDirectoryPath(projectName) + File.separator
                 + CliConstants.GW_DIST_POLICIES_FILE;
         ThrottlePolicyListMapper throttlePolicyListMapper = mapper
                 .readValue(new File(policyFileLocation), ThrottlePolicyListMapper.class);

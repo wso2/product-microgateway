@@ -55,9 +55,9 @@ import java.util.List;
 /**
  * Utility functions providing tasks related to MGW toolkit.
  */
-public final class GatewayCmdUtils {
+public final class CmdUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(CmdUtils.class);
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
@@ -66,7 +66,7 @@ public final class GatewayCmdUtils {
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
 
-    private GatewayCmdUtils() {
+    private CmdUtils() {
 
     }
 
@@ -83,7 +83,7 @@ public final class GatewayCmdUtils {
     }
 
     public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
-        GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
+        CmdUtils.codeGenerationContext = codeGenerationContext;
     }
 
     /**
@@ -344,8 +344,8 @@ public final class GatewayCmdUtils {
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
         try {
-            Path genPath = Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName));
-            Path apiDefPath = Paths.get(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
+            Path genPath = Paths.get(CmdUtils.getProjectGenDirectoryPath(projectName));
+            Path apiDefPath = Paths.get(CmdUtils.getProjectGenAPIDefinitionPath(projectName));
             if (Files.notExists(genPath)) {
                 Files.createDirectory(genPath);
                 Files.createDirectory(apiDefPath);
@@ -361,7 +361,7 @@ public final class GatewayCmdUtils {
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
                 ? CliConstants.API_SWAGGER : CliConstants.API_OPENAPI_YAML;
-        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
+        CmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
     }
 
     /**
@@ -389,7 +389,7 @@ public final class GatewayCmdUtils {
         String resourceHashFileLocation = getResourceHashHolderFileLocation(projectName);
         String content = null;
         if (new File(resourceHashFileLocation).exists()) {
-            content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
+            content = CmdUtils.readFileAsString(resourceHashFileLocation, false);
         }
         return content;
     }
@@ -816,7 +816,7 @@ public final class GatewayCmdUtils {
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
         overrideContainerConfigs(containerConfig);
-        GatewayCmdUtils.containerConfig = containerConfig;
+        CmdUtils.containerConfig = containerConfig;
     }
 
     private static void overrideContainerConfigs(ContainerConfig containerConfig) {

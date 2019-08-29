@@ -26,7 +26,7 @@ import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -114,7 +114,7 @@ public class Main {
             return Optional.of((LauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";
-            throw GatewayCmdUtils.createUsageException(errorMsg);
+            throw CmdUtils.createUsageException(errorMsg);
         } catch (ParameterException e) {
             String msg = e.getMessage();
             CliLauncherException cliEx = new CliLauncherException(e);

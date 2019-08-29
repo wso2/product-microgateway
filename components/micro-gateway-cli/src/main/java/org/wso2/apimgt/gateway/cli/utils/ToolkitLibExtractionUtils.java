@@ -37,11 +37,11 @@ public class ToolkitLibExtractionUtils {
      */
     public static void extractPlatformAndRuntime() {
         try {
-            String libPath = GatewayCmdUtils.getCLILibPath();
+            String libPath = CmdUtils.getCLILibPath();
             String baloPath = CliConstants.CLI_GATEWAY + File.separator + CliConstants.CLI_BALO;
             String breLibPath = CliConstants.CLI_BRE + File.separator + CliConstants.CLI_LIB;
             String platformExtractedPath =
-                    GatewayCmdUtils.getCLILibPath() + File.separator + CliConstants.CLI_PLATFORM;
+                    CmdUtils.getCLILibPath() + File.separator + CliConstants.CLI_PLATFORM;
 
             extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
         } catch (IOException e) {
@@ -58,12 +58,12 @@ public class ToolkitLibExtractionUtils {
                     isAddToClasspath);
 
             // Copy balo to the platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + baloPath,
+            CmdUtils.copyFolder(libPath + File.separator + baloPath,
                     destination + File.separator + CliConstants.CLI_LIB + File.separator
                             + CliConstants.CLI_REPO);
 
             // Copy gateway jars to platform
-            GatewayCmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator
+            CmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator
                     + CliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
 
             //todo: remove this segment in next release

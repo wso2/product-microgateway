@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -47,7 +47,7 @@ public class Token {
         String absoluteTrustoreLocation = trustStoreLocation;
         File file = new File(absoluteTrustoreLocation);
         if (!file.isAbsolute()) {
-            absoluteTrustoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
+            absoluteTrustoreLocation = CmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
             file = new File(absoluteTrustoreLocation);
             if (!file.exists()) {
                 PrintStream err = System.err;

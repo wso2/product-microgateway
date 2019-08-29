@@ -21,7 +21,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 
@@ -50,7 +50,7 @@ public class HelpCmd implements LauncherCmd {
         }
 
         if (parentCmdParser.getCommands().get(helpCommand) == null) {
-            throw GatewayCmdUtils.createUsageException("unknown help topic `" + helpCommand + "`");
+            throw CmdUtils.createUsageException("unknown help topic `" + helpCommand + "`");
         }
 
         String commandUsageInfo = getCommandUsageInfo(helpCommand);
