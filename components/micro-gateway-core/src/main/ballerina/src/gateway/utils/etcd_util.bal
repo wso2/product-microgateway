@@ -176,8 +176,7 @@ public function etcdLookup(string base10EncodedKey) returns string {
                 base64EncodedValue = <string>value;
                }
             }
-        }
-        else {
+        } else {
             printError(KEY_ETCD_UTIL, msg.reason());
         }
     } else {
