@@ -266,33 +266,27 @@ public final class GatewayCmdUtils {
      * @param projectName name of the project
      */
     public static void createProjectStructure(String projectName) throws IOException {
-        File projectDir = createFolderIfNotExist(getUserDir() + File.separator + projectName);
+        File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
-        createFolderIfNotExist(interceptorsPath);
+        createDirectory(interceptorsPath, false);
+        createFile(interceptorsPath, GatewayCliConstants.KEEP_FILE, true);
 
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
-        createFolderIfNotExist(extensionsPath);
-
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
-        createFolderIfNotExist(targetDirPath);
-
-        String targetGenDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR;
-        createFolderIfNotExist(targetGenDirPath);
+        createDirectory(extensionsPath, false);
 
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
-        createFolderIfNotExist(confDirPath);
+        createDirectory(confDirPath, false);
 
         String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-        createFolderIfNotExist(definitionsPath);
+        createDirectory(definitionsPath, false);
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
                 getResourceFolderLocation() + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         copyFolder(resourceServicesDirectory, projectServicesDirectory);
 
-        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
+        createFile(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE, true);
 
         String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;
         File policyResFile = new File(policyResPath);
@@ -409,7 +403,7 @@ public final class GatewayCmdUtils {
      */
     public static void storeResourceHashesFileContent(String content, String projectName) throws IOException {
         String tempDirPath = getProjectTempFolderLocation(projectName);
-        createFolderIfNotExist(tempDirPath);
+        createDirectory(tempDirPath, false);
 
         String resourceHashesFileLocation = getResourceHashHolderFileLocation(projectName);
         File pathFile = new File(resourceHashesFileLocation);
@@ -488,14 +482,16 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /target/gen of a given project in the current working directory
+     * Returns the path to ballerina project module inside of a given mgw project
+     * in the current working directory.
      *
-     * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @param projectName name of the mgw project
+     * @return path to ballerina project module
      */
-    public static String getProjectTargetGenDirectoryPath(String projectName) {
+    public static String getProjectTargetModulePath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
+                GatewayCliConstants.GEN_SRC_DIR + File.separator + projectName;
     }
 
     /**
@@ -521,26 +517,26 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Returns path to the /interceptors of a given project in the current working directory
+     * Returns the path to mgw project's 'interceptors' directory.
+     * Project should be located in the current directory.
      *
      * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @return path to project interceptors directory
      */
-    public static String getProjectInterceptorsDirectoryPath(String projectName) {
+    public static String getProjectInterceptorsPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
                 + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
-     * Returns path to the /gen/src/interceptors of a given project in the current working directory
+     * Returns the path to target ballerina project's 'interceptors' directory, inside of a
+     * given mgw project in the current working directory.
      *
      * @param projectName name of the project
-     * @return path to the /src of a given project in the current working directory
+     * @return path to target interceptors directory
      */
-    public static String getProjectGenSrcInterceptorsDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator
-                + GatewayCliConstants.GEN_SRC_DIR + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+    public static String getProjectTargetInterceptorsPath(String projectName) {
+        return getProjectTargetModulePath(projectName) + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
@@ -630,7 +626,7 @@ public final class GatewayCmdUtils {
         File sourceFolder = new File(source);
         File destinationFolder = new File(destination);
         if (destinationFolder.exists()) {
-            delete(destinationFolder);
+            FileUtils.deleteDirectory(destinationFolder);
         }
         copyFolder(sourceFolder, destinationFolder);
     }
@@ -697,20 +693,58 @@ public final class GatewayCmdUtils {
      * Creates a new folder if not exists
      *
      * @param path folder path
-     * @return File object for the created folder
+     * @param overwrite if `true` existing directory will be removed
+     *                  and new directory will be created in {@code path}.
+     * @return created directory
+     * @throws IOException Failed delete or create the directory in {@code path}
      */
-    private static File createFolderIfNotExist(String path) {
-        File folder = new File(path);
-        if (!folder.exists() && !folder.isDirectory()) {
-            boolean created = folder.mkdir();
+    public static File createDirectory(String path, boolean overwrite) throws IOException {
+        File dir = new File(path);
+        if (overwrite && dir.exists() && dir.isDirectory()) {
+            FileUtils.deleteDirectory(dir);
+        }
+
+        if (!dir.exists() && !dir.isDirectory()) {
+            boolean created = dir.mkdir();
             if (created) {
                 logger.trace("Directory: {} created. ", path);
             } else {
-                logger.error("Failed to create directory: {} ", path);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
+                throw new CLIInternalException("Failed to create directory: " + path);
             }
         }
-        return folder;
+
+        return dir;
+    }
+
+    /**
+     * Create new file in a given location.
+     *
+     * @param path location of the new file.
+     * @param overwrite if `true` existing file with the same name will be replaced.
+     * @param fileName name of the new file.
+     * @return created file
+     * @throws IOException Failed delete or create the file in {@code path}
+     */
+    public static File createFile(String path, String fileName, boolean overwrite) throws IOException {
+        String filePath = path + File.separator + fileName;
+        File file = new File(filePath);
+        if (overwrite && file.exists() && file.isFile()) {
+            boolean isDeleted = file.delete();
+            if (!isDeleted) {
+                throw new CLIInternalException("Failed to overwrite file: " + filePath);
+            }
+        }
+
+        if (!file.exists() && !file.isFile()) {
+            boolean isCreated = file.createNewFile();
+            if (isCreated) {
+                logger.trace("File: {} created.", filePath);
+            } else {
+                throw new CLIInternalException("Failed to create file: " + filePath);
+            }
+        }
+
+        return file;
     }
 
     /**
@@ -724,31 +758,6 @@ public final class GatewayCmdUtils {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             writer.write(content);
             writer.flush();
-        }
-    }
-
-    /**
-     * Creates file if not exist
-     *
-     * @param path     folder path
-     * @param fileName name of the file
-     */
-    private static void createFileIfNotExist(String path, String fileName) {
-        String filePath = path + File.separator + fileName;
-        File file = new File(filePath);
-        if (!file.exists()) {
-            try {
-                boolean created = file.createNewFile();
-                if (created) {
-                    logger.trace("File: {} created. ", path);
-                } else {
-                    logger.error("Failed to create file: {} ", path);
-                    throw new CLIInternalException("Error occurred while setting up the workspace structure");
-                }
-            } catch (IOException e) {
-                logger.error("Failed to create file: {} ", path, e);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
-            }
         }
     }
 
@@ -854,32 +863,11 @@ public final class GatewayCmdUtils {
     public static void deleteProject(String projectPath) {
         File file = new File(projectPath);
         try {
-            // Deleting the directory recursively.
-            delete(file);
+            FileUtils.deleteDirectory(file);
         } catch (IOException e) {
-            // not throwing the error because deleting faild project is not
+            // not throwing the error because deleting failed project is not
             // a critical task. This can be deleted manually if not used.
             logger.error("Failed to delete project : {} ", projectPath, e);
-        }
-    }
-
-    private static void delete(File file) throws IOException {
-        File[] fileList = file.listFiles();
-        if (fileList == null) {
-            logger.debug("No files to delete in: {}", file.getAbsolutePath());
-            return;
-        }
-        for (File childFile : fileList) {
-            if (childFile.isDirectory()) {
-                delete(childFile);
-            } else {
-                if (!childFile.delete()) {
-                    throw new IOException();
-                }
-            }
-        }
-        if (!file.delete()) {
-            throw new IOException();
         }
     }
 
@@ -893,22 +881,6 @@ public final class GatewayCmdUtils {
     public static String promptForTextInput(PrintStream outStream, String msg) {
         outStream.println(msg);
         return System.console().readLine();
-    }
-
-    /**
-     * Create directory structure for projects /gen directory.
-     *
-     * @param genDirPath path to project's /gen directory
-     */
-    public static void createGenDirectoryStructure(String genDirPath) throws IOException {
-        Path genPath = Paths.get(genDirPath);
-        FileUtils.deleteDirectory(new File(genDirPath));
-        Files.createDirectory(genPath);
-        String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
-        createFolderIfNotExist(genSrcPath);
-
-        String genPoliciesPath = genSrcPath + File.separator + GatewayCliConstants.GEN_POLICIES_DIR;
-        createFolderIfNotExist(genPoliciesPath);
     }
 
     /**

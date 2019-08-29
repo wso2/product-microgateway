@@ -382,7 +382,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${maven.spotbugsplugin.version}</version>
+                <version>${maven.spotbugs.version}</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
@@ -466,14 +466,14 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>${maven.spotbugsplugin.version}</version>
+                    <version>${maven.spotbugs.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <properties>
-        <ballerina.platform.version>0.990.5</ballerina.platform.version>
+        <ballerina.platform.version>1.0.0-alpha3</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
