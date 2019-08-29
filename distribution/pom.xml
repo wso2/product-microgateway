@@ -105,7 +105,7 @@
                                 <artifactItem>
                                     <groupId>com.google.protobuf</groupId>
                                     <artifactId>protoc</artifactId>
-                                    <version>3.7.1</version>
+                                    <version>${com.google.protobuf.version}</version>
                                     <classifier>windows-x86_64</classifier>
                                     <type>exe</type>
                                     <overWrite>true</overWrite>
@@ -115,7 +115,7 @@
                                 <artifactItem>
                                     <groupId>com.google.protobuf</groupId>
                                     <artifactId>protoc</artifactId>
-                                    <version>3.7.1</version>
+                                    <version>${com.google.protobuf.version}</version>
                                     <classifier>osx-x86_64</classifier>
                                     <type>exe</type>
                                     <overWrite>true</overWrite>
@@ -125,7 +125,7 @@
                                 <artifactItem>
                                     <groupId>com.google.protobuf</groupId>
                                     <artifactId>protoc</artifactId>
-                                    <version>3.7.1</version>
+                                    <version>${com.google.protobuf.version}</version>
                                     <classifier>linux-x86_64</classifier>
                                     <type>exe</type>
                                     <overWrite>true</overWrite>

@@ -15,13 +15,18 @@ public class ProtocCommandBuilder {
     private String protoFolderPath;
     private String descriptorSetOutPath;
 
-    public ProtocCommandBuilder(String exePath, String protoPath, String protofolderPath, String descriptorSetOutPath) {
+    ProtocCommandBuilder(String exePath, String protoPath, String protofolderPath, String descriptorSetOutPath) {
         this.exePath = exePath;
         this.protoPath = protoPath;
         this.descriptorSetOutPath = descriptorSetOutPath;
         this.protoFolderPath = protofolderPath;
     }
 
+    /**
+     * Build the command to generate descriptor by compiling the protobuf file using protoc.exe
+     *
+     * @return the command to generate descriptor
+     */
     public String build() {
         return COMMAND_PLACEHOLDER.replace(EXE_PATH_PLACEHOLDER, exePath)
                 .replace(PROTO_PATH_PLACEHOLDER, protoPath)

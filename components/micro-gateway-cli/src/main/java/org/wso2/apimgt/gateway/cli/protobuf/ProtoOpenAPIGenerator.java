@@ -1,83 +1,128 @@
 package org.wso2.apimgt.gateway.cli.protobuf;
 
-import io.swagger.v3.oas.models.*;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.apimgt.gateway.cli.constants.GrpcConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
+/**
+ * Generate custom OpenAPI object for mapping the grpc service definition (protobuf).
+ */
 public class ProtoOpenAPIGenerator {
-    public static final String OAUTH2_SCHEME = "grpc-oauth2-scheme";
-    public static final String BASIC_SCHEME = "grpc-basic-scheme";
+    private static final String OAUTH2_SCHEME = "grpc-oauth2-scheme";
+    private static final String BASIC_SCHEME = "grpc-basic-scheme";
     private boolean isBasicAuthEnabled = false;
     private boolean isOauth2Enabled = false;
     private boolean isSecurityDisabled = false;
     private boolean endpointsAvailable = false;
     private OpenAPI openAPI;
 
-    public ProtoOpenAPIGenerator(){
+    ProtoOpenAPIGenerator() {
         openAPI = new OpenAPI();
     }
 
-    //todo: bring enum for security, if so needs to modify in the openAPI related process as well.
-    public void addOpenAPIInfo(String name, String version) {
+    /**
+     * Add the minimal information required for OpenAPI Info segment.
+     * The same name is assigned as the basePath.
+     *
+     * @param name API name
+     */
+    void addOpenAPIInfo(String name) {
         Info info = new Info();
         info.setTitle(name);
-        info.setVersion(version);
+        //todo: decide if we bring versioning into this.
+        //version is set to 1.0.0 as default.
+        info.setVersion("1.0.0");
         openAPI.setInfo(info);
-        openAPI.addExtension(OpenAPIConstants.BASEPATH, name);
+        openAPI.addExtension(GrpcConstants.URL_SEPARATOR + OpenAPIConstants.BASEPATH, name);
     }
 
-    public void addOpenAPIPath(String path, String[] scopes, String throttling_tier) {
+    /**
+     * Add openAPI path item to the the openAPI object.
+     *
+     * @param path            name of the pathItem
+     * @param scopes          array of operation scopes
+     * @param throttlingTier throttling tier
+     */
+    void addOpenAPIPath(String path, String[] scopes, String throttlingTier) {
         PathItem pathItem = new PathItem();
         Operation operation = new Operation();
         operation.setOperationId(UUID.randomUUID().toString());
         addOauth2SecurityRequirement(operation, scopes);
         addBasicAuthSecurityRequirement(operation);
-
-        if(StringUtils.isNotEmpty(throttling_tier)){
-            operation.addExtension(OpenAPIConstants.THROTTLING_TIER, throttling_tier);
+        if (StringUtils.isNotEmpty(throttlingTier)) {
+            operation.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
         }
-
+        //For each path, the only available http method is "post" according to the grpc mapping.
         pathItem.setPost(operation);
-        openAPI.setPaths(new Paths().addPathItem(path, pathItem));
+        if (openAPI.getPaths() == null) {
+            openAPI.setPaths(new Paths());
+        }
+        openAPI.getPaths().addPathItem(path, pathItem);
     }
 
-    public void addAPIProdEpExtension(EndpointListRouteDTO endpointListRouteDTO) {
-        if(endpointListRouteDTO == null){
+    /**
+     * Add API Level production endpoints to the openAPI object.
+     * If the provided {@link EndpointListRouteDTO} object is null, nothing will be added to the openAPI object.
+     *
+     * @param endpointListRouteDTO {@link EndpointListRouteDTO} object representing the endpoint configuration.
+     */
+    void addAPIProdEpExtension(EndpointListRouteDTO endpointListRouteDTO) {
+        if (endpointListRouteDTO == null) {
             return;
         }
         openAPI.addExtension(OpenAPIConstants.PRODUCTION_ENDPOINTS, endpointListRouteDTO);
         endpointsAvailable = true;
     }
 
-    public void addAPISandEpExtension(EndpointListRouteDTO endpointListRouteDTO) {
-        if(endpointListRouteDTO == null){
+    /**
+     * Add API Level sandbox endpoints to the openAPI object.
+     * If the provided {@link EndpointListRouteDTO} object is null, nothing will be added to the openAPI object.
+     *
+     * @param endpointListRouteDTO {@link EndpointListRouteDTO} object representing the endpoint configuration.
+     */
+    void addAPISandEpExtension(EndpointListRouteDTO endpointListRouteDTO) {
+        if (endpointListRouteDTO == null) {
             return;
         }
         openAPI.addExtension(OpenAPIConstants.SANDBOX_ENDPOINTS, endpointListRouteDTO);
         endpointsAvailable = true;
     }
 
+    /**
+     * Add Oauth2 security scheme to the openAPI object.
+     */
     private void addOauth2SecurityScheme() {
         OAuthFlow flowObj = new OAuthFlow();
         //todo: fix this dummy value to something meaningful
         flowObj.setAuthorizationUrl("http://dummmyVal.com");
         flowObj.setScopes(new Scopes());
-        SecurityScheme scheme = new SecurityScheme();
+        SecurityScheme scheme;
+        scheme = new SecurityScheme();
         scheme.setType(SecurityScheme.Type.OAUTH2);
-        //todo: the dummy flow object is added as an "implicit" object
         scheme.setFlows(new OAuthFlows().implicit(flowObj));
         openAPI.setComponents(new Components().addSecuritySchemes(OAUTH2_SCHEME, scheme));
         isOauth2Enabled = true;
     }
 
+    /**
+     * Add Basic security scheme to the openAPI object.
+     */
     private void addBasicSecurityScheme() {
         SecurityScheme scheme = new SecurityScheme();
         scheme.setType(SecurityScheme.Type.HTTP);
@@ -86,22 +131,38 @@ public class ProtoOpenAPIGenerator {
         isBasicAuthEnabled = false;
     }
 
+    /**
+     * Add scopes to the security schema.
+     *
+     * @param scope scope
+     */
     private void addScopeToSchema(String scope) {
-        if(StringUtils.isEmpty(scope)){
+        if (StringUtils.isEmpty(scope)) {
             return;
         }
         SecurityScheme scheme = openAPI.getComponents().getSecuritySchemes().get(OAUTH2_SCHEME);
-        scheme.getFlows().getImplicit().setScopes(new Scopes().addString(scope, ""));
+        if (!scheme.getFlows().getImplicit().getScopes().containsKey(scope)) {
+            //scopes description is set as a null string
+            scheme.getFlows().getImplicit().setScopes(new Scopes().addString(scope, ""));
+        }
     }
 
-    //it is required to happen updating the security schema and creating the security requirement at the same moment
-    //as we do not know about the available scopes until the end
+    /**
+     * Add Oauth2 security requirement to the operation/API.
+     * If {@link Operation} object is null, security requirement is added to the API.
+     *
+     * @param operation {@link Operation} object
+     * @param scopes    array of scopes
+     */
     private void addOauth2SecurityRequirement(Operation operation, String[] scopes) {
-        if(!isOauth2Enabled){
-            throw new RuntimeException("Scopes cannot be added if \"oauth2\" is not provided as security type.");
+        //if Oauth2 is not available as a security scheme, adding scopes would be meaningless.
+        if (!isOauth2Enabled) {
+            throw new CLIRuntimeException("Scopes cannot be added if \"oauth2\" is not provided as security type.");
         }
         SecurityRequirement oauth2Req = new SecurityRequirement();
-        if(scopes != null){
+        //Since the scopes are not known at the start, the security scheme should be updated with newly identified
+        //scopes as proceed
+        if (scopes != null) {
             for (String scope : scopes) {
                 addScopeToSchema(scope);
             }
@@ -109,7 +170,6 @@ public class ProtoOpenAPIGenerator {
         } else {
             oauth2Req.addList(OAUTH2_SCHEME);
         }
-
         if (operation == null) {
             openAPI.addSecurityItem(oauth2Req);
         } else {
@@ -117,15 +177,21 @@ public class ProtoOpenAPIGenerator {
         }
     }
 
+    /**
+     * Add Basic Auth security requirement to the operation/API.
+     * If {@link Operation} object is null, security requirement is added to the API.
+     *
+     * @param operation {@link Operation} object
+     */
     private void addBasicAuthSecurityRequirement(Operation operation) {
-        if(!isBasicAuthEnabled){
+        if (!isBasicAuthEnabled) {
             return;
         }
-        if(openAPI.getComponents().getSecuritySchemes().get(BASIC_SCHEME) != null){
+        if (openAPI.getComponents().getSecuritySchemes().get(BASIC_SCHEME) != null) {
             SecurityRequirement basicAuthReq = new SecurityRequirement();
             basicAuthReq.addList(BASIC_SCHEME);
 
-            if (operation == null){
+            if (operation == null) {
                 openAPI.addSecurityItem(basicAuthReq);
             } else {
                 operation.addSecurityItem(basicAuthReq);
@@ -133,45 +199,65 @@ public class ProtoOpenAPIGenerator {
         }
     }
 
-    public void addAPIOauth2SecurityRequirement(){
+    /**
+     * Add Oauth2 security requirement to the API level.
+     */
+    void addAPIOauth2SecurityRequirement() {
         addOauth2SecurityScheme();
         addOauth2SecurityRequirement(null, null);
     }
 
-    public void addAPIBasicSecurityRequirement(){
+    /**
+     * Add Basic Auth security requirement to the API level.
+     */
+    void addAPIBasicSecurityRequirement() {
         addBasicSecurityScheme();
         addBasicAuthSecurityRequirement(null);
     }
 
-    public void disableAPISecurity(){
+    /**
+     * Disable API security.
+     */
+    void disableAPISecurity() {
         openAPI.addExtension(OpenAPIConstants.DISABLE_SECURITY, true);
         isSecurityDisabled = true;
         checkSecurityTypeIncompatibility();
     }
 
-    private void checkSecurityTypeIncompatibility(){
-        if((isOauth2Enabled || isBasicAuthEnabled) && isSecurityDisabled) {
+    private void checkSecurityTypeIncompatibility() {
+        //if security types are defined with disabled security option, throw an error to indicate incompatibility.
+        if ((isOauth2Enabled || isBasicAuthEnabled) && isSecurityDisabled) {
             throw new RuntimeException("\"None\" security type is incompatible with other security types.");
         }
     }
 
-    public void setAPIThrottlingTier(String throttlingTier){
-        if(StringUtils.isEmpty(throttlingTier)){
+    /**
+     * Set API level throttling tier.
+     *
+     * @param throttlingTier throttling-tier as mentioned in the policies.yaml
+     */
+    void setAPIThrottlingTier(String throttlingTier) {
+        if (StringUtils.isEmpty(throttlingTier)) {
             return;
         }
         openAPI.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
     }
 
-    private void checkEndpointAvailability(){
-        if(!endpointsAvailable){
+    private void checkEndpointAvailability() {
+        //if no endpoints are available, throw an error.
+        if (!endpointsAvailable) {
             throw new CLIRuntimeException("No endpoints provided for the service");
         }
     }
 
-    public OpenAPI getOpenAPI(){
+    /**
+     * Return the validated openAPI object.
+     *
+     * @return {@link OpenAPI} object
+     */
+    OpenAPI getOpenAPI() {
         checkEndpointAvailability();
         checkSecurityTypeIncompatibility();
-        //todo: do the validation here
         return openAPI;
     }
 }

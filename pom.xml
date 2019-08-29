@@ -406,6 +406,9 @@
                         <version>${maven.checkstyle.version}</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <excludes>org/wso2/apimgt/gateway/cli/protobuf/ExtensionHolder.java</excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>validate</id>
