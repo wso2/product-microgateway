@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.logging;
 
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,7 +45,7 @@ public class CLILogManager extends LogManager {
     }
 
     private String substituteVariables(String value) {
-        Matcher matcher = GatewayCliConstants.SYS_PROP_PATTERN.matcher(value);
+        Matcher matcher = CliConstants.SYS_PROP_PATTERN.matcher(value);
         boolean found = matcher.find();
         if (!found) {
             return value;

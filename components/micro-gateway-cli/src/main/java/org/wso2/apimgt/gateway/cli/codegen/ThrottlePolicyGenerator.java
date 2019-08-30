@@ -24,7 +24,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
@@ -33,8 +33,8 @@ import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyMapper;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicyInitializer;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,8 +79,8 @@ public class ThrottlePolicyGenerator {
     public void generate(String outPath, String projectName) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        String policyFileLocation = GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.GW_DIST_POLICIES_FILE;
+        String policyFileLocation = CmdUtils.getProjectDirectoryPath(projectName) + File.separator
+                + CliConstants.GW_DIST_POLICIES_FILE;
         ThrottlePolicyListMapper throttlePolicyListMapper = mapper
                 .readValue(new File(policyFileLocation), ThrottlePolicyListMapper.class);
 

@@ -18,15 +18,15 @@
 package org.wso2.apimgt.gateway.cli.cmd;
 
 import com.beust.jcommander.JCommander;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * {@code GatewayLauncherCmd} represents a micro gateway cli launcher command.
+ * {@code LauncherCmd} represents a micro gateway cli launcher command.
  */
-public interface GatewayLauncherCmd {
+public interface LauncherCmd {
 
     void execute();
 
@@ -36,14 +36,14 @@ public interface GatewayLauncherCmd {
 
     default String getCommandUsageInfo(String commandName) {
         if (commandName == null) {
-            commandName = GatewayCliCommands.DEFAULT;
+            commandName = CliCommands.DEFAULT;
         }
 
         String fileName = "cli-help/cli-" + commandName + ".help";
         try {
-            return GatewayCmdUtils.readFileAsString(fileName, true);
+            return CmdUtils.readFileAsString(fileName, true);
         } catch (IOException e) {
-            throw GatewayCmdUtils.createUsageException("Usage info not available for command: " + commandName);
+            throw CmdUtils.createUsageException("Usage info not available for command: " + commandName);
         }
     }
 

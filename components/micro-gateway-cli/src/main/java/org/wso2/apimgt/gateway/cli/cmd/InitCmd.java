@@ -22,7 +22,7 @@ import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -37,7 +37,7 @@ import java.nio.file.Paths;
  * Command will create the basic directory structure for a microgateway project.
  */
 @Parameters(commandNames = "init", commandDescription = "initialize a new project")
-public class InitCmd implements GatewayLauncherCmd {
+public class InitCmd implements LauncherCmd {
     private static final Logger LOGGER = LoggerFactory.getLogger(InitCmd.class);
     private static final PrintStream OUT = System.out;
 
@@ -69,18 +69,18 @@ public class InitCmd implements GatewayLauncherCmd {
             return;
         }
 
-        String workspace = GatewayCmdUtils.getUserDir();
+        String workspace = CmdUtils.getUserDir();
         Path projectLocation = Paths.get(workspace + File.separator + projectName);
         boolean isDirectory = Files.isDirectory(projectLocation);
 
         if (isDirectory && !isForceful) {
-            throw GatewayCmdUtils.createUsageException("Project name `" + projectName
+            throw CmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
 
         // This is a valid force init
         if (isDirectory) {
-            GatewayCmdUtils.deleteProject(projectName);
+            CmdUtils.deleteProject(projectName);
         }
 
         // Extract the zipped ballerina platform and runtime
@@ -92,7 +92,7 @@ public class InitCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.INIT;
+        return CliCommands.INIT;
     }
 
     @Override
@@ -107,8 +107,8 @@ public class InitCmd implements GatewayLauncherCmd {
      */
     private static void init(String projectName, String deploymentConfigPath) {
         try {
-            GatewayCmdUtils.createProjectStructure(projectName);
-            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
+            CmdUtils.createProjectStructure(projectName);
+            CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
             throw new CLIInternalException("Error occurred while loading configurations.");

@@ -24,7 +24,7 @@ import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
@@ -55,9 +55,9 @@ import java.util.List;
 /**
  * Utility functions providing tasks related to MGW toolkit.
  */
-public final class GatewayCmdUtils {
+public final class CmdUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(GatewayCmdUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(CmdUtils.class);
     private static Config config;
     private static ContainerConfig containerConfig;
     private static CodeGenerationContext codeGenerationContext;
@@ -66,7 +66,7 @@ public final class GatewayCmdUtils {
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
 
-    private GatewayCmdUtils() {
+    private CmdUtils() {
 
     }
 
@@ -83,7 +83,7 @@ public final class GatewayCmdUtils {
     }
 
     public static void setCodeGenerationContext(CodeGenerationContext codeGenerationContext) {
-        GatewayCmdUtils.codeGenerationContext = codeGenerationContext;
+        CmdUtils.codeGenerationContext = codeGenerationContext;
     }
 
     /**
@@ -186,11 +186,11 @@ public final class GatewayCmdUtils {
      * @return current user dir
      */
     public static String getUserDir() {
-        String currentDirProp = System.getProperty(GatewayCliConstants.SYS_PROP_CURRENT_DIR);
+        String currentDirProp = System.getProperty(CliConstants.SYS_PROP_CURRENT_DIR);
         if (currentDirProp != null) {
             return currentDirProp;
         } else {
-            return System.getProperty(GatewayCliConstants.SYS_PROP_USER_DIR);
+            return System.getProperty(CliConstants.SYS_PROP_USER_DIR);
         }
     }
 
@@ -200,7 +200,7 @@ public final class GatewayCmdUtils {
      * @return cli home location
      */
     public static String getCLIHome() {
-        return System.getProperty(GatewayCliConstants.CLI_HOME);
+        return System.getProperty(CliConstants.CLI_HOME);
     }
 
     /**
@@ -209,7 +209,7 @@ public final class GatewayCmdUtils {
      * @return cli lib location
      */
     public static String getCLILibPath() {
-        return getCLIHome() + File.separator + GatewayCliConstants.CLI_LIB;
+        return getCLIHome() + File.separator + CliConstants.CLI_LIB;
     }
 
     /**
@@ -218,8 +218,8 @@ public final class GatewayCmdUtils {
      * @return resources file directory path
      */
     public static String getResourceFolderLocation() {
-        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator
-                + GatewayCliConstants.GW_DIST_RESOURCES;
+        return System.getProperty(CliConstants.CLI_HOME) + File.separator
+                + CliConstants.GW_DIST_RESOURCES;
     }
 
     /**
@@ -228,8 +228,8 @@ public final class GatewayCmdUtils {
      * @return resources file directory path
      */
     public static String getLoggingPropertiesFileLocation() {
-        return System.getProperty(GatewayCliConstants.CLI_HOME) + File.separator + GatewayCliConstants.CLI_CONF
-                + File.separator + GatewayCliConstants.LOGGING_PROPERTIES_FILENAME;
+        return System.getProperty(CliConstants.CLI_HOME) + File.separator + CliConstants.CLI_CONF
+                + File.separator + CliConstants.LOGGING_PROPERTIES_FILENAME;
     }
 
     /**
@@ -238,7 +238,7 @@ public final class GatewayCmdUtils {
      * @return filters folder location
      */
     public static String getDefinitionsLocation() {
-        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_DEFINITIONS;
+        return getResourceFolderLocation() + File.separator + CliConstants.GW_DIST_DEFINITIONS;
     }
 
     /**
@@ -247,7 +247,7 @@ public final class GatewayCmdUtils {
      * @return filters folder location
      */
     public static String getFiltersFolderLocation() {
-        return getResourceFolderLocation() + File.separator + GatewayCliConstants.GW_DIST_FILTERS;
+        return getResourceFolderLocation() + File.separator + CliConstants.GW_DIST_FILTERS;
     }
 
     /**
@@ -257,7 +257,7 @@ public final class GatewayCmdUtils {
      * @return temp folder location
      */
     private static String getProjectTempFolderLocation(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.TEMP_DIR_NAME;
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.TEMP_DIR_NAME;
     }
 
     /**
@@ -268,47 +268,47 @@ public final class GatewayCmdUtils {
     public static void createProjectStructure(String projectName) throws IOException {
         File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
-        String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+        String interceptorsPath = projectDir + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
         createDirectory(interceptorsPath, false);
-        createFile(interceptorsPath, GatewayCliConstants.KEEP_FILE, true);
+        createFile(interceptorsPath, CliConstants.KEEP_FILE, true);
 
-        String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
+        String extensionsPath = projectDir + File.separator + CliConstants.PROJECT_EXTENSIONS_DIR;
         createDirectory(extensionsPath, false);
 
-        String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
+        String confDirPath = projectDir + File.separator + CliConstants.PROJECT_CONF_DIR;
         createDirectory(confDirPath, false);
 
-        String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+        String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
 
-        String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
+        String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
-                getResourceFolderLocation() + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
+                getResourceFolderLocation() + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         copyFolder(resourceServicesDirectory, projectServicesDirectory);
 
-        createFile(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE, true);
+        createFile(projectDir.getPath(), CliConstants.PROJECT_POLICIES_FILE, true);
 
-        String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;
+        String policyResPath = getDefinitionsLocation() + File.separator + CliConstants.GW_DIST_POLICIES_FILE;
         File policyResFile = new File(policyResPath);
-        File policesFile = new File(projectDir + File.separator + GatewayCliConstants.PROJECT_POLICIES_FILE);
+        File policesFile = new File(projectDir + File.separator + CliConstants.PROJECT_POLICIES_FILE);
 
         String extensionResPath = getFiltersFolderLocation() + File.separator +
-                GatewayCliConstants.GW_DIST_EXTENSION_FILTER;
+                CliConstants.GW_DIST_EXTENSION_FILTER;
         File extensionResFile = new File(extensionResPath);
         File extensionFile = new File(extensionsPath + File.separator +
-                GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
+                CliConstants.GW_DIST_EXTENSION_FILTER);
 
         String tokenRevocationResPath = getFiltersFolderLocation() + File.separator +
-                GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION;
+                CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION;
         File tokenRevocationResFile = new File(tokenRevocationResPath);
         File tokenRevocationFile = new File(extensionsPath + File.separator +
-                GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
+                CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
 
         String startUpExtensionResourcePath = getFiltersFolderLocation() + File.separator +
-                GatewayCliConstants.GW_DIST_START_UP_EXTENSION;
+                CliConstants.GW_DIST_START_UP_EXTENSION;
         File startUpExtensionResFile = new File(startUpExtensionResourcePath);
         File startUpExtensionFile = new File(extensionsPath + File.separator +
-                GatewayCliConstants.GW_DIST_START_UP_EXTENSION);
+                CliConstants.GW_DIST_START_UP_EXTENSION);
 
         if (Files.exists(extensionResFile.toPath())) {
             FileUtils.copyFile(extensionResFile, extensionFile);
@@ -344,8 +344,8 @@ public final class GatewayCmdUtils {
             throw new CLIInternalException("No swagger definition is provided to generate API");
         }
         try {
-            Path genPath = Paths.get(GatewayCmdUtils.getProjectGenDirectoryPath(projectName));
-            Path apiDefPath = Paths.get(GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName));
+            Path genPath = Paths.get(CmdUtils.getProjectGenDirectoryPath(projectName));
+            Path apiDefPath = Paths.get(CmdUtils.getProjectGenAPIDefinitionPath(projectName));
             if (Files.notExists(genPath)) {
                 Files.createDirectory(genPath);
                 Files.createDirectory(apiDefPath);
@@ -360,8 +360,8 @@ public final class GatewayCmdUtils {
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
-                ? GatewayCliConstants.API_SWAGGER : GatewayCliConstants.API_OPENAPI_YAML;
-        GatewayCmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
+                ? CliConstants.API_SWAGGER : CliConstants.API_OPENAPI_YAML;
+        CmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
     }
 
     /**
@@ -389,7 +389,7 @@ public final class GatewayCmdUtils {
         String resourceHashFileLocation = getResourceHashHolderFileLocation(projectName);
         String content = null;
         if (new File(resourceHashFileLocation).exists()) {
-            content = GatewayCmdUtils.readFileAsString(resourceHashFileLocation, false);
+            content = CmdUtils.readFileAsString(resourceHashFileLocation, false);
         }
         return content;
     }
@@ -428,7 +428,7 @@ public final class GatewayCmdUtils {
      */
     private static String getResourceHashHolderFileLocation(String projectName) {
         return getProjectTempFolderLocation(projectName) + File.separator
-                + GatewayCliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
+                + CliConstants.RESOURCE_HASH_HOLDER_FILE_NAME;
     }
 
     /**
@@ -437,8 +437,8 @@ public final class GatewayCmdUtils {
      * @return path configuration file
      */
     public static String getMainConfigLocation() {
-        return getCLIHome() + File.separator + GatewayCliConstants.GW_DIST_CONF + File.separator
-                + GatewayCliConstants.MAIN_CONFIG_FILE_NAME;
+        return getCLIHome() + File.separator + CliConstants.GW_DIST_CONF + File.separator
+                + CliConstants.MAIN_CONFIG_FILE_NAME;
     }
 
     /**
@@ -447,7 +447,7 @@ public final class GatewayCmdUtils {
      * @return path to the project conf folder
      */
     private static String getProjectConfigDirPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_CONF_DIR;
     }
 
     /**
@@ -457,7 +457,7 @@ public final class GatewayCmdUtils {
      * @return path to deployment configuration file
      */
     public static String getDeploymentConfigLocation(String projectName) {
-        return getProjectConfigDirPath(projectName) + File.separator + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
+        return getProjectConfigDirPath(projectName) + File.separator + CliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
     }
 
     /**
@@ -478,7 +478,7 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGenDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR;
+                + CliConstants.PROJECT_GEN_DIR;
     }
 
     /**
@@ -489,9 +489,9 @@ public final class GatewayCmdUtils {
      * @return path to ballerina project module
      */
     public static String getProjectTargetModulePath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
-                GatewayCliConstants.GEN_SRC_DIR + File.separator + projectName;
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_TARGET_DIR
+                + File.separator + CliConstants.PROJECT_GEN_DIR + File.separator +
+                CliConstants.GEN_SRC_DIR + File.separator + projectName;
     }
 
     /**
@@ -501,9 +501,9 @@ public final class GatewayCmdUtils {
      * @return path to the /src of a given project in the current working directory
      */
     public static String getProjectGenSrcDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR
-                + File.separator + GatewayCliConstants.PROJECT_GEN_DIR + File.separator
-                + GatewayCliConstants.GEN_SRC_DIR;
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_TARGET_DIR
+                + File.separator + CliConstants.PROJECT_GEN_DIR + File.separator
+                + CliConstants.GEN_SRC_DIR;
     }
 
     /**
@@ -513,7 +513,7 @@ public final class GatewayCmdUtils {
      * @return path to the /extensions of a given project in the current working directory
      */
     public static String getProjectExtensionsDirectoryPath(String projectName) {
-        return getProjectDirectoryPath(projectName) + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_EXTENSIONS_DIR;
     }
 
     /**
@@ -525,7 +525,7 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectInterceptorsPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator
-                + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+                + CliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
@@ -536,7 +536,7 @@ public final class GatewayCmdUtils {
      * @return path to target interceptors directory
      */
     public static String getProjectTargetInterceptorsPath(String projectName) {
-        return getProjectTargetModulePath(projectName) + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
+        return getProjectTargetModulePath(projectName) + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
     }
 
     /**
@@ -549,8 +549,8 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGenSwaggerPath(String projectName, String apiId, String extensionType) {
         return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
+                CliConstants.PROJECT_GEN_DIR + File.separator +
+                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
                 + extensionType;
     }
 
@@ -563,9 +563,9 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGenSwaggerPath(String projectName, String apiId) {
         return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
-                + GatewayCliConstants.API_SWAGGER;
+                CliConstants.PROJECT_GEN_DIR + File.separator +
+                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + apiId
+                + CliConstants.API_SWAGGER;
     }
 
     /**
@@ -576,8 +576,8 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGenAPIDefinitionPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+                CliConstants.PROJECT_GEN_DIR + File.separator +
+                CliConstants.PROJECT_API_DEFINITIONS_DIR;
     }
 
     /**
@@ -587,8 +587,8 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGrpcDirectoryPath() {
         return getUserDir() + File.separator
-                + GatewayCliConstants.PROJECT_GRPC_SERVICE_DIR + File.separator +
-                GatewayCliConstants.PROJECT_GRPC_CLIENT_DIR;
+                + CliConstants.PROJECT_GRPC_SERVICE_DIR + File.separator +
+                CliConstants.PROJECT_GRPC_CLIENT_DIR;
     }
 
     /**
@@ -598,7 +598,7 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectGrpcSoloDirectoryPath() {
         return getUserDir() + File.separator
-                + GatewayCliConstants.PROJECT_GRPC_SERVICE_DIR;
+                + CliConstants.PROJECT_GRPC_SERVICE_DIR;
     }
 
     /**
@@ -773,7 +773,7 @@ public final class GatewayCmdUtils {
             throws IOException {
 
         String depConfig = getProjectConfigDirPath(projectName) + File.separator
-                + GatewayCliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
+                + CliConstants.DEPLOYMENT_CONFIG_FILE_NAME;
         File file = new File(depConfig);
 
         if (deploymentConfPath == null) {
@@ -786,7 +786,7 @@ public final class GatewayCmdUtils {
                     throw new CLIInternalException("Failed to create the deployment configuration file: " + depConfig);
                 }
                 //Write Content
-                defaultConfig = readFileAsString(GatewayCliConstants.DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME, true);
+                defaultConfig = readFileAsString(CliConstants.DEFAULT_DEPLOYMENT_CONFIG_FILE_NAME, true);
                 writeContent(defaultConfig, file);
             }
         } else {
@@ -816,7 +816,7 @@ public final class GatewayCmdUtils {
 
     public static void setContainerConfig(ContainerConfig containerConfig) {
         overrideContainerConfigs(containerConfig);
-        GatewayCmdUtils.containerConfig = containerConfig;
+        CmdUtils.containerConfig = containerConfig;
     }
 
     private static void overrideContainerConfigs(ContainerConfig containerConfig) {
@@ -838,10 +838,10 @@ public final class GatewayCmdUtils {
     public static APICorsConfigurationDTO getDefaultCorsConfig() {
         APICorsConfigurationDTO corsConfigurationDTO = new APICorsConfigurationDTO();
         corsConfigurationDTO.setCorsConfigurationEnabled(true);
-        corsConfigurationDTO.setAccessControlAllowOrigins(GatewayCliConstants.ACCESS_CONTROL_ALLOW_ORIGINS);
-        corsConfigurationDTO.setAccessControlAllowMethods(GatewayCliConstants.ACCESS_CONTROL_ALLOW_METHODS);
-        corsConfigurationDTO.setAccessControlAllowHeaders(GatewayCliConstants.ACCESS_CONTROL_ALLOW_HEADERS);
-        corsConfigurationDTO.setAccessControlAllowCredentials(GatewayCliConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS);
+        corsConfigurationDTO.setAccessControlAllowOrigins(CliConstants.ACCESS_CONTROL_ALLOW_ORIGINS);
+        corsConfigurationDTO.setAccessControlAllowMethods(CliConstants.ACCESS_CONTROL_ALLOW_METHODS);
+        corsConfigurationDTO.setAccessControlAllowHeaders(CliConstants.ACCESS_CONTROL_ALLOW_HEADERS);
+        corsConfigurationDTO.setAccessControlAllowCredentials(CliConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS);
         return corsConfigurationDTO;
     }
 
@@ -891,7 +891,7 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectAPIFilesDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator +
-                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+                CliConstants.PROJECT_API_DEFINITIONS_DIR;
     }
 
     /**
@@ -903,7 +903,7 @@ public final class GatewayCmdUtils {
      */
     public static String getProjectSwaggerFilePath(String projectName, String apiId) {
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
-                GatewayCliConstants.API_SWAGGER;
+                CliConstants.API_SWAGGER;
     }
 
     /**

@@ -33,7 +33,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
@@ -370,14 +370,14 @@ public class OpenAPICodegenUtils {
      * @throws IOException if an error occurred while reading the bal files inside interceptor directory
      */
     public static void setInterceptors(String projectName) throws IOException {
-        String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsPath(projectName);
+        String interceptorsDirectoryPath = CmdUtils.getProjectInterceptorsPath(projectName);
         Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> {
             Path fileName = path.getFileName();
-            return fileName != null && fileName.toString().endsWith(GatewayCliConstants.EXTENSION_BAL);
+            return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_BAL);
         }).forEach(path -> {
             String balSrcCode = null;
             try {
-                balSrcCode = GatewayCmdUtils.readFileAsString(path.toString(), false);
+                balSrcCode = CmdUtils.readFileAsString(path.toString(), false);
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }
@@ -495,7 +495,7 @@ public class OpenAPICodegenUtils {
             if (path != null && operation != null) {
                 errorMsg += "under path:'" + path + "' operation:'" + operation + "' ";
             }
-            errorMsg += "is not available in any function in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR +
+            errorMsg += "is not available in any function in the " + CliConstants.PROJECT_INTERCEPTORS_DIR +
                     " directory.";
             throw new CLIRuntimeException(errorMsg);
         }

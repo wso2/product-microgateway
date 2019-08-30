@@ -25,7 +25,7 @@ import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -36,7 +36,7 @@ import java.nio.file.Paths;
  * This class represents the "reset" command and it holds arguments and flags specified by the user.
  */
 @Parameters(commandNames = "reset", commandDescription = "reset configurations")
-public class ResetCmd implements GatewayLauncherCmd {
+public class ResetCmd implements LauncherCmd {
     private static PrintStream outStream = System.err;
 
     @Parameter(names = {"-c", "--config"}, description = "external config file path")
@@ -49,7 +49,7 @@ public class ResetCmd implements GatewayLauncherCmd {
     public void execute() {
         // Reset the configuration of the provided config path. If path is not given use the default config file
         if (StringUtils.isEmpty(configPath)) {
-            configPath = GatewayCmdUtils.getMainConfigLocation();
+            configPath = CmdUtils.getMainConfigLocation();
         }
 
         Path configurationFile = Paths.get(configPath);
@@ -69,13 +69,13 @@ public class ResetCmd implements GatewayLauncherCmd {
                 .setUsername(StringUtils.EMPTY).setClientId(StringUtils.EMPTY).setClientSecret(StringUtils.EMPTY)
                 .setTrustStoreLocation(StringUtils.EMPTY).setTrustStorePassword(StringUtils.EMPTY).build();
         newConfig.setToken(token);
-        newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
-        GatewayCmdUtils.saveConfig(newConfig, configPath);
+        newConfig.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
+        CmdUtils.saveConfig(newConfig, configPath);
     }
 
     @Override
     public String getName() {
-        return GatewayCliCommands.RESET;
+        return CliCommands.RESET;
     }
 
     @Override
