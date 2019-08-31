@@ -29,7 +29,7 @@ public class ProtobufParser {
      * @param descriptorPath descriptor file path
      * @return {@link DescriptorProtos.FileDescriptorSet} object
      */
-    public static DescriptorProtos.FileDescriptorProto generateRootFileDescriptor(String exePath, String protoPath,
+    private static DescriptorProtos.FileDescriptorProto generateRootFileDescriptor(String exePath, String protoPath,
                                                                                   String descriptorPath) {
         String command = new ProtocCommandBuilder
                 (exePath, protoPath, resolveProtoFolderPath(protoPath), descriptorPath).build();
@@ -110,10 +110,10 @@ public class ProtobufParser {
     /**
      * Generate OpenAPI object for the {@link DescriptorProtos.FieldDescriptorProto}.
      *
-     * @param descriptor
-     * @return
+     * @param descriptor file descriptor of the protobuf
+     * @return {@link OpenAPI} object
      */
-    public static OpenAPI generateOpenAPI(DescriptorProtos.FileDescriptorProto descriptor) {
+    private static OpenAPI generateOpenAPIFromProto(DescriptorProtos.FileDescriptorProto descriptor) {
         if (descriptor == null) {
             throw new RuntimeException("descriptor is not available");
         }
@@ -151,6 +151,18 @@ public class ProtobufParser {
             });
         });
         return protoOpenAPIGenerator.getOpenAPI();
+    }
+
+    /**
+     * Generate OpenAPI from protobuf
+     *
+     * @param exePath        protoc.exe path
+     * @param protoPath      protobuf file path
+     * @param descriptorPath descriptor file path
+     * @return {@link OpenAPI} object
+     */
+    public OpenAPI generateOpenAPI(String exePath, String protoPath, String descriptorPath) {
+        return generateOpenAPIFromProto(generateRootFileDescriptor(exePath, protoPath, descriptorPath));
     }
 
     /**

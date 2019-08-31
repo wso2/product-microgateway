@@ -223,11 +223,11 @@ public final class GatewayCmdUtils {
     }
 
     /**
-     * Get grpc folder location inside Resources Directory.
+     * Get grpc directory location inside Resources Directory.
      *
-     * @return grpc folder location
+     * @return protobuf directory location
      */
-    public static String getGrpcFolderLocation() {
+    public static String getResourcesGrpcDirLocation() {
         return getResourceFolderLocation() + File.separator + GatewayCliConstants.RESOURCES_GRPC_DIR;
     }
 
@@ -297,14 +297,7 @@ public final class GatewayCmdUtils {
         createFolderIfNotExist(definitionsPath);
 
         String grpcDefinitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
-        String grpcCustomOptionDirPath = grpcDefinitionsPath + File.separator +
-                GatewayCliConstants.PROJECT_GRPC_OPTIONS_DIR;
-        String grpcCustomOptionsFilePath = grpcCustomOptionDirPath + File.separator +
-                GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE;
         createFolderIfNotExist(grpcDefinitionsPath);
-        createFolderIfNotExist(grpcCustomOptionDirPath);
-        FileUtils.copyFile(new File(getGrpcFolderLocation() + "/" + GatewayCliConstants.PROJECT_GRPC_OPTIONS_FILE),
-                new File(grpcCustomOptionsFilePath));
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -601,6 +594,17 @@ public final class GatewayCmdUtils {
         return getProjectDirectoryPath(projectName) + File.separator +
                 GatewayCliConstants.PROJECT_GEN_DIR + File.separator +
                 GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
+    }
+
+    /**
+     * Returns path to the /grpc_definitions of a given project in the current directory
+     *
+     * @param projectName project name
+     * @return path to the grpc_defintions of a given project in the current working directory
+     */
+    public static String getGrpcDefinitionsDirPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                GatewayCliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
     }
 
     /**
@@ -951,6 +955,43 @@ public final class GatewayCmdUtils {
     public static String getProjectSwaggerFilePath(String projectName, String apiId) {
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
                 GatewayCliConstants.API_SWAGGER;
+    }
+
+    /**
+     * get the path of the protoc executable.
+     *
+     * @param projectName project name
+     * @return the absolute path of the protoc executable
+     */
+    public static String getProtocFilePath(String projectName) {
+        return getResourceFolderLocation() + File.separator + GatewayCliConstants.RESOURCES_GRPC_DIR + File.separator +
+                getOsSpecificProtocFileName();
+    }
+
+    //todo: consider arch_type, and other os types and throw an error
+    private static String getOsSpecificProtocFileName() {
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("windows")) {
+            return GatewayCliConstants.PROTOC_EXE_WINDOWS;
+        } else if (osName.toLowerCase().contains("mac")) {
+            return GatewayCliConstants.PROTOC_EXE_OSX;
+        } else {
+            return GatewayCliConstants.PROTOC_EXE_LINUX;
+        }
+    }
+
+    //todo: change the file location
+
+    /**
+     * descriptor path of the grpc definition
+     *
+     * @param projectName   project name
+     * @param protoFileName protobuf file name
+     * @return descriptor path
+     */
+    public static String getProtoDescriptorPath(String projectName, String protoFileName) {
+        String fileName = protoFileName.substring(0, protoFileName.length() - 7);
+        return getGrpcDefinitionsDirPath(projectName) + File.separator + fileName + ".desc";
     }
 
     /**
