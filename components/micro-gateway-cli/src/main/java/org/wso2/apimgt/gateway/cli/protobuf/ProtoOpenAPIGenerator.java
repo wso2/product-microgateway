@@ -49,7 +49,7 @@ public class ProtoOpenAPIGenerator {
         //version is set to 1.0.0 as default.
         info.setVersion("1.0.0");
         openAPI.setInfo(info);
-        openAPI.addExtension(GrpcConstants.URL_SEPARATOR + OpenAPIConstants.BASEPATH, name);
+        openAPI.addExtension(OpenAPIConstants.BASEPATH, GrpcConstants.URL_SEPARATOR + name);
     }
 
     /**
