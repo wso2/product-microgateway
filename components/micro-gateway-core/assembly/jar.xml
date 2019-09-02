@@ -1,6 +1,6 @@
 <!--
   ~ /*
-  ~ * Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~ *
   ~ * Licensed under the Apache License, Version 2.0 (the "License");
   ~ * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
   ~ */
   -->
 <assembly>
-    <includeBaseDirectory>true</includeBaseDirectory>
+    <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
-    <id>micro-gw-binary-repo</id>
+    <id>mgw-jar</id>
     <formats>
         <format>zip</format>
     </formats>
 
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/generated-balo</directory>
-            <outputDirectory/>
+            <directory>${project.build.directory}/jar_cache/</directory>
+            <outputDirectory></outputDirectory>
             <includes>
-                <include>**</include>
+                <include>**/*.jar</include>
             </includes>
         </fileSet>
     </fileSets>
