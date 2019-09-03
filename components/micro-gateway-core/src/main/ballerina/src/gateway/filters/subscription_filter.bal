@@ -54,6 +54,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
             }
         } else {
             printWarn(KEY_SUBSCRIPTION_FILTER, "Auth schema was not defined in the authentication context");
+            return true;
         }
 
 
@@ -135,7 +136,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                         authenticationContext.keyType = decodedPayload.keytype.toString();
                         invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.
                         keyType;
-                        filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                        invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                         return true;
                     }
                     int index = 0;
@@ -175,7 +176,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                                     authenticationContext.keyType);
                             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext
                             .keyType;
-                            filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                            invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                             printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
                             return true;
                         }
@@ -190,7 +191,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                     authenticationContext.apiKey = jwtToken;
                     authenticationContext.username = decodedPayload.sub.toString();
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
                     return true;
                 }

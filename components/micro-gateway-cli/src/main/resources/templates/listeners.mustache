@@ -37,9 +37,10 @@ ExtensionFilter extensionFilter = new;
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
                                                                            auth: {
-                                                                                authHandlers: gateway:getAuthHandlers()
+                                                                                authHandlers: gateway:getAuthHandlers(),
+                                                                                position: 1
                                                                            },
-                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
+                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
                                                                            extensionFilter]
                                                                        };
 
@@ -50,7 +51,7 @@ listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureSe
 
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
 
-                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,
+                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
                                                                      extensionFilter]
                                                                  };
 

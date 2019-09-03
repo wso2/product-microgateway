@@ -53,7 +53,7 @@ public type OAuth2KeyValidationProvider object {
         AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(invocationContext);
+        APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(invocationContext, credential);
         APIKeyValidationDto | error apiKeyValidationDto = trap self.checkCacheAndAuthenticate(apiKeyValidationRequestDto, invocationContext);
         if (apiKeyValidationDto is APIKeyValidationDto){
             isAuthorized = apiKeyValidationDto.authorized;
@@ -102,14 +102,14 @@ public type OAuth2KeyValidationProvider object {
                 printDebug(KEY_AUTHN_FILTER,
                         "Authentication handler returned with validation status : " + errorStatus.toString());
                 //TODO: Send proper error messages        
-                //setErrorMessageToFilterContext(context, errorStatus);
+                setErrorMessageToInvocationContext(errorStatus);
                 //sendErrorResponse(caller, request, <@untainted>  context);
                 return false;
             }
         } else {
             log:printError(<string>apiKeyValidationDto.reason(), err = apiKeyValidationDto);
             //TODO: Send proper error messages  
-            //setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+            setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, <@untainted>  context);
             return false;
         }
@@ -178,13 +178,13 @@ public type OAuth2KeyValidationProvider object {
         xml soapEnvelope = xml `<soapenv:Envelope>
                                     <soapenv:Body>
                                         <xsd:validateKey>
-                                            <xsd:context>{{apiRequestMetaDataDto.context}}</xsd:context>
-                                            <xsd:version>{{apiRequestMetaDataDto.apiVersion}}</xsd:version>
-                                            <xsd:accessToken>{{apiRequestMetaDataDto.accessToken}}</xsd:accessToken>
-                                            <xsd:requiredAuthenticationLevel>{{apiRequestMetaDataDto.requiredAuthenticationLevel}}</xsd:requiredAuthenticationLevel>
-                                            <xsd:clientDomain>{{apiRequestMetaDataDto.clientDomain}}</xsd:clientDomain>
-                                            <xsd:matchingResource>{{apiRequestMetaDataDto.matchingResource}}</xsd:matchingResource>
-                                            <xsd:httpVerb>{{apiRequestMetaDataDto.httpVerb}}</xsd:httpVerb>
+                                            <xsd:context>${apiRequestMetaDataDto.context}</xsd:context>
+                                            <xsd:version>${apiRequestMetaDataDto.apiVersion}</xsd:version>
+                                            <xsd:accessToken>${apiRequestMetaDataDto.accessToken}</xsd:accessToken>
+                                            <xsd:requiredAuthenticationLevel>${apiRequestMetaDataDto.requiredAuthenticationLevel}</xsd:requiredAuthenticationLevel>
+                                            <xsd:clientDomain>${apiRequestMetaDataDto.clientDomain}</xsd:clientDomain>
+                                            <xsd:matchingResource>${apiRequestMetaDataDto.matchingResource}</xsd:matchingResource>
+                                            <xsd:httpVerb>${apiRequestMetaDataDto.httpVerb}</xsd:httpVerb>
                                         </xsd:validateKey>
                                     </soapenv:Body>
                                 </soapenv:Envelope>`;

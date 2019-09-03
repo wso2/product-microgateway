@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/runtime;
 
  public const string API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
@@ -144,7 +143,7 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
     return errorMessage;
 }
 
-public function getFailureMessageDetailDescription(http:FilterContext context, int errorCode, string errorMessage) returns string {
+public function getFailureMessageDetailDescription(int errorCode, string errorMessage) returns string {
     string errorDescription = errorMessage;
     if (API_AUTH_INCORRECT_API_RESOURCE == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION;

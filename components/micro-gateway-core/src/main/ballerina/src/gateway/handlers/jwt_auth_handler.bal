@@ -16,22 +16,21 @@
 
 import ballerina/auth;
 import ballerina/http;
-import ballerina/runtime;
 
-# Representation of the key validation  handler
+# Representation of the jwt self validating handler
 #
 # + bearerAuthHandler - The reference to the 'BearerAuthHandler' instance
-# + oauth2KeyValidationProvider - The reference to the key validation provider instance
-public type KeyValidationHandler object {
+# + jwtAuthProvider - The reference to the jwt auth provider instance
+public type JWTAuthHandler object {
 
     *http:InboundAuthHandler;
 
     public http:BearerAuthHandler bearerAuthHandler;
-    public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
+    public JwtAuthProvider jwtAuthProvider;
 
-    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider) {
-        self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
-        self.bearerAuthHandler = new(oauth2KeyValidationProvider);
+    public function __init(JwtAuthProvider jwtAuthProvider) {
+        self.jwtAuthProvider = jwtAuthProvider;
+        self.bearerAuthHandler = new(jwtAuthProvider);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -44,7 +43,7 @@ public type KeyValidationHandler object {
             if(hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential,"\\.");
-                if(splitContent.length() < 3) {
+                if(splitContent.length() == 3) {
                     return true;
                 }
             }
@@ -58,23 +57,7 @@ public type KeyValidationHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean|http:AuthenticationError {
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        var authenticationResult = self.bearerAuthHandler.process(req);
-        if(authenticationResult is boolean && authenticationResult) {
-            AuthenticationContext authenticationContext = {};
-            authenticationContext = <AuthenticationContext>invocationContext.attributes[
-            AUTHENTICATION_CONTEXT];
-            
-            if (authenticationContext?.callerToken is string && authenticationContext?.callerToken != () && authenticationContext?.callerToken != "") {
-                printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
-                            callerToken);
-                string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
-                req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
-            }
-            string authHeaderName = getAuthorizationHeader(invocationContext);
-            checkAndRemoveAuthHeaders(req, authHeaderName);
-        }
-        return authenticationResult;
+        return self.bearerAuthHandler.process(req);
     }
 
 };

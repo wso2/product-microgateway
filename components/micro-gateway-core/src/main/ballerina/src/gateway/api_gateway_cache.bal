@@ -23,15 +23,13 @@ cache:Cache invalidTokenCache= new;
 cache:Cache jwtCache = new;
 
 public function initGatewayCaches() {
-    gatewayTokenCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-            900000), getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-    gatewayKeyValidationCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY,
-            900000), getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
-    invalidTokenCache = new(getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000),
-        getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100),
-        getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25));
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 10000);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    gatewayTokenCache = new(cacheExpiryTime, cacheSize, evictionFactor);
+    gatewayKeyValidationCache = new(cacheExpiryTime, cacheSize, evictionFactor);
+    invalidTokenCache = new(cacheExpiryTime, cacheSize, evictionFactor);
+    jwtCache = new(cacheExpiryTime, cacheSize, evictionFactor);
 }
 
 public type APIGatewayCache object {

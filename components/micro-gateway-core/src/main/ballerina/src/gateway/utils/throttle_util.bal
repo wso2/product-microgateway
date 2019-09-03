@@ -50,6 +50,8 @@ public function putBlockCondition(map<any> m) {
 
 //check whether throttle event is in the local map(request is throttled or not)
 public function isRequestThrottled(string key) returns [boolean, boolean] {
+    printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
+    printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
         int currentTime = time:currentTime().time;

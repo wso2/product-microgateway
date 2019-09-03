@@ -49,25 +49,27 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     boolean isThrottled = false;
     boolean stopOnQuota;
     string apiContext = getContext(context);
-    boolean isSecured = <boolean>context.attributes[IS_SECURED];
+    boolean isSecured = <boolean>invocationContext.attributes[IS_SECURED];
     context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
     context.attributes[IS_THROTTLE_OUT] = false;
 
     AuthenticationContext keyvalidationResult = {};
-    if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        if (isRequestBlocked(caller, request, context)) {
+    if (invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
+        keyvalidationResult = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
+        if (isRequestBlocked(caller, request, context, keyvalidationResult)) {
             setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
                 BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         }
-        printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
-        keyvalidationResult = <AuthenticationContext>context.attributes[
-        AUTHENTICATION_CONTEXT];
+
+
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.
                 tier + "' exist.");
         string? resourceLevelPolicyName = getResourceLevelPolicy(context);
         if(resourceLevelPolicyName is string) {
+            printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy : " + resourceLevelPolicyName);
             if(resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
                 printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
                         + "' does not exist.");
@@ -255,6 +257,7 @@ function isResourceLevelThrottled(http:FilterContext context,AuthenticationConte
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
+        printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
         boolean throttled;
         boolean stopOnQuota;
         [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey);
@@ -277,15 +280,14 @@ function isUnauthenticateLevelThrottled(http:FilterContext context) returns [boo
     }
     return isRequestThrottled(throttleKey);
 }
-function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context) returns (boolean) {
-    AuthenticationContext keyvalidationResult = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context, AuthenticationContext keyValidationResult) returns (boolean) {
     string apiLevelBlockingKey = getContext(context);
     string apiTenantDomain = getTenantDomain(context);
     string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request, caller);
-    string appLevelBlockingKey = keyvalidationResult.subscriber + ":" + keyvalidationResult.applicationName;
+    string appLevelBlockingKey = keyValidationResult.subscriber + ":" + keyValidationResult.applicationName;
     if (isAnyBlockConditionExist() && (isBlockConditionExist(apiLevelBlockingKey) ||
     isBlockConditionExist(ipLevelBlockingKey) || isBlockConditionExist(appLevelBlockingKey)) ||
-    isBlockConditionExist(keyvalidationResult.username)) {
+    isBlockConditionExist(keyValidationResult.username)) {
         return true;
     } else {
         return false;

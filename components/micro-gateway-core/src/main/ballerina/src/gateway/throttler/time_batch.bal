@@ -33,7 +33,7 @@ public type TimeBatch object {
                         self.process(e);
         });
         self.expiredEventQueue = new;
-        self.attrExpiredTimestamp = "expiryTimestamp";
+        self.attrExpiredTimestamp = "expiryTimeStamp";
         self.windowParameters = windowParameters;
         self.nextProcessPointer = nextProcessPointer;
         self.initParameters(windowParameters);
