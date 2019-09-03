@@ -30,10 +30,12 @@
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>
-                ${project.build.directory}/lib/repo/
-            </directory>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway/balo</outputDirectory>
+            <directory>${project.build.directory}/lib/gw/</directory>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway/bir-cache</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/lib/jar/</directory>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
         </fileSet>
 
         <fileSet>
@@ -59,7 +61,7 @@
 
     <files>
         <file>
-            <source>${basedir}/target/runtime.zip</source>
+            <source>${basedir}/target/platform.zip</source>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/</outputDirectory>
             <destName>runtime.zip</destName>
         </file>
@@ -98,15 +100,5 @@
             <fileMode>755</fileMode>
         </file>
     </files>
-
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
-            <scope>runtime</scope>
-            <includes>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
-            </includes>
-        </dependencySet>
-    </dependencySets>
 
 </assembly>

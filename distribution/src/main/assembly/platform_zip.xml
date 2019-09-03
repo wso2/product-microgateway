@@ -26,8 +26,8 @@
 
     <fileSets>
         <fileSet>
-        <directory>${basedir}/target/ballerina/ballerina-${ballerina.platform.version}</directory>
-        <outputDirectory/>
+            <directory>${basedir}/target/ballerina/jballerina-tools-${ballerina.platform.version}</directory>
+            <outputDirectory/>
         </fileSet>
     </fileSets>
 

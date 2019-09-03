@@ -220,14 +220,14 @@
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
                 <type>zip</type>
-                <classifier>zip</classifier>
+                <classifier>mgw-bir</classifier>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
                 <type>zip</type>
-                <classifier>jar</classifier>
+                <classifier>mgw-jar</classifier>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
