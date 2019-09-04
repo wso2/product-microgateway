@@ -46,11 +46,10 @@ public class CliConstants {
     public static final String CLI_HOME = "cli.home";
     public static final String CLI_LIB = "lib";
     public static final String CLI_BIN = "bin";
-    public static final String CLI_REPO = "repo";
+    public static final String CLI_BIR_CACHE = "bir-cache";
     public static final String CLI_CONF = "conf";
     public static final String CLI_PLATFORM = "platform";
     public static final String CLI_GATEWAY = "gateway";
-    public static final String CLI_BALO = "balo";
     public static final String CLI_BRE = "bre";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_JAR = ".jar";

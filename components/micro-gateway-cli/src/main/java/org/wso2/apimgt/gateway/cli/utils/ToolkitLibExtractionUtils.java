@@ -38,29 +38,28 @@ public class ToolkitLibExtractionUtils {
     public static void extractPlatformAndRuntime() {
         try {
             String libPath = CmdUtils.getCLILibPath();
-            String baloPath = CliConstants.CLI_GATEWAY + File.separator + CliConstants.CLI_BALO;
+            String birPath = CliConstants.CLI_GATEWAY + File.separator + CliConstants.CLI_BIR_CACHE;
             String breLibPath = CliConstants.CLI_BRE + File.separator + CliConstants.CLI_LIB;
             String platformExtractedPath =
                     CmdUtils.getCLILibPath() + File.separator + CliConstants.CLI_PLATFORM;
 
-            extractBallerinaDist(platformExtractedPath, libPath, baloPath, breLibPath, true);
+            extractBallerinaDist(platformExtractedPath, libPath, birPath, breLibPath, true);
         } catch (IOException e) {
-            String message = "Error while unzipping platform and runtime while project setup";
+            String message = "Error while unzipping platform while project setup";
             LOGGER.error(message, e);
             throw new CLIInternalException(message);
         }
     }
 
-    private static void extractBallerinaDist(String destination, String libPath, String baloPath, String breLibPath,
+    private static void extractBallerinaDist(String destination, String libPath, String birPath, String breLibPath,
                                              Boolean isAddToClasspath) throws IOException {
         if (!Files.exists(Paths.get(destination))) {
             ZipUtils.unzip(destination + CliConstants.EXTENSION_ZIP, destination,
                     isAddToClasspath);
 
-            // Copy balo to the platform
-            CmdUtils.copyFolder(libPath + File.separator + baloPath,
-                    destination + File.separator + CliConstants.CLI_LIB + File.separator
-                            + CliConstants.CLI_REPO);
+            // Copy bir to the platform
+            CmdUtils.copyFolder(libPath + File.separator + birPath,
+                    destination + File.separator + CliConstants.CLI_BIR_CACHE);
 
             // Copy gateway jars to platform
             CmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator
@@ -68,7 +67,7 @@ public class ToolkitLibExtractionUtils {
 
             //todo: remove this segment in next release
             File b7aSwaggerJar = new File(destination + File.separator + breLibPath + File.separator +
-                    "swagger-to-ballerina-generator-0.990.5.jar");
+                    "openapi-to-ballerina-generator-1.0.0-alpha3.jar");
             if (!b7aSwaggerJar.delete()) {
                 throw new CLIInternalException("Failed to remove ballerina code generator jar file");
             }
