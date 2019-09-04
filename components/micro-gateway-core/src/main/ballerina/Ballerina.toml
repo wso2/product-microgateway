@@ -3,3 +3,4 @@ org-name= "wso2"
 version= "3.1.0"
 
 [dependencies]
+"wso2/jms" = { path = "/Users/hasunie/RD/MC/test/ps/module-jms/target/balo/jms-2019r3-java8-0.6.0.balo", version = "0.6.0"}

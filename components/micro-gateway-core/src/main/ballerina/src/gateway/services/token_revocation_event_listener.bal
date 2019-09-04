@@ -15,10 +15,7 @@
 // // under the License.
 
 // import ballerina/log;
-// import ballerina/io;
-// import ballerina/config;
-// import ballerina/jms;
-// import ballerina/http;
+// import wso2/jms;
 
 // string jmsConnectioninitialContextFactoryTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,
 //     REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
@@ -29,11 +26,10 @@
 // string jmsConnectionUsernameTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_USERNAME, "");
 // string tokenRevocationJMSTopic = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, REALTIME_JMS_CONNECTION_TOPIC, "jwtRevocation");
 
-// service jmsTokenRevocationListener =
-// service {
-//     resource function onMessage(jms:TopicSubscriberCaller consumer, jms:Message message) {
+// service tokenRevServ = service {
+//     resource function onMessage(jms:Message message) {
 //         printDebug(KEY_TOKEN_REVOCATION_JMS,"token revoked jms Message Received");
-//         map<any>|error mapMessage=message.getMapMessageContent();
+
 //         map<string> inputMap={};
 //         if (mapMessage is map<any>) {
 //             if (mapMessage.hasKey("revokedToken") && mapMessage.hasKey("ttl")) {
@@ -88,8 +84,8 @@
 //         REALTIME_MESSAGE_ENABLED, false);
 
 //     if (enabledRealtimeMessage) {
-//         jms:TopicSubscriber|error topicTokenRevocationSubscriber = trap startTokenRevocationSubscriberService();
-//         if (topicTokenRevocationSubscriber is jms:TopicSubscriber) {
+//         jms:MessageConsumer|error topicTokenRevocationSubscriber = trap startTokenRevocationSubscriberService();
+//         if (topicTokenRevocationSubscriber is jms:MessageConsumer) {
 //             printInfo(KEY_TOKEN_REVOCATION_JMS , "subscriber service for token revocation is started");
 //             return true;
 //         } else {
