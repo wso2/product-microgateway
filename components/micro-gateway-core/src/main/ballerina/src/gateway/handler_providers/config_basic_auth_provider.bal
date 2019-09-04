@@ -64,7 +64,7 @@ public type BasicAuthProvider object {
             string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0)== ()){
                 //TODO: Handle the error message properly 
-                //setErrorMessageToFilterContext(context, API_AUTH_BASICAUTH_INVALID_FORMAT);
+                setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 //sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }
@@ -73,7 +73,7 @@ public type BasicAuthProvider object {
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
                 //TODO: Handle the error message properly 
-                //setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, context);
                 return false;
             }
@@ -81,7 +81,7 @@ public type BasicAuthProvider object {
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             //TODO: Handle the error message properly 
-            //setErrorMessageToFilterContext(context, API_AUTH_GENERAL_ERROR);
+            setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, context);
             return false;
         }
@@ -101,7 +101,7 @@ public type BasicAuthProvider object {
             printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
                 //TODO: Handle the error message properly 
-                //setErrorMessageToFilterContext(context, API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }

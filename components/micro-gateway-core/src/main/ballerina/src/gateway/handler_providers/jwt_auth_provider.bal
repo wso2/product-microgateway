@@ -74,6 +74,7 @@ public type JwtAuthProvider object {
                             if (isBlacklisted) {
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isBlacklisted.toString());
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Token is revoked");
+                                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                                 return false;
                             } else {
                                 return true;
@@ -92,9 +93,11 @@ public type JwtAuthProvider object {
             }
             return handleVar;
         } else {
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             return handleVar;
         }
     } else {
+        setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
         return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
         }
 

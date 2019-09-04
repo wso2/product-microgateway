@@ -34,6 +34,9 @@ public type PreAuthnFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        if(response.statusCode == 401) {
+            sendErrorResponseFromInvocationContext(response);
+        }
         return true;
     }
 };
@@ -47,8 +50,12 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
 
     context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
     context.attributes[FILTER_FAILED] = false;
+    string serviceName = context.getServiceName();
+    string resourceName = context.getResourceName();
     invocationContext.attributes[SERVICE_TYPE_ATTR] = context.getService();
-    invocationContext.attributes[RESOURCE_NAME_ATTR] = context.getResourceName();
+    invocationContext.attributes[RESOURCE_NAME_ATTR] = resourceName;
+    boolean isSecuredResource = isSecured(serviceName, resourceName);
+    invocationContext.attributes[IS_SECURED] = isSecuredResource;
 
     boolean isCookie = false;
     string authHeader = "";
@@ -86,7 +93,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     }
 
     if (!canHandleAuthentication) {
-        setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
+        setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
         return false;
     }

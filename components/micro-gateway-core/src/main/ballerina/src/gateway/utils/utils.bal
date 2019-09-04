@@ -40,15 +40,21 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     }
     serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, SERVICE_ANN_NAME, ANN_PACKAGE);
     apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
+    printDebug(KEY_UTILS, "Service annotation map: " + serviceAnnotationMap.toString());
+    printDebug(KEY_UTILS, "Resource annotation map: " + resourceAnnotationMap.toString());
+    printDebug(KEY_UTILS, "API config annotation map: " + apiConfigAnnotationMap.toString());
+    printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
 }
 
 # Retrieve the key validation request dto from filter context
 #
 # + return - api key validation request dto
-public function getKeyValidationRequestObject(runtime:InvocationContext context) returns APIRequestMetaDataDto {
+public function getKeyValidationRequestObject(runtime:InvocationContext context, string accessToken) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    string serviceName = runtime:getInvocationContext().attributes["ServiceName"].toString();
-    string resourceName = runtime:getInvocationContext().attributes["ResourceName"].toString();
+    string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
+    string resourceName = runtime:getInvocationContext().attributes[http:RESOURCE_NAME].toString();
+    printDebug(KEY_UTILS, "Service Name : " + serviceName);
+    printDebug(KEY_UTILS, "Resource Name : " + resourceName);
     http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     io:println(httpServiceConfig);
@@ -74,7 +80,7 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context)
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
     
-    apiKeyValidationRequest.accessToken = <string>runtime:getInvocationContext().attributes[ACCESS_TOKEN_ATTR];
+    apiKeyValidationRequest.accessToken = accessToken;
     printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
             + ", resource: " + apiKeyValidationRequest.matchingResource
             + ", verb: " + apiKeyValidationRequest.httpVerb);
@@ -223,7 +229,30 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     context.attributes[ERROR_CODE] = errorCode;
     string errorMessage = getAuthenticationFailureMessage(errorCode);
     context.attributes[ERROR_MESSAGE] = errorMessage;
-    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(context, errorCode, errorMessage);
+    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
+}
+
+public function setErrorMessageToInvocationContext(int errorCode) {
+    runtime:InvocationContext context = runtime:getInvocationContext();
+    int status;
+    if (errorCode == API_AUTH_GENERAL_ERROR) {
+        status = INTERNAL_SERVER_ERROR;
+    } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE ||errorCode == API_AUTH_FORBIDDEN ||
+        errorCode == INVALID_SCOPE) {
+        status = FORBIDDEN;
+    } else if (errorCode == INVALID_ENTITY) {
+        status = UNPROCESSABLE_ENTITY;
+    } else if (errorCode == INVALID_RESPONSE) {
+        status = INTERNAL_SERVER_ERROR;
+    } else {
+        status = UNAUTHORIZED;
+    }
+    context.attributes[HTTP_STATUS_CODE] = status;
+    context.attributes[FILTER_FAILED] = true;
+    context.attributes[ERROR_CODE] = errorCode;
+    string errorMessage = getAuthenticationFailureMessage(errorCode);
+    context.attributes[ERROR_MESSAGE] = errorMessage;
+    context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
 }
 
 # Default error response sender with json error response
@@ -244,6 +273,22 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     if(value is error) {
     log:printError("Error occurred while sending the error response", err = value);
     }
+}
+
+# Default error response sender with json error response
+public function sendErrorResponseFromInvocationContext(http:Response response) {
+    runtime: InvocationContext context = runtime:getInvocationContext();
+    string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
+    string errorMessage = <string>context.attributes[ERROR_MESSAGE];
+    int errorCode = <int>context.attributes[ERROR_CODE];
+    response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
+    response.setContentType(APPLICATION_JSON);
+    json payload = { fault: {
+        code: errorCode,
+        message: errorMessage,
+        description: errorDescription
+    } };
+    response.setJsonPayload(payload);
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {

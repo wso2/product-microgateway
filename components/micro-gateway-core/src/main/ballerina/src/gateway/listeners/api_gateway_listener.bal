@@ -101,10 +101,11 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
                 password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
             },
             certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
-        }
+        },
+        jwtCache : jwtCache
     };
     JwtAuthProvider jwtAuthProvider = new(jwtValidatorConfig);
-    http:BearerAuthHandler jwtAuthHandler = new (jwtAuthProvider); //TODO: use separate jwt handler on gateway level
+    JWTAuthHandler jwtAuthHandler = new (jwtAuthProvider);
 
     // Initializes the key validation handler
     KeyValidationServerConfig keyValidationServerConfig = {url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
