@@ -41,10 +41,10 @@ public type KeyValidationHandler object {
     public function canProcess(http:Request req) returns @tainted boolean {
         if (req.hasHeader(AUTH_HEADER)) {
             string headerValue = http:extractAuthorizationHeaderValue(req);
-            if(hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
+            if (hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential,"\\.");
-                if(splitContent.length() < 3) {
+                if (splitContent.length() < 3) {
                     return true;
                 }
             }
