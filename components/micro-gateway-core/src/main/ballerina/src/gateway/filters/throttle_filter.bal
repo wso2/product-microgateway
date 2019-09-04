@@ -334,7 +334,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 
 function getVersion(http:FilterContext context) returns string|() {
     string? apiVersion = "";
-    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         apiVersion = apiConfiguration.apiVersion;
     }

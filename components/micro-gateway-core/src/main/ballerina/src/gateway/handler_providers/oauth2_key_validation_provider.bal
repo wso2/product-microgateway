@@ -19,7 +19,6 @@ import ballerina/internal;
 import ballerina/runtime;
 import ballerina/log;
 import ballerina/time;
-import ballerina/encoding;
 import ballerina/lang.'int;
 
 
@@ -44,7 +43,7 @@ public type OAuth2KeyValidationProvider object {
     public function __init(KeyValidationServerConfig config) {
         string base64Header = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin") + ":" +
             getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
-        self.encodedBasicAuthHeader = encoding:encodeBase64(base64Header.toBytes());
+        self.encodedBasicAuthHeader = base64Header.toBytes().toBase64();
         self.keyValidationClient = new(config.url, config.clientConfig);
     }
 

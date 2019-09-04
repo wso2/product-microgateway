@@ -17,7 +17,6 @@
 import ballerina/streams;
 
 public type EmitOnStateChange object {
-    *streams:Window;
 
     public string key = "";
     public boolean|error isThrottled = false;

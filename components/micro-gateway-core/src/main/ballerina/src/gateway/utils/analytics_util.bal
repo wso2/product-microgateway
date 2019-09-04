@@ -26,7 +26,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
 
-    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
       eventDto.apiVersion = apiConfiguration.apiVersion;
     }
@@ -55,7 +55,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     } else {
         metaInfo["keyType"]= PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfig is APIConfiguration) {
            var api_Creator = apiConfig.publisher;
            eventDto.apiCreator = api_Creator;
@@ -78,7 +78,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     map<json> metaInfo = {};
 
     eventDto.apiContext = getContext(context);
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfig is APIConfiguration) {
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
@@ -108,7 +108,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        APIConfiguration? apiConfigs = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+        APIConfiguration? apiConfigs = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfigs is APIConfiguration) {
            var api_Creater = apiConfigs.publisher;
            eventDto.apiCreator = api_Creater;
