@@ -78,6 +78,17 @@ public function hasPrefix(string str, string prefix) returns boolean {
     return jStartsWith(rec, pref);
 }
 
+public function toLowerCase(string str) returns string {
+    handle rec = java:fromString(str);
+    handle newStr = jtoLowerCase(rec);
+    return newStr.toString();
+}
+
+function jtoLowerCase(handle receiver) returns handle = @java:Method {
+    name: "toLowerCase",
+    class: "java.lang.String"
+} external;
+
 function jSplit(handle receiver, handle delimeter) returns handle = @java:Method {
     name: "split",
     class: "java.lang.String"
