@@ -86,7 +86,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-        APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+        APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfiguration is APIConfiguration) {
          requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
          requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;

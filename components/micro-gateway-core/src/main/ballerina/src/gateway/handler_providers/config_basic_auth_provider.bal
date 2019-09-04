@@ -15,12 +15,11 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/encoding;
 import ballerina/internal;
 import ballerina/runtime;
 import ballerina/auth;
-
-
+import ballerina/lang.'array as arrays;
+import ballerina/lang.'string as strings;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -56,12 +55,13 @@ public type BasicAuthProvider object {
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string encodedCredentials = credential[1];
-        byte[]|error decodedCredentials =  encoding:decodeBase64(encodedCredentials);
+        byte[]|error decodedCredentials =  arrays:fromBase64(encodedCredentials);
+
         //Extract username and password from the request
         string userName;
-        string passWord;
+        string password;
         if(decodedCredentials is byte[]){
-            string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
+            string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0)== ()){
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
@@ -77,7 +77,7 @@ public type BasicAuthProvider object {
                 //sendErrorResponse(caller, request, context);
                 return false;
             }
-            passWord = decodedCred[1];
+            password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             //TODO: Handle the error message properly 
@@ -87,11 +87,11 @@ public type BasicAuthProvider object {
         }
 
         //Hashing mechanism
-        string hashedPass = encoding:encodeHex(crypto:hashSha1(passWord.toBytes()));
+        string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        string encodedVal = encoding:encodeBase64(credentials.toBytes());
+        string encodedVal = credentials.toBytes().toBase64();
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
 
