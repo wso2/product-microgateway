@@ -23,8 +23,10 @@ import wso2/gateway;
 #
 public type ExtensionFilter object {
 
-    # Request filter function
-    #
+    # Request filter function.
+    # + caller - http caller object.
+    # + request - http request object.
+    # + context - http filter context object.
     # + return - Whether the filter has passed or not
     public function filterRequest (http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                          boolean {

@@ -26,14 +26,14 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
         executionTimeDTO.provider = authContext.apiPublisher;
         executionTimeDTO.keyType = authContext.keyType;
     } else {
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfig is APIConfiguration) {
         executionTimeDTO.provider = apiConfig.publisher;
         }
         executionTimeDTO.keyType = PRODUCTION_KEY_TYPE;
     }
     executionTimeDTO.apiName = getApiName(context);
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfig is APIConfiguration) {
        executionTimeDTO.apiVersion = apiConfig.apiVersion;  
     }
