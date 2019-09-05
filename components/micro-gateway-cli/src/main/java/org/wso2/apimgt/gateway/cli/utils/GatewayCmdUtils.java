@@ -693,9 +693,11 @@ public class GatewayCmdUtils {
         if (!dir.exists() && !dir.isDirectory()) {
             boolean created = dir.mkdir();
             if (created) {
-                logger.trace("Directory: {} created. ", path);
+                logger.debug("Directory: {} created. ", path);
             } else {
-                throw new CLIInternalException("Failed to create directory: " + path);
+                String errMsg = "Failed to create directory: " + path;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
             }
         }
 
@@ -717,16 +719,20 @@ public class GatewayCmdUtils {
         if (overwrite && file.exists() && file.isFile()) {
             boolean isDeleted = file.delete();
             if (!isDeleted) {
-                throw new CLIInternalException("Failed to overwrite file: " + filePath);
+                String errMsg = "Failed to overwrite file: " + filePath;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
             }
         }
 
         if (!file.exists() && !file.isFile()) {
             boolean isCreated = file.createNewFile();
             if (isCreated) {
-                logger.trace("File: {} created.", filePath);
+                logger.debug("File: {} created.", filePath);
             } else {
-                throw new CLIInternalException("Failed to create file: " + filePath);
+                String errMsg = "Failed to create file: " + filePath;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
             }
         }
 
@@ -741,8 +747,7 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     public static void writeContent(String content, File file) throws IOException {
-        FileWriter writer = null;
-        writer = new FileWriter(file);
+        FileWriter writer = new FileWriter(file);
         writer.write(content);
         writer.flush();
     }
