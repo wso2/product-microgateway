@@ -17,10 +17,9 @@
 import ballerina/encoding;
 import ballerina/io;
 import ballerina/log;
-import ballerina/lang.'string as strings;
 
 public function getDecodedJWTPayload(string encodedJWTPayload) returns @tainted (json|error) {
-    string jwtPayload = check strings:fromBytes(check encoding:decodeBase64Url(encodedJWTPayload));
+    string jwtPayload = encoding:byteArrayToString(check encoding:decodeBase64(urlDecode(encodedJWTPayload)));
     io:StringReader reader = new (jwtPayload);
     json jwtPayloadJson = {};
 
