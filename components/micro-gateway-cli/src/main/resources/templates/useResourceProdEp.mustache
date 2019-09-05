@@ -1,9 +1,9 @@
 {{#if epConfig.prodEndpoints.endpointListEtcdEnabled}}
     {{#epConfig.prodEndpoints}}{{>endpointReinit}}{{/epConfig.prodEndpoints}}
     if (!reinitFailed) {
-        clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+        clientResponse = {{operationId}}_prod->forward(urlPostfix, <@untainted>req);
     }
 {{else}}
-    clientResponse = {{operationId}}_prod->forward(urlPostfix, req);
+    clientResponse = {{operationId}}_prod->forward(urlPostfix, <@untainted>req);
 {{/if}}
 invocationContext.attributes["destination"] = "{{epConfig.prodEndpoints.endpoints.0.endpointUrl}}";
