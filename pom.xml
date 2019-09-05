@@ -143,16 +143,6 @@
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
-                <artifactId>siddhi-core</artifactId>
-                <version>${ballerina.platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ballerinalang</groupId>
-                <artifactId>siddhi-query-api</artifactId>
-                <version>${ballerina.platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-core</artifactId>
                 <version>${ballerina.platform.version}</version>
             </dependency>
@@ -229,6 +219,15 @@
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
+                <type>zip</type>
+                <classifier>mgw-bir</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.core</artifactId>
+                <type>zip</type>
+                <classifier>mgw-jar</classifier>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -35,10 +35,6 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.cli</artifactId>
         </dependency>
         <dependency>
@@ -48,9 +44,14 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <version>${project.version}</version>
             <type>zip</type>
-            <classifier>micro-gw-binary-repo</classifier>
+            <classifier>mgw-bir</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.core</artifactId>
+            <type>zip</type>
+            <classifier>mgw-jar</classifier>
         </dependency>
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
@@ -72,28 +73,28 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeClassifiers>micro-gw-binary-repo</includeClassifiers>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>
+                            <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.wso2.am.microgw</groupId>
-                                    <artifactId>org.wso2.micro.gateway.core</artifactId>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>copy</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <artifactItems>-->
+<!--                                <artifactItem>-->
+<!--                                    <groupId>org.wso2.am.microgw</groupId>-->
+<!--                                    <artifactId>org.wso2.micro.gateway.core</artifactId>-->
+<!--                                    <type>jar</type>-->
+<!--                                    <overWrite>true</overWrite>-->
+<!--                                </artifactItem>-->
+<!--                            </artifactItems>-->
+<!--                            <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                        <id>unpack-gw-tools</id>
                        <phase>generate-resources</phase>
@@ -123,44 +124,29 @@
                             <includeArtifactIds>
                                 ballerina-jre-artifacts
                             </includeArtifactIds>
-                            <outputDirectory>${project.build.directory}
-                            </outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>${download.plugin.version}</version>
-                <executions>
                     <execution>
-                        <id>download-ballerina-platform</id>
-                        <phase>prepare-package</phase>
+                        <id>unpack-jbal-tools</id>
+                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>wget</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
-                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-${ballerina.platform.version}.zip</url>
-                            <!--<url>https://product-dist.ballerina.io/nightly/${ballerina.platform.version}/ballerina-platform-${ballerina.platform.version}.zip</url>-->
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>download-ballerina-runtime</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/ballerina-runtime-${ballerina.platform.version}.zip</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.ballerinalang</groupId>
+                                    <artifactId>jballerina-tools</artifactId>
+                                    <version>${ballerina.platform.version}</version>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
@@ -198,6 +184,22 @@
                             </target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move todir="${project.build.directory}/lib/jar" flatten="true" >
+                                    <fileset dir="${project.build.directory}/lib/gw">
+                                        <include name="**/*.jar" />
+                                    </fileset>
+                                </move>
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -221,23 +223,23 @@
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>ballerina-runtime</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/ballerina_runtimes/runtime_zip.xml</descriptor>
-                            </descriptors>
-                            <finalName>runtime</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>ballerina-runtime</id>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>single</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <filters>-->
+<!--                                <filter>${basedir}/src/main/assembly/filter.properties</filter>-->
+<!--                            </filters>-->
+<!--                            <descriptors>-->
+<!--                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>-->
+<!--                            </descriptors>-->
+<!--                            <finalName>runtime</finalName>-->
+<!--                            <appendAssemblyId>false</appendAssemblyId>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                         <id>micro-gateway-toolkit</id>
                         <phase>package</phase>
