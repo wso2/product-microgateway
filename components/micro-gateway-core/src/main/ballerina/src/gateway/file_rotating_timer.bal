@@ -45,10 +45,12 @@ function rotatingTask() {
             initialDelayInMillis: delay
     };
     task:Scheduler timer = new(timerConfiguration);
-    var attachResult = timer.attach(fileRotating);
-    if (attachResult is error) {
-        printError(KEY_ROTATE_TASK, attachResult.toString());
-    }
+    //TODO: Re enable this timer service once the https://github.com/ballerina-platform/ballerina-lang/issues/18431
+    //is fixed
+    //var attachResult = timer.attach(fileRotating);
+    //if (attachResult is error) {
+    //    printError(KEY_ROTATE_TASK, attachResult.toString());
+    //}
     var startResult = timer.start();
     if (startResult is error) {
         printError(KEY_ROTATE_TASK, "Starting the task is failed: " + startResult.toString());
@@ -56,11 +58,11 @@ function rotatingTask() {
     printDebug(KEY_ROTATE_TASK, "File rotating task initialized.");
 }
 
-service fileRotating = service {
-    resource function onFileRotatingTask() {
-    error? triggerFunction = sendFileRotatingEvent();
-     if (triggerFunction is error) {
-       printError(KEY_ROTATE_TASK, "Error occurred while rotating event.");
-     }
-    }
-};
+//service fileRotating = service {
+//    resource function onFileRotatingTask() {
+//    error? triggerFunction = sendFileRotatingEvent();
+//     if (triggerFunction is error) {
+//       printError(KEY_ROTATE_TASK, "Error occurred while rotating event.");
+//     }
+//    }
+//};

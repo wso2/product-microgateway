@@ -22,7 +22,7 @@ import ballerina/jwt;
 import ballerina/'lang\.object as lang;
 
 public type APIGatewayListener object {
-    *lang:Listener;
+    *lang:AbstractListener;
 
     private int listenerPort = 0;
     private string listenerType = "HTTP";

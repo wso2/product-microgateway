@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/http;
+import ballerina/encoding;
 
 string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL,
     "https://localhost:9443/endpoints");
@@ -63,7 +64,7 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     };
 
     http:Request clientRequest = new;
-    string encodedBasicAuthHeader = throttleEndpointbase64Header.toBytes().toBase64();
+    string encodedBasicAuthHeader = encoding:encodeBase64(throttleEndpointbase64Header.toBytes());
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
 
