@@ -105,7 +105,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             GatewayCmdUtils
                     .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));
             policyGenerator.generate(GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                    + GatewayCliConstants.POLICY_DIR, projectName);
+                    + GatewayCliConstants.GEN_POLICIES_DIR, projectName);
             GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                     GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
             GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
@@ -146,7 +146,6 @@ public class BuildCmd implements GatewayLauncherCmd {
     //todo: implement this method properly
     private void init(String projectName, String configPath, String deploymentConfig) {
         try {
-
             Path configurationFile = Paths.get(configPath);
             if (Files.exists(configurationFile)) {
                 Config config = TOMLConfigParser.parse(configPath, Config.class);
@@ -168,11 +167,28 @@ public class BuildCmd implements GatewayLauncherCmd {
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
             codeGenerationContext.setProjectName(projectName);
             GatewayCmdUtils.setCodeGenerationContext(codeGenerationContext);
+
+            initTarget(projectName);
         } catch (ConfigParserException e) {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
             throw new CLIInternalException("Error occured while reading the deployment configuration", e);
         }
+    }
+
+    /**
+     * Initializes the project build target directory.
+     *
+     * @param projectName Name of the micro gateway project.
+     * @throws IOException Error occurred while creating target directory structure.
+     */
+    private void initTarget(String projectName) throws IOException {
+        String projectDir = GatewayCmdUtils.getProjectDirectoryPath(projectName);
+        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
+        GatewayCmdUtils.createDirectory(targetDirPath, true);
+
+        String targetGenDir = targetDirPath + File.separator + GatewayCliConstants.PROJECT_GEN_DIR;
+        GatewayCmdUtils.createDirectory(targetGenDir, true);
     }
 }

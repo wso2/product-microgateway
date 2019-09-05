@@ -255,33 +255,27 @@ public class GatewayCmdUtils {
      * @param projectName name of the project
      */
     public static void createProjectStructure(String projectName) throws IOException {
-        File projectDir = createFolderIfNotExist(getUserDir() + File.separator + projectName);
+        File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR;
-        createFolderIfNotExist(interceptorsPath);
+        createDirectory(interceptorsPath, false);
+        createFile(interceptorsPath, GatewayCliConstants.KEEP_FILE, true);
 
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
-        createFolderIfNotExist(extensionsPath);
-
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
-        createFolderIfNotExist(targetDirPath);
-
-        String targetGenDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR;
-        createFolderIfNotExist(targetGenDirPath);
+        createDirectory(extensionsPath, false);
 
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
-        createFolderIfNotExist(confDirPath);
+        createDirectory(confDirPath, false);
 
         String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
-        createFolderIfNotExist(definitionsPath);
+        createDirectory(definitionsPath, false);
 
         String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
                 getResourceFolderLocation() + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
         copyFolder(resourceServicesDirectory, projectServicesDirectory);
 
-        createFileIfNotExist(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE);
+        createFile(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE, true);
 
         String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;
         File policyResFile = new File(policyResPath);
@@ -397,7 +391,7 @@ public class GatewayCmdUtils {
      */
     public static void storeResourceHashesFileContent(String content, String projectName) throws IOException {
         String tempDirPath = getProjectTempFolderLocation(projectName);
-        createFolderIfNotExist(tempDirPath);
+        createDirectory(tempDirPath, false);
 
         String resourceHashesFileLocation = getResourceHashHolderFileLocation(projectName);
         File pathFile = new File(resourceHashesFileLocation);
@@ -685,20 +679,64 @@ public class GatewayCmdUtils {
      * Creates a new folder if not exists
      *
      * @param path folder path
-     * @return File object for the created folder
+     * @param overwrite if `true` existing directory will be removed
+     *                  and new directory will be created in {@code path}.
+     * @return created directory
+     * @throws IOException Failed delete or create the directory in {@code path}
      */
-    private static File createFolderIfNotExist(String path) {
-        File folder = new File(path);
-        if (!folder.exists() && !folder.isDirectory()) {
-            boolean created = folder.mkdir();
+    public static File createDirectory(String path, boolean overwrite) throws IOException {
+        File dir = new File(path);
+        if (overwrite && dir.exists() && dir.isDirectory()) {
+            FileUtils.deleteDirectory(dir);
+        }
+
+        if (!dir.exists() && !dir.isDirectory()) {
+            boolean created = dir.mkdir();
             if (created) {
-                logger.trace("Directory: {} created. ", path);
+                logger.debug("Directory: {} created. ", path);
             } else {
-                logger.error("Failed to create directory: {} ", path);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
+                String errMsg = "Failed to create directory: " + path;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
             }
         }
-        return folder;
+
+        return dir;
+    }
+
+    /**
+     * Create new file in a given location.
+     *
+     * @param path location of the new file.
+     * @param overwrite if `true` existing file with the same name will be replaced.
+     * @param fileName name of the new file.
+     * @return created file
+     * @throws IOException Failed delete or create the file in {@code path}
+     */
+    public static File createFile(String path, String fileName, boolean overwrite) throws IOException {
+        String filePath = path + File.separator + fileName;
+        File file = new File(filePath);
+        if (overwrite && file.exists() && file.isFile()) {
+            boolean isDeleted = file.delete();
+            if (!isDeleted) {
+                String errMsg = "Failed to overwrite file: " + filePath;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
+            }
+        }
+
+        if (!file.exists() && !file.isFile()) {
+            boolean isCreated = file.createNewFile();
+            if (isCreated) {
+                logger.debug("File: {} created.", filePath);
+            } else {
+                String errMsg = "Failed to create file: " + filePath;
+                logger.error(errMsg);
+                throw new CLIInternalException(errMsg);
+            }
+        }
+
+        return file;
     }
 
     /**
@@ -709,35 +747,9 @@ public class GatewayCmdUtils {
      * @throws IOException error while writing content to file
      */
     public static void writeContent(String content, File file) throws IOException {
-        FileWriter writer = null;
-        writer = new FileWriter(file);
+        FileWriter writer = new FileWriter(file);
         writer.write(content);
         writer.flush();
-    }
-
-    /**
-     * Creates file if not exist
-     *
-     * @param path     folder path
-     * @param fileName name of the file
-     */
-    private static void createFileIfNotExist(String path, String fileName) {
-        String filePath = path + File.separator + fileName;
-        File file = new File(filePath);
-        if (!file.exists()) {
-            try {
-                boolean created = file.createNewFile();
-                if (created) {
-                    logger.trace("File: {} created. ", path);
-                } else {
-                    logger.error("Failed to create file: {} ", path);
-                    throw new CLIInternalException("Error occurred while setting up the workspace structure");
-                }
-            } catch (IOException e) {
-                logger.error("Failed to create file: {} ", path, e);
-                throw new CLIInternalException("Error occurred while setting up the workspace structure");
-            }
-        }
     }
 
     /**
@@ -888,10 +900,10 @@ public class GatewayCmdUtils {
         FileUtils.deleteDirectory(new File(genDirPath));
         Files.createDirectory(genPath);
         String genSrcPath = genDirPath + File.separator + GatewayCliConstants.GEN_SRC_DIR;
-        createFolderIfNotExist(genSrcPath);
+        createDirectory(genSrcPath, false);
 
         String genPoliciesPath = genSrcPath + File.separator + GatewayCliConstants.GEN_POLICIES_DIR;
-        createFolderIfNotExist(genPoliciesPath);
+        createDirectory(genPoliciesPath, false);
     }
 
     /**
