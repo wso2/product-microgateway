@@ -264,13 +264,6 @@ public class GatewayCmdUtils {
         String extensionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_EXTENSIONS_DIR;
         createDirectory(extensionsPath, false);
 
-        String targetDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR;
-        createDirectory(targetDirPath, false);
-
-        String targetGenDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_TARGET_DIR + File.separator
-                + GatewayCliConstants.PROJECT_GEN_DIR;
-        createDirectory(targetGenDirPath, false);
-
         String confDirPath = projectDir + File.separator + GatewayCliConstants.PROJECT_CONF_DIR;
         createDirectory(confDirPath, false);
 
