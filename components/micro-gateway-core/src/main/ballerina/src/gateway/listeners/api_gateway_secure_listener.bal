@@ -20,7 +20,7 @@ import ballerina/crypto;
 import ballerina/'lang\.object as lang;
 
 public type APIGatewaySecureListener object {
-    *lang:AbstractListener;
+    *lang:Listener;
     APIGatewayListener apiGatewayListener;
 
     public function __init(int port, http:ListenerConfiguration config) {
