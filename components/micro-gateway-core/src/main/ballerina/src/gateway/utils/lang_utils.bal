@@ -32,6 +32,13 @@ public function split(string str, string delimeter) returns string[] {
     return splitArr;
 }
 
+public function matches(string str, string regex) returns boolean {
+    handle reg = java:fromString(regex);
+    handle rec = java:fromString(str);
+
+    return jMatches(rec, reg);
+}
+
 public function replaceAll(string str, string regex, string replacement) returns string {
     handle reg = java:fromString(regex);
     handle rep = java:fromString(replacement);
@@ -91,6 +98,11 @@ function jtoLowerCase(handle receiver) returns handle = @java:Method {
 
 function jSplit(handle receiver, handle delimeter) returns handle = @java:Method {
     name: "split",
+    class: "java.lang.String"
+} external;
+
+function jMatches(handle receiver, handle delimeter) returns boolean = @java:Method {
+    name: "matches",
     class: "java.lang.String"
 } external;
 
