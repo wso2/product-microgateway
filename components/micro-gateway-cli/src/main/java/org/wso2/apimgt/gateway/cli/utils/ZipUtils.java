@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,18 +38,24 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class ZipUtils {
-
+/**
+ * Utility functions to handle zip files.
+ */
+public final class ZipUtils {
     private static final Logger logger = LoggerFactory.getLogger(ZipUtils.class);
     private static final String ADD_URL = "addURL";
 
+    private ZipUtils() {
+
+    }
+
     /**
      * A method to zip a folder with given path.
-     * 
+     * <p>
      * Note: this zip method does not preserve permissions of files. eg: "execute" permissions.
-     * 
+     *
      * @param sourceDirPath src path to zip
-     * @param zipFilePath created zip file path
+     * @param zipFilePath   created zip file path
      * @throws IOException error while creating the zip file
      */
     public static void zip(String sourceDirPath, String zipFilePath) throws IOException {
@@ -63,7 +68,7 @@ public class ZipUtils {
                         ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
                         try {
                             zs.putNextEntry(zipEntry);
-                            
+
                             Files.copy(path, zs);
                             zs.closeEntry();
                         } catch (IOException e) {
@@ -77,11 +82,11 @@ public class ZipUtils {
 
     /**
      * A method to unzip a zip file to given folder path.
-     *
+     * <p>
      * Note: this unzip method does not preserve permissions of files. eg: "execute" permissions.
      *
-     * @param zipFilePath src path of the zip
-     * @param unzipLocation the path zip should be extracted to
+     * @param zipFilePath      src path of the zip
+     * @param unzipLocation    the path zip should be extracted to
      * @param isAddToClasspath if the file is jar, whether add it to the CLI class path
      * @throws IOException error while unzipping the file
      */
@@ -97,12 +102,14 @@ public class ZipUtils {
                 Path filePath = Paths.get(unzipLocation, entry.getName());
                 if (!entry.isDirectory()) {
                     unzipFiles(zipInputStream, filePath);
-                    //Explicitly set exection permission to files inside bin folders.
-                    if(filePath.toString().contains(File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator)){
+
+                    //Explicitly set execution permission to files inside bin folders.
+                    String binPath = File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator;
+                    if (filePath.toString().contains(binPath)) {
                         filePath.toFile().setExecutable(true, false);
                     }
                     //If file is a jar add it to the class loader dynamically.
-                    if(isAddToClasspath && entry.getName().endsWith(GatewayCliConstants.EXTENSION_JAR)) {
+                    if (isAddToClasspath && entry.getName().endsWith(GatewayCliConstants.EXTENSION_JAR)) {
                         addJarToClasspath(new File(filePath.toString()));
                     }
                 } else {
@@ -117,7 +124,8 @@ public class ZipUtils {
 
     private static void unzipFiles(final ZipInputStream zipInputStream, final Path unzipFilePath) throws IOException {
 
-        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(unzipFilePath.toAbsolutePath().toString()))) {
+        FileOutputStream fileOutStream = new FileOutputStream(unzipFilePath.toAbsolutePath().toString());
+        try (BufferedOutputStream bos = new BufferedOutputStream(fileOutStream)) {
             byte[] bytesIn = new byte[1024];
             int read = 0;
             while ((read = zipInputStream.read(bytesIn)) != -1) {
@@ -142,7 +150,7 @@ public class ZipUtils {
 
             // Run projected addURL method to add JAR to classpath
             method.setAccessible(true);
-            method.invoke(cl, jar.toURI().toURL() );
+            method.invoke(cl, jar.toURI().toURL());
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException |
                 InvocationTargetException | MalformedURLException e) {
             logger.error("Error while adding jar : " + jar.getName() + " to the class path", e);

@@ -101,6 +101,39 @@ public class HttpClientRequest {
     }
 
     /**
+     * Send an HTTP PUT request to a rest.
+     *
+     * @param endpoint - rest endpoint
+     * @param putBody - message payload
+     * @param headers  http request headers map
+     * @return - HttpResponse from end point
+     * @throws IOException If an error occurs while sending the GET request
+     */
+    public static HttpResponse doPut(String endpoint, String putBody, Map<String, String> headers)
+            throws IOException {
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = getURLConnection(endpoint);
+            setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_PUT);
+            OutputStream out = urlConnection.getOutputStream();
+            try {
+                Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
+                writer.write(putBody);
+                writer.close();
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+            }
+            return buildResponse(urlConnection);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
+
+    /**
      * Sends an HTTP OPTIONS request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")

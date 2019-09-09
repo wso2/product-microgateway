@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.1stleg</groupId>
             <artifactId>jnativehook</artifactId>
-            <version>2.0.2</version>
+            <version>2.1.0</version>
         </dependency>
 
         <dependency>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180130</version>
+            <version>20180813</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -141,7 +141,6 @@
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
-            <version>3.2.85</version>
         </dependency>
         <dependency>
             <groupId>io.ballerina.messaging</groupId>
@@ -184,9 +183,18 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <server.zip>
-                            ${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip
-                        </server.zip>
+                        <toolkit>
+                            ${toolkit.dir}
+                        </toolkit>
+                        <runtime_macos>
+                            ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-macos-${project.version}
+                        </runtime_macos>
+                        <runtime_windows>
+                            ${basedir}\..\tests\target\micro-gwtmp\wso2am-micro-gw-windows-${project.version}
+                        </runtime_windows>
+                        <runtime_linux>
+                            ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-linux-${project.version}
+                        </runtime_linux>
                         <project.build.directory>${project.build.directory}</project.build.directory>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                         <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
@@ -198,14 +206,72 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract-packs</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x"/>
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.0.M0</version>
+                <version>9.4.18.v20190429</version>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <host.os>macos</host.os>
+                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <host.os>linux</host.os>
+                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <host.os>windows</host.os>
+                <toolkit.dir>${basedir}\..\tests\target\micro-gwtmp\wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+            </properties>
+        </profile>
         <profile>
             <id>local-etcd</id>
             <build>
@@ -282,9 +348,15 @@
                                 <PORT>2379</PORT>
                             </environmentVariables>
                             <systemPropertyVariables>
-                                <server.zip>
-                                    ${basedir}/../distribution/target/wso2am-micro-gw-${project.version}.zip
-                                </server.zip>
+                                <runtime_macos>
+                                    ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-macos-${project.version}
+                                </runtime_macos>
+                                <runtime_windows>
+                                    ${basedir}\..\tests\target\micro-gwtmp\wso2am-micro-gw-windows-${project.version}
+                                </runtime_windows>
+                                <runtime_linux>
+                                    ${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-linux-${project.version}
+                                </runtime_linux>
                                 <project.build.directory>${project.build.directory}</project.build.directory>
                                 <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                                 <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>

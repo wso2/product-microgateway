@@ -18,13 +18,17 @@
 package org.wso2.apimgt.gateway.cli.rest;
 
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 
 import java.util.List;
 
+/**
+ * Interface to communicate with Third party rest API for fetching
+ * APIs. As an example usage, Implementations of this interface will
+ * be used by import command to communicate with API Provider.
+ */
 public interface RESTAPIService {
 
     /**

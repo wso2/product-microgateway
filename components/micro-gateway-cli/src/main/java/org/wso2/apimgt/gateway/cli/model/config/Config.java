@@ -19,6 +19,10 @@ package org.wso2.apimgt.gateway.cli.model.config;
 
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 
+/**
+ * Configuration data holder.
+ * Holds toolkit config and few other configurations.
+ */
 public class Config {
     private Client client;
     private Token token;

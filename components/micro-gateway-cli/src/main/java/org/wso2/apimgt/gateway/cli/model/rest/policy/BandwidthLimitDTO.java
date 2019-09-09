@@ -16,9 +16,10 @@
 package org.wso2.apimgt.gateway.cli.model.rest.policy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * Data mapper for WSO2 APIM bandwidth limits.
+ */
 public class BandwidthLimitDTO extends ThrottleLimitDTO {
 
     private Long dataAmount = null;

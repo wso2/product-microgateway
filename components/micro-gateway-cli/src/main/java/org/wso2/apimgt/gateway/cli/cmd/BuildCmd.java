@@ -74,8 +74,7 @@ public class BuildCmd implements GatewayLauncherCmd {
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
             outStream.println(commandUsageInfo);
-            //to avoid the command running for a second time
-            System.exit(1);
+            return;
         }
 
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
@@ -89,8 +88,8 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         String importedAPIDefLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
         String addedAPIDefLocation = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        boolean isImportedAPIsAvailable = checkFolderContentAvailablity(importedAPIDefLocation);
-        boolean isAddedAPIsAvailable = checkFolderContentAvailablity(addedAPIDefLocation);
+        boolean isImportedAPIsAvailable = checkDirContentAvailability(importedAPIDefLocation);
+        boolean isAddedAPIsAvailable = checkDirContentAvailability(addedAPIDefLocation);
 
         if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
             throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
@@ -123,15 +122,12 @@ public class BuildCmd implements GatewayLauncherCmd {
         }
     }
 
-    private boolean checkFolderContentAvailablity(String fileLocation) {
+    private boolean checkDirContentAvailability(String fileLocation) {
         File file = new File(fileLocation);
         FilenameFilter filter = (f, name) -> (name.endsWith(".yaml") || name.endsWith(".json"));
-        if (file.list() == null) {
-            return false;
-        } else if (file.list() != null && file.list(filter).length == 0) {
-            return false;
-        }
-        return true;
+        String[] fileNames = file.list(filter);
+
+        return file.list() != null && fileNames != null && fileNames.length > 0;
     }
 
     @Override

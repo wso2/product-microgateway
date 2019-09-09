@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+/**
+ * K8s job decriptor.
+ */
 public class KubernetesJob {
     private String name;
     private String labels;

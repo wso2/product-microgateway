@@ -17,6 +17,11 @@
  */
 package org.wso2.apimgt.gateway.cli.model.oauth;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+/**
+ * Dynamic Client Registration request definition.
+ */
 public class DCRRequest {
     private String callbackUrl;
     private String clientName;
@@ -49,10 +54,12 @@ public class DCRRequest {
         this.owner = owner;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP")
     public String[] getGrantTypes() {
         return grantTypes;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
     public void setGrantTypes(String[] grantTypes) {
         this.grantTypes = grantTypes;
     }

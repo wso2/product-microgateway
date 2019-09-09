@@ -17,8 +17,12 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.NotNull;
 
+/**
+ * Data mapper for WSO2 APIM Labels.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LabelDTO {
 

@@ -1,0 +1,11 @@
+{{#if containerConfig.kubernetes.kubernetesService.enable}}
+{{>kubernetesService}}
+{{else if containerConfig.kubernetes.kubernetesServiceHttps.enable}}
+@kubernetes:Service {
+    {{#if containerConfig.kubernetes.kubernetesServiceHttps.name}}
+    name:"{{containerConfig.kubernetes.kubernetesServiceHttps.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttps.labels}},
+    labels:"{{containerConfig.kubernetes.kubernetesServiceHttps.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttps.serviceType}},
+    serviceType:"{{containerConfig.kubernetes.kubernetesServiceHttps.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttps.port}},
+    port:{{containerConfig.kubernetes.kubernetesServiceHttps.port}}{{/if}}
+}
+{{/if}}

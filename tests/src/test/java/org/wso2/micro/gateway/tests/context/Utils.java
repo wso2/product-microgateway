@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
-import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -235,6 +233,7 @@ public class Utils {
     /**
      * Return the system property value of os.name.
      * System.getProperty("os.name").
+     *
      * @return Operating System name
      */
     public static String getOSName() {
@@ -289,7 +288,7 @@ public class Utils {
     /**
      * Invoke an API
      *
-     * @param token The token to be sent with the request header.
+     * @param token      The token to be sent with the request header.
      * @param requestUrl The url to which the request should be sent.
      */
     public static HttpResponse invokeApi(String token, String requestUrl) throws Exception {
@@ -304,7 +303,7 @@ public class Utils {
     /**
      * Assert the result of a response
      *
-     * @param response The response object.
+     * @param response     The response object.
      * @param responseData The data which is expected as the response
      * @param responseCode The response code which is expected
      */

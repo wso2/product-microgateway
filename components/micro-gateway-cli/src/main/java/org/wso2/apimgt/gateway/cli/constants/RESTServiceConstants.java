@@ -17,6 +17,9 @@
  */
 package org.wso2.apimgt.gateway.cli.constants;
 
+/**
+ * Constants to be used for third party REST API integration.
+ */
 public class RESTServiceConstants {
 
     public static final String ENDPOINT_TYPE = "endpoint_type";

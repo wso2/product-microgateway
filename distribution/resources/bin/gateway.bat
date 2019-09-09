@@ -33,7 +33,7 @@ SET JAVA_XMS_VALUE="256m"
 SET JAVA_XMX_VALUE="512m"
 
 REM Get the location of this(gateway.bat) file
-SET PRGDIR=%~sdp0
+SET PRGDIR=%~dp0
 SET GWHOME=%PRGDIR%..
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
@@ -44,7 +44,9 @@ if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 REM Check if path to runtime executable is available
 set last=""
 for %%a in (%*) do set last=%%a
-if "%last%"=="" set isInvalidPath=T
+echo %last%
+if %last%=="" set isInvalidPath=T
+echo %last%
 if not exist %last% set isInvalidPath=T
 if "%isInvalidPath%"=="T" (
 	echo Path to executable balx file is invalid
@@ -53,22 +55,49 @@ if "%isInvalidPath%"=="T" (
 
 REM Extract ballerina runtime
 if not exist %GW_HOME%\runtime\ (
-    call %PRGDIR%\tools.exe
+    call "%PRGDIR%\tools.exe"
     if ERRORLEVEL 0 (
-        xcopy /y %GWHOME%\lib\gateway\*.jar %GWHOME%\runtime\bre\lib\ >nul
-        xcopy /sy %GWHOME%\lib\gateway\balo\wso2 %GWHOME%\runtime\lib\repo\wso2\ >nul
+        xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul
+        xcopy /sy "%GWHOME%\lib\gateway\balo\wso2" "%GWHOME%\runtime\lib\repo\wso2\" >nul
     )
 )
+
+REM Needs to identify the ballerina arguments and the last argument which is the path of executable.
+REM The path of executable should be provided as \"<path>\" to avoid ballerina when the path includes a space.
+REM BAL_ARGS variable is used to store formatted string
+set BAL_ARGS=
+:formatAndValidateCmdArgs
+    if "%~1"=="-e" (
+        set "BAL_ARGS=%BAL_ARGS% %1 %2=%3"
+        shift
+        shift
+        shift
+        goto :formatAndValidateCmdArgs
+    ) else (
+        if "%~2"=="" (
+            set "BAL_ARGS=%BAL_ARGS% \"%~1\""
+            goto :callBallerina
+        ) else (
+            if "%~1"=="--debug" (
+                 set "BAL_ARGS=%BAL_ARGS% %1 %2"
+                 shift
+                 shift
+                 goto :formatAndValidateCmdArgs
+            ) else (
+                 echo %*
+                 echo "Provided set of arguments are invalid."
+                 goto end
+            )
+        )
+    )
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
 	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
-	if ""%1""=="""" goto :callBallerina
+	if ""%1""=="""" goto :formatAndValidateCmdArgs
 
 	if ""%1""==""--debug""    goto commandDebug
-	if ""%1""==""-debug""   goto commandDebug
-	if ""%1""==""debug""  goto commandDebug
 	shift
 goto setupArgs
 
@@ -79,7 +108,7 @@ goto setupArgs
 	set DEBUG_PORT=%1
 	if "%DEBUG_PORT%"=="" goto noDebugPort
 	echo Please start the remote debugging client to continue...
-goto :callBallerina
+goto :formatAndValidateCmdArgs
 
 :noDebugPort
 	echo Please specify the debug port after the ballerina debug option
@@ -107,13 +136,13 @@ goto end
 		echo [%date% %time%] WARN: Can't find powershell in the system!
 		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
 		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
-		%GWHOME%\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" "%*" >> "%GWHOME%\logs\microgateway.log" 2>&1
+		"%GWHOME%\runtime\bin\ballerina" run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" %BAL_ARGS% >> "%GWHOME%\logs\microgateway.log" 2>&1
 	) else (
 		REM Change Java heap Xmx and Xmx values
-		powershell -Command "(Get-Content %GWHOME%\runtime\bin\ballerina.bat) | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content %GWHOME%\runtime\bin\ballerina_1.bat"
-		powershell -Command "Remove-Item %GWHOME%\runtime\bin\ballerina.bat"
-		powershell -Command "Rename-Item -path %GWHOME%\runtime\bin\ballerina_1.bat -newName ballerina.bat"
-		CD %GWHOME%
+		powershell -Command "(Get-Content \"%GWHOME%\runtime\bin\ballerina.bat\") | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content \"%GWHOME%\runtime\bin\ballerina_1.bat\""
+		powershell -Command "Remove-Item \"%GWHOME%\runtime\bin\ballerina.bat\""
+		powershell -Command "Rename-Item -path \"%GWHOME%\runtime\bin\ballerina_1.bat\" -newName ballerina.bat"
+		CD "%GWHOME%"
 		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
 			set /a n=!n!+1
 			set c=%%A
@@ -125,10 +154,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=%usage_data_path% -e b7a.http.accesslog.path=%unix_style_path% --config .\conf\micro-gw.conf "%*" | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
