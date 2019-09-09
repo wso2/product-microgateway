@@ -133,6 +133,7 @@ goto :end
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
+                REM TODO: Generate only the jar_cache with -c option in build command
                 call ballerina build %project_name% --experimental
 
                 if ERRORLEVEL 0 (

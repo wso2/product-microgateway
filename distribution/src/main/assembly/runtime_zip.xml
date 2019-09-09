@@ -40,6 +40,9 @@
                     bir-cache/**
                 </exclude>
                 <exclude>
+                    docs/**
+                </exclude>
+                <exclude>
                     bre/lib/ballerina-bir-${ballerina.platform.version}.jar
                 </exclude>
                 <exclude>

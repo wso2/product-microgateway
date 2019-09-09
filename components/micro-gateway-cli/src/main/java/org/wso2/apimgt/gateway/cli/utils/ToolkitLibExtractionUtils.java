@@ -65,12 +65,7 @@ public class ToolkitLibExtractionUtils {
             CmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator
                     + CliConstants.CLI_PLATFORM, destination + File.separator + breLibPath);
 
-            //todo: remove this segment in next release
-            File b7aSwaggerJar = new File(destination + File.separator + breLibPath + File.separator +
-                    "openapi-to-ballerina-generator-1.0.0-beta.jar");
-            if (!b7aSwaggerJar.delete()) {
-                throw new CLIInternalException("Failed to remove ballerina code generator jar file");
-            }
+
         }
     }
 }
