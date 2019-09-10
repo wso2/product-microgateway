@@ -118,7 +118,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                     subscribedAPIList = jsonSubscribedApis;
                     }
                     printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
-                    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.getServiceName())];
+                    APIConfiguration? apiConfig = apiConfigAnnotationMap[filterContext.getServiceName()];
                     int l = subscribedAPIList.length();
                     if (l == 0){
                         authenticationContext.authenticated = true;

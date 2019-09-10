@@ -68,10 +68,12 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         auth:{
-        {{#unless isSecured}}
-            enabled:false {{/unless}} {{#if scope}},
-            scopes: [{{{scope}}}] {{/if}}
-
+        {{#if isSecured}}
+            {{#if scope}}
+                scopes: [{{{scope}}}] {{/if}}
+        {{else}}
+            enabled:false
+        {{/if}}
         }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
