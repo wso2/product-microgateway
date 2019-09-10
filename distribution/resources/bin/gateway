@@ -92,7 +92,6 @@ if [ ! -d "$GWHOME/runtime" ]; then
     $PRGDIR/tools
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
-        cp -r $GWHOME/lib/gateway/bir-cache/wso2 $GWHOME/runtime/bir-cache/
     fi
 fi
 
