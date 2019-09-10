@@ -223,23 +223,23 @@
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>ballerina-runtime</id>-->
-<!--                        <phase>prepare-package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>single</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <filters>-->
-<!--                                <filter>${basedir}/src/main/assembly/filter.properties</filter>-->
-<!--                            </filters>-->
-<!--                            <descriptors>-->
-<!--                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>-->
-<!--                            </descriptors>-->
-<!--                            <finalName>runtime</finalName>-->
-<!--                            <appendAssemblyId>false</appendAssemblyId>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+                    <execution>
+                        <id>ballerina-runtime</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>
+                            </descriptors>
+                            <finalName>runtime</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>micro-gateway-toolkit</id>
                         <phase>package</phase>
