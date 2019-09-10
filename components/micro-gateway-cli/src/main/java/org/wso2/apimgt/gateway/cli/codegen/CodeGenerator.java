@@ -101,15 +101,7 @@ public class CodeGenerator {
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
-
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
-
+        GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
     }
 
 
@@ -170,15 +162,7 @@ public class CodeGenerator {
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_EXTENSION_FILTER);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
-        GatewayCmdUtils.copyFilesToSources(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION,
-                projectSrcPath + File.separator + GatewayCliConstants.GW_DIST_START_UP_EXTENSION);
+        GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
     }
 
     /**

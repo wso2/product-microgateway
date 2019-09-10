@@ -113,7 +113,7 @@ public class BuildCmd implements GatewayLauncherCmd {
                             + GatewayCliConstants.PROJECT_SERVICES_DIR);
             codeGenerator.generate(projectName, true);
 
-            //Initializing the ballerina project and creating .bal folder.
+            //Initializing the ballerina project and creating .ballerina folder.
             InitHandler.initialize(Paths.get(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName)), null,
                     new ArrayList<>(), null);
         } catch (IOException e) {
