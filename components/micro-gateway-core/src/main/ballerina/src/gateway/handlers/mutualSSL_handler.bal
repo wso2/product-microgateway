@@ -40,9 +40,14 @@ public type MutualSSLHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean|http:AuthenticationError {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(MUTUALSSL_FILTER_PROCESS);
         int startingTime = getCurrentTime();
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();  
-        return doMTSLFilterRequest(req, invocationContext);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        boolean|http:AuthenticationError result = doMTSLFilterRequest(req, invocationContext);
+        //Finish span.
+        finishingSpan(MUTUALSSL_FILTER_PROCESS, spanId_req);  
+        return result;
     }
 
 };

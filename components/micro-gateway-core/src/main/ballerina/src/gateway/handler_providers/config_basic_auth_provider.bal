@@ -49,6 +49,8 @@ public type BasicAuthProvider object {
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
     public function authenticate(string credential) returns (boolean|auth:Error) {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(BASICAUTH_PROVIDER);
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -66,6 +68,8 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             string[] decodedCred = internal:split(decodedCredentialsString.trim(), ":");
@@ -75,6 +79,8 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, context);
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             passWord = decodedCred[1];
@@ -83,9 +89,12 @@ public type BasicAuthProvider object {
             //TODO: Handle the error message properly 
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, context);
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return false;
         }
-
+        //Starting a new span 
+        int|error|() spanId_Hash = startingSpan(HASHING_MECHANISM);
         //Hashing mechanism
         string hashedPass = encoding:encodeHex(crypto:hashSha1(passWord.toBytes()));
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
@@ -94,15 +103,23 @@ public type BasicAuthProvider object {
         string encodedVal = encoding:encodeBase64(credentials.toBytes());
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
+        //finishing span
+        finishingSpan(HASHING_MECHANISM, spanId_Hash);
 
         printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
+        //Starting a new span 
+        int|error|() spanId_Inbound = startingSpan(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
+        //finishing span
+        finishingSpan(BALLERINA_INBOUND_BASICAUTH, spanId_Inbound);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             int startingTime = getCurrentTime();
@@ -127,8 +144,12 @@ public type BasicAuthProvider object {
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             isAuthenticated = true;
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return isAuthenticated;
         } else {
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
         

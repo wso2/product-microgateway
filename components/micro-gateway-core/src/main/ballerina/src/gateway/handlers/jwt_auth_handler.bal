@@ -57,6 +57,11 @@ public type JWTAuthHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean|http:AuthenticationError {
-        return self.bearerAuthHandler.process(req);
+        //Start a span attaching to the system span.
+        int|error|() spanId_Process = startingSpan(JWT_AUTHENHANDLER_PROCESS);
+        boolean|http:AuthenticationError result = self.bearerAuthHandler.process(req);
+        //finishing span
+        finishingSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
+        return result;
     }
 };

@@ -50,11 +50,17 @@ public type OAuth2KeyValidationProvider object {
 
   
     public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
+        //Start a span attaching to the system span.
+        int|error|() spanId_Authenticate = startingSpan(OAUTH_AUTHPROVIDER_AUTHENTICATE);
         AuthenticationContext authenticationContext = {};
         boolean isAuthorized;
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(invocationContext, credential);
+        /////////////////////Start a span attaching to the system span.
+        int|error|() spanId_Handle= startingSpan(OAUTHN_AUTHENTICATOR_HANDLE);
         APIKeyValidationDto | error apiKeyValidationDto = trap self.checkCacheAndAuthenticate(apiKeyValidationRequestDto, invocationContext);
+        //Finish span.
+        finishingSpan(OAUTHN_AUTHENTICATOR_HANDLE, spanId_Handle);
         if (apiKeyValidationDto is APIKeyValidationDto){
             isAuthorized = apiKeyValidationDto.authorized;
             printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
@@ -95,6 +101,8 @@ public type OAuth2KeyValidationProvider object {
                 .keyType;
                 runtime:AuthenticationContext authContext = {scheme:AUTH_SCHEME_OAUTH2,authToken: credential};
                 invocationContext.authenticationContext = authContext;
+                //Finish span.
+                finishingSpan(OAUTH_AUTHPROVIDER_AUTHENTICATE, spanId_Authenticate);
                 return isAuthorized;
             } else {
                 int|error status = 'int:fromString(apiKeyValidationDto.validationStatus);
@@ -104,6 +112,8 @@ public type OAuth2KeyValidationProvider object {
                 //TODO: Send proper error messages        
                 setErrorMessageToInvocationContext(errorStatus);
                 //sendErrorResponse(caller, request, <@untainted>  context);
+                //Finish span.
+                finishingSpan(OAUTH_AUTHPROVIDER_AUTHENTICATE, spanId_Authenticate);
                 return false;
             }
         } else {
@@ -111,6 +121,8 @@ public type OAuth2KeyValidationProvider object {
             //TODO: Send proper error messages  
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, <@untainted>  context);
+            //Finish span.
+            finishingSpan(OAUTH_AUTHPROVIDER_AUTHENTICATE, spanId_Authenticate);
             return false;
         }
     }
@@ -222,7 +234,11 @@ public type OAuth2KeyValidationProvider object {
         APIKeyValidationDto apiKeyValidationDto = {};
         string accessToken = apiRequestMetaDataDto.accessToken;
         boolean authorized = false;
+        //Start a new child span for the span.
+        int|error|() spanId_KeyValidate = startingSpan(OAUTH_AUTHPROVIDER_DOKEYVALIDATION);
         xml|error keyValidationResponseXML = self.doKeyValidation(apiRequestMetaDataDto);
+        //finishing span
+        finishingSpan(OAUTH_AUTHPROVIDER_DOKEYVALIDATION, spanId_KeyValidate);
         if (keyValidationResponseXML is xml) {
             printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
             xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:'return];

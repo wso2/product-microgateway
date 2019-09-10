@@ -58,6 +58,8 @@ public type KeyValidationHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean|http:AuthenticationError {
+        //Start a span attaching to the system span.
+        int|error|() spanId_Process = startingSpan(KEY_VALIDATION_HANDLER_PROCESS);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         var authenticationResult = self.bearerAuthHandler.process(req);
         if(authenticationResult is boolean && authenticationResult) {
@@ -74,6 +76,8 @@ public type KeyValidationHandler object {
             string authHeaderName = getAuthorizationHeader(invocationContext);
             checkAndRemoveAuthHeaders(req, authHeaderName);
         }
+        //Finish span.
+        finishingSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
         return authenticationResult;
     }
 
