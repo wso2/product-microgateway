@@ -15,7 +15,7 @@
 // under the License.
 import ballerina/auth;
 import ballerina/http;
-import ballerina/internal;
+import ballerina/stringutils;
 import ballerina/runtime;
 import ballerina/log;
 import ballerina/time;
@@ -84,7 +84,7 @@ public type OAuth2KeyValidationProvider object {
                 int|error spikeArrestLimit = 'int:fromString(apiKeyValidationDto.spikeArrestLimit);
                 authenticationContext.spikeArrestLimit =  (spikeArrestLimit is int)?spikeArrestLimit:0;
                 authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
-                authenticationContext.stopOnQuotaReach = internal:toBoolean(apiKeyValidationDto.
+                authenticationContext.stopOnQuotaReach = stringutils:toBoolean(apiKeyValidationDto.
                     stopOnQuotaReach);
                 
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
@@ -226,7 +226,7 @@ public type OAuth2KeyValidationProvider object {
             printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
             xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:'return];
             string authorizeValue = keyValidationInfoXML[apim:authorized].getTextValue();
-            boolean auth = internal:toBoolean(authorizeValue);
+            boolean auth = stringutils:toBoolean(authorizeValue);
             printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth.toString());
             if (auth) {
                 apiKeyValidationDto = convertXmlToKeyValidationObject(keyValidationInfoXML);
@@ -262,7 +262,7 @@ public type OAuth2KeyValidationProvider object {
 # + clientConfig - HTTP client configurations which calls the key validation server
 public type KeyValidationServerConfig record {|
     string url;
-    http:ClientEndpointConfig clientConfig = {};
+    http:ClientConfiguration clientConfig = {};
 |};
 
 
@@ -275,7 +275,7 @@ function convertXmlToKeyValidationObject(xml keyValidationInfoXML) returns APIKe
      apiKeyValidationDto.applicationId = keyValidationInfoXML[apim:applicationId].getTextValue();
      apiKeyValidationDto.applicationName = keyValidationInfoXML[apim:applicationName].getTextValue();
      apiKeyValidationDto.applicationTier = keyValidationInfoXML[apim:applicationTier].getTextValue();
-     apiKeyValidationDto.authorized = internal:toBoolean(keyValidationInfoXML[apim:authorized].getTextValue());
+     apiKeyValidationDto.authorized = stringutils:toBoolean(keyValidationInfoXML[apim:authorized].getTextValue());
      apiKeyValidationDto.authorizedDomains = keyValidationInfoXML[apim:authorizedDomains].getTextValue();
      apiKeyValidationDto.consumerKey = keyValidationInfoXML[apim:consumerKey].getTextValue();
      apiKeyValidationDto.contentAware = keyValidationInfoXML[apim:contentAware].getTextValue();

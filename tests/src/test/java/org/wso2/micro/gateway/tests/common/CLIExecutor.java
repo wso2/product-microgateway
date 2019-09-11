@@ -243,6 +243,6 @@ public class CLIExecutor {
      */
     public String getLabelBalx(String project) {
         return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project +
-                ".balx";
+                ".jar";
     }
 }

@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/internal;
 import ballerina/crypto;
 import ballerina/'lang\.object as lang;
 
@@ -79,9 +78,9 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
     TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
     SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
-    string[] protocolVersions = internal:split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
+    string[] protocolVersions = split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
     defaultProtocolVersions), ",");
-    string[] ciphers = internal:split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers), ",");
+    string[] ciphers = split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers), ",");
     string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
     crypto:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
