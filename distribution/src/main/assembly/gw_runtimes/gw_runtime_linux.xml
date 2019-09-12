@@ -96,5 +96,14 @@
             <fileMode>755</fileMode>
         </file>
     </files>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 
 </assembly>

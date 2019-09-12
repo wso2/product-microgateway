@@ -14,22 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// public const string AUTHN_FILTER_REQUEST = "Authn_Filter_Request";
 public const string PRE_AUTHN_FILTER_REQUEST = "Pre_Authen_Filter_Request";
 public const string BASICAUTH_PROVIDER = "BasicAuth_Provider";
 public const string HASHING_MECHANISM = "Hashing_Mechanism";
 public const string BALLERINA_INBOUND_BASICAUTH = "Ballerina_Inbound_BasicAuth";
-// public const string BALLERINA_AUTH_HANDLERCHAIN = "Ballerina_authhandlerchain";
 
 public const string JWT_AUTHENHANDLER_PROCESS = "Jwt_AuthenHandler_Process";
 public const string JWT_PROVIDER_AUTHENTICATE = "JWT_Provider_Authenticate";
-// public const string JWT_AUTHENHANDLER_HANDLE = "Jwt_AuthenHandler_handle";
 public const string JWT_CACHE = "Jwt_Cache";
-// public const string BALLERINA_JWTAUTHN_HANDLER = "Ballerina_jwtAuthn_Handler";
 public const string KEY_VALIDATION_HANDLER_PROCESS = "KeyValidation_Handler_Process";
-public const string OAUTHN_AUTHENTICATOR_HANDLE = "OAuthn_Authenticator_handle";
-public const string OAUTH_AUTHPROVIDER_AUTHENTICATE = "OAuth_AuthProvider_authenticate";
-public const string OAUTH_AUTHPROVIDER_DOKEYVALIDATION = "OAuth_AuthProvider_doKeyValidation";
+public const string OAUTH_VALIDATION_PROVIDER_CACHE_CHECK = "OAuth_ValidationProvider_CacheCheck";
+public const string OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION = "OAuth_AuthProvider_InvokeKeyValidation";
 
 public const string ANALY_FILTER_REQUEST = "Analytics_Filter_Request";
 public const string ANALY_FILTER_RESPONSE = "Analytics_Filter_Response";
@@ -41,9 +36,11 @@ public const string BALLERINA_AUTHZ_FILTER = "Ballerina_authzFilter";
 public const string MUTUALSSL_FILTER_PROCESS = "MutualSSL_Filter_Process";
 
 public const string SUBSCRIPTION_FILTER_REQUEST = "Subscription_FilterRequest";
-// public const string PAYLOAD_JSON_CONVERT = "PayLoad_Json_Convert";
 
 public const string THROTTLE_FILTER_REQUEST = "Throttle_Filter_Request";
+
+public const string REQUEST_METHOD = "REQUEST_METHOD";
+public const string REQUEST_RAWPATH = "REQUEST_RAWPATH";
 
 // public const string VALIDATION_FILTER_REQUEST = "Validation_Filter_Request";
 // public const string VALIDATION_FILTER_RESPONSE = "Validation_Filter_Response";

@@ -60,6 +60,8 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     invocationContext.attributes[RESOURCE_NAME_ATTR] = resourceName;
     boolean isSecuredResource = isSecured(serviceName, resourceName);
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
+    invocationContext.attributes[REQUEST_METHOD] = request.method;
+    invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
 
     boolean isCookie = false;
     string authHeader = "";

@@ -20,6 +20,7 @@ import ballerina/runtime;
 import ballerina/auth;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
+import ballerina/observe;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -50,6 +51,10 @@ public type BasicAuthProvider object {
     public function authenticate(string credential) returns (boolean|auth:Error) {
         //Start a span attaching to the system span.
         int|error|() spanId_req = startingSpan(BASICAUTH_PROVIDER);
+        int startingTime = getCurrentTime();
+        map<string> gaugeTags = gageTagDetails_basicAuth(FIL_AUTHENTICATION);
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -68,6 +73,9 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);
                 //Finish span.
                 finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
@@ -79,6 +87,9 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);
                 //Finish span.
                 finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
@@ -89,6 +100,9 @@ public type BasicAuthProvider object {
             //TODO: Handle the error message properly 
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, context);
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);
             //Finish span.
             finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return false;
@@ -118,12 +132,15 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);                
                 //Finish span.
                 finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
-            int startingTime = getCurrentTime();
-            invocationContext.attributes[REQUEST_TIME] = startingTime;
+            int startingTime_req = getCurrentTime();
+            invocationContext.attributes[REQUEST_TIME] = startingTime_req;
             invocationContext.attributes[FILTER_FAILED] = false;
             //Set authenticationContext data
             authenticationContext.authenticated = true;
@@ -144,10 +161,16 @@ public type BasicAuthProvider object {
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             isAuthenticated = true;
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);            
             //Finish span.
             finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return isAuthenticated;
         } else {
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);
             //Finish span.
             finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);

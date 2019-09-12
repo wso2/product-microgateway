@@ -59,6 +59,10 @@
             <version>${ballerina.jre.artifacts.version}</version>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>io.prometheus.jmx</groupId>
+            <artifactId>jmx_prometheus_javaagent</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

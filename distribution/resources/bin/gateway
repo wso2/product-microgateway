@@ -100,6 +100,8 @@ sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
 sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
 rm $BALLERINA_HOME/bin/ballerina.back
 
+export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=8080:$GWHOME/conf/Prometheus/config.yml"
+
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
     if  ps -p $PID > /dev/null ; then
