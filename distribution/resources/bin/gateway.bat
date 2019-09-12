@@ -58,7 +58,6 @@ if not exist %GW_HOME%\runtime\ (
     call "%PRGDIR%\tools.exe"
     if ERRORLEVEL 0 (
         xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul
-        xcopy /sy "%GWHOME%\lib\gateway\bir-cache\wso2" "%GWHOME%\runtime\bir-cache\wso2\" >nul
     )
 )
 

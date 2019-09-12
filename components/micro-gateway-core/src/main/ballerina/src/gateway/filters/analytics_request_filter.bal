@@ -16,22 +16,39 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/observe;
 
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(ANALY_FILTER_REQUEST);
+        map<string> gaugeTags = gageTagDetails(request, context, FIL_ANALYTICS);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        invocationContext.attributes[ANALYTIC_GAUGE_TAGS] = gaugeTags;
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
+            int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
+            float latency = setGaugeDuration(startingTime);
+            invocationContext.attributes[ANALYTIC_REQUEST_TIME] = latency;
         }
+        //Finish span.
+        finishingSpan(ANALY_FILTER_REQUEST, spanId_req);
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-
+        //Start a span attaching to the system span.
+        int|error|() spanId_res = startingSpan(ANALY_FILTER_RESPONSE);
+        //starting a Gauge metric
+        map<string > gaugeTags= <map<string >>runtime:getInvocationContext().attributes[ANALYTIC_GAUGE_TAGS];
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_ANALYTICS});
         if (isAnalyticsEnabled) {
+            int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
@@ -49,7 +66,14 @@ public type AnalyticsRequestFilter object {
                     doFilterAll(response, context);
                 }
             }
+            float latency = setGaugeDuration(startingTime);
+            float req_latency=<float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME];
+            float total_latency = req_latency + latency;
+            UpdatingGauge(localGauge, total_latency);
+            UpdatingGauge(localGauge_total, total_latency);
         }
+        //Finish span.
+        finishingSpan(ANALY_FILTER_RESPONSE, spanId_res);
         return true;
     }
 

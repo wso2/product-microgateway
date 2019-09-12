@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/encoding;
 import ballerina/internal;
 import ballerina/runtime;
 import ballerina/auth;
-
-
+import ballerina/lang.'array as arrays;
+import ballerina/lang.'string as strings;
+import ballerina/observe;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -49,6 +49,12 @@ public type BasicAuthProvider object {
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
     public function authenticate(string credential) returns (boolean|auth:Error) {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(BASICAUTH_PROVIDER);
+        int startingTime = getCurrentTime();
+        map<string> gaugeTags = gageTagDetails_basicAuth(FIL_AUTHENTICATION);
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -56,16 +62,22 @@ public type BasicAuthProvider object {
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string encodedCredentials = credential[1];
-        byte[]|error decodedCredentials =  encoding:decodeBase64(encodedCredentials);
+        byte[]|error decodedCredentials =  arrays:fromBase64(encodedCredentials);
+
         //Extract username and password from the request
         string userName;
-        string passWord;
+        string password;
         if(decodedCredentials is byte[]){
-            string  decodedCredentialsString =  encoding:byteArrayToString(decodedCredentials);
+            string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0)== ()){
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             string[] decodedCred = internal:split(decodedCredentialsString.trim(), ":");
@@ -75,38 +87,60 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
-            passWord = decodedCred[1];
+            password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             //TODO: Handle the error message properly 
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, context);
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return false;
         }
-
+        //Starting a new span 
+        int|error|() spanId_Hash = startingSpan(HASHING_MECHANISM);
         //Hashing mechanism
-        string hashedPass = encoding:encodeHex(crypto:hashSha1(passWord.toBytes()));
+        string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
-        string encodedVal = encoding:encodeBase64(credentials.toBytes());
+        string encodedVal = credentials.toBytes().toBase64();
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
+        //finishing span
+        finishingSpan(HASHING_MECHANISM, spanId_Hash);
 
         printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
+        //Starting a new span 
+        int|error|() spanId_Inbound = startingSpan(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
+        //finishing span
+        finishingSpan(BALLERINA_INBOUND_BASICAUTH, spanId_Inbound);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
+                float latency = setGaugeDuration(startingTime);
+                UpdatingGauge(localGauge, latency);
+                UpdatingGauge(localGauge_total, latency);                
+                //Finish span.
+                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
-            int startingTime = getCurrentTime();
-            invocationContext.attributes[REQUEST_TIME] = startingTime;
+            int startingTime_req = getCurrentTime();
+            invocationContext.attributes[REQUEST_TIME] = startingTime_req;
             invocationContext.attributes[FILTER_FAILED] = false;
             //Set authenticationContext data
             authenticationContext.authenticated = true;
@@ -127,8 +161,18 @@ public type BasicAuthProvider object {
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             isAuthenticated = true;
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);            
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return isAuthenticated;
         } else {
+            float latency = setGaugeDuration(startingTime);
+            UpdatingGauge(localGauge, latency);
+            UpdatingGauge(localGauge_total, latency);
+            //Finish span.
+            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
         

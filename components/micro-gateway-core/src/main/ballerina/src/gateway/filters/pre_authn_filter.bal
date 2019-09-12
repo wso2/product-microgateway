@@ -22,15 +22,19 @@ import ballerina/runtime;
 
 public type PreAuthnFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context)
-                        returns boolean {
+    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(PRE_AUTHN_FILTER_REQUEST);
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
-        return doAuthnFilterRequest(caller, request, <@untainted>context);
+        boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
+        //Finish span.
+        finishingSpan(PRE_AUTHN_FILTER_REQUEST, spanId_req);
+        return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
@@ -56,6 +60,8 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     invocationContext.attributes[RESOURCE_NAME_ATTR] = resourceName;
     boolean isSecuredResource = isSecured(serviceName, resourceName);
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
+    invocationContext.attributes[REQUEST_METHOD] = request.method;
+    invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
 
     boolean isCookie = false;
     string authHeader = "";

@@ -26,10 +26,14 @@ public type SubscriptionFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext filterContext)
                         returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(SUBSCRIPTION_FILTER_REQUEST);
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
         boolean result = doSubscriptionFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_SUBS);
+        //Finish span.
+        finishingSpan(SUBSCRIPTION_FILTER_REQUEST, spanId_req);
         return result;
     }
 
@@ -114,7 +118,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                     subscribedAPIList = jsonSubscribedApis;
                     }
                     printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
-                    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(filterContext.getServiceName())];
+                    APIConfiguration? apiConfig = apiConfigAnnotationMap[filterContext.getServiceName()];
                     int l = subscribedAPIList.length();
                     if (l == 0){
                         authenticationContext.authenticated = true;

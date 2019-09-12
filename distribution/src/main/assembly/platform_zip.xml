@@ -28,6 +28,12 @@
         <fileSet>
             <directory>${basedir}/target/ballerina/jballerina-tools-${ballerina.platform.version}</directory>
             <outputDirectory/>
+            <!--> Excludes open API parser from b7a due to an older version<-->
+            <excludes>
+                <exclude>
+                    bre/lib/openapi-to-ballerina-generator-${ballerina.platform.version}.jar
+                </exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 

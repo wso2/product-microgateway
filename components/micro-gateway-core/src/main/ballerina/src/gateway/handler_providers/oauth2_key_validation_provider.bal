@@ -19,7 +19,6 @@ import ballerina/internal;
 import ballerina/runtime;
 import ballerina/log;
 import ballerina/time;
-import ballerina/encoding;
 import ballerina/lang.'int;
 
 
@@ -44,7 +43,7 @@ public type OAuth2KeyValidationProvider object {
     public function __init(KeyValidationServerConfig config) {
         string base64Header = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin") + ":" +
             getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
-        self.encodedBasicAuthHeader = encoding:encodeBase64(base64Header.toBytes());
+        self.encodedBasicAuthHeader = base64Header.toBytes().toBase64();
         self.keyValidationClient = new(config.url, config.clientConfig);
     }
 
@@ -54,7 +53,11 @@ public type OAuth2KeyValidationProvider object {
         boolean isAuthorized;
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(invocationContext, credential);
+        //Start a span attaching to the system span.
+        int|error|() spanId_cacheCheck= startingSpan(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK);
         APIKeyValidationDto | error apiKeyValidationDto = trap self.checkCacheAndAuthenticate(apiKeyValidationRequestDto, invocationContext);
+        //Finish span.
+        finishingSpan(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK, spanId_cacheCheck);
         if (apiKeyValidationDto is APIKeyValidationDto){
             isAuthorized = apiKeyValidationDto.authorized;
             printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
@@ -222,7 +225,11 @@ public type OAuth2KeyValidationProvider object {
         APIKeyValidationDto apiKeyValidationDto = {};
         string accessToken = apiRequestMetaDataDto.accessToken;
         boolean authorized = false;
+        //Start a new child span for the span.
+        int|error|() spanId_KeyValidate = startingSpan(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION);
         xml|error keyValidationResponseXML = self.doKeyValidation(apiRequestMetaDataDto);
+        //finishing span
+        finishingSpan(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION, spanId_KeyValidate);
         if (keyValidationResponseXML is xml) {
             printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
             xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:'return];

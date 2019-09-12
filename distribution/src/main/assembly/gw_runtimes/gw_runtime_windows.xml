@@ -30,10 +30,6 @@
             <outputDirectory>wso2am-micro-gw-windows-${project.version}/conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/lib/gw/</directory>
-            <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/gateway/bir-cache</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/lib/jar/</directory>
             <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/gateway</outputDirectory>
         </fileSet>
@@ -61,7 +57,7 @@
 
     <files>
         <file>
-            <source>${basedir}/target/platform.zip</source>
+            <source>${basedir}/target/runtime.zip</source>
             <outputDirectory>wso2am-micro-gw-windows-${project.version}/</outputDirectory>
             <destName>runtime.zip</destName>
         </file>
@@ -99,4 +95,13 @@
             <fileMode>755</fileMode>
         </file>
     </files>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/lib/gateway</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 </assembly>

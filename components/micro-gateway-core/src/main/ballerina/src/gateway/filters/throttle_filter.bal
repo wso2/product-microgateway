@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/observe;
 
 public type ThrottleFilter object {
     public map<boolean> deployedPolicies = {};
@@ -25,10 +26,21 @@ public type ThrottleFilter object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(THROTTLE_FILTER_REQUEST);
+        //Gauge metric initialization
+        map<string> gaugeTags = gageTagDetails(request, context, FIL_THROTTLING);
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_THROTTLING});
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
+        float latency = setGaugeDuration(startingTime);
+        UpdatingGauge(localGauge, latency);
+        UpdatingGauge(localGauge_total, latency);
+        //Finish span.
+        finishingSpan(THROTTLE_FILTER_REQUEST, spanId_req);
         return result;
     }
 
@@ -334,7 +346,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 
 function getVersion(http:FilterContext context) returns string|() {
     string? apiVersion = "";
-    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[getServiceName(context.getServiceName())];
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         apiVersion = apiConfiguration.apiVersion;
     }

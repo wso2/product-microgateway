@@ -25,8 +25,9 @@ import ballerina/reflect;
 import ballerina/internal;
 import ballerina/system;
 import ballerina/file;
-import ballerina/encoding;
 import ballerina/lang.'int;
+import ballerina/lang.'array as arrays;
+import ballerina/lang.'string as strings;
 
 map<http:HttpResourceConfig?> resourceAnnotationMap = {};
 map<http:HttpServiceConfig?> serviceAnnotationMap = {};
@@ -46,9 +47,10 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
 }
 
-# Retrieve the key validation request dto from filter context
-#
-# + return - api key validation request dto
+# Retrieve the key validation request dto from filter context.
+# + context - invocation context.
+# + accessToken - access token sent in the authorization header.
+# + return - api key validation request dto.
 public function getKeyValidationRequestObject(runtime:InvocationContext context, string accessToken) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
@@ -88,13 +90,6 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
 
 }
 
-# Retrieve the correct service name from service name that contains object reference(for ex; MyService$$service$0).
-# This method is a work around due to ballerina filter context returns wrong service name
-#
-# + return - service name
-public function getServiceName(string serviceObjectName) returns string {
-    return split(serviceObjectName, "\\$")[0];
-}
 
 public function getTenantFromBasePath(string basePath) returns string {
     string[] splittedArray = split(basePath, "/");
@@ -133,7 +128,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     return false;
 }
 public function getContext(http:FilterContext context) returns (string) {
-    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[getServiceName(context.getServiceName())];
+    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[context.getServiceName()];
     return <string>httpServiceConfig.basePath;
 
 }
@@ -255,7 +250,10 @@ public function setErrorMessageToInvocationContext(int errorCode) {
     context.attributes[ERROR_DESCRIPTION] = getFailureMessageDetailDescription(errorCode, errorMessage);
 }
 
-# Default error response sender with json error response
+# Default error response sender with json error response.
+# + caller - http caller object.
+# + request - http request object.
+# + context - filter context object.
 public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
     string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
@@ -275,7 +273,8 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     }
 }
 
-# Default error response sender with json error response
+# Default error response sender with json error response.
+# + response - http response object.
 public function sendErrorResponseFromInvocationContext(http:Response response) {
     runtime: InvocationContext context = runtime:getInvocationContext();
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
@@ -293,7 +292,7 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
     string serviceName = context.attributes["ServiceName"].toString();
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[getServiceName(serviceName)];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
     if(annotatedHeadeName is string) {
@@ -335,16 +334,17 @@ public function rotateFile(string fileName) returns string|error {
     }
 }
 
-# Retrieve external configurations defined against a key
-#
-# + return - Returns the confif value as a string
+# Retrieve external configurations defined against a key.
+# + key - The key of the configurations to be read.
+# + defaultConfig - Default value of the configuration.
+# + return - Returns the confif value as a string.
 public function retrieveConfig(string key, string defaultConfig) returns string {
     return config:getAsString(key, defaultConfig);
 }
 
 # mask all letters with given text except last 4 charactors.
-#
-# + return - Returns the masked string value
+# + text - The string to be masked.
+# + return - Returns the masked string value.
 public function mask(string text) returns string {
     if (text.length() > 4) {
         string last = text.substring(text.length() - 4, text.length());
@@ -371,35 +371,47 @@ public function getMessageId() returns string {
     }
 }
 
-# Add a error log with provided key (class) and message ID
+# Add a error log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printError(string key, string message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-# Add a debug log with provided key (class) and message ID
+# Add a debug log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printDebug(string key, string message) {
     log:printDebug(function() returns string {
             return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 
-# Add a warn log with provided key (class) and message ID
+# Add a warn log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printWarn(string key, string message) {
     log:printWarn(function() returns string {
             return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 
-# Add a trace log with provided key (class) and message ID
+# Add a trace log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printTrace(string key, string message) {
     log:printTrace(function() returns string {
             return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
 }
 
-# Add a info log with provided key (class) and message ID
+# Add a info log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printInfo(string key, string message) {
     log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-# Add a full error log with provided key (class) and message ID
+# Add a full error log with provided key (class) and message ID.
+# + key - The name of the bal file from which the log is printed.
+# + message - The message to be logged.
 public function printFullError(string key, error message) {
     log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.reason()), err = message);
 }
@@ -411,7 +423,8 @@ public function setLatency(int starting, http:FilterContext context, string late
     printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + latency.toString() + "ms");
 }
 
-# Check MESSAGE_ID in context and set if it is not
+# Check MESSAGE_ID in context and set if it is not.
+# + context - http filter context object.
 public function checkOrSetMessageID(http:FilterContext context) {
     if (!context.attributes.hasKey(MESSAGE_ID)) {
         context.attributes[MESSAGE_ID] = system:uuid();
@@ -427,20 +440,25 @@ public function checkExpectHeaderPresent(http:Request request) {
 }
 
 # Encode a given value to base64 format
-#
-# + return - Returns a string in base64 format
+# + value - String value to be encoded.
+# + return - Returns a string in base64 format.
 public function encodeValueToBase64(string value) returns string {
-    return encoding:encodeBase64(value.toBytes());
+    return value.toBytes().toBase64();
 }
 
 # Decode a given base64value to base10 format
-#
+# + value - String value to be decoded.
 # + return - Returns a string in base10 format
 public function decodeValueToBase10(string value) returns string {
     string decodedValue = "";
-    var result = encoding:decodeBase64(value);
+    var result = arrays:fromBase64(value);
     if(result is byte[]) {
-        decodedValue = encoding:byteArrayToString(result);
+        string|error decodedValueFromBytes =  strings:fromBytes(result);
+        if (decodedValueFromBytes is string) {
+            decodedValue = decodedValueFromBytes;
+        } else {
+            printError(KEY_UTILS, decodedValueFromBytes.reason());
+        }
     }
     else {
         printError(KEY_UTILS, result.reason());
@@ -449,6 +467,8 @@ public function decodeValueToBase10(string value) returns string {
 }
 
 # Extracts host header from request and set it to the filter context
+# + request - http request object.
+# + context - http filter context object.
 public function setHostHeaderToFilterContext(http:Request request, @tainted http:FilterContext context) {
     if(context.attributes[HOSTNAME_PROPERTY] == ()) {
         printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
