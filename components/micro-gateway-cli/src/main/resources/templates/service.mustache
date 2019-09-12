@@ -95,7 +95,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         string failedEtcdKey = "";
         string failedEtcdKeyConfigValue = "";
         boolean|error hasUrlChanged;
-        http:ClientEndpointConfig newConfig;
+        http:ClientConfiguration newConfig;
         boolean reinitFailed = false;
         boolean isProdEtcdEnabled = false;
         boolean isSandEtcdEnabled = false;

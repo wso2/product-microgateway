@@ -26,14 +26,14 @@
 
     <!-- Below tests should run sequentially since it will use same port in each test -->
 
-    <test name="micro-gw-pre-requisites" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.micro.gateway.tests.prepare.PreRequisites" />
-        </classes>
-    </test>
+<!--    <test name="micro-gw-pre-requisites" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.micro.gateway.tests.prepare.PreRequisites" />-->
+<!--        </classes>-->
+<!--    </test>-->
     <test name="micro-gw-services" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
+<!--            <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />-->
             <class name="org.wso2.micro.gateway.tests.security.AuthenticationFailureTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP1BackEndTestCase" />

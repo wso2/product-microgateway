@@ -24,7 +24,7 @@ GATEWAY_PROJECT="${MAVEN_PROJECT_ROOT}/src/main/ballerina/"
 rm -rf ${GATEWAY_PROJECT}/target
 
 cd ${GATEWAY_PROJECT}
-${BAL_EXEC} build -c gateway --experimental
+${BAL_EXEC} build -c --experimental gateway
 cd -
 
 cp -r ${GATEWAY_PROJECT}/target/caches/bir_cache ${MAVEN_PROJECT_ROOT}/target

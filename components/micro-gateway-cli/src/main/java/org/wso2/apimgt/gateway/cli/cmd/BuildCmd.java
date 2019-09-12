@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -189,7 +190,22 @@ public class BuildCmd implements LauncherCmd {
         
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
+        updateProjectOrganizationName(projectName);
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
         CmdUtils.createDirectory(projectModuleDir, true);
+    }
+
+    /**
+     * Updates the organization name created in the Ballerina.toml file with value "wso2".
+     *
+     * @param projectName Name of the micro gateway project.
+     * @throws IOException Error occurred while updating ballerina toml file.
+     */
+    private void updateProjectOrganizationName(String projectName) throws IOException {
+        String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
+                + CliConstants.BALLERINA_TOML_FILE;
+        String fileContent = CmdUtils.readFileAsString(ballerinaTomlFile, false);
+        fileContent = fileContent.replaceFirst("org-name=.*\"", "org-name= \"wso2\"");
+        Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -22,9 +22,7 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
-import ballerina/internal;
 import ballerina/system;
-import ballerina/file;
 import ballerina/lang.'int;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
@@ -317,21 +315,23 @@ public function rotateFile(string fileName) returns string|error {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
-    var compressResult = internal:compress(fileName, zipName);
-    if(compressResult is error) {
-        printFullError(KEY_UTILS, compressResult);
-        return compressResult;
-    } else {
-        printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = file:remove(fileName);
-            if(deleteResult is ()) {
-                printInfo(KEY_UTILS, "Existing file deleted successfully");
-            }
-            else {
-                printFullError(KEY_UTILS, deleteResult);
-            }
-        return zipName;
-    }
+    return zipName;
+    //TODO : Enable compression once the compress is implemented in native
+    //var compressResult = internal:compress(fileName, zipName);
+    //if(compressResult is error) {
+    //    printFullError(KEY_UTILS, compressResult);
+    //    return compressResult;
+    //} else {
+    //    printInfo(KEY_UTILS, "File compressed successfully");
+    //    var deleteResult = file:remove(fileName);
+    //        if(deleteResult is ()) {
+    //            printInfo(KEY_UTILS, "Existing file deleted successfully");
+    //        }
+    //        else {
+    //            printFullError(KEY_UTILS, deleteResult);
+    //        }
+    //    return zipName;
+    //}
 }
 
 # Retrieve external configurations defined against a key.

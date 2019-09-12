@@ -153,10 +153,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.http.accesslog.path=\"%unix_style_path%\" --b7a.config.file=".\conf\micro-gw.conf" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.http.accesslog.path=\"%unix_style_path%\" --b7a.config.file=".\conf\micro-gw.conf" | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end
