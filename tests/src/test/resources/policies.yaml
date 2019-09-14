@@ -54,7 +54,7 @@ subscriptionPolicies:
      unitTime: 1
      timeUnit: min
   - Unauthenticated:
-     count: 10
+     count: 500
      unitTime: 1
      timeUnit: min
   - 5min:

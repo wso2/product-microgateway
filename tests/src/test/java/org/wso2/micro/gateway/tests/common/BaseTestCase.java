@@ -29,7 +29,6 @@ import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -90,7 +89,7 @@ public class BaseTestCase {
         initHttpServer();
         CLIExecutor cliExecutor = CLIExecutor.getInstance();
         cliExecutor.generate(label, project);
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        String balPath = CLIExecutor.getInstance().getLabelJar(project);
         initAndStartMicroGWServer(configFilePath, balPath, args);
     }
 
@@ -132,7 +131,7 @@ public class BaseTestCase {
         initHttpServer();
         CLIExecutor cliExecutor = CLIExecutor.getInstance();
         cliExecutor.generateFromDefinition(project, openAPIFileNames);
-        String balPath = CLIExecutor.getInstance().getLabelBalx(project);
+        String balPath = CLIExecutor.getInstance().getLabelJar(project);
         initAndStartMicroGWServer(configFilePath, balPath, args);
     }
 

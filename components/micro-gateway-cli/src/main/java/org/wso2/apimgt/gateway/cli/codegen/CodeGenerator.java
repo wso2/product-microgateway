@@ -217,7 +217,7 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private GenSrcFile generateOpenAPIJsonConstantsBal(List<BallerinaService> services) throws IOException {
-        String srcFile = GeneratorConstants.OPEN_API_JSON_CONSTANTS + GeneratorConstants.BALLERINA_EXTENSION;
+        String srcFile = GeneratorConstants.OPEN_API_JSON_CONSTANTS + GeneratorConstants.JSON_EXTENSION;
         String mainContent = getContent(services, GeneratorConstants.OPEN_API_JSON_CONSTANTS);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }

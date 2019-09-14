@@ -81,8 +81,8 @@ done
 for last; do true; done
 
 if [ ! "$CMD" = "stop" ]; then
-  if [[ ! -f "$last" ]]; then
-      echo "Path to executable balx file is invalid"
+  if [[ ! -f "$1" ]]; then
+      echo "Path to executable jar file is invalid"
       exit 0
   fi
 fi
