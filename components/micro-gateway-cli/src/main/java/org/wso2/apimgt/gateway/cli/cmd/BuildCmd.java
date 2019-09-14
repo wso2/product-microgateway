@@ -195,7 +195,6 @@ public class BuildCmd implements LauncherCmd {
         CmdUtils.createDirectory(projectModuleDir, true);
     }
 
-
     /**
      * Updates the organization name created in the Ballerina.toml file with value "wso2".
      *
