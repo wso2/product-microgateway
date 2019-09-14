@@ -37,11 +37,11 @@ public class EndpointOverrideTestCase extends EndpointsByReferenceTestCase {
 
         jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        String[] args = {"-e", "myEndpoint1_prod_endpoint_0=https://localhost:2380/v1", "-e",
-                "myEndpoint2_prod_endpoint_0=https://localhost:2380/v2", "-e",
-                "myEndpoint3_prod_endpoint_0=https://localhost:2380/v1", "-e",
-                "myEndpoint3_prod_endpoint_1=https://localhost:2380/v2", "-e",
-                "myEndpoint4_prod_endpoint_1=https://localhost:2380/v2",
+        String[] args = {"--myEndpoint1_prod_endpoint_0=https://localhost:2380/v1",
+                "--myEndpoint2_prod_endpoint_0=https://localhost:2380/v2",
+                "--myEndpoint3_prod_endpoint_0=https://localhost:2380/v1",
+                "--myEndpoint3_prod_endpoint_1=https://localhost:2380/v2",
+                "--myEndpoint4_prod_endpoint_1=https://localhost:2380/v2",
         };
         super.init(project, new String[]{"endpoints/endpoint_override.yaml"}, args);
     }

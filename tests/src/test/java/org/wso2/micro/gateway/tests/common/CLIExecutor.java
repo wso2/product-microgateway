@@ -236,12 +236,12 @@ public class CLIExecutor {
     }
 
     /**
-     * Get the absolute path for the compiled ballerina project executable (balx file).
+     * Get the absolute path for the compiled ballerina project executable (jar file).
      *
      * @param project project name
      * @return the absolute path of the project's executable
      */
-    public String getLabelBalx(String project) {
+    public String getLabelJar(String project) {
         return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project +
                 ".jar";
     }

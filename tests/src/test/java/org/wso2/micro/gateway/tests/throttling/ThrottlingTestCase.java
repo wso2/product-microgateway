@@ -215,6 +215,9 @@ public class ThrottlingTestCase extends BaseTestCase {
                 Thread.sleep(1000);
                 Assert.assertNotNull(response);
                 responseCode = response.getResponseCode();
+                if (responseCode == 429) {
+                    return responseCode;
+                }
                 retry--;
             }
         }

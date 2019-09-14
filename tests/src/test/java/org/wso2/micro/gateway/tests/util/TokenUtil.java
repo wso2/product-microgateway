@@ -25,8 +25,8 @@ public class TokenUtil {
         jwtTokenInfo.put("application", new JSONObject(applicationDTO));
         jwtTokenInfo.put("iss", "https://localhost:8244/token");
         jwtTokenInfo.put("keytype", keyType);
-        jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("iat", System.currentTimeMillis());
+        jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("jti", UUID.randomUUID());
 
         String payload = jwtTokenInfo.toString();

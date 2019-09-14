@@ -1,4 +1,3 @@
-import ballerina/io;
 import ballerina/http;
 
 public function interceptPerAPIRequest (http:Caller caller, http:Request req) {
@@ -7,5 +6,5 @@ public function interceptPerAPIRequest (http:Caller caller, http:Request req) {
                         message: "Successfully intercepted",
                         description: "Description"
                     } };
-  req.setJsonPayload(untaint newPayload);    
+  req.setJsonPayload(<@untainted> newPayload);
 }

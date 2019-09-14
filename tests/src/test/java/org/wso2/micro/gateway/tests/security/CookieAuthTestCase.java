@@ -87,11 +87,11 @@ public class CookieAuthTestCase extends BaseTestCase {
         String configPath = "confs/default-test-config.conf";
         String cookie;
         if (Utils.getOSName().toLowerCase().contains("windows")) {
-            cookie = "Cookie=\"" + jwtTokenProd + "\"";
+            cookie = "--Cookie=\"" + jwtTokenProd + "\"";
         } else {
-            cookie = "Cookie=" + jwtTokenProd;
+            cookie = "--Cookie=" + jwtTokenProd;
         }
-        String[] args = {"-e", cookie};
+        String[] args = {cookie};
         super.init(label, project, args, configPath);
     }
 
