@@ -96,14 +96,18 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         } else {
             retryCount = 10;
         }
-        int retry = retryCount;
+        int retry = 5;
         while (retry > 0) {
             for (int i = 0; i < retryCount; i++) {
                 response = HttpClientRequest.doGet(url, headers);
                 Thread.sleep(1000);
                 Assert.assertNotNull(response);
-                retry--;
+                int responseCode = response.getResponseCode();
+                if (responseCode == 429) {
+                    return response;
+                }
             }
+            retry--;
         }
         return response;
     }

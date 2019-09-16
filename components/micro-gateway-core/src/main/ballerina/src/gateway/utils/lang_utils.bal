@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerinax/java;
+import ballerinax/'java\.arrays as arrays;
 
 public function split(string str, string delimeter) returns string[] {
     handle delim = java:fromString(delimeter);
@@ -23,8 +24,8 @@ public function split(string str, string delimeter) returns string[] {
 
     string[] splitArr = [];
     int i = 0;
-    while (i < java:getArrayLength(arr)) {
-        string val = java:getArrayElement(arr, i).toString();
+    while (i < arrays:getLength(arr)) {
+        string val = arrays:get(arr, i).toString();
         splitArr[splitArr.length()] = val;
         i = i + 1;
     }

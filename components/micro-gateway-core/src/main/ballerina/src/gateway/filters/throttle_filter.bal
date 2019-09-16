@@ -240,6 +240,7 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
     if (apiVersion is string) {
         subscriptionLevelThrottleKey += ":" + apiVersion;
     }
+    printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle key : " + subscriptionLevelThrottleKey);
     return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
@@ -248,6 +249,7 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
         return false;
     }
     string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
+    printDebug(KEY_THROTTLE_FILTER, "Application level throttle key : " + applicationLevelThrottleKey);
     boolean throttled;
     boolean stopOnQuota;
     [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey);
@@ -338,6 +340,14 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
         requestStreamDto.subscriptionKey +=":" + apiVersion;
         requestStreamDto.resourceKey += ":" + apiVersion;
     }
+    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDto.resourceKey);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDto.subscriptionKey);
+    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDto.appKey);
+    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDto.apiKey);
+    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDto.resourceTier);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDto.subscriptionTier);
+    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDto.appTier);
+    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDto.apiTier);
 
     json properties = {};
     requestStreamDto.properties = properties.toString();

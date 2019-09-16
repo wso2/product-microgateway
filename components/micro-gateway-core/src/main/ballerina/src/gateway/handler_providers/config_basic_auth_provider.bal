@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/internal;
 import ballerina/runtime;
 import ballerina/auth;
 import ballerina/lang.'array as arrays;
@@ -80,7 +79,7 @@ public type BasicAuthProvider object {
                 finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
-            string[] decodedCred = internal:split(decodedCredentialsString.trim(), ":");
+            string[] decodedCred = split(decodedCredentialsString.trim(), ":");
             userName = decodedCred[0];
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {

@@ -4,32 +4,37 @@ import ballerina/time;
 import ballerina/runtime;
 {{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
 import wso2/gateway;
+{{#if endpointConfig.prodEndpoints.securityConfig}}
+    {{#equals endpointConfig.prodEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
+{{else if endpointConfig.sandEndpoints.securityConfig}}
+    {{#equals endpointConfig.sandEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
+{{/if}}
 {{#equals endpointConfig.prodEndpoints.type "http"}}
-    {{#endpointConfig.prodEndpoints}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
+    {{#endpointConfig.prodEndpoints}}{{>basicAuthHandler}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{/equals}}
 {{#equals endpointConfig.sandEndpoints.type "http"}}
-    {{#endpointConfig.sandEndpoints}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
+    {{#endpointConfig.sandEndpoints}}{{>basicAuthHandler}}{{>httpEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
 {{#equals endpointConfig.prodEndpoints.type "load_balance"}}
-    {{#endpointConfig.prodEndpoints}}{{>lbEndpoint}}{{/endpointConfig.prodEndpoints}}
+    {{#endpointConfig.prodEndpoints}}{{>basicAuthHandler}}{{>lbEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{/equals}}
 {{#equals endpointConfig.sandEndpoints.type "load_balance"}}
-    {{#endpointConfig.sandEndpoints}}{{>lbEndpoint}}{{/endpointConfig.sandEndpoints}}
+    {{#endpointConfig.sandEndpoints}}{{>basicAuthHandler}}{{>lbEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
 {{#equals endpointConfig.prodEndpoints.type "failover"}}
-    {{#endpointConfig.prodEndpoints}}{{>failoverEndpoint}}{{/endpointConfig.prodEndpoints}}
+    {{#endpointConfig.prodEndpoints}}{{>basicAuthHandler}}{{>failoverEndpoint}}{{/endpointConfig.prodEndpoints}}
 {{/equals}}
 {{#equals endpointConfig.sandEndpoints.type "failover"}}
-    {{#endpointConfig.sandEndpoints}}{{>failoverEndpoint}}{{/endpointConfig.sandEndpoints}}
+    {{#endpointConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverEndpoint}}{{/endpointConfig.sandEndpoints}}
 {{/equals}}
 
 {{#paths}}{{#value}}{{#operations}}{{#value}}
-    {{#equals epConfig.prodEndpoints.type "http"}} {{#epConfig.prodEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "http"}} {{#epConfig.sandEndpoints}}{{>httpResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
-    {{#equals epConfig.prodEndpoints.type "load_balance"}} {{#epConfig.prodEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "load_balance"}} {{#epConfig.sandEndpoints}}{{>lbResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
-    {{#equals epConfig.prodEndpoints.type "failover"}} {{#epConfig.prodEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
-    {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "http"}} {{#epConfig.prodEndpoints}}{{>basicAuthHandler}}{{>httpResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "http"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>httpResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "load_balance"}} {{#epConfig.prodEndpoints}}{{>basicAuthHandler}}{{>lbResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "load_balance"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>lbResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+    {{#equals epConfig.prodEndpoints.type "failover"}} {{#epConfig.prodEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
+    {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
 
@@ -95,7 +100,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         string failedEtcdKey = "";
         string failedEtcdKeyConfigValue = "";
         boolean|error hasUrlChanged;
-        http:ClientEndpointConfig newConfig;
+        http:ClientConfiguration newConfig;
         boolean reinitFailed = false;
         boolean isProdEtcdEnabled = false;
         boolean isSandEtcdEnabled = false;

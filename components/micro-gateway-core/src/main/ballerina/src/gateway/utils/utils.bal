@@ -22,9 +22,7 @@ import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
-import ballerina/internal;
 import ballerina/system;
-import ballerina/file;
 import ballerina/lang.'int;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
@@ -291,7 +289,7 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
-    string serviceName = context.attributes["ServiceName"].toString();
+    string serviceName = context.attributes[http:SERVICE_NAME].toString();
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
@@ -303,6 +301,20 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
     }
     return authHeader;
 
+}
+
+public function getAuthHeaderFromFilterContext(http:FilterContext context) returns string {
+    string serviceName = context.getServiceName();
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    string authHeader = "";
+    string? annotatedHeadeName = apiConfig["authorizationHeader"];
+    if(annotatedHeadeName is string) {
+        authHeader = annotatedHeadeName;
+    }
+    if (authHeader == "") {
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+    }
+    return authHeader;
 }
 
 public function getCurrentTime() returns int {
@@ -317,21 +329,23 @@ public function rotateFile(string fileName) returns string|error {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileName + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
-    var compressResult = internal:compress(fileName, zipName);
-    if(compressResult is error) {
-        printFullError(KEY_UTILS, compressResult);
-        return compressResult;
-    } else {
-        printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = file:remove(fileName);
-            if(deleteResult is ()) {
-                printInfo(KEY_UTILS, "Existing file deleted successfully");
-            }
-            else {
-                printFullError(KEY_UTILS, deleteResult);
-            }
-        return zipName;
-    }
+    return zipName;
+    //TODO : Enable compression once the compress is implemented in native
+    //var compressResult = internal:compress(fileName, zipName);
+    //if(compressResult is error) {
+    //    printFullError(KEY_UTILS, compressResult);
+    //    return compressResult;
+    //} else {
+    //    printInfo(KEY_UTILS, "File compressed successfully");
+    //    var deleteResult = file:remove(fileName);
+    //        if(deleteResult is ()) {
+    //            printInfo(KEY_UTILS, "Existing file deleted successfully");
+    //        }
+    //        else {
+    //            printFullError(KEY_UTILS, deleteResult);
+    //        }
+    //    return zipName;
+    //}
 }
 
 # Retrieve external configurations defined against a key.
@@ -545,6 +559,21 @@ public function prepareError(string message, error? err = ()) returns auth:Error
         authError = error(auth:AUTH_ERROR, message = message);
     }
     return authError;
+}
+
+# Logs, prepares, and returns the `AuthenticationError`.
+#
+# + message -The error message.
+# + err - The `error` instance.
+# + return - Returns the prepared `AuthenticationError` instance.
+function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
+    log:printDebug(function () returns string { return message; });
+    if (err is error) {
+        http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
+        return preparedError;
+    }
+    http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
+    return preparedError;
 }
 
 

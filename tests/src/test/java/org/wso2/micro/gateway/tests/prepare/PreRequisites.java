@@ -11,12 +11,12 @@ import java.io.File;
 
 public class PreRequisites {
     private MockBackEndServer mockBackEndServer;
-    @BeforeSuite
-    private void initializeMessageBroker() throws Exception {
-        JMSPublisher jmsPublisher = new JMSPublisher();
-        jmsPublisher.startMessageBroker();
-        System.out.println("JMS Message Broker");
-    }
+//    @BeforeSuite
+//    private void initializeMessageBroker() throws Exception {
+//        JMSPublisher jmsPublisher = new JMSPublisher();
+//        jmsPublisher.startMessageBroker();
+//        System.out.println("JMS Message Broker");
+//    }
 
     @BeforeSuite
     public void startMockBackendServer() {

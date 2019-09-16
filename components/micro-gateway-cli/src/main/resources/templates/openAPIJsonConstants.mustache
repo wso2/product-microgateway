@@ -1,4 +1,5 @@
-
-function getOpenAPIs() returns map<json> {
-	return { {{#each this}} "{{cut qualifiedServiceName " "}}" : {{{api.apiDefinition}}}{{#unless @last}},{{/unless}} {{/each}} };
+{
+{{#each this}}
+"{{cut qualifiedServiceName " "}}" : {{{api.apiDefinition}}}{{#unless @last}},{{/unless}}
+{{/each}}
 }

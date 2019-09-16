@@ -194,6 +194,19 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request, @
                     authenticationContext.authenticated = true;
                     authenticationContext.apiKey = jwtToken;
                     authenticationContext.username = decodedPayload.sub.toString();
+                    if(decodedPayload.application != null) {
+                        if (decodedPayload.application.id != null) {
+                            authenticationContext.applicationId = decodedPayload.application.id.toString();
+                        }
+                        if (decodedPayload.application.name != null) {
+                            authenticationContext.applicationName = decodedPayload.application.name.toString
+                            ();
+                        }
+                        if (decodedPayload.application.tier != null) {
+                            authenticationContext.applicationTier = decodedPayload.application.tier.toString
+                            ();
+                        }
+                    }
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 

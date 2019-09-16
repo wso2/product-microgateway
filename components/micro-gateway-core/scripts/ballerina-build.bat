@@ -23,7 +23,7 @@ REM Quietly delete the directory structure in %GATEWAY_PROJECT%\target
 RMDIR /S /Q %GATEWAY_PROJECT%\target
 
 PUSHD %GATEWAY_PROJECT%
-    %BAL_EXEC% build -c gateway --experimental
+    %BAL_EXEC% build -c --experimental gateway
 POPD
 
 cp -r %GATEWAY_PROJECT%\target\caches\bir_cache %MAVEN_PROJECT_ROOT%\target

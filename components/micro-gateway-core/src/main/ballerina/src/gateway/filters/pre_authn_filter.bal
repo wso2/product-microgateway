@@ -50,7 +50,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     boolean isOauth2Enabled = false;
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     invocationContext.attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
-    printDebug(KEY_AUTHN_FILTER, "Processing request via Pre Authentication filter.");
+    printDebug(KEY_PRE_AUTHN_FILTER, "Processing request via Pre Authentication filter.");
 
     context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
     context.attributes[FILTER_FAILED] = false;
@@ -59,6 +59,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     invocationContext.attributes[SERVICE_TYPE_ATTR] = context.getService();
     invocationContext.attributes[RESOURCE_NAME_ATTR] = resourceName;
     boolean isSecuredResource = isSecured(serviceName, resourceName);
+    printDebug(KEY_PRE_AUTHN_FILTER, "Resource secured : " + isSecuredResource.toString());
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
     invocationContext.attributes[REQUEST_METHOD] = request.method;
     invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
@@ -67,7 +68,8 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     string authHeader = "";
     string? authCookie = "";
     string|error extractedToken = "";
-    string authHeaderName = getAuthorizationHeader(invocationContext);
+    string authHeaderName = getAuthHeaderFromFilterContext(context);
+    printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header name : " + authHeaderName);
     invocationContext.attributes[AUTH_HEADER] = authHeaderName;
     string[] authProvidersIds = getAuthProviders(context.getServiceName());
 
@@ -90,7 +92,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     } else {
         providerId = getAuthenticationProviderTypeWithCookie(authHeader);
     }
-    printDebug(KEY_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
+    printDebug(KEY_PRE_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
     boolean canHandleAuthentication = false;
     foreach string provider in authProvidersIds {
         if (provider == providerId) {
@@ -98,8 +100,17 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         }
     }
 
+    if(isSecuredResource && !request.hasHeader(authHeaderName)) {
+        printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
+        setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
+        setErrorMessageToFilterContext(context,API_AUTH_MISSING_CREDENTIALS);
+        sendErrorResponse(caller, request, context);
+        return false;
+    }
+
     if (!canHandleAuthentication) {
         setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
+        setErrorMessageToFilterContext(context,API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
         return false;
     }
@@ -132,13 +143,13 @@ function getAuthenticationProviderTypeWithCookie(string authHeader) returns (str
 function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) {
     if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, true)) {
         request.removeHeader(authHeaderName);
-        printDebug(KEY_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
+        printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
     }
     if (request.hasHeader(TEMP_AUTH_HEADER)) {
         request.setHeader(AUTH_HEADER, request.getHeader(TEMP_AUTH_HEADER));
-        printDebug(KEY_AUTHN_FILTER, "Setting the backed up auth header value to the header: " + AUTH_HEADER);
+        printDebug(KEY_PRE_AUTHN_FILTER, "Setting the backed up auth header value to the header: " + AUTH_HEADER);
         request.removeHeader(TEMP_AUTH_HEADER);
-        printDebug(KEY_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
+        printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
 }
 

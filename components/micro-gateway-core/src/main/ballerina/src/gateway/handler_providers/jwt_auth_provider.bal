@@ -105,7 +105,7 @@ public type JwtAuthProvider object {
             return handleVar;
         }
     } else {
-        setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+        setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
         return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
         }
 
