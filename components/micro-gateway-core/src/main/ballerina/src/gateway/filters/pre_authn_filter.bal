@@ -65,8 +65,8 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     string authHeaderName = getAuthHeaderFromFilterContext(context);
     printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header name : " + authHeaderName);
     invocationContext.attributes[AUTH_HEADER] = authHeaderName;
-    string[] authProvidersIds = getAuthProviders(context.getServiceName());
-
+    string[] authProvidersIds = getAuthProviders(context.getServiceName(), context.getResourceName());
+    printDebug(KEY_PRE_AUTHN_FILTER, "Auth providers array  : " + authProvidersIds.toString());
 
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);

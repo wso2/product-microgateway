@@ -206,11 +206,10 @@ public class ThrottlingTestCase extends BaseTestCase {
         if (token != null) {
             headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
         }
-
-        int retry = 9;
+        int retry = 5;
         int responseCode = -1;
         while (retry > 0) {
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < 5; i++) {
                 org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
                 Thread.sleep(1000);
                 Assert.assertNotNull(response);
@@ -218,8 +217,9 @@ public class ThrottlingTestCase extends BaseTestCase {
                 if (responseCode == 429) {
                     return responseCode;
                 }
-                retry--;
+
             }
+            retry--;
         }
         return responseCode;
     }

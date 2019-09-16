@@ -77,3 +77,4 @@ subscriptionPolicies:
       count: 10
       unitTime: 1
       timeUnit: min
+      stopOnQuota: false
