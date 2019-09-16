@@ -29,14 +29,10 @@ public type OAuthzFilter object {
         self.authzFilter = new(authzHandler,scopes);
     }
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
-                                                                                                            boolean
-    {
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a new root span attaching to the system span.
         int|error|() spanId_req = startingSpan(AUTHZ_FILTER_REQUEST);
-
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
-
         if (checkAuthentication != "require") {
             //Setting UUID
             int startingTime = getCurrentTime();
