@@ -102,6 +102,10 @@ done
 
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
+GREEN='\033[0;32m'
+RED="\033[0;31m"
+BOLD="\033[1m"
+NC='\033[0m' # No Color
 
 # if MICROGW_HOME environment variable not set then set it relative to the micro-gw binary location
 if [[ -z "${MICROGW_HOME}" ]]; then
@@ -297,6 +301,16 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
             fi
             # build the ballerina source code for the label
             ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
+            exit_code=$?
+            TARGET_PATH=$MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx
+            echo
+
+            if [ $exit_code -eq 0 ] && [ -f $TARGET_PATH ]; then
+                printf "${GREEN}${BOLD}BUILD SUCCESSFUL${NC}\n"
+                printf  "${BOLD}Target: ${TARGET_PATH}${NC}\n"
+            else
+                printf "${RED}${BOLD}BUILD FAILED${NC}\n"
+            fi
         popd > /dev/null
      else
         exit $exit_code
