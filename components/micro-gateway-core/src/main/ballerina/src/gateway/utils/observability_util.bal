@@ -22,7 +22,6 @@ import ballerina/runtime;
 boolean isTracingEnabled = getConfigBooleanValue("b7a.observability.tracing", "enabled", false);
 boolean isMetricsEnabled = getConfigBooleanValue("b7a.observability.metrics", "enabled", false);
 
-
 //metrics
 public function setGaugeDuration(int starting) returns float{
     int ending = getCurrentTime();
