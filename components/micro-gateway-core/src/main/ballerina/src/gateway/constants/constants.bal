@@ -51,6 +51,7 @@
  public const string THROTTLE_KEY = "throttleKey";
  public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
  public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
+ public const string RESOURCE_CONFIGURATION_ANN_NAME = "Resource";
  public const string UNLIMITED_TIER = "Unlimited";
  public const string UNAUTHENTICATED_TIER = "Unauthenticated";
  public const string END_USER_ANONYMOUS = "anonymous";

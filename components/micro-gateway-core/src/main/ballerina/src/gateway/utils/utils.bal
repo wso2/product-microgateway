@@ -31,11 +31,13 @@ map<http:HttpResourceConfig?> resourceAnnotationMap = {};
 map<http:HttpServiceConfig?> serviceAnnotationMap = {};
 map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
+map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
         resourceAnnotationMap[resourceFunction] = <http:HttpResourceConfig?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_ANN_NAME, ANN_PACKAGE);
         resourceTierAnnotationMap[resourceFunction] = <TierConfiguration?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_TIER_ANN_NAME, GATEWAY_ANN_PACKAGE);
+        resourceConfigAnnotationMap[resourceFunction] = <ResourceConfiguration?>reflect:getResourceAnnotations(s, resourceFunction, RESOURCE_CONFIGURATION_ANN_NAME, GATEWAY_ANN_PACKAGE);
     }
     serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, SERVICE_ANN_NAME, ANN_PACKAGE);
     apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
@@ -43,6 +45,7 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     printDebug(KEY_UTILS, "Resource annotation map: " + resourceAnnotationMap.toString());
     printDebug(KEY_UTILS, "API config annotation map: " + apiConfigAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
+    printDebug(KEY_UTILS, "Resource Configuration annotation map: " + resourceConfigAnnotationMap.toString());
 }
 
 # Retrieve the key validation request dto from filter context.
@@ -535,9 +538,16 @@ function isServiceResourceSecured(http:ServiceResourceAuth? serviceResourceAuth)
     return secured;
 }
 
-public function getAuthProviders(string serviceName) returns string[] {
+public function getAuthProviders(string serviceName, string resourceName) returns string[] {
     printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
     string[] authProviders = [];
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if(resourceConfig is ResourceConfiguration) {
+        authProviders = resourceConfig.authProviders;
+        if(authProviders.length() > 0) {
+            return authProviders;
+        }
+    }
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     if(apiConfig is APIConfiguration) {
         authProviders = apiConfig.authProviders;

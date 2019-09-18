@@ -30,3 +30,9 @@ public type APIConfiguration record {
 };
 
 public annotation APIConfiguration API on service;
+
+public type ResourceConfiguration record {
+    string[] authProviders = [];
+};
+
+public annotation ResourceConfiguration Resource on resource function;

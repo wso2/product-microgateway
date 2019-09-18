@@ -81,6 +81,15 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{/if}}
         }
     }
+    @gateway:Resource {
+        {{#if basicAuth.isOptional}}
+            authProviders:["basic","oauth2","jwt"]
+        {{else if basicAuth.isRequired}}
+            authProviders:["basic"]
+        {{else}}
+            authProviders:["jwt","oauth2"]
+        {{/if}}
+    }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);

@@ -80,6 +80,7 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     //Publish throttle event to internal policies
     else {
         requestStream.publish(throttleEvent);
+        printDebug(KEY_THROTTLE_UTIL, "Request stream : " + requestStream.toString());
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
     }
 }
