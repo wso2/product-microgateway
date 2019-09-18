@@ -55,6 +55,7 @@ if "%isInvalidPath%"=="T" (
 
 REM Extract ballerina runtime
 if not exist %GW_HOME%\runtime\ (
+    REM TODO: Evaluate the use of powershell `tee` here
     call "%PRGDIR%\tools.exe"
     if ERRORLEVEL 0 (
         xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul

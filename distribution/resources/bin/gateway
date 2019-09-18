@@ -89,7 +89,7 @@ fi
 
 # Extract ballerina runtime
 if [ ! -d "$GWHOME/runtime" ]; then
-    $PRGDIR/tools
+    $PRGDIR/tools 2>&1 | tee -a $GWHOME/logs/microgateway.log
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
         cp -r $GWHOME/lib/gateway/balo/wso2 $GWHOME/runtime/lib/repo/
