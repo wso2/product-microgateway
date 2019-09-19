@@ -17,9 +17,11 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/lang.'int;
+import ballerina/stringutils;
 
 
 public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
+    printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO : " + requestResponseExecutionDTO.toString());
     string output =
         requestResponseExecutionDTO.applicationConsumerKey + OBJ +
         requestResponseExecutionDTO.applicationName + OBJ + requestResponseExecutionDTO.applicationId + OBJ +
@@ -50,6 +52,7 @@ public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDT
         requestResponseExecutionDTO.executionTime.otherLatency.toString() + OBJ +
         requestResponseExecutionDTO.gatewayType + OBJ +
         requestResponseExecutionDTO.label;
+        printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
     return output;
 }
 
@@ -75,9 +78,9 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
 {
     RequestResponseExecutionDTO requestResponseExecutionDTO = {};
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
-
-    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         requestResponseExecutionDTO.apiCreator = authContext.apiPublisher;
         requestResponseExecutionDTO.metaClientType = authContext.keyType;
         requestResponseExecutionDTO.applicationConsumerKey = authContext.consumerKey;
@@ -86,17 +89,20 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-        APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfiguration is APIConfiguration) {
-         requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
-         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
-        }
+
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
         requestResponseExecutionDTO.applicationId = ANONYMOUS_APP_ID;
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
         requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+    }
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
+    if (apiConfiguration is APIConfiguration) {
+        if(! stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+            requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
+        }
+        requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
 
@@ -132,8 +138,9 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.responseSize = 0;
     }
     requestResponseExecutionDTO.responseCode = response.statusCode;
-    string resourceName = context.attributes["ResourceName"].toString();
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[resourceName];
+    string resourceName = context.getResourceName();
+    string serviceName = context.getServiceName();
+    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
         requestResponseExecutionDTO.apiResourcePath = httpResourceConfig.path;
@@ -142,14 +149,14 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     //request method
     requestResponseExecutionDTO.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
     int initTime = <int>context.attributes[REQUEST_TIME];
-    int timeRequestOut = <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
-    int timeResponseIn = <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
+    int timeRequestOut = <int>invocationContext.attributes[TS_REQUEST_OUT];
+    int timeResponseIn = <int>invocationContext.attributes[TS_RESPONSE_IN];
     requestResponseExecutionDTO.serviceTime = timeRequestOut - initTime;
     requestResponseExecutionDTO.backendTime = timeResponseIn - timeRequestOut;
     requestResponseExecutionDTO.responseTime = timeResponseIn - initTime;
     //dummy values for protocol and destination for now
     requestResponseExecutionDTO.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
-    requestResponseExecutionDTO.destination = <string>runtime:getInvocationContext().attributes[DESTINATION];
+    requestResponseExecutionDTO.destination = <string>invocationContext.attributes[DESTINATION];
 
     //Set data which were set to context in the Request path
     requestResponseExecutionDTO.applicationOwner = <string>context.attributes[APPLICATION_OWNER_PROPERTY];

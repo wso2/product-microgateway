@@ -23,6 +23,19 @@
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
     <version>3.0.2-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-runtime</artifactId>
+            <version>1.0.0-beta</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-lang</artifactId>
+            <version>1.0.0-alpha3</version>
+        </dependency>
+    </dependencies>
     <name>Micro Gateway - Parent</name>
 
     <url>http://wso2.org</url>
@@ -215,6 +228,12 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.core</artifactId>
+                <type>jar</type>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>

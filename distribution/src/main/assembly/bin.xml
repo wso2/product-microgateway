@@ -120,6 +120,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
             </includes>

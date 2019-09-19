@@ -67,6 +67,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
+    printDebug(KEY_ANALYTICS_FILTER, "Throttle Event DTO : " + eventDto.toString());
     return eventDto;
 }
 

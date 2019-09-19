@@ -89,7 +89,7 @@
                 <executions>
                     <execution>
                         <id>build-project</id>
-                        <phase>generate-sources</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -131,7 +131,7 @@
                 <executions>
                     <execution>
                         <id>default-jar</id>
-                        <phase>none</phase>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>

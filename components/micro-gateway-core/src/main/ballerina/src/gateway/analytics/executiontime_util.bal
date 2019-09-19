@@ -21,8 +21,10 @@ import ballerina/runtime;
 public function generateExecutionTimeEvent(http:FilterContext context) returns ExecutionTimeDTO {
     ExecutionTimeDTO executionTimeDTO = {};
     boolean isSecured =  <boolean>context.attributes[IS_SECURED];
-    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext =  <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+    printDebug(KEY_ANALYTICS_FILTER, "Resource is secured : " + isSecured.toString());
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext =  <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         executionTimeDTO.provider = authContext.apiPublisher;
         executionTimeDTO.keyType = authContext.keyType;
     } else {
@@ -47,10 +49,10 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
     executionTimeDTO.responseMediationLatency = 0;
-    int timeRequestOut =  <int>runtime:getInvocationContext().attributes[TS_REQUEST_OUT];
-    int timeResponseIn =  <int>runtime:getInvocationContext().attributes[TS_RESPONSE_IN];
+    int timeRequestOut =  <int>invocationContext.attributes[TS_REQUEST_OUT];
+    int timeResponseIn =  <int>invocationContext.attributes[TS_RESPONSE_IN];
     executionTimeDTO.backEndLatency = timeResponseIn - timeRequestOut;
-
+    printDebug(KEY_ANALYTICS_FILTER, "Execution time dto : " + executionTimeDTO.toString());
     return executionTimeDTO;
 }
 

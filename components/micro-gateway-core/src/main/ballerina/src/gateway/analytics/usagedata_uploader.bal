@@ -22,7 +22,9 @@ import ballerina/mime;
 
 public function multipartSender(string location, string file, string username, string password) returns http:Response {
     mime:Entity filePart = new;
-    filePart.setFileAsEntityBody(location + file);
+    string filePath = location + PATH_SEPERATOR + file;
+    filePart.setFileAsEntityBody(filePath);
+    printDebug(KEY_UPLOAD_TASK,"File being uploaded : " + filePath);
     filePart.setContentDisposition(getContentDispositionForFormData(file));
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
@@ -30,8 +32,9 @@ public function multipartSender(string location, string file, string username, s
     request.addHeader(AUTH_HEADER, getBasicAuthHeaderValue(username, password));
     request.addHeader(FILE_NAME, file);
     request.addHeader(ACCEPT, APPLICATION_JSON);
-    request.setBodyParts(bodyParts);
+    request.setBodyParts(bodyParts, contentType = mime:MULTIPART_FORM_DATA);
     var returnResponse = analyticsFileUploadEndpoint->post("", request);
+
 
         if(returnResponse is error) {
             http:Response response = new;
@@ -41,7 +44,11 @@ public function multipartSender(string location, string file, string username, s
             printFullError(KEY_UPLOAD_TASK, returnResponse);
             return response;
         }
-        else  {
+        else {
+            var responseString = returnResponse.getTextPayload();
+            if(responseString is string) {
+                printDebug(KEY_UPLOAD_TASK,"File upload response : " + returnResponse.getTextPayload().toString());
+            }
             return returnResponse;
         }
 

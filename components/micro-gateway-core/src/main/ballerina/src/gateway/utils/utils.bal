@@ -21,6 +21,7 @@ import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/io;
+import ballerina/file;
 import ballerina/reflect;
 import ballerina/system;
 import ballerina/lang.'int;
@@ -327,28 +328,26 @@ public function getCurrentTime() returns int {
 
 }
 
-public function rotateFile(string fileName) returns string|error {
+public function rotateFile(string filePath) returns string|error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileName + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
-    return zipName;
-    //TODO : Enable compression once the compress is implemented in native
-    //var compressResult = internal:compress(fileName, zipName);
-    //if(compressResult is error) {
-    //    printFullError(KEY_UTILS, compressResult);
-    //    return compressResult;
-    //} else {
-    //    printInfo(KEY_UTILS, "File compressed successfully");
-    //    var deleteResult = file:remove(fileName);
-    //        if(deleteResult is ()) {
-    //            printInfo(KEY_UTILS, "Existing file deleted successfully");
-    //        }
-    //        else {
-    //            printFullError(KEY_UTILS, deleteResult);
-    //        }
-    //    return zipName;
-    //}
+    string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
+    var compressResult = compress(filePath, zipName);
+    if(compressResult is error) {
+        printFullError(KEY_UTILS, compressResult);
+        return compressResult;
+    } else {
+        printInfo(KEY_UTILS, "File compressed successfully");
+        var deleteResult = file:remove(filePath);
+            if(deleteResult is ()) {
+                printInfo(KEY_UTILS, "Existing file deleted successfully");
+            }
+            else {
+                printFullError(KEY_UTILS, deleteResult);
+            }
+        return zipName;
+    }
 }
 
 # Retrieve external configurations defined against a key.
