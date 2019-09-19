@@ -89,7 +89,7 @@ fi
 
 # Extract ballerina runtime
 if [ ! -d "$GWHOME/runtime" ]; then
-    $PRGDIR/tools
+    $PRGDIR/tools 2>&1 | tee -a $GWHOME/logs/microgateway.log
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
     fi
@@ -111,7 +111,7 @@ if [ "$CMD" = "start" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-    $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1  | tee -a $GWHOME/logs/microgateway.log
+    $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
@@ -152,7 +152,7 @@ elif [ "$CMD" = "restart" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-   $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1  | tee -a $GWHOME/logs/microgateway.log
+   $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   PROCESS_ID=""
@@ -174,5 +174,5 @@ EOF
 fi
 
 # run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
-$BALLERINA_HOME/bin/ballerina run  "$@" --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1  | tee -a $GWHOME/logs/microgateway.log
+$BALLERINA_HOME/bin/ballerina run  "$@" --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
 

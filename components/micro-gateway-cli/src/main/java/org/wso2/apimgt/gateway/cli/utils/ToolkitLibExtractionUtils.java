@@ -23,6 +23,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
  */
 public class ToolkitLibExtractionUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitLibExtractionUtils.class);
+    private static final PrintStream OUT = System.out;
 
     /**
      * Extracts the platform and runtime and copy related jars and balos to extracted runtime and platform.
@@ -54,6 +56,7 @@ public class ToolkitLibExtractionUtils {
     private static void extractBallerinaDist(String destination, String libPath, String birPath, String breLibPath,
                                              Boolean isAddToClasspath) throws IOException {
         if (!Files.exists(Paths.get(destination))) {
+            OUT.println("Initializing Toolkit...");
             ZipUtils.unzip(destination + CliConstants.EXTENSION_ZIP, destination,
                     isAddToClasspath);
 
