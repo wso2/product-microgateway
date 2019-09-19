@@ -36,6 +36,8 @@ public class ThrottlePolicyMapper {
     private String timeUnit = null;
     @NotNull
     private Integer unitTime = null;
+    @NotNull
+    private Boolean stopOnQuotaReach = true;
 
     public String getName() {
         return name;
@@ -69,11 +71,22 @@ public class ThrottlePolicyMapper {
         this.unitTime = unitTime;
     }
 
+    public Boolean getStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(Boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
     @JsonAnySetter
     public void setValues(String key, LinkedHashMap<String, String> value) {
         this.name = key;
         this.count = Long.parseLong(value.get("count"));
         this.timeUnit = value.get("timeUnit");
         this.unitTime = Integer.parseInt(value.get("unitTime"));
+        if (value.get("stopOnQuota") != null) {
+            this.stopOnQuotaReach = Boolean.parseBoolean(value.get("stopOnQuota"));
+        }
     }
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,6 +20,7 @@ func main() {
 	}
 
 	if _, existsErr := os.Stat(destPath); os.IsNotExist(existsErr) {
+	    fmt.Println("Initializing Runtime...")
 		err := util.Unzip(runtimePath, destPath)
 		if err != nil {
 			log.Fatal(err)

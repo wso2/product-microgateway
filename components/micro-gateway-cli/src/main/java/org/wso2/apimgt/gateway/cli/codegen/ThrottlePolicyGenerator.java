@@ -89,7 +89,7 @@ public class ThrottlePolicyGenerator {
         List<ThrottlePolicyMapper> subscriptionPolicies = throttlePolicyListMapper.getSubscriptionPolicies();
         List<ThrottlePolicyMapper> resourcePolicies = throttlePolicyListMapper.getResourcePolicies();
 
-        if (applicationPolicies == null && subscriptionPolicies == null) {
+        if (applicationPolicies == null && subscriptionPolicies == null && resourcePolicies == null) {
             return;
         }
 

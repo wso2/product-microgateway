@@ -57,10 +57,11 @@ public type BasicAuthProvider object {
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
+        printDebug(KEY_AUTHN_FILTER, "Processing request with the Basic authentication provider");
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
-        string encodedCredentials = credential[1];
+        string encodedCredentials = credential;
         byte[]|error decodedCredentials =  arrays:fromBase64(encodedCredentials);
 
         //Extract username and password from the request
@@ -69,9 +70,7 @@ public type BasicAuthProvider object {
         if(decodedCredentials is byte[]){
             string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0)== ()){
-                //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
-                //sendErrorResponse(caller, request, <@untainted> context);
                 float latency = setGaugeDuration(startingTime);
                 UpdatingGauge(localGauge, latency);
                 UpdatingGauge(localGauge_total, latency);
@@ -83,9 +82,7 @@ public type BasicAuthProvider object {
             userName = decodedCred[0];
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
-                //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                //sendErrorResponse(caller, request, context);
                 float latency = setGaugeDuration(startingTime);
                 UpdatingGauge(localGauge, latency);
                 UpdatingGauge(localGauge_total, latency);
@@ -96,9 +93,7 @@ public type BasicAuthProvider object {
             password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
-            //TODO: Handle the error message properly 
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
-            //sendErrorResponse(caller, request, context);
             float latency = setGaugeDuration(startingTime);
             UpdatingGauge(localGauge, latency);
             UpdatingGauge(localGauge_total, latency);
@@ -118,15 +113,13 @@ public type BasicAuthProvider object {
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         //finishing span
         finishingSpan(HASHING_MECHANISM, spanId_Hash);
-
-        printDebug(KEY_AUTHN_FILTER, "Processing request with the Authentication handler chain");
         //Starting a new span 
         int|error|() spanId_Inbound = startingSpan(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
         //finishing span
         finishingSpan(BALLERINA_INBOUND_BASICAUTH, spanId_Inbound);
         if (isAuthorized is boolean) {
-            printDebug(KEY_AUTHN_FILTER, "Authentication handler chain returned with value : " + isAuthorized.toString());
+            printDebug(KEY_AUTHN_FILTER, "Basic auth provider returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
