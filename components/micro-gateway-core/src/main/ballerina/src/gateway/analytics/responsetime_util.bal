@@ -62,7 +62,7 @@ public function getMetaDataForRequestResponseExecutionData(RequestResponseExecut
 }
 
 function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
-                                                                                                                   EventDTO
+                                                                                                                   EventDTO|error
 {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.request:3.0.0";
@@ -74,7 +74,7 @@ function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDT
 }
 
 public function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
-                                                                                 @tainted RequestResponseExecutionDTO
+                                                                                 @tainted RequestResponseExecutionDTO|error
 {
     RequestResponseExecutionDTO requestResponseExecutionDTO = {};
     boolean isSecured = <boolean>context.attributes[IS_SECURED];

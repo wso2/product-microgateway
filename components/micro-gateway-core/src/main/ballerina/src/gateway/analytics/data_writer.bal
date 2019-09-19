@@ -30,7 +30,7 @@ int rotatingTime = 0;
 stream<EventDTO> eventStream = new;
 
 
-function setRequestAttributesToContext(http:Request request, http:FilterContext context) {
+function setRequestAttributesToContext(http:Request request, http:FilterContext context) returns error? {
     //ready authentication context to get values
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
