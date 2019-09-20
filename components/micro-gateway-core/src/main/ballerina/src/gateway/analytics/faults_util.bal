@@ -28,7 +28,7 @@ public function getFaultPayloadData(FaultDTO dto) returns string {
         dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ + dto.faultTime.toString();
 }
 
-public function getEventFromFaultData(FaultDTO dto) returns EventDTO {
+public function getEventFromFaultData(FaultDTO dto) returns EventDTO|error {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.fault:3.0.0";
     eventDTO.timeStamp = getCurrentTime();

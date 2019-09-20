@@ -57,6 +57,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     boolean isSecuredResource = isSecured(serviceName, resourceName);
     printDebug(KEY_PRE_AUTHN_FILTER, "Resource secured : " + isSecuredResource.toString());
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
+    context.attributes[IS_SECURED] = isSecuredResource;
 
     boolean isCookie = false;
     string authHeader = "";

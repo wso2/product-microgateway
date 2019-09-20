@@ -17,6 +17,7 @@
 import ballerina/io;
 import ballerina/http;
 import ballerina/time;
+import ballerina/runtime;
 
 
 public const string KVT = "-KS-";
@@ -29,11 +30,13 @@ int rotatingTime = 0;
 stream<EventDTO> eventStream = new;
 
 
-function setRequestAttributesToContext(http:Request request, http:FilterContext context) {
+function setRequestAttributesToContext(http:Request request, http:FilterContext context) returns error? {
     //ready authentication context to get values
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
-    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext =  <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+    printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext =  <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         context.attributes[APPLICATION_OWNER_PROPERTY] = authContext.subscriber;
         context.attributes[API_TIER_PROPERTY] = authContext.apiTier;
         context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = !authContext.stopOnQuotaReach;

@@ -162,6 +162,16 @@
                 <version>${ballerina.platform.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-runtime</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-lang</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-tcnative-boringssl-static</artifactId>
                 <version>${netty-tcnative-boringssl-static.version}</version>
@@ -215,6 +225,12 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.core</artifactId>
+                <type>jar</type>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>

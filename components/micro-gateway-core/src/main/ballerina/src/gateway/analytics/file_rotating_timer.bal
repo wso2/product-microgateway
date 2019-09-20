@@ -17,13 +17,15 @@
 import ballerina/task;
 import ballerina/file;
 import ballerina/filepath;
+import ballerina/stringutils;
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + filepath:getPathSeparator();
-    string path = fileLocation + API_USAGE_FILE; 
+    printDebug(KEY_ROTATE_TASK, "Rotate file location : " + fileLocation);
+    string path = fileLocation + API_USAGE_FILE;
     if (file:exists(path)) {
-        var result = rotateFile(API_USAGE_FILE);
+        var result = rotateFile(path);
         if(result is string) {
             printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
         } else {
@@ -57,10 +59,14 @@ function rotatingTask() {
 }
 
 service fileRotating = service {
-    resource function onFileRotatingTask() {
+    resource function onTrigger() {
     error? triggerFunction = sendFileRotatingEvent();
      if (triggerFunction is error) {
-       printError(KEY_ROTATE_TASK, "Error occurred while rotating event.");
+        if(stringutils:equalsIgnoreCase("No files present to rotate.", triggerFunction.reason())) {
+            printDebug(KEY_ROTATE_TASK, "No files present to rotate.");
+        } else {
+            printError(KEY_ROTATE_TASK, "Error occurred while rotating event." + triggerFunction.reason());
+        }
      }
     }
 };

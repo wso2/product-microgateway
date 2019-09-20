@@ -117,7 +117,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
 
 }
 
-public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO {
+public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO|error {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();

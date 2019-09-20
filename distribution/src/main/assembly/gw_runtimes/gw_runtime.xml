@@ -89,4 +89,13 @@
             <fileMode>755</fileMode>
         </file>
     </files>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>wso2am-micro-gw-${project.version}/lib/gateway</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 </assembly>

@@ -21,6 +21,14 @@
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-http</artifactId>
             <version>${ballerina.platform.version}</version>
             <type>zip</type>
@@ -89,7 +97,7 @@
                 <executions>
                     <execution>
                         <id>build-project</id>
-                        <phase>generate-sources</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -131,7 +139,7 @@
                 <executions>
                     <execution>
                         <id>default-jar</id>
-                        <phase>none</phase>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>
