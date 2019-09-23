@@ -54,6 +54,10 @@
             <classifier>mgw-jar</classifier>
         </dependency>
         <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
             <artifactId>ballerina-jre-artifacts</artifactId>
             <version>${ballerina.jre.artifacts.version}</version>

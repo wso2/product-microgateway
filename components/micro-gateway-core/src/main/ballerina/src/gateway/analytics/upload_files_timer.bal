@@ -18,6 +18,7 @@ import ballerina/task;
 import ballerina/file;
 import ballerina/http;
 import ballerina/filepath;
+import ballerina/stringutils;
 
 string uploadingUrl = "";
 string analyticsUsername = "";
@@ -41,14 +42,16 @@ function searchFilesToUpload() returns (error?) {
     } else {
         foreach var pathEntry in pathList {
             string fileName = pathEntry.getName();
+
             if (contains(fileName, ZIP_EXTENSION)) {
-                http:Response response = multipartSender(fileLocation + PATH_SEPERATOR, pathEntry.getName(),
+                http:Response response = multipartSender(fileLocation, pathEntry.getName(),
                     analyticsUsername, analyticsPassword);
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                     var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
                 } else {
-                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file");
+                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned
+                    with status code : " + response.statusCode.toString());
                 }
                 cnt=cnt +1;
             }
@@ -97,7 +100,11 @@ service searchFiles = service {
     resource function onTrigger() {
      error? onTriggerFunction = searchFilesToUpload();
      if (onTriggerFunction is error) {
-       printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.toString());
+        if(stringutils:equalsIgnoreCase("No files present to upload.", onTriggerFunction.reason())) {
+            printDebug(KEY_UPLOAD_TASK, "No files present to upload.");
+        } else {
+            printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.toString());
+        }
      }
     }
 };

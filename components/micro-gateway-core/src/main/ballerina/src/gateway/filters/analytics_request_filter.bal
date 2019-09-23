@@ -53,8 +53,19 @@ public type AnalyticsRequestFilter object {
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
-                    ThrottleAnalyticsEventDTO eventDto = populateThrottleAnalyticsDTO(context);
-                    eventStream.publish(getEventFromThrottleData(eventDto));
+                    ThrottleAnalyticsEventDTO|error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
+                    if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
+                        EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
+                        if(eventDTO is EventDTO) {
+                            eventStream.publish(eventDTO);
+                        } else {
+                            printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
+                            printFullError(KEY_ANALYTICS_FILTER, eventDTO);
+                        }
+                    } else {
+                        printError(KEY_ANALYTICS_FILTER, "Error while populating throttle analytics event data");
+                        printFullError(KEY_ANALYTICS_FILTER, throttleAnalyticsEventDTO);
+                    }
                 } else {
                     if (!filterFailed) {
                         doFilterAll(response, context);
@@ -81,31 +92,54 @@ public type AnalyticsRequestFilter object {
 
 
 function doFilterRequest(http:Request request, http:FilterContext context) {
-    setRequestAttributesToContext(request, context);
+    error? result = trap setRequestAttributesToContext(request, context);
+    if(result is error) {
+        printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path");
+        printFullError(KEY_ANALYTICS_FILTER, result);
+    }
 }
 
-function doFilterFault(http:FilterContext context, error err) {
-    FaultDTO faultDTO = populateFaultAnalyticsDTO(context, err);
-    eventStream.publish(getEventFromFaultData(faultDTO));
+function doFilterFault(http:FilterContext context, string errorMessage) {
+    FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
+    if(faultDTO is FaultDTO) {
+        EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
+        if(eventDTO is EventDTO) {
+            eventStream.publish(eventDTO);
+        } else {
+            printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
+            printFullError(KEY_ANALYTICS_FILTER, eventDTO);
+        }
+    } else {
+        printError(KEY_ANALYTICS_FILTER, "Error while populating analytics fault event data");
+        printFullError(KEY_ANALYTICS_FILTER, faultDTO);
+    }
 }
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
     //Response data publishing
-    RequestResponseExecutionDTO requestResponseExecutionDTO = generateRequestResponseExecutionDataEvent(response,
+    RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
-    EventDTO event = generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
-    eventStream.publish(event);
+    if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+        EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
+        if(event is EventDTO) {
+            eventStream.publish(event);
+        } else {
+            printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
+            printFullError(KEY_ANALYTICS_FILTER, event);
+        }
+    } else {
+        printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data");
+        printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
+    }
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
-    // TODO: refactor the logic. error does not belong to type any
-    var code = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
-    if (code is ()) {
+    var resp = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
+    if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
+    } else if(resp is string) {
+        printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
+        doFilterFault(context, resp);
     }
-    // } else if(code is error) {
-    //     printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-    //     doFilterFault(context, code);
-    // }
 }

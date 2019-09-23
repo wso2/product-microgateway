@@ -35,6 +35,7 @@ SET JAVA_XMX_VALUE="512m"
 REM Get the location of this(gateway.bat) file
 SET PRGDIR=%~dp0
 SET GWHOME=%PRGDIR%..
+SET MGW_VERSION="3.1.0"
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
 set JAVA_HOME=%GWHOME%\lib\jdk8u202-b08-jre

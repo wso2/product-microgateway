@@ -47,6 +47,7 @@ PRGDIR=`dirname "$PRG"`
 GWHOME=`cd "$PRGDIR/.." ; pwd`
 export BALLERINA_HOME=$GWHOME'/runtime'
 export JAVA_HOME=$GWHOME'/lib/jdk8u202-b08-jre'
+export MGW_VERSION="3.1.0"
 
 if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`

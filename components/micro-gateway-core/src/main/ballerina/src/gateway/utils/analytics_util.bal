@@ -22,7 +22,7 @@ import ballerina/runtime;
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
-function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO) {
+function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO|error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
 
@@ -44,7 +44,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     eventDto.hostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
         HOSTNAME_PROPERTY]);
     if (isSecured) {
-        AuthenticationContext authContext = <AuthenticationContext>context
+        AuthenticationContext authContext = <AuthenticationContext>runtime:getInvocationContext()
         .attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"]= authContext.keyType;
         eventDto.userName = authContext.username;
@@ -67,10 +67,11 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
+    printDebug(KEY_ANALYTICS_FILTER, "Throttle Event DTO : " + eventDto.toString());
     return eventDto;
 }
 
-function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
+function populateFaultAnalyticsDTO(http:FilterContext context, string  err) returns (FaultDTO|error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     FaultDTO eventDto = {};
     time:Time time = time:currentTime();
@@ -91,7 +92,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     }
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
     eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
-    eventDto.errorMessage = err.reason();
+    eventDto.errorMessage = err;
     eventDto.faultTime = currentTimeMills;
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
