@@ -4,10 +4,11 @@
                 endpointEtcdConfigValues["{{name}}_{{endpointUrlType}}__{{@index}}_etcdKey"] = "{{etcdKey}}";
             {{/if}}
         {{/endpoints}}
-        foreach var (etcdKeyConfigValue,defaultEtcdKey) in endpointEtcdConfigValues {
+        foreach var [etcdKeyConfigValue,defaultEtcdKey] in endpointEtcdConfigValues.entries() {
             string etcdKey = gateway:retrieveConfig(etcdKeyConfigValue, defaultEtcdKey);
-            if (etcdKey != "" && gateway:etcdConnectionEstablished) {
-                hasUrlChanged = <boolean>gateway:urlChanged[etcdKey];
+            if (etcdKey != "" && gateway:isEtcdConnectionEstablished()) {
+                map<any> urlChangedMap = gateway:getUrlChangedMap();
+                hasUrlChanged = <boolean>urlChangedMap[etcdKey];
                 if(hasUrlChanged is boolean) {
                     if (reinitRequired == false) {
                         reinitRequired = hasUrlChanged;
@@ -22,14 +23,16 @@
             }
         }
                         if (reinitRequired) {
-                        //destination_attribute = <string>gateway:etcdUrls[etcdKey];
+                        map<string> etcdUrls = gateway:getEtcdUrlsMap();
+                        //destination_attribute = <string>etcdUrls[etcdKey];
                         {{#equals type "http"}} {{>httpEndpointReInit}} {{/equals}}
                         {{#equals type "load_balance"}} {{>lbEndpointReInit}} {{/equals}}
                         {{#equals type "failover"}} {{>failoverEndpointReInit}} {{/equals}}
 
-                            if(err is error) {
+                            if(reInitializedEndpoint is error) {
                                 reinitFailed = true;
-                                gateway:urlChanged[failedEtcdKey] = true;
+                                map<any> urlChangedMap = gateway:getUrlChangedMap();
+                                urlChangedMap[failedEtcdKey] = true;
 
                                 http:Response res = new;
                                 res.statusCode = 500;
@@ -37,13 +40,13 @@
                                     "fault": {
                                         "code": "101503",
                                         "message": "Runtime Error",
-                                        "description": "Error connecting to the back end"
+                                        "description": "Error while connecting to re initialized backend"
                                     }
                                 };
                                 invocationContext.attributes["error_code"] = "101503";
                                 res.setPayload(payload);
                                 clientResponse = res;
-                                log:printError("URL defined at etcd for key " + config:getAsString(failedEtcdKeyConfigValue) + " is invalid");
+                                log:printError("URL defined at etcd for key " + gateway:getConfigValue("", failedEtcdKeyConfigValue, "") + " is invalid");
                             }
                             reinitRequired = false;
                         }

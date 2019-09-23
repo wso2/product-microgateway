@@ -243,12 +243,12 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string defaultUrlRef,string etcdRef, string defaultUrl, string etcdKey) returns string {
     string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
-    //TODO set the correct value from gateway module
-    //gateway:urlChanged[<string> retrievedEtcdKey] = false;
+    map<any> urlChangedMap = gateway:getUrlChangedMap();
+    urlChangedMap[<string> retrievedEtcdKey] = false;
 
-    //TODO: get the correct url valus from gateway module
     string url = "";
-    //string url = <string> gateway:etcdUrls[retrievedEtcdKey];
+    map<string> etcdUrls = gateway:getEtcdUrlsMap();
+    //string url = <string> etcdUrls[retrievedEtcdKey];
     if (url == "") {
         return <string> gateway:retrieveConfig(defaultUrlRef, defaultUrl);
     } else {

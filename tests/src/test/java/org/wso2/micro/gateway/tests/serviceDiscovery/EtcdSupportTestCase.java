@@ -40,8 +40,10 @@ public class EtcdSupportTestCase extends BaseTestCase {
     private String etcdUrlParameter;
     private String etcdusername = "root";
     private String etcdpassword = "root";
+    private String etcdBasePath = "/v3alpha";
     private String etcdUsernameParameter;
     private String etcdPasswordParameter;
+    private String etcdBasePathParameter;
     private String pizzaShackEndpointSandConfigValue;
     private String pizzaShackProdConfigValue;
     private String pizzaShackProdEtcdKey = "pizzashackprod";
@@ -66,8 +68,8 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
     @BeforeClass
     public void start() throws Exception {
-        String label = "apimTestLabel";
-        String project = "apimTestProject";
+        String label = "etcdLabel";
+        String project = "etcdProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -97,26 +99,15 @@ public class EtcdSupportTestCase extends BaseTestCase {
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
 
-        //generate apis with CLI and start the micro gateway server
-        CLIExecutor cliExecutor;
-
-        configPath = getClass().getClassLoader()
-                .getResource("confs/default-test-config.conf").getPath();
-        microGWServer = ServerInstance.initMicroGwServer(configPath);
-
-        boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
-        Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
-        mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
-        mockHttpServer.start();
-        cliExecutor = CLIExecutor.getInstance();
-        cliExecutor.generate(label, project);
-
-        balPath = CLIExecutor.getInstance().getLabelJar(project);
-
         encodeValuesToBase64();
         prepareConfigValues();
         prepareCLIParameters();
         initializeEtcdServer();
+        String[] args = { etcdUrlParameter,etcdUsernameParameter,  etcdPasswordParameter,
+                pizzaShackProdParameter,  pizzaShackSandParameter,  etcdTimerParameter, etcdBasePathParameter};
+        super.init(project, new String[]{"serviceDiscovery/etcd_test.yaml"}, args);
+
+
     }
 
     private void encodeValuesToBase64() throws Exception {
@@ -137,21 +128,23 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String prodUrlType = "prod";
         String sandUrlType = "sand";
         String apiId = "4a731db3-3a76-4950-a2d9-9778fd73b31c";
-        pizzaShackEndpointSandConfigValue = apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
-        pizzaShackProdConfigValue = apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
-        pizzaShackSandConfigValue = apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
+        pizzaShackEndpointSandConfigValue = "--" + apiId + "_" + sandUrlType + "_" + apiEndpointSuffix;
+        pizzaShackProdConfigValue = "--" + apiId + "_" + prodUrlType + "_" + etcdKeySuffix;
+        pizzaShackSandConfigValue = "--" + apiId + "_" + sandUrlType + "_" + etcdKeySuffix;
     }
 
     private void prepareCLIParameters() {
-        String etcdUsernameConfigValue = "etcdusername";
-        String etcdPasswordConfigValue = "etcdpassword";
-        String etcdTimerConfigValue = "etcdtimer";
+        String etcdUsernameConfigValue = "--etcdusername";
+        String etcdPasswordConfigValue = "--etcdpassword";
+        String etcdTimerConfigValue = "--etcdtimer";
+        String etcdBasepathConfigValue = "--etcdbasepath";
         String etcdTimer = "1000";
         etcdUsernameParameter = etcdUsernameConfigValue + "=" + etcdusername;
         etcdPasswordParameter = etcdPasswordConfigValue + "=" + etcdpassword;
         pizzaShackProdParameter = pizzaShackProdConfigValue + "=" + pizzaShackProdEtcdKey;
         pizzaShackSandParameter = pizzaShackSandConfigValue + "=" + pizzaShackSandEtcdKey;
         etcdTimerParameter = etcdTimerConfigValue + "=" + etcdTimer;
+        etcdBasePathParameter = etcdBasepathConfigValue + "=" + etcdBasePath;
         overridingEndpointParameter = pizzaShackEndpointSandConfigValue + "=" + pizzaShackSandNewEndpoint;
     }
 
@@ -162,7 +155,7 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String etcd_port = System.getenv("PORT");
         etcdClient = new EtcdClient(etcd_host, etcd_port);
         etcdUrl = etcdClient.getEtcdUrl();
-        String etcdUrlConfigValue = "etcdurl";
+        String etcdUrlConfigValue = "--etcdurl";
         etcdUrlParameter =  etcdUrlConfigValue + "=" + etcdUrl;
 
         //create root user in etcd
@@ -189,20 +182,17 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
         String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
         Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support by changing the api url at the etcd node")
     public void testEtcdSupportApiUrlChanged() throws Exception {
         String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
@@ -213,14 +203,12 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support Providing all correct arguments but provided keys not defined in Etcd Node")
     public void testMissingKeysInEtcd() throws Exception {
         String[] args = {"-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //sandbox key is not present at etcd. So invoke the sandbox endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenSand, getServiceURLHttp(servicePath));
@@ -231,17 +219,14 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackSandKey, base64EncodedPizzaShackSandNewValue);
 
         retryPolicy(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_NEW_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support without providing relevant etcd keys")
     public void testWithoutProvidingKeys() throws Exception {
         String[] args = { "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter,
                 "-e", etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support when etcd authentication fails")
@@ -250,12 +235,10 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String invalidetcdpassword = "etcdpassword=invalid";
         String[] args = { "-e", etcdUrlParameter, "-e", invalidetcdusername, "-e", invalidetcdpassword, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
         Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support when incorrect Etcd URL is provided")
@@ -263,24 +246,20 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String incorrectetcdUrl = "etcdurl=http://127.0.0.1:2389";
         String[] args = { "-e", incorrectetcdUrl, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter};
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
         Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support without providing Etcd URL")
     public void testWithoutEtcdUrl() throws Exception {
         String[] args = { "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e",
                 pizzaShackSandParameter, "-e", etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
         Utils.assertResult(response, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support by changing the api url at the etcd node")
@@ -288,7 +267,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String[] args = { "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e", etcdPasswordParameter, "-e",
                 pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e", etcdTimerParameter, "-e",
                 overridingEndpointParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test sand endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenSand, getServiceURLHttp(servicePath));
@@ -299,7 +277,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackSandKey, base64EncodedPizzaShackSandValue);
 
         retryPolicy(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support when the URL defined at etcd corresponding to a key is invalid")
@@ -307,7 +284,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e",
                 etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e",
                 etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //insert an invalid url for the pizzashackprod key at etcd node
         String token = etcdClient.authenticate();
@@ -315,7 +291,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(token, base64EncodedPizzaShackProdKey, Utils.encodeValueToBase64(invalidUrlValue));
 
         retryPolicy(jwtTokenProd, INVALID_URL_AT_ETCD_RESPONSE, 500);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support when etcd credentials are provided, but etcd authentication is disabled")
@@ -328,7 +303,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", etcdUsernameParameter, "-e",
                 etcdPasswordParameter, "-e", pizzaShackProdParameter, "-e", pizzaShackSandParameter, "-e",
                 etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
@@ -338,7 +312,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     @Test(description = "Test Etcd Support when etcd credentials are not provided, but etcd authentication is disabled")
@@ -350,7 +323,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
 
         String[] args = { "--config", configPath, "-e", etcdUrlParameter, "-e", pizzaShackProdParameter, "-e",
                 pizzaShackSandParameter, "-e", etcdTimerParameter };
-        microGWServer.startMicroGwServer(balPath, args);
 
         //test the prod endpoint
         HttpResponse response = Utils.invokeApi(jwtTokenProd, getServiceURLHttp(servicePath));
@@ -360,7 +332,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         etcdClient.addKeyValuePair(base64EncodedPizzaShackProdKey, base64EncodedPizzaShackProdNewValue);
 
         retryPolicy(jwtTokenProd, MockHttpServer.PROD_ENDPOINT_NEW_RESPONSE, 200);
-        microGWServer.stopServer(false);
     }
 
     private void retryPolicy(String token, String responseData, int responseCode) throws Exception {
