@@ -38,12 +38,12 @@ public class RouteUtils {
 
     /**
      * To parse the Endpoint Configuration received from API Manager to RouteEndpointConfig Object
-     * @param endpointConfigJson    Endpoint Configuration Json received from Publisher API
-     * @param endpointSecurity      Endpoint Security details received from Publisher API
-     * @return                      RouteEndpointConfig object
+     *
+     * @param endpointConfigJson Endpoint Configuration Json received from Publisher API
+     * @param endpointSecurity   Endpoint Security details received from Publisher API
+     * @return RouteEndpointConfig object
      */
-    public static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity){
-
+    public static RouteEndpointConfig parseEndpointConfig(String endpointConfigJson, APIEndpointSecurityDTO endpointSecurity) {
         RouteEndpointConfig endpointConfig = new RouteEndpointConfig();
         EndpointListRouteDTO prodEndpointConfig = new EndpointListRouteDTO();
         EndpointListRouteDTO sandEndpointConfig = new EndpointListRouteDTO();
@@ -60,12 +60,10 @@ public class RouteUtils {
         }
 
         JsonNode endpointTypeNode = rootNode.get(RESTServiceConstants.ENDPOINT_TYPE);
-
         String endpointType = endpointTypeNode.asText();
 
         if (RESTServiceConstants.HTTP.equalsIgnoreCase(endpointType) || RESTServiceConstants.FAILOVER.
                 equalsIgnoreCase(endpointType)) {
-
             JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
 
             if (prodEndpointNode != null) {
@@ -97,36 +95,47 @@ public class RouteUtils {
                         sandEndpointConfig.addEndpoint(node.get(RESTServiceConstants.URL).asText());
                     }
                 }
-            }
-            else{
+            } else {
                 prodEndpointConfig.setType(EndpointType.http);
                 sandEndpointConfig.setType(EndpointType.http);
             }
         } else if (RESTServiceConstants.LOAD_BALANCE.equalsIgnoreCase(endpointType)) {
-
+            JsonNode prodEndpoints = rootNode.withArray(RESTServiceConstants.PRODUCTION_ENDPOINTS);
+            JsonNode sandboxEndpoints = rootNode.withArray(RESTServiceConstants.SANDBOX_ENDPOINTS);
             prodEndpointConfig.setType(EndpointType.load_balance);
             sandEndpointConfig.setType(EndpointType.load_balance);
 
-            JsonNode prodEndpoints = rootNode.withArray(RESTServiceConstants.PRODUCTION_ENDPOINTS);
             if (prodEndpoints != null) {
                 for (JsonNode node : prodEndpoints) {
                     prodEndpointConfig.addEndpoint(node.get(RESTServiceConstants.URL).asText());
                 }
             }
 
-            JsonNode sandboxEndpoints = rootNode.withArray(RESTServiceConstants.SANDBOX_ENDPOINTS);
             if (sandboxEndpoints != null) {
                 for (JsonNode node : sandboxEndpoints) {
                     sandEndpointConfig.addEndpoint(node.get(RESTServiceConstants.URL).asText());
                 }
             }
+        } else if (RESTServiceConstants.ADDRESS.equalsIgnoreCase(endpointType)) {
+            JsonNode prodEndpointNode = rootNode.get(RESTServiceConstants.PRODUCTION_ENDPOINTS);
+            JsonNode sandEndpointNode = rootNode.get(RESTServiceConstants.SANDBOX_ENDPOINTS);
+            prodEndpointConfig.setType(EndpointType.address);
+            sandEndpointConfig.setType(EndpointType.address);
+
+            if (prodEndpointNode != null) {
+                prodEndpointConfig.addEndpoint(prodEndpointNode.get(RESTServiceConstants.URL).asText());
+            }
+
+            if (sandEndpointNode != null) {
+                sandEndpointConfig.addEndpoint(sandEndpointNode.get(RESTServiceConstants.URL).asText());
+            }
         }
 
-        if(prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size()>0){
+        if (prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size() > 0) {
             endpointConfig.setProdEndpointList(prodEndpointConfig);
         }
 
-        if(sandEndpointConfig.getEndpoints() != null && sandEndpointConfig.getEndpoints().size()>0){
+        if (sandEndpointConfig.getEndpoints() != null && sandEndpointConfig.getEndpoints().size() > 0) {
             endpointConfig.setSandboxEndpointList(sandEndpointConfig);
         }
 
@@ -135,13 +144,14 @@ public class RouteUtils {
 
     /**
      * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation
-     * @param
-     * @return                      MgeEndpointConfig Object corresponding to provided routeEndpointConfig
+     *
+     * @param prodEpListDTO list of production endpoints
+     * @param sandEpListDTO list of sandbox endpoints
+     * @return MgeEndpointConfig Object corresponding to provided routeEndpointConfig
      */
     static MgwEndpointConfigDTO convertToMgwServiceMap(EndpointListRouteDTO prodEpListDTO, EndpointListRouteDTO
             sandEpListDTO) {
         MgwEndpointConfigDTO endpointConfigDTO = new MgwEndpointConfigDTO();
-
         MgwEndpointListDTO prod = null;
         MgwEndpointListDTO sandbox = null;
 
@@ -178,6 +188,7 @@ public class RouteUtils {
     private static void setEndpointType(EndpointListRouteDTO sourceObject, MgwEndpointListDTO destObject) {
         int endpointListSize = sourceObject.getEndpoints().size();
         EndpointType endpointType = sourceObject.getType();
+
         if (endpointListSize > 1) {
             if (endpointType == null) {
                 //default value is load_balance
@@ -203,11 +214,12 @@ public class RouteUtils {
                 destObject.setType(EndpointType.http);
                 return;
             }
-            //if endpointList size is one, we ignore the user input for 'type'
+
+            // if endpointList size is one, we ignore the user input for 'type'
             destObject.setType(EndpointType.http);
-            if (endpointType.equals(EndpointType.failover) || endpointType.equals(EndpointType.load_balance)) {
+            if (!endpointType.equals(EndpointType.http)) {
                 GatewayCmdUtils.printVerbose(endpointType + " is changed to " + EndpointType.http +
-                        " as one endpoint is available.");
+                        " as only one endpoint is available.");
             }
         }
     }
@@ -216,13 +228,15 @@ public class RouteUtils {
      * Set endpoint Urls from {@link EndpointListRouteDTO} object to {@link MgwEndpointConfigDTO} object.
      *
      * @param sourceObject {@link EndpointListRouteDTO} object
-     *                     * @param destObject {@link MgwEndpointListDTO} object
+     * @param destObject {@link MgwEndpointListDTO} object
      */
     private static void setEndpointUrls(EndpointListRouteDTO sourceObject, MgwEndpointListDTO destObject) {
         ArrayList<MgwEndpointDTO> mgwEpList = new ArrayList<>();
+
         for (String ep : sourceObject.getEndpoints()) {
             mgwEpList.add(new MgwEndpointDTO(ep));
         }
+
         //if any etcd enabled key is available, update the destObject for the usage of ballerina code generation
         for (MgwEndpointDTO mgwEndpointDTO : mgwEpList) {
             if(mgwEndpointDTO.isEtcdEnabled()){
