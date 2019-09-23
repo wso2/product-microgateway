@@ -85,7 +85,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
     {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
-    string urlPostfix = untaint req.rawPath.replace("{{basepath}}","");
+    string urlPostfix = untaint req.rawPath.replaceFirst("{{basepath}}", "");
     if (urlPostfix != "" && !urlPostfix.hasPrefix("/")) {
         urlPostfix = "/" + urlPostfix;
     }
