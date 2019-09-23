@@ -123,7 +123,7 @@ goto :end
         :continueBuild
             call :passToJar
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
-            REM set ballerina home again as the platform is extracted at this point.
+            REM Set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%PATH%;%BALLERINA_HOME%\bin\
             if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
@@ -132,8 +132,26 @@ goto :end
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
+                SET TARGET_FILE="%TARGET_DIR%\%project_name%.balx"
+                SET BUILD_STATUS=F
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
+
+                REM Build project using ballerina
                 call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
+
+                if ERRORLEVEL 0 (
+                    if EXIST "%TARGET_FILE%" (
+                        SET BUILD_STATUS=T
+                    )
+                )
+
+                ECHO
+                if %BUILD_STATUS%==T (
+                    ECHO "BUILD SUCCESSFUL"
+                    ECHO "Target: %TARGET_FILE%"
+                ) else (
+                    ECHO "BUILD FAILED"
+                )
             POPD
 goto :end
 
