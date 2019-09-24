@@ -26,7 +26,7 @@ public type AnalyticsRequestFilter object {
             checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             error? err = trap doFilterRequest(request, context);
-            if(err is error) {
+            if (err is error) {
                 printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path");
                 printFullError(KEY_ANALYTICS_FILTER, err);
             }
@@ -42,9 +42,9 @@ public type AnalyticsRequestFilter object {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
                     ThrottleAnalyticsEventDTO|error  throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
-                    if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
+                    if (throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
-                        if(eventDTO is EventDTO) {
+                        if (eventDTO is EventDTO) {
                             eventStream.publish(eventDTO);
                         } else {
                             printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
@@ -78,9 +78,9 @@ function doFilterRequest(http:Request request, http:FilterContext context) {
 
 function doFilterFault(http:FilterContext context, string errorMessage) {
     FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
-    if(faultDTO is FaultDTO) {
+    if (faultDTO is FaultDTO) {
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
-        if(eventDTO is EventDTO) {
+        if (eventDTO is EventDTO) {
             eventStream.publish(eventDTO);
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
@@ -96,9 +96,9 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     //Response data publishing
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
             context);
-    if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+    if (requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
-        if(event is EventDTO) {
+        if (event is EventDTO) {
             eventStream.publish(event);
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
@@ -115,7 +115,7 @@ function doFilterAll(http:Response response, http:FilterContext context) {
     if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
-    } else if(resp is string) {
+    } else if (resp is string) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }
