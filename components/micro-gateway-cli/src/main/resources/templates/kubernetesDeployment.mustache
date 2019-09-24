@@ -2,7 +2,7 @@
 @kubernetes:Deployment {
     {{#if containerConfig.kubernetes.kubernetesDeployment.name}}
     name:"{{containerConfig.kubernetes.kubernetesDeployment.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesDeployment.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.replicas}},
+    labels:{{& containerConfig.kubernetes.kubernetesDeployment.labels}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.replicas}},
     replicas:{{containerConfig.kubernetes.kubernetesDeployment.replicas}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.enableLiveness}},
     enableLiveness:{{containerConfig.kubernetes.kubernetesDeployment.enableLiveness}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.initialDelaySeconds}},
     initialDelaySeconds:{{containerConfig.kubernetes.kubernetesDeployment.initialDelaySeconds}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.periodSeconds}},

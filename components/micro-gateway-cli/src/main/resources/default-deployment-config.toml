@@ -98,18 +98,19 @@
     #cpuPrecentage = ''
   [kubernetes.kubernetesSecret]
     enable = false
-    #name = ''
-    #mountPath = ''
-    #readOnly = ''
-    #data = ''
+    #[[kubernetes.kubernetesSecret.secrets]]
+      #name = ''
+      #mountPath = ''
+      #readOnly = false
+      #data = ['']
   [kubernetes.kubernetesConfigMap]
     enable = false
     ballerinaConf = 'path/to/micro-gw.conf'
     #[[kubernetes.kubernetesConfigMap.configMaps]]
-    #    name = ''
-    #    mountPath = ''
-    #    readOnly = false
-    #    data = ['']
+      #name = ''
+      #mountPath = ''
+      #data = ['']
+      #readOnly = false
   [kubernetes.kubernetesPersistentVolumeClaim]
     enable = false
     #name = ''
