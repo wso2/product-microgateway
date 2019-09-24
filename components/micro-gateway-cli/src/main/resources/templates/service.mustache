@@ -203,7 +203,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                 errorDescription = "Malformed URL";
             }
             // Todo: error is not type any -> runtime:getInvocationContext().attributes["error_response"] =  clientResponse;
-            runtime:getInvocationContext().attributes["error_response_code"] = errorCode;
+            runtime:getInvocationContext().attributes[gateway:ERROR_RESPONSE_CODE] = errorCode;
+            runtime:getInvocationContext().attributes[gateway:ERROR_RESPONSE] = errorDescription;
             json payload = {fault : {
                 code : errorCode,
                 message : "Runtime Error",
