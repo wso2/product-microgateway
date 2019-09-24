@@ -59,7 +59,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     return eventDto;
 }
 
-function populateFaultAnalyticsDTO(http:FilterContext context, error err) returns (FaultDTO) {
+function populateFaultAnalyticsDTO(http:FilterContext context, string  errorMessage) returns (FaultDTO) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     FaultDTO eventDto = {};
     time:Time time = time:currentTime();
@@ -73,7 +73,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, error err) return
     eventDto.resourcePath = (resource_Path is string) ? resource_Path : "";
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
     eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
-    eventDto.errorMessage = err.reason();
+    eventDto.errorMessage = errorMessage;
     eventDto.faultTime = currentTimeMills;
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
