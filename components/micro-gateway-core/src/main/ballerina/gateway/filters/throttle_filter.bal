@@ -258,6 +258,9 @@ function isResourceLevelThrottled(http:FilterContext context,AuthenticationConte
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
+        if(enabledGlobalTMEventPublishing) {
+            resourceLevelThrottleKey += "_default";
+        }
         boolean throttled;
         boolean stopOnQuota;
         (throttled, stopOnQuota) = isRequestThrottled(resourceLevelThrottleKey);
@@ -329,7 +332,15 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
         requestStreamDto.subscriptionKey +=":" + apiVersion;
         requestStreamDto.resourceKey += ":" + apiVersion;
     }
-
+    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDto.resourceKey);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDto.subscriptionKey);
+    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDto.appKey);
+    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDto.apiKey);
+    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDto.resourceTier);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDto.subscriptionTier);
+    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDto.appTier);
+    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDto.apiTier);
+    printDebug(KEY_THROTTLE_FILTER, "Throttle tenant domain published : "  + requestStreamDto.apiTenant );
     json properties = {};
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
