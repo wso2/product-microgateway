@@ -23,7 +23,7 @@
   [kubernetes.kubernetesDeployment]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #replicas = ''
     #enableLiveness = ''
     #initialDelaySeconds = ''
@@ -48,31 +48,31 @@
   [kubernetes.kubernetesService]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #serviceType = ''
     #port = ''
   #[kubernetes.kubernetesServiceHttps]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   #[kubernetes.kubernetesServiceHttp]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   #[kubernetes.kubernetesServiceToken]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   [kubernetes.kubernetesIngress]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #hostname = ''
     #annotations = ''
     #path = ''
@@ -81,7 +81,7 @@
   [kubernetes.secureKubernetesIngress]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #hostname = ''
     #annotations = ''
     #path = ''
@@ -92,7 +92,7 @@
   [kubernetes.kubernetesHpa]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #minReplicas = ''
     #maxReplicas = ''
     #cpuPrecentage = ''
@@ -121,7 +121,7 @@
   [kubernetes.kubernetesJob]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #restartPolicy = ''
     #backoffLimit = ''
     #activeDeadlineSeconds = ''
