@@ -2,6 +2,7 @@ package org.wso2.apimgt.gateway.cli.model.route;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointProxyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class EndpointListRouteDTO {
     private EndpointType type = null;
     private List<String> endpoints = null;
     private String name;
+    private APIEndpointProxyDTO proxyConfig = null;
 
     @JsonProperty("securityConfig")
     public APIEndpointSecurityDTO getSecurityConfig() {
@@ -40,6 +42,15 @@ public class EndpointListRouteDTO {
     @JsonProperty(value = "urls", required = true)
     public List<String> getEndpoints() {
         return endpoints;
+    }
+
+    @JsonProperty("proxyConfig")
+    public APIEndpointProxyDTO getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(APIEndpointProxyDTO proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 
     /**

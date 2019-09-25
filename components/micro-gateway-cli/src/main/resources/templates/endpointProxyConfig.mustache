@@ -1,0 +1,9 @@
+{{#if proxyConfig.host}},
+proxy : {
+    host : gateway:getConfigValue("httpClients.proxy", "host", "{{proxyConfig.host}}"), {{#if proxyConfig.port}}
+    port : gateway:getConfigIntValue("httpClients.proxy", "port", {{proxyConfig.port}}), {{else}}
+    port : gateway:getConfigIntValue("httpClients.proxy", "port", 0),{{/if}}
+    userName : gateway:getConfigValue("httpClients.proxy", "username", "{{proxyConfig.username}}"),
+    password : gateway:getConfigValue("httpClients.proxy", "password", "{{proxyConfig.password}}")
+}
+{{/if}}
