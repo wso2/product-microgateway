@@ -44,9 +44,7 @@ if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 REM Check if path to runtime executable is available
 set last=""
 for %%a in (%*) do set last=%%a
-echo %last%
 if %last%=="" set isInvalidPath=T
-echo %last%
 if not exist %last% set isInvalidPath=T
 if "%isInvalidPath%"=="T" (
 	echo Path to executable balx file is invalid

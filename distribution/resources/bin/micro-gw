@@ -254,28 +254,25 @@ fi
 
 #execute build command
 if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_GW_PROJECT_DIR" != "" ]; then
-
-  # ----- Execute The Build Command without --compiled flag (1st phase) -----------------------------------------
-
-  $JAVACMD \
-    -Xms256m -Xmx1024m \
-    -XX:+HeapDumpOnOutOfMemoryError \
-    -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-    $JAVA_OPTS \
-    -classpath "$CLI_CLASSPATH" \
-    -Djava.security.egd=file:/dev/./urandom \
-    -Dballerina.home=$BALLERINA_HOME \
-    -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-    -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-    -Dfile.encoding=UTF8 \
-    -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-    -Dcli.home=$MICROGW_HOME \
-    -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
-    org.wso2.apimgt.gateway.cli.cmd.Main "$@"
+    # ----- Execute the micro-gw build command (1st phase) -----
+    $JAVACMD \
+        -Xms256m -Xmx1024m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+        $JAVA_OPTS \
+        -classpath "$CLI_CLASSPATH" \
+        -Djava.security.egd=file:/dev/./urandom \
+        -Dballerina.home=$BALLERINA_HOME \
+        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+        -Dfile.encoding=UTF8 \
+        -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+        -Dcli.home=$MICROGW_HOME \
+        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
+        org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 
     exit_code=$?
-    if [ $exit_code -eq 0 ]
-    then
+    if [ $exit_code -eq 0 ]; then
         # Ballerina path is updated as ballerina platform is extracted
         BALLERINA_HOME="$MICROGW_HOME/lib/platform"
         export BALLERINA_HOME=$BALLERINA_HOME
@@ -289,7 +286,6 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         if $cygwin; then
             [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`
             BALLERINA_HOME=`cygpath --absolute --windows "$BALLERINA_HOME"`
-
         fi
 
         update_cli_classpath
@@ -312,25 +308,23 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
                 printf "${RED}${BOLD}BUILD FAILED${NC}\n"
             fi
         popd > /dev/null
-     else
-        exit $exit_code
-     fi
+    fi
+    exit $exit_code
 else
-  $JAVACMD \
-      -Xms256m -Xmx1024m \
-      -XX:+HeapDumpOnOutOfMemoryError \
-      -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
-      $JAVA_OPTS \
-      -classpath "$CLI_CLASSPATH" \
-      -Djava.security.egd=file:/dev/./urandom \
-      -Dballerina.home=$BALLERINA_HOME \
-      -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-      -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-      -Dfile.encoding=UTF8 \
-      -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-      -Dcli.home=$MICROGW_HOME \
-      -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
-      org.wso2.apimgt.gateway.cli.cmd.Main "$@"
-
+    $JAVACMD \
+        -Xms256m -Xmx1024m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:HeapDumpPath="$MICROGW_HOME/heap-dump.hprof" \
+        $JAVA_OPTS \
+        -classpath "$CLI_CLASSPATH" \
+        -Djava.security.egd=file:/dev/./urandom \
+        -Dballerina.home=$BALLERINA_HOME \
+        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+        -Dfile.encoding=UTF8 \
+        -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
+        -Dcli.home=$MICROGW_HOME \
+        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
+        org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 fi
 
