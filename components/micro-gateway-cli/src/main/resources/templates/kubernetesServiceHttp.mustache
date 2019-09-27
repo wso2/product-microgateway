@@ -4,7 +4,7 @@
 @kubernetes:Service {
     {{#if containerConfig.kubernetes.kubernetesServiceHttp.name}}
     name:"{{containerConfig.kubernetes.kubernetesServiceHttp.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesServiceHttp.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.serviceType}},
+    labels:{{& containerConfig.kubernetes.kubernetesServiceHttp.labels}}{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.serviceType}},
     serviceType:"{{containerConfig.kubernetes.kubernetesServiceHttp.serviceType}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesServiceHttp.port}},
     port:{{containerConfig.kubernetes.kubernetesServiceHttp.port}}{{/if}}
 }

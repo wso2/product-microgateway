@@ -23,7 +23,7 @@
   [kubernetes.kubernetesDeployment]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #replicas = ''
     #enableLiveness = ''
     #initialDelaySeconds = ''
@@ -48,31 +48,31 @@
   [kubernetes.kubernetesService]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #serviceType = ''
     #port = ''
   #[kubernetes.kubernetesServiceHttps]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   #[kubernetes.kubernetesServiceHttp]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   #[kubernetes.kubernetesServiceToken]
       #enable = false
       #name = ''
-      #labels = ''
+      #labels = '{"", ""}'
       #serviceType = ''
       #port = ''
   [kubernetes.kubernetesIngress]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #hostname = ''
     #annotations = ''
     #path = ''
@@ -81,7 +81,7 @@
   [kubernetes.secureKubernetesIngress]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #hostname = ''
     #annotations = ''
     #path = ''
@@ -92,24 +92,25 @@
   [kubernetes.kubernetesHpa]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #minReplicas = ''
     #maxReplicas = ''
     #cpuPrecentage = ''
   [kubernetes.kubernetesSecret]
     enable = false
-    #name = ''
-    #mountPath = ''
-    #readOnly = ''
-    #data = ''
+    #[[kubernetes.kubernetesSecret.secrets]]
+      #name = ''
+      #mountPath = ''
+      #readOnly = false
+      #data = ['']
   [kubernetes.kubernetesConfigMap]
     enable = false
     ballerinaConf = 'path/to/micro-gw.conf'
     #[[kubernetes.kubernetesConfigMap.configMaps]]
-    #    name = ''
-    #    mountPath = ''
-    #    readOnly = false
-    #    data = ['']
+      #name = ''
+      #mountPath = ''
+      #data = ['']
+      #readOnly = false
   [kubernetes.kubernetesPersistentVolumeClaim]
     enable = false
     #name = ''
@@ -120,7 +121,7 @@
   [kubernetes.kubernetesJob]
     enable = false
     #name = ''
-    #labels = ''
+    #labels = '{"", ""}'
     #restartPolicy = ''
     #backoffLimit = ''
     #activeDeadlineSeconds = ''
