@@ -55,11 +55,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
     private String publisherEp;
     private String adminEp;
     private boolean inSecure;
+    private String restVersion;
 
-    public RESTAPIServiceImpl(String publisherEp, String adminEp, boolean inSecure) {
+    public RESTAPIServiceImpl(String publisherEp, String adminEp, String restVersion, boolean inSecure) {
         this.publisherEp = publisherEp;
         this.adminEp = adminEp;
         this.inSecure = inSecure;
+        this.restVersion = restVersion;
     }
 
     /**
@@ -70,12 +72,20 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         URL url;
         HttpsURLConnection urlConn = null;
         APIListDTO apiListDTO;
+        boolean isExpand = false;
         //calling token endpoint
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + RESTServiceConstants.APIS_GET_URI
                     .replace(CliConstants.LABEL_PLACEHOLDER, URLEncoder.encode(labelName, CliConstants.CHARSET_UTF8));
-            logger.debug("GET API URL: {}", urlStr);
+            //Expand property is not used from APIM v3 onwards.
+            if (restVersion.startsWith(CliConstants.REST_API_V1_PREFIX)) {
+                urlStr = urlStr.replace(CliConstants.EXPAND_PLACEHOLDER, "false");
+            } else {
+                urlStr = urlStr.replace(CliConstants.EXPAND_PLACEHOLDER, "true");
+                isExpand = true;
+            }
+            logger.debug("GET APIs URL: {}", urlStr);
             url = new URL(urlStr);
             urlConn = (HttpsURLConnection) url.openConnection();
             if (inSecure) {
@@ -94,8 +104,11 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
                 for (ExtendedAPI api : apiListDTO.getList()) {
-
                     setAdditionalConfigs(api);
+                    // if using APIM v3, then open API should be fetched separately and set to the API object.
+                    if (!isExpand) {
+                        api.setApiDefinition(getOpenAPIFromAPIId(api.getId(), accessToken));
+                    }
                 }
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
@@ -124,13 +137,20 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         URL url;
         HttpsURLConnection urlConn = null;
         ExtendedAPI matchedAPI = null;
+        boolean isExpand = false;
         //calling token endpoint
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + RESTServiceConstants.API_GET_BY_NAME_VERSION_URI
                     .replace(CliConstants.API_NAME_PLACEHOLDER, URLEncoder.encode(apiName, CliConstants.CHARSET_UTF8))
                     .replace(CliConstants.VERSION_PLACEHOLDER, URLEncoder.encode(version, CliConstants.CHARSET_UTF8));
-            logger.debug("GET API URL: {}", urlStr);
+            if (restVersion.startsWith(CliConstants.REST_API_V1_PREFIX)) {
+                urlStr = urlStr.replace(CliConstants.EXPAND_PLACEHOLDER, "false");
+            } else {
+                urlStr = urlStr.replace(CliConstants.EXPAND_PLACEHOLDER, "true");
+                isExpand = true;
+            }
+            logger.debug("GET APIs URL: {}", urlStr);
             url = new URL(urlStr);
 
             urlConn = (HttpsURLConnection) url.openConnection();
@@ -162,6 +182,10 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     }
                     //set additional configs such as CORS configs from the toolkit configuration
                     setAdditionalConfigs(matchedAPI);
+                    // if using APIM v3, then open API should be fetched separately and set to the API object.
+                    if (!isExpand) {
+                        matchedAPI.setApiDefinition(getOpenAPIFromAPIId(matchedAPI.getId(), accessToken));
+                    }
                 } else {
                     throw new CLIInternalException("No proper response received for get API request.");
                 }
@@ -183,18 +207,59 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         return matchedAPI;
     }
 
+    private String getOpenAPIFromAPIId(String apiId, String accessToken) throws IOException {
+        URL url;
+        HttpsURLConnection urlConn = null;
+        String openAPIContent;
+        publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
+        try {
+            String urlStr = publisherEp + RESTServiceConstants.API_OPEN_API_GET_URI
+                    .replace(CliConstants.API_ID_PLACEHOLDER, URLEncoder.encode(apiId, CliConstants.CHARSET_UTF8));
+            logger.debug("GET OPEN API URL: {}", urlStr);
+            url = new URL(urlStr);
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
+            int responseCode = urlConn.getResponseCode();
+            logger.debug("Response code: {}", responseCode);
+            if (responseCode == 200) {
+                openAPIContent = RESTAPIUtils.getResponseString(urlConn.getInputStream());
+                logger.trace("Response body: {}", openAPIContent);
+                //convert json string to object
+
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
+            } else {
+                throw new CLIInternalException(
+                        "Error occurred while getting the open API definition of API with ID: " + apiId
+                                + ". Status code: " + responseCode);
+            }
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
+        return openAPIContent;
+    }
+
     private void setAdditionalConfigs(ExtendedAPI api) {
         //todo: remove the comment
         //api.setEndpointConfigRepresentation((endpointConfig));
         // set default values from config if per api cors is not enabled
         Config config = CmdUtils.getConfig();
         if (config == null) {
-            if (!api.getCorsConfiguration().getCorsConfigurationEnabled()) {
+            if (api.getCorsConfiguration() != null && !api.getCorsConfiguration().getCorsConfigurationEnabled()) {
                 api.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
             }
         } else {
-            if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !api.getCorsConfiguration()
-                    .getCorsConfigurationEnabled()) {
+            if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !(api.getCorsConfiguration() != null
+                    && api.getCorsConfiguration().getCorsConfigurationEnabled())) {
                 api.setCorsConfiguration(config.getCorsConfiguration());
             }
         }

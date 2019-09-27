@@ -21,6 +21,7 @@ package org.wso2.micro.gateway.tests.common.model;
  * API Object model
  */
 public class API {
+    private String id;
     private String name;
     private String version;
     private String context;
@@ -97,5 +98,13 @@ public class API {
     public void setEndpoint(String endpoint) {
         setProdEndpoint(endpoint);
         setSandEndpoint(endpoint);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
