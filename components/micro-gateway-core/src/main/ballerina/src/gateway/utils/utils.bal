@@ -187,7 +187,7 @@ public function getApiName(http:FilterContext context) returns (string) {
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {
-    if(stringutils:equalsIgnoreCase("",instanceId)) {
+    if(stringutils:equalsIgnoreCase("", instanceId)) {
         return config:getAsString(property,  defaultValue);
     }
     return config:getAsString(instanceId + "." + property,  defaultValue);

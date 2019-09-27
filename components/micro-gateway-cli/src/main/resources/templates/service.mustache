@@ -245,10 +245,8 @@ function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string default
     string retrievedEtcdKey = <string> gateway:retrieveConfig(etcdRef,etcdKey);
     map<any> urlChangedMap = gateway:getUrlChangedMap();
     urlChangedMap[<string> retrievedEtcdKey] = false;
-
-    string url = "";
     map<string> etcdUrls = gateway:getEtcdUrlsMap();
-    //string url = <string> etcdUrls[retrievedEtcdKey];
+    string url = <string> etcdUrls[retrievedEtcdKey];
     if (url == "") {
         return <string> gateway:retrieveConfig(defaultUrlRef, defaultUrl);
     } else {

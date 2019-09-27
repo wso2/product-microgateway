@@ -4,4 +4,3 @@ if(reInitializedEndpoint is http:Client) {
 {{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
 = reInitializedEndpoint;
 }
-

@@ -31,6 +31,12 @@ boolean etcdAuthenticationEnabled = true;
 string etcdBasePath = getConfigValue("","etcdbasepath","/v3");
 string etcdKVBasePath = etcdBasePath + "/kv";
 string etcdAuthBasePath = etcdBasePath + "/auth";
+int etcdTriggerTime = config:getAsInt("etcdtimer", DEFAULT_ETCD_TRIGGER_TIME);
+task:TimerConfiguration timerConfiguration = {
+        intervalInMillis: etcdTriggerTime,
+        initialDelayInMillis: 1000
+};
+task:Scheduler timer = new(timerConfiguration);
 
 # Setting up etcd timer task
 public function initiateEtcdTimerTask() {
@@ -38,19 +44,15 @@ public function initiateEtcdTimerTask() {
     int etcdTriggerTime = config:getAsInt("etcdtimer", DEFAULT_ETCD_TRIGGER_TIME);
     string|error trigTime = etcdTriggerTime.toString();
     // The Task Timer configuration record to configure the Task Listener.
-          task:TimerConfiguration timerConfiguration = {
-            intervalInMillis: etcdTriggerTime,
-            initialDelayInMillis: 1000
-          };
-         task:Scheduler timer = new(timerConfiguration);
-          var searchResult = timer.attach(etcdService);
-          if (searchResult is error) {
-             printError(KEY_ETCD_UTIL, searchResult.toString());
-          }
-          var startResult = timer.start();
-          if (startResult is error) {
-             printError(KEY_ETCD_UTIL, "Starting the etcd service task is failed.");
-          }
+
+    var searchResult = timer.attach(etcdService);
+    if (searchResult is error) {
+        printError(KEY_ETCD_UTIL, searchResult.toString());
+    }
+    var startResult = timer.start();
+    if (startResult is error) {
+        printError(KEY_ETCD_UTIL, "Starting the etcd service task is failed.");
+    }
     if(trigTime is string){
         printInfo(KEY_ETCD_UTIL, "Etcd periodic timer task started with a periodic time of " + trigTime + "ms");
     }
@@ -82,10 +84,13 @@ public function etcdTimerTask() returns error? {
             printDebug(KEY_ETCD_UTIL, key + " : " + <string>etcdUrls[<string>key]);
         }
         printDebug(KEY_ETCD_UTIL, "etcdurl map values - end");
-    }
-    else {
+    } else {
         printInfo(KEY_ETCD_UTIL, "No Etcd keys provided. Stopping etcd periodic call");
-            // Additional sleep to finish the onTrigger function.
+        var stopResult = timer.stop();
+        if (stopResult is error) {
+            printError(KEY_ETCD_UTIL, "Error while stopping the etcd periodic timer task");
+        }
+
     }
     return ();
 }

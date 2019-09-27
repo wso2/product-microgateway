@@ -23,13 +23,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
 import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
 import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
 import org.wso2.micro.gateway.tests.common.MockHttpServer;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.EtcdClient;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
@@ -106,8 +104,6 @@ public class EtcdSupportTestCase extends BaseTestCase {
         String[] args = { etcdUrlParameter,etcdUsernameParameter,  etcdPasswordParameter,
                 pizzaShackProdParameter,  pizzaShackSandParameter,  etcdTimerParameter, etcdBasePathParameter};
         super.init(project, new String[]{"serviceDiscovery/etcd_test.yaml"}, args);
-
-
     }
 
     private void encodeValuesToBase64() throws Exception {
