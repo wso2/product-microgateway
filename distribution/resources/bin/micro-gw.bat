@@ -51,7 +51,7 @@ REM set BALLERINA_HOME
 SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
-SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+SET PATH=%BALLERINA_HOME%\bin\;%PATH%
 if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 if %verbose%==T ECHO MICROGW_HOME environment variable is set to %MICROGW_HOME%
 
@@ -125,9 +125,8 @@ goto :end
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
             REM Set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
-            SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+            SET PATH=%BALLERINA_HOME%\bin\;%PATH%
             if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-            ECHO MICRO_GW_PROJECT_DIR:  "%CURRENT_D%"
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
