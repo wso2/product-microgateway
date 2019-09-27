@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
@@ -88,6 +89,10 @@ public class InitCmd implements GatewayLauncherCmd {
         init(projectName, deploymentConfigPath);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
+        OUT.println("\n(Use \"" + GatewayCliConstants.MICRO_GW + ' ' + GatewayCliCommands.BUILD + ' ' + projectName
+                + "\" after copying the api definitions)");
+        OUT.println("(Use \"" + GatewayCliConstants.MICRO_GW + ' ' + GatewayCliCommands.IMPORT + ' ' + projectName
+                + " [-l]|[-a -v]\" to import APIs from WSO2 API Manager)");
     }
 
     @Override
