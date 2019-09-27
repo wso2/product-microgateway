@@ -2,7 +2,7 @@
 @kubernetes:Job {
     {{#if containerConfig.kubernetes.kubernetesJob.name}}
     name:"{{containerConfig.kubernetes.kubernetesJob.name}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.labels}},
-    labels:"{{containerConfig.kubernetes.kubernetesJob.labels}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.restartPolicy}},
+    labels:{{& containerConfig.kubernetes.kubernetesJob.labels}}{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.restartPolicy}},
     restartPolicy:"{{containerConfig.kubernetes.kubernetesJob.restartPolicy}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.backoffLimit}},
     backoffLimit:"{{containerConfig.kubernetes.kubernetesJob.backoffLimit}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.activeDeadlineSeconds}},
     activeDeadlineSeconds:"{{containerConfig.kubernetes.kubernetesJob.activeDeadlineSeconds}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesJob.schedule}},
