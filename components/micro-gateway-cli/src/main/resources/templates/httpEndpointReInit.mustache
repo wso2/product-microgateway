@@ -1,4 +1,6 @@
-var err = trap
-{{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}.__init{{/equals}}
-{{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}.__init{{/equals}}
-                (<string>gateway:etcdUrls[<string> gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}")], { {{>http2}}{{>caching}}{{>basicAuth}}{{>secureSocket}} });
+http:Client|error reInitializedEndpoint = trap new(<string>etcdUrls[<string> gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}")], { {{>http2}}{{>caching}}{{>basicAuth}}{{>secureSocket}} });
+if(reInitializedEndpoint is http:Client) {
+{{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
+{{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
+= reInitializedEndpoint;
+}
