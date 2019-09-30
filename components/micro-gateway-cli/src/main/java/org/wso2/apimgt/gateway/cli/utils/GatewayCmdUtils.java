@@ -133,7 +133,7 @@ public class GatewayCmdUtils {
     public static CliLauncherException createUsageException(String errorMsg) {
         CliLauncherException launcherException = new CliLauncherException();
         launcherException.addMessage("micro-gw: " + errorMsg);
-        launcherException.addMessage("Run 'micro-gw' for usage.");
+        launcherException.addMessage("Run 'micro-gw help <command>' for usage.");
         return launcherException;
     }
 
