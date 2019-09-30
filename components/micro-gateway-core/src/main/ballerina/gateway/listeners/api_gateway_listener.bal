@@ -107,6 +107,7 @@ public function initiateGatewayConfigurations(http:ServiceEndpointConfiguration 
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     initializeAnalytics();
+    reInitializeClientsWithProxies();
 
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {

@@ -186,6 +186,12 @@
 
  public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
  public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
+ public const string HTTP_CLIENTS_PROXY_INSTANCE_ID = "httpClients.proxy";
+ public const string PROXY_ENABLED = "enabled";
+ public const string PROXY_HOST = "host";
+ public const string PROXY_PORT = "port";
+ public const string PROXY_USERNAME = "username";
+ public const string PROXY_PASSWORD = "password";
 
 
  public const string BLOCKING_CONDITION_STATE = "state";
@@ -308,6 +314,7 @@
  const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
  const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
  const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
+ const string GW_CLIENTS = "APIGatewayEndpoint";
 
 
  public int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins

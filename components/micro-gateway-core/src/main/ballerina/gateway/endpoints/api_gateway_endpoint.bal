@@ -47,16 +47,102 @@ http:Client analyticsFileUploadEndpoint = new (
     }
 );
 
-listener http:Listener tokenListenerEndpoint = new (
-    getConfigIntValue(LISTENER_CONF_INSTANCE_ID ,TOKEN_LISTENER_PORT, 9096), config = {
-        host: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "localhost"),
-        secureSocket: {
-            keyStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                    LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+public function reInitializeClientsWithProxies() {
+    boolean proxyEnabled = getConfigBooleanValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_ENABLED, false);
+    if (proxyEnabled) {
+        printDebug(GW_CLIENTS, "Re initializing gateway clients with proxy configurations");
+        keyValidationEndpoint = new (
+            getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+            config =
+                {cache: { enabled: false },
+                secureSocket: {
+                    trustStore: {
+                          path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                              "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                          password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                    },
+                    verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+                },
+                proxy: {
+                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+                }
             }
-        }
+        );
+        analyticsFileUploadEndpoint = new (
+            getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
+            config =
+                {cache: { enabled: false },
+                secureSocket:{
+                    trustStore: {
+                        path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                          "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                        password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                    },
+                    verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+                },
+                proxy: {
+                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+                }
+            }
+        );
+        etcdEndpoint = new (
+            retrieveConfig("etcdurl", "http://127.0.0.1:2379"), config = {
+                secureSocket: {
+                    trustStore: {
+                        path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                        password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                    },
+                    verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+                },
+                proxy: {
+                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+                }
+            }
+        );
+        etcdTokenRevocationEndpoint = new (
+            getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, "https://localhost:2379/v2/keys/jti/"), config = {
+                secureSocket: {
+                    trustStore: {
+                        path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                        password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                    },
+                    verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+                },
+                proxy: {
+                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+                }
+            }
+        );
+        throttleEndpoint = new(throttleEndpointUrl, config = {
+            cache: { enabled: false },
+            secureSocket:{
+                trustStore: {
+                      path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                          "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                      password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                },
+                verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+            },
+            proxy: {
+                host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+                port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+                userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+                password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+            }
+        });
     }
-);
+}
