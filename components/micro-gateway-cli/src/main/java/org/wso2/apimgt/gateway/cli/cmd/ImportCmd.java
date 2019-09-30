@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -124,8 +125,8 @@ public class ImportCmd implements LauncherCmd {
         File projectLocation = new File(CmdUtils.getProjectDirectoryPath(projectName));
 
         if (!projectLocation.exists()) {
-            throw CmdUtils.createUsageException("Project " + projectName + " does not exist. " +
-                    "Please execute the command '" + "micro-gw init " + projectName + "' to initialize the project.");
+            throw CmdUtils.createUsageException("Project " + projectName + " does not exist. Please use " +
+                    "'micro-gw init " + projectName + "' to initialize the project.");
         }
         //extract the ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
@@ -301,6 +302,9 @@ public class ImportCmd implements LauncherCmd {
             newConfig.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
             CmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
+
+        outStream.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' '
+                + projectName + "\" to build the project)");
     }
 
     @Override
@@ -349,10 +353,7 @@ public class ImportCmd implements LauncherCmd {
                 (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) ||
                 (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
             throw CmdUtils.createUsageException(
-                    "Either label (-l <label>) or API name (-a <api-name>) with version (-v <version>) "
-                            + "should be provided."
-                            + "\n\nEx:\tmicro-gw setup accounts-project -l accounts"
-                            + "\n\tmicro-gw setup pizzashack-project -a Pizzashack -v 1.0.0");
+                    "Missing \"-l <label>\" or \"-a <api-name> -v <version>\" parameters");
         }
     }
 

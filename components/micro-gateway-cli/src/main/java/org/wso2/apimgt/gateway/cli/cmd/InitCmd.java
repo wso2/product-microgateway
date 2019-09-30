@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
@@ -88,6 +89,10 @@ public class InitCmd implements LauncherCmd {
         init(projectName, deploymentConfigPath);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
+        OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
+                + "\" after copying the api definitions)");
+        OUT.println("(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.IMPORT + ' ' + projectName
+                + " [-l]|[-a -v]\" to import APIs from WSO2 API Manager)");
     }
 
     @Override
