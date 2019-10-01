@@ -1,4 +1,4 @@
-http:Client {{qualifiedServiceName}}_{{endpointUrlType}} = new (
+gateway:Client {{qualifiedServiceName}}_{{endpointUrlType}} = new ("{{qualifiedServiceName}}_{{endpointUrlType}}",
 {{#if endpoints.0.isEtcdEnabled}}gateway:etcdSetup("{{name}}_{{endpointUrlType}}_endpoint_0","{{name}}_{{endpointUrlType}}_0_etcdKey","{{endpoints.0.endpointUrl}}","{{endpoints.0.etcdKey}}"){{else}}gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_0","{{endpoints.0.endpointUrl}}"){{/if}},
-config = { {{>http2}}{{>caching}}{{>basicAuth}}{{>secureSocket}}{{>endpointProxyConfig}}
+config = { {{>http2}}{{>caching}}{{>basicAuth}}{{>secureSocket}}
 });

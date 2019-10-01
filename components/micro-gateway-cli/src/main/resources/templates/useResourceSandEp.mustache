@@ -1,9 +1,9 @@
 {{#if epConfig.sandEndpoints.endpointListEtcdEnabled}}
     {{#epConfig.sandEndpoints}}{{>endpointReinit}}{{/epConfig.sandEndpoints}}
     if (!reinitFailed) {
-        clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+        clientResponse = {{operationId}}_sand.forward(urlPostfix, req);
     }
 {{else}}
-    clientResponse = {{operationId}}_sand->forward(urlPostfix, req);
+    clientResponse = {{operationId}}_sand.forward(urlPostfix, req);
 {{/if}}
 runtime:getInvocationContext().attributes["destination"] = "{{epConfig.sandEndpoints.endpoints.0.endpointUrl}}";

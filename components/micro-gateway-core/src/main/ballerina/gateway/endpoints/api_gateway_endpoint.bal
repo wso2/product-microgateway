@@ -50,6 +50,13 @@ http:Client analyticsFileUploadEndpoint = new (
 public function reInitializeClientsWithProxies() {
     boolean proxyEnabled = getConfigBooleanValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_ENABLED, false);
     if (proxyEnabled) {
+        http:ProxyConfig proxyConfig = {
+            host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
+            port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
+            userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
+            password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
+        };
+        reInitializeClientsWithProxyConfig(proxyConfig);
         printDebug(GW_CLIENTS, "Re initializing gateway clients with proxy configurations");
         keyValidationEndpoint = new (
             getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
@@ -63,12 +70,7 @@ public function reInitializeClientsWithProxies() {
                     },
                     verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
                 },
-                proxy: {
-                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
-                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
-                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
-                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
-                }
+                proxy: proxyConfig
             }
         );
         analyticsFileUploadEndpoint = new (
@@ -83,12 +85,7 @@ public function reInitializeClientsWithProxies() {
                     },
                     verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
                 },
-                proxy: {
-                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
-                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
-                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
-                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
-                }
+                proxy: proxyConfig
             }
         );
         etcdEndpoint = new (
@@ -101,12 +98,7 @@ public function reInitializeClientsWithProxies() {
                     },
                     verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
                 },
-                proxy: {
-                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
-                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
-                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
-                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
-                }
+                proxy: proxyConfig
             }
         );
         etcdTokenRevocationEndpoint = new (
@@ -119,12 +111,7 @@ public function reInitializeClientsWithProxies() {
                     },
                     verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
                 },
-                proxy: {
-                    host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
-                    port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
-                    userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
-                    password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
-                }
+                proxy: proxyConfig
             }
         );
         throttleEndpoint = new(throttleEndpointUrl, config = {
@@ -137,12 +124,7 @@ public function reInitializeClientsWithProxies() {
                 },
                 verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
             },
-            proxy: {
-                host: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_HOST, ""),
-                port: getConfigIntValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PORT, 0),
-                userName: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_USERNAME, ""),
-                password: getConfigValue(HTTP_CLIENTS_PROXY_INSTANCE_ID, PROXY_PASSWORD, "")
-            }
+            proxy: proxyConfig
         });
     }
 }

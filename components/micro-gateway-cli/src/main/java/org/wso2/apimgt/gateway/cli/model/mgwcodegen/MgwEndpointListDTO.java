@@ -1,6 +1,5 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
-import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointProxyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
@@ -16,7 +15,6 @@ public class MgwEndpointListDTO {
     private EndpointUrlTypeEnum endpointUrlType = null;
     private String name = null;
     private boolean endpointListEtcdEnabled = false;
-    private APIEndpointProxyDTO proxyConfig = null;
 
     public APIEndpointSecurityDTO getSecurityConfig() {
         return securityConfig;
@@ -60,13 +58,5 @@ public class MgwEndpointListDTO {
 
     public void setEndpointListEtcdEnabled(boolean endpointListEtcdEnabled) {
         this.endpointListEtcdEnabled = endpointListEtcdEnabled;
-    }
-
-    public APIEndpointProxyDTO getProxyConfig() {
-        return proxyConfig;
-    }
-
-    public void setProxyConfig(APIEndpointProxyDTO proxyConfig) {
-        this.proxyConfig = proxyConfig;
     }
 }

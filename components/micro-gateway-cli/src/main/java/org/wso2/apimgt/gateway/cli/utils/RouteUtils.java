@@ -162,7 +162,6 @@ public class RouteUtils {
             setEndpointUrls(prodEpListDTO, prod);
             prod.setSecurityConfig(prodEpListDTO.getSecurityConfig());
             prod.setName(prodEpListDTO.getName());
-            prod.setProxyConfig(prodEpListDTO.getProxyConfig());
         }
 
         if (sandEpListDTO != null) {
@@ -172,7 +171,6 @@ public class RouteUtils {
             setEndpointUrls(sandEpListDTO, sandbox);
             sandbox.setSecurityConfig(sandEpListDTO.getSecurityConfig());
             sandbox.setName(sandEpListDTO.getName());
-            sandbox.setProxyConfig(sandEpListDTO.getProxyConfig());
         }
 
         endpointConfigDTO.setProdEndpointList(prod);
