@@ -80,23 +80,33 @@ public class BuildCmd implements GatewayLauncherCmd {
 
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(GatewayCmdUtils.getProjectDirectoryPath(projectName));
-
-        if (!projectLocation.exists()) {
-            throw new CLIRuntimeException("Project " + projectName + " does not exist.");
-        }
-        //extract the ballerina platform and runtime
-        ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-
-        String importedAPIDefLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
-        String addedAPIDefLocation = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        boolean isImportedAPIsAvailable = checkFolderContentAvailablity(importedAPIDefLocation);
-        boolean isAddedAPIsAvailable = checkFolderContentAvailablity(addedAPIDefLocation);
-
-        if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
-            throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
-        }
-
         try {
+            String projectCanonicalPath = projectLocation.getCanonicalPath();
+            String projectAbsolutePath = projectLocation.getAbsolutePath();
+
+            if (!projectLocation.exists()) {
+                throw new CLIRuntimeException("Project " + projectName + " does not exist.");
+            }
+            // Some times user might run the command from different directory other than the directory where the project
+            // exists. In those cases we need to ask the users to run the command in directory where project directory exists
+            if (!projectAbsolutePath.equalsIgnoreCase(projectCanonicalPath)) {
+                throw new CLIRuntimeException(
+                        "Current directory: '" + GatewayCmdUtils.getUserDir() + "' should have a project with name: '"
+                                + projectName
+                                + "'. Execute the build command from the directory where the project is initialized");
+            }
+
+            //extract the ballerina platform and runtime
+            ToolkitLibExtractionUtils.extractPlatformAndRuntime();
+
+            String importedAPIDefLocation = GatewayCmdUtils.getProjectGenAPIDefinitionPath(projectName);
+            String addedAPIDefLocation = GatewayCmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+            boolean isImportedAPIsAvailable = checkFolderContentAvailablity(importedAPIDefLocation);
+            boolean isAddedAPIsAvailable = checkFolderContentAvailablity(addedAPIDefLocation);
+
+            if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
+                throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
+            }
             String toolkitConfigPath = GatewayCmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
 
