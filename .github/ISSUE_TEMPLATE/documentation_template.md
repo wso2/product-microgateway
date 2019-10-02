@@ -1,9 +1,9 @@
 ---
-name: "❗️Report a bug"
-about: If something doesn't work as it is suppose to.
+name: "\U0001F4DA Documentation Issue"
+about: If Something is missing in the project or official documentation.
 title: ''
-labels: Priority/Normal, Type/Bug
-assignees: ''
+labels: Docs/Has Impact, Priority/Normal, Type/Docs
+assignees: Mariangela, ruthryi, shaniR
 
 ---
 
@@ -15,10 +15,10 @@ assignees: ''
 ### Affected Product Version:
 <!-- Members can use Affected/*** labels -->
 
-### OS and other environment details and versions:
-- OS:
-- Client:
-- Env (Docker/K8s):
+### Content Positioning in Doc Structure:
+- Link:
+- Heading:
+- Any other reference:
 
 ---
 ### Optional Fields

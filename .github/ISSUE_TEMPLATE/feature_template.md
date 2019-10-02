@@ -1,18 +1,24 @@
 ---
-name: "\U0001f31e Feature or Improvement request"
-about: "If you need to suggest new functionality or saw a place we can improve \U0001f44d"
-labels: 'Priority/Normal, Type/New Feature'
+name: "✅ Feature or Improvement request"
+about: If you need to suggest new functionality or saw a place we can improve.
+title: ''
+labels: Priority/Normal, Type/New Feature
+assignees: ''
 
 ---
 
-### Describe your problem(s)
-<!-- Describe why you think this project needs this feature -->
+### Description:
+<!-- Describe the issue -->
 
-### Describe your solution
-<!-- Describe the feature/improvement -->
+### Steps to reproduce:
 
-### How will you implement it
-<!-- If you like to suggest an approach or a design -->
+### Affected Product Version:
+<!-- Members can use Affected/*** labels -->
+
+### OS and other environment details and versions:
+- OS:
+- Client:
+- Env (Docker/K8s):
 
 ---
 ### Optional Fields
@@ -20,7 +26,7 @@ labels: 'Priority/Normal, Type/New Feature'
 <!-- Any related issues from this/other repositories-->
 
 #### Suggested Labels:
-<!--Only to be used by non-committers-->
+<!--Only to be used by non-members-->
 
 #### Suggested Assignees:
-<!--Only to be used by non-committers-->
+<!--Only to be used by non-members-->
