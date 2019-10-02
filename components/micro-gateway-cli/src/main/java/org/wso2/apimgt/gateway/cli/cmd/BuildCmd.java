@@ -88,7 +88,7 @@ public class BuildCmd implements GatewayLauncherCmd {
                 throw new CLIRuntimeException("Project " + projectName + " does not exist.");
             }
             // Some times user might run the command from different directory other than the directory where the project
-            // exists. In those cases we need to ask the users to
+            // exists. In those cases we need to ask the users to run the command in directory where project directory exists
             if (!projectAbsolutePath.equalsIgnoreCase(projectCanonicalPath)) {
                 throw new CLIRuntimeException(
                         "Current directory: '" + GatewayCmdUtils.getUserDir() + "' should have a project with name: '"
