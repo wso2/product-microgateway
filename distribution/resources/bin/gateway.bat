@@ -129,16 +129,13 @@ goto end
 		powershell -Command "Remove-Item \"%GWHOME%\runtime\bin\ballerina.bat\""
 		powershell -Command "Rename-Item -path \"%GWHOME%\runtime\bin\ballerina_1.bat\" -newName ballerina.bat"
 		CD "%GWHOME%"
-		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
-			set /a n=!n!+1
-			set c=%%A
-			if !n!==1 set PSVersion=!c!
-		)
+		SET PSVersion=1
+		for /f "tokens=*" %%A in ('powershell -command "$PSVersionTable.PSVersion.Major"') do (set PSVersion=%%A)
+		REM Remove whitespaces from PSVersion
 		set PSVersion=!PSVersion: =!
-		set PSVersion=!PSVersion:~0,1!
 
 		IF !PSVersion! LEQ 3 (
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
 			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | tee -Append .\logs\microgateway.log"
