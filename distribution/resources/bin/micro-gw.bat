@@ -41,7 +41,6 @@ REM If the current disk drive ie: `E:\` is different from the drive where this (
 :switchDrive
 	SET curDrive=%CURRENT_D:~0,1%
 	SET wsasDrive=%PRGDIR:~0,1%
-	if %verbose%==T ( ECHO Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
 	if NOT "%curDrive%" == "%wsasDrive%" %wsasDrive%:
 
 REM if MICROGW_HOME environment variable not set then set it
@@ -52,8 +51,6 @@ SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
 SET PATH=%BALLERINA_HOME%\bin\;%PATH%
-if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-if %verbose%==T ECHO MICROGW_HOME environment variable is set to %MICROGW_HOME%
 
 REM Check JAVA availability
 :checkJavaHome
@@ -75,14 +72,12 @@ goto runServer
 goto end
 
 :runServer
-	if %verbose%==T ECHO JAVA_HOME environment variable was set to %JAVA_HOME%
 	SET originalArgs=%*
 	if ""%1""=="""" goto usageInfo
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	if %verbose%==T ECHO Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
 	if ""%1""==""help""     goto passToJar
 	if ""%1""==""build""     goto commandBuild
@@ -94,10 +89,7 @@ goto setupArgs
 	ECHO Missing command operand
 	ECHO "Use: micro-gw [--verbose] (init | import | build)"
 goto :end
-
 :commandBuild
-	if %verbose%==T ECHO Running commandBuild
-
 	REM Immediate next parameter should be project name after the `build` command
 	SHIFT
 	SET "project_name=%1"
@@ -108,13 +100,10 @@ goto :end
 		goto :usageInfo
 
 	:nameFound
-		if %verbose%==T ECHO Building micro gateway for project %project_name:\=%
-
 		REM Set micro gateway project directory relative to CD (current directory)
 		SET MICRO_GW_PROJECT_DIR=%CURRENT_D%\%project_name:\=%
 		if EXIST %MICRO_GW_PROJECT_DIR% goto :continueBuild
 			REM Exit, if can not find a project with given project name
-			if %verbose%==T ECHO Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
 			ECHO "Project `%project_name:\=%` not found!"
 			goto :EOF
 
@@ -128,10 +117,8 @@ goto :end
             REM Set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%BALLERINA_HOME%\bin\;%PATH%
-            if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
-                if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
                 SET TARGET_FILE=%TARGET_DIR%\%project_name%.balx
                 SET BUILD_STATUS=F
@@ -157,8 +144,6 @@ goto :end
 goto :end
 
 :commandDebug
-	if %verbose%==T ECHO Running commandDebug
-
 	SHIFT
 	SET DEBUG_PORT=%1
 	if "%DEBUG_PORT%"=="" goto noDebugPort
@@ -174,7 +159,6 @@ goto end
 
 :passToJar
 	REM ---------- Add jars to classpath ----------------
-	if %verbose%==T echo Running passToJar
 	SET CLI_CLASSPATH=
 	if EXIST "%BALLERINA_HOME%"\bre\lib (
 		for %%i in ("%BALLERINA_HOME%"\bre\lib\*.jar) do (
@@ -192,8 +176,6 @@ goto end
 		)
 	)
 
-	if %verbose%==T ECHO CLI_CLASSPATH = "%CLI_CLASSPATH%"
-
 	SET JAVACMD=-Xms256m -Xmx1024m ^
 		-XX:+HeapDumpOnOutOfMemoryError ^
 		-XX:HeapDumpPath="%MICROGW_HOME%\heap-dump.hprof" ^
@@ -208,7 +190,6 @@ goto end
 		-Dcli.home="%MICROGW_HOME%" ^
 		-Dcurrent.dir="%CD%" ^
 		-DVERBOSE_ENABLED=%verbose%
-	if %verbose%==T ECHO JAVACMD = !JAVACMD!
 
 :runJava
 	REM Jump to GW-CLI exec location when running the jar
