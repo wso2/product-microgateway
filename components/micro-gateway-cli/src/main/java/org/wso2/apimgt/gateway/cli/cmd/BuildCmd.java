@@ -111,6 +111,7 @@ public class BuildCmd implements GatewayLauncherCmd {
             init(projectName, toolkitConfigPath, deploymentConfigPath);
 
             CodeGenerator codeGenerator = new CodeGenerator();
+            outStream.print("Generating sources...");
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             GatewayCmdUtils
                     .createGenDirectoryStructure(GatewayCmdUtils.getProjectTargetGenDirectoryPath(projectName));

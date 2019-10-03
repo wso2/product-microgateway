@@ -25,9 +25,6 @@ REM NOTE: Borrowed generously from Apache Tomcat startup scripts.
 REM -----------------------------------------------------------------------------
 setlocal EnableDelayedExpansion
 
-if ""%1%""==""-v"" ( set verbose=T ) else ( set verbose=F )
-if %verbose%==T ( echo Verbose mode enabled )
-
 REM Set Java Xms and Xmx values. The values specified here will set in gateway runtime.
 SET JAVA_XMS_VALUE="256m"
 SET JAVA_XMX_VALUE="512m"
@@ -38,8 +35,6 @@ SET GWHOME=%PRGDIR%..
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
 set JAVA_HOME=%GWHOME%\lib\jdk8u202-b08-jre
-if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 
 REM Check if path to runtime executable is available
 set last=""
@@ -93,15 +88,12 @@ set BAL_ARGS=
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
 	if ""%1""=="""" goto :formatAndValidateCmdArgs
 	if ""%1""==""--debug""    goto commandDebug
 	shift
 goto setupArgs
 
 :commandDebug
-	if %verbose%==T echo [%date% %time%] DEBUG: Running commandDebug
-
 	shift
 	set DEBUG_PORT=%1
 	if "%DEBUG_PORT%"=="" goto noDebugPort
@@ -124,15 +116,11 @@ goto end
 	set usage_data_path=%GWHOME%\api-usage-data
 	call set usage_data_path=%%usage_data_path:\=%separator%%%
 
-	if %verbose%==T echo [%date% %time%] DEBUG: b7a.http.accesslog.path = "%GWHOME%\logs\access_logs"
-	if %verbose%==T echo [%date% %time%] DEBUG: configs = %unix_style_path%
-	if %verbose%==T echo [%date% %time%] DEBUG: Starting micro gateway server...
-
 	REM Check if powershell is available
 	WHERE powershell >nul 2>nul
 	IF %ERRORLEVEL% NEQ 0 (
 		echo [%date% %time%] WARN: Can't find powershell in the system!
-		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
+		echo [%date% %time%] WARN: All messages will be redirected to %GWHOME%\logs\microgateway.log
 		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
 		"%GWHOME%\runtime\bin\ballerina" run -e api.usage.data.path=%usage_data_path%  -e b7a.http.accesslog.path=%unix_style_path% --config "%GWHOME%\conf\micro-gw.conf" %BAL_ARGS% >> "%GWHOME%\logs\microgateway.log" 2>&1
 	) else (
@@ -141,18 +129,13 @@ goto end
 		powershell -Command "Remove-Item \"%GWHOME%\runtime\bin\ballerina.bat\""
 		powershell -Command "Rename-Item -path \"%GWHOME%\runtime\bin\ballerina_1.bat\" -newName ballerina.bat"
 		CD "%GWHOME%"
-		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
-			set /a n=!n!+1
-			set c=%%A
-			if !n!==1 set PSVersion=!c!
-		)
+		SET PSVersion=1
+		for /f "tokens=*" %%A in ('powershell -command "$PSVersionTable.PSVersion.Major"') do (set PSVersion=%%A)
+		REM Remove whitespaces from PSVersion
 		set PSVersion=!PSVersion: =!
-		if %verbose%==T echo [%date% %time%] DEBUG: PowerShell version !PSVersion! detected!
-		set PSVersion=!PSVersion:~0,1!
-		echo [%date% %time%] Starting Micro-Gateway
+
 		IF !PSVersion! LEQ 3 (
-			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
 			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | tee -Append .\logs\microgateway.log"
