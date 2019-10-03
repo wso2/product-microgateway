@@ -56,7 +56,7 @@ public type AuthenticationContext record {
     boolean authenticated=false;
     string username="";
     string applicationTier=UNLIMITED_TIER;
-    string tier=UNAUTHENTICATED_TIER;
+    string tier=DEFAULT_SUBSCRIPTION_TIER;
     string apiTier=UNLIMITED_TIER;
     boolean isContentAwareTierPresent=false;
     string apiKey="";

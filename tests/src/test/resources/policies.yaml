@@ -77,3 +77,7 @@ subscriptionPolicies:
       count: 10
       unitTime: 1
       timeUnit: min
+  - Default:
+      count: 500
+      unitTime: 1
+      timeUnit: min

@@ -101,7 +101,7 @@ public type BasicAuthUtils object {
         //Set authenticationContext data
         authenticationContext.authenticated = true;
         //Authentication context data is set to default value bacuase in basic authentication we cannot have informtaion on subscription and applications
-        authenticationContext.tier = UNAUTHENTICATED_TIER;
+        authenticationContext.tier = DEFAULT_SUBSCRIPTION_TIER;
         authenticationContext.applicationTier = UNLIMITED_TIER;
         authenticationContext.apiKey = ANONYMOUS_APP_ID;
         //Username is extracted from the request
@@ -110,7 +110,7 @@ public type BasicAuthUtils object {
         authenticationContext.applicationName = ANONYMOUS_APP_NAME;
         authenticationContext.subscriber = ANONYMOUS_APP_OWNER;
         authenticationContext.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        authenticationContext.apiTier = UNAUTHENTICATED_TIER;
+        authenticationContext.apiTier = UNLIMITED_TIER;
         authenticationContext.apiPublisher = USER_NAME_UNKNOWN;
         authenticationContext.subscriberTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
         authenticationContext.keyType = PRODUCTION_KEY_TYPE;
