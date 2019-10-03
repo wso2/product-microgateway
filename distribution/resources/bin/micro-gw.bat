@@ -73,7 +73,6 @@ goto end
 
 :runServer
 	SET originalArgs=%*
-	if ""%1""=="""" goto usageInfo
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
@@ -85,62 +84,47 @@ REM of arguments (up to the command line limit, anyway).
 	SHIFT
 goto setupArgs
 
-:usageInfo
-	ECHO Missing command operand
-	ECHO "Use: micro-gw [--verbose] (init | import | build)"
-goto :end
 :commandBuild
 	REM Immediate next parameter should be project name after the `build` command
 	SHIFT
-	SET "project_name=%1"
-	if [%project_name%] == [] ( goto :noName ) else ( goto :nameFound )
-
-	:noName
-		ECHO "micro-gw: main parameters are required (""), Run 'micro-gw help' for usage."
-		goto :usageInfo
+	SET project_name=%1
+	if [%project_name%] == [] ( goto :passToJar ) else ( goto :nameFound )
 
 	:nameFound
 		REM Set micro gateway project directory relative to CD (current directory)
 		SET MICRO_GW_PROJECT_DIR=%CURRENT_D%\%project_name:\=%
-		if EXIST %MICRO_GW_PROJECT_DIR% goto :continueBuild
-			REM Exit, if can not find a project with given project name
-			ECHO "Project `%project_name:\=%` not found!"
-			goto :EOF
 
+        call :passToJar
         if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
+        ECHO [DONE]
 
-        :continueBuild
-            call :passToJar
-            if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
+        REM Set ballerina home again as the platform is extracted at this point.
+        SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
+        SET PATH=%BALLERINA_HOME%\bin\;%PATH%
+        PUSHD "%CURRENT_D%"
+        PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
+            SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
+            SET TARGET_FILE=%TARGET_DIR%\%project_name%.balx
+            SET BUILD_STATUS=F
+            if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
 
-            ECHO [DONE]
-            REM Set ballerina home again as the platform is extracted at this point.
-            SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
-            SET PATH=%BALLERINA_HOME%\bin\;%PATH%
-            PUSHD "%CURRENT_D%"
-            PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
-                SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
-                SET TARGET_FILE=%TARGET_DIR%\%project_name%.balx
-                SET BUILD_STATUS=F
-                if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
+            REM Build project using ballerina
+            call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
 
-                REM Build project using ballerina
-                call ballerina build src -o %TARGET_DIR%\%project_name:\=%.balx --offline --experimental --siddhiruntime
-
-                if ERRORLEVEL 0 (
-                    if EXIST "%TARGET_FILE%" (
-                        SET BUILD_STATUS=T
-                    )
+            if ERRORLEVEL 0 (
+                if EXIST "%TARGET_FILE%" (
+                    SET BUILD_STATUS=T
                 )
+            )
 
-                ECHO.
-                if %BUILD_STATUS%==T (
-                    ECHO BUILD SUCCESSFUL
-                    ECHO Target: %TARGET_FILE%
-                ) else (
-                    ECHO BUILD FAILED
-                )
-            POPD
+            ECHO.
+            if %BUILD_STATUS%==T (
+                ECHO BUILD SUCCESSFUL
+                ECHO Target: %TARGET_FILE%
+            ) else (
+                ECHO BUILD FAILED
+            )
+        POPD
 goto :end
 
 :commandDebug
@@ -155,7 +139,6 @@ goto passToJar
 :noDebugPort
 	ECHO Please specify the debug port after the --java.debug option
 goto end
-
 
 :passToJar
 	REM ---------- Add jars to classpath ----------------
