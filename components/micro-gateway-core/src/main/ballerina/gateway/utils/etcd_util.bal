@@ -37,8 +37,9 @@ boolean etcdConnectionAttempted = false;
 boolean credentialsProvided = false;
 boolean etcdAuthenticationEnabled = true;
 task:Timer? etcdTimer = ();
-string etcdKVBasePath = "/v3alpha/kv";
-string etcdAuthBasePath = "/v3alpha/auth";
+string etcdBasePath = config:getAsString("etcdbasePath", default = DEFAULT_ETCD_BASE_PATH);
+string etcdKVBasePath = etcdBasePath + "/kv";
+string etcdAuthBasePath = etcdBasePath + "/auth";
 
 # Setting up etcd timer task
 public function initiateEtcdTimerTask() {
