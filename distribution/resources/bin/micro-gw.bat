@@ -62,7 +62,7 @@ REM Check JAVA availability
 goto checkJava
 
 :noJavaHome
-	ECHO "You must set the JAVA_HOME variable before running Micro-Gateway Tooling."
+	ECHO You must set the JAVA_HOME variable before running Micro-Gateway Tooling.
 goto end
 
 :checkJava
@@ -111,11 +111,11 @@ goto :end
 		if %verbose%==T ECHO Building micro gateway for project %project_name:\=%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		SET MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name:\=%"
+		SET MICRO_GW_PROJECT_DIR=%CURRENT_D%\%project_name:\=%
 		if EXIST %MICRO_GW_PROJECT_DIR% goto :continueBuild
 			REM Exit, if can not find a project with given project name
 			if %verbose%==T ECHO Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
-			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
+			ECHO "Project `%project_name:\=%` not found!"
 			goto :EOF
 
         if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
@@ -123,6 +123,8 @@ goto :end
         :continueBuild
             call :passToJar
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
+
+            ECHO [DONE]
             REM Set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%BALLERINA_HOME%\bin\;%PATH%
@@ -130,8 +132,8 @@ goto :end
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
-                SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
-                SET TARGET_FILE="%TARGET_DIR%\%project_name%.balx"
+                SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
+                SET TARGET_FILE=%TARGET_DIR%\%project_name%.balx
                 SET BUILD_STATUS=F
                 if EXIST "%TARGET_DIR%\*.balx"  DEL /F "%TARGET_DIR%\*.balx"
 
@@ -144,12 +146,12 @@ goto :end
                     )
                 )
 
-                ECHO
+                ECHO.
                 if %BUILD_STATUS%==T (
-                    ECHO "BUILD SUCCESSFUL"
-                    ECHO "Target: %TARGET_FILE%"
+                    ECHO BUILD SUCCESSFUL
+                    ECHO Target: %TARGET_FILE%
                 ) else (
-                    ECHO "BUILD FAILED"
+                    ECHO BUILD FAILED
                 )
             POPD
 goto :end

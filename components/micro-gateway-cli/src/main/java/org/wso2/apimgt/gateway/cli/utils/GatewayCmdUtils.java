@@ -149,7 +149,7 @@ public class GatewayCmdUtils {
             AESCipherTool cipherTool = new AESCipherTool(secret);
             return cipherTool.encrypt(value);
         } catch (AESCipherToolException e) {
-            throw createUsageException("failed to encrypt client secret");
+            throw new CLIRuntimeException("failed to encrypt client secret");
         }
     }
 
@@ -165,7 +165,7 @@ public class GatewayCmdUtils {
             AESCipherTool cipherTool = new AESCipherTool(secret);
             return cipherTool.decrypt(value);
         } catch (AESCipherToolException e) {
-            throw createUsageException("failed to decrypt client secret");
+            throw new CLIRuntimeException("failed to decrypt client secret");
         }
     }
 

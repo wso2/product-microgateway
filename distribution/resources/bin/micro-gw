@@ -273,6 +273,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
 
     exit_code=$?
     if [ $exit_code -eq 0 ]; then
+        printf "${BOLD}[DONE]${NC}\n"
         # Ballerina path is updated as ballerina platform is extracted
         BALLERINA_HOME="$MICROGW_HOME/lib/platform"
         export BALLERINA_HOME=$BALLERINA_HOME
@@ -297,6 +298,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
             fi
             # build the ballerina source code for the label
             ballerina build src/ -o $MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx --offline --experimental --siddhiruntime
+
             exit_code=$?
             TARGET_PATH=$MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.balx
             echo
