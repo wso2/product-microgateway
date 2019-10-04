@@ -113,6 +113,8 @@ public class ImportCmd implements LauncherCmd {
     private String tokenEndpoint;
     private String clientSecret;
     private boolean isOverwriteRequired;
+    private String restVersion;
+    private String dcrVersion;
 
     @Override
     public void execute() {
@@ -254,7 +256,7 @@ public class ImportCmd implements LauncherCmd {
                         isInsecure);
 
         List<ExtendedAPI> apis = new ArrayList<>();
-        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, isInsecure);
+        RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, restVersion, isInsecure);
         if (label != null) {
             apis = service.getAPIs(label, accessToken);
         } else {
@@ -276,7 +278,8 @@ public class ImportCmd implements LauncherCmd {
 
         //delete the folder if an exception is thrown in following steps
         try {
-            CmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis);
+            CmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis,
+                    !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX));
         } catch (Exception e) {
             throw new CLIInternalException("Exception occurred during codeGeneration process");
         }
@@ -371,7 +374,8 @@ public class ImportCmd implements LauncherCmd {
         boolean isBaseURLNeeded; //if endpoint(s) contains {baseURL} or endPointsNeeded
         boolean isRestVersionNeeded; //if endpoint(s) contains {restVersion}
 
-        String restVersion = token.getRestVersion();
+        restVersion = token.getRestVersion();
+        dcrVersion = token.getDcrVersion();
         publisherEndpoint = token.getPublisherEndpoint();
         adminEndpoint = token.getAdminEndpoint();
         registrationEndpoint = token.getRegistrationEndpoint();
@@ -395,7 +399,7 @@ public class ImportCmd implements LauncherCmd {
 
         isRestVersionNeeded = publisherEndpoint.contains(RESTServiceConstants.REST_VERSION_TAG) ||
                 adminEndpoint.contains(RESTServiceConstants.REST_VERSION_TAG)
-                || registrationEndpoint.contains(RESTServiceConstants.REST_VERSION_TAG) || isEndPointsNeeded;
+                || registrationEndpoint.contains(RESTServiceConstants.DCR_VERSION_TAG) || isEndPointsNeeded;
 
         //set endpoints format if endpoint(s) is empty
         if (isEndPointsNeeded) {
@@ -441,7 +445,10 @@ public class ImportCmd implements LauncherCmd {
             if (StringUtils.isEmpty(restVersion)) {
                 restVersion = RESTServiceConstants.CONFIG_REST_VERSION;
             }
-            informRestVersionToUser(restVersion);
+            if (StringUtils.isEmpty(dcrVersion)) {
+                dcrVersion = RESTServiceConstants.CONFIG_REST_VERSION;
+            }
+            informRestVersionToUser(restVersion, dcrVersion);
             configTokenValues.setRestVersion(restVersion);
         }
 
@@ -451,7 +458,7 @@ public class ImportCmd implements LauncherCmd {
             adminEndpoint = adminEndpoint.replace(RESTServiceConstants.BASE_URL_TAG, baseURL)
                     .replace(RESTServiceConstants.REST_VERSION_TAG, restVersion);
             registrationEndpoint = registrationEndpoint.replace(RESTServiceConstants.BASE_URL_TAG, baseURL)
-                    .replace(RESTServiceConstants.REST_VERSION_TAG, restVersion);
+                    .replace(RESTServiceConstants.DCR_VERSION_TAG, dcrVersion);
             tokenEndpoint = tokenEndpoint.replace(RESTServiceConstants.BASE_URL_TAG, baseURL)
                     .replace(RESTServiceConstants.REST_VERSION_TAG, restVersion);
         }
@@ -486,10 +493,10 @@ public class ImportCmd implements LauncherCmd {
      *
      * @param restVersion API Manager's REST version
      */
-    private void informRestVersionToUser(String restVersion) {
-        outStream.println(
-                "You are using REST version - " + restVersion + " of API Manager. (If you want to change this, go to "
-                        + "<MICROGW_HOME>/conf/toolkit-config.toml)");
+    private void informRestVersionToUser(String restVersion, String dcrVersion) {
+        outStream.println("You are using REST version - " + restVersion + " and dynamic client registration version - "
+                + dcrVersion + " of API Manager. \n (If you want to change this, go to "
+                + "<MICROGW_HOME>/conf/toolkit-config.toml)");
     }
 
     /**

@@ -29,6 +29,7 @@ public class Token {
 
     private String baseURL;
     private String restVersion;
+    private String dcrVersion;
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -140,5 +141,13 @@ public class Token {
 
     public void setBaseURL(String baseURL) {
         this.baseURL = baseURL;
+    }
+
+    public String getDcrVersion() {
+        return dcrVersion;
+    }
+
+    public void setDcrVersion(String dcrVersion) {
+        this.dcrVersion = dcrVersion;
     }
 }

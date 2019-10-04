@@ -52,8 +52,8 @@ public class MockHttpServer extends Thread {
     private String KMServerUrl;
     private int KMServerPort = -1;
     private String DCRRestAPIBasePath = "/client-registration/v0.14";
-    private String PubRestAPIBasePath = "/api/am/publisher/v0.14";
-    private String AdminRestAPIBasePath = "/api/am/admin/v0.14";
+    private String PubRestAPIBasePath = "/api/am/publisher/v1.0";
+    private String AdminRestAPIBasePath = "/api/am/admin/v1.0";
     private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
@@ -247,6 +247,14 @@ public class MockHttpServer extends Thread {
             httpServer.createContext(PubRestAPIBasePath + "/apis", new HttpHandler() {
                 public void handle(HttpExchange exchange) throws IOException {
 
+                    if(exchange.getRequestURI().getRawPath().contains("/swagger")) {
+                        String apiId = exchange.getRequestURI().getRawPath().split("/")[6];
+                        byte[] response = MockAPIPublisher.getInstance().getResponseForOpenAPI(apiId).getBytes();
+                        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                        exchange.getResponseBody().write(response);
+                        exchange.close();
+                        return;
+                    }
                     String query = parseParas(exchange.getRequestURI()).get("query");
                     String[] paras = URLDecoder.decode(query, CliConstants.CHARSET_UTF8).split(" ");
                     String label = null;

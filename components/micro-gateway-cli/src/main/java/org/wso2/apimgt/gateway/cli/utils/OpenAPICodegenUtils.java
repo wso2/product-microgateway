@@ -127,21 +127,27 @@ public class OpenAPICodegenUtils {
      * @param api ExtendedAPI object
      * @return openAPI definition as a String
      */
-    static String generateSwaggerString(ExtendedAPI api) {
+    static String generateSwaggerString(ExtendedAPI api, boolean isExpand) {
 
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
-
-        RouteEndpointConfig mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+        RouteEndpointConfig mgwEndpointConfigDTO = null;
+        if (isExpand) {
+            mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+        }
 
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                if (isExpand) {
+                    swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Json.pretty(swagger);
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-                openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                if (isExpand) {
+                    openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Yaml.pretty(openAPI);
 
             default:
