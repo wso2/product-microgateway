@@ -110,7 +110,7 @@ standard VM by following the steps mentioned in the section [How to run the micr
 Execute the command below to run the Microgateway for our Petstore project.
 
 ```
-docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore"  wso2/wso2micro-gw:3.0.1
+docker run -d -v <PROJECT_TARGET_PATH>:/home/exec/ -p 9095:9095 -p 9090:9090 -e project="petstore"  wso2/wso2micro-gw:3.0.2
 
 <PROJECT_TARGET_PATH> - The path of the target directory created inside the project directory
 
