@@ -51,7 +51,7 @@ REM set BALLERINA_HOME
 SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
-SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+SET PATH=%BALLERINA_HOME%\bin\;%PATH%
 if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
 if %verbose%==T ECHO MICROGW_HOME environment variable is set to %MICROGW_HOME%
 
@@ -125,22 +125,29 @@ goto :end
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
-            SET PATH=%PATH%;%BALLERINA_HOME%\bin\
+            SET PATH=%BALLERINA_HOME%\bin\;%PATH%
             if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-            ECHO MICRO_GW_PROJECT_DIR:  "%CURRENT_D%"
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
-                if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jat"
+                SET TARGET_FILE="%TARGET_DIR%\%project_name%.jar"
+                if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jar"
+
+                REM Build project using ballerina
                 call ballerina build -c --experimental %project_name%
 
                 if ERRORLEVEL 0 (
                     REM move all executable ballerina build outputs to MGW_PROJECT/target directory
-                    MOVE /y %TARGET_DIR%\gen\target\caches\jar_cache\wso2\%project_name%\0.1.0\*  %TARGET_DIR%\
-                    ECHO
-                    ECHO "Target: %TARGET_DIR%\%project_name%-executable.jar"
+                    MOVE /y %TARGET_DIR%\gen\target\caches\jar_cache\wso2\%project_name%\0.1.0\*  %TARGET_DIR%\ 2> nul
+                )
+
+                ECHO
+                if EXIST "%TARGET_FILE%" (
                     ECHO "BUILD SUCCESSFUL"
+                    ECHO "Target: %TARGET_FILE%"
+                ) else (
+                    ECHO "BUILD FAILED"
                 )
             POPD
 goto :end

@@ -69,6 +69,8 @@ public class CliConstants {
     public static final String LABEL_PLACEHOLDER = "${label}";
     public static final String API_NAME_PLACEHOLDER = "${name}";
     public static final String VERSION_PLACEHOLDER = "${version}";
+    public static final String EXPAND_PLACEHOLDER = "${expand}";
+    public static final String API_ID_PLACEHOLDER = "${apiId}";
     public static final String CHARSET_UTF8 = "UTF-8";
     public static final String SYS_PROP_USER_DIR = "user.dir";
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
@@ -89,4 +91,5 @@ public class CliConstants {
 
     public static final String API_SWAGGER = "swagger.json";
     public static final String API_OPENAPI_YAML = "openAPI.yaml";
+    public static final String REST_API_V1_PREFIX = "v1.";
 }

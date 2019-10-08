@@ -144,7 +144,7 @@ public final class CmdUtils {
     public static CliLauncherException createUsageException(String errorMsg) {
         CliLauncherException launcherException = new CliLauncherException();
         launcherException.addMessage("micro-gw: " + errorMsg);
-        launcherException.addMessage("Run 'micro-gw' for usage.");
+        launcherException.addMessage("Run 'micro-gw help <command>' for usage.");
         return launcherException;
     }
 
@@ -356,8 +356,8 @@ public final class CmdUtils {
         }
     }
 
-    private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api) {
-        String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api);
+    private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api, boolean isExpand) {
+        String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api, isExpand);
         String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
         String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
                 ? CliConstants.API_SWAGGER : CliConstants.API_OPENAPI_YAML;
@@ -370,9 +370,10 @@ public final class CmdUtils {
      * @param projectName project name
      * @param apis        API object List
      */
-    public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis) {
+    public static void saveSwaggerDefinitionForMultipleAPIs(String projectName, List<ExtendedAPI> apis,
+            boolean isExpand) {
         for (ExtendedAPI api : apis) {
-            saveSwaggerDefinitionForSingleAPI(projectName, api);
+            saveSwaggerDefinitionForSingleAPI(projectName, api, isExpand);
             OUT.println("ID for API with name " + api.getName() + " : "
                     + HashUtils.generateAPIId(api.getName(), api.getVersion()));
         }

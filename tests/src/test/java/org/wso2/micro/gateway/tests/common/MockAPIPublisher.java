@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.micro.gateway.tests.common.model.API;
 import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
@@ -41,6 +42,7 @@ import java.util.UUID;
 public class MockAPIPublisher {
     private static final Logger log = LoggerFactory.getLogger(MockAPIPublisher.class);
     private Map<String, List<API>> apis;
+    private Map<String, API> apiMap;
     private Map<String, KeyValidationInfo> tokenInfo;
     private static MockAPIPublisher instance;
     private static List<SubscriptionPolicy> subscriptionPolicies;
@@ -55,6 +57,7 @@ public class MockAPIPublisher {
 
     public MockAPIPublisher() {
         apis = new HashMap<>();
+        apiMap = new HashMap<>();
         tokenInfo = new HashMap<>();
         subscriptionPolicies = new ArrayList<>();
         applicationPolicies = new ArrayList<>();
@@ -64,6 +67,7 @@ public class MockAPIPublisher {
 
         try {
             api = populateJson(api);
+            apiMap.put(api.getId(), api);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -95,10 +99,36 @@ public class MockAPIPublisher {
         apiJsonObj.put("version", api.getVersion());
         apiJsonObj.put("context", api.getContext());
         apiJsonObj.put("provider", api.getProvider());
+        String uuid = UUID.randomUUID().toString();
+        api.setId(uuid);
+        apiJsonObj.put("id", uuid);
 
         //todo: set tiers and swagger
         api.setSwagger(apiJsonObj.toString());
         return api;
+    }
+
+    public String getResponseForOpenAPI(String apiId) throws IOException {
+        API api = apiMap.get(apiId);
+        String openAPIString =  IOUtils.toString(
+                new FileInputStream(getClass().getClassLoader().getResource("api-definition.json").getPath()));
+        JSONObject openAPIObj = new JSONObject(openAPIString);
+        openAPIObj.put(OpenAPIConstants.BASEPATH,api.getContext() + "/" + api.getVersion());
+        if(api.getProdEndpoint() != null) {
+            JSONObject prodEpObj = new JSONObject();
+            JSONArray urls = new JSONArray();
+            urls.put(api.getProdEndpoint());
+            prodEpObj.put("urls", urls);
+            openAPIObj.put(OpenAPIConstants.PRODUCTION_ENDPOINTS,prodEpObj);
+        }
+        if(api.getSandEndpoint() != null) {
+            JSONObject sandEpObj = new JSONObject();
+            JSONArray urls = new JSONArray();
+            urls.put(api.getSandEndpoint());
+            sandEpObj.put("urls", urls);
+            openAPIObj.put(OpenAPIConstants.SANDBOX_ENDPOINTS,sandEpObj);
+        }
+        return openAPIObj.toString();
     }
 
     public String getAPIResponseForLabel(String label) {
