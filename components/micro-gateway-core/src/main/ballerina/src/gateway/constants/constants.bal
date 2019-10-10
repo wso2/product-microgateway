@@ -54,6 +54,7 @@
  public const string RESOURCE_CONFIGURATION_ANN_NAME = "Resource";
  public const string UNLIMITED_TIER = "Unlimited";
  public const string UNAUTHENTICATED_TIER = "Unauthenticated";
+ public const string DEFAULT_SUBSCRIPTION_TIER = "Default";
  public const string END_USER_ANONYMOUS = "anonymous";
  public const string ANONYMOUS_USER_TENANT_DOMAIN = "anonymous";
  public const string ANONYMOUS_APP_NAME = "anonymous";

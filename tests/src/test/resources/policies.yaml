@@ -78,3 +78,7 @@ subscriptionPolicies:
       unitTime: 1
       timeUnit: min
       stopOnQuota: false
+  - Default:
+      count: 500
+      unitTime: 1
+      timeUnit: min
