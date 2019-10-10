@@ -356,7 +356,13 @@ public class OpenAPICodegenUtils {
      * @param openApiFilePath OpenAPI definition file
      */
     private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
-        String basePath = (String) openAPI.getExtensions().get(OpenAPIConstants.BASEPATH);
+        Map<String, Object> openAPIExtensions = openAPI.getExtensions();
+        if (openAPIExtensions == null) {
+            throw new CLIRuntimeException(" At least '" + OpenAPIConstants.BASEPATH + "' property and '"
+                    + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' property should present in the open API "
+                    + "definition: '" + openApiFilePath + "'.");
+        }
+        String basePath = (String) openAPIExtensions.get(OpenAPIConstants.BASEPATH);
         if (basePath == null || basePath.isEmpty()) {
             throw new CLIRuntimeException("'" + OpenAPIConstants.BASEPATH + "' property is not included in openAPI " +
                     "definition '" + openApiFilePath + "'.");
