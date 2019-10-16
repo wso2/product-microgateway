@@ -32,7 +32,7 @@ public function setGaugeDuration(int starting) returns float{
 public function gaugeInitializing(string name, string description, map<string> gaugeTags) returns observe:Gauge|(){
 	if (isMetricsEnabled){
 		observe:Gauge localGauge = new(name, description,gaugeTags);
-        registeringGauge(localGauge);
+        registerGauge(localGauge);
 		return localGauge;
 	}
 	else{
@@ -40,13 +40,13 @@ public function gaugeInitializing(string name, string description, map<string> g
 	}
 }
 
-public function UpdatingGauge(observe:Gauge|() localGauge, float latency){
+public function UpdateGauge(observe:Gauge|() localGauge, float latency){
 	if (localGauge is  observe:Gauge){
 		localGauge.setValue(latency);
 	}
 }
 
-public function registeringGauge(observe:Gauge gauge){
+public function registerGauge(observe:Gauge gauge){
     error? result = gauge.register();
         if (result is error) {
             log:printError("Error in registering Counter", err = result);

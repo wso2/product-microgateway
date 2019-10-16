@@ -48,12 +48,6 @@ public type BasicAuthProvider object {
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
     public function authenticate(string credential) returns (boolean|auth:Error) {
-        //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(BASICAUTH_PROVIDER);
-        int startingTime = getCurrentTime();
-        map<string> gaugeTags = gageTagDetails_basicAuth(FIL_AUTHENTICATION);
-        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -71,11 +65,6 @@ public type BasicAuthProvider object {
             string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0)== ()){
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
-                float latency = setGaugeDuration(startingTime);
-                UpdatingGauge(localGauge, latency);
-                UpdatingGauge(localGauge_total, latency);
-                //Finish span.
-                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             string[] decodedCred = split(decodedCredentialsString.trim(), ":");
@@ -83,22 +72,12 @@ public type BasicAuthProvider object {
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
                 setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                float latency = setGaugeDuration(startingTime);
-                UpdatingGauge(localGauge, latency);
-                UpdatingGauge(localGauge_total, latency);
-                //Finish span.
-                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
-            float latency = setGaugeDuration(startingTime);
-            UpdatingGauge(localGauge, latency);
-            UpdatingGauge(localGauge_total, latency);
-            //Finish span.
-            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return false;
         }
         //Starting a new span 
@@ -124,11 +103,6 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly 
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
-                float latency = setGaugeDuration(startingTime);
-                UpdatingGauge(localGauge, latency);
-                UpdatingGauge(localGauge_total, latency);                
-                //Finish span.
-                finishingSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             int startingTime_req = getCurrentTime();
@@ -153,24 +127,45 @@ public type BasicAuthProvider object {
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             isAuthenticated = true;
-            float latency = setGaugeDuration(startingTime);
-            UpdatingGauge(localGauge, latency);
-            UpdatingGauge(localGauge_total, latency);            
-            //Finish span.
-            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return isAuthenticated;
         } else {
-            float latency = setGaugeDuration(startingTime);
-            UpdatingGauge(localGauge, latency);
-            UpdatingGauge(localGauge_total, latency);
-            //Finish span.
-            finishingSpan(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
         
-        
+    }
 
-        
+};    
+
+public type BasicAuthProviderWrapper object {
+    *auth:InboundAuthProvider;
+
+    BasicAuthProvider basicAuthProvider;
+
+    # Provides authentication based on the provided configuration.
+    #
+    # + basicAuthConfig - The Basic Auth provider configurations.
+    public function __init(auth:BasicAuthConfig? basicAuthConfig = ()) {
+        self.basicAuthProvider = new (basicAuthConfig);
+    }
+
+    # Attempts to authenticate with credentials.
+    #
+    # + credential - Credential
+    # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
+    public function authenticate(string credential) returns (boolean|auth:Error) {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(BASICAUTH_PROVIDER);
+        int startingTime = getCurrentTime();
+        map<string> gaugeTags = gageTagDetails_basicAuth(FIL_AUTHENTICATION);
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
+        boolean|auth:Error result = self.basicAuthProvider.authenticate(credential);
+        float latency = setGaugeDuration(startingTime);
+        UpdateGauge(localGauge, latency);
+        UpdateGauge(localGauge_total, latency);
+        //Finish span.
+        finishingSpan(BASICAUTH_PROVIDER, spanId_req);
+        return result;
     }
 
 };    

@@ -15,9 +15,7 @@ import ballerina/log;
     json ClientCerts=null;
 {{/if}}
 
-
-
-// Get authentication filter
+{{! // Get authentication filter
 gateway:PreAuthnFilter preAuthnFilter = new;
 // Subscription validation filter
 // Authorization filter
@@ -26,15 +24,15 @@ gateway:SubscriptionFilter subscriptionFilter = new;
 // Get deployed policies
 map<boolean> deployedPolicies = getDeployedPolicies();
 // Throttling filter
-gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
+gateway:ThrottleFilter throttleFilter = new(deployedPolicies); 
 //get open API definition map
 map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
-// Validation filter
-//gateway:ValidationFilter validationFilter = new(openAPIs);
+//Validation filter
+gateway:ValidationFilter validationFilter = new(openAPIs);
 // Analytics filter
 gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
-ExtensionFilter extensionFilter = new;
+ExtensionFilter extensionFilter = new; }}
 
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
@@ -42,8 +40,7 @@ http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                                 authHandlers: gateway:getAuthHandlers(),
                                                                                 position: 1
                                                                            },
-                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                           analyticsFilter, extensionFilter]
+                                                                           filters:getFilters()
                                                                        };
 
 {{>docker}}
@@ -57,8 +54,7 @@ http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                          mandateSecureSocket: false,
                                                                          position: 1
                                                                      },
-                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                     analyticsFilter, extensionFilter]
+                                                                     filters:getFilters()
                                                                  };
 
 {{>kubernetesIngress}}
@@ -121,6 +117,44 @@ listener http:Listener tokenListenerEndpoint = new (
     {{/if}}
     }
 );
+
+public function getFilters() returns http:RequestFilter[] {
+    
+    // Get authentication filter
+    gateway:PreAuthnFilter preAuthnFilter = new;
+
+    // Subscription validation filter
+    // Authorization filter
+    gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
+    gateway:SubscriptionFilter subscriptionFilter = new;
+
+    // Get deployed policies
+    map<boolean> deployedPolicies = getDeployedPolicies();
+
+    // Throttling filter
+    // Analytic filter
+    gateway:ThrottleFilter|gateway:ThrottleFilterWrapper throttleFilter;
+    gateway:AnalyticsRequestFilter|gateway:AnalyticsRequestFilterWrapper analyticsFilter;
+    if (gateway:getConfigBooleanValue("b7a.observability.metrics", "enabled", false)) {
+        throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
+        analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
+    }
+    else{
+        throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
+        analyticsFilter =  new gateway:AnalyticsRequestFilter();
+    }
+
+    //get open API definition map
+    map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
+
+    //Validation filter
+    //gateway:ValidationFilter validationFilter = new(openAPIs);
+
+    // Extension filter
+    ExtensionFilter extensionFilter = new;
+
+    return [preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter];
+}
 
 public function getOpenAPIMapFromFile() returns @tainted map<json>{
     map<json> openAPIMap = {};

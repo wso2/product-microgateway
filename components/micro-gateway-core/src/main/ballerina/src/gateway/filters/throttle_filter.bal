@@ -17,6 +17,8 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/observe;
+import ballerina/io;
+
 
 public type ThrottleFilter object {
     public map<boolean> deployedPolicies = {};
@@ -26,21 +28,10 @@ public type ThrottleFilter object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(THROTTLE_FILTER_REQUEST);
-        //Gauge metric initialization
-        map<string> gaugeTags = gageTagDetails(request, context, FIL_THROTTLING);
-        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_THROTTLING});
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
-        float latency = setGaugeDuration(startingTime);
-        UpdatingGauge(localGauge, latency);
-        UpdatingGauge(localGauge_total, latency);
-        //Finish span.
-        finishingSpan(THROTTLE_FILTER_REQUEST, spanId_req);
         return result;
     }
 
@@ -363,3 +354,34 @@ function getVersion(http:FilterContext context) returns string|() {
 
     return apiVersion;
 }
+
+public type ThrottleFilterWrapper object {
+    ThrottleFilter throttleFilter;
+
+    public function __init(map<boolean> deployedPolicies) {
+        self.throttleFilter = new ThrottleFilter(deployedPolicies);
+    }
+
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = startingSpan(THROTTLE_FILTER_REQUEST);
+        io:println("Anjana");
+        //Gauge metric initialization
+        map<string> gaugeTags = gageTagDetails(request, context, FIL_THROTTLING);
+        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_THROTTLING});
+        int startingTime = getCurrentTime();
+        boolean result = self.throttleFilter.filterRequest(caller, request, context);
+        float latency = setGaugeDuration(startingTime);
+        UpdateGauge(localGauge, latency);
+        UpdateGauge(localGauge_total, latency);
+        //Finish span.
+        finishingSpan(THROTTLE_FILTER_REQUEST, spanId_req);
+        return result;
+    }
+
+    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        boolean result = self.throttleFilter.filterResponse(response, context);
+        return result;
+    }
+};

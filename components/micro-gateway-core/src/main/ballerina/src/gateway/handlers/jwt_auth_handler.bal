@@ -58,27 +58,57 @@ public type JWTAuthHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
+        string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
+        string headerValue = req.getHeader(authHeader);
+        string credential = headerValue.substring(6, headerValue.length()).trim();
+        var authenticationResult = self.jwtAuthProvider.authenticate(credential);
+        if (authenticationResult is boolean) {
+            return authenticationResult;
+        } else {
+            return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
+        }
+    }
+};
+
+# Representation of the jwt self validating handler
+#
+# + jwtAuthProvider - The reference to the jwt auth provider instance
+public type JWTAuthHandlerWrapper object {
+    *http:InboundAuthHandler;
+
+    JWTAuthHandler jwtAuthHandler ;
+
+    public function __init(JwtAuthProvider jwtAuthProvider) {
+        self.jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+    }
+
+    # Checks if the request can be authenticated with the Bearer Auth header.
+    #
+    # + req - The `Request` instance.
+    # + return - Returns `true` if can be authenticated. Else, returns `false`.
+    public function canProcess(http:Request req) returns @tainted boolean {
+        boolean result = self.jwtAuthHandler.canProcess(req);
+        return result;
+    }
+
+    # Authenticates the incoming request with the use of credentials passed as the Bearer Auth header.
+    #
+    # + req - The `Request` instance.
+    # + return - Returns `true` if authenticated successfully. Else, returns `false`
+    # or the `AuthenticationError` in case of an error.
+    public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
         //Start a span attaching to the system span.
         int|error|() spanId_Process = startingSpan(JWT_AUTHENHANDLER_PROCESS);
         int startingTime = getCurrentTime();
         map<string> gaugeTags = gageTagDetails_authn(req, FIL_AUTHENTICATION);
         observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
         observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
-        string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
-        string headerValue = req.getHeader(authHeader);
-        string credential = headerValue.substring(6, headerValue.length()).trim();
-        var authenticationResult = self.jwtAuthProvider.authenticate(credential);
+        boolean|http:AuthenticationError result = self.jwtAuthHandler.process(req);
         float latency = setGaugeDuration(startingTime);
-        UpdatingGauge(localGauge, latency);
-        UpdatingGauge(localGauge_total, latency);
-        if (authenticationResult is boolean) {
-            //finishing span
-            finishingSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
-            return authenticationResult;
-        } else {
-            //finishing span
-            finishingSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
-            return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
-        }
+        UpdateGauge(localGauge, latency);
+        UpdateGauge(localGauge_total, latency);
+        //finishing span
+        finishingSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
+        return result;
     }
 };

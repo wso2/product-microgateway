@@ -14,6 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+public const string MICRO_GATEWAY_METRICS = "b7a.observability.metrics";
+public const string METRICS_ENABLE = "enabled";
+
 public const string PRE_AUTHN_FILTER_REQUEST = "Pre_Authen_Filter_Request";
 public const string BASICAUTH_PROVIDER = "BasicAuth_Provider";
 public const string HASHING_MECHANISM = "Hashing_Mechanism";

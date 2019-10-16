@@ -95,6 +95,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+                <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>

@@ -105,7 +105,14 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         jwtCache : jwtCache
     };
     JwtAuthProvider jwtAuthProvider = new(jwtValidatorConfig);
-    JWTAuthHandler jwtAuthHandler = new (jwtAuthProvider);
+    JWTAuthHandler|JWTAuthHandlerWrapper jwtAuthHandler;
+    if (isMetricsEnabled){
+        jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+    }
+    else{
+        jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+    }
+    
 
     // Initializes the key validation handler
     KeyValidationServerConfig keyValidationServerConfig = {url:getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
@@ -122,11 +129,24 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         }
     };
     OAuth2KeyValidationProvider oauth2KeyValidationProvider = new(keyValidationServerConfig);
-    KeyValidationHandler keyValidationHandler = new(oauth2KeyValidationProvider);
+    KeyValidationHandler|KeyValidationHandlerWrapper keyValidationHandler;
+    if (isMetricsEnabled){
+        keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider);
+    }
+    else{
+        keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider);
+    }
+    
 
     // Initializes the basic auth handler
     auth:BasicAuthConfig basicAuthConfig = {tableName : CONFIG_USER_SECTION};
-    BasicAuthProvider configBasicAuthProvider = new(basicAuthConfig);
+    BasicAuthProvider|BasicAuthProviderWrapper configBasicAuthProvider;
+    if (isMetricsEnabled){
+        configBasicAuthProvider = new BasicAuthProviderWrapper(basicAuthConfig);
+    }
+    else {
+        configBasicAuthProvider = new BasicAuthProvider(basicAuthConfig);
+    }
     http:BasicAuthHandler basicAuthHandler = new(configBasicAuthProvider);
 
     //Initializes the mutual ssl handler
