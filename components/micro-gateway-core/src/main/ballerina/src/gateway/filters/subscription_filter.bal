@@ -27,13 +27,13 @@ public type SubscriptionFilter object {
     public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext filterContext)
                         returns boolean {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(SUBSCRIPTION_FILTER_REQUEST);
+        int|error|() spanId_req = spanStart(SUBSCRIPTION_FILTER_REQUEST);
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
         boolean result = doSubscriptionFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_SUBS);
         //Finish span.
-        finishingSpan(SUBSCRIPTION_FILTER_REQUEST, spanId_req);
+        spanFinish(SUBSCRIPTION_FILTER_REQUEST, spanId_req);
         return result;
     }
 

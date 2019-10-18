@@ -29,8 +29,8 @@ public const string KEY_VALIDATION_HANDLER_PROCESS = "KeyValidation_Handler_Proc
 public const string OAUTH_VALIDATION_PROVIDER_CACHE_CHECK = "OAuth_ValidationProvider_CacheCheck";
 public const string OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION = "OAuth_AuthProvider_InvokeKeyValidation";
 
-public const string ANALY_FILTER_REQUEST = "Analytics_Filter_Request";
-public const string ANALY_FILTER_RESPONSE = "Analytics_Filter_Response";
+public const string ANALYTICS_FILTER_REQUEST = "Analytics_Filter_Request";
+public const string ANALYTICS_FILTER_RESPONSE = "Analytics_Filter_Response";
 
 public const string AUTHZ_FILTER_REQUEST = "Authz_Filter_Request";
 public const string AUTHZ_FILTER_RESPONSE = "Authz_Filter_Response";
@@ -49,9 +49,9 @@ public const string REQUEST_RAWPATH = "REQUEST_RAWPATH";
 // public const string VALIDATION_FILTER_RESPONSE = "Validation_Filter_Response";
 // public const string GETTTING_PAYLOAD = "Getting_Payload";
 
-public const string FIL_AUTHENTICATION = "Authentiation";
-public const string FIL_ANALYTICS = "Analytics";
-public const string FIL_THROTTLING = "Throttling";
+public const string FILTER_AUTHENTICATION = "Authentiation";
+public const string FILTER_ANALYTICS = "Analytics";
+public const string FILTER_THROTTLING = "Throttling";
 public const string PER_REQ_DURATION = "Per_Request_Duration";
 public const string REQ_FLTER_DURATION = "Request_Filter_Duration";
 public const string REQ_DURATION_TOTAL = "Request_Duration_Total";

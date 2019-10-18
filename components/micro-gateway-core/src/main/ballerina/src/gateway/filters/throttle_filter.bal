@@ -17,8 +17,6 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/observe;
-import ballerina/io;
-
 
 public type ThrottleFilter object {
     public map<boolean> deployedPolicies = {};
@@ -28,10 +26,14 @@ public type ThrottleFilter object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = spanStart(THROTTLE_FILTER_REQUEST);
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
+        //Finish span.
+        spanFinish(THROTTLE_FILTER_REQUEST, spanId_req);
         return result;
     }
 
@@ -363,20 +365,15 @@ public type ThrottleFilterWrapper object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(THROTTLE_FILTER_REQUEST);
-        io:println("Anjana");
         //Gauge metric initialization
-        map<string> gaugeTags = gageTagDetails(request, context, FIL_THROTTLING);
-        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_THROTTLING});
+        map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_THROTTLING);
+        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FILTER_THROTTLING});
         int startingTime = getCurrentTime();
         boolean result = self.throttleFilter.filterRequest(caller, request, context);
-        float latency = setGaugeDuration(startingTime);
-        UpdateGauge(localGauge, latency);
-        UpdateGauge(localGauge_total, latency);
-        //Finish span.
-        finishingSpan(THROTTLE_FILTER_REQUEST, spanId_req);
+        float latency = gaugeDurationSet(startingTime);
+        gaugeUpdate(localGauge, latency);
+        gaugeUpdate(localGauge_total, latency);
         return result;
     }
 

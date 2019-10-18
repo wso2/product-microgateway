@@ -134,7 +134,7 @@ public function getFilters() returns http:RequestFilter[] {
     // Throttling filter
     // Analytic filter
     gateway:ThrottleFilter|gateway:ThrottleFilterWrapper throttleFilter;
-    gateway:AnalyticsRequestFilter|gateway:AnalyticsRequestFilterWrapper analyticsFilter;
+    gateway:AnalyticsRequestFilter analyticsFilter;
     if (gateway:getConfigBooleanValue("b7a.observability.metrics", "enabled", false)) {
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();

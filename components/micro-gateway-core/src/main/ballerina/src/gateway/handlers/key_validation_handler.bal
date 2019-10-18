@@ -58,6 +58,8 @@ public type KeyValidationHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
+        //Start a span attaching to the system span.
+        int|error|() spanId_Process = spanStart(KEY_VALIDATION_HANDLER_PROCESS);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         string authHeader = invocationContext.attributes[AUTH_HEADER].toString();
         string headerValue = req.getHeader(authHeader);
@@ -78,8 +80,12 @@ public type KeyValidationHandler object {
                 string authHeaderName = getAuthorizationHeader(invocationContext);
                 checkAndRemoveAuthHeaders(req, authHeaderName);
             }
+            //Finish span.
+            spanFinish(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
             return authenticationResult;
         } else {
+            //Finish span.
+            spanFinish(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
             return prepareAuthenticationError("Failed to authenticate with key validation auth handler.", authenticationResult);
         }
     }
@@ -91,10 +97,12 @@ public type KeyValidationHandler object {
 # + oauth2KeyValidationProvider - The reference to the key validation provider instance
 public type KeyValidationHandlerWrapper object {
     *http:InboundAuthHandler;
-    
+
+    public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     KeyValidationHandler keyValidationHandler;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider) {
+        self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider);
     }
 
@@ -113,18 +121,14 @@ public type KeyValidationHandlerWrapper object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
-        //Start a span attaching to the system span.
-        int|error|() spanId_Process = startingSpan(KEY_VALIDATION_HANDLER_PROCESS);
         int startingTime = getCurrentTime();
-        map<string> gaugeTags = gageTagDetails_authn(req, FIL_AUTHENTICATION);
-        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_AUTHENTICATION});
+        map<string> gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
+        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FILTER_AUTHENTICATION});
         boolean|http:AuthenticationError result = self.keyValidationHandler.process(req);
-        float latency = setGaugeDuration(startingTime);
-        UpdateGauge(localGauge, latency);
-        UpdateGauge(localGauge_total, latency);
-        //Finish span.
-        finishingSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
+        float latency = gaugeDurationSet(startingTime);
+        gaugeUpdate(localGauge, latency);
+        gaugeUpdate(localGauge_total, latency);
         return result;
     }
 

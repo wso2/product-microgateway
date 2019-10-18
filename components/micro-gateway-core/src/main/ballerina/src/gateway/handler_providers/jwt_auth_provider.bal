@@ -40,10 +40,10 @@ public type JwtAuthProvider object {
  
     public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
         //Start a span attaching to the system span.
-        int|error|() spanId_Authen = startingSpan(JWT_PROVIDER_AUTHENTICATE);
+        int|error|() spanId_Authen = spanStart(JWT_PROVIDER_AUTHENTICATE);
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         //finishing span
-        finishingSpan(JWT_PROVIDER_AUTHENTICATE, spanId_Authen);
+        spanFinish(JWT_PROVIDER_AUTHENTICATE, spanId_Authen);
         if(handleVar is boolean) {
         if (handleVar) {
             boolean isBlacklisted = false;
@@ -54,10 +54,10 @@ public type JwtAuthProvider object {
                 string? jwtToken = authContext?.authToken;
                 if(jwtToken is string) {
                     //Start a new child span for the span.
-                    int|error|() spanId_Cache = startingSpan(JWT_CACHE);
+                    int|error|() spanId_Cache = spanStart(JWT_CACHE);
                     var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
                     //finishing span
-                    finishingSpan(JWT_CACHE, spanId_Cache);
+                    spanFinish(JWT_CACHE, spanId_Cache);
                     if (cachedJwt is jwt:CachedJwt) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
                         jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;

@@ -21,6 +21,8 @@ import ballerina/observe;
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_req = spanStart(ANALYTICS_FILTER_REQUEST);
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
@@ -28,10 +30,14 @@ public type AnalyticsRequestFilter object {
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }
+        //Finish span.
+        spanFinish(ANALYTICS_FILTER_REQUEST, spanId_req);
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int|error|() spanId_res = spanStart(ANALYTICS_FILTER_RESPONSE);
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
@@ -63,6 +69,8 @@ public type AnalyticsRequestFilter object {
                 }
             }
         }
+        //Finish span.
+        spanFinish(ANALYTICS_FILTER_RESPONSE, spanId_res);
         return true;
     }
 
@@ -126,36 +134,28 @@ public type AnalyticsRequestFilterWrapper object {
     AnalyticsRequestFilter analyticsRequestFilter = new;
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(ANALY_FILTER_REQUEST);
-        map<string> gaugeTags = gageTagDetails(request, context, FIL_ANALYTICS);
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        invocationContext.attributes[ANALYTIC_GAUGE_TAGS] = gaugeTags;
+        map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_ANALYTICS);
+        gaugeTagInvocationContextSet(ANALYTIC_GAUGE_TAGS, gaugeTags);
         int startingTime = getCurrentTime();
         boolean result = self.analyticsRequestFilter.filterRequest(caller, request, context);
-        float latency = setGaugeDuration(startingTime);
+        float latency = gaugeDurationSet(startingTime);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         invocationContext.attributes[ANALYTIC_REQUEST_TIME] = latency;
-        //Finish span.
-        finishingSpan(ANALY_FILTER_REQUEST, spanId_req);
         return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int|error|() spanId_res = startingSpan(ANALY_FILTER_RESPONSE);
         //starting a Gauge metric
-        map<string > gaugeTags= <map<string >>runtime:getInvocationContext().attributes[ANALYTIC_GAUGE_TAGS];
-        observe:Gauge|() localGauge = gaugeInitializing(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge|() localGauge_total = gaugeInitializing(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FIL_ANALYTICS});
+        map<string > gaugeTags= gaugeTagInvocationContextGet(ANALYTIC_GAUGE_TAGS);
+        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FILTER_ANALYTICS});
         int startingTime = getCurrentTime();
         boolean result = self.analyticsRequestFilter.filterResponse(response, context);
-        float latency = setGaugeDuration(startingTime);
+        float latency = gaugeDurationSet(startingTime);
         float req_latency=<float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME];
         float total_latency = req_latency + latency;
-        UpdateGauge(localGauge, total_latency);
-        UpdateGauge(localGauge_total, total_latency);
-        //Finish span.
-        finishingSpan(ANALY_FILTER_RESPONSE, spanId_res);
+        gaugeUpdate(localGauge, total_latency);
+        gaugeUpdate(localGauge_total, total_latency);
         return result;
     }
 

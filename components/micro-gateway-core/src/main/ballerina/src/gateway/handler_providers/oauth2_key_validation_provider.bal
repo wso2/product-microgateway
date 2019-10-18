@@ -54,10 +54,10 @@ public type OAuth2KeyValidationProvider object {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         APIRequestMetaDataDto apiKeyValidationRequestDto = getKeyValidationRequestObject(invocationContext, credential);
         //Start a span attaching to the system span.
-        int|error|() spanId_cacheCheck= startingSpan(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK);
+        int|error|() spanId_cacheCheck= spanStart(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK);
         APIKeyValidationDto | error apiKeyValidationDto = trap self.checkCacheAndAuthenticate(apiKeyValidationRequestDto, invocationContext);
         //Finish span.
-        finishingSpan(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK, spanId_cacheCheck);
+        spanFinish(OAUTH_VALIDATION_PROVIDER_CACHE_CHECK, spanId_cacheCheck);
         if (apiKeyValidationDto is APIKeyValidationDto){
             isAuthorized = apiKeyValidationDto.authorized;
             printDebug(KEY_AUTHN_FILTER, "Authentication handler returned with value : " +
@@ -226,10 +226,10 @@ public type OAuth2KeyValidationProvider object {
         string accessToken = apiRequestMetaDataDto.accessToken;
         boolean authorized = false;
         //Start a new child span for the span.
-        int|error|() spanId_KeyValidate = startingSpan(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION);
+        int|error|() spanId_KeyValidate = spanStart(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION);
         xml|error keyValidationResponseXML = self.doKeyValidation(apiRequestMetaDataDto);
         //finishing span
-        finishingSpan(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION, spanId_KeyValidate);
+        spanFinish(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION, spanId_KeyValidate);
         if (keyValidationResponseXML is xml) {
             printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
             xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:'return];

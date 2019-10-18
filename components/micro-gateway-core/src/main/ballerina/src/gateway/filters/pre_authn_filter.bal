@@ -24,7 +24,7 @@ public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = startingSpan(PRE_AUTHN_FILTER_REQUEST);
+        int|error|() spanId_req = spanStart(PRE_AUTHN_FILTER_REQUEST);
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
@@ -33,7 +33,7 @@ public type PreAuthnFilter object {
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
         //Finish span.
-        finishingSpan(PRE_AUTHN_FILTER_REQUEST, spanId_req);
+        spanFinish(PRE_AUTHN_FILTER_REQUEST, spanId_req);
         return result;
     }
 

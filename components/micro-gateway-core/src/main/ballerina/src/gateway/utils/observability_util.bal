@@ -23,48 +23,41 @@ boolean isTracingEnabled = getConfigBooleanValue("b7a.observability.tracing", "e
 boolean isMetricsEnabled = getConfigBooleanValue("b7a.observability.metrics", "enabled", false);
 
 //metrics
-public function setGaugeDuration(int starting) returns float{
+public function gaugeDurationSet(int starting) returns float{
     int ending = getCurrentTime();
     float latency = (ending - starting)*1.0;
     return (latency);
 }
 
-public function gaugeInitializing(string name, string description, map<string> gaugeTags) returns observe:Gauge|(){
-	if (isMetricsEnabled){
-		observe:Gauge localGauge = new(name, description,gaugeTags);
-        registerGauge(localGauge);
-		return localGauge;
-	}
-	else{
-		return ();
-	}
+public function gaugeInitialize(string name, string description, map<string> gaugeTags) returns observe:Gauge {
+	observe:Gauge localGauge = new(name, description,gaugeTags);
+    gaugeRegister(localGauge);
+	return localGauge;
 }
 
-public function UpdateGauge(observe:Gauge|() localGauge, float latency){
-	if (localGauge is  observe:Gauge){
-		localGauge.setValue(latency);
-	}
+public function gaugeUpdate(observe:Gauge localGauge, float latency) {
+	localGauge.setValue(latency);
 }
 
-public function registerGauge(observe:Gauge gauge){
+public function gaugeRegister(observe:Gauge gauge) {
     error? result = gauge.register();
         if (result is error) {
             log:printError("Error in registering Counter", err = result);
         }
 }
 
-public function gageTagDetails(http:Request request, http:FilterContext context, string category) returns map<string> {
+public function gaugeTagDetails(http:Request request, http:FilterContext context, string category) returns map<string> {
     map<string> gaugeTags = { "Category":category , "Method":request.method, "ServicePath":request.rawPath, "Service": context.getServiceName()};
-    return gaugeTags;
+    return gaugeTags;  
 }
 
-public function gageTagDetails_authn(http:Request request, string category) returns map<string> {
+public function gaugeTagDetails_authn(http:Request request, string category) returns map<string> {
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
     map<string> gaugeTags = { "Category":category , "Method":request.method, "ServicePath":request.rawPath, "Service": serviceName };
     return gaugeTags;
 }
 
-public function gageTagDetails_basicAuth(string category) returns map<string> {
+public function gaugeTagDetails_basicAuth(string category) returns map<string> {
     string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
     string requestRawPath= runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
@@ -72,8 +65,17 @@ public function gageTagDetails_basicAuth(string category) returns map<string> {
     return gaugeTags;
 }
 
+public function gaugeTagInvocationContextSet(string attribute, map<string> gaugeTags){
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    invocationContext.attributes[attribute] = gaugeTags;
+}
+
+public function gaugeTagInvocationContextGet(string attribute) returns map<string> {
+    return (<map<string >>runtime:getInvocationContext().attributes[attribute]);
+}
+
 //tracing
-public function startingSpan(string spanName) returns int|error|(){
+public function spanStart(string spanName) returns int|error|(){
     if (isTracingEnabled){
 	    return observe:startSpan(spanName);
     }
@@ -82,11 +84,13 @@ public function startingSpan(string spanName) returns int|error|(){
     }
 }
 
-public function finishingSpan(string spanName, int|error|() spanId){
-    if (spanId is int) {
-        error? result = observe:finishSpan(spanId);
-        checkFinishSpanError(result, spanName);
-    }
+public function spanFinish(string spanName, int|error|() spanId){
+    if (isTracingEnabled){
+        if (spanId is int) {
+            error? result = observe:finishSpan(spanId);
+            checkFinishSpanError(result, spanName);
+        }
+    }  
 }
 
 public function checkFinishSpanError(error? result, string spanName){
