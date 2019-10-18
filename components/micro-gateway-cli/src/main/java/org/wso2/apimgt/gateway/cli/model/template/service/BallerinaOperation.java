@@ -90,6 +90,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
+        //set resource level endpoint configuration
+        setEpConfigDTO(operation);
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null) {
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
@@ -102,8 +104,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
-            //set resource level endpoint configuration
-            setEpConfigDTO(operation);
             //set resource level request interceptors
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
