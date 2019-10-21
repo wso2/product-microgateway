@@ -220,6 +220,7 @@
  public const string CERTIFICATE_ALIAS = "certificateAlias";
  public const string TRUST_STORE_PATH = "trustStorePath";
  public const string TRUST_STORE_PASSWORD = "trustStorePassword";
+ public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
  public const string CACHING_ID = "caching";
  public const string TOKEN_CACHE_ENABLED = "enabled";
