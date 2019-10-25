@@ -8,6 +8,7 @@ public function main() {
     {{/each}}
 
     initThrottlePolicies();
+    gateway:startObservabilityMetrics();
 
     {{>jwtRevocation}}
     startupExtension();

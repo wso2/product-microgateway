@@ -19,8 +19,8 @@ import ballerina/observe;
 import ballerina/http;
 import ballerina/runtime;
 
-boolean isTracingEnabled = getConfigBooleanValue("b7a.observability.tracing", "enabled", false);
-boolean isMetricsEnabled = getConfigBooleanValue("b7a.observability.metrics", "enabled", false);
+boolean isTracingEnabled = getConfigBooleanValue(MICRO_GATEWAY_TRACING, ENABLED , false);
+boolean isMetricsEnabled = getConfigBooleanValue(MICRO_GATEWAY_METRICS, ENABLED, false);
 
 //metrics
 public function gaugeDurationSet(int starting) returns float{
@@ -85,12 +85,10 @@ public function spanStart(string spanName) returns int|error|(){
 }
 
 public function spanFinish(string spanName, int|error|() spanId){
-    if (isTracingEnabled){
-        if (spanId is int) {
-            error? result = observe:finishSpan(spanId);
-            checkFinishSpanError(result, spanName);
-        }
-    }  
+    if (spanId is int) {
+        error? result = observe:finishSpan(spanId);
+        checkFinishSpanError(result, spanName);
+    } 
 }
 
 public function checkFinishSpanError(error? result, string spanName){

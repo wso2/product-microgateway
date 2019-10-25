@@ -106,21 +106,8 @@ configFile="$GWHOME/conf/micro-gw.conf"
 for c in $*
 do
     if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
-        while read line; do
-            if [ "$line" == "[b7a.observability.metrics]" ]; then
-                while read nextline; do
-                    string_array_new=($(echo $nextline | tr "=" "\n"))
-                    if [ "${string_array_new[0]}" == "JMX_port" ]; then
-                        jmx_port="${string_array_new[-1]}"
-                        export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
-                        break
-                    fi
-                done
-            break
-            fi
-        done < $configFile
-    flag="true"
-    break    
+        flag="true"
+        break    
     fi
 done
 
@@ -130,14 +117,7 @@ if [ "$flag" != "true" ]; then
           while read newline; do
               string_array=($(echo $newline | tr "=" "\n"))
               if [ "${string_array[0]}" == "enabled" -a "${string_array[-1]}" == "true" ]; then
-                  while read nextline; do
-                      string_array_new=($(echo $nextline | tr "=" "\n"))
-                      if [ "${string_array_new[0]}" == "JMX_port" ]; then
-                          jmx_port="${string_array_new[-1]}"
-                          export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
-                          break
-                      fi
-                  done
+                  flag="true"
                   break    
               elif [ "${string_array[0]}" == "enabled" -a "${string_array[-1]}" == "false" ]; then
                   break
@@ -145,6 +125,22 @@ if [ "$flag" != "true" ]; then
           done
           break
       fi
+    done < $configFile
+fi
+
+if [ "$flag" == "true" ]; then
+    while read line; do
+        if [ "$line" == "[b7a.observability.metrics.prometheus]" ]; then
+            while read nextline; do
+                string_array_new=($(echo $nextline | tr "=" "\n"))
+                if [ "${string_array_new[0]}" == "jmx_port" ]; then
+                    jmx_port="${string_array_new[-1]}"
+                    export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
+                    break
+                fi
+            done
+            break
+        fi
     done < $configFile
 fi
 

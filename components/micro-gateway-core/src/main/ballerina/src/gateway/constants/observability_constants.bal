@@ -15,7 +15,12 @@
 // under the License.
 
 public const string MICRO_GATEWAY_METRICS = "b7a.observability.metrics";
-public const string METRICS_ENABLE = "enabled";
+public const string MICRO_GATEWAY_TRACING = "b7a.observability.tracing";
+public const string MICRO_GATEWAY_METRICS_PORTS = "b7a.observability.metrics.prometheus";
+public const string ENABLED = "enabled";
+public const string PORT = "port";
+public const string JMX_PORT = "jmx_port";
+public const string SECURE_PORT = "secure_port";
 
 public const string PRE_AUTHN_FILTER_REQUEST = "Pre_Authen_Filter_Request";
 public const string BASICAUTH_PROVIDER = "BasicAuth_Provider";

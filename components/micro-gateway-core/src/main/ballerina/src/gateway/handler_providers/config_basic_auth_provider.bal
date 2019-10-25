@@ -145,7 +145,6 @@ public type BasicAuthProvider object {
             spanFinish(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
-        
     }
 
 };    
