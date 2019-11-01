@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/io;
 
 public type AnalyticsRequestFilter object {
 
@@ -40,7 +41,12 @@ public type AnalyticsRequestFilter object {
                     if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                         if(eventDTO is EventDTO) {
-                            eventStream.publish(eventDTO);
+                            // eventStream.publish(eventDTO);
+                            io:println("This is the event DTO of throttling -->");
+                            // ####################################################
+                            json analyticsThrottleJSON = createThrottleJSON(throttleAnalyticsEventDTO);
+                            dataToAnalytics(analyticsThrottleJSON.toJsonString() , "InComingThrottledOutStream");
+                            // ####################################################
                         } else {
                             printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
                             printFullError(KEY_ANALYTICS_FILTER, eventDTO);
@@ -80,7 +86,12 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
     if(faultDTO is FaultDTO) {
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if(eventDTO is EventDTO) {
-            eventStream.publish(eventDTO);
+            // eventStream.publish(eventDTO);
+            io:println("This is the falut event DTO --->");
+            // ####################################################
+            json analyticsFaultJSON = createFaultJSON(faultDTO);
+            dataToAnalytics(analyticsFaultJSON.toJsonString() , "FaultStream");
+            // ####################################################
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
             printFullError(KEY_ANALYTICS_FILTER, eventDTO);
@@ -98,7 +109,14 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
-            eventStream.publish(event);
+            // eventStream.publish(event);
+            // ###############################################
+            io:println("This is the Response event DTO --->");
+            json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
+            dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+            // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
+            // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
+            // ##############################################
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
             printFullError(KEY_ANALYTICS_FILTER, event);
@@ -118,4 +136,112 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }
+}
+
+
+
+//#####################################################################
+
+
+
+
+public function createAnalyticsJSON(RequestResponseExecutionDTO requestResponseExecutionDTO) returns json {
+
+    json analyticsJSON = {
+        meta_clientType : <string>requestResponseExecutionDTO.metaClientType ,
+        applicationConsumerKey : <string>requestResponseExecutionDTO.applicationConsumerKey ,
+        applicationName : <string>requestResponseExecutionDTO.applicationName ,
+        applicationId : <string>requestResponseExecutionDTO.applicationId ,
+        applicationOwner : <string>requestResponseExecutionDTO.applicationOwner ,
+
+        apiContext : <string>requestResponseExecutionDTO.apiContext ,
+        apiName : <string> requestResponseExecutionDTO.apiName ,
+        apiVersion : <string>requestResponseExecutionDTO.apiVersion ,
+        apiResourcePath : <string>requestResponseExecutionDTO.apiResourcePath ,
+        apiResourceTemplate : <string>requestResponseExecutionDTO.apiResourceTemplate ,
+
+        apiMethod : <string>requestResponseExecutionDTO.apiMethod ,
+        apiCreator : <string>requestResponseExecutionDTO.apiCreator ,
+        apiCreatorTenantDomain : <string>requestResponseExecutionDTO.apiCreatorTenantDomain ,
+        apiTier :  <string>requestResponseExecutionDTO.apiTier ,
+        apiHostname : <string>requestResponseExecutionDTO.apiHostname ,
+
+        username : <string>requestResponseExecutionDTO.userName ,
+        userTenantDomain :  <string>requestResponseExecutionDTO.userTenantDomain ,
+        userIp :  <string>requestResponseExecutionDTO.userIp ,
+        userAgent : <string>requestResponseExecutionDTO.userAgent ,
+        requestTimestamp : requestResponseExecutionDTO.requestTimestamp ,
+
+        throttledOut : requestResponseExecutionDTO.throttledOut ,
+        responseTime : requestResponseExecutionDTO.responseTime ,
+        serviceTime : requestResponseExecutionDTO.serviceTime ,
+        backendTime : requestResponseExecutionDTO.backendTime ,
+        responseCacheHit : requestResponseExecutionDTO.responseCacheHit ,
+
+        responseSize : requestResponseExecutionDTO.responseSize ,
+        protocol : requestResponseExecutionDTO.protocol ,
+        responseCode : requestResponseExecutionDTO.responseCode ,
+        destination : requestResponseExecutionDTO.destination ,
+        securityLatency : requestResponseExecutionDTO.executionTime.securityLatency ,
+
+        throttlingLatency : requestResponseExecutionDTO.executionTime.throttlingLatency , 
+        requestMedLat : requestResponseExecutionDTO.executionTime.requestMediationLatency ,
+        responseMedLat :requestResponseExecutionDTO.executionTime.responseMediationLatency , 
+        backendLatency : requestResponseExecutionDTO.executionTime.backEndLatency , 
+        otherLatency : requestResponseExecutionDTO.executionTime.otherLatency , 
+
+        gatewayType : <string>requestResponseExecutionDTO.gatewayType , 
+        label : <string>requestResponseExecutionDTO.label
+    };  
+
+    return analyticsJSON;
+}
+
+
+public function createThrottleJSON(ThrottleAnalyticsEventDTO throttleAnalyticsEventDTO) returns json{
+        json throttleJSON = {
+            meta_clientType : throttleAnalyticsEventDTO.metaClientType,
+            username : throttleAnalyticsEventDTO.userName,
+            userTenantDomain : throttleAnalyticsEventDTO.userTenantDomain,
+            apiName :throttleAnalyticsEventDTO.apiName,
+            apiVersion : throttleAnalyticsEventDTO.apiVersion,
+            apiContext : throttleAnalyticsEventDTO.apiContext,
+            apiCreator : throttleAnalyticsEventDTO.apiCreator,
+            apiCreatorTenantDomain : throttleAnalyticsEventDTO.apiCreatorTenantDomain,
+            applicationId : throttleAnalyticsEventDTO.applicationId,
+            applicationName : throttleAnalyticsEventDTO.applicationName,
+            subscriber : throttleAnalyticsEventDTO.subscriber,
+            throttledOutReason : throttleAnalyticsEventDTO.throttledOutReason,
+            gatewayType : throttleAnalyticsEventDTO.gatewayType,
+            throttledOutTimestamp : throttleAnalyticsEventDTO.throttledTime,
+            hostname : throttleAnalyticsEventDTO.hostname
+        };
+
+        return throttleJSON;
+}
+
+
+
+public function createFaultJSON(FaultDTO faultDTO)returns json{
+    json falutJSON = {
+        meta_clientType : faultDTO. metaClientType,
+        applicationConsumerKey : faultDTO.consumerKey,
+        apiName : faultDTO.apiName,
+        apiVersion : faultDTO.apiVersion,
+        apiContext : faultDTO.apiContext,
+        apiResourcePath : faultDTO.resourcePath,
+        apiMethod : faultDTO.method,
+        apiCreator : faultDTO.apiCreator,
+        username : faultDTO.userName,
+        userTenantDomain : faultDTO.userTenantDomain,
+        apiCreatorTenantDomain : faultDTO.apiCreatorTenantDomain,
+        hostname : faultDTO.hostName,
+        applicationId : faultDTO.applicationId,
+        applicationName : faultDTO.applicationName,
+        protocol : faultDTO.protocol,
+        errorCode : faultDTO.errorCode,
+        errorMessage : faultDTO.errorMessage,
+        requestTimestamp : faultDTO.faultTime
+    };
+    return falutJSON;
 }

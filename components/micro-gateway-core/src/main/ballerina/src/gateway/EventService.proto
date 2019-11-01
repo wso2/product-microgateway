@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.wso2.grpc";
+
+package eventservice;
+
+import "google/protobuf/empty.proto";
+
+service EventService {
+    rpc process(Event) returns (Event) {}
+
+    rpc consume(stream Event) returns (google.protobuf.Empty) {}
+}
+
+message Event {
+    string payload = 1;
+    map<string, string> headers = 2;
+}
