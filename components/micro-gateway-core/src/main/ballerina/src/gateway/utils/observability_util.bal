@@ -14,85 +14,85 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import ballerina/log;
 import ballerina/observe;
-import ballerina/http;
 import ballerina/runtime;
 
-boolean isTracingEnabled = getConfigBooleanValue(MICRO_GATEWAY_TRACING, ENABLED , false);
+boolean isTracingEnabled = getConfigBooleanValue(MICRO_GATEWAY_TRACING, ENABLED, false);
 boolean isMetricsEnabled = getConfigBooleanValue(MICRO_GATEWAY_METRICS, ENABLED, false);
 
 //metrics
-public function gaugeDurationSet(int starting) returns float{
+public function gaugeDurationSet(int starting) returns float {
     int ending = getCurrentTime();
-    float latency = (ending - starting)*1.0;
+    float latency = (ending - starting) * 1.0;
     return (latency);
 }
 
 public function gaugeInitialize(string name, string description, map<string> gaugeTags) returns observe:Gauge {
-	observe:Gauge localGauge = new(name, description,gaugeTags);
+    observe:Gauge localGauge = new (name, description, gaugeTags);
     gaugeRegister(localGauge);
-	return localGauge;
+    return localGauge;
 }
 
 public function gaugeUpdate(observe:Gauge localGauge, float latency) {
-	localGauge.setValue(latency);
+    localGauge.setValue(latency);
 }
 
 public function gaugeRegister(observe:Gauge gauge) {
     error? result = gauge.register();
-        if (result is error) {
-            log:printError("Error in registering Counter", err = result);
-        }
+    if (result is error) {
+        log:printError("Error in registering Counter", err = result);
+    }
 }
 
 public function gaugeTagDetails(http:Request request, http:FilterContext context, string category) returns map<string> {
-    map<string> gaugeTags = { "Category":category , "Method":request.method, "ServicePath":request.rawPath, "Service": context.getServiceName()};
-    return gaugeTags;  
+    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": context.getServiceName()};
+    return gaugeTags;
 }
 
 public function gaugeTagDetails_authn(http:Request request, string category) returns map<string> {
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = { "Category":category , "Method":request.method, "ServicePath":request.rawPath, "Service": serviceName };
+    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": serviceName};
     return gaugeTags;
 }
 
 public function gaugeTagDetails_basicAuth(string category) returns map<string> {
     string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
-    string requestRawPath= runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
+    string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = { "Category":category , "Method":requestMethod, "ServicePath":requestRawPath, "Service": serviceName };
+    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": serviceName};
     return gaugeTags;
 }
 
-public function gaugeTagInvocationContextSet(string attribute, map<string> gaugeTags){
+public function gaugeTagInvocationContextSet(string attribute, map<string> gaugeTags) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     invocationContext.attributes[attribute] = gaugeTags;
 }
 
 public function gaugeTagInvocationContextGet(string attribute) returns map<string> {
-    return (<map<string >>runtime:getInvocationContext().attributes[attribute]);
+    return (<map<string>>runtime:getInvocationContext().attributes[attribute]);
 }
 
 //tracing
-public function spanStart(string spanName) returns int|error|(){
-    if (isTracingEnabled){
-	    return observe:startSpan(spanName);
+public function spanStart(string spanName) returns int | error | () {
+    if (isTracingEnabled) {
+        return observe:startSpan(spanName);
     }
     else {
         return ();
     }
 }
 
-public function spanFinish(string spanName, int|error|() spanId){
+public function spanFinish(string spanName, int | error | () spanId) {
     if (spanId is int) {
         error? result = observe:finishSpan(spanId);
         checkFinishSpanError(result, spanName);
-    } 
+    }
 }
 
-public function checkFinishSpanError(error? result, string spanName){
-    if (result is error){
-        log:printError(spanName, err=result);
+public function checkFinishSpanError(error? result, string spanName) {
+    if (result is error) {
+        log:printError(spanName, err = result);
     }
 }

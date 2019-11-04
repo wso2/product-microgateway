@@ -14,17 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/config;
+import ballerina/http;
 import ballerina/runtime;
 
 // Pre Authentication filter
 
 public type PreAuthnFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context) returns boolean {
+    public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = spanStart(PRE_AUTHN_FILTER_REQUEST);
+        int | error | () spanId_req = spanStart(PRE_AUTHN_FILTER_REQUEST);
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
@@ -38,7 +38,7 @@ public type PreAuthnFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if(response.statusCode == 401) {
+        if (response.statusCode == 401) {
             sendErrorResponseFromInvocationContext(response);
         }
         return true;
@@ -46,7 +46,7 @@ public type PreAuthnFilter object {
 };
 
 function doAuthnFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
-             returns boolean {
+returns boolean {
     boolean isOauth2Enabled = false;
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     invocationContext.attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
@@ -67,7 +67,7 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     boolean isCookie = false;
     string authHeader = "";
     string? authCookie = "";
-    string|error extractedToken = "";
+    string | error extractedToken = "";
     string authHeaderName = getAuthHeaderFromFilterContext(context);
     printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header name : " + authHeaderName);
     invocationContext.attributes[AUTH_HEADER] = authHeaderName;
@@ -100,31 +100,31 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         }
     }
 
-    if(isSecuredResource && !request.hasHeader(authHeaderName)) {
+    if (isSecuredResource && !request.hasHeader(authHeaderName)) {
         printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
         setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
-        setErrorMessageToFilterContext(context,API_AUTH_MISSING_CREDENTIALS);
+        setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
         sendErrorResponse(caller, request, context);
         return false;
     }
 
     if (!canHandleAuthentication) {
         setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
-        setErrorMessageToFilterContext(context,API_AUTH_PROVIDER_INVALID);
+        setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
         return false;
     }
     // if auth providers are there, use those to authenticate
 
-        //TODO: Move this to post authentication handler
-        //checkAndRemoveAuthHeaders(request, authHeaderName);
+    //TODO: Move this to post authentication handler
+    //checkAndRemoveAuthHeaders(request, authHeaderName);
     return true;
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
-    if (contains(authHeader, AUTH_SCHEME_BASIC)){
+    if (contains(authHeader, AUTH_SCHEME_BASIC)) {
         return AUTHN_SCHEME_BASIC;
-    } else if (contains(authHeader,AUTH_SCHEME_BEARER) && contains(authHeader,".")) {
+    } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
@@ -133,7 +133,7 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
 
 
 function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
-    if (contains(authHeader,".")) {
+    if (contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;

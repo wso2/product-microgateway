@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/auth;
 import ballerina/http;
 import ballerina/log;
-import ballerina/auth;
 
 public type ObservabilityMetricListener object {
 
@@ -25,16 +25,16 @@ public type ObservabilityMetricListener object {
     public http:Listener metricListener;
 
     public function __init() {
-       
+
         auth:InboundBasicAuthProvider basicAuthProvider = new;
-        http:BasicAuthHandler basicAuthHandler = new(basicAuthProvider);
+        http:BasicAuthHandler basicAuthHandler = new (basicAuthProvider);
         self.listenerPort = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, SECURE_PORT, 9000);
-        self.metricListener = new(self.listenerPort, config = {
+        self.metricListener = new (self.listenerPort, config = {
             auth: {
                 authHandlers: [basicAuthHandler],
                 mandateSecureSocket: false
             }
-        });    
+        });
     }
 
 
@@ -54,7 +54,7 @@ public type ObservabilityMetricListener object {
     }
 
     public function __immediateStop() returns error? {
-            return self.metricListener.__immediateStop();
+        return self.metricListener.__immediateStop();
     }
 
     public function __detach(service s) returns error? {

@@ -16,16 +16,16 @@
 
 import ballerina/encoding;
 import ballerina/io;
-import ballerina/log;
 import ballerina/lang.'string as strings;
+import ballerina/log;
 
-public function getDecodedJWTPayload(string encodedJWTPayload) returns @tainted (json|error) {
+public function getDecodedJWTPayload(string encodedJWTPayload) returns @tainted (json | error) {
     string jwtPayload = check strings:fromBytes(check encoding:decodeBase64Url(encodedJWTPayload));
     io:StringReader reader = new (jwtPayload);
     json jwtPayloadJson = {};
 
     var result = reader.readJson();
-    if(result is json) {
+    if (result is json) {
         jwtPayloadJson = result;
     }
     else {
@@ -40,7 +40,7 @@ public function urlDecode(string encodedString) returns (string) {
     return decodedString;
 }
 
-public function getEncodedJWTPayload(string jwtToken) returns (string)|error {
+public function getEncodedJWTPayload(string jwtToken) returns (string) | error {
     string[] jwtPayload = split(jwtToken, "\\.");
     if (jwtPayload.length() != 3) {
         log:printDebug("Invalid JWT token :" + jwtToken);

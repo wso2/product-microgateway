@@ -21,14 +21,14 @@ import ballerina/runtime;
 #
 public type MutualSSLHandler object {
 
-    *http:InboundAuthHandler;    
+    *http:InboundAuthHandler;
 
     # Checks if the request can be authenticated with the Bearer Auth header.
     #
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        if(req.mutualSslHandshake["status"] == PASSED) {
+        if (req.mutualSslHandshake["status"] == PASSED) {
             return true;
         }
         return false;
@@ -39,23 +39,23 @@ public type MutualSSLHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
-    public function process(http:Request req) returns boolean|http:AuthenticationError {
+    public function process(http:Request req) returns boolean | http:AuthenticationError {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = spanStart(MUTUALSSL_FILTER_PROCESS);
+        int | error | () spanId_req = spanStart(MUTUALSSL_FILTER_PROCESS);
         int startingTime = getCurrentTime();
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        boolean|http:AuthenticationError result = doMTSLFilterRequest(req, invocationContext);
+        boolean | http:AuthenticationError result = doMTSLFilterRequest(req, invocationContext);
         //Finish span.
-        spanFinish(MUTUALSSL_FILTER_PROCESS, spanId_req);  
+        spanFinish(MUTUALSSL_FILTER_PROCESS, spanId_req);
         return result;
     }
 
 };
 
 
-function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean|http:AuthenticationError {
+function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean | http:AuthenticationError {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    boolean|http:AuthenticationError isAuthenticated = true;
+    boolean | http:AuthenticationError isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
     boolean isSecured = true;
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");

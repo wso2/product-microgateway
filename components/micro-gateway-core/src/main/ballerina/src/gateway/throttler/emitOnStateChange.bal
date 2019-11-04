@@ -19,7 +19,7 @@ import ballerina/streams;
 public type EmitOnStateChange object {
 
     public string key = "";
-    public boolean|error isThrottled = false;
+    public boolean | error isThrottled = false;
     public any[] stateParameters = [];
     public map<boolean> throttleStateMap = {};
     public string streamName = "";
@@ -37,14 +37,14 @@ public type EmitOnStateChange object {
             error err = error("Must have only 3 parameters");
             panic err;
         } else {
-            string|error keys = <string>stateParameters[0];
+            string | error keys = <string>stateParameters[0];
             if (keys is error) {
                 error err = error("Key should be a string");
                 panic err;
             } else {
                 self.key = keys;
             }
-            string|error streamName = <string>stateParameters[2];
+            string | error streamName = <string>stateParameters[2];
             if (streamName is error) {
                 error err = error("Stream name should be a string");
                 panic err;
@@ -55,11 +55,11 @@ public type EmitOnStateChange object {
     }
 
     public function getCandidateEvents(
-                            streams:StreamEvent originEvent,
-                            (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
-                            boolean isLHSTrigger = true)
-                            returns [streams:StreamEvent?, streams:StreamEvent?][] {
-            // do nothing;
+    streams:StreamEvent originEvent,
+ (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+    boolean isLHSTrigger = true)
+    returns [streams:StreamEvent?, streams:StreamEvent?][] {
+        // do nothing;
         return [[(), ()]];
     }
 
@@ -83,15 +83,15 @@ public type EmitOnStateChange object {
             }
         }
         if (streamEvents.length() > 0) {
-            function (streams:StreamEvent?[]) nextProcessor =
-                    <function (streams:StreamEvent?[])>self.nextProcessPointer;
+            function(streams:StreamEvent?[]) nextProcessor =
+            <function(streams:StreamEvent?[])>self.nextProcessPointer;
             nextProcessor(streamEvents);
         }
     }
 };
 
 public function emitOnStateChange(any[] stateParameters, function (streams:StreamEvent?[])? nextProcessPointer = ())
-                    returns streams:Window {
-    EmitOnStateChange stateChangeProcessor = new(nextProcessPointer, stateParameters);
+returns streams:Window {
+    EmitOnStateChange stateChangeProcessor = new (nextProcessPointer, stateParameters);
     return stateChangeProcessor;
 }

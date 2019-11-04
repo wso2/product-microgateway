@@ -24,7 +24,7 @@ public function multipartSender(string location, string file, string username, s
     mime:Entity filePart = new;
     string filePath = location + PATH_SEPERATOR + file;
     filePart.setFileAsEntityBody(filePath);
-    printDebug(KEY_UPLOAD_TASK,"File being uploaded : " + filePath);
+    printDebug(KEY_UPLOAD_TASK, "File being uploaded : " + filePath);
     filePart.setContentDisposition(getContentDispositionForFormData(file));
     mime:Entity[] bodyParts = [filePart];
     http:Request request = new;
@@ -36,27 +36,27 @@ public function multipartSender(string location, string file, string username, s
     var returnResponse = analyticsFileUploadEndpoint->post("", request);
 
 
-        if(returnResponse is error) {
-            http:Response response = new;
-            string errorMessage = "Error occurred while sending multipart request: SC 500";
-            response.setPayload(errorMessage);
-            response.statusCode = 500;
-            printFullError(KEY_UPLOAD_TASK, returnResponse);
-            return response;
+    if (returnResponse is error) {
+        http:Response response = new;
+        string errorMessage = "Error occurred while sending multipart request: SC 500";
+        response.setPayload(errorMessage);
+        response.statusCode = 500;
+        printFullError(KEY_UPLOAD_TASK, returnResponse);
+        return response;
+    }
+    else {
+        var responseString = returnResponse.getTextPayload();
+        if (responseString is string) {
+            printDebug(KEY_UPLOAD_TASK, "File upload response : " + returnResponse.getTextPayload().toString());
         }
-        else {
-            var responseString = returnResponse.getTextPayload();
-            if(responseString is string) {
-                printDebug(KEY_UPLOAD_TASK,"File upload response : " + returnResponse.getTextPayload().toString());
-            }
-            return returnResponse;
-        }
+        return returnResponse;
+    }
 
 }
 
 
 public function getContentDispositionForFormData(string partName)
-             returns (mime:ContentDisposition) {
+returns (mime:ContentDisposition) {
     mime:ContentDisposition contentDisposition = new;
     contentDisposition.name = "file";
     contentDisposition.fileName = partName;
@@ -67,5 +67,5 @@ public function getContentDispositionForFormData(string partName)
 public function getBasicAuthHeaderValue(string username, string password) returns string {
     string credentials = username + ":" + password;
     string encodedVal = encodeValueToBase64(credentials);
-    return "Basic " + encodedVal;  
+    return "Basic " + encodedVal;
 }

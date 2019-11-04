@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/http;
-import ballerina/time;
+import ballerina/io;
 import ballerina/runtime;
+import ballerina/time;
 
 
 public const string KVT = "-KS-";
@@ -36,7 +36,7 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
     printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext =  <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
+        AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         context.attributes[APPLICATION_OWNER_PROPERTY] = authContext.subscriber;
         context.attributes[API_TIER_PROPERTY] = authContext.apiTier;
         context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] = !authContext.stopOnQuotaReach;
@@ -57,8 +57,8 @@ function setRequestAttributesToContext(http:Request request, http:FilterContext 
 
 public function getEventData(EventDTO dto) returns string {
     string output = "streamId" + KVT + dto.streamId + EVS + "timestamp" + KVT + dto.timeStamp.toString() + EVS +
-        "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
-        "payLoadData" + KVT + dto.payloadData + "\n";
+    "metadata" + KVT + dto.metaData + EVS + "correlationData" + KVT + "null" + EVS +
+    "payLoadData" + KVT + dto.payloadData + "\n";
     return output;
 }
 
@@ -66,7 +66,7 @@ function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     // errors from 'openWritableFile' will be 'panicked'
     var writableChannel = <io:WritableByteChannel>io:openWritableFile(fileLocation + API_USAGE_FILE, true);
-    io:WritableCharacterChannel charChannel = new(writableChannel, "UTF-8");
+    io:WritableCharacterChannel charChannel = new (writableChannel, "UTF-8");
     var result = charChannel.write(getEventData(eventDTO), 0);
     if (result is io:GenericError) {
         closeWC(charChannel);
@@ -74,7 +74,7 @@ function writeEventToFile(EventDTO eventDTO) {
     } else if (result is io:ConnectionTimedOutError) {
         closeWC(charChannel);
         panic result;
-    } else  {
+    } else {
         closeWC(charChannel);
         printDebug(KEY_ANALYTICS_FILTER, "Event is being written");
     }
@@ -83,9 +83,9 @@ function writeEventToFile(EventDTO eventDTO) {
 
 public function closeWC(io:WritableCharacterChannel charChannel) {
     var result = charChannel.close();
-    if(result is error){
-            printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
-                    + result.reason());
+    if (result is error) {
+        printError(KEY_ANALYTICS_FILTER, "Error occurred while closing the channel: "
+        + result.reason());
     } else {
         printDebug(KEY_ANALYTICS_FILTER, "Source channel closed successfully.");
     }

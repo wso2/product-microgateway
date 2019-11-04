@@ -15,14 +15,14 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/runtime;
 import ballerina/observe;
+import ballerina/runtime;
 
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = spanStart(ANALYTICS_FILTER_REQUEST);
+        int | error | () spanId_req = spanStart(ANALYTICS_FILTER_REQUEST);
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
@@ -37,17 +37,17 @@ public type AnalyticsRequestFilter object {
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int|error|() spanId_res = spanStart(ANALYTICS_FILTER_RESPONSE);
+        int | error | () spanId_res = spanStart(ANALYTICS_FILTER_RESPONSE);
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
-                    ThrottleAnalyticsEventDTO|error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
-                    if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
-                        EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
-                        if(eventDTO is EventDTO) {
+                    ThrottleAnalyticsEventDTO | error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
+                    if (throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
+                        EventDTO | error eventDTO = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
+                        if (eventDTO is EventDTO) {
                             eventStream.publish(eventDTO);
                         } else {
                             printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
@@ -79,17 +79,17 @@ public type AnalyticsRequestFilter object {
 
 function doFilterRequest(http:Request request, http:FilterContext context) {
     error? result = trap setRequestAttributesToContext(request, context);
-    if(result is error) {
+    if (result is error) {
         printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path");
         printFullError(KEY_ANALYTICS_FILTER, result);
     }
 }
 
 function doFilterFault(http:FilterContext context, string errorMessage) {
-    FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
-    if(faultDTO is FaultDTO) {
-        EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
-        if(eventDTO is EventDTO) {
+    FaultDTO | error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
+    if (faultDTO is FaultDTO) {
+        EventDTO | error eventDTO = trap getEventFromFaultData(faultDTO);
+        if (eventDTO is EventDTO) {
             eventStream.publish(eventDTO);
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
@@ -103,11 +103,11 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
     //Response data publishing
-    RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
-        context);
-    if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
-        EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
-        if(event is EventDTO) {
+    RequestResponseExecutionDTO | error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
+    context);
+    if (requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+        EventDTO | error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
+        if (event is EventDTO) {
             eventStream.publish(event);
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
@@ -124,39 +124,8 @@ function doFilterAll(http:Response response, http:FilterContext context) {
     if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
-    } else if(resp is string) {
+    } else if (resp is string) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }
 }
-
-public type AnalyticsRequestFilterWrapper object {
-    AnalyticsRequestFilter analyticsRequestFilter = new;
-
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_ANALYTICS);
-        gaugeTagInvocationContextSet(ANALYTIC_GAUGE_TAGS, gaugeTags);
-        int startingTime = getCurrentTime();
-        boolean result = self.analyticsRequestFilter.filterRequest(caller, request, context);
-        float latency = gaugeDurationSet(startingTime);
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        invocationContext.attributes[ANALYTIC_REQUEST_TIME] = latency;
-        return result;
-    }
-
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        //starting a Gauge metric
-        map<string > gaugeTags= gaugeTagInvocationContextGet(ANALYTIC_GAUGE_TAGS);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FILTER_ANALYTICS});
-        int startingTime = getCurrentTime();
-        boolean result = self.analyticsRequestFilter.filterResponse(response, context);
-        float latency = gaugeDurationSet(startingTime);
-        float req_latency=<float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME];
-        float total_latency = req_latency + latency;
-        gaugeUpdate(localGauge, total_latency);
-        gaugeUpdate(localGauge_total, total_latency);
-        return result;
-    }
-
-};

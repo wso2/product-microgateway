@@ -14,12 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/crypto;
-import ballerina/runtime;
 import ballerina/auth;
+import ballerina/crypto;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
 import ballerina/observe;
+import ballerina/runtime;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -38,18 +38,18 @@ public type BasicAuthProvider object {
         if (basicAuthConfig is auth:BasicAuthConfig) {
             self.basicAuthConfig = basicAuthConfig;
         } else {
-            self.basicAuthConfig = { tableName: CONFIG_USER_SECTION };
+            self.basicAuthConfig = {tableName: CONFIG_USER_SECTION};
         }
-        self.inboundBasicAuthProvider = new(basicAuthConfig);
+        self.inboundBasicAuthProvider = new (basicAuthConfig);
     }
 
     # Attempts to authenticate with credentials.
     #
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
-    public function authenticate(string credential) returns (boolean|auth:Error) {
+    public function authenticate(string credential) returns (boolean | auth:Error) {
         //Start a span attaching to the system span.
-        int|error|() spanId_req = spanStart(BASICAUTH_PROVIDER);
+        int | error | () spanId_req = spanStart(BASICAUTH_PROVIDER);
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -58,14 +58,14 @@ public type BasicAuthProvider object {
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string encodedCredentials = credential;
-        byte[]|error decodedCredentials =  arrays:fromBase64(encodedCredentials);
+        byte[] | error decodedCredentials = arrays:fromBase64(encodedCredentials);
 
         //Extract username and password from the request
         string userName;
         string password;
-        if(decodedCredentials is byte[]){
+        if (decodedCredentials is byte[]) {
             string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
-            if (decodedCredentialsString.indexOf(":", 0)== ()){
+            if (decodedCredentialsString.indexOf(":", 0) == ()) {
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 //Finish span.
                 spanFinish(BASICAUTH_PROVIDER, spanId_req);
@@ -75,7 +75,7 @@ public type BasicAuthProvider object {
             userName = decodedCred[0];
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
-                setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //Finish span.
                 spanFinish(BASICAUTH_PROVIDER, spanId_req);
                 return false;
@@ -88,8 +88,8 @@ public type BasicAuthProvider object {
             spanFinish(BASICAUTH_PROVIDER, spanId_req);
             return false;
         }
-        //Starting a new span 
-        int|error|() spanId_Hash = spanStart(HASHING_MECHANISM);
+        //Starting a new span
+        int | error | () spanId_Hash = spanStart(HASHING_MECHANISM);
         //Hashing mechanism
         string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
@@ -100,15 +100,15 @@ public type BasicAuthProvider object {
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         //finishing span
         spanFinish(HASHING_MECHANISM, spanId_Hash);
-        //Starting a new span 
-        int|error|() spanId_Inbound = spanStart(BALLERINA_INBOUND_BASICAUTH);
+        //Starting a new span
+        int | error | () spanId_Inbound = spanStart(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
         //finishing span
         spanFinish(BALLERINA_INBOUND_BASICAUTH, spanId_Inbound);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Basic auth provider returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
-                //TODO: Handle the error message properly 
+                //TODO: Handle the error message properly
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
                 //Finish span.
@@ -147,34 +147,4 @@ public type BasicAuthProvider object {
         }
     }
 
-};    
-
-public type BasicAuthProviderWrapper object {
-    *auth:InboundAuthProvider;
-
-    BasicAuthProvider basicAuthProvider;
-
-    # Provides authentication based on the provided configuration.
-    #
-    # + basicAuthConfig - The Basic Auth provider configurations.
-    public function __init(auth:BasicAuthConfig? basicAuthConfig = ()) {
-        self.basicAuthProvider = new (basicAuthConfig);
-    }
-
-    # Attempts to authenticate with credentials.
-    #
-    # + credential - Credential
-    # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
-    public function authenticate(string credential) returns (boolean|auth:Error) {
-        int startingTime = getCurrentTime();
-        map<string> gaugeTags = gaugeTagDetails_basicAuth(FILTER_AUTHENTICATION);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category":FILTER_AUTHENTICATION});
-        boolean|auth:Error result = self.basicAuthProvider.authenticate(credential);
-        float latency = gaugeDurationSet(startingTime);
-        gaugeUpdate(localGauge, latency);
-        gaugeUpdate(localGauge_total, latency);
-        return result;
-    }
-
-};    
+};

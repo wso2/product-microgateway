@@ -25,7 +25,7 @@ boolean isStreamsInitialized = false;
 
 boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
-    GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
+GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
 public function isBlockConditionExist(string key) returns (boolean) {
     return blockConditions.hasKey(key);
@@ -42,7 +42,7 @@ public function putBlockCondition(map<any> m) {
         blockConditions[conditionValue] = conditionValue;
     } else {
         _ = blockConditions.remove(conditionValue);
-        if (blockConditions.keys().length()== 0) {
+        if (blockConditions.keys().length() == 0) {
             blockConditionExist = false;
         }
     }
@@ -92,12 +92,12 @@ public function initializeThrottleSubscription() {
 }
 
 //public function getInitThrottleSubscriptionFuture() returns future<()>{
-    //return ftr;
+//return ftr;
 //}
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
-    printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey: " + throttleEvent.throttleKey + 
-            " ,isThrottled:" + throttleEvent.isThrottled.toString() + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp.toString());
-    if (throttleEvent.isThrottled){
+    printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey: " + throttleEvent.throttleKey +
+    " ,isThrottled:" + throttleEvent.isThrottled.toString() + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp.toString());
+    if (throttleEvent.isThrottled) {
         throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
     }
     else {
@@ -111,13 +111,13 @@ public function getThrottleMetaData(ThrottleAnalyticsEventDTO dto) returns strin
 
 public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns string {
     return dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
-        dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
-        dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
-        gatewayType + OBJ + dto.throttledTime.toString() + OBJ + dto.hostname;
+    dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
+    dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
+    gatewayType + OBJ + dto.throttledTime.toString() + OBJ + dto.hostname;
 
 }
 
-public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO|error {
+public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO | error {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
@@ -136,7 +136,7 @@ public function removeThrottleData(string key) {
 
 //check whether the throttle policy is available if in built throttling is used
 public function isPolicyExist(map<boolean> deployedPolicies, string policyName) returns boolean {
-    if(!enabledGlobalTMEventPublishing) {
+    if (!enabledGlobalTMEventPublishing) {
         return deployedPolicies.hasKey(policyName);
     }
     return true;

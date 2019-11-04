@@ -27,11 +27,11 @@ public type GatewayConf object {
     public function setKeyManagerConf(KeyManagerConf keyManagerConfig) {
         gatewayConf.keyManagerConf = keyManagerConfig;
     }
-    public function getKeyManagerConf() returns(KeyManagerConf) {
+    public function getKeyManagerConf() returns (KeyManagerConf) {
         return gatewayConf.keyManagerConf;
     }
 };
 
-   public function getGatewayConfInstance() returns (GatewayConf) {
-       return gatewayConf;
-   }
+public function getGatewayConfInstance() returns (GatewayConf) {
+    return gatewayConf;
+}

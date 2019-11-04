@@ -16,35 +16,36 @@
 
 import ballerina/http;
 import ballerina/log;
-import ballerina/io;
 
 
 int bal_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, PORT, 9797);
 int jmx_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, JMX_PORT, 8080);
 
-http:Client balMetricEndpoint = new("http://localhost:" + bal_metric_port.toString());
-http:Client jmxMetricEndpoint = new("http://localhost:" + jmx_metric_port.toString());
+http:Client balMetricEndpoint = new ("http://localhost:" + bal_metric_port.toString());
+http:Client jmxMetricEndpoint = new ("http://localhost:" + jmx_metric_port.toString());
 
 
 service metric =
 @http:ServiceConfig {
-    basePath:"/*"
+    basePath: "/*",
+    auth: {
+        scopes: ["observability"]
+    }
 }
 service {
 
-     @http:ResourceConfig {
+    @http:ResourceConfig {
         path: "/balMetric"
     }
 
     resource function balMetric(http:Caller caller, http:Request req) returns error? {
-        
-        var bal_response = balMetricEndpoint->forward ("/metrics", <@untainted>req );
-        
-        if (bal_response is http:Response)  {
-            io:println("baleeeeeeeeeeeee");
+
+        var bal_response = balMetricEndpoint->forward("/metrics", <@untainted>req);
+
+        if (bal_response is http:Response) {
             var result = caller->respond(bal_response);
             if (result is error) {
-               log:printError("Error sending bal response http:responce", err = result);
+                log:printError("Error sending bal response http:responce", err = result);
             }
         } else {
 
@@ -53,20 +54,19 @@ service {
             res.setPayload(<string>bal_response.detail()?.message);
             var result = caller->respond(res);
             if (result is error) {
-               log:printError("Error sending bal response else http:responce", err = result);
+                log:printError("Error sending bal response else http:responce", err = result);
             }
         }
     }
 
     resource function jmxMetric(http:Caller caller, http:Request req) returns error? {
 
-        var jmx_response = jmxMetricEndpoint->forward ("/metrics", <@untainted>req );
-        
-        if (jmx_response is http:Response)  {
-            io:println("jmxxxxxxxxxxxxx");
+        var jmx_response = jmxMetricEndpoint->forward("/metrics", <@untainted>req);
+
+        if (jmx_response is http:Response) {
             var result = caller->respond(jmx_response);
             if (result is error) {
-               log:printError("Error sending jmx response http:responce", err = result);
+                log:printError("Error sending jmx response http:responce", err = result);
             }
         } else {
 
@@ -75,7 +75,7 @@ service {
             res.setPayload(<string>jmx_response.detail()?.message);
             var result = caller->respond(res);
             if (result is error) {
-               log:printError("Error sending jmx response else http:responce", err = result);
+                log:printError("Error sending jmx response else http:responce", err = result);
             }
         }
     }
@@ -83,7 +83,7 @@ service {
 };
 
 public function startObservabilityMetrics() {
-    if (isMetricsEnabled){
+    if (isMetricsEnabled) {
         ObservabilityMetricListener observabilityMetricListner = new;
         error? err = observabilityMetricListner.__attach(metric, ());
         error? err1 = observabilityMetricListner.__start();

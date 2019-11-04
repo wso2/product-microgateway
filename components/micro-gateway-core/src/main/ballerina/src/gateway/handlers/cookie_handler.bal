@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/config;
+import ballerina/http;
 import ballerina/runtime;
 
 
@@ -38,7 +38,7 @@ public type CookieAuthHandler object {
                 string[] splitedStrings = split(converted.trim(), "::");
                 string sessionId = splitedStrings[1];
                 if (sessionId == requiredCookie) {
-                    invocationContext.attributes[COOKIE_HEADER]=sessionId;
+                    invocationContext.attributes[COOKIE_HEADER] = sessionId;
                     return true;
                 }
             }
@@ -51,13 +51,13 @@ public type CookieAuthHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
-    public function process(http:Request req) returns boolean|http:AuthenticationError {
+    public function process(http:Request req) returns boolean | http:AuthenticationError {
         string authHeader = <string>runtime:getInvocationContext().attributes[AUTH_HEADER];
         string cookieValue = <string>runtime:getInvocationContext().attributes[COOKIE_HEADER];
         req.setHeader(authHeader, cookieValue);
         return false;
-        // we always set this handler false , and set the cookie value to authorization header 
-        // to be validated by subsequent filters
+    // we always set this handler false , and set the cookie value to authorization header
+    // to be validated by subsequent filters
     }
- 
+
 };
