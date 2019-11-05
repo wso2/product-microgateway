@@ -148,6 +148,14 @@
  public const string INITIAL_DELAY = "initialDelayInMillis";
  public const string DESTINATION = "destination";
 
+ //gRPC analytics related constants
+ public const string GRPC_ANALYTICS = "gRPCAnaltics";
+ public const string GRPC_ENDPOINT_URL = "endpointURL";
+ public const string KEYSTORE_FILE_PATH = "keyStorePath";
+ public const string KEYSTORE_PASSWORD = "keyStorePassword";
+ public const string TURSTSTORE_FILE_PATH = "trustStorePath";
+ public const string TRUSTSTORE_PASSWORD = "trustStorePassword";
+ 
 //validation_filter related constatnts
  public const string PATHS = "paths";
  public const string PARAMETERS = "parameters";

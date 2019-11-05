@@ -22,7 +22,7 @@ public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Filter only if analytics is enabled.
-        if (isAnalyticsEnabled) {
+        if (isAnalyticsEnabled || isgRPCAnalyticsEnabled) {
             checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
@@ -32,7 +32,7 @@ public type AnalyticsRequestFilter object {
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
 
-        if (isAnalyticsEnabled) {
+        if (isAnalyticsEnabled || isgRPCAnalyticsEnabled) {
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
@@ -41,11 +41,15 @@ public type AnalyticsRequestFilter object {
                     if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                         if(eventDTO is EventDTO) {
-                            // eventStream.publish(eventDTO);
+                             eventStream.publish(eventDTO);
                             io:println("This is the event DTO of throttling -->");
                             // ####################################################
                             json analyticsThrottleJSON = createThrottleJSON(throttleAnalyticsEventDTO);
-                            dataToAnalytics(analyticsThrottleJSON.toJsonString() , "InComingThrottledOutStream");
+                            io:print("\n\n###########GRPC Enable Value in throttle stream : ");
+                            io:println(isgRPCAnalyticsEnabled);
+                            if(isgRPCAnalyticsEnabled != false){
+                                dataToAnalytics(analyticsThrottleJSON.toJsonString() , "InComingThrottledOutStream");
+                            }
                             // ####################################################
                         } else {
                             printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
@@ -90,7 +94,11 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
             io:println("This is the falut event DTO --->");
             // ####################################################
             json analyticsFaultJSON = createFaultJSON(faultDTO);
-            dataToAnalytics(analyticsFaultJSON.toJsonString() , "FaultStream");
+            io:print("\n\n###########GRPC Enable Value in false stream : ");
+            io:println(isgRPCAnalyticsEnabled);
+            if(isgRPCAnalyticsEnabled != false){
+                dataToAnalytics(analyticsFaultJSON.toJsonString() , "FaultStream");
+            }
             // ####################################################
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
@@ -113,7 +121,11 @@ function doFilterResponseData(http:Response response, http:FilterContext context
             // ###############################################
             io:println("This is the Response event DTO --->");
             json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
-            dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+            io:print("\n\n###########GRPC Enable Value in response stream : ");
+            io:println(isgRPCAnalyticsEnabled);
+            if(isgRPCAnalyticsEnabled != false){
+                dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+            }
             // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
             // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
             // ##############################################

@@ -18,9 +18,12 @@ import ballerina/http;
 import ballerina/time;
 import ballerina/config;
 import ballerina/runtime;
+import ballerina/io;
 
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
+boolean isgRPCAnalyticsEnabled = false;
+boolean gRPCConfigsRead = false;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO|error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -134,6 +137,17 @@ function getAnalyticsEnableConfig() {
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
+function getGRPCAnalyticsEnableConfig() returns boolean{
+    map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
+    isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
+    printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
+    return isgRPCAnalyticsEnabled;
+}
+
+function initializegRPCAnalytics(){
+    io:println("getgRPCAnalyticsEnableConfig method in analytics util bal called");
+    boolean result = getGRPCAnalyticsEnableConfig();
+}
 
 function initializeAnalytics() {
     if (!configsRead) {
