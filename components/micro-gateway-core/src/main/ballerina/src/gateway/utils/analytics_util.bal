@@ -22,8 +22,15 @@ import ballerina/io;
 
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
+
+//gRPCConfigs
 boolean isgRPCAnalyticsEnabled = false;
 boolean gRPCConfigsRead = false;
+string endpointURL = "";
+string keyStoreFile = "";
+string keyStorePassword = "";
+string trustStoreFile = "";
+string trustStorePassword = "";
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO|error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -134,12 +141,25 @@ function getAnalyticsEnableConfig() {
     rotatingTime =  <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
     configsRead = true;
+    io:println("Uploading url : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
 function getGRPCAnalyticsEnableConfig() returns boolean{
     map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
     isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
+    endpointURL = <string>gRPCConfigs[GRPC_ENDPOINT_URL];
+    keyStoreFile = <string>gRPCConfigs[KEYSTORE_FILE_PATH];
+    keyStorePassword = <string>gRPCConfigs[KEYSTORE_PASSWORD];
+    trustStoreFile = <string>gRPCConfigs[TURSTSTORE_FILE_PATH];
+    trustStorePassword = <string>gRPCConfigs[TRUSTSTORE_PASSWORD];
+
+    io:println( "Endpint : " + endpointURL);
+    io:println( "K_Store : " + keyStoreFile);
+    io:println( "K_Pass  : " + keyStorePassword);
+    io:println( "T_Store : " + trustStoreFile);
+    io:println( "T_Pass  : " + trustStorePassword);
+
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     return isgRPCAnalyticsEnabled;
 }

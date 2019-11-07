@@ -127,7 +127,7 @@
  public const string TIME_INTERVAL = "timeInterval";
  public const string FILE_NAME = "FileName";
  public const string ACCEPT = "Accept";
- public const string ANALYTICS = "analytics";
+ public const string ANALYTICS = "analytics.fileUpload";
  public const string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
  public const string ROTATING_TIME = "rotatingPeriod";
  public const string UPLOADING_EP = "uploadingEndpoint";
@@ -149,7 +149,7 @@
  public const string DESTINATION = "destination";
 
  //gRPC analytics related constants
- public const string GRPC_ANALYTICS = "gRPCAnaltics";
+ public const string GRPC_ANALYTICS = "analytics.gRPCAnaltics";
  public const string GRPC_ENDPOINT_URL = "endpointURL";
  public const string KEYSTORE_FILE_PATH = "keyStorePath";
  public const string KEYSTORE_PASSWORD = "keyStorePassword";
