@@ -18,7 +18,6 @@ import ballerina/auth;
 import ballerina/crypto;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
-import ballerina/observe;
 import ballerina/runtime;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.

@@ -48,6 +48,7 @@ GWHOME=`cd "$PRGDIR/.." ; pwd`
 export BALLERINA_HOME=$GWHOME'/runtime'
 export JAVA_HOME=$GWHOME'/lib/jdk8u202-b08-jre'
 export MGW_VERSION="3.1.0"
+export GW_HOME="$GWHOME"
 
 if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
@@ -88,9 +89,55 @@ if [ ! "$CMD" = "stop" ]; then
   fi
 fi
 
+if [ -z "$JAVACMD" ] ; then
+    if [ -n "$JAVA_HOME"  ] ; then
+        if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+            # IBM's JDK on AIX uses strange locations for the executables
+            JAVACMD="$JAVA_HOME/jre/sh/java"
+        else
+            JAVACMD="$JAVA_HOME/bin/java"
+        fi
+    else
+        JAVACMD=java
+    fi
+fi
+
+#add system variable VERBOSE_ENABLED
+VerboseRemovedArgs="$@"
+if [[ " ${VerboseRemovedArgs[*]} " == *" --verbose "* ]]; then
+    VERBOSE_ENABLED=true
+    #delete '--verbose' if available
+    delete=( --verbose )
+    VerboseRemovedArgs=${VerboseRemovedArgs/$delete}
+    #set modified args as $@
+    set -- $VerboseRemovedArgs
+else
+    VERBOSE_ENABLED=false
+fi
+
 # Extract ballerina runtime
 if [ ! -d "$GWHOME/runtime" ]; then
-    $PRGDIR/tools 2>&1 | tee -a $GWHOME/logs/microgateway.log
+    echo "Initializing Runtime..."
+    ALL_CLASSPATH=""
+    for j in "$GWHOME"/lib/gateway/*.jar
+    do
+        ALL_CLASSPATH="$ALL_CLASSPATH":$j
+    done
+    $JAVACMD \
+        -Xms256m -Xmx1024m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+        $JAVA_OPTS \
+        -classpath "$ALL_CLASSPATH" \
+        -Djava.security.egd=file:/dev/./urandom \
+        -Dballerina.home=$BALLERINA_HOME \
+        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
+        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
+        -Dfile.encoding=UTF8 \
+        -Dtemplates.dir.path="$GWHOME/logs" \
+        -Dcli.home=$GWHOME \
+        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
+        org.wso2.micro.gateway.core.unzip.UnzipUtility | tee -a $GWHOME/logs/microgateway.log
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
     fi

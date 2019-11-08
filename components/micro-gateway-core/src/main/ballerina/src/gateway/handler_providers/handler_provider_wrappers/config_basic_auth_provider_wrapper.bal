@@ -15,11 +15,7 @@
 // under the License.
 
 import ballerina/auth;
-import ballerina/crypto;
-import ballerina/lang.'array as arrays;
-import ballerina/lang.'string as strings;
 import ballerina/observe;
-import ballerina/runtime;
 
 public type BasicAuthProviderWrapper object {
     *auth:InboundAuthProvider;

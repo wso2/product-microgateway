@@ -16,7 +16,6 @@
 
 import ballerina/auth;
 import ballerina/http;
-import ballerina/observe;
 import ballerina/runtime;
 
 # Representation of the key validation  handler

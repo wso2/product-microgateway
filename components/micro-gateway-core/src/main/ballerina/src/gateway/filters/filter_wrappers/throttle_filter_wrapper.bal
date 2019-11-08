@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/observe;
-import ballerina/runtime;
 
 public type ThrottleFilterWrapper object {
     ThrottleFilter throttleFilter;

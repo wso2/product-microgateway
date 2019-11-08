@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/observe;
 import ballerina/runtime;
 
 public type AnalyticsRequestFilter object {
