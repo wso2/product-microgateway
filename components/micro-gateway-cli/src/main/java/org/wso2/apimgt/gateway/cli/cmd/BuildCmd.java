@@ -79,29 +79,38 @@ public class BuildCmd implements LauncherCmd {
 
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(CmdUtils.getProjectDirectoryPath(projectName));
-
-        if (!projectLocation.exists()) {
-            throw new CLIRuntimeException("Project " + projectName + " does not exist.");
-        }
-        //extract the ballerina platform and runtime
-        ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-
-        String importedAPIDefLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
-        String addedAPIDefLocation = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-        boolean isImportedAPIsAvailable = checkDirContentAvailability(importedAPIDefLocation);
-        boolean isAddedAPIsAvailable = checkDirContentAvailability(addedAPIDefLocation);
-
-        if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
-            throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
-        }
-
         try {
+            String projectCanonicalPath = projectLocation.getCanonicalPath();
+            String projectAbsolutePath = projectLocation.getAbsolutePath();
+            if (!projectLocation.exists()) {
+                throw new CLIRuntimeException("Project " + projectName + " does not exist.");
+            }
+            //extract the ballerina platform and runtime
+            ToolkitLibExtractionUtils.extractPlatformAndRuntime();
+
+            String importedAPIDefLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
+            String addedAPIDefLocation = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+            boolean isImportedAPIsAvailable = checkDirContentAvailability(importedAPIDefLocation);
+            boolean isAddedAPIsAvailable = checkDirContentAvailability(addedAPIDefLocation);
+
+            if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
+                throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
+            }
+            // Some times user might run the command from different directory other than the directory where the project
+            // exists. In those cases we need to ask the users to run the command in directory where project
+            // directory exists.
+            if (!projectAbsolutePath.equalsIgnoreCase(projectCanonicalPath)) {
+                throw new CLIRuntimeException(
+                        "Current directory: '" + CmdUtils.getUserDir() + "' should have a project with name: '"
+                                + projectName
+                                + "'. Execute the build command from the directory where the project is initialized");
+            }
             String toolkitConfigPath = CmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
 
             // Create policies directory
-            String genPoliciesPath = CmdUtils.getProjectTargetModulePath(projectName) + File.separator
-                    + CliConstants.GEN_POLICIES_DIR;
+            String genPoliciesPath =
+                    CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.GEN_POLICIES_DIR;
             CmdUtils.createDirectory(genPoliciesPath, false);
 
             // Generate policy definitions
@@ -111,14 +120,14 @@ public class BuildCmd implements LauncherCmd {
             // Copy static source files
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
-            CmdUtils.copyFolder(CmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                            + CliConstants.PROJECT_SERVICES_DIR,
+            CmdUtils.copyFolder(
+                    CmdUtils.getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_SERVICES_DIR,
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator
                             + CliConstants.PROJECT_SERVICES_DIR);
             new CodeGenerator().generate(projectName, true);
         } catch (IOException e) {
-            throw new CLIInternalException(
-                    "Error occurred while generating source code for the open API definitions.", e);
+            throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
+                    e);
         }
     }
 

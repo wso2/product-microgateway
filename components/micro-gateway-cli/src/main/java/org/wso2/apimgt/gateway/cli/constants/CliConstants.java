@@ -92,4 +92,9 @@ public class CliConstants {
     public static final String API_SWAGGER = "swagger.json";
     public static final String API_OPENAPI_YAML = "openAPI.yaml";
     public static final String REST_API_V1_PREFIX = "v1.";
+
+    public static final String JSON_EXTENSION = ".json";
+    public static final String YAML_EXTENSION = ".yaml";
+
+    public static final String WARN_LOG_PATTERN = "WARN: ";
 }

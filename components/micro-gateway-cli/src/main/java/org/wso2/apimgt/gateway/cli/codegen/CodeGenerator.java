@@ -42,6 +42,7 @@ import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -140,13 +141,20 @@ public class CodeGenerator {
             try {
                 Files.walk(Paths.get(openApiPath)).filter(path -> {
                     Path fileName = path.getFileName();
-                    return fileName != null &&
-                            (fileName.toString().endsWith(".json") || fileName.toString().endsWith(".yaml"));
+                    return fileName != null && (fileName.toString().endsWith(CliConstants.JSON_EXTENSION) || fileName
+                            .toString().endsWith(CliConstants.YAML_EXTENSION));
                 }).forEach(path -> {
                     try {
                         OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-                        OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString());
-                        ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, path);
+                        String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                        String openAPIAsJson = OpenAPICodegenUtils.getOpenAPIAsJson(openAPI, openAPIContent, path);
+                        String openAPIContentAsJson = openAPIAsJson;
+                        if (path.toString().endsWith(CliConstants.YAML_EXTENSION)) {
+                            openAPIContentAsJson = OpenAPICodegenUtils.convertYamlToJson(openAPIContent);
+                        }
+                        String openAPIVersion = OpenAPICodegenUtils.findSwaggerVersion(openAPIContentAsJson, false);
+                        OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString(), openAPIVersion);
+                        ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson, path);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
 

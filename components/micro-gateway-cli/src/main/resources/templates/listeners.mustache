@@ -4,7 +4,7 @@ import ballerina/config;
 import ballerina/io;
 import ballerina/log;
 
-{{#if containerConfig.hasDocker}}import ballerinax/docker;{{/if}}
+{{#if containerConfig.hasDocker}}import ballerina/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerinax/kubernetes;{{/if}}
 
 //Throttle tier data initiation
