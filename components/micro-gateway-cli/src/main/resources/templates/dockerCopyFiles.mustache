@@ -2,7 +2,7 @@
     @docker:CopyFiles {
         files: [
             {{#containerConfig.docker.dockerCopyFiles.files}}
-                { {{#if source}} sourceFile:"{{source}}", {{/if}}
+                { {{#if source}} source:"{{source}}", {{/if}}
                   {{#if target}} target:"{{target}}", {{/if}}
                   {{#if isBallerinaConf}} isBallerinaConf:{{isBallerinaConf}} {{/if}}
                 }{{#unless @last}},
