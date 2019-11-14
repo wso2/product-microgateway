@@ -34,7 +34,7 @@ public class UnzipUtility {
     private static final int BUFFER_SIZE = 4096;
 
     /**
-     * Add file inside the src directory to the ZipOutputStream.
+     * unzip folders and files seperately
      *
      * @param zipFilePath    file path of the zip file
      * @param destDirectory  file path of the destination driectory
@@ -75,7 +75,7 @@ public class UnzipUtility {
     }
 
     /**
-     * Add file inside the src directory to the ZipOutputStream.
+     * extract files in the ZipInputStream.
      *
      * @param zipIn      ZipInputStream
      * @param filePath   file path of each file inside the driectory
