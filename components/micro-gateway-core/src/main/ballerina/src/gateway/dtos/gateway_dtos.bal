@@ -53,14 +53,14 @@ public type APIRequestMetaDataDto record {
 };
 
 public type AuthenticationContext record {
-    boolean authenticated=false;
-    string username="";
-    string applicationTier=UNLIMITED_TIER;
-    string tier=DEFAULT_SUBSCRIPTION_TIER;
-    string apiTier=UNLIMITED_TIER;
-    boolean isContentAwareTierPresent=false;
-    string apiKey="";
-    string keyType=PRODUCTION_KEY_TYPE;
+    boolean authenticated = false;
+    string username = "";
+    string applicationTier = UNLIMITED_TIER;
+    string tier = DEFAULT_SUBSCRIPTION_TIER;
+    string apiTier = UNLIMITED_TIER;
+    boolean isContentAwareTierPresent = false;
+    string apiKey = "";
+    string keyType = PRODUCTION_KEY_TYPE;
     string callerToken?;
     string applicationId = UNKNOWN_VALUE;
     string applicationName = UNKNOWN_VALUE;

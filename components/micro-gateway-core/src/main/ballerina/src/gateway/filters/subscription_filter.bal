@@ -26,8 +26,8 @@ public type SubscriptionFilter object {
 
     public boolean subsciptionEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, false);
 
-    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext filterContext)
-                        returns boolean {
+    public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext filterContext)
+    returns boolean {
         //Start a span attaching to the system span.
         int | error | () spanId_req = spanStart(SUBSCRIPTION_FILTER_REQUEST);
         int startingTime = getCurrentTime();
@@ -47,7 +47,7 @@ public type SubscriptionFilter object {
 };
 
 function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
-        @tainted http:FilterContext filterContext, boolean subsciptionEnabled) returns boolean {
+@tainted http:FilterContext filterContext, boolean subsciptionEnabled) returns boolean {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
     if (authContext is runtime:AuthenticationContext) {
@@ -68,7 +68,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
         string currentAPIContext = getContext(filterContext);
         boolean subscriptionValidated = false;
         AuthenticationContext authenticationContext = {};
-        json|error decodedPayload = {};
+        json | error decodedPayload = {};
         if (jwtToken is string) {
             var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
             if (cachedJwt is jwt:CachedJwt) {
@@ -117,7 +117,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
                 authenticationContext.apiKey = jwtToken;
                 authenticationContext.username = decodedPayload.sub.toString();
                 authenticationContext.callerToken = jwtToken;
-                json|error application = decodedPayload.application;
+                json | error application = decodedPayload.application;
                 if (application is map<json>) {
                     if (decodedPayload.application.id != null) {
                         authenticationContext.applicationId = decodedPayload.application.id.toString();
@@ -141,13 +141,13 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
                     authenticationContext.keyType = decodedPayload.keytype.toString();
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     printDebug(KEY_SUBSCRIPTION_FILTER, "Setting key type as " +
-                                                        authenticationContext.keyType);
+                    authenticationContext.keyType);
                 }
-                json|error jsonSubscribedApis = decodedPayload.subscribedAPIs;
+                json | error jsonSubscribedApis = decodedPayload.subscribedAPIs;
                 if (jsonSubscribedApis is json) {
                     printDebug(KEY_SUBSCRIPTION_FILTER, "subscribedAPIs claim found in the jwt");
                     if (jsonSubscribedApis is json[]) {
-                    subscribedAPIList = jsonSubscribedApis;
+                        subscribedAPIList = jsonSubscribedApis;
                     }
                     printDebug(KEY_SUBSCRIPTION_FILTER, "Subscribed APIs list : " + subscribedAPIList.toString());
                     APIConfiguration? apiConfig = apiConfigAnnotationMap[filterContext.getServiceName()];
@@ -155,17 +155,17 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
                     int index = 0;
                     while (index < l) {
                         var subscription = subscribedAPIList[index];
-                        string apiName="";
-                        string apiVersion="";
+                        string apiName = "";
+                        string apiVersion = "";
                         if (apiConfig is APIConfiguration) {
-                            apiName= apiConfig.name;
+                            apiName = apiConfig.name;
                             apiVersion = apiConfig?.apiVersion;
                         }
                         if (subscription.name.toString() == apiName &&
                         subscription.'version.toString() == apiVersion) {
                             printDebug(KEY_SUBSCRIPTION_FILTER, "Found a matching subscription with name:" +
-                                    subscription.name.toString() + " version:" + subscription.'version.
-                                    toString());
+                            subscription.name.toString() + " version:" + subscription.'version.
+                            toString());
                             subscriptionValidated = true;
                             authenticationContext.authenticated = true;
                             authenticationContext.tier = subscription.subscriptionTier.toString();
@@ -177,7 +177,7 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
                             printDebug(KEY_SUBSCRIPTION_FILTER, "Subscription validation success.");
                             return true;
                         }
-                        index+=1;
+                        index += 1;
                     }
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     if (subsciptionEnabled && !subscriptionValidated) {

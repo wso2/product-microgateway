@@ -261,7 +261,7 @@ function isResourceLevelThrottled(http:FilterContext context, AuthenticationCont
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
-        if(enabledGlobalTMEventPublishing) {
+        if (enabledGlobalTMEventPublishing) {
             resourceLevelThrottleKey += "_default";
         }
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
