@@ -15,7 +15,7 @@
     copyFiles:[
       {{#containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
           {
-            {{#if source}} sourceFile:"{{source}}", {{/if}}
+            {{#if sourceFile}} sourceFile:"{{sourceFile}}", {{/if}}
             {{#if target}} target:"{{target}}" {{/if}}
           }{{#unless @last}},{{/unless}}
       {{/containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
