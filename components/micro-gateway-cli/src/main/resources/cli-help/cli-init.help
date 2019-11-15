@@ -20,6 +20,11 @@ OPTIONS
        <Optional>
        Deployment configuration file for docker/kubernetes environments
 
+    -a
+        --api-definition
+            <Optional>
+            File path of api definition
+
 EXAMPLES
     $ micro-gw init accounts-project
 

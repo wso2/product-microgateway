@@ -14,6 +14,10 @@ OPTIONS
        <Optional>
        Deployment configuration file for docker/kubernetes environments
 
+    --docker
+            <Optional>
+            Prompt for docker configurations (image name, tag and baseImage)
+
 EXAMPLES
     $ micro-gw build accounts-project
 

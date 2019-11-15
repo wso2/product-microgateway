@@ -21,6 +21,7 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.cmd.CommandUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,9 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.CopyFile;
+import org.wso2.apimgt.gateway.cli.model.config.CopyFileConfig;
+import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
@@ -45,6 +49,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -69,6 +75,10 @@ public class BuildCmd implements LauncherCmd {
     @SuppressWarnings("unused")
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--docker")
+    private boolean isDocker;
 
     public void execute() {
         if (helpFlag) {
@@ -168,6 +178,34 @@ public class BuildCmd implements LauncherCmd {
             }
             String deploymentConfigPath = CmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            if (isDocker) {
+                PrintStream outStream = System.out;
+                String dockerName = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ").trim();
+                String dockerTag = CmdUtils.promptForTextInput(outStream, "Enter docker image tag: ").trim();
+                String dockerBaseImage = CmdUtils.promptForTextInput(outStream,
+                        "Enter docker baseImage [default=" + CliConstants.DEFAULT_DOCKER_BASE_IMAGE + "]: ").trim();
+                if (StringUtils.isBlank(dockerBaseImage)) {
+                    dockerBaseImage = CliConstants.DEFAULT_DOCKER_BASE_IMAGE;
+                }
+
+                DockerConfig dockerConfig = containerConfig.getDocker().getDockerConfig();
+                CopyFileConfig dockerCopyFiles = containerConfig.getDocker().getDockerCopyFiles();
+                dockerConfig.setEnable(true);
+                dockerConfig.setName(dockerName);
+                dockerConfig.setTag(dockerTag);
+                dockerConfig.setBaseImage(dockerBaseImage);
+
+                dockerCopyFiles.setEnable(true);
+
+                CopyFile copyFile = new CopyFile();
+                copyFile.setIsBallerinaConf("true");
+                copyFile.setSourceFile(CmdUtils.getMicroGWConfResourceLocation());
+                copyFile.setTarget(File.separator + CliConstants.WSO2 + File.separator + CliConstants.MGW
+                        + File.separator + CliConstants.GW_DIST_CONF + File.separator
+                        + CliConstants.MICRO_GW_CONF_FILE);
+                dockerCopyFiles.setFiles(new ArrayList<>(Collections.singletonList(copyFile)));
+            }
+
             CmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();

@@ -265,7 +265,7 @@ public final class CmdUtils {
      *
      * @param projectName name of the project
      */
-    public static void createProjectStructure(String projectName) throws IOException {
+    public static void createProjectStructure(String projectName, String apiDefinition) throws IOException {
         File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
@@ -280,6 +280,12 @@ public final class CmdUtils {
 
         String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
+
+        if (apiDefinition != null) {
+            String apidDefinitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR +
+                    File.separator + Paths.get(apiDefinition).getFileName();
+            Files.copy(Paths.get(apiDefinition), Paths.get(apidDefinitionsPath));
+        }
 
         String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -440,6 +446,16 @@ public final class CmdUtils {
     public static String getMainConfigLocation() {
         return getCLIHome() + File.separator + CliConstants.GW_DIST_CONF + File.separator
                 + CliConstants.MAIN_CONFIG_FILE_NAME;
+    }
+
+    /**
+     * Returns location of the micro-gw.conf resource file
+     *
+     * @return path configuration file
+     */
+    public static String getMicroGWConfResourceLocation() {
+        return getCLIHome() + File.separator + CliConstants.GW_DIST_RESOURCES + File.separator
+                + CliConstants.GW_DIST_CONF + File.separator + CliConstants.MICRO_GW_CONF_FILE;
     }
 
     /**
@@ -891,6 +907,18 @@ public final class CmdUtils {
     public static String promptForTextInput(PrintStream outStream, String msg) {
         outStream.println(msg);
         return System.console().readLine();
+    }
+
+    /**
+     * Prompts for a password input.
+     *
+     * @param outStream Print Stream
+     * @param msg       message
+     * @return user entered text
+     */
+    public static String promptForPasswordInput(PrintStream outStream, String msg) {
+        outStream.println(msg);
+        return new String(System.console().readPassword());
     }
 
     /**

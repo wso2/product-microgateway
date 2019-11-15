@@ -62,6 +62,10 @@ public class InitCmd implements LauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-a", "--api-definition"})
+    private String apiDefinition;
+
     @Override
     public void execute() {
         if (helpFlag) {
@@ -84,9 +88,19 @@ public class InitCmd implements LauncherCmd {
             CmdUtils.deleteProject(projectName);
         }
 
+        //validate api-definition file path
+        if (apiDefinition != null) {
+            File apiDefinitionFile = new File(apiDefinition);
+            if (!apiDefinitionFile.exists()) {
+                throw CmdUtils.createUsageException(
+                        "Error while getting the open API definition. Probably the file path '"
+                                + apiDefinition + "' is invalid.");
+            }
+        }
+
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        init(projectName, deploymentConfigPath);
+        init(projectName, deploymentConfigPath, apiDefinition);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
         OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
@@ -110,9 +124,9 @@ public class InitCmd implements LauncherCmd {
      * @param projectName          name of the project being initialized
      * @param deploymentConfigPath path to deployment config file (used in k8s scenarios)
      */
-    private static void init(String projectName, String deploymentConfigPath) {
+    private static void init(String projectName, String deploymentConfigPath, String apiDefinition) {
         try {
-            CmdUtils.createProjectStructure(projectName);
+            CmdUtils.createProjectStructure(projectName, apiDefinition);
             CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
