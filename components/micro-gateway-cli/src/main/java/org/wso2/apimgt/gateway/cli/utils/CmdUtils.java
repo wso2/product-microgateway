@@ -910,18 +910,6 @@ public final class CmdUtils {
     }
 
     /**
-     * Prompts for a password input.
-     *
-     * @param outStream Print Stream
-     * @param msg       message
-     * @return user entered text
-     */
-    public static String promptForPasswordInput(PrintStream outStream, String msg) {
-        outStream.println(msg);
-        return new String(System.console().readPassword());
-    }
-
-    /**
      * Returns path to the /API-Files of a given project in the current working directory
      *
      * @param projectName name of the project
