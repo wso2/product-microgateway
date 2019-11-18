@@ -119,10 +119,6 @@ public class BuildCmd implements GatewayLauncherCmd {
                     + GatewayCliConstants.GEN_POLICIES_DIR, projectName);
             GatewayCmdUtils.copyAndReplaceFolder(GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName),
                     GatewayCmdUtils.getProjectGenSrcInterceptorsDirectoryPath(projectName));
-            GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                            + GatewayCliConstants.PROJECT_SERVICES_DIR,
-                    GatewayCmdUtils.getProjectGenSrcDirectoryPath(projectName) + File.separator
-                            + GatewayCliConstants.PROJECT_SERVICES_DIR);
             codeGenerator.generate(projectName, true);
 
             //Initializing the ballerina project and creating .ballerina folder.
