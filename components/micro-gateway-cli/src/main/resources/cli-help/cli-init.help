@@ -21,9 +21,29 @@ OPTIONS
        Deployment configuration file for docker/kubernetes environments
 
     -a
-        --api-definition
+    --api-definition
+        <Optional>
+        File path of api definition
+
+    -u
+    --api-definition-url
+        <Optional>
+        URL to api definition
+
+        OPTIONS
+            -r
+            --headers
             <Optional>
-            File path of api definition
+            Request properties to download file. Comma (,) separated.
+
+            -v
+            --values
+            <Optional>
+            Corresponding values for request properties to download file. Comma (,) separated.
+
+        EXAMPLES
+            ./micro-gw init pet -u https://github.com/wso2/product-microgateway/blob/master/samples/petstore_basic.yaml
+            ./micro-gw init pet -u https://example.com/petstore_basic.yaml -r header1,header2 -v value1,value2
 
 EXAMPLES
     $ micro-gw init accounts-project

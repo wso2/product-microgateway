@@ -18,6 +18,7 @@
 package org.wso2.apimgt.gateway.cli.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
@@ -45,11 +46,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -261,11 +266,45 @@ public final class CmdUtils {
     }
 
     /**
+     * Set api definition file
+     *
+     * @param projectName name of the project
+     * @param apiDefinition api definition file local path
+     * @param apiDefinitionURL api definition download URL
+     * @param headers api definition download request headers
+     * @param values api definition download values for request headers
+     */
+    private static void setApiDefinition(String projectName, String apiDefinition, String apiDefinitionURL,
+                                         String headers, String values) throws IOException {
+        String apiDefinitionsPath = getUserDir() + File.separator + projectName + File.separator +
+                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator;
+        if (!StringUtils.isEmpty(apiDefinition)) {
+            Files.copy(Paths.get(apiDefinition), Paths.get(apiDefinitionsPath +
+                        Paths.get(apiDefinition).getFileName()));
+        }
+        if (!StringUtils.isEmpty(apiDefinitionURL)) {
+            ArrayList<String> headersList = new ArrayList<>();
+            ArrayList<String> valuesList = new ArrayList<>();
+            if (!StringUtils.isBlank(headers) && !StringUtils.isBlank(values)) {
+                headersList = new ArrayList(Arrays.asList(headers.split(",")));
+                valuesList = new ArrayList(Arrays.asList(values.split(",")));
+                if (headersList.size() > 0) {
+                    if (headersList.size() != valuesList.size()) {
+                        throw new CLIRuntimeException("Provided number of header and number of values is different");
+                    }
+                }
+            }
+            downloadFile(apiDefinitionURL, apiDefinitionsPath, headersList, valuesList);
+        }
+    }
+
+    /**
      * Create a project structure for a particular project name.
      *
      * @param projectName name of the project
      */
-    public static void createProjectStructure(String projectName, String apiDefinition) throws IOException {
+    public static void createProjectStructure(String projectName, String apiDefinition, String apiDefinitionURL,
+                                              String headers, String values) throws IOException {
         File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
@@ -281,11 +320,7 @@ public final class CmdUtils {
         String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
 
-        if (apiDefinition != null) {
-            String apidDefinitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR +
-                    File.separator + Paths.get(apiDefinition).getFileName();
-            Files.copy(Paths.get(apiDefinition), Paths.get(apidDefinitionsPath));
-        }
+        setApiDefinition(projectName, apiDefinition, apiDefinitionURL, headers, values);
 
         String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -836,6 +871,74 @@ public final class CmdUtils {
         }
     }
 
+    /**
+     * Download file
+     *
+     * @param source source URL
+     * @param destination destination path to save file
+     * @param headers api definition download request headers
+     * @param values api definition download values for request headers
+     */
+    private static void downloadFile(String source, String destination, ArrayList<String> headers,
+                                     ArrayList<String> values) throws IOException {
+
+        URL url;
+        HttpURLConnection urlConn = null;
+        FileOutputStream outputStream = null;
+        try {
+            url = new URL(source);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setRequestMethod(CliConstants.GET);
+            if (headers.size() > 0) {
+                for (int i = 0; i < headers.size(); i++) {
+                    urlConn.setRequestProperty(headers.get(i), values.get(i));
+                }
+            }
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode == CliConstants.HTTP_OK) {
+                String fileName = "";
+                String disposition = urlConn.getHeaderField("Content-Disposition");
+
+                if (disposition != null) {
+                    // extracts file name from header field
+                    int index = disposition.indexOf("filename=");
+                    if (index > 0) {
+                        fileName = disposition.substring(index + 10, disposition.length() - 1);
+                    }
+                } else {
+                    // extracts file name from URL
+                    fileName = source.substring(source.lastIndexOf("/") + 1);
+                }
+
+                // opens input stream from the HTTP connection
+                InputStream inputStream = urlConn.getInputStream();
+                String saveFilePath = destination + File.separator + fileName;
+
+                // opens an output stream to save into file
+                outputStream = new FileOutputStream(saveFilePath);
+
+                int bytesRead;
+                byte[] buffer = new byte[1024];
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                inputStream.close();
+
+            } else {
+                throw new CLIInternalException("Error occurred while downloading file. Status code: " + responseCode);
+            }
+        } catch (IOException e) {
+            throw new CLIRuntimeException("Error while downloading file from " + source + ": " + e.getMessage());
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
+    }
+
     public static ContainerConfig getContainerConfig() {
         return containerConfig;
     }
@@ -907,18 +1010,6 @@ public final class CmdUtils {
     public static String promptForTextInput(PrintStream outStream, String msg) {
         outStream.println(msg);
         return System.console().readLine();
-    }
-
-    /**
-     * Prompts for a password input.
-     *
-     * @param outStream Print Stream
-     * @param msg       message
-     * @return user entered text
-     */
-    public static String promptForPasswordInput(PrintStream outStream, String msg) {
-        outStream.println(msg);
-        return new String(System.console().readPassword());
     }
 
     /**

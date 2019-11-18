@@ -80,6 +80,14 @@ public class BuildCmd implements LauncherCmd {
     @Parameter(names = "--docker")
     private boolean isDocker;
 
+    @SuppressWarnings("unused")
+    @Parameter(names = "--docker-image")
+    private String dockerImage;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--docker-base-image")
+    private String dockerBaseImage;
+
     public void execute() {
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
@@ -180,13 +188,28 @@ public class BuildCmd implements LauncherCmd {
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
             if (isDocker) {
                 PrintStream outStream = System.out;
-                String dockerName = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ").trim();
-                String dockerTag = CmdUtils.promptForTextInput(outStream, "Enter docker image tag: ").trim();
-                String dockerBaseImage = CmdUtils.promptForTextInput(outStream,
-                        "Enter docker baseImage [default=" + CliConstants.DEFAULT_DOCKER_BASE_IMAGE + "]: ").trim();
+
+                if (StringUtils.isEmpty(dockerImage)) {
+                    dockerImage = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ["
+                            + projectName + ":" + CliConstants.DEFAULT_VERSION + "]").trim();
+                }
+
+                if (StringUtils.isEmpty(dockerBaseImage)) {
+                    dockerBaseImage = CmdUtils.promptForTextInput(outStream,
+                            "Enter docker baseImage [" + CliConstants.DEFAULT_DOCKER_BASE_IMAGE + "]: ").trim();
+                }
+
+                if (StringUtils.isBlank(dockerImage)) {
+                    dockerImage = projectName + ":" + CliConstants.DEFAULT_VERSION;
+                }
+
                 if (StringUtils.isBlank(dockerBaseImage)) {
                     dockerBaseImage = CliConstants.DEFAULT_DOCKER_BASE_IMAGE;
                 }
+
+                String[] dockerNameAndTag = dockerImage.split(":");
+                String dockerName = dockerNameAndTag[0];
+                String dockerTag = dockerNameAndTag[1];
 
                 DockerConfig dockerConfig = containerConfig.getDocker().getDockerConfig();
                 CopyFileConfig dockerCopyFiles = containerConfig.getDocker().getDockerCopyFiles();
