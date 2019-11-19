@@ -21,7 +21,7 @@ public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = spanStart(ANALYTICS_FILTER_REQUEST);
+        int | error | () spanId_req = startSpan(ANALYTICS_FILTER_REQUEST);
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
@@ -30,13 +30,13 @@ public type AnalyticsRequestFilter object {
             doFilterRequest(request, context);
         }
         //Finish span.
-        spanFinish(ANALYTICS_FILTER_REQUEST, spanId_req);
+        finishSpan(ANALYTICS_FILTER_REQUEST, spanId_req);
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_res = spanStart(ANALYTICS_FILTER_RESPONSE);
+        int | error | () spanId_res = startSpan(ANALYTICS_FILTER_RESPONSE);
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
@@ -69,7 +69,7 @@ public type AnalyticsRequestFilter object {
             }
         }
         //Finish span.
-        spanFinish(ANALYTICS_FILTER_RESPONSE, spanId_res);
+        finishSpan(ANALYTICS_FILTER_RESPONSE, spanId_res);
         return true;
     }
 

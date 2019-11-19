@@ -23,23 +23,23 @@ boolean isTracingEnabled = getConfigBooleanValue(MICRO_GATEWAY_TRACING, ENABLED,
 boolean isMetricsEnabled = getConfigBooleanValue(MICRO_GATEWAY_METRICS, ENABLED, false);
 
 //metrics
-public function gaugeDurationSet(int starting) returns float {
+public function InitializeGauge(string name, string description, map<string> gaugeTags) returns observe:Gauge {
+    observe:Gauge localGauge = new (name, description, gaugeTags);
+    registerGauge(localGauge);
+    return localGauge;
+}
+
+public function setGaugeDuration(int starting) returns float {
     int ending = getCurrentTime();
     float latency = (ending - starting) * 1.0;
     return (latency);
 }
 
-public function gaugeInitialize(string name, string description, map<string> gaugeTags) returns observe:Gauge {
-    observe:Gauge localGauge = new (name, description, gaugeTags);
-    gaugeRegister(localGauge);
-    return localGauge;
-}
-
-public function gaugeUpdate(observe:Gauge localGauge, float latency) {
+public function updateGauge(observe:Gauge localGauge, float latency) {
     localGauge.setValue(latency);
 }
 
-public function gaugeRegister(observe:Gauge gauge) {
+public function registerGauge(observe:Gauge gauge) {
     error? result = gauge.register();
     if (result is error) {
         log:printError("Error in registering Counter", err = result);
@@ -65,17 +65,17 @@ public function gaugeTagDetails_basicAuth(string category) returns map<string> {
     return gaugeTags;
 }
 
-public function gaugeTagInvocationContextSet(string attribute, map<string> gaugeTags) {
+public function setGaugeTagInvocationContext(string attribute, map<string> gaugeTags) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     invocationContext.attributes[attribute] = gaugeTags;
 }
 
-public function gaugeTagInvocationContextGet(string attribute) returns map<string> {
+public function getGaugeTagInvocationContext(string attribute) returns map<string> {
     return (<map<string>>runtime:getInvocationContext().attributes[attribute]);
 }
 
 //tracing
-public function spanStart(string spanName) returns int | error | () {
+public function startSpan(string spanName) returns int | error | () {
     if (isTracingEnabled) {
         return observe:startSpan(spanName);
     }
@@ -84,7 +84,7 @@ public function spanStart(string spanName) returns int | error | () {
     }
 }
 
-public function spanFinish(string spanName, int | error | () spanId) {
+public function finishSpan(string spanName, int | error | () spanId) {
     if (spanId is int) {
         error? result = observe:finishSpan(spanId);
         checkFinishSpanError(result, spanName);

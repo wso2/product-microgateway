@@ -48,12 +48,12 @@ public type KeyValidationHandlerWrapper object {
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
         int startingTime = getCurrentTime();
         map<string> gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | http:AuthenticationError result = self.keyValidationHandler.process(req);
-        float latency = gaugeDurationSet(startingTime);
-        gaugeUpdate(localGauge, latency);
-        gaugeUpdate(localGauge_total, latency);
+        float latency = setGaugeDuration(startingTime);
+        updateGauge(localGauge, latency);
+        updateGauge(localGauge_total, latency);
         return result;
     }
 

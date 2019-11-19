@@ -27,13 +27,13 @@ public type ThrottleFilterWrapper object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Gauge metric initialization
         map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_THROTTLING);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_THROTTLING});
+        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_THROTTLING});
         int startingTime = getCurrentTime();
         boolean result = self.throttleFilter.filterRequest(caller, request, context);
-        float latency = gaugeDurationSet(startingTime);
-        gaugeUpdate(localGauge, latency);
-        gaugeUpdate(localGauge_total, latency);
+        float latency = setGaugeDuration(startingTime);
+        updateGauge(localGauge, latency);
+        updateGauge(localGauge_total, latency);
         return result;
     }
 

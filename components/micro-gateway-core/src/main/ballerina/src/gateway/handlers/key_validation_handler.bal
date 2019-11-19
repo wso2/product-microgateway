@@ -58,7 +58,7 @@ public type KeyValidationHandler object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
         //Start a span attaching to the system span.
-        int | error | () spanId_Process = spanStart(KEY_VALIDATION_HANDLER_PROCESS);
+        int | error | () spanId_Process = startSpan(KEY_VALIDATION_HANDLER_PROCESS);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         string authHeader = invocationContext.attributes[AUTH_HEADER].toString();
         string headerValue = req.getHeader(authHeader);
@@ -80,11 +80,11 @@ public type KeyValidationHandler object {
                 checkAndRemoveAuthHeaders(req, authHeaderName);
             }
             //Finish span.
-            spanFinish(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
+            finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
             return authenticationResult;
         } else {
             //Finish span.
-            spanFinish(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
+            finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
             return prepareAuthenticationError("Failed to authenticate with key validation auth handler.", authenticationResult);
         }
     }

@@ -17,22 +17,33 @@
 import ballerina/auth;
 import ballerina/http;
 import ballerina/log;
+import ballerina/system;
+import ballerina/io;
+
 
 public type ObservabilityMetricListener object {
 
     private int listenerPort = 0;
-    private string listenerType = "HTTP";
+    private string listenerType = "HTTPS";
     public http:Listener metricListener;
 
     public function __init() {
 
+        string ballerina_home = system:getEnv("BALLERINA_HOME");
+        string keyStore_path = ballerina_home+"/bre/security/ballerinaKeystore.p12";
+        io:println(keyStore_path);
         auth:InboundBasicAuthProvider basicAuthProvider = new;
         http:BasicAuthHandler basicAuthHandler = new (basicAuthProvider);
         self.listenerPort = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, SECURE_PORT, 9000);
-        self.metricListener = new (self.listenerPort, config = {
+        self.metricListener = new (self.listenerPort, {
             auth: {
-                authHandlers: [basicAuthHandler],
-                mandateSecureSocket: false
+                authHandlers: [basicAuthHandler]
+            },
+            secureSocket: {
+                keyStore: {
+                    path: keyStore_path,
+                    password: "ballerina"
+                }
             }
         });
     }

@@ -23,10 +23,10 @@ public type AnalyticsRequestFilterWrapper object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_ANALYTICS);
-        gaugeTagInvocationContextSet(ANALYTIC_GAUGE_TAGS, gaugeTags);
+        setGaugeTagInvocationContext(ANALYTIC_GAUGE_TAGS, gaugeTags);
         int startingTime = getCurrentTime();
         boolean result = self.analyticsRequestFilter.filterRequest(caller, request, context);
-        float latency = gaugeDurationSet(startingTime);
+        float latency = setGaugeDuration(startingTime);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         invocationContext.attributes[ANALYTIC_REQUEST_TIME] = latency;
         return result;
@@ -34,16 +34,16 @@ public type AnalyticsRequestFilterWrapper object {
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         //starting a Gauge metric
-        map<string> gaugeTags = gaugeTagInvocationContextGet(ANALYTIC_GAUGE_TAGS);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_ANALYTICS});
+        map<string> gaugeTags = getGaugeTagInvocationContext(ANALYTIC_GAUGE_TAGS);
+        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_ANALYTICS});
         int startingTime = getCurrentTime();
         boolean result = self.analyticsRequestFilter.filterResponse(response, context);
-        float latency = gaugeDurationSet(startingTime);
+        float latency = setGaugeDuration(startingTime);
         float req_latency = <float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME];
         float total_latency = req_latency + latency;
-        gaugeUpdate(localGauge, total_latency);
-        gaugeUpdate(localGauge_total, total_latency);
+        updateGauge(localGauge, total_latency);
+        updateGauge(localGauge_total, total_latency);
         return result;
     }
 

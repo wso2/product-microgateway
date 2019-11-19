@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
-
 
 int bal_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, PORT, 9797);
 int jmx_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, JMX_PORT, 8080);
@@ -35,7 +33,7 @@ service metric =
 service {
 
     @http:ResourceConfig {
-        path: "/balMetric"
+        path: "/metrics"
     }
 
     resource function balMetric(http:Caller caller, http:Request req) returns error? {
@@ -44,19 +42,17 @@ service {
 
         if (bal_response is http:Response) {
             var result = caller->respond(bal_response);
-            if (result is error) {
-                log:printError("Error sending bal response http:responce", err = result);
-            }
+            
         } else {
-
             http:Response res = new;
             res.statusCode = 500;
             res.setPayload(<string>bal_response.detail()?.message);
             var result = caller->respond(res);
-            if (result is error) {
-                log:printError("Error sending bal response else http:responce", err = result);
-            }
         }
+    }
+
+    @http:ResourceConfig {
+        path: "/jmxMetrics"
     }
 
     resource function jmxMetric(http:Caller caller, http:Request req) returns error? {
@@ -65,18 +61,11 @@ service {
 
         if (jmx_response is http:Response) {
             var result = caller->respond(jmx_response);
-            if (result is error) {
-                log:printError("Error sending jmx response http:responce", err = result);
-            }
         } else {
-
             http:Response res = new;
             res.statusCode = 500;
             res.setPayload(<string>jmx_response.detail()?.message);
             var result = caller->respond(res);
-            if (result is error) {
-                log:printError("Error sending jmx response else http:responce", err = result);
-            }
         }
     }
 

@@ -26,13 +26,13 @@ public type ThrottleFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = spanStart(THROTTLE_FILTER_REQUEST);
+        int | error | () spanId_req = startSpan(THROTTLE_FILTER_REQUEST);
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
         //Finish span.
-        spanFinish(THROTTLE_FILTER_REQUEST, spanId_req);
+        finishSpan(THROTTLE_FILTER_REQUEST, spanId_req);
         return result;
     }
 

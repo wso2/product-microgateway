@@ -36,12 +36,12 @@ public type BasicAuthProviderWrapper object {
     public function authenticate(string credential) returns (boolean | auth:Error) {
         int startingTime = getCurrentTime();
         map<string> gaugeTags = gaugeTagDetails_basicAuth(FILTER_AUTHENTICATION);
-        observe:Gauge localGauge = gaugeInitialize(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = gaugeInitialize(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | auth:Error result = self.basicAuthProvider.authenticate(credential);
-        float latency = gaugeDurationSet(startingTime);
-        gaugeUpdate(localGauge, latency);
-        gaugeUpdate(localGauge_total, latency);
+        float latency = setGaugeDuration(startingTime);
+        updateGauge(localGauge, latency);
+        updateGauge(localGauge_total, latency);
         return result;
     }
 

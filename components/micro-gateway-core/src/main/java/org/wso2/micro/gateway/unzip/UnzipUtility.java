@@ -13,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package org.wso2.micro.gateway.core.unzip;
+package org.wso2.micro.gateway.unzip;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,7 +29,7 @@ import java.util.zip.ZipInputStream;
  *
  */
 public class UnzipUtility {
-    
+
     private static final int BUFFER_SIZE = 4096;
 
     /**
@@ -43,7 +42,7 @@ public class UnzipUtility {
     public void unzipping(String zipFilePath, String destDirectory) throws IOException {
         File destDir = new File(destDirectory);
         boolean wasSuccessful = destDir.mkdir();
-        if (!wasSuccessful) { 
+        if (!wasSuccessful) {
             throw new IOException("Error occurred when creating folder");
         }
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
@@ -62,7 +61,7 @@ public class UnzipUtility {
                 // if the entry is a directory, make the directory
                 File dir = new File(filePath);
                 boolean wasDirSuccessful = dir.mkdir();
-                if (!wasDirSuccessful) { 
+                if (!wasDirSuccessful) {
                     throw new IOException("Error occurred when creating folder");
                 }
             }
@@ -110,4 +109,3 @@ public class UnzipUtility {
         }
     }
 }
-
