@@ -41,4 +41,5 @@ public class TokenManagementConstants {
     public static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String PASSWORD = "password";
     public static final String ACCESS_TOKEN = "access_token";
+    public static final String TLS = "TLS";
 }

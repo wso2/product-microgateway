@@ -26,13 +26,23 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
+import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.TokenManagementUtil;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509TrustManager;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 
 public class OAuthServiceImpl implements OAuthService {
 
@@ -45,13 +55,14 @@ public class OAuthServiceImpl implements OAuthService {
                                       String clientSecret, boolean inSecure) {
 
         URL url;
+        if (inSecure) {
+            useInsecureSSL();
+        }
         HttpsURLConnection urlConn = null;
         try {
             url = new URL(tokenEndpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
-            if (inSecure) {
-                urlConn.setHostnameVerifier((s, sslSession) -> true);
-            }
+
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
@@ -93,6 +104,9 @@ public class OAuthServiceImpl implements OAuthService {
     public String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password, boolean inSecure) {
 
         URL url;
+        if (inSecure) {
+            useInsecureSSL();
+        }
         HttpsURLConnection urlConn = null;
         try {
             String requestBody = new DCRRequestBuilder()
@@ -103,9 +117,7 @@ public class OAuthServiceImpl implements OAuthService {
             ObjectMapper mapper = new ObjectMapper();
             url = new URL(dcrEndpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
-            if (inSecure) {
-                urlConn.setHostnameVerifier((s, sslSession) -> true);
-            }
+
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
@@ -155,5 +167,37 @@ public class OAuthServiceImpl implements OAuthService {
         String[] serverUrlParts = dcrEndpoint.split("/", 4);
         return String.join("/",
                 Arrays.copyOfRange(serverUrlParts, 0, serverUrlParts.length >= 3 ? 3 : serverUrlParts.length));
+    }
+
+    /**
+     * method use to trust all certificates using insecure ssl.
+     */
+    private void useInsecureSSL() {
+
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
+        SSLContext context;
+        try {
+            context = SSLContext.getInstance(TokenManagementConstants.TLS);
+            context.init(null, new X509TrustManager[] { new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[0];
+                }
+            } }, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            String message = "Error while setting in secure ssl options";
+            logger.error(message, e);
+            GatewayCmdUtils.printVerbose(message);
+        }
     }
 }
