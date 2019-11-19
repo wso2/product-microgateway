@@ -270,11 +270,6 @@ public class GatewayCmdUtils {
         String definitionsPath = projectDir + File.separator + GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
 
-        String projectServicesDirectory = projectDir + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
-        String resourceServicesDirectory =
-                getResourceFolderLocation() + File.separator + GatewayCliConstants.PROJECT_SERVICES_DIR;
-        copyFolder(resourceServicesDirectory, projectServicesDirectory);
-
         createFile(projectDir.getPath(), GatewayCliConstants.PROJECT_POLICIES_FILE, true);
 
         String policyResPath = getDefinitionsLocation() + File.separator + GatewayCliConstants.GW_DIST_POLICIES_FILE;

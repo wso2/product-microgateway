@@ -97,6 +97,7 @@ public class CodeGenerator {
         }
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateCommonEndpoints());
+        genFiles.add(generateTokenServices());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
     }
@@ -154,6 +155,7 @@ public class CodeGenerator {
         });
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
+        genFiles.add(generateTokenServices());
         genFiles.add(generateCommonEndpoints());
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         GatewayCmdUtils.copyFolder(GatewayCmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
@@ -210,6 +212,18 @@ public class CodeGenerator {
         String srcFile = GeneratorConstants.LISTENERS + GeneratorConstants.BALLERINA_EXTENSION;
         ListenerEndpoint listnerEndpoint = new ListenerEndpoint().buildContext();
         String endpointContent = getContent(listnerEndpoint, GeneratorConstants.LISTENERS_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
+    }
+
+    /**
+     * Generate token proxy services. For ex: /token, /authorize, /revoke and etc
+     *
+     * @return generated source file  {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateTokenServices() throws IOException {
+        String srcFile = GeneratorConstants.TOKEN_SERVICES + GeneratorConstants.BALLERINA_EXTENSION;
+        String endpointContent = getContent(GatewayCmdUtils.getConfig(), GeneratorConstants.TOKEN_SERVICES);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 

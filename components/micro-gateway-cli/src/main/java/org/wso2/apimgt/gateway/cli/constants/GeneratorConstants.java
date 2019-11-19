@@ -29,6 +29,7 @@ public class GeneratorConstants {
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String LISTENERS_TEMPLATE_NAME = "listeners";
     public static final String LISTENERS = "listeners";
+    public static final String TOKEN_SERVICES = "tokenServices";
     public static final String BALLERINA_EXTENSION = ".bal";
     public static final String JSON_EXTENSION = ".json";
     public static final String THROTTLE_POLICY_INIT_TEMPLATE_NAME = "policy_init";

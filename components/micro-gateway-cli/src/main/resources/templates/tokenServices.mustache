@@ -1,0 +1,148 @@
+import ballerina/http;
+import wso2/gateway;
+
+@http:ServiceConfig {
+    basePath:"/authorize"
+     {{#corsConfiguration.corsConfigurationEnabled}},
+        cors: {
+             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+        }
+     {{/corsConfiguration.corsConfigurationEnabled}}
+}
+service authorizeService on tokenListenerEndpoint {
+
+    @http:ResourceConfig {
+        path: "/*"
+    }
+    resource function authorizeResource(http:Caller caller, http:Request req) {
+        gateway:checkExpectHeaderPresent(req);
+        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+                untaint req.rawPath, req);
+        if(response is http:Response)   {
+            var outboundResult = caller->respond(response);
+            if (outboundResult is error) {
+                log:printError("Error when sending authorize endpoint response", err = outboundResult);
+            }
+        }
+        else  {
+            log:printError("Error while invoking authorize endpoint", err = response);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
+        }
+
+    }
+}
+
+@http:ServiceConfig {
+    basePath:"/token"
+    {{#corsConfiguration.corsConfigurationEnabled}},
+        cors: {
+             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+        }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+service tokenService on tokenListenerEndpoint {
+
+    @http:ResourceConfig {
+        path: "/*"
+    }
+    resource function tokenResource(http:Caller caller, http:Request req) {
+        gateway:checkExpectHeaderPresent(req);
+        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+                untaint req.rawPath, req);
+        if(response is http:Response) {
+            var outboundResult = caller->respond(response);
+            if (outboundResult is error) {
+                log:printError("Error when sending token endpoint response", err = outboundResult);
+            }
+        }
+        else {
+            log:printError("Error while invoking token endpoint", err = response);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the token endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
+        }
+    }
+}
+
+
+@http:ServiceConfig {
+    basePath:"/revoke"
+    {{#corsConfiguration.corsConfigurationEnabled}},
+        cors: {
+             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+        }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+service revokeService on tokenListenerEndpoint {
+
+    @http:ResourceConfig {
+        path: "/*"
+    }
+    resource function revokeResource(http:Caller caller, http:Request req) {
+        gateway:checkExpectHeaderPresent(req);
+        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+                untaint req.rawPath, req);
+        if(response is http:Response) {
+            var outboundResult = caller->respond(response);
+            if (outboundResult is error) {
+                log:printError("Error when sending revoke endpoint response", err = outboundResult);
+            }
+        } else {
+            log:printError("Error while invoking revoke endpoint", err = response);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
+        }
+
+    }
+}
+
+@http:ServiceConfig {
+    basePath:"/userinfo"
+    {{#corsConfiguration.corsConfigurationEnabled}},
+        cors: {
+             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+        }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+service userInfoService on tokenListenerEndpoint {
+
+    @http:ResourceConfig {
+        path: "/*"
+    }
+    resource function userInfoResource(http:Caller caller, http:Request req) {
+        gateway:checkExpectHeaderPresent(req);
+        var response = gateway:keyValidationEndpoint->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+                untaint req.rawPath, req);
+        if(response is http:Response) {
+            var outboundResult = caller->respond(response);
+            if (outboundResult is error) {
+                log:printError("Error when sending user info endpoint response", err = outboundResult);
+            }
+        }
+        else {
+            log:printError("Error while invoking user info endpoint", err = response);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while invoking the user info endpoint" };
+            errorResponse.setJsonPayload(errMsg);
+            _ = caller->respond(errorResponse);
+        }
+    }
+}
