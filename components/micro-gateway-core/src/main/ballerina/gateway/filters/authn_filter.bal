@@ -246,15 +246,14 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
                     return false;
                 }
 
-            }
-            else {
+            } else {
                 if (isCookie) {
-                    log:printError(<string>extractedToken.detail().message, err = extractedToken);
+                    log:printError(<string>extractedToken.reason(), err = extractedToken);
                     setErrorMessageToFilterContext(context, API_AUTH_INVALID_COOKIE);
                     sendErrorResponse(caller, request, untaint context);
                     return false;
                 } else {
-                    log:printError(<string>extractedToken.detail().message, err = extractedToken);
+                    log:printError(<string>extractedToken.reason(), err = extractedToken);
                     setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
                     sendErrorResponse(caller, request, untaint context);
                     return false;
