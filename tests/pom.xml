@@ -21,7 +21,7 @@
     <parent>
         <artifactId>micro-gateway-parent</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.0.4-SNAPSHOT</version>
+        <version>3.0.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
