@@ -1,22 +1,23 @@
 NAME
-     micro-gw help reset - resets all the previously specified configurations.
+     micro-gw help reset - resets the user related configurations.
 
 SYNOPSIS
      micro-gw reset [-c|--config]
 
 DESCRIPTION
     
-     The reset command is used to clear all the previously specified configurations, such as "--server-url", "--username",
-      etc.
+     The reset command is used to clear all the previous user configurations, such as "--username",
+     "--clientId", etc. This will enable different user credentials to be provided when importing APIs from
+     WSO2 API Manager
      
-     When running the setup command for the first time, those configurations are stored internally within the microgateway
-     CLI tool and will be reused for subsequent setup commands. To rerun the setup command with a new set of configurations,
-     the reset command needs to be run beforehand.
+     When running the setup command for the first time, those configurations are stored internally within the
+     microgateway CLI tool and will be reused for subsequent import commands. To rerun the import command with a
+     different user credentials, the reset command needs to be run beforehand.
      
      Using "micro-gw reset -c <config-file>", we can reset an externally provided config file. 
 
 EXAMPLES
-    Reset all the configuration to default.
+    Reset user related configuration to default.
     $ micro-gw reset
     
     Reset an external config file

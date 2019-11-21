@@ -284,9 +284,7 @@ public class ImportCmd implements GatewayLauncherCmd {
         //if all the operations are success, write new config to file
         if (isOverwriteRequired) {
             Config newConfig = new Config();
-            Client client = new Client();
-            client.setHttpRequestTimeout(1000000);
-            newConfig.setClient(client);
+            newConfig.setClient(config.getClient());
 
             String encryptedCS = GatewayCmdUtils.encrypt(clientSecret, password);
             String encryptedTrustStorePass = GatewayCmdUtils.encrypt(trustStorePassword, password);
@@ -298,7 +296,7 @@ public class ImportCmd implements GatewayLauncherCmd {
                     .setTrustStorePassword(encryptedTrustStorePass)
                     .build();
             newConfig.setToken(token);
-            newConfig.setCorsConfiguration(GatewayCmdUtils.getDefaultCorsConfig());
+            newConfig.setCorsConfiguration(config.getCorsConfiguration());
             GatewayCmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
 
