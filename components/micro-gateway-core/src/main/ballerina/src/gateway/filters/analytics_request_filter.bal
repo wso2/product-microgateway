@@ -19,9 +19,7 @@ import ballerina/runtime;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(ANALYTICS_FILTER_REQUEST);
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean { 
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
@@ -29,14 +27,10 @@ public type AnalyticsRequestFilter object {
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }
-        //Finish span.
-        finishSpan(ANALYTICS_FILTER_REQUEST, spanId_req);
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int | error | () spanId_res = startSpan(ANALYTICS_FILTER_RESPONSE);
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
@@ -68,8 +62,6 @@ public type AnalyticsRequestFilter object {
                 }
             }
         }
-        //Finish span.
-        finishSpan(ANALYTICS_FILTER_RESPONSE, spanId_res);
         return true;
     }
 

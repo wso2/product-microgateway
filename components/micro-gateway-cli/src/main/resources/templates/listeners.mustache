@@ -120,30 +120,38 @@ listener http:Listener tokenListenerEndpoint = new (
 
 public function getFilters() returns http:RequestFilter[] {
     
-    // Get authentication filter
-    gateway:PreAuthnFilter preAuthnFilter = new;
-
-    // Subscription validation filter
-    // Authorization filter
-    gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
-    gateway:SubscriptionFilter subscriptionFilter = new;
 
     // Get deployed policies
     map<boolean> deployedPolicies = getDeployedPolicies();
 
+    // Authentication filter
+    gateway:PreAuthnFilter preAuthnFilter;
     // Throttling filter
-    // Analytic filter
     gateway:ThrottleFilter|gateway:ThrottleFilterWrapper throttleFilter;
+    // Analytic filter
     gateway:AnalyticsRequestFilter analyticsFilter;
-    if (gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false)) {
+    // Subscription validation filter
+    gateway:SubscriptionFilter|gateway:SubscriptionFilterWrapper subscriptionFilter;
+
+    boolean observability = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
+    
+    if (observability) {
+        preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
+        subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
     }
     else{
+        preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
+        subscriptionFilter =  new gateway:SubscriptionFilter();
     }
 
+    // Authorization filter
+    gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
+    authorizationFilter = gateway:getDefaultAuthorizationFilter();
+    
     //get open API definition map
     map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
 

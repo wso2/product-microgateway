@@ -30,8 +30,6 @@ public type OAuthzFilter object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        //Start a new root span attaching to the system span.
-        int | error | () spanId_req = startSpan(AUTHZ_FILTER_REQUEST);
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
         if (checkAuthentication != "require") {
             //Setting UUID
@@ -46,33 +44,25 @@ public type OAuthzFilter object {
                 //validate scopes if auth scheme is jwt.
                 if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
                     //Start a new child span for the span.
-                    int | error | () childSpan_Req = startSpan(BALLERINA_AUTHZ_FILTER);
+                    int | error | () span_balReq = startSpan(BALLERINA_AUTHZ_FILTER);
                     result = self.authzFilter.filterRequest(caller, request, context);
                     //finishing span
-                    finishSpan(BALLERINA_AUTHZ_FILTER, childSpan_Req);
+                    finishSpan(BALLERINA_AUTHZ_FILTER, span_balReq);
                 }
             }
             printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());
             setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
-            //Finish span.
-            finishSpan(AUTHZ_FILTER_REQUEST, spanId_req);
             return result;
         } else {
             // Skip this filter is mutualSSL is enabled.
-            //Finish span.
-            finishSpan(AUTHZ_FILTER_REQUEST, spanId_req);
             return true;
         }
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        //Start a new root span without attaching to the system span.
-        int | error | () spanId_res = startSpan(AUTHZ_FILTER_RESPONSE);
         int startingTime = getCurrentTime();
         boolean result = doAuthzFilterResponse(response, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ_RESPONSE);
-        //Finish span.
-        finishSpan(AUTHZ_FILTER_RESPONSE, spanId_res);
         return result;
     }
 

@@ -25,15 +25,19 @@ public type ThrottleFilterWrapper object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        //Start a span attaching to the system span.
+        int | error | () spanId_req = startSpan(THROTTLE_FILTER_REQUEST);
         //Gauge metric initialization
-        map<string> gaugeTags = gaugeTagDetails(request, context, FILTER_THROTTLING);
-        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_THROTTLING});
+        map<string> | () gaugeTags = gaugeTagDetails(request, context, FILTER_THROTTLING);
+        observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_THROTTLING});
         int startingTime = getCurrentTime();
         boolean result = self.throttleFilter.filterRequest(caller, request, context);
-        float latency = setGaugeDuration(startingTime);
+        float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);
         updateGauge(localGauge_total, latency);
+        //Finish span.
+        finishSpan(THROTTLE_FILTER_REQUEST, spanId_req);
         return result;
     }
 

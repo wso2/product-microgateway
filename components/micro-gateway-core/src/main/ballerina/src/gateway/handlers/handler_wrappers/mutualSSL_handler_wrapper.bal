@@ -15,23 +15,21 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/runtime;
 
 # Representation of the mutual ssl handler
 #
-public type MutualSSLHandler object {
-
+public type MutualSSLHandlerWrapper object {
     *http:InboundAuthHandler;
+
+    MutualSSLHandler mutualSSLHandler = new;
 
     # Checks if the request can be authenticated with the Bearer Auth header.
     #
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        if (req.mutualSslHandshake["status"] == PASSED) {
-            return true;
-        }
-        return false;
+        boolean result = self.mutualSSLHandler.canProcess(req);
+        return result;
     }
 
     # Authenticates the incoming request knowing that mutual ssl has happened at the trasnport layer.
@@ -40,31 +38,12 @@ public type MutualSSLHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean | http:AuthenticationError {
-        int startingTime = getCurrentTime();
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        boolean | http:AuthenticationError result = doMTSLFilterRequest(req, invocationContext);
+        //Start a span attaching to the system span.
+        int | error | () spanId_req = startSpan(MUTUALSSL_FILTER_PROCESS);
+        boolean | http:AuthenticationError result = self.mutualSSLHandler.process(req);
+        //Finish span.
+        finishSpan(MUTUALSSL_FILTER_PROCESS, spanId_req);
         return result;
     }
 
 };
-
-
-function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean | http:AuthenticationError {
-    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    boolean | http:AuthenticationError isAuthenticated = true;
-    AuthenticationContext authenticationContext = {};
-    boolean isSecured = true;
-    printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
-
-    context.attributes[IS_SECURED] = isSecured;
-    int startingTime = getCurrentTime();
-    context.attributes[REQUEST_TIME] = startingTime;
-    context.attributes[FILTER_FAILED] = false;
-    //Set authenticationContext data
-    authenticationContext.authenticated = true;
-    authenticationContext.username = USER_NAME_UNKNOWN;
-    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-    context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-
-    return isAuthenticated;
-}

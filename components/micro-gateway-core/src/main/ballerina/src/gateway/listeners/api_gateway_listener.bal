@@ -106,7 +106,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     };
     JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
     JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
-    if (isMetricsEnabled) {
+    if (isMetricsEnabled || isTracingEnabled) {
         jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
     }
     else {
@@ -132,7 +132,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     };
     OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationServerConfig);
     KeyValidationHandler | KeyValidationHandlerWrapper keyValidationHandler;
-    if (isMetricsEnabled) {
+    if (isMetricsEnabled || isTracingEnabled) {
         keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider);
     }
     else {
@@ -143,7 +143,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     // Initializes the basic auth handler
     auth:BasicAuthConfig basicAuthConfig = {tableName: CONFIG_USER_SECTION};
     BasicAuthProvider | BasicAuthProviderWrapper configBasicAuthProvider;
-    if (isMetricsEnabled) {
+    if (isMetricsEnabled || isTracingEnabled) {
         configBasicAuthProvider = new BasicAuthProviderWrapper(basicAuthConfig);
     }
     else {
@@ -152,7 +152,13 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     http:BasicAuthHandler basicAuthHandler = new (configBasicAuthProvider);
 
     //Initializes the mutual ssl handler
-    MutualSSLHandler mutualSSLHandler = new;
+    MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler ;
+    if (isMetricsEnabled || isTracingEnabled) {
+        mutualSSLHandler = new MutualSSLHandlerWrapper();
+    }
+    else {
+        mutualSSLHandler = new MutualSSLHandler();
+    }
 
     //Initializes the cookie based handler
     CookieAuthHandler cookieBasedHandler = new;
@@ -161,14 +167,21 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
 }
 
 
-public function getDefaultAuthorizationFilter() returns OAuthzFilter {
+public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {
     int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
     int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
     float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
     cache:Cache positiveAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     cache:Cache negativeAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-    OAuthzFilter authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());    //TODO: set the proper scopes
-    return authzFilterWrapper;
+    if (isTracingEnabled || isMetricsEnabled) {
+        OAuthzFilterWrapper authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());    //TODO: set the proper scopes
+        return authzFilterWrapper;
+    }
+    else {
+        OAuthzFilter authzFilter = new (positiveAuthzCache, negativeAuthzCache, ());    //TODO: set the proper scopes
+        return authzFilter;
+    }
+    
 }
 
 function initiateKeyManagerConfigurations() {

@@ -57,19 +57,13 @@ public type JWTAuthHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
-        //Start a span attaching to the system span.
-        int | error | () spanId_Process = startSpan(JWT_AUTHENHANDLER_PROCESS);
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
         string headerValue = req.getHeader(authHeader);
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
-            //finishing span
-            finishSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
             return authenticationResult;
         } else {
-            //finishing span
-            finishSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }

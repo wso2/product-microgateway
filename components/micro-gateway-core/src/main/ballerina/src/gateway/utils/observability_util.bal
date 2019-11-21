@@ -23,20 +23,34 @@ boolean isTracingEnabled = getConfigBooleanValue(MICRO_GATEWAY_TRACING, ENABLED,
 boolean isMetricsEnabled = getConfigBooleanValue(MICRO_GATEWAY_METRICS, ENABLED, false);
 
 //metrics
-public function InitializeGauge(string name, string description, map<string> gaugeTags) returns observe:Gauge {
-    observe:Gauge localGauge = new (name, description, gaugeTags);
-    registerGauge(localGauge);
-    return localGauge;
+public function initializeGauge(string name, string description, map<string> | () gaugeTags) returns observe:Gauge | () {
+    if (isMetricsEnabled) {
+        observe:Gauge localGauge = new (name, description, gaugeTags);
+        registerGauge(localGauge);
+        return localGauge;
+    }
+    else {
+        return ();
+    }
 }
 
-public function setGaugeDuration(int starting) returns float {
-    int ending = getCurrentTime();
-    float latency = (ending - starting) * 1.0;
-    return (latency);
+public function setGaugeDuration(int starting) returns float | () {
+    if (isMetricsEnabled) {
+        int ending = getCurrentTime();
+        float latency = (ending - starting) * 1.0;
+        return (latency);
+    }
+    else {
+        return ();
+    }
 }
 
-public function updateGauge(observe:Gauge localGauge, float latency) {
-    localGauge.setValue(latency);
+public function updateGauge(observe:Gauge | () localGauge, float | () latency) {
+    if (isMetricsEnabled) {
+        observe:Gauge gauge = <observe:Gauge>localGauge;
+        float gauge_latency = <float>latency;
+        gauge.setValue(gauge_latency);
+    }
 }
 
 public function registerGauge(observe:Gauge gauge) {
@@ -46,32 +60,79 @@ public function registerGauge(observe:Gauge gauge) {
     }
 }
 
-public function gaugeTagDetails(http:Request request, http:FilterContext context, string category) returns map<string> {
-    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": context.getServiceName()};
-    return gaugeTags;
+public function gaugeTagDetails(http:Request request, http:FilterContext context, string category) returns map<string> | () {
+    if (isMetricsEnabled) {
+        map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": context.getServiceName()};
+        return gaugeTags;
+    }
+    else {
+        return ();
+    }
 }
 
-public function gaugeTagDetails_authn(http:Request request, string category) returns map<string> {
-    string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": serviceName};
-    return gaugeTags;
+public function gaugeTagDetails_authn(http:Request request, string category) returns map<string> | () {
+    if (isMetricsEnabled) {
+        string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
+        map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": serviceName};
+        return gaugeTags;
+    }
+    else {
+        return ();
+    }
+}   
+
+public function gaugeTagDetails_basicAuth(string category) returns map<string> |() {
+    if (isMetricsEnabled) {
+        string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
+        string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
+        string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
+        map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": serviceName};
+        return gaugeTags;
+    }
+    else {
+        return ();
+    }
 }
 
-public function gaugeTagDetails_basicAuth(string category) returns map<string> {
-    string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
-    string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
-    string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": serviceName};
-    return gaugeTags;
+public function setGaugeTagInvocationContext(string attribute, map<string>|() gaugeTags) {
+    if (isMetricsEnabled) {
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        invocationContext.attributes[attribute] = gaugeTags;
+    }
 }
 
-public function setGaugeTagInvocationContext(string attribute, map<string> gaugeTags) {
-    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    invocationContext.attributes[attribute] = gaugeTags;
+public function getGaugeTagInvocationContext(string attribute) returns map<string> | () {
+    if (isMetricsEnabled) {
+        return (<map<string>>runtime:getInvocationContext().attributes[attribute]);
+    }
+    else {
+        return ();
+    }
 }
 
-public function getGaugeTagInvocationContext(string attribute) returns map<string> {
-    return (<map<string>>runtime:getInvocationContext().attributes[attribute]);
+public function setLatencyInvocationContext(string attribute, float|() latency) {
+    if (isMetricsEnabled) {
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        invocationContext.attributes[attribute] = latency;
+    }
+}
+
+public function getLatencyInvocationContext(string attribute) returns float | () {
+    if (isMetricsEnabled) {
+        return (<float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME]);
+    }
+    else {
+        return ();
+    }
+}
+
+public function calculateLatency(float | () req_latency, float | () latency) returns float | () {
+    if (isMetricsEnabled) {
+        return (<float>req_latency + <float>latency);
+    }
+    else {
+        return ();
+    }
 }
 
 //tracing

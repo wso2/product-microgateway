@@ -47,8 +47,6 @@ public type BasicAuthProvider object {
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
     public function authenticate(string credential) returns (boolean | auth:Error) {
-        //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(BASICAUTH_PROVIDER);
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -66,8 +64,6 @@ public type BasicAuthProvider object {
             string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
             if (decodedCredentialsString.indexOf(":", 0) == ()) {
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
-                //Finish span.
-                finishSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             string[] decodedCred = split(decodedCredentialsString.trim(), ":");
@@ -75,16 +71,12 @@ public type BasicAuthProvider object {
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                //Finish span.
-                finishSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
-            //Finish span.
-            finishSpan(BASICAUTH_PROVIDER, spanId_req);
             return false;
         }
         //Starting a new span
@@ -110,8 +102,6 @@ public type BasicAuthProvider object {
                 //TODO: Handle the error message properly
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
-                //Finish span.
-                finishSpan(BASICAUTH_PROVIDER, spanId_req);
                 return false;
             }
             int startingTime_req = getCurrentTime();
@@ -136,12 +126,8 @@ public type BasicAuthProvider object {
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
             invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             isAuthenticated = true;
-            //Finish span.
-            finishSpan(BASICAUTH_PROVIDER, spanId_req);
             return isAuthenticated;
         } else {
-            //Finish span.
-            finishSpan(BASICAUTH_PROVIDER, spanId_req);
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
     }

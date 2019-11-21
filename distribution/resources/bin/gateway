@@ -137,7 +137,7 @@ if [ ! -d "$GWHOME/runtime" ]; then
         -Dtemplates.dir.path="$GWHOME/logs" \
         -Dcli.home=$GWHOME \
         -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
-        org.wso2.micro.gateway.core.unzip.UnzipUtility | tee -a $GWHOME/logs/microgateway.log
+        org.wso2.micro.gateway.tools.UnzipUtility | tee -a $GWHOME/logs/microgateway.log
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
     fi

@@ -89,12 +89,6 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
-        <file>
-            <source>${project.build.directory}/bin/gw/tools</source>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/bin</outputDirectory>
-            <destName>tools</destName>
-            <fileMode>755</fileMode>
-        </file>
     </files>
     <dependencySets>
         <dependencySet>
@@ -103,6 +97,7 @@
             <includes>
                 <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.tools:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>

@@ -46,14 +46,19 @@ public type KeyValidationHandlerWrapper object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
+        //Start a span attaching to the system span.
+        int | error | () spanId_Process = startSpan(KEY_VALIDATION_HANDLER_PROCESS);
+        //Starting Gauge
         int startingTime = getCurrentTime();
-        map<string> gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
-        observe:Gauge localGauge = InitializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge localGauge_total = InitializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        map<string> | () gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
+        observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | http:AuthenticationError result = self.keyValidationHandler.process(req);
-        float latency = setGaugeDuration(startingTime);
+        float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);
         updateGauge(localGauge_total, latency);
+        //Finish span.
+        finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
         return result;
     }
 

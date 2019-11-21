@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.micro.gateway.unzip;
+package org.wso2.micro.gateway.tools;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

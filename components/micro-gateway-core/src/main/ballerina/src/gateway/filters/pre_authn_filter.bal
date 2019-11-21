@@ -23,8 +23,6 @@ import ballerina/runtime;
 public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
-        //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(PRE_AUTHN_FILTER_REQUEST);
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
@@ -32,8 +30,6 @@ public type PreAuthnFilter object {
         setHostHeaderToFilterContext(request, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
-        //Finish span.
-        finishSpan(PRE_AUTHN_FILTER_REQUEST, spanId_req);
         return result;
     }
 

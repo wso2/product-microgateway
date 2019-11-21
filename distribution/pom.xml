@@ -67,6 +67,10 @@
             <groupId>io.prometheus.jmx</groupId>
             <artifactId>jmx_prometheus_javaagent</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.tools</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -103,25 +107,6 @@
 <!--                            <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>-->
 <!--                        </configuration>-->
 <!--                    </execution>-->
-                    <execution>
-                       <id>unpack-gw-tools</id>
-                       <phase>generate-resources</phase>
-                       <goals>
-                           <goal>unpack</goal>
-                       </goals>
-                       <configuration>
-                           <artifactItems>
-                               <artifactItem>
-                                   <groupId>org.wso2.am.microgw</groupId>
-                                   <artifactId>org.wso2.micro.gateway.tools</artifactId>
-                                   <version>${project.version}</version>
-                                   <type>zip</type>
-                                   <classifier>micro-gateway-tools</classifier>
-                                   <outputDirectory>${project.build.directory}/bin/gw</outputDirectory>
-                               </artifactItem>
-                           </artifactItems>
-                       </configuration>
-                    </execution>
                     <execution>
                         <id>unpack-jre</id>
                         <phase>generate-resources</phase>
