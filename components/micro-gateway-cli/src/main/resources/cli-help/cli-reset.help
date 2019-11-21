@@ -6,12 +6,12 @@ SYNOPSIS
 
 DESCRIPTION
     
-     The reset command is used to clear all the previously user related configurations, such as "--username",
+     The reset command is used to clear all the previous user configurations, such as "--username",
      "--clientId", etc. This will enable different user credentials to be provided when importing APIs from
      WSO2 API Manager
      
      When running the setup command for the first time, those configurations are stored internally within the
-     microgateway CLI tool and will be reused for subsequent setup commands. To rerun the setup command with a
+     microgateway CLI tool and will be reused for subsequent import commands. To rerun the import command with a
      different user credentials, the reset command needs to be run beforehand.
      
      Using "micro-gw reset -c <config-file>", we can reset an externally provided config file. 
