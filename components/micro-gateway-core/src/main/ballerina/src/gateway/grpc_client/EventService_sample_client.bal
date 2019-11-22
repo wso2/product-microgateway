@@ -5,19 +5,22 @@
 
 
 import ballerina/grpc;
-import ballerina/io;
+import ballerina/log;
+//import ballerina/io;
 
-EventServiceClient analyticsClient = new("https://localhost:9806",
+EventServiceClient analyticsClient = new(getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, "https://localhost:9806"),
 config = {
             secureSocket: {
                  keyStore: {
-                       path : "/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaKeystore.p12",
-                       password : "ballerina"
+                       path : getConfigValue(GRPC_ANALYTICS, keyStoreFile, "/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaKeystore.p12") , //"/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaKeystore.p12",
+                       password : getConfigValue(GRPC_ANALYTICS, keyStorePassword, "ballerina") //"ballerina"
                 },
                 trustStore: {
-                    path : "/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaTruststore.p12",
-                    password : "ballerina"
-                }
+                    path : getConfigValue(GRPC_ANALYTICS, trustStoreFile, "/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaTruststore.p12") //"ballerina"
+                , //"/home/lahiru/Desktop/TestZip/mcgw/runtime/bre/security/ballerinaTruststore.p12",
+                    password :  getConfigValue(GRPC_ANALYTICS, trustStorePassword, "ballerina") //"ballerina"
+                },
+                verifyHostname:false
             }
     } );
 
@@ -25,41 +28,42 @@ config = {
 service EventServiceMessageListner = service {
         resource function onMessage(string message) {
         // total = 1;
-        io:println("Response received from server: " + message);
+        log:printDebug("Response received from server: " + message);
     }
 
     resource function onError(error err) {
-        io:println("Error reported from server: " + err.reason() + " - "
+        log:printDebug("Error reported from server: " + err.reason() + " - "
                                            + <string> err.detail()["message"]);
 }
 
     resource function onComplete() {
         // total = 1;
-        io:println("Server Complete Sending Responses.");
+        log:printDebug("Server Complete Sending Responses.");
     }
 };
 
 public function dataToAnalytics(string payloadString, string streamId){
-    io:println("Grpc :" + streamId +"triggered------------------------>>>>>>>>>>>>>>>>>" );
+    //io:println("3 -->  Inside method call");
+    log:printDebug("Grpc :" + streamId +"triggered------------------------>>>>>>>>>>>>>>>>>" );
     grpc:StreamingClient ep;
     var res = analyticsClient->consume(EventServiceMessageListner);
     // var res = analyticsClient->consume();
     if(res is grpc:Error){
-        io:println("Error from connector :" + res.reason()+ " - " + <string>res.detail()["message"]);
+        log:printDebug("Error from connector :" + res.reason()+ " - " + <string>res.detail()["message"]);
         return ;
     }
     else{
-        io:println("Initialized Connection Successfully");
+        log:printDebug("Initialized Connection Successfully");
         ep = res;
     }
     Event event = {payload:payloadString,
     headers: [{key:"stream.id", value:streamId}]};
     grpc:Error? connErr = ep->send(event);
         if (connErr is grpc:Error) {
-            io:println("Error from Connector: " + connErr.reason() + " - "
+            log:printDebug("Error from Connector: " + connErr.reason() + " - "
                                        + <string> connErr.detail()["message"]);
         } else {
-            io:println("send greeting successfully");
+            log:printDebug("gRPC analyitics sent successfully");
         }
 }
 

@@ -18,7 +18,7 @@ import ballerina/http;
 import ballerina/time;
 import ballerina/config;
 import ballerina/runtime;
-import ballerina/io;
+import ballerina/log;
 
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
@@ -141,7 +141,7 @@ function getAnalyticsEnableConfig() {
     rotatingTime =  <int> vals[ROTATING_TIME];
     uploadingUrl = <string> vals[UPLOADING_EP];
     configsRead = true;
-    io:println("Uploading url : "+ uploadingUrl);
+    log:printDebug("Uploading url : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
@@ -154,18 +154,18 @@ function getGRPCAnalyticsEnableConfig() returns boolean{
     trustStoreFile = <string>gRPCConfigs[TURSTSTORE_FILE_PATH];
     trustStorePassword = <string>gRPCConfigs[TRUSTSTORE_PASSWORD];
 
-    io:println( "Endpint : " + endpointURL);
-    io:println( "K_Store : " + keyStoreFile);
-    io:println( "K_Pass  : " + keyStorePassword);
-    io:println( "T_Store : " + trustStoreFile);
-    io:println( "T_Pass  : " + trustStorePassword);
+    log:printDebug( "Endpint : " + endpointURL);
+    log:printDebug( "K_Store : " + keyStoreFile);
+    log:printDebug( "K_Pass  : " + keyStorePassword);
+    log:printDebug( "T_Store : " + trustStoreFile);
+    log:printDebug( "T_Pass  : " + trustStorePassword);
 
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     return isgRPCAnalyticsEnabled;
 }
 
 function initializegRPCAnalytics(){
-    io:println("getgRPCAnalyticsEnableConfig method in analytics util bal called");
+    log:printDebug("getgRPCAnalyticsEnableConfig method in analytics util bal called");
     boolean result = getGRPCAnalyticsEnableConfig();
 }
 

@@ -16,7 +16,8 @@
 
 import ballerina/http;
 import ballerina/runtime;
-import ballerina/io;
+import ballerina/log;
+//import ballerina/io;
 
 public type AnalyticsRequestFilter object {
 
@@ -41,14 +42,20 @@ public type AnalyticsRequestFilter object {
                     if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                         if(eventDTO is EventDTO) {
-                             eventStream.publish(eventDTO);
-                            io:println("This is the event DTO of throttling -->");
+                            if(isAnalyticsEnabled != false){
+                                eventStream.publish(eventDTO);
+
+                            }
+                             
+                            log:printDebug("This is the event DTO of throttling -->");
                             // ####################################################
                             json analyticsThrottleJSON = createThrottleJSON(throttleAnalyticsEventDTO);
-                            io:print("\n\n###########GRPC Enable Value in throttle stream : ");
-                            io:println(isgRPCAnalyticsEnabled);
-                            if(isgRPCAnalyticsEnabled != false){
-                                dataToAnalytics(analyticsThrottleJSON.toJsonString() , "InComingThrottledOutStream");
+                            //json|error analyticsThrottleJSON = json.constructFrom(throttleAnalyticsEventDTO);
+                            log:printDebug("\n\n###########GRPC Enable Value in throttle stream : ");
+                            //log:printDebug(<string>isgRPCAnalyticsEnabled);    && analyticsThrottleJSON is json
+                            if(isgRPCAnalyticsEnabled != false ){
+                                    log:printDebug("F_Upload eventTrottletStream called");
+                                    future<()> publishedGRPCThrottleStream = start dataToAnalytics(analyticsThrottleJSON.toJsonString() , "InComingThrottledOutStream");
                             }
                             // ####################################################
                         } else {
@@ -90,14 +97,19 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
     if(faultDTO is FaultDTO) {
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if(eventDTO is EventDTO) {
+            if(isAnalyticsEnabled != false){
+                log:printDebug("F_Upload eventFaultStream called");
+                eventStream.publish(eventDTO);
+            }
             // eventStream.publish(eventDTO);
-            io:println("This is the falut event DTO --->");
+            log:printDebug("This is the falut event DTO --->");
             // ####################################################
             json analyticsFaultJSON = createFaultJSON(faultDTO);
-            io:print("\n\n###########GRPC Enable Value in false stream : ");
-            io:println(isgRPCAnalyticsEnabled);
-            if(isgRPCAnalyticsEnabled != false){
-                dataToAnalytics(analyticsFaultJSON.toJsonString() , "FaultStream");
+            //json|error analyticsFaultJSON = json.constructFrom(faultDTO);    && analyticsFaultJSON is json
+            log:printDebug("\n\n###########GRPC Enable Value in false stream : ");
+            //log:printDebug(isgRPCAnalyticsEnabled);
+            if(isgRPCAnalyticsEnabled != false ){
+                future<()> publishedGRPCFaultStream = start dataToAnalytics(analyticsFaultJSON.toJsonString() , "FaultStream");
             }
             // ####################################################
         } else {
@@ -117,15 +129,23 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
-            // eventStream.publish(event);
-            // ###############################################
-            io:println("This is the Response event DTO --->");
-            json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
-            io:print("\n\n###########GRPC Enable Value in response stream : ");
-            io:println(isgRPCAnalyticsEnabled);
-            if(isgRPCAnalyticsEnabled != false){
-                dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+            if(isAnalyticsEnabled != false){
+                log:printDebug("F_Upload eventRequestStream called");
+                eventStream.publish(event);
             }
+            // ###############################################
+            log:printDebug("This is the Response event DTO --->");
+            json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
+            //json|error analyticsResponseJSON = json.constructFrom(requestResponseExecutionDTO);
+            log:printDebug("\n\n###########GRPC Enable Value in response stream : ");
+            //      log:printDebug(isgRPCAnalyticsEnabled);  && analyticsResponseJSON is json
+            //io:println("1 -->  Before method call");
+            if(isgRPCAnalyticsEnabled != false ){
+                //io:println("2 -->  Inside if call");
+                log:printDebug("\n\n###########GRPC Data going to publish");
+                future<()> publishedGRPCResponseStream = start dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+            }
+            //io:println("4 -->  After method call");
             // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
             // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
             // ##############################################
