@@ -14,85 +14,57 @@
  // specific language governing permissions and limitations
  // under the License.
 
-
-import ballerina/log;
 import wso2/jms;
 
- string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID,
+string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID,
      JMS_CONNECTION_INITIAL_CONTEXT_FACTORY, "bmbInitialContextFactory");
- string jmsConnectionProviderUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PROVIDER_URL,
+string jmsConnectionProviderUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PROVIDER_URL,
      "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
- string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, "");
- string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, "");
+string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, "");
+string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, "");
 
 service messageServ = service {
     resource function onMessage(jms:Message message) {
-        printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage Received-----------------------" + message.toString());
+        printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage received.");
         if (message is jms:MapMessage) {
-            printDebug(KEY_THROTTLE_UTIL, "message is map message----------------------");
             string?|error throttleKey = message.getString(THROTTLE_KEY);
             boolean|error throttleEnable = message.getBoolean(IS_THROTTLED);
             int|error expiryTime = message.getLong(EXPIRY_TIMESTAMP);
             string?|error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
             if (throttleKey is string) {
-                printDebug(KEY_THROTTLE_UTIL, "enter to the throttle key" + throttleKey.toString() + "enable throttle "+  throttleEnable.toString());
+                printDebug(KEY_THROTTLE_UTIL, "Throttle Key : " + throttleKey.toString() + " Throttle status : " +
+                 throttleEnable.toString());
                 if (throttleEnable is boolean && expiryTime is int) {
                         GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
                         throttleKey: throttleKey,
                         isThrottled: throttleEnable,
                         expiryTimeStamp: expiryTime };
                         if (globalThrottleStreamDtoTM.isThrottled == true) {
+                            printDebug(KEY_THROTTLE_UTIL, "Adding to throttledata map.");
                             putThrottleData(globalThrottleStreamDtoTM);
                         } else {
-                            printDebug(KEY_THROTTLE_UTIL, "remove throttledata" );
+                            printDebug(KEY_THROTTLE_UTIL, "Romoving from throttledata map.");
                             removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
                         }
                 }  else {
-                   log:printInfo("Throlling configs values are wrong.");
+                     printDebug(KEY_THROTTLE_UTIL, "Throlling configs values are wrong.");
                 }
             } else if (blockingKey is string) {
-                   //putBlockCondition();
+                printDebug(KEY_THROTTLE_UTIL, "Romoving from the throttledata map.");
+                putBlockCondition(message);
             }
         } else {
-            log:printError("Error occurred while reading message");
+            printDebug(KEY_THROTTLE_UTIL, "Error occurred while reading throttle message.");
         }
     }
 };
- //service jmsListener =
- //service {
- //    resource function onMessage(jms:TopicSubscriberCaller consumer, jms:Message message) {
- //        map<any>|error m = message.getMapMessageContent();
- //        if (m is map<any>) {
- //            log:printDebug("ThrottleMessage Received");
- //            //Throttling decisions made by TM going to throttleDataMap
- //            if (m.hasKey(THROTTLE_KEY)) {
- //                GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
- //                    throttleKey: <string>m[THROTTLE_KEY],
- //                    isThrottled: <boolean>m[IS_THROTTLED],
- //                    expiryTimeStamp: <int>m[EXPIRY_TIMESTAMP] };
- //
- //                if (globalThrottleStreamDtoTM.isThrottled == true) {
- //                    putThrottleData(globalThrottleStreamDtoTM);
- //                } else {
- //                    removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
- //                }
- //                //Blocking decisions going to a separate map
- //            } else if (m.hasKey(BLOCKING_CONDITION_KEY)){
- //                putBlockCondition(m);
- //            }
- //        } else {
- //            log:printError("Error occurred while reading message", err = m);
- //        }
- //    }
- //};
 
  # `startSubscriberService` function create jms connection, jms session and jms topic subscriber.
  # It binds the subscriber endpoint and jms listener
  #
  # + return - jms:TopicSubscriber for global throttling event publishing
  public function startSubscriberService() returns @tainted jms:MessageConsumer|error {
-     // Initialize a JMS connectiontion with the provider.
-     printDebug(KEY_THROTTLE_UTIL, "Start subscribe---------------logggggg");
+     // Initialize a JMS connection  with the provider.
      jms:Connection connection = check jms:createConnection({
                     initialContextFactory: jmsConnectionInitialContextFactory,
                     providerUrl: jmsConnectionProviderUrl,
@@ -101,18 +73,15 @@ service messageServ = service {
 
                });
      jms:Session session = check connection->createSession({acknowledgementMode: "AUTO_ACKNOWLEDGE"});
-      printDebug(KEY_THROTTLE_UTIL, "auto ack---------------logggggg");
      jms:Destination dest = check session->createTopic("throttleData");
      jms:MessageConsumer subscriberEndpoint = check session->createDurableSubscriber(dest, "sub-1");
      var attachResult = subscriberEndpoint.__attach(messageServ);
-     printDebug(KEY_THROTTLE_UTIL, "attachResult---------------logggggg");
      if (attachResult is error) {
-         log:printInfo("subscriber service for global throttling is started");
-          printDebug(KEY_THROTTLE_UTIL, "subscriber service for global throttling is  notstarte");
+          printDebug(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.");
      }
      var startResult = subscriberEndpoint.__start();
      if (startResult is error) {
-         log:printInfo("Starting the task is failed.");
+         printDebug(KEY_THROTTLE_UTIL, "Starting the task is failed.");
      }
      return subscriberEndpoint;
  }
@@ -127,16 +96,14 @@ service messageServ = service {
          GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
      if (enabledGlobalTMEventPublishing) {
-         printDebug(KEY_THROTTLE_UTIL, "Enabled Global throttling------");
          jms:MessageConsumer|error topicSubscriber = trap startSubscriberService();
          if (topicSubscriber is jms:MessageConsumer) {
-            log:printInfo("subscriber service for global throttling is started");
+            printDebug(KEY_THROTTLE_UTIL, "subscriber service for global throttling is started.");
             return true;
          } else {
-             log:printError("Error while starting subscriber service for global throttling");
+             printDebug(KEY_THROTTLE_UTIL, "Error while starting subscriber service for global throttling");
              return false;
          }
      }
      return false;
  }
-

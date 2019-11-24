@@ -38,6 +38,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+            <version>${jmx.api.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -129,6 +134,7 @@
                             <descriptors>
                                 <descriptor>${basedir}/assembly/jar.xml</descriptor>
                                 <descriptor>${basedir}/assembly/bir.xml</descriptor>
+                                <descriptor>${basedir}/assembly/jms_zip.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
