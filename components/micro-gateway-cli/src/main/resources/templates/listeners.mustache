@@ -124,6 +124,9 @@ public function getFilters() returns http:RequestFilter[] {
     // Get deployed policies
     map<boolean> deployedPolicies = getDeployedPolicies();
 
+    //get open API definition map
+    map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
+
     // Authentication filter
     gateway:PreAuthnFilter preAuthnFilter;
     // Throttling filter
@@ -132,6 +135,8 @@ public function getFilters() returns http:RequestFilter[] {
     gateway:AnalyticsRequestFilter analyticsFilter;
     // Subscription validation filter
     gateway:SubscriptionFilter|gateway:SubscriptionFilterWrapper subscriptionFilter;
+    //Validation filter
+    //gateway:ValidationFilter|gateway:ValidationFilterWrapper validationFilter;
 
     boolean observability = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
     
@@ -140,23 +145,19 @@ public function getFilters() returns http:RequestFilter[] {
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
         subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
+        //validationFilter = new gateway:ValidationFilterWrapper(openAPIs);
     }
     else{
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
         subscriptionFilter =  new gateway:SubscriptionFilter();
+        //validationFilter = new gateway:ValidationFilter(openAPIs);
     }
 
     // Authorization filter
     gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
     authorizationFilter = gateway:getDefaultAuthorizationFilter();
-    
-    //get open API definition map
-    map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
-
-    //Validation filter
-    //gateway:ValidationFilter validationFilter = new(openAPIs);
 
     // Extension filter
     ExtensionFilter extensionFilter = new;

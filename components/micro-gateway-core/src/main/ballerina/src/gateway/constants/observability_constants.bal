@@ -50,8 +50,8 @@ public const string THROTTLE_FILTER_REQUEST = "Throttle_Filter_Request";
 public const string REQUEST_METHOD = "REQUEST_METHOD";
 public const string REQUEST_RAWPATH = "REQUEST_RAWPATH";
 
-// public const string VALIDATION_FILTER_REQUEST = "Validation_Filter_Request";
-// public const string VALIDATION_FILTER_RESPONSE = "Validation_Filter_Response";
+public const string VALIDATION_FILTER_REQUEST = "Validation_Filter_Request";
+public const string VALIDATION_FILTER_RESPONSE = "Validation_Filter_Response";
 // public const string GETTTING_PAYLOAD = "Getting_Payload";
 
 public const string FILTER_AUTHENTICATION = "Authentiation";

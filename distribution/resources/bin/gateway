@@ -150,13 +150,20 @@ rm $BALLERINA_HOME/bin/ballerina.back
 
 flag="false"
 configFile="$GWHOME/conf/micro-gw.conf"
-for c in $*
-do
-    if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
-        flag="true"
-        break    
-    fi
-done
+
+if [[ $b7a_observability_metrics_enabled == "true" ]]; then
+    flag="true"
+fi
+
+if [ "$flag" != "true" ]; then
+    for c in $*
+    do
+        if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
+            flag="true"
+            break    
+        fi
+    done
+fi
 
 if [ "$flag" != "true" ]; then
     while read line; do
