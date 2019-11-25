@@ -18,8 +18,6 @@ import ballerina/auth;
 import ballerina/http;
 import ballerina/log;
 import ballerina/system;
-import ballerina/io;
-
 
 public type ObservabilityMetricListener object {
 
@@ -28,10 +26,8 @@ public type ObservabilityMetricListener object {
     public http:Listener metricListener;
 
     public function __init() {
-
         string ballerina_home = system:getEnv("BALLERINA_HOME");
-        string keyStore_path = ballerina_home+"/bre/security/ballerinaKeystore.p12";
-        io:println(keyStore_path);
+        string keyStore_path = ballerina_home + "/bre/security/ballerinaKeystore.p12";
         auth:InboundBasicAuthProvider basicAuthProvider = new;
         http:BasicAuthHandler basicAuthHandler = new (basicAuthProvider);
         self.listenerPort = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, SECURE_PORT, 9000);
@@ -47,7 +43,6 @@ public type ObservabilityMetricListener object {
             }
         });
     }
-
 
     public function __start() returns error? {
         error? gwListener = self.metricListener.__start();

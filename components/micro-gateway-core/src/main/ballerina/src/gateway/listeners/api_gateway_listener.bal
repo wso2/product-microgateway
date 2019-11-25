@@ -152,7 +152,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     http:BasicAuthHandler basicAuthHandler = new (configBasicAuthProvider);
 
     //Initializes the mutual ssl handler
-    MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler ;
+    MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         mutualSSLHandler = new MutualSSLHandlerWrapper();
     }
@@ -174,14 +174,13 @@ public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFil
     cache:Cache positiveAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     cache:Cache negativeAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     if (isTracingEnabled || isMetricsEnabled) {
-        OAuthzFilterWrapper authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());    //TODO: set the proper scopes
+        OAuthzFilterWrapper authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());        //TODO: set the proper scopes
         return authzFilterWrapper;
     }
     else {
-        OAuthzFilter authzFilter = new (positiveAuthzCache, negativeAuthzCache, ());    //TODO: set the proper scopes
+        OAuthzFilter authzFilter = new (positiveAuthzCache, negativeAuthzCache, ());        //TODO: set the proper scopes
         return authzFilter;
     }
-    
 }
 
 function initiateKeyManagerConfigurations() {

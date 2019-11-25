@@ -130,13 +130,13 @@ public function getFilters() returns http:RequestFilter[] {
     // Authentication filter
     gateway:PreAuthnFilter preAuthnFilter;
     // Throttling filter
-    gateway:ThrottleFilter|gateway:ThrottleFilterWrapper throttleFilter;
+    gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
     // Analytic filter
     gateway:AnalyticsRequestFilter analyticsFilter;
     // Subscription validation filter
-    gateway:SubscriptionFilter|gateway:SubscriptionFilterWrapper subscriptionFilter;
+    gateway:SubscriptionFilter | gateway:SubscriptionFilterWrapper subscriptionFilter;
     //Validation filter
-    //gateway:ValidationFilter|gateway:ValidationFilterWrapper validationFilter;
+    //gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
 
     boolean observability = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
     

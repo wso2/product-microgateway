@@ -19,7 +19,7 @@ import ballerina/runtime;
 
 public type AnalyticsRequestFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean { 
+    public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             int startingTime = getCurrentTime();

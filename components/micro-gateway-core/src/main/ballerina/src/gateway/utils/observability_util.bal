@@ -79,9 +79,9 @@ public function gaugeTagDetails_authn(http:Request request, string category) ret
     else {
         return ();
     }
-}   
+}
 
-public function gaugeTagDetails_basicAuth(string category) returns map<string> |() {
+public function gaugeTagDetails_basicAuth(string category) returns map<string> | () {
     if (isMetricsEnabled) {
         string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
         string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
@@ -94,7 +94,7 @@ public function gaugeTagDetails_basicAuth(string category) returns map<string> |
     }
 }
 
-public function setGaugeTagInvocationContext(string attribute, map<string>|() gaugeTags) {
+public function setGaugeTagInvocationContext(string attribute, map<string> | () gaugeTags) {
     if (isMetricsEnabled) {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         invocationContext.attributes[attribute] = gaugeTags;
@@ -110,7 +110,7 @@ public function getGaugeTagInvocationContext(string attribute) returns map<strin
     }
 }
 
-public function setLatencyInvocationContext(string attribute, float|() latency) {
+public function setLatencyInvocationContext(string attribute, float | () latency) {
     if (isMetricsEnabled) {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         invocationContext.attributes[attribute] = latency;

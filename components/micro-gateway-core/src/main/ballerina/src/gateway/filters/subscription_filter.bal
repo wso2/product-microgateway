@@ -35,8 +35,6 @@ public type SubscriptionFilter object {
         return result;
     }
 
-
-
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         return true;
     }

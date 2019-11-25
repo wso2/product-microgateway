@@ -42,7 +42,6 @@ service {
 
         if (bal_response is http:Response) {
             var result = caller->respond(bal_response);
-            
         } else {
             http:Response res = new;
             res.statusCode = 500;
@@ -55,7 +54,7 @@ service {
         path: "/jmxMetrics"
     }
 
-    resource function jmxMetric(http:Caller caller, http:Request req) returns error? {
+    resource function jmxMetrics(http:Caller caller, http:Request req) returns error? {
 
         var jmx_response = jmxMetricEndpoint->forward("/metrics", <@untainted>req);
 

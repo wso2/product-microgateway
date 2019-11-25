@@ -33,8 +33,6 @@ public type SubscriptionFilterWrapper object {
         return result;
     }
 
-
-
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         boolean result = self.subscriptionFilter.filterResponse(response, context);
         return result;
