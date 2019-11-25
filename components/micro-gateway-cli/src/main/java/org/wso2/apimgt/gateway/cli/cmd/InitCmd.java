@@ -73,11 +73,15 @@ public class InitCmd implements LauncherCmd {
 
     @SuppressWarnings("unused")
     @Parameter(names = {"-r", "--headers"})
-    String headers;
+    private String headers;
 
     @SuppressWarnings("unused")
     @Parameter(names = {"-v", "--values"})
-    String values;
+    private String values;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-k", "--insecure"})
+    private boolean insecure;
 
     @Override
     public void execute() {
@@ -113,7 +117,7 @@ public class InitCmd implements LauncherCmd {
 
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        init(projectName, deploymentConfigPath, apiDefinition, apiDefinitionURL, headers, values);
+        init(projectName, deploymentConfigPath, apiDefinition, apiDefinitionURL, headers, values, insecure);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
         OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
@@ -138,9 +142,9 @@ public class InitCmd implements LauncherCmd {
      * @param deploymentConfigPath path to deployment config file (used in k8s scenarios)
      */
     private static void init(String projectName, String deploymentConfigPath, String apiDefinition,
-                             String apiDefinitionURL, String headers, String values) {
+                             String apiDefinitionURL, String headers, String values, boolean insecure) {
         try {
-            CmdUtils.createProjectStructure(projectName, apiDefinition, apiDefinitionURL, headers, values);
+            CmdUtils.createProjectStructure(projectName, apiDefinition, apiDefinitionURL, headers, values, insecure);
             CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);

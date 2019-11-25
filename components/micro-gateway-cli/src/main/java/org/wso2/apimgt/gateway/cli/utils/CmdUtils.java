@@ -17,6 +17,10 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +30,7 @@ import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
+import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
@@ -53,10 +58,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 /**
  * Utility functions providing tasks related to MGW toolkit.
  */
@@ -275,12 +287,16 @@ public final class CmdUtils {
      * @param values api definition download values for request headers
      */
     private static void setApiDefinition(String projectName, String apiDefinition, String apiDefinitionURL,
-                                         String headers, String values) throws IOException {
-        String apiDefinitionsPath = getUserDir() + File.separator + projectName + File.separator +
+                                         String headers, String values, boolean insecure) throws IOException {
+        String apiDefinitionsDir = getUserDir() + File.separator + projectName + File.separator +
                 CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator;
+        String filePath = "";
+        boolean isDownloaded = false;
         if (!StringUtils.isEmpty(apiDefinition)) {
-            Files.copy(Paths.get(apiDefinition), Paths.get(apiDefinitionsPath +
-                        Paths.get(apiDefinition).getFileName()));
+            filePath = apiDefinitionsDir + Paths.get(apiDefinition).getFileName();
+            Files.copy(Paths.get(apiDefinition), Paths.get(filePath));
+            isDownloaded = true;
+            logger.debug("Api definition is successfully copied to :" + filePath);
         }
         if (!StringUtils.isEmpty(apiDefinitionURL)) {
             ArrayList<String> headersList = new ArrayList<>();
@@ -293,8 +309,47 @@ public final class CmdUtils {
                         throw new CLIRuntimeException("Provided number of header and number of values is different");
                     }
                 }
+                logger.debug("Request headers are provided.");
             }
-            downloadFile(apiDefinitionURL, apiDefinitionsPath, headersList, valuesList);
+            isDownloaded = true;
+            filePath = downloadFile(apiDefinitionURL, apiDefinitionsDir, headersList, valuesList, insecure);
+        }
+        if (isDownloaded && !(filePath.endsWith(CliConstants.JSON_EXTENSION) ||
+                filePath.endsWith(CliConstants.YAML_EXTENSION))) {
+            logger.debug("Api definition file name has no .json or .yaml extension");
+            jsonYamlIdentifier(filePath);
+        }
+    }
+
+    private static void jsonYamlIdentifier(String filePath) {
+        String content;
+        File file = new File(filePath);
+        boolean success;
+        try {
+            content = readFileAsString(filePath, false);
+        } catch (IOException e) {
+            throw new CLIRuntimeException("Error while reading the api-definition from" + filePath);
+        }
+        try {
+            new JsonParser().parse(content);
+            File newFile = new File(filePath + CliConstants.JSON_EXTENSION);
+            logger.debug("API definition identified as a " + CliConstants.JSON_EXTENSION + " file.");
+            success = file.renameTo(newFile);
+        } catch (JsonParseException e) {
+            ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+            try {
+                yamlReader.readValue(content, Object.class);
+                File newFile = new File(filePath + CliConstants.YAML_EXTENSION);
+                logger.debug("API definition identified as a " + CliConstants.YAML_EXTENSION + " file.");
+                success = file.renameTo(newFile);
+            } catch (IOException ex) {
+                throw new CLIRuntimeException("Error while trying parsing the api definition to YAML");
+            }
+        }
+        if (!success) {
+            logger.debug("Failed to identify API definition format");
+        } else {
+            logger.debug("API definition is renamed.");
         }
     }
 
@@ -304,7 +359,7 @@ public final class CmdUtils {
      * @param projectName name of the project
      */
     public static void createProjectStructure(String projectName, String apiDefinition, String apiDefinitionURL,
-                                              String headers, String values) throws IOException {
+                                              String headers, String values, boolean insecure) throws IOException {
         File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
@@ -320,7 +375,7 @@ public final class CmdUtils {
         String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
 
-        setApiDefinition(projectName, apiDefinition, apiDefinitionURL, headers, values);
+        setApiDefinition(projectName, apiDefinition, apiDefinitionURL, headers, values, insecure);
 
         String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -879,12 +934,16 @@ public final class CmdUtils {
      * @param headers api definition download request headers
      * @param values api definition download values for request headers
      */
-    private static void downloadFile(String source, String destination, ArrayList<String> headers,
-                                     ArrayList<String> values) throws IOException {
+    private static String downloadFile(String source, String destination, ArrayList<String> headers,
+                                     ArrayList<String> values, boolean insecure) throws IOException {
 
         URL url;
+        if (insecure) {
+            useInsecureSSL();
+        }
         HttpURLConnection urlConn = null;
         FileOutputStream outputStream = null;
+        String saveFilePath;
         try {
             url = new URL(source);
             urlConn = (HttpURLConnection) url.openConnection();
@@ -912,7 +971,7 @@ public final class CmdUtils {
 
                 // opens input stream from the HTTP connection
                 InputStream inputStream = urlConn.getInputStream();
-                String saveFilePath = destination + File.separator + fileName;
+                saveFilePath = destination + File.separator + fileName;
 
                 // opens an output stream to save into file
                 outputStream = new FileOutputStream(saveFilePath);
@@ -937,6 +996,7 @@ public final class CmdUtils {
                 urlConn.disconnect();
             }
         }
+        return saveFilePath;
     }
 
     public static ContainerConfig getContainerConfig() {
@@ -1055,5 +1115,32 @@ public final class CmdUtils {
         String value = System.getProperty("VERBOSE_ENABLED");
         //bat file provides T and shell script provides true
         return value != null && (value.equals("T") || value.equalsIgnoreCase("true"));
+    }
+
+    /**
+     * method use to trust all certificates using insecure ssl.
+     */
+    public static void useInsecureSSL() {
+
+        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        SSLContext context;
+        try {
+            context = SSLContext.getInstance(TokenManagementConstants.TLS);
+            context.init(null, new X509TrustManager[] { new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[0];
+                }
+            } }, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            String message = "Error while setting in secure ssl options";
+            logger.error(message, e);
+        }
     }
 }
