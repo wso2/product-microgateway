@@ -65,6 +65,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -278,78 +280,120 @@ public final class CmdUtils {
     }
 
     /**
-     * Set api definition file
+     * Set api definition file.
      *
      * @param projectName name of the project
      * @param apiDefinition api definition file local path
-     * @param apiDefinitionURL api definition download URL
      * @param headers api definition download request headers
      * @param values api definition download values for request headers
+     * @param insecure insecure url connection
      */
-    private static void setApiDefinition(String projectName, String apiDefinition, String apiDefinitionURL,
+    private static void setApiDefinition(String projectName, String apiDefinition,
                                          String headers, String values, boolean insecure) throws IOException {
         String apiDefinitionsDir = getUserDir() + File.separator + projectName + File.separator +
                 CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator;
-        String filePath = "";
-        boolean isDownloaded = false;
-        if (!StringUtils.isEmpty(apiDefinition)) {
-            filePath = apiDefinitionsDir + Paths.get(apiDefinition).getFileName();
-            Files.copy(Paths.get(apiDefinition), Paths.get(filePath));
-            isDownloaded = true;
-            logger.debug("Api definition is successfully copied to :" + filePath);
-        }
-        if (!StringUtils.isEmpty(apiDefinitionURL)) {
+        String filePath;
+
+        if (isURL(apiDefinition)) {
             ArrayList<String> headersList = new ArrayList<>();
             ArrayList<String> valuesList = new ArrayList<>();
             if (!StringUtils.isBlank(headers) && !StringUtils.isBlank(values)) {
                 headersList = new ArrayList(Arrays.asList(headers.split(",")));
                 valuesList = new ArrayList(Arrays.asList(values.split(",")));
-                if (headersList.size() > 0) {
-                    if (headersList.size() != valuesList.size()) {
-                        throw new CLIRuntimeException("Provided number of header and number of values is different");
-                    }
+                if (headersList.size() > 0 && (headersList.size() != valuesList.size())) {
+                    throw new CLIRuntimeException("Provided number of header and number of values is different");
                 }
                 logger.debug("Request headers are provided.");
             }
-            isDownloaded = true;
-            filePath = downloadFile(apiDefinitionURL, apiDefinitionsDir, headersList, valuesList, insecure);
+            filePath = downloadFile(apiDefinition, apiDefinitionsDir, headersList, valuesList, insecure);
+        } else {
+            //validate api-definition file path
+            File apiDefinitionFile = new File(apiDefinition);
+            if (!apiDefinitionFile.exists()) {
+                throw CmdUtils.createUsageException(
+                        "Error while getting the open API definition. Probably the file path '"
+                                + apiDefinition + "' is invalid.");
+            }
+
+            filePath = apiDefinitionsDir + Paths.get(apiDefinition).getFileName();
+            Files.copy(Paths.get(apiDefinition), Paths.get(filePath));
+            logger.debug("Api definition is successfully copied to :" + filePath);
         }
-        if (isDownloaded && !(filePath.endsWith(CliConstants.JSON_EXTENSION) ||
-                filePath.endsWith(CliConstants.YAML_EXTENSION))) {
-            logger.debug("Api definition file name has no .json or .yaml extension");
-            jsonYamlIdentifier(filePath);
+
+        if (!(filePath.endsWith(CliConstants.JSON_EXTENSION) || filePath.endsWith(CliConstants.YAML_EXTENSION))) {
+            logger.debug("API definition file name has no .json or .yaml extension");
+            if (addExtension(filePath)) {
+                logger.debug("API definition renamed.");
+            }
         }
     }
 
-    private static void jsonYamlIdentifier(String filePath) {
-        String content;
-        File file = new File(filePath);
-        boolean success;
-        try {
-            content = readFileAsString(filePath, false);
-        } catch (IOException e) {
-            throw new CLIRuntimeException("Error while reading the api-definition from" + filePath);
-        }
+    /**
+     * Url validator, Allow any url with https and http.
+     * Allow any url without fully qualified domain.
+     *
+     * @param url Url as string
+     * @return boolean type stating validated or not
+     */
+    private static boolean isURL(String url) {
+        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
+    }
+
+    /**
+     * Identify a Json content.
+     *
+     * @param content content
+     */
+    private static boolean isJson(String content) {
         try {
             new JsonParser().parse(content);
-            File newFile = new File(filePath + CliConstants.JSON_EXTENSION);
-            logger.debug("API definition identified as a " + CliConstants.JSON_EXTENSION + " file.");
-            success = file.renameTo(newFile);
         } catch (JsonParseException e) {
-            ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-            try {
-                yamlReader.readValue(content, Object.class);
-                File newFile = new File(filePath + CliConstants.YAML_EXTENSION);
-                logger.debug("API definition identified as a " + CliConstants.YAML_EXTENSION + " file.");
-                success = file.renameTo(newFile);
-            } catch (IOException ex) {
-                throw new CLIRuntimeException("Error while trying parsing the api definition to YAML");
-            }
+            return false;
         }
-        if (!success) {
-            logger.debug("Failed to identify API definition format");
-        } else {
-            logger.debug("API definition is renamed.");
+        return true;
+    }
+
+    /**
+     * Identify a Yaml content.
+     *
+     * @param content content
+     */
+    private static boolean isYaml(String content) {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        try {
+            yamlReader.readValue(content, Object.class);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Add yaml and json file extensions.
+     *
+     * @param filePath file
+     */
+    private static boolean addExtension(String filePath) {
+        String content;
+        File file = new File(filePath);
+        try {
+            content = readFileAsString(filePath, false);
+            if (isJson(content)) {
+                File newFile = new File(filePath + CliConstants.JSON_EXTENSION);
+                logger.debug("File identified as a " + CliConstants.JSON_EXTENSION + " file.");
+                return file.renameTo(newFile);
+            } else if (isYaml(content)) {
+                File newFile = new File(filePath + CliConstants.YAML_EXTENSION);
+                logger.debug("File identified as a " + CliConstants.YAML_EXTENSION + " file.");
+                return file.renameTo(newFile);
+            } else {
+                logger.debug("Failed to identify format");
+                return false;
+            }
+        } catch (IOException e) {
+            throw new CLIRuntimeException("Error while reading file: " + filePath);
         }
     }
 
@@ -358,8 +402,8 @@ public final class CmdUtils {
      *
      * @param projectName name of the project
      */
-    public static void createProjectStructure(String projectName, String apiDefinition, String apiDefinitionURL,
-                                              String headers, String values, boolean insecure) throws IOException {
+    public static void createProjectStructure(String projectName, String apiDefinition, String headers, String values,
+                                              boolean insecure) throws IOException {
         File projectDir = createDirectory(getUserDir() + File.separator + projectName, false);
 
         String interceptorsPath = projectDir + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR;
@@ -374,8 +418,9 @@ public final class CmdUtils {
 
         String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
-
-        setApiDefinition(projectName, apiDefinition, apiDefinitionURL, headers, values, insecure);
+        if (!StringUtils.isEmpty(apiDefinition)) {
+            setApiDefinition(projectName, apiDefinition, headers, values, insecure);
+        }
 
         String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
         String resourceServicesDirectory =
@@ -539,11 +584,11 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns location of the micro-gw.conf resource file
+     * Returns location of the micro-gw.conf resource file.
      *
      * @return path configuration file
      */
-    public static String getMicroGWConfResourceLocation() {
+    public static String getGWConfResourceLocation() {
         return getCLIHome() + File.separator + CliConstants.GW_DIST_RESOURCES + File.separator
                 + CliConstants.GW_DIST_CONF + File.separator + CliConstants.MICRO_GW_CONF_FILE;
     }
@@ -927,7 +972,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Download file
+     * Download file.
      *
      * @param source source URL
      * @param destination destination path to save file
@@ -936,7 +981,6 @@ public final class CmdUtils {
      */
     private static String downloadFile(String source, String destination, ArrayList<String> headers,
                                      ArrayList<String> values, boolean insecure) throws IOException {
-
         URL url;
         if (insecure) {
             useInsecureSSL();

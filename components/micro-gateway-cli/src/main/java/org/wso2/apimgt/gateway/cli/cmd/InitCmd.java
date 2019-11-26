@@ -19,7 +19,6 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
@@ -68,15 +67,11 @@ public class InitCmd implements LauncherCmd {
     private String apiDefinition;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-u", "--api-definition-url"})
-    private String apiDefinitionURL;
-
-    @SuppressWarnings("unused")
-    @Parameter(names = {"-r", "--headers"})
+    @Parameter(names = "--headers")
     private String headers;
 
     @SuppressWarnings("unused")
-    @Parameter(names = {"-v", "--values"})
+    @Parameter(names = "--values")
     private String values;
 
     @SuppressWarnings("unused")
@@ -105,19 +100,9 @@ public class InitCmd implements LauncherCmd {
             CmdUtils.deleteProject(projectName);
         }
 
-        //validate api-definition file path
-        if (!StringUtils.isEmpty(apiDefinition)) {
-            File apiDefinitionFile = new File(apiDefinition);
-            if (!apiDefinitionFile.exists()) {
-                throw CmdUtils.createUsageException(
-                        "Error while getting the open API definition. Probably the file path '"
-                                + apiDefinition + "' is invalid.");
-            }
-        }
-
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        init(projectName, deploymentConfigPath, apiDefinition, apiDefinitionURL, headers, values, insecure);
+        init(projectName, deploymentConfigPath, apiDefinition, headers, values, insecure);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
         OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
@@ -141,10 +126,10 @@ public class InitCmd implements LauncherCmd {
      * @param projectName          name of the project being initialized
      * @param deploymentConfigPath path to deployment config file (used in k8s scenarios)
      */
-    private static void init(String projectName, String deploymentConfigPath, String apiDefinition,
-                             String apiDefinitionURL, String headers, String values, boolean insecure) {
+    private static void init(String projectName, String deploymentConfigPath, String apiDefinition, String headers,
+                             String values, boolean insecure) {
         try {
-            CmdUtils.createProjectStructure(projectName, apiDefinition, apiDefinitionURL, headers, values, insecure);
+            CmdUtils.createProjectStructure(projectName, apiDefinition, headers, values, insecure);
             CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
