@@ -1,6 +1,6 @@
  // Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  //
- // WSO2 Inc. licenses this file to you under the Apache License,
+ // WSO2 Inc. 2019, licenses this file to you under the Apache License,
  // Version 2.0 (the "License"); you may not use this file except
  // in compliance with the License.
  // You may obtain a copy of the License at
@@ -33,19 +33,19 @@ service messageServ = service {
             string?|error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
             if (throttleKey is string) {
                 printDebug(KEY_THROTTLE_UTIL, "Throttle Key : " + throttleKey.toString() + " Throttle status : " +
-                 throttleEnable.toString());
+                throttleEnable.toString());
                 if (throttleEnable is boolean && expiryTime is int) {
-                        GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
-                        throttleKey: throttleKey,
-                        isThrottled: throttleEnable,
-                        expiryTimeStamp: expiryTime };
-                        if (globalThrottleStreamDtoTM.isThrottled == true) {
-                            printDebug(KEY_THROTTLE_UTIL, "Adding to throttledata map.");
-                            putThrottleData(globalThrottleStreamDtoTM);
-                        } else {
-                            printDebug(KEY_THROTTLE_UTIL, "Romoving from throttledata map.");
-                            removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
-                        }
+                    GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
+                    throttleKey: throttleKey,
+                    isThrottled: throttleEnable,
+                    expiryTimeStamp: expiryTime };
+                    if (globalThrottleStreamDtoTM.isThrottled == true) {
+                        printDebug(KEY_THROTTLE_UTIL, "Adding to throttledata map.");
+                        putThrottleData(globalThrottleStreamDtoTM);
+                    } else {
+                        printDebug(KEY_THROTTLE_UTIL, "Romoving from throttledata map.");
+                        removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
+                    }
                 }  else {
                      printDebug(KEY_THROTTLE_UTIL, "Throlling configs values are wrong.");
                 }
@@ -88,14 +88,15 @@ service messageServ = service {
 
 
  # `initiateThrottlingJmsListener` function initialize jmslistener subscriber service if `enabledGlobalTMEventPublishing`
- # is enabled
+ # is true
  #
  # + return - boolean value of jmslistener started or not
  public function initiateThrottlingJmsListener() returns boolean {
      enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
          GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
-
-     if (enabledGlobalTMEventPublishing) {
+     if (!enabledGlobalTMEventPublishing) {
+        return false;
+     } else {
          jms:MessageConsumer|error topicSubscriber = trap startSubscriberService();
          if (topicSubscriber is jms:MessageConsumer) {
             printDebug(KEY_THROTTLE_UTIL, "subscriber service for global throttling is started.");
@@ -105,5 +106,4 @@ service messageServ = service {
              return false;
          }
      }
-     return false;
  }
