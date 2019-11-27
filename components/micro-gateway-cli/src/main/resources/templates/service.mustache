@@ -2,7 +2,7 @@ import ballerina/log;
 import ballerina/http;
 import ballerina/time;
 import ballerina/runtime;
-{{#if containerConfig.hasKubernetes}}import ballerinax/kubernetes;{{/if}}
+{{#if containerConfig.hasKubernetes}}import ballerina/kubernetes;{{/if}}
 import wso2/gateway;
 {{#if endpointConfig.prodEndpoints.securityConfig}}
     {{#equals endpointConfig.prodEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
