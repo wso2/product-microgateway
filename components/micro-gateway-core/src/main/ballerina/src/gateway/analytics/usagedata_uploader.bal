@@ -43,8 +43,7 @@ public function multipartSender(string location, string file, string username, s
         response.statusCode = 500;
         printFullError(KEY_UPLOAD_TASK, returnResponse);
         return response;
-    }
-    else {
+    } else {
         var responseString = returnResponse.getTextPayload();
         if (responseString is string) {
             printDebug(KEY_UPLOAD_TASK, "File upload response : " + returnResponse.getTextPayload().toString());

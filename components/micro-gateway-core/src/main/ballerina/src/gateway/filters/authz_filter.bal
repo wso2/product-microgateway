@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -44,10 +44,10 @@ public type OAuthzFilter object {
                 //validate scopes if auth scheme is jwt.
                 if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
                     //Start a new child span for the span.
-                    int | error | () span_balReq = startSpan(BALLERINA_AUTHZ_FILTER);
+                    int | error | () balSpan = startSpan(BALLERINA_AUTHZ_FILTER);
                     result = self.authzFilter.filterRequest(caller, request, context);
                     //finishing span
-                    finishSpan(BALLERINA_AUTHZ_FILTER, span_balReq);
+                    finishSpan(BALLERINA_AUTHZ_FILTER, balSpan);
                 }
             }
             printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());

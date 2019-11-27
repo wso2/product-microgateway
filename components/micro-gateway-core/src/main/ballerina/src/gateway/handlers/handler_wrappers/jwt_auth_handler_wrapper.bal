@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ import ballerina/observe;
 # + jwtAuthProvider - The reference to the jwt auth provider instance
 public type JWTAuthHandlerWrapper object {
     *http:InboundAuthHandler;
-
     public JwtAuthProvider jwtAuthProvider;
     JWTAuthHandler jwtAuthHandler;
 
@@ -47,18 +46,18 @@ public type JWTAuthHandlerWrapper object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
         //Start a span attaching to the system span.
-        int | error | () spanId_Process = startSpan(JWT_AUTHENHANDLER_PROCESS);
+        int | error | () spanIdProcess = startSpan(JWT_AUTHENHANDLER_PROCESS);
         //starting Gauge
         int startingTime = getCurrentTime();
         map<string> | () gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | http:AuthenticationError result = self.jwtAuthHandler.process(req);
         float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);
-        updateGauge(localGauge_total, latency);
+        updateGauge(localGaugeTotal, latency);
         //finishing span
-        finishSpan(JWT_AUTHENHANDLER_PROCESS, spanId_Process);
+        finishSpan(JWT_AUTHENHANDLER_PROCESS, spanIdProcess);
         return result;
     }
 };

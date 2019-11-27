@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -17,17 +17,15 @@
 import ballerina/http;
 
 // Pre Authentication filter
-
 public type PreAuthnFilterWrapper object {
-
     PreAuthnFilter preAuthnFilter = new;
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(PRE_AUTHN_FILTER_REQUEST);
+        int | error | () spanIdReq = startSpan(PRE_AUTHN_FILTER_REQUEST);
         boolean result = self.preAuthnFilter.filterRequest(caller, request, context);
         //Finish span.
-        finishSpan(PRE_AUTHN_FILTER_REQUEST, spanId_req);
+        finishSpan(PRE_AUTHN_FILTER_REQUEST, spanIdReq);
         return result;
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -18,9 +18,7 @@ import ballerina/cache;
 import ballerina/http;
 
 // authorization filter which wraps the ballerina in built authorization filter.
-
 public type OAuthzFilterWrapper object {
-
     OAuthzFilter oAuthzFilter;
 
     public function __init(cache:Cache positiveAuthzCache, cache:Cache negativeAuthzCache, string[][]? scopes) {
@@ -29,19 +27,19 @@ public type OAuthzFilterWrapper object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a new root span attaching to the system span.
-        int | error | () spanId_req = startSpan(AUTHZ_FILTER_REQUEST);
+        int | error | () spanIdReq = startSpan(AUTHZ_FILTER_REQUEST);
         boolean result = self.oAuthzFilter.filterRequest(caller, request, context);
         //Finish span.
-        finishSpan(AUTHZ_FILTER_REQUEST, spanId_req);
+        finishSpan(AUTHZ_FILTER_REQUEST, spanIdReq);
         return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         //Start a new root span without attaching to the system span.
-        int | error | () spanId_res = startSpan(AUTHZ_FILTER_RESPONSE);
+        int | error | () spanIdRes = startSpan(AUTHZ_FILTER_RESPONSE);
         boolean result = self.oAuthzFilter.filterResponse(response, context);
         //Finish span.
-        finishSpan(AUTHZ_FILTER_RESPONSE, spanId_res);
+        finishSpan(AUTHZ_FILTER_RESPONSE, spanIdRes);
         return result;
     }
 

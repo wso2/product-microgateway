@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -40,10 +40,10 @@ public type JwtAuthProvider object {
 
     public function authenticate(string credential) returns @tainted (boolean | auth:Error) {
         //Start a span attaching to the system span.
-        int | error | () spanId_Authen = startSpan(JWT_PROVIDER_AUTHENTICATE);
+        int | error | () spanIdAuth = startSpan(JWT_PROVIDER_AUTHENTICATE);
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         //finishing span
-        finishSpan(JWT_PROVIDER_AUTHENTICATE, spanId_Authen);
+        finishSpan(JWT_PROVIDER_AUTHENTICATE, spanIdAuth);
         if (handleVar is boolean) {
             if (handleVar) {
                 boolean isBlacklisted = false;
@@ -54,10 +54,10 @@ public type JwtAuthProvider object {
                     string? jwtToken = authContext?.authToken;
                     if (jwtToken is string) {
                         //Start a new child span for the span.
-                        int | error | () spanId_Cache = startSpan(JWT_CACHE);
+                        int | error | () spanIdCache = startSpan(JWT_CACHE);
                         var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
                         //finishing span
-                        finishSpan(JWT_CACHE, spanId_Cache);
+                        finishSpan(JWT_CACHE, spanIdCache);
                         if (cachedJwt is jwt:CachedJwt) {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
                             jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;

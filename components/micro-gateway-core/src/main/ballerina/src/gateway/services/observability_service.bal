@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -35,7 +35,6 @@ service {
     @http:ResourceConfig {
         path: "/metrics"
     }
-
     resource function balMetric(http:Caller caller, http:Request req) returns error? {
 
         var bal_response = balMetricEndpoint->forward("/metrics", <@untainted>req);
@@ -53,7 +52,6 @@ service {
     @http:ResourceConfig {
         path: "/jmxMetrics"
     }
-
     resource function jmxMetrics(http:Caller caller, http:Request req) returns error? {
 
         var jmx_response = jmxMetricEndpoint->forward("/metrics", <@untainted>req);
@@ -70,7 +68,7 @@ service {
 
 };
 
-public function startObservabilityMetrics() {
+public function startObservabilityListener() {
     if (isMetricsEnabled) {
         ObservabilityMetricListener observabilityMetricListner = new;
         error? err = observabilityMetricListner.__attach(metric, ());

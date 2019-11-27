@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -20,16 +20,15 @@ import ballerina/http;
 // This filter should only be engaged when jwt token is is used for authentication. For oauth2
 // OAuthnFilter will handle the subscription validation as well.
 public type SubscriptionFilterWrapper object {
-
     SubscriptionFilter subscriptionFilter = new;
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext filterContext)
     returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(SUBSCRIPTION_FILTER_REQUEST);
+        int | error | () spanIdReq = startSpan(SUBSCRIPTION_FILTER_REQUEST);
         boolean result = self.subscriptionFilter.filterRequest(caller, request, filterContext);
         //Finish span.
-        finishSpan(SUBSCRIPTION_FILTER_REQUEST, spanId_req);
+        finishSpan(SUBSCRIPTION_FILTER_REQUEST, spanIdReq);
         return result;
     }
 

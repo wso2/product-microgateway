@@ -351,7 +351,6 @@
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.tools</artifactId>
-                <type>jar</type>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

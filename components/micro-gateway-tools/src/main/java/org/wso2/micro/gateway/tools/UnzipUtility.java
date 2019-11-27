@@ -25,24 +25,21 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Extern function wso2.gateway:unzip.
- *
- *
  */
 public class UnzipUtility {
-
     private static final int BUFFER_SIZE = 4096;
 
     /**
-     * unzip folders and files seperately
+     * Unzip folders and files seperately
      *
      * @param zipFilePath    file path of the zip file
      * @param destDirectory  file path of the destination driectory
      * @throws IOException exception if an error occurrs when compressing
      */
-    public void unzipping(String zipFilePath, String destDirectory) throws IOException {
+    public void unzip(String zipFilePath, String destDirectory) throws IOException {
         File destDir = new File(destDirectory);
-        boolean wasSuccessful = destDir.mkdir();
-        if (!wasSuccessful) {
+        boolean isDestCreated = destDir.mkdir();
+        if (!isDestCreated) {
             throw new IOException("Error occurred when creating folder");
         }
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
@@ -69,8 +66,6 @@ public class UnzipUtility {
             entry = zipIn.getNextEntry();
         }
         zipIn.close();
-
-
     }
 
     /**
@@ -90,19 +85,14 @@ public class UnzipUtility {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-
     }
 
-    /**
-     * Main function to extract the file.
-     *
-     */
     public static void main(String[] args) {
         String zipFilePath = System.getenv("GW_HOME") + "/runtime.zip";
         String destDirectory = System.getenv("GW_HOME") + "/runtime";
         UnzipUtility unzipper = new UnzipUtility();
         try {
-            unzipper.unzipping(zipFilePath, destDirectory);
+            unzipper.unzip(zipFilePath, destDirectory);
         } catch (Exception ex) {
             // some errors occurred
             ex.printStackTrace();

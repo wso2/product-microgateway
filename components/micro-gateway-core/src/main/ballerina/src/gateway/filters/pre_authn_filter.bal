@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -57,6 +57,7 @@ returns boolean {
     boolean isSecuredResource = isSecured(serviceName, resourceName);
     printDebug(KEY_PRE_AUTHN_FILTER, "Resource secured : " + isSecuredResource.toString());
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
+    context.attributes[IS_SECURED] = isSecuredResource;
     invocationContext.attributes[REQUEST_METHOD] = request.method;
     invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
 

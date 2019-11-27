@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -108,8 +108,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
-    }
-    else {
+    } else {
         jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
     }
 
@@ -134,8 +133,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     KeyValidationHandler | KeyValidationHandlerWrapper keyValidationHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider);
-    }
-    else {
+    } else {
         keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider);
     }
 
@@ -145,8 +143,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     BasicAuthProvider | BasicAuthProviderWrapper configBasicAuthProvider;
     if (isMetricsEnabled || isTracingEnabled) {
         configBasicAuthProvider = new BasicAuthProviderWrapper(basicAuthConfig);
-    }
-    else {
+    } else {
         configBasicAuthProvider = new BasicAuthProvider(basicAuthConfig);
     }
     http:BasicAuthHandler basicAuthHandler = new (configBasicAuthProvider);
@@ -155,8 +152,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         mutualSSLHandler = new MutualSSLHandlerWrapper();
-    }
-    else {
+    } else {
         mutualSSLHandler = new MutualSSLHandler();
     }
 
@@ -176,8 +172,7 @@ public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFil
     if (isTracingEnabled || isMetricsEnabled) {
         OAuthzFilterWrapper authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());        //TODO: set the proper scopes
         return authzFilterWrapper;
-    }
-    else {
+    } else {
         OAuthzFilter authzFilter = new (positiveAuthzCache, negativeAuthzCache, ());        //TODO: set the proper scopes
         return authzFilter;
     }

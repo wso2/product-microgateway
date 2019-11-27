@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -47,18 +47,18 @@ public type KeyValidationHandlerWrapper object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
         //Start a span attaching to the system span.
-        int | error | () spanId_Process = startSpan(KEY_VALIDATION_HANDLER_PROCESS);
+        int | error | () spanIdProcess = startSpan(KEY_VALIDATION_HANDLER_PROCESS);
         //Starting Gauge
         int startingTime = getCurrentTime();
         map<string> | () gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | http:AuthenticationError result = self.keyValidationHandler.process(req);
         float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);
-        updateGauge(localGauge_total, latency);
+        updateGauge(localGaugeTotal, latency);
         //Finish span.
-        finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanId_Process);
+        finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanIdProcess);
         return result;
     }
 

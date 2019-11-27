@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,7 @@ public type AnalyticsRequestFilterWrapper object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(ANALYTICS_FILTER_REQUEST);
+        int | error | () spanIdReq = startSpan(ANALYTICS_FILTER_REQUEST);
         map<string> | () gaugeTags = gaugeTagDetails(request, context, FILTER_ANALYTICS);
         setGaugeTagInvocationContext(ANALYTIC_GAUGE_TAGS, gaugeTags);
         int startingTime = getCurrentTime();
@@ -30,26 +30,26 @@ public type AnalyticsRequestFilterWrapper object {
         float | () latency = setGaugeDuration(startingTime);
         setLatencyInvocationContext(ANALYTIC_REQUEST_TIME, latency);
         //Finish span.
-        finishSpan(ANALYTICS_FILTER_REQUEST, spanId_req);
+        finishSpan(ANALYTICS_FILTER_REQUEST, spanIdReq);
         return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         //Start a span attaching to the system span.
-        int | error | () spanId_res = startSpan(ANALYTICS_FILTER_RESPONSE);
+        int | error | () spanIdRes = startSpan(ANALYTICS_FILTER_RESPONSE);
         //starting a Gauge metric
         map<string> | () gaugeTags = getGaugeTagInvocationContext(ANALYTIC_GAUGE_TAGS);
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_ANALYTICS});
+        observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_ANALYTICS});
         int startingTime = getCurrentTime();
         boolean result = self.analyticsRequestFilter.filterResponse(response, context);
         float | () latency = setGaugeDuration(startingTime);
-        float | () req_latency = getLatencyInvocationContext(ANALYTIC_REQUEST_TIME);
-        float | () total_latency = calculateLatency(req_latency, latency);
-        updateGauge(localGauge, total_latency);
-        updateGauge(localGauge_total, total_latency);
+        float | () reqLatency = getLatencyInvocationContext(ANALYTIC_REQUEST_TIME);
+        float | () totalLatency = calculateLatency(reqLatency, latency);
+        updateGauge(localGauge, totalLatency);
+        updateGauge(localGaugeTotal, totalLatency);
         //Finish span.
-        finishSpan(ANALYTICS_FILTER_RESPONSE, spanId_res);
+        finishSpan(ANALYTICS_FILTER_RESPONSE, spanIdRes);
         return result;
     }
 

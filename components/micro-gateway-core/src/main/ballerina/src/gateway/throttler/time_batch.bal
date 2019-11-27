@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -117,7 +117,7 @@ public type TimeBatch object {
 
     public function getCandidateEvents(
     streams:StreamEvent originEvent,
- (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+    (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
     boolean isLHSTrigger = true)
     returns [streams:StreamEvent?, streams:StreamEvent?][] {
         // do nothing;

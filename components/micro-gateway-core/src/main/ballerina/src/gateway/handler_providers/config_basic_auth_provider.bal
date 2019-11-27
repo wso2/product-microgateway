@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -80,7 +80,7 @@ public type BasicAuthProvider object {
             return false;
         }
         //Starting a new span
-        int | error | () spanId_Hash = startSpan(HASHING_MECHANISM);
+        int | error | () spanHash = startSpan(HASHING_MECHANISM);
         //Hashing mechanism
         string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
@@ -90,12 +90,12 @@ public type BasicAuthProvider object {
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         //finishing span
-        finishSpan(HASHING_MECHANISM, spanId_Hash);
+        finishSpan(HASHING_MECHANISM, spanHash);
         //Starting a new span
-        int | error | () spanId_Inbound = startSpan(BALLERINA_INBOUND_BASICAUTH);
+        int | error | () spanInbound = startSpan(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
         //finishing span
-        finishSpan(BALLERINA_INBOUND_BASICAUTH, spanId_Inbound);
+        finishSpan(BALLERINA_INBOUND_BASICAUTH, spanInbound);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Basic auth provider returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
@@ -104,8 +104,8 @@ public type BasicAuthProvider object {
                 //sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }
-            int startingTime_req = getCurrentTime();
-            invocationContext.attributes[REQUEST_TIME] = startingTime_req;
+            int startingTimeReq = getCurrentTime();
+            invocationContext.attributes[REQUEST_TIME] = startingTimeReq;
             invocationContext.attributes[FILTER_FAILED] = false;
             //Set authenticationContext data
             authenticationContext.authenticated = true;

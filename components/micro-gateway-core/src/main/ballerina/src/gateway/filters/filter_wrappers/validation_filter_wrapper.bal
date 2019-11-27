@@ -1,4 +1,4 @@
-// // Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 // //
 // // WSO2 Inc. licenses this file to you under the Apache License,
 // // Version 2.0 (the "License"); you may not use this file   except
@@ -27,19 +27,19 @@
 //     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
 //                         returns boolean {
 //         //Start a new root span attaching to the system span.
-//         int | error | () spanId_req = startSpan(VALIDATION_FILTER_REQUEST);
+//         int | error | () spanIdReq = startSpan(VALIDATION_FILTER_REQUEST);
 //         boolean result = self.validationFilter.filterRequest(caller, request, filterContext);
 //         //Finish span.
-//         finishSpan(VALIDATION_FILTER_REQUEST, spanId_req);
+//         finishSpan(VALIDATION_FILTER_REQUEST, spanIdReq);
 //         return result;
 //     }
 
 //     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
 //         //Start a new root span attaching to the system span.
-//         int | error | () spanId_res = startSpan(VALIDATION_FILTER_RESPONSE);
+//         int | error | () spanIdRes = startSpan(VALIDATION_FILTER_RESPONSE);
 //         boolean result = self.validationFilter.filterResponse(response, context);
 //         //Finish span.
-//         finishSpan(VALIDATION_FILTER_RESPONSE, spanId_res);
+//         finishSpan(VALIDATION_FILTER_RESPONSE, spanIdRes);
 //         return result;
 //     }
 

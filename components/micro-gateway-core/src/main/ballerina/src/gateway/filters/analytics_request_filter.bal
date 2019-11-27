@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ public type AnalyticsRequestFilter object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
-            int startingTime = getCurrentTime();
             checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
@@ -32,7 +31,6 @@ public type AnalyticsRequestFilter object {
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         if (isAnalyticsEnabled) {
-            int startingTime = getCurrentTime();
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];

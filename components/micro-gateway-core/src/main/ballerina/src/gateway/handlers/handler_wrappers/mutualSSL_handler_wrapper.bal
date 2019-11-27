@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -39,10 +39,10 @@ public type MutualSSLHandlerWrapper object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean | http:AuthenticationError {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(MUTUALSSL_FILTER_PROCESS);
+        int | error | () spanIdReq = startSpan(MUTUALSSL_FILTER_PROCESS);
         boolean | http:AuthenticationError result = self.mutualSSLHandler.process(req);
         //Finish span.
-        finishSpan(MUTUALSSL_FILTER_PROCESS, spanId_req);
+        finishSpan(MUTUALSSL_FILTER_PROCESS, spanIdReq);
         return result;
     }
 

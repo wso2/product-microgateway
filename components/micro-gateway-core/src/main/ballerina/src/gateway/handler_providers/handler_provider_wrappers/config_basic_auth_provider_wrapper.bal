@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -19,7 +19,6 @@ import ballerina/observe;
 
 public type BasicAuthProviderWrapper object {
     *auth:InboundAuthProvider;
-
     BasicAuthProvider basicAuthProvider;
 
     # Provides authentication based on the provided configuration.
@@ -35,18 +34,18 @@ public type BasicAuthProviderWrapper object {
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
     public function authenticate(string credential) returns (boolean | auth:Error) {
         //Start a span attaching to the system span.
-        int | error | () spanId_req = startSpan(BASICAUTH_PROVIDER);
+        int | error | () spanIdReq = startSpan(BASICAUTH_PROVIDER);
         //starting Gauge
         int startingTime = getCurrentTime();
         map<string> | () gaugeTags = gaugeTagDetails_basicAuth(FILTER_AUTHENTICATION);
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge | () localGauge_total = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | auth:Error result = self.basicAuthProvider.authenticate(credential);
         float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);
-        updateGauge(localGauge_total, latency);
+        updateGauge(localGaugeTotal, latency);
         //Finish span.
-        finishSpan(BASICAUTH_PROVIDER, spanId_req);
+        finishSpan(BASICAUTH_PROVIDER, spanIdReq);
         return result;
     }
 
