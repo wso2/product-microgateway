@@ -23,7 +23,7 @@ package org.wso2.apimgt.gateway.cli.model.config;
  * annotation.
  */
 public class CopyFile {
-    private String sourceFile;
+    private String source;
     private String target;
     private String isBallerinaConf;
 
@@ -43,12 +43,12 @@ public class CopyFile {
         this.target = target;
     }
 
-    public String getSourceFile() {
-        return sourceFile;
+    public String getSource() {
+        return source;
     }
 
-    public void setSourceFile(String sourceFile) {
-        this.sourceFile = sourceFile;
+    public void setSource(String source) {
+        this.source = source;
     }
 
 }
