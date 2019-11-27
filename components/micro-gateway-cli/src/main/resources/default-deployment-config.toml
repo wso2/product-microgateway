@@ -16,7 +16,7 @@
   [docker.dockerCopyFiles]
     enable = false
     [[docker.dockerCopyFiles.files]]
-        sourceFile = ''
+        source = ''
         target = ''
         isBallerinaConf = false
 [kubernetes]
@@ -36,7 +36,7 @@
     [kubernetes.kubernetesDeployment.copyFiles]
         enable = false
         [[kubernetes.kubernetesDeployment.copyFiles.files]]
-            sourceFile = ''
+            source = ''
             target = ''
     #dockerHost = ''
     #dockerCertPath = ''
