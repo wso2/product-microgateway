@@ -6,7 +6,10 @@
 | ------- | ------------------ |
 | > 2.5.0 | :white_check_mark: |
 
-## Reporting a Vulnerability
+## Reporting Vulnerabilities
 
-Common WSO2 guidelines for reporting a security vulnerability can be found 
-on the [WSO2 Security Vulnerability Reporting Guidelines](https://docs.wso2.com/display/Security/WSO2+Security+Vulnerability+Reporting+Guidelines) page.
+WSO2 takes security issues very seriously. If you have any concerns regarding our product security or have uncovered a security vulnerability, we strongly encourage you to report that to our private and highly confidential security mailing list: security@wso2.com first, without disclosing them in any forums, sites or other groups - public or private. To protect the end-user security, these issues could be disclosed in other places only after WSO2 completes its Vulnerability Management Process.
+
+Warning : Please do not create GitHub issues for security vulnerabilities.
+
+WSO2 guidelines for reporting a security vulnerability page describes how to report a Security Vulnerability and includes a public key if you wish to send secure messages to security@wso2.com
