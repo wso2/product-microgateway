@@ -66,5 +66,4 @@ public type ObservabilityMetricListener object {
     public function __detach(service s) returns error? {
         return self.metricListener.__detach(s);
     }
-
 };

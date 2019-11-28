@@ -82,8 +82,6 @@ public class UnzipUtility {
             while ((read = zipIn.read(bytesIn)) != -1) {
                 bos.write(bytesIn, 0, read);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -96,6 +94,7 @@ public class UnzipUtility {
         } catch (Exception ex) {
             // some errors occurred
             ex.printStackTrace();
+            System.exit(1);
         }
     }
 }

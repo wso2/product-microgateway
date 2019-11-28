@@ -41,8 +41,7 @@ public type MutualSSLHandler object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean | http:AuthenticationError {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        boolean | http:AuthenticationError result = doMTSLFilterRequest(req, invocationContext);
-        return result;
+        return doMTSLFilterRequest(req, invocationContext);
     }
 
 };
