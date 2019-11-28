@@ -73,6 +73,16 @@
             <artifactId>geronimo-jms_1.1_spec</artifactId>
             <version>${orbit.version.geronimo-jms_1.1_spec}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ballerinax.docker</groupId>
+            <artifactId>docker-extension</artifactId>
+            <version>${ballerina.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinax.kubernetes</groupId>
+            <artifactId>kubernetes-extension</artifactId>
+            <version>${ballerina.platform.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
