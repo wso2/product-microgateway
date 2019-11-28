@@ -96,6 +96,11 @@
             <destName>tools.exe</destName>
             <fileMode>755</fileMode>
         </file>
+        <file>
+            <source>${basedir}/target/update/update_windows.exe</source>
+            <outputDirectory>wso2am-micro-gw-windows-${project.version}/bin</outputDirectory>
+            <fileMode>744</fileMode>
+        </file>
     </files>
 
     <dependencySets>
