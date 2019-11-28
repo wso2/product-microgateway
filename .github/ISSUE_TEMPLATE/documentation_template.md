@@ -12,14 +12,13 @@ assignees: Mariangela, ruthryi, shaniR
 
 ### Steps to reproduce:
 
-### Affected Product Version:
-<!-- Members can use Affected/*** labels -->
-
-### Content Positioning in Documentation Structure:
+### Content Positioning in Documentation:
 <!-- https://docs.wso2.com/display/MG301/Quick+Start+Guide+-+Binary -->
 - Link:
+
 <!-- Initialize a project/2 -->
 - Heading (& Step):
+
 <!-- More information section -->
 - Any other reference:
 
