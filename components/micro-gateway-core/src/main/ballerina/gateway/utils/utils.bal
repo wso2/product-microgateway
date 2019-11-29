@@ -30,6 +30,7 @@ public map<reflect:annotationData[]> resourceAnnotationMap = {};
 public map<reflect:annotationData[]> serviceAnnotationMap = {};
 public map<TierConfiguration?> resourceTierAnnotationMap = {};
 public map<APIConfiguration?> apiConfigAnnotationMap = {};
+public map<FilterConfiguration?> filterConfigAnnotationMap = {};
 
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
@@ -40,7 +41,9 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     }
     serviceAnnotationMap[serviceName] = reflect:getServiceAnnotations(s);
     apiConfigAnnotationMap[serviceName] = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
+    filterConfigAnnotationMap[serviceName] = getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
 }
+
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
     serviceLevelAuthAnn) returns boolean {
@@ -228,6 +231,25 @@ public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annD
     if(apiAnn is reflect:annotationData) {
         APIConfiguration apiConfig =  <APIConfiguration>apiAnn.value;
         return apiConfig;
+    } else {
+        return ();
+    }
+}
+
+public function getFilterDetailsFromServiceAnnotation(reflect:annotationData[] annData) returns FilterConfiguration? {
+    if (annData.length() == 0) {
+        return ();
+    }
+    reflect:annotationData|() filterAnn = ();
+    foreach var ann in annData {
+        if (ann.name == FILTER_ANN_NAME && ann.moduleName == GATEWAY_ANN_PACKAGE) {
+            filterAnn = ann;
+            break;
+        }
+    }
+    if(filterAnn is reflect:annotationData) {
+        FilterConfiguration filterConfig =  <FilterConfiguration>filterAnn.value;
+        return filterConfig;
     } else {
         return ();
     }
@@ -549,4 +571,17 @@ public function setHostHeaderToFilterContext(http:Request request, http:FilterCo
         printDebug(KEY_UTILS, "Hostname attribute of the filter context is already set to : " +
                             <string>context.attributes[HOSTNAME_PROPERTY]);
     }
+}
+
+public function setFilterSkipToFilterContext(http:FilterContext context) {
+    if (context.attributes.hasKey(SKIP_ALL_FILTERS)) {
+        return;
+    }
+    string serviceName = getServiceName(context.serviceName);
+    boolean skipFilter = false;
+    FilterConfiguration? filterConfigAnn = filterConfigAnnotationMap[serviceName];
+    if (filterConfigAnn is FilterConfiguration) {
+        skipFilter = filterConfigAnn.skipAll;
+    }
+    context.attributes[SKIP_ALL_FILTERS] = skipFilter;
 }

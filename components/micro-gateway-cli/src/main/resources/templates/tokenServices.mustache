@@ -12,7 +12,10 @@ import wso2/gateway;
         }
      {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service authorizeService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service authorizeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
         path: "/*"
@@ -49,7 +52,10 @@ service authorizeService on tokenListenerEndpoint {
         }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service tokenService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service tokenService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
         path: "/*"
@@ -86,7 +92,10 @@ service tokenService on tokenListenerEndpoint {
         }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service revokeService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service revokeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
         path: "/*"
@@ -122,7 +131,10 @@ service revokeService on tokenListenerEndpoint {
         }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service userInfoService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service userInfoService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
         path: "/*"
@@ -145,4 +157,11 @@ service userInfoService on tokenListenerEndpoint {
             _ = caller->respond(errorResponse);
         }
     }
+}
+
+public function addTokenServicesFilterAnnotation() {
+    gateway:filterConfigAnnotationMap["authorizeService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(authorizeService));
+    gateway:filterConfigAnnotationMap["tokenService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(tokenService));
+    gateway:filterConfigAnnotationMap["revokeService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(revokeService));
+    gateway:filterConfigAnnotationMap["userInfoService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(userInfoService));
 }

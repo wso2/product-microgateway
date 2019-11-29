@@ -48,6 +48,10 @@ public type ValidationFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
+        if (filterContext.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>filterContext.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_VALIDATION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
         boolean result =  doValidationFilterRequest(caller, request, filterContext, self.openAPIs);
@@ -56,6 +60,10 @@ public type ValidationFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_VALIDATION_FILTER, "Skip all filter annotation set in the service. Skip the filter in response path");
+            return true;
+        }
         int startingTime = getCurrentTime();
         boolean result = doValidationFilterResponse(response, context, self.openAPIs);
         setLatency(startingTime, context, SECURITY_LATENCY_VALIDATION);

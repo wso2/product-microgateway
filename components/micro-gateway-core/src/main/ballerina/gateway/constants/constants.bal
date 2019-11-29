@@ -26,6 +26,7 @@
  public const string RESOURCE_ANN_NAME = "ResourceConfig";
  public const string SERVICE_ANN_NAME = "ServiceConfig";
  public const string API_ANN_NAME = "API";
+ public const string FILTER_ANN_NAME = "Filters";
  public const string SKIP_FILTERS_ANN_NAME = "SkipFilters";
  public const string GATEWAY_ANN_PACKAGE = "wso2/gateway";
 
@@ -75,6 +76,7 @@
  public const string PASSED = "passed";
 
  public const string FILTER_FAILED = "filter_failed";
+ public const string SKIP_ALL_FILTERS = "skip_filters";
  public const string REMOTE_ADDRESS = "remote_address";
  public const string ERROR_CODE = "error_code";
  public const string ERROR_MESSAGE = "error_message";

@@ -27,6 +27,10 @@ public type SubscriptionFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                         returns boolean {
+        if (filterContext.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>filterContext.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_SUBSCRIPTION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         int startingTime = getCurrentTime();
         checkOrSetMessageID(filterContext);
         boolean result = doSubscriptionFilterRequest(caller, request, filterContext);
