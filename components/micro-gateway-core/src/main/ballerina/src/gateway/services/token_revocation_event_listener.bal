@@ -17,11 +17,11 @@
  import wso2/jms;
 
  string jmsConnectioninitialContextFactoryTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,
-     REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
-     "bmbInitialContextFactory");
+REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
+"bmbInitialContextFactory");
  string jmsConnectionProviderUrlTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,
  REALTIME_JMS_CONNECTION_PROVIDER_URL,
-     "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
+"amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
  string jmsConnectionPasswordTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,
  REALTIME_JMS_CONNECTION_PASSWORD, "");
  string jmsConnectionUsernameTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID,

@@ -6,7 +6,7 @@ function initThrottlePolicies() {
     //TODO : move this to a future function call in throttle_util.bal once
     future<()> ftr = start gateway:initializeThrottleSubscription();
     //TODO: Enable once the jms module with ballerina
-    boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
+    boolean globalThrottlingEnabled = gateway:initiateThrottlingJmsListener();
 
      if(!globalThrottlingEnabled){
          while (true) {
