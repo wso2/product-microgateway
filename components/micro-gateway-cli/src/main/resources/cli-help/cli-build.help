@@ -29,6 +29,5 @@ OPTIONS
         EXAMPLES
             $ micro-gw build petstore --docker --docker-image petstore:v1 --docker-base-image wso2/micro-gw:latest
 
-
 EXAMPLES
     $ micro-gw build accounts-project
