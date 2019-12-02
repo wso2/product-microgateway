@@ -23,6 +23,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.cipher.AESCipherTool;
@@ -290,8 +292,7 @@ public final class CmdUtils {
      */
     private static void setApiDefinition(String projectName, String apiDefinition,
                                          String headers, String values, boolean insecure) throws IOException {
-        String apiDefinitionsDir = getUserDir() + File.separator + projectName + File.separator +
-                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator;
+        String apiDefinitionsDir = getProjectAPIFilesDirectoryPath(projectName);
         String filePath;
 
         if (isURL(apiDefinition)) {
@@ -303,7 +304,7 @@ public final class CmdUtils {
                 if (headersList.size() > 0 && (headersList.size() != valuesList.size())) {
                     throw new CLIRuntimeException("Provided number of header and number of values is different");
                 }
-                logger.debug("Request headers are provided.");
+                logger.debug("Request headers : " + headers + " values : " + values + "are provided.");
             }
             filePath = downloadFile(apiDefinition, apiDefinitionsDir, headersList, valuesList, insecure);
         } else {
@@ -315,7 +316,7 @@ public final class CmdUtils {
                                 + apiDefinition + "' is invalid.");
             }
 
-            filePath = apiDefinitionsDir + Paths.get(apiDefinition).getFileName();
+            filePath = apiDefinitionsDir + File.separator + Paths.get(apiDefinition).getFileName();
             Files.copy(Paths.get(apiDefinition), Paths.get(filePath));
             logger.debug("Api definition is successfully copied to :" + filePath);
         }
@@ -581,16 +582,6 @@ public final class CmdUtils {
     public static String getMainConfigLocation() {
         return getCLIHome() + File.separator + CliConstants.GW_DIST_CONF + File.separator
                 + CliConstants.MAIN_CONFIG_FILE_NAME;
-    }
-
-    /**
-     * Returns location of the micro-gw.conf resource file.
-     *
-     * @return path configuration file
-     */
-    public static String getGWConfResourceLocation() {
-        return getCLIHome() + File.separator + CliConstants.GW_DIST_RESOURCES + File.separator
-                + CliConstants.GW_DIST_CONF + File.separator + CliConstants.MICRO_GW_CONF_FILE;
     }
 
     /**
@@ -991,14 +982,14 @@ public final class CmdUtils {
         try {
             url = new URL(source);
             urlConn = (HttpURLConnection) url.openConnection();
-            urlConn.setRequestMethod(CliConstants.GET);
+            urlConn.setRequestMethod(HttpGet.METHOD_NAME);
             if (headers.size() > 0) {
                 for (int i = 0; i < headers.size(); i++) {
                     urlConn.setRequestProperty(headers.get(i), values.get(i));
                 }
             }
             int responseCode = urlConn.getResponseCode();
-            if (responseCode == CliConstants.HTTP_OK) {
+            if (responseCode == HttpStatus.SC_OK) {
                 String fileName = "";
                 String disposition = urlConn.getHeaderField("Content-Disposition");
 
@@ -1012,11 +1003,9 @@ public final class CmdUtils {
                     // extracts file name from URL
                     fileName = source.substring(source.lastIndexOf("/") + 1);
                 }
-
                 // opens input stream from the HTTP connection
                 InputStream inputStream = urlConn.getInputStream();
                 saveFilePath = destination + File.separator + fileName;
-
                 // opens an output stream to save into file
                 outputStream = new FileOutputStream(saveFilePath);
 
@@ -1026,7 +1015,6 @@ public final class CmdUtils {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 inputStream.close();
-
             } else {
                 throw new CLIInternalException("Error occurred while downloading file. Status code: " + responseCode);
             }

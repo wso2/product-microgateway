@@ -222,7 +222,7 @@ public class BuildCmd implements LauncherCmd {
 
                 CopyFile copyFile = new CopyFile();
                 copyFile.setIsBallerinaConf("true");
-                copyFile.setSource(CmdUtils.getGWConfResourceLocation());
+                copyFile.setSource(CmdUtils.getResourceFolderLocation());
                 copyFile.setTarget(File.separator + CliConstants.WSO2 + File.separator + CliConstants.MGW
                         + File.separator + CliConstants.GW_DIST_CONF + File.separator
                         + CliConstants.MICRO_GW_CONF_FILE);

@@ -87,15 +87,12 @@ public class CliConstants {
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
-    public static final String GET = "GET";
     public static final List<String> ACCESS_CONTROL_ALLOW_ORIGINS = Collections.singletonList("*");
     public static final List<String> ACCESS_CONTROL_ALLOW_METHODS = Collections.unmodifiableList(Arrays
             .asList("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"));
     public static final List<String> ACCESS_CONTROL_ALLOW_HEADERS = Collections.unmodifiableList(Arrays
             .asList("authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"));
     public static final boolean ACCESS_CONTROL_ALLOW_CREDENTIALS = false;
-
-    public static final int HTTP_OK = 200;
 
     public static final String API_SWAGGER = "swagger.json";
     public static final String API_OPENAPI_YAML = "openAPI.yaml";
