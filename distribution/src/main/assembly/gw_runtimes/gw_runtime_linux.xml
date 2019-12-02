@@ -26,6 +26,10 @@
 
     <fileSets>
         <fileSet>
+            <directory>${basedir}/target/jms-artifact/</directory>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/conf</outputDirectory>
         </fileSet>
@@ -103,6 +107,9 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+                <include>org.wso2.orbit.org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar</include>
+                <include>javax.jms:javax.jms-api:jar:</include>
+                <include>org.wso2.andes.wso2:andes-client:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
