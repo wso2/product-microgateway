@@ -124,8 +124,16 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
     //Response data publishing
+
+
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
+    if(isgRPCAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO){
+        json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
+        log:printDebug("\n\n###########GRPC Data going to publish");
+        future<()> publishedGRPCResponseStream = start dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+        return;
+    }
     if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
@@ -133,22 +141,6 @@ function doFilterResponseData(http:Response response, http:FilterContext context
                 log:printDebug("F_Upload eventRequestStream called");
                 eventStream.publish(event);
             }
-            // ###############################################
-            log:printDebug("This is the Response event DTO --->");
-            json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
-            //json|error analyticsResponseJSON = json.constructFrom(requestResponseExecutionDTO);
-            log:printDebug("\n\n###########GRPC Enable Value in response stream : ");
-            //      log:printDebug(isgRPCAnalyticsEnabled);  && analyticsResponseJSON is json
-            //io:println("1 -->  Before method call");
-            if(isgRPCAnalyticsEnabled != false ){
-                //io:println("2 -->  Inside if call");
-                log:printDebug("\n\n###########GRPC Data going to publish");
-                future<()> publishedGRPCResponseStream = start dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
-            }
-            //io:println("4 -->  After method call");
-            // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
-            // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
-            // ##############################################
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
             printFullError(KEY_ANALYTICS_FILTER, event);
@@ -157,6 +149,41 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data");
         printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
     }
+
+
+    // RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
+    //     context);
+    // if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+    //     EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
+    //     if(event is EventDTO) {
+    //         if(isAnalyticsEnabled != false){
+    //             log:printDebug("F_Upload eventRequestStream called");
+    //             eventStream.publish(event);
+    //         }
+    //         // ###############################################
+    //         log:printDebug("This is the Response event DTO --->");
+    //         json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
+    //         //json|error analyticsResponseJSON = json.constructFrom(requestResponseExecutionDTO);
+    //         log:printDebug("\n\n###########GRPC Enable Value in response stream : ");
+    //         //      log:printDebug(isgRPCAnalyticsEnabled);  && analyticsResponseJSON is json
+    //         //io:println("1 -->  Before method call");
+    //         if(isgRPCAnalyticsEnabled != false ){
+    //             //io:println("2 -->  Inside if call");
+    //             log:printDebug("\n\n###########GRPC Data going to publish");
+    //             future<()> publishedGRPCResponseStream = start dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
+    //         }
+    //         //io:println("4 -->  After method call");
+    //         // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
+    //         // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
+    //         // ##############################################
+    //     } else {
+    //         printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
+    //         printFullError(KEY_ANALYTICS_FILTER, event);
+    //     }
+    // } else {
+    //     printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data");
+    //     printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
+    // }
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
