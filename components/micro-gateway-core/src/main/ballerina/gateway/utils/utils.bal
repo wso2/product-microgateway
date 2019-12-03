@@ -41,7 +41,7 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     }
     serviceAnnotationMap[serviceName] = reflect:getServiceAnnotations(s);
     apiConfigAnnotationMap[serviceName] = getAPIDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
-    filterConfigAnnotationMap[serviceName] = getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(s));
+    filterConfigAnnotationMap[serviceName] = getFilterConfigFromServiceAnnotation(reflect:getServiceAnnotations(s));
 }
 
 
@@ -236,7 +236,7 @@ public function getAPIDetailsFromServiceAnnotation(reflect:annotationData[] annD
     }
 }
 
-public function getFilterDetailsFromServiceAnnotation(reflect:annotationData[] annData) returns FilterConfiguration? {
+public function getFilterConfigFromServiceAnnotation(reflect:annotationData[] annData) returns FilterConfiguration? {
     if (annData.length() == 0) {
         return ();
     }

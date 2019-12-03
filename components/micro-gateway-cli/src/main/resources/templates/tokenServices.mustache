@@ -160,8 +160,8 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
 }
 
 public function addTokenServicesFilterAnnotation() {
-    gateway:filterConfigAnnotationMap["authorizeService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(authorizeService));
-    gateway:filterConfigAnnotationMap["tokenService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(tokenService));
-    gateway:filterConfigAnnotationMap["revokeService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(revokeService));
-    gateway:filterConfigAnnotationMap["userInfoService"] = gateway:getFilterDetailsFromServiceAnnotation(reflect:getServiceAnnotations(userInfoService));
+    gateway:filterConfigAnnotationMap["authorizeService"] = gateway:getFilterConfigFromServiceAnnotation(reflect:getServiceAnnotations(authorizeService));
+    gateway:filterConfigAnnotationMap["tokenService"] = gateway:getFilterConfigFromServiceAnnotation(reflect:getServiceAnnotations(tokenService));
+    gateway:filterConfigAnnotationMap["revokeService"] = gateway:getFilterConfigFromServiceAnnotation(reflect:getServiceAnnotations(revokeService));
+    gateway:filterConfigAnnotationMap["userInfoService"] = gateway:getFilterConfigFromServiceAnnotation(reflect:getServiceAnnotations(userInfoService));
 }
