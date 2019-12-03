@@ -32,7 +32,7 @@ public type APIConfiguration record {
 public annotation <service> API APIConfiguration;
 
 public type FilterConfiguration record {
-    boolean skipAll = false ;
+    boolean skipAll = false;
 };
 
 public annotation <service> Filters FilterConfiguration;
