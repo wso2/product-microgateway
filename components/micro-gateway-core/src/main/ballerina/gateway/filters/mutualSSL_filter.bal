@@ -24,6 +24,11 @@ import ballerina/io;
 public type MutualSSLFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        setFilterSkipToFilterContext(context);
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_MUTUAL_SSL_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
@@ -44,7 +49,7 @@ function doMTSLFilterRequest(http:Caller caller, http:Request request, http:Filt
     boolean isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
     boolean isSecured = true;
-    printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
+    printDebug(KEY_MUTUAL_SSL_FILTER, "Processing request via MutualSSL filter.");
 
     context.attributes[IS_SECURED] = isSecured;
     int startingTime = getCurrentTime();

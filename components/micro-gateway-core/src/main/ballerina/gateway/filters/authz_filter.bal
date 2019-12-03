@@ -37,7 +37,9 @@ public type OAuthzFilter object {
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns
                                                                                                             boolean
     {
-
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_AUTHZ_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+        }
         string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
         if (checkAuthentication != "require") {
@@ -62,6 +64,10 @@ public type OAuthzFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_AUTHZ_FILTER, "Skip all filter annotation set in the service. Skip the filter in response path");
+            return true;
+        }
         int startingTime = getCurrentTime();
         boolean result = doAuthzFilterResponse(response, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ_RESPONSE);

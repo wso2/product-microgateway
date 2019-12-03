@@ -39,7 +39,11 @@ public type AuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context)
                         returns boolean {
-        //Setting UUID
+        setFilterSkipToFilterContext(context);
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         if(request.mutualSslHandshake["status"] != PASSED) {
             int startingTime = getCurrentTime();
             context.attributes[REQUEST_TIME] = startingTime;

@@ -21,6 +21,10 @@ import ballerina/time;
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -35,7 +39,10 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter in response path");
+            return true;
+        }
         if (isAnalyticsEnabled) {
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
