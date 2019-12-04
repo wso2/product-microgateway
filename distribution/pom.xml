@@ -72,6 +72,16 @@
             <artifactId>org.wso2.micro.gateway.tools</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+            <version>${andes.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+            <version>${orbit.version.geronimo-jms_1.1_spec}</version>
+        </dependency>
+        <dependency>
             <groupId>org.ballerinax.docker</groupId>
             <artifactId>docker-extension</artifactId>
             <version>${ballerina.platform.version}</version>
@@ -173,6 +183,18 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>extract-zip</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <phase>verify</phase>
                         <goals>
                             <goal>run</goal>
@@ -184,6 +206,7 @@
                                 <delete dir="${project.build.directory}/extracted-jre-macos" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/extracted-jre-windows" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/ballerina-jre-artifacts-zip" includeemptydirs="true" />
+                                <delete dir="${project.build.directory}/jms-artifact" includeemptydirs="true" />
                             </target>
                         </configuration>
                     </execution>
@@ -351,7 +374,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <!-- Skip deploying the product zip to nexus -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
