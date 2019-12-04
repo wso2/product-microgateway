@@ -102,42 +102,21 @@ if [ -z "$JAVACMD" ] ; then
     fi
 fi
 
-#add system variable VERBOSE_ENABLED
-VerboseRemovedArgs="$@"
-if [[ " ${VerboseRemovedArgs[*]} " == *" --verbose "* ]]; then
-    VERBOSE_ENABLED=true
-    #delete '--verbose' if available
-    delete=( --verbose )
-    VerboseRemovedArgs=${VerboseRemovedArgs/$delete}
-    #set modified args as $@
-    set -- $VerboseRemovedArgs
-else
-    VERBOSE_ENABLED=false
-fi
-
-# Extract ballerina runtime
-if [ ! -d "$GWHOME/runtime" ]; then
-    echo "Initializing Runtime..."
-    ALL_CLASSPATH=""
+ALL_CLASSPATH=""
     for j in "$GWHOME"/lib/gateway/*.jar
     do
         ALL_CLASSPATH="$ALL_CLASSPATH":$j
     done
+# Extract ballerina runtime
+if [ ! -d "$GWHOME/runtime" ]; then
+    echo "Initializing Runtime..."
     $JAVACMD \
         -Xms256m -Xmx1024m \
         -XX:+HeapDumpOnOutOfMemoryError \
         -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
         $JAVA_OPTS \
         -classpath "$ALL_CLASSPATH" \
-        -Djava.security.egd=file:/dev/./urandom \
-        -Dballerina.home=$BALLERINA_HOME \
-        -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
-        -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
-        -Dfile.encoding=UTF8 \
-        -Dtemplates.dir.path="$GWHOME/logs" \
-        -Dcli.home=$GWHOME \
-        -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
-        org.wso2.micro.gateway.tools.UnzipUtility | tee -a $GWHOME/logs/microgateway.log
+        org.wso2.micro.gateway.tools.Main unzip | tee -a $GWHOME/logs/microgateway.log
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
     fi
@@ -148,55 +127,45 @@ sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
 sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
 rm $BALLERINA_HOME/bin/ballerina.back
 
-flag="false"
-configFile="$GWHOME/conf/micro-gw.conf"
+FLAG="false"
+CONFIGFILE="$GWHOME/conf/micro-gw.conf"
+CONFIGWRITTENFILE="$GWHOME/configs.txt"
 
 if [[ $b7a_observability_metrics_enabled == "true" ]]; then
-    flag="true"
-fi
-
-if [ "$flag" != "true" ]; then
+    FLAG="true"
+else
     for c in $*
     do
         if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
-            flag="true"
+            FLAG="true"
             break    
         fi
-    done
+    done    
 fi
 
-if [ "$flag" != "true" ]; then
-    while read line; do
-      if [ "$line" == "[b7a.observability.metrics]" ]; then
-          while read newline; do
-              string_array=($(echo $newline | tr "=" "\n"))
-              if [ "${string_array[0]}" == "enabled" -a "${string_array[-1]}" == "true" ]; then
-                  flag="true"
-                  break    
-              elif [ "${string_array[0]}" == "enabled" -a "${string_array[-1]}" == "false" ]; then
-                  break
-              fi
-          done
-          break
-      fi
-    done < $configFile
-fi
+$JAVACMD \
+    -Xms256m -Xmx1024m \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -classpath "$ALL_CLASSPATH" \
+    org.wso2.micro.gateway.tools.Main getConfig $CONFIGFILE $CONFIGWRITTENFILE | tee -a $GWHOME/logs/microgateway.log
 
-if [ "$flag" == "true" ]; then
-    while read line; do
-        if [ "$line" == "[b7a.observability.metrics.prometheus]" ]; then
-            while read nextline; do
-                string_array_new=($(echo $nextline | tr "=" "\n"))
-                if [ "${string_array_new[0]}" == "jmx_port" ]; then
-                    jmx_port="${string_array_new[-1]}"
-                    export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
-                    break
-                fi
-            done
-            break
+if [ -f "$CONFIGWRITTENFILE" ]; then
+    if [ "$FLAG" != "true" ]; then 
+        if [ $(sed -n '1p' $CONFIGWRITTENFILE) == "true" ]; then
+            FLAG="true"
         fi
-    done < $configFile
+    fi
+    if [ "$FLAG" == "true" ]; then
+        jmx_port=$(sed -n '2p' $CONFIGWRITTENFILE)
+        export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
+    fi
+else
+    echo "Error while reading Observability configurations from the file"
 fi
+
+rm $CONFIGWRITTENFILE
 
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
@@ -273,4 +242,3 @@ fi
 
 # run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
 $BALLERINA_HOME/bin/ballerina run  "$@" --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
-

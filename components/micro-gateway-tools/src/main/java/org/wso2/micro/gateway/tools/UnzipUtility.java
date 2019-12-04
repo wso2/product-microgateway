@@ -84,17 +84,4 @@ public class UnzipUtility {
             }
         }
     }
-
-    public static void main(String[] args) {
-        String zipFilePath = System.getenv("GW_HOME") + "/runtime.zip";
-        String destDirectory = System.getenv("GW_HOME") + "/runtime";
-        UnzipUtility unzipper = new UnzipUtility();
-        try {
-            unzipper.unzip(zipFilePath, destDirectory);
-        } catch (Exception ex) {
-            // some errors occurred
-            ex.printStackTrace();
-            System.exit(1);
-        }
-    }
 }

@@ -53,7 +53,7 @@
   "gnetId": 5841,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1574941799981,
+  "iteration": 1575450125250,
   "links": [],
   "panels": [
     {
@@ -1856,7 +1856,7 @@
       "tableColumn": "__name__",
       "targets": [
         {
-          "expr": "sum(http_inprogress_requests_value{instance=~\"$instance\",resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetric\"})",
+          "expr": "sum(http_inprogress_requests_value{instance=~\"$instance\",resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetrics\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -2000,7 +2000,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "http_response_time_seconds_value{instance=~\"$instance\",protocol=~\"$protocol\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetric\"}",
+          "expr": "http_response_time_seconds_value{instance=~\"$instance\",protocol=~\"$protocol\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Instance: {{instance}}, Protocol: {{protocol}}, Method: {{http_method}}, URL: {{http_url}},  Service:{{service}}",
@@ -2087,7 +2087,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "http_response_time_seconds{instance=~\"$instance\",protocol=~\"$protocol\",quantile=\"0.99\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetric\",timeWindow=\"60000\"}",
+          "expr": "http_response_time_seconds{instance=~\"$instance\",protocol=~\"$protocol\",quantile=\"0.99\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetrics\",timeWindow=\"60000\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Instance: {{instance}}, Protocol: {{protocol}}, Method: {{http_method}}, URL: {{http_url}}, Quantile: {\"0.99\"}, Service:{{service}}",
@@ -2176,7 +2176,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum without (http_status_code)(rate(http_requests_total_value{instance=~\"$instance\",protocol=~\"$protocol\",http_method=~\"$http_method\",http_url!=\"/metrics\", http_url!=\"/balMetric\", http_url!=\"/jmxMetric\",service=~\"$service\",resource=~\"$resource\"}[1m]))",
+          "expr": "sum without (http_status_code)(rate(http_requests_total_value{instance=~\"$instance\",protocol=~\"$protocol\",http_method=~\"$http_method\",http_url!=\"/metrics\", http_url!=\"/jmxMetrics\",service=~\"$service\",resource=~\"$resource\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -2267,7 +2267,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "http_response_time_seconds_mean{instance=~\"$instance\",protocol=~\"$protocol\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetric\",timeWindow=\"60000\"}",
+          "expr": "http_response_time_seconds_mean{instance=~\"$instance\",protocol=~\"$protocol\", resource!=\"getMetrics\", resource!=\"balMetric\", resource!=\"jmxMetrics\",timeWindow=\"60000\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Instance: {{instance}}, Protocol: {{protocol}}, Method: {{http_method}}, URL: {{http_url}}, Service:{{service}}",
@@ -3914,7 +3914,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -3945,5 +3945,5 @@
   "timezone": "",
   "title": "MicroGateway Dashboard",
   "uid": "T565UrOZk",
-  "version": 69
+  "version": 1
 }
