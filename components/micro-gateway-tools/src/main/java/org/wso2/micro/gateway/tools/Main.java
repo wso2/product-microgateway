@@ -12,7 +12,7 @@ public class Main {
             try {
                 unZipper.unzip(zipFilePath, destDirectory);
             } catch (Exception ex) {
-                // some errors occurred
+                // if some error occurs we are using printStackTrace as we have logged that error from the shell
                 ex.printStackTrace();
                 System.exit(1);
             }
@@ -23,7 +23,7 @@ public class Main {
             try {
                 getConfig.getConfigurations(confFilePath, fileWritePath);
             } catch (Exception ex) {
-                // some errors occurred
+                // if some error occurs we are using printStackTrace as we have logged that error from the shell
                 ex.printStackTrace();
                 System.exit(1);
             }

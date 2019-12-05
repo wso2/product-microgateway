@@ -54,6 +54,36 @@ if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
 
+#To run the Java classes
+java_cmd () {
+  if [ -z "$JAVACMD" ] ; then
+      if [ -n "$JAVA_HOME"  ] ; then
+          if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+              # IBM's JDK on AIX uses strange locations for the executables
+              JAVACMD="$JAVA_HOME/jre/sh/java"
+          else
+              JAVACMD="$JAVA_HOME/bin/java"
+          fi
+      else
+          JAVACMD=java
+      fi
+  fi
+
+  METRIC_CLASSPATH=""
+      for j in "$GWHOME"/lib/gateway/*.jar
+      do
+          METRIC_CLASSPATH="$METRIC_CLASSPATH":$j
+      done
+
+  $JAVACMD \
+      -Xms256m -Xmx1024m \
+      -XX:+HeapDumpOnOutOfMemoryError \
+      -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+      $JAVA_OPTS \
+      -classpath "$METRIC_CLASSPATH" \
+      org.wso2.micro.gateway.tools.Main $1 | tee -a $GWHOME/logs/microgateway.log
+}
+
 # ----- Process the input command ----------------------------------------------
 args=""
 for c in $*
@@ -89,34 +119,11 @@ if [ ! "$CMD" = "stop" ]; then
   fi
 fi
 
-if [ -z "$JAVACMD" ] ; then
-    if [ -n "$JAVA_HOME"  ] ; then
-        if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-            # IBM's JDK on AIX uses strange locations for the executables
-            JAVACMD="$JAVA_HOME/jre/sh/java"
-        else
-            JAVACMD="$JAVA_HOME/bin/java"
-        fi
-    else
-        JAVACMD=java
-    fi
-fi
 
-ALL_CLASSPATH=""
-    for j in "$GWHOME"/lib/gateway/*.jar
-    do
-        ALL_CLASSPATH="$ALL_CLASSPATH":$j
-    done
 # Extract ballerina runtime
 if [ ! -d "$GWHOME/runtime" ]; then
     echo "Initializing Runtime..."
-    $JAVACMD \
-        -Xms256m -Xmx1024m \
-        -XX:+HeapDumpOnOutOfMemoryError \
-        -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
-        $JAVA_OPTS \
-        -classpath "$ALL_CLASSPATH" \
-        org.wso2.micro.gateway.tools.Main unzip | tee -a $GWHOME/logs/microgateway.log
+    java_cmd "unzip"
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
     fi
@@ -128,8 +135,8 @@ sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
 rm $BALLERINA_HOME/bin/ballerina.back
 
 FLAG="false"
-CONFIGFILE="$GWHOME/conf/micro-gw.conf"
-CONFIGWRITTENFILE="$GWHOME/configs.txt"
+CONFIG_FILE="$GWHOME/conf/micro-gw.conf"
+CONFIG_OUT_FILE="$GWHOME/.config"
 
 if [[ $b7a_observability_metrics_enabled == "true" ]]; then
     FLAG="true"
@@ -143,29 +150,23 @@ else
     done    
 fi
 
-$JAVACMD \
-    -Xms256m -Xmx1024m \
-    -XX:+HeapDumpOnOutOfMemoryError \
-    -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
-    $JAVA_OPTS \
-    -classpath "$ALL_CLASSPATH" \
-    org.wso2.micro.gateway.tools.Main getConfig $CONFIGFILE $CONFIGWRITTENFILE | tee -a $GWHOME/logs/microgateway.log
+java_cmd "getConfig $CONFIG_FILE $CONFIG_OUT_FILE"
 
-if [ -f "$CONFIGWRITTENFILE" ]; then
+if [ -f "$CONFIG_OUT_FILE" ]; then
     if [ "$FLAG" != "true" ]; then 
-        if [ $(sed -n '1p' $CONFIGWRITTENFILE) == "true" ]; then
+        if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
             FLAG="true"
         fi
     fi
     if [ "$FLAG" == "true" ]; then
-        jmx_port=$(sed -n '2p' $CONFIGWRITTENFILE)
+        jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
         export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
     fi
 else
     echo "Error while reading Observability configurations from the file"
 fi
 
-rm $CONFIGWRITTENFILE
+rm $CONFIG_OUT_FILE
 
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
