@@ -37,7 +37,7 @@ The following are the test parameters.
 The duration of each test is **600 seconds**. The warm-up period is **300 seconds**.
 The measurement results are collected after the warm-up period.
 
-A [**m5.2xlarge** Amazon EC2 instance](https://aws.amazon.com/ec2/instance-types/) was used to install WSO2 API Microgateway.
+A [**m5.2xlarge** Amazon EC2 instance](https://aws.amazon.com/ec2/instance-types/) was used to install WSO2 API Microgateway. The microgateway has been deployed inside a docker container with the option "--cpus=8".
 
 The following are the measurements collected from each performance test conducted for a given combination of
 test parameters.
