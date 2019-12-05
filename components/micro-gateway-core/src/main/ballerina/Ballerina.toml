@@ -9,3 +9,4 @@ target = "java8"
     path = "../../../target/org.wso2.micro.gateway.core-3.0.2-SNAPSHOT.jar"
 
 [dependencies]
+"wso2/jms" = "0.6.2"

@@ -15,13 +15,14 @@
 // under the License.
 
 import ballerina/time;
+import wso2/jms;
 
 map<string> blockConditions = {};
 map<any> throttleDataMap = {};
 stream<RequestStreamDTO> requestStream = new;
 stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 boolean isStreamsInitialized = false;
-//future<()> ftr = start initializeThrottleSubscription();
+future<()> ftr = start initializeThrottleSubscription();
 
 boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
@@ -33,17 +34,19 @@ public function isBlockConditionExist(string key) returns (boolean) {
 public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
 }
-public function putBlockCondition(map<any> m) {
-    string condition = <string>m[BLOCKING_CONDITION_KEY];
-    string conditionValue = <string>m[BLOCKING_CONDITION_VALUE];
-    string conditionState = <string>m[BLOCKING_CONDITION_STATE];
-    if (conditionState == TRUE) {
+public function putBlockCondition(jms:MapMessage m) {
+    string?|error condition = m.getString(BLOCKING_CONDITION_KEY);
+    string?|error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
+    string?|error conditionState = m.getString(BLOCKING_CONDITION_STATE);
+    if (conditionState == TRUE && conditionState is string && conditionValue is string) {
         blockConditionExist = true;
         blockConditions[conditionValue] = conditionValue;
     } else {
+        if (conditionValue is string) {
         _ = blockConditions.remove(conditionValue);
-        if (blockConditions.keys().length()== 0) {
-            blockConditionExist = false;
+            if (blockConditions.keys().length() == 0) {
+               blockConditionExist = false;
+            }
         }
     }
 }
