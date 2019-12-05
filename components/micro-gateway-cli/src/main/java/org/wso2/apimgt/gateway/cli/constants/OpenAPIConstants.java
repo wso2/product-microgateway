@@ -15,4 +15,5 @@ public class OpenAPIConstants {
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
+    public static final String BALLERINA_CENTRAL_KEYWORD = "central";
 }

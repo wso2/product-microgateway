@@ -34,12 +34,16 @@ import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Wrapper for {@link OpenAPI}.
@@ -57,6 +61,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
+    private ArrayList<String> importModules = new ArrayList<>();
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -90,7 +95,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.setBasepath(api.getSpecificBasepath());
         setSecuritySchemas(api.getMgwApiSecurity());
         setPaths(definition);
-
+        // to extract the module names of ballerina modules to be imported from the Ballerina Central
+        // if specified in api level interceptors
+        extractImportModules(definition);
         return buildContext(definition);
     }
 
@@ -129,6 +136,76 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return tags;
     }
 
+    public ArrayList<String> getImportModules() {
+        return importModules;
+    }
+
+    /**
+     * To set the names of all the modules to be imported from the Ballerina Central
+     *
+     * @param moduleName     The name of the module which is stored in Ballerina Central
+     */
+    public void setImportModules(String moduleName) {
+        while (!this.importModules.contains(moduleName)) {
+            this.importModules.add(moduleName);
+        }
+        importModules.removeAll(Collections.singletonList(null));
+    }
+
+    /**
+     * To extract the ballerina module name from the openAPI definitions, if the api level interceptors are to be
+     * accessed from the Ballerina Central
+     *
+     * @param openAPI       {@link OpenAPI} object
+     */
+    public void extractImportModules (OpenAPI openAPI) {
+        // Regular Expression which indicates the Ballerina Module
+        String moduleRegEx = "\\w*" + "/" + "\\w*";
+
+        ArrayList<String> requestInterceptorStatement = new ArrayList<>();
+        ArrayList<String> requestInterceptorModule = new ArrayList<>();
+
+        Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+
+        if (apiRequestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            requestInterceptorStatement.add(apiRequestInterceptor.toString());
+            requestInterceptorStatement.forEach(statement -> {
+                Pattern p = Pattern.compile(moduleRegEx);
+                Matcher m = p.matcher(statement);
+                while (m.find()) {
+                    String matchedModule = m.group();
+                    requestInterceptorModule.add(matchedModule);
+                }
+                for (String value : requestInterceptorModule) {
+                    setImportModules(value);
+                }
+            });
+        }
+
+        ArrayList<String> responseInterceptorStatement = new ArrayList<>();
+        ArrayList<String> responseInterceptorModule = new ArrayList<>();
+
+        Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
+                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+
+        if (apiResponseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            responseInterceptorStatement.add(apiResponseInterceptor.toString());
+            responseInterceptorStatement.forEach(statement -> {
+                Pattern p1 = Pattern.compile(moduleRegEx);
+                Matcher m1 = p1.matcher(statement);
+                while (m1.find()) {
+                    String matchedModule = m1.group();
+                    responseInterceptorModule.add(matchedModule);
+                }
+                for (String value : requestInterceptorModule) {
+                    setImportModules(value);
+                }
+
+            });
+        }
+    }
+
     public Set<Map.Entry<String, BallerinaPath>> getPaths() {
         return paths;
     }
@@ -157,18 +234,40 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 //to set BasicAuth property corresponding to the security schema in API-level
                 operation.getValue().setBasicAuth(OpenAPICodegenUtils
                         .generateBasicAuthFromSecurity(this.api.getMgwApiSecurity()));
+
+                //set the import modules specified in the operation level request interceptors
+                setImportModules(operation.getValue().getRequestInterceptorModule());
+
+                //set the import modules specified in the operation level response interceptors
+                setImportModules(operation.getValue().getResponseInterceptorModule());
+
                 //if it is the developer first approach
+
                 if (isDevFirst) {
-                    //to add API level request interceptor
-                    Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-                    apiRequestInterceptor.ifPresent(value -> operation.getValue()
-                            .setApiRequestInterceptor(value.toString()));
-                    //to add API level response interceptor
-                    Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-                    apiResponseInterceptor.ifPresent(value -> operation.getValue()
-                            .setApiResponseInterceptor(value.toString()));
+
+                    // for the purpose of adding API level request interceptors
+                    Optional<Object> apiRequestInterceptor = Optional
+                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+
+                    if (apiRequestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                       apiRequestInterceptor.ifPresent(value -> operation.getValue()
+                               .setApiRequestInterceptor(value.toString().split("/")[1]));
+                    } else {
+                        apiRequestInterceptor.ifPresent(value -> operation.getValue()
+                                .setApiRequestInterceptor(value.toString()));
+                    }
+
+                    // for the purpose of adding API level response interceptors
+                    Optional<Object> apiResponseInterceptor = Optional
+                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+                    if (apiResponseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                        apiResponseInterceptor.ifPresent(value -> operation.getValue()
+                                .setApiResponseInterceptor(value.toString().split("/")[1]));
+                    } else {
+                        apiResponseInterceptor.ifPresent(value -> operation.getValue()
+                                .setApiResponseInterceptor(value.toString()));
+                    }
+
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
@@ -192,11 +291,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     });
                     //to set scope property of API
                     operation.getValue().setScope(api.getMgwApiScope());
+
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
         }
     }
+
 
     private String replaceAllNonAlphaNumeric(String value) {
         return value.replaceAll("[^a-zA-Z0-9]+", "_");

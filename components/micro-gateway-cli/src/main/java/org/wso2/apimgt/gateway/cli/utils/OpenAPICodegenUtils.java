@@ -599,23 +599,37 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * validate API level interceptors
+     * validate API level request Interceptors
      *
-     * @param openAPI         {@link OpenAPI} object
-     * @param openAPIFilePath file path to openAPI definition
+     * @param openAPI           {@link OpenAPI} object
+     * @param openAPIFilePath   file path to openAPI definition
      */
-    private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
-        if (openAPI.getExtensions() != null) {
-            Optional<Object> apiRequestInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            apiRequestInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), true, openAPIFilePath, null, null));
-            Optional<Object> apiResponseInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            apiResponseInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), false, openAPIFilePath, null, null));
-        }
-    }
+     private static void validateAPIRequestInterceptors(OpenAPI openAPI, String openAPIFilePath) {
+         if (openAPI.getExtensions() != null) {
+             Optional<Object> apiRequestInterceptor = Optional
+                     .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+             apiRequestInterceptor.ifPresent(
+                     requestInterceptorValue -> validateInterceptorAvailability(requestInterceptorValue.toString(),
+                             true, openAPIFilePath, null, null));
+
+         }
+     }
+
+    /**
+     * validate API level response Interceptors
+     *
+     * @param openAPI          {@link OpenAPI} object
+     * @param openAPIFilePath  file path to openAPI definition
+     */
+     private static void validateAPIResponseInterceptors(OpenAPI openAPI, String openAPIFilePath) {
+         if (openAPI.getExtensions() != null) {
+             Optional<Object> apiResponseInterceptor = Optional
+                     .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+             apiResponseInterceptor.ifPresent(
+                     responseInterceptorValue -> validateInterceptorAvailability(responseInterceptorValue.toString(),
+                             false, openAPIFilePath, null, null));
+         }
+     }
 
     /**
      * validate all resource extensions for single path
@@ -650,29 +664,63 @@ public class OpenAPICodegenUtils {
             return;
         }
         //todo: validate policy
-        validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
+
+        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions()
+                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions()
+                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+
+        // validate request interceptor for a single resource
+        // skip validation if the request interceptor is being looked-up from the Ballerina Central
+        if (!requestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            validateSingleResourceRequestInterceptors(operation, pathItem, operationName, openAPIFilePath);
+        }
+
+        // validate response interceptor for a single resource
+        // skip validation if the response interceptor is being looked-up from the Ballerina Central
+        if (!responseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            validateSingleResourceResponseInterceptors(operation, pathItem, operationName, openAPIFilePath);
+        }
     }
 
+
     /**
-     * Validate Resource interceptors for Single Resource
+     * Validate Resource Request interceptors for Single Resource
      *
      * @param operation       {@link Operation} object
      * @param pathItem        path name
      * @param operationName   operation name
      * @param openAPIFilePath file path to openAPI definition
      */
-    private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
-                                                           String openAPIFilePath) {
-        //validate request interceptor
+    private static void validateSingleResourceRequestInterceptors(Operation operation, String pathItem,
+                                                                  String operationName, String openAPIFilePath) {
+
         Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions()
                 .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
-                openAPIFilePath, pathItem, operationName));
-        //validate response interceptor
+
+        requestInterceptor.ifPresent(
+                requestInterceptorValue -> validateInterceptorAvailability(requestInterceptorValue.toString(),
+                        true, openAPIFilePath, pathItem, operationName));
+
+    }
+
+    /**
+     * Validate Resource Response interceptors for Single Resource
+     *
+     * @param operation       {@link Operation} object
+     * @param pathItem        path name
+     * @param operationName   operation name
+     * @param openAPIFilePath file path to openAPI definition
+     */
+    private static void validateSingleResourceResponseInterceptors(Operation operation, String pathItem,
+                                                                   String operationName, String openAPIFilePath) {
+
         Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions()
                 .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        responseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), false,
-                openAPIFilePath, pathItem, operationName));
+
+        responseInterceptor.ifPresent(
+                responseInterceptorValue -> validateInterceptorAvailability(responseInterceptorValue.toString(),
+                                false, openAPIFilePath, pathItem, operationName));
     }
 
     /**
@@ -827,10 +875,27 @@ public class OpenAPICodegenUtils {
      * @param openAPIFilePath file path to openAPI definition
      */
     public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath, String openAPIVersion) {
+
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasePath(openAPI, openAPIFilePath, openAPIVersion);
         validateEndpointAvailability(openAPI, openAPIFilePath, openAPIVersion);
-        validateAPIInterceptors(openAPI, openAPIFilePath);
+
+        Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions().
+                get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+        // validate API level request interceptors
+        // skip validation if the interceptor is being looked-up from the Ballerina Central
+        if (!apiRequestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            validateAPIRequestInterceptors(openAPI, openAPIFilePath);
+        }
+
+        Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions().
+                get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+        // validate API level response interceptors
+        // skip validation if the interceptor is being looked up from the Ballerina Central
+        if (!apiResponseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            validateAPIResponseInterceptors(openAPI, openAPIFilePath);
+        }
+
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setBasicSecuritySchemaList(openAPI);

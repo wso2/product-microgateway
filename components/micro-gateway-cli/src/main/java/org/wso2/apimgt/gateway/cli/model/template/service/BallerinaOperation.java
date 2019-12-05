@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Wraps the {@link Operation} from swagger models to provide iterable child models.
@@ -60,6 +62,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
+    private String requestInterceptorModule;
+    private String responseInterceptorModule;
     private BasicAuth basicAuth;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
@@ -77,6 +81,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             return getDefaultValue();
         }
 
+        //PrintStream outStream = System.out;
         // OperationId with spaces with special characters will cause errors in ballerina code.
         // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
         operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
@@ -104,14 +109,41 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
+            // Regular Expression which indicates the Ballerina Module
+            String moduleRegEx = "\\w*" + "/" + "\\w*";
+
             //set resource level request interceptors
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
+
+            if (requestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString().split("/")[1]);
+                Pattern p = Pattern.compile(moduleRegEx);
+                Matcher m = p.matcher(requestInterceptor.toString());
+                while (m.find()) {
+                    String matchedModule = m.group();
+                    setRequestInterceptorModule(matchedModule);
+                }
+            } else {
+                requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
+            }
+
             //set resource level response interceptors
             Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
+
+            if (responseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString().split("/")[1]);
+                Pattern p = Pattern.compile(moduleRegEx);
+                Matcher m = p.matcher(responseInterceptor.toString());
+                while (m.find()) {
+                    String matchedModule = m.group();
+                    setResponseInterceptorModule(matchedModule);
+                }
+            } else {
+                responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
+            }
+
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.THROTTLING_TIER));
@@ -136,6 +168,45 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
 
         return this;
+    }
+
+    /**
+     * Get the module located in the Ballerina Central, where the operation level request interceptors can be found
+     *
+     * @return     returns the module which contains the operation level request interceptors
+     */
+    public String getRequestInterceptorModule() {
+        return requestInterceptorModule;
+    }
+
+    /**
+     * Set the module located in the Ballerina Central, where the operation level request interceptor can be found
+     *
+     * @param requestInterceptorModule   Ballerina Central Module where the operation level request interceptor
+     *                                   can be found
+     */
+    public void setRequestInterceptorModule(String requestInterceptorModule) {
+        this.requestInterceptorModule = requestInterceptorModule;
+    }
+
+    /**
+     * Get the module located in the Ballerina Central, where the operation level response interceptor can be found
+     *
+     * @return     returns the module which contains the operation level response interceptors
+     */
+    public String getResponseInterceptorModule() {
+        return responseInterceptorModule;
+    }
+
+    /**
+     * Set the module located in the Ballerina Central, where the operation level response interceptors can be found
+     *
+     * @param responseInterceptorModule   Ballerina Central Module where the operation level response interceptor
+     *                                    can be found
+     */
+
+    public void setResponseInterceptorModule(String responseInterceptorModule) {
+        this.responseInterceptorModule = responseInterceptorModule;
     }
 
     @Override
@@ -253,6 +324,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         // api level interceptor
         if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
             this.apiRequestInterceptor = requestInterceptor;
+
         }
     }
 
@@ -274,4 +346,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             this.basicAuth = basicAuth;
         }
     }
+
+
 }
