@@ -29,8 +29,7 @@ getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     }
-}
-);
+});
 
 http:Client analyticsFileUploadEndpoint = new (
 getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
@@ -44,8 +43,7 @@ getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/u
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     }
-}
-);
+});
 
 
 public function getTokenEndpoint() returns http:Client {

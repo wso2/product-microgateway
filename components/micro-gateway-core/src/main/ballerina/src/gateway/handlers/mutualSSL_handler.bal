@@ -20,7 +20,6 @@ import ballerina/runtime;
 # Representation of the mutual ssl handler
 #
 public type MutualSSLHandler object {
-
     *http:InboundAuthHandler;
 
     # Checks if the request can be authenticated with the Bearer Auth header.

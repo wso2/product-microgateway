@@ -350,8 +350,7 @@ public function rotateFile(string filePath) returns string | error {
         var deleteResult = file:remove(filePath);
         if (deleteResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
-        }
-        else {
+        } else {
             printFullError(KEY_UTILS, deleteResult);
         }
         return zipName;

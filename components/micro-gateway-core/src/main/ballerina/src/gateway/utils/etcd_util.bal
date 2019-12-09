@@ -126,16 +126,14 @@ public function etcdSetup(string key, string etcdConfigKey, string defaultUrl, s
         if (etcdKey == "") {
             printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
             endpointUrl = config:getAsString(key, defaultUrl);
-        }
-        else {
+        } else {
             printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + key);
             defaultUrls[etcdKey] = config:getAsString(key, defaultUrl);
             urlChanged[etcdKey] = false;
             etcdUrls[etcdKey] = etcdLookup(etcdKey);
             endpointUrl = <string>etcdUrls[etcdKey];
         }
-    }
-    else {
+    } else {
         endpointUrl = config:getAsString(key, defaultUrl);
     }
     printDebug(KEY_ETCD_UTIL, "Resolved endpoint url : " + endpointUrl);
