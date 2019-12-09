@@ -93,20 +93,15 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
-        <file>
-            <source>${project.build.directory}/bin/gw/tools</source>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/bin</outputDirectory>
-            <destName>tools</destName>
-            <fileMode>755</fileMode>
-        </file>
     </files>
-
     <dependencySets>
         <dependencySet>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
             <scope>runtime</scope>
             <includes>
+                <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.tools:jar</include>
                 <include>org.wso2.orbit.org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar</include>
                 <include>javax.jms:javax.jms-api:jar:</include>
                 <include>org.wso2.andes.wso2:andes-client:jar:</include>

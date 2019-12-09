@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -41,7 +41,7 @@ public type JWTAuthHandler object {
             string headerValue = req.getHeader(authHeader);
             if (hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
-                string[] splitContent = split(credential,"\\.");
+                string[] splitContent = split(credential, "\\.");
                 if (splitContent.length() == 3) {
                     printDebug(KEY_AUTHN_FILTER, "Request will authenticated via jwt handler");
                     return true;
@@ -56,7 +56,7 @@ public type JWTAuthHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
-    public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
+    public function process(http:Request req) returns @tainted boolean | http:AuthenticationError {
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
         string headerValue = req.getHeader(authHeader);
         string credential = headerValue.substring(6, headerValue.length()).trim();

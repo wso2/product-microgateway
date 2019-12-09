@@ -15,35 +15,13 @@ import ballerina/log;
     json ClientCerts=null;
 {{/if}}
 
-
-
-// Get authentication filter
-gateway:PreAuthnFilter preAuthnFilter = new;
-// Subscription validation filter
-// Authorization filter
-gateway:OAuthzFilter authorizationFilter = gateway:getDefaultAuthorizationFilter();
-gateway:SubscriptionFilter subscriptionFilter = new;
-// Get deployed policies
-map<boolean> deployedPolicies = getDeployedPolicies();
-// Throttling filter
-gateway:ThrottleFilter throttleFilter = new(deployedPolicies);
-//get open API definition map
-map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
-// Validation filter
-//gateway:ValidationFilter validationFilter = new(openAPIs);
-// Analytics filter
-gateway:AnalyticsRequestFilter analyticsFilter = new;
-// Extension filter
-ExtensionFilter extensionFilter = new;
-
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
                                                                            auth: {
                                                                                 authHandlers: gateway:getAuthHandlers(),
                                                                                 position: 1
                                                                            },
-                                                                           filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                           analyticsFilter, extensionFilter]
+                                                                           filters:getFilters()
                                                                        };
 
 {{>docker}}
@@ -57,8 +35,7 @@ http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                          mandateSecureSocket: false,
                                                                          position: 1
                                                                      },
-                                                                     filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                     analyticsFilter, extensionFilter]
+                                                                     filters:getFilters()
                                                                  };
 
 {{>kubernetesIngress}}
@@ -122,6 +99,47 @@ listener http:Listener tokenListenerEndpoint = new (
     }
 );
 
+public function getFilters() returns http:RequestFilter[] {
+    map<boolean> deployedPolicies = getDeployedPolicies();
+    map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
+
+    // Authentication filter
+    gateway:PreAuthnFilter preAuthnFilter;
+    // Throttling filter
+    gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
+    // Analytic filter
+    gateway:AnalyticsRequestFilter analyticsFilter;
+    // Subscription validation filter
+    gateway:SubscriptionFilter | gateway:SubscriptionFilterWrapper subscriptionFilter;
+    //Validation filter
+    //gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
+    // Authorization filter
+    gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
+
+    boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
+    
+    if (isObservable) {
+        preAuthnFilter = new gateway:PreAuthnFilterWrapper();
+        throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
+        analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
+        subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
+        //validationFilter = new gateway:ValidationFilterWrapper(openAPIs);
+    } else {
+        preAuthnFilter = new gateway:PreAuthnFilter();
+        throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
+        analyticsFilter =  new gateway:AnalyticsRequestFilter();
+        subscriptionFilter =  new gateway:SubscriptionFilter();
+        //validationFilter = new gateway:ValidationFilter(openAPIs);
+    }
+
+    authorizationFilter = gateway:getDefaultAuthorizationFilter();
+
+    // Extension filter
+    ExtensionFilter extensionFilter = new;
+
+    return [preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter];
+}
+
 public function getOpenAPIMapFromFile() returns @tainted map<json>{
     map<json> openAPIMap = {};
     string filePath = "./openAPIJsonConstants.json";
@@ -141,7 +159,3 @@ public function getOpenAPIMapFromFile() returns @tainted map<json>{
     }
     return openAPIMap;
 }
-
-
-
-

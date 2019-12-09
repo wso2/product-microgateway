@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,21 +14,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
-import ballerina/time;
 import ballerina/config;
+import ballerina/http;
 import ballerina/runtime;
+import ballerina/time;
 
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
-function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO|error) {
+function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO | error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
 
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
-      eventDto.apiVersion = apiConfiguration.apiVersion;
+        eventDto.apiVersion = apiConfiguration.apiVersion;
     }
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
@@ -42,36 +42,36 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.gatewayType = GATEWAY_TYPE;
     eventDto.hostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
-        HOSTNAME_PROPERTY]);
+    HOSTNAME_PROPERTY]);
     if (isSecured) {
         AuthenticationContext authContext = <AuthenticationContext>runtime:getInvocationContext()
         .attributes[AUTHENTICATION_CONTEXT];
-        metaInfo["keyType"]= authContext.keyType;
+        metaInfo["keyType"] = authContext.keyType;
         eventDto.userName = authContext.username;
         eventDto.apiCreator = authContext.apiPublisher;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
     } else {
-        metaInfo["keyType"]= PRODUCTION_KEY_TYPE;
+        metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
         APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfig is APIConfiguration) {
-           var api_Creator = apiConfig.publisher;
-           eventDto.apiCreator = api_Creator;
+            var api_Creator = apiConfig.publisher;
+            eventDto.apiCreator = api_Creator;
         }
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
     }
-    
+
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
     printDebug(KEY_ANALYTICS_FILTER, "Throttle Event DTO : " + eventDto.toString());
     return eventDto;
 }
 
-function populateFaultAnalyticsDTO(http:FilterContext context, string  err) returns (FaultDTO|error) {
+function populateFaultAnalyticsDTO(http:FilterContext context, string err) returns (FaultDTO | error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     FaultDTO eventDto = {};
     time:Time time = time:currentTime();
@@ -111,8 +111,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string  err) retu
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
         APIConfiguration? apiConfigs = apiConfigAnnotationMap[context.getServiceName()];
         if (apiConfigs is APIConfiguration) {
-           var api_Creater = apiConfigs.publisher;
-           eventDto.apiCreator = api_Creater;
+            var api_Creater = apiConfigs.publisher;
+            eventDto.apiCreator = api_Creater;
         }
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
@@ -128,8 +128,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string  err) retu
 function getAnalyticsEnableConfig() {
     map<any> vals = getConfigMapValue(ANALYTICS);
     isAnalyticsEnabled = <boolean>vals[ENABLE];
-    rotatingTime =  <int> vals[ROTATING_TIME];
-    uploadingUrl = <string> vals[UPLOADING_EP];
+    rotatingTime = <int>vals[ROTATING_TIME];
+    uploadingUrl = <string>vals[UPLOADING_EP];
     configsRead = true;
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
@@ -141,8 +141,8 @@ function initializeAnalytics() {
         if (isAnalyticsEnabled) {
             initStreamPublisher();
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
-            future<()> uploadTask = start timerTask(); // file uploading task
-            future<()> rotateTask = start rotatingTask(); // file rotating task
+            future<()> uploadTask = start timerTask();            // file uploading task
+            future<()> rotateTask = start rotatingTask();        // file rotating task
         } else {
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
         }
