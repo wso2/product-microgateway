@@ -45,69 +45,66 @@ public type JwtAuthProvider object {
         //finishing span
         finishSpan(JWT_PROVIDER_AUTHENTICATE, spanIdAuth);
         if (handleVar is boolean) {
-            if (handleVar) {
-                boolean isBlacklisted = false;
-                string? jti = "";
-                runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-                runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
-                if (authContext is runtime:AuthenticationContext) {
-                    string? jwtToken = authContext?.authToken;
-                    if (jwtToken is string) {
-                        //Start a new child span for the span.
-                        int | error | () spanIdCache = startSpan(JWT_CACHE);
-                        var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
-                        //finishing span
-                        finishSpan(JWT_CACHE, spanIdCache);
-                        if (cachedJwt is jwt:CachedJwt) {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
-                            jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
-                            jti = jwtPayloadFromCache["jti"];
-                            if (jti is string) {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim found in the jwt");
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Checking for the JTI in the gateway invalid revoked token map.");
-                                var status = retrieveFromRevokedTokenMap(jti);
-                                if (status is boolean) {
-                                    if (status) {
-                                        printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token found in the invalid token map.");
-                                        isBlacklisted = true;
-                                    } else {
-                                        printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
-                                        isBlacklisted = false;
-                                    }
+            if (!handleVar) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                return handleVar;
+            }
+
+            boolean isBlacklisted = false;
+            string? jti = "";
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
+            if (authContext is runtime:AuthenticationContext) {
+                string? jwtToken = authContext?.authToken;
+                if (jwtToken is string) {
+                    //Start a new child span for the span.
+                    int | error | () spanIdCache = startSpan(JWT_CACHE);
+                    var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
+                    //finishing span
+                    finishSpan(JWT_CACHE, spanIdCache);
+                    if (cachedJwt is jwt:CachedJwt) {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
+                        jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
+                        jti = jwtPayloadFromCache["jti"];
+                        if (jti is string) {
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim found in the jwt");
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "Checking for the JTI in the gateway invalid revoked token map.");
+                            var status = retrieveFromRevokedTokenMap(jti);
+                            if (status is boolean) {
+                                if (status) {
+                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token found in the invalid token map.");
+                                    isBlacklisted = true;
                                 } else {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
                                     isBlacklisted = false;
                                 }
-
-                                if (isBlacklisted) {
-                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isBlacklisted.toString());
-                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Token is revoked");
-                                    setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-                                    return false;
-                                } else {
-                                    return true;
-                                }
-
                             } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
-                                return handleVar;
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
+                                isBlacklisted = false;
                             }
 
+                            if (isBlacklisted) {
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isBlacklisted.toString());
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Token is revoked");
+                                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                                return false;
+                            }
+                            return true;
                         } else {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
                             return handleVar;
                         }
+
+                    } else {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
+                        return handleVar;
                     }
                 }
-                return handleVar;
-            } else {
-                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-                return handleVar;
             }
+            return handleVar;
         } else {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
         }
-
     }
 };

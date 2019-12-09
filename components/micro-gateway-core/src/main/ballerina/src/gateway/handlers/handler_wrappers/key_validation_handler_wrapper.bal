@@ -22,7 +22,6 @@ import ballerina/observe;
 # + oauth2KeyValidationProvider - The reference to the key validation provider instance
 public type KeyValidationHandlerWrapper object {
     *http:InboundAuthHandler;
-
     public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     KeyValidationHandler keyValidationHandler;
 
@@ -61,5 +60,4 @@ public type KeyValidationHandlerWrapper object {
         finishSpan(KEY_VALIDATION_HANDLER_PROCESS, spanIdProcess);
         return result;
     }
-
 };

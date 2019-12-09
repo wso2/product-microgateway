@@ -20,7 +20,6 @@ import ballerina/http;
 #
 public type MutualSSLHandlerWrapper object {
     *http:InboundAuthHandler;
-
     MutualSSLHandler mutualSSLHandler = new;
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -45,5 +44,4 @@ public type MutualSSLHandlerWrapper object {
         finishSpan(MUTUALSSL_FILTER_PROCESS, spanIdReq);
         return result;
     }
-
 };

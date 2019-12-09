@@ -33,8 +33,8 @@ public class UnzipUtility {
      * Unzip folders and files seperately
      *
      * @param zipFilePath    file path of the zip file
-     * @param destDirectory  file path of the destination driectory
-     * @throws IOException exception if an error occurrs when compressing
+     * @param destDirectory  file path of the destination directory
+     * @throws IOException exception if an error occurs when compressing
      */
     public void unzip(String zipFilePath, String destDirectory) throws IOException {
         File destDir = new File(destDirectory);
@@ -42,38 +42,38 @@ public class UnzipUtility {
         if (!isDestCreated) {
             throw new IOException("Error occurred when creating folder");
         }
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
-        ZipEntry entry = zipIn.getNextEntry();
-        // iterates over entries in the zip file
-        while (entry != null) {
-            String filePath = destDirectory + File.separator + entry.getName();
-            if (!entry.isDirectory()) {
-                // if the entry is a file, extracts it
-                extractFile(zipIn, filePath);
-                if (entry.getName().equals("bin/ballerina")) {
-                    File file = new File(filePath);
-                    file.setExecutable(true, false);
+        try (FileInputStream f = new FileInputStream(zipFilePath); ZipInputStream zipIn = new ZipInputStream(f)) {
+            ZipEntry entry = zipIn.getNextEntry();
+            // iterates over entries in the zip file
+            while (entry != null) {
+                String filePath = destDirectory + File.separator + entry.getName();
+                if (!entry.isDirectory()) {
+                    // if the entry is a file, extracts it
+                    extractFile(zipIn, filePath);
+                    if (entry.getName().equals("bin/ballerina")) {
+                        File file = new File(filePath);
+                        file.setExecutable(true, false);
+                    }
+                } else {
+                    // if the entry is a directory, make the directory
+                    File dir = new File(filePath);
+                    boolean wasDirSuccessful = dir.mkdir();
+                    if (!wasDirSuccessful) {
+                        throw new IOException("Error occurred when creating folder");
+                    }
                 }
-            } else {
-                // if the entry is a directory, make the directory
-                File dir = new File(filePath);
-                boolean wasDirSuccessful = dir.mkdir();
-                if (!wasDirSuccessful) {
-                    throw new IOException("Error occurred when creating folder");
-                }
+                zipIn.closeEntry();
+                entry = zipIn.getNextEntry();
             }
-            zipIn.closeEntry();
-            entry = zipIn.getNextEntry();
         }
-        zipIn.close();
     }
 
     /**
      * extract files in the ZipInputStream.
      *
      * @param zipIn      ZipInputStream
-     * @param filePath   file path of each file inside the driectory
-     * @throws IOException exception if an error occurrs when compressing
+     * @param filePath   file path of each file inside the directory
+     * @throws IOException exception if an error occurs when compressing
      */
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
