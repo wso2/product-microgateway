@@ -138,10 +138,6 @@ public class BuildCmd implements LauncherCmd {
             // Copy static source files
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
-            CmdUtils.copyFolder(
-                    CmdUtils.getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_SERVICES_DIR,
-                    CmdUtils.getProjectTargetModulePath(projectName) + File.separator
-                            + CliConstants.PROJECT_SERVICES_DIR);
             new CodeGenerator().generate(projectName, true);
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",

@@ -31,7 +31,6 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
 import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
@@ -288,9 +287,7 @@ public class ImportCmd implements LauncherCmd {
         //if all the operations are success, write new config to file
         if (isOverwriteRequired) {
             Config newConfig = new Config();
-            Client client = new Client();
-            client.setHttpRequestTimeout(1000000);
-            newConfig.setClient(client);
+            newConfig.setClient(config.getClient());
 
             String encryptedCS = CmdUtils.encrypt(clientSecret, password);
             String encryptedTrustStorePass = CmdUtils.encrypt(trustStorePassword, password);
@@ -302,7 +299,7 @@ public class ImportCmd implements LauncherCmd {
                     .setTrustStorePassword(encryptedTrustStorePass)
                     .build();
             newConfig.setToken(token);
-            newConfig.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
+            newConfig.setCorsConfiguration(config.getCorsConfiguration());
             CmdUtils.saveConfig(newConfig, toolkitConfigPath);
         }
 
