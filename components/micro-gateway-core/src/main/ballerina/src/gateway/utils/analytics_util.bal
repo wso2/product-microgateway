@@ -160,6 +160,8 @@ function getGRPCAnalyticsEnableConfig() returns boolean{
     log:printDebug( "T_Store : " + trustStoreFile);
     log:printDebug( "T_Pass  : " + trustStorePassword);
 
+    initGRPCService();
+
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     return isgRPCAnalyticsEnabled;
 }
