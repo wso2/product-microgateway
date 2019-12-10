@@ -423,13 +423,7 @@ public final class CmdUtils {
             setApiDefinition(projectName, apiDefinition, headers, values, insecure);
         }
 
-        String projectServicesDirectory = projectDir + File.separator + CliConstants.PROJECT_SERVICES_DIR;
-        String resourceServicesDirectory =
-                getResourceFolderLocation() + File.separator + CliConstants.PROJECT_SERVICES_DIR;
-        copyFolder(resourceServicesDirectory, projectServicesDirectory);
-
         createFile(projectDir.getPath(), CliConstants.PROJECT_POLICIES_FILE, true);
-
         String policyResPath = getDefinitionsLocation() + File.separator + CliConstants.GW_DIST_POLICIES_FILE;
         File policyResFile = new File(policyResPath);
         File policesFile = new File(projectDir + File.separator + CliConstants.PROJECT_POLICIES_FILE);
