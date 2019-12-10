@@ -14,6 +14,20 @@ OPTIONS
        <Optional>
        Deployment configuration file for docker/kubernetes environments
 
+    --docker
+        <Optional>
+        Enable docker configuration
+
+        OPTIONS
+            --docker-image
+                <Optional>
+                Provide docker image name and tag.
+
+            --docker-base-image
+                <Optional>
+                Provide docker base image
+        EXAMPLES
+            $ micro-gw build petstore --docker --docker-image petstore:v1 --docker-base-image wso2/micro-gw:latest
+
 EXAMPLES
     $ micro-gw build accounts-project
-

@@ -62,6 +62,22 @@ public class InitCmd implements LauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-a", "--api-definition"})
+    private String apiDefinition;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--headers")
+    private String headers;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--values")
+    private String values;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-k", "--insecure"})
+    private boolean insecure;
+
     @Override
     public void execute() {
         if (helpFlag) {
@@ -86,7 +102,7 @@ public class InitCmd implements LauncherCmd {
 
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        init(projectName, deploymentConfigPath);
+        init(projectName, deploymentConfigPath, apiDefinition, headers, values, insecure);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
         OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
@@ -110,9 +126,10 @@ public class InitCmd implements LauncherCmd {
      * @param projectName          name of the project being initialized
      * @param deploymentConfigPath path to deployment config file (used in k8s scenarios)
      */
-    private static void init(String projectName, String deploymentConfigPath) {
+    private static void init(String projectName, String deploymentConfigPath, String apiDefinition, String headers,
+                             String values, boolean insecure) {
         try {
-            CmdUtils.createProjectStructure(projectName);
+            CmdUtils.createProjectStructure(projectName, apiDefinition, headers, values, insecure);
             CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
