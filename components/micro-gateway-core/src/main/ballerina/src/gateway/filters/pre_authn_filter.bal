@@ -35,6 +35,11 @@ public type PreAuthnFilter object {
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
         if (response.statusCode == 401) {
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            //This handles the case where the empty Bearer/Basic value provided for authorization header.
+            if (!invocationContext.attributes.hasKey(ERROR_CODE)) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            }
             sendErrorResponseFromInvocationContext(response);
         }
         return true;
@@ -97,12 +102,14 @@ returns boolean {
         }
     }
 
-    if (isSecuredResource && !request.hasHeader(authHeaderName)) {
+    if (isSecuredResource) {
+        if(!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) {
         printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
         setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
         setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
         sendErrorResponse(caller, request, context);
         return false;
+        }
     }
 
     if (!canHandleAuthentication) {
