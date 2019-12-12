@@ -1,22 +1,31 @@
 import ballerina/http;
+import ballerina/reflect;
 import wso2/gateway;
 import ballerina/log;
 
 @http:ServiceConfig {
-    basePath:"/authorize"
-    {{#corsConfiguration.corsConfigurationEnabled}},
-        cors: {
-             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
-             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
-             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
-        }
+    basePath:"/authorize",
+    auth: {
+        enabled: false
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service authorizeService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service authorizeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
-        path: "/*"
+        path: "/*",
+        auth: {
+            enabled: false
+        }
     }
     resource function authorizeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
@@ -27,6 +36,7 @@ service authorizeService on tokenListenerEndpoint {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
+            log:printError("Error occurred while invoking the authorize endpoint", err = response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -41,20 +51,28 @@ service authorizeService on tokenListenerEndpoint {
 }
 
 @http:ServiceConfig {
-    basePath:"/revoke"
-    {{#corsConfiguration.corsConfigurationEnabled}},
-        cors: {
-             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
-             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
-             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
-        }
+    basePath:"/revoke",
+    auth: {
+        enabled: false
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service revokeService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service revokeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
-        path: "/*"
+        path: "/*",
+        auth: {
+            enabled: false
+        }
     }
     resource function revokeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
@@ -65,6 +83,7 @@ service revokeService on tokenListenerEndpoint {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
+            log:printError("Error occurred while invoking the revoke endpoint", err = response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -79,20 +98,28 @@ service revokeService on tokenListenerEndpoint {
 }
 
 @http:ServiceConfig {
-    basePath:"/token"
-    {{#corsConfiguration.corsConfigurationEnabled}},
-        cors: {
-             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
-             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
-             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
-        }
+    basePath:"/token",
+    auth: {
+        enabled: false
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service tokenService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service tokenService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
-        path: "/*"
+        path: "/*",
+        auth: {
+            enabled: false
+        }
     }
     resource function tokenResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
@@ -103,6 +130,7 @@ service tokenService on tokenListenerEndpoint {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
+            log:printError("Error occurred while invoking the token endpoint", err = response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -116,20 +144,28 @@ service tokenService on tokenListenerEndpoint {
 }
 
 @http:ServiceConfig {
-    basePath:"/userinfo"
-    {{#corsConfiguration.corsConfigurationEnabled}},
-        cors: {
-             allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
-             allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
-             allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-             allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
-        }
+    basePath:"/userinfo",
+    auth: {
+        enabled: false
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
-service userInfoService on tokenListenerEndpoint {
+@gateway:Filters {
+    skipAll: true
+}
+service userInfoService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
-        path: "/*"
+        path: "/*",
+        auth: {
+            enabled: false
+        }
     }
     resource function userInfoResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
@@ -140,6 +176,7 @@ service userInfoService on tokenListenerEndpoint {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
+            log:printError("Error occurred while invoking the userinfo endpoint", err = response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the user info endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -150,4 +187,12 @@ service userInfoService on tokenListenerEndpoint {
            log:printError("Error when responding during the user info endpoint request", err = result);
         }
     }
+}
+
+public function addTokenServicesFilterAnnotation() {
+    map<gateway:FilterConfiguration?> filterConfigAnnotationMap = gateway:getFilterConfigAnnotationMap();
+    filterConfigAnnotationMap["authorizeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(authorizeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["tokenService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(tokenService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["revokeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(revokeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["userInfoService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(userInfoService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
 }
