@@ -34,6 +34,7 @@ map<http:HttpServiceConfig?> serviceAnnotationMap = {};
 map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
+map<FilterConfiguration?> filterConfigAnnotationMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -43,11 +44,13 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     }
     serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, SERVICE_ANN_NAME, ANN_PACKAGE);
     apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap[serviceName] = <FilterConfiguration?>reflect:getServiceAnnotations(s, FILTER_ANN_NAME, GATEWAY_ANN_PACKAGE);
     printDebug(KEY_UTILS, "Service annotation map: " + serviceAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource annotation map: " + resourceAnnotationMap.toString());
     printDebug(KEY_UTILS, "API config annotation map: " + apiConfigAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource Configuration annotation map: " + resourceConfigAnnotationMap.toString());
+    printDebug(KEY_UTILS, "Filter Configuration annotation map: " + filterConfigAnnotationMap.toString());
 }
 
 # Retrieve the key validation request dto from filter context.
@@ -595,6 +598,26 @@ function prepareAuthenticationError(string message, error? err = ()) returns htt
     }
     http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
     return preparedError;
+}
+
+# Read the filter skip annotation from service and set to the filter context
+#
+# + context - Filter Context object.
+public function setFilterSkipToFilterContext(http:FilterContext context) {
+    if (context.attributes.hasKey(SKIP_ALL_FILTERS)) {
+        return;
+    }
+    string serviceName = context.getServiceName();
+    boolean skipFilter = false;
+    FilterConfiguration? filterConfigAnn = filterConfigAnnotationMap[serviceName];
+    if (filterConfigAnn is FilterConfiguration) {
+        skipFilter = filterConfigAnn.skipAll;
+    }
+    context.attributes[SKIP_ALL_FILTERS] = skipFilter;
+}
+
+public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
+    return filterConfigAnnotationMap;
 }
 
 
