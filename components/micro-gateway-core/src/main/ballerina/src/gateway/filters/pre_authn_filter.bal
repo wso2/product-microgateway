@@ -103,12 +103,12 @@ returns boolean {
     }
 
     if (isSecuredResource) {
-        if(!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) {
-        printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
-        setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
-        setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-        sendErrorResponse(caller, request, context);
-        return false;
+        if (!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
+            setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
+            setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+            sendErrorResponse(caller, request, context);
+            return false;
         }
     }
 
