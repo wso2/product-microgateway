@@ -24,7 +24,8 @@ public type APIGatewaySecureListener object {
 
     public function __init(int port, http:ServiceEndpointConfiguration config) {
         initiateGatewaySecureConfigurations(config);
-        self.apiGatewayListener = new(getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port), config);
+        self.apiGatewayListener = new(getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port),
+            config);
     }
 
 
