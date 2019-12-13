@@ -23,6 +23,11 @@ import ballerina/runtime;
 public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
+        setFilterSkipToFilterContext(context);
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
@@ -34,9 +39,15 @@ public type PreAuthnFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         if (response.statusCode == 401) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-            //This handles the case where the empty Bearer/Basic value provided for authorization header.
+            //This handles the case where the empty Bearer/Basic value provided for authorization header. If all the
+            //auth handlers are invoked and returning 401 without proper error message in the context means, invalid
+            //credentials are provided. Hence we seth invalid credentials message to context
             if (!invocationContext.attributes.hasKey(ERROR_CODE)) {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             }
