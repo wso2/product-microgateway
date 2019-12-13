@@ -89,30 +89,8 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
 }
 
 public function getAuthHandlers() returns http:InboundAuthHandler[] {
-    //Initializes jwt handler
-    jwt:JwtValidatorConfig jwtValidatorConfig = {
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
-        clockSkewInSeconds: 60,
-        trustStoreConfig: {
-            trustStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
-            },
-            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
-        },
-        jwtCache: jwtCache
-    };
-    JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
-    JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
-    if (isMetricsEnabled || isTracingEnabled) {
-        jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
-    } else {
-        jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
-    }
-
-
+    //Read multiple jwt issuers
+    http:InboundAuthHandler[] multipleJwtIssuers = readMultipleJWTIssuers();
     // Initializes the key validation handler
     KeyValidationServerConfig keyValidationServerConfig = {
         url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
@@ -158,8 +136,59 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
 
     //Initializes the cookie based handler
     CookieAuthHandler cookieBasedHandler = new;
+    http:InboundAuthHandler[] handlerArray = [];
+    //Setting the handlers in specific order
+    handlerArray[0] = mutualSSLHandler;
+    handlerArray[1] = cookieBasedHandler;
+    int issuerCount = 2;
+    foreach(http:InboundAuthHandler handler in multipleJwtIssuers) {
+        handlerArray[issuerCount] = handler;
+        issuerCount = issuerCount + 1;
+    }
+    handlerArray[issuerCount] = keyValidationHandler;
+    handlerArray[issuerCount +1] = basicAuthHandler;
+    return handlerArray;
+}
 
-    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
+function readMultipleJWTIssuers() returns http:InboundAuthHandler[] {
+    int issuerCount = 0;
+    http:InboundAuthHandler[] issuerArray = [];
+    string issuerId = JWT_INSTANCE_ID;
+    while (true) {
+        if(issuerCount > 0 ) {
+            issuerId = JWT_INSTANCE_ID + issuerCount.toString();
+        }
+        map<any> issuerConfig = getConfigMapValue(issuerId);
+        if (issuerConfig.length() > 0 ) {
+            jwt:JwtValidatorConfig jwtValidatorConfig = {
+                issuer: getConfigValue(issuerId, ISSUER, "https://localhost:9443/oauth2/token"),
+                audience: getConfigValue(issuerId, AUDIENCE, "http://org.wso2.apimgt/gateway"),
+                clockSkewInSeconds: 60,
+                trustStoreConfig: {
+                    trustStore: {
+                        path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                        "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                        password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                    },
+                    certificateAlias: getConfigValue(issuerId, CERTIFICATE_ALIAS, "ballerina")
+                },
+                jwtCache: jwtCache
+            };
+            printDebug(KEY_GW_LISTNER, "JWT issuer found with key : " + issuerId);
+            JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
+            JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
+            if (isMetricsEnabled || isTracingEnabled) {
+                jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+            } else {
+                jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+            }
+            issuerArray[issuerCount] = jwtAuthHandler;
+            issuerCount = issuerCount + 1;
+        } else {
+            break;
+        }
+    }
+    return issuerArray;
 }
 
 
