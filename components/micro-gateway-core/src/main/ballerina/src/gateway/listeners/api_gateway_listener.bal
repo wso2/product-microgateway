@@ -114,6 +114,14 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
     }
 
+    APIKeyProvider apiKeyProvider = new(jwtValidatorConfig);
+    APIKeyHandler | APIKeyHandlerWrapper apiKeyHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        apiKeyHandler = new APIKeyHandlerWrapper(apiKeyProvider);
+    } else {
+        apiKeyHandler = new APIKeyHandler(apiKeyProvider);
+    }
+
     // Initializes the key validation handler
     http:ClientSecureSocket secureSocket = {
         trustStore: {
@@ -190,7 +198,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes the cookie based handler
     CookieAuthHandler cookieBasedHandler = new;
 
-    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
+    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, apiKeyHandler, keyValidationHandler, basicAuthHandler];
 }
 
 
@@ -217,6 +225,14 @@ function initiateKeyManagerConfigurations() {
     credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
+}
+
+public function getBasicAuthHandler() returns http:InboundAuthHandler[] {
+    // Initializes the basic auth handler
+    auth:BasicAuthConfig basicAuthConfig = {tableName : CONFIG_USER_SECTION};
+    BasicAuthProvider configBasicAuthProvider = new(basicAuthConfig);
+    http:BasicAuthHandler basicAuthHandler = new(configBasicAuthProvider);
+    return [basicAuthHandler];
 }
 
 function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider|error {
@@ -315,6 +331,6 @@ function getCredentialBearer() returns http:CredentialBearer {
         return http:AUTH_HEADER_BEARER;
     } else if (stringutils:equalsIgnoreCase(crednetailBearerString, http:POST_BODY_BEARER)) {
         return http:POST_BODY_BEARER;
-    } 
+    }
     return http:NO_BEARER;
 }

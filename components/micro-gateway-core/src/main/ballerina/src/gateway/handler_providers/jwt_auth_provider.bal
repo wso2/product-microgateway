@@ -57,6 +57,13 @@ public type JwtAuthProvider object {
             if (authContext is runtime:AuthenticationContext) {
                 string? jwtToken = authContext?.authToken;
                 if (jwtToken is string) {
+                    //if api key given validate user.
+                    boolean proceed = validateIfAPIKey(jwtToken);
+                    if (!proceed) {
+                        printDebug(KEY_JWT_AUTH_PROVIDER,"API Key validation failed.");
+                        setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                        return false;
+                    }
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
                     var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);

@@ -620,4 +620,15 @@ public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?>
     return filterConfigAnnotationMap;
 }
 
-
+# Read the config and check whether the user exists.
+#
+# + user - username.
+# + return - Returns boolean value.
+public function isUserExists(string user) returns boolean {
+    string password = getConfigValue(CONFIG_USER_SECTION + "." + user , "password", " ");
+    if (!stringutils:equalsIgnoreCase(" ", password)) {
+        log:printDebug("User" + user + "exists.");
+        return true;
+    }
+    return false;
+}
