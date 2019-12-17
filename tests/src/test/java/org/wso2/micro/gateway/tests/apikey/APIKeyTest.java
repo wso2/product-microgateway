@@ -53,7 +53,7 @@ public class APIKeyTest extends BaseTestCase {
         //get token from token endpoint
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + basicAuthToken);
         HttpResponse response = HttpClientRequest
-                .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT + "/token", headers);
+                .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT + "/apikey", headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
