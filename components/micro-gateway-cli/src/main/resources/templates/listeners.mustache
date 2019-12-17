@@ -64,7 +64,7 @@ listener http:Listener tokenListenerEndpoint = new (
         }
     {{else if containerConfig.kubernetes.kubernetesService.enable}}
         9096, config = {
-            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
+        host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
         secureSocket: {
             keyStore: {
                 path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
@@ -84,7 +84,7 @@ listener http:Listener tokenListenerEndpoint = new (
                         gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
                 }
             }
-        }
+        
     {{else}}
         gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TOKEN_LISTENER_PORT, 9096), config = {
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
@@ -159,43 +159,4 @@ public function getOpenAPIMapFromFile() returns @tainted map<json>{
         log:printError("Error occurred while reading the open API json file", err = rbc);
     }
     return openAPIMap;
-}
-
-public function provideTokenEndpointConfig() returns http:ListenerConfiguration {
-
-    boolean apiKeyIssuer = gateway:getConfigBooleanValue(
-    gateway: API_KEY_INSTANCE_ID, gateway:API_KEY_ISSUER_ENABLED, false);
-    if (apiKeyIssuer) {
-        log:printDebug("api key issuer enabled.");
-        http:ListenerConfiguration tokenEndpointConfig = {
-            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
-            auth: {
-                authHandlers: gateway:getBasicAuthHandler()
-            },
-            secureSocket: {
-                keyStore: {
-                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
-                    password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway: LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
-                }
-            }
-        };
-        return tokenEndpointConfig;
-    }
-
-    else {
-        http:ListenerConfiguration tokenEndpointConfig = {
-            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
-            secureSocket: {
-                keyStore: {
-                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
-                    password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway: LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
-                }
-            }
-        };
-        return tokenEndpointConfig;
-    }
 }
