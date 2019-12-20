@@ -273,6 +273,16 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.dataformat.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.jknack</groupId>
                 <artifactId>handlebars</artifactId>
                 <version>${handlebars.version}</version>
@@ -337,6 +347,16 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${maven.spotbugs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus.jmx</groupId>
+                <artifactId>jmx_prometheus_javaagent</artifactId>
+                <version>${prometheus.jmx.agent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.tools</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
@@ -537,7 +557,6 @@
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
         <jcip.annotations.version>1.0</jcip.annotations.version>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jackson.core.version>2.8.6</jackson.core.version>
@@ -546,6 +565,7 @@
         <kraal.version>0.0.16</kraal.version>
         <kotlin.stdlib.version>1.3.31</kotlin.stdlib.version>
         <asm.version>7.1</asm.version>
+        <prometheus.jmx.agent.version>0.12.0</prometheus.jmx.agent.version>
         <jms-module.version>0.6.2</jms-module.version>
         <jmx.api.version>2.0.1</jmx.api.version>
         <orbit.version.geronimo-jms_1.1_spec>1.1.1.wso2v1</orbit.version.geronimo-jms_1.1_spec>

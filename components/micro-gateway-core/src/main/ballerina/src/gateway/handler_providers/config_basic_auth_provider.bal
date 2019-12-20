@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/crypto;
-import ballerina/runtime;
 import ballerina/auth;
+import ballerina/crypto;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
+import ballerina/runtime;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -37,16 +37,16 @@ public type BasicAuthProvider object {
         if (basicAuthConfig is auth:BasicAuthConfig) {
             self.basicAuthConfig = basicAuthConfig;
         } else {
-            self.basicAuthConfig = { tableName: CONFIG_USER_SECTION };
+            self.basicAuthConfig = {tableName: CONFIG_USER_SECTION};
         }
-        self.inboundBasicAuthProvider = new(basicAuthConfig);
+        self.inboundBasicAuthProvider = new (basicAuthConfig);
     }
 
     # Attempts to authenticate with credentials.
     #
     # + credential - Credential
     # + return - `true` if authentication is successful, otherwise `false` or `Error` occurred while extracting credentials
-    public function authenticate(string credential) returns (boolean|auth:Error) {
+    public function authenticate(string credential) returns (boolean | auth:Error) {
         boolean isAuthenticated;
         //API authentication info
         AuthenticationContext authenticationContext = {};
@@ -55,14 +55,14 @@ public type BasicAuthProvider object {
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
         string encodedCredentials = credential;
-        byte[]|error decodedCredentials =  arrays:fromBase64(encodedCredentials);
+        byte[] | error decodedCredentials = arrays:fromBase64(encodedCredentials);
 
         //Extract username and password from the request
         string userName;
         string password;
-        if(decodedCredentials is byte[]){
+        if (decodedCredentials is byte[]) {
             string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
-            if (decodedCredentialsString.indexOf(":", 0)== ()){
+            if (decodedCredentialsString.indexOf(":", 0) == ()) {
                 setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
                 return false;
             }
@@ -70,7 +70,7 @@ public type BasicAuthProvider object {
             userName = decodedCred[0];
             printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
             if (decodedCred.length() < 2) {
-                setErrorMessageToInvocationContext( API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 return false;
             }
             password = decodedCred[1];
@@ -79,7 +79,8 @@ public type BasicAuthProvider object {
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             return false;
         }
-
+        //Starting a new span
+        int | error | () spanHash = startSpan(HASHING_MECHANISM);
         //Hashing mechanism
         string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
@@ -88,19 +89,23 @@ public type BasicAuthProvider object {
         string encodedVal = credentials.toBytes().toBase64();
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
-
-
+        //finishing span
+        finishSpan(HASHING_MECHANISM, spanHash);
+        //Starting a new span
+        int | error | () spanInbound = startSpan(BALLERINA_INBOUND_BASICAUTH);
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
+        //finishing span
+        finishSpan(BALLERINA_INBOUND_BASICAUTH, spanInbound);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Basic auth provider returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
-                //TODO: Handle the error message properly 
+                //TODO: Handle the error message properly
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 //sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }
-            int startingTime = getCurrentTime();
-            invocationContext.attributes[REQUEST_TIME] = startingTime;
+            int startingTimeReq = getCurrentTime();
+            invocationContext.attributes[REQUEST_TIME] = startingTimeReq;
             invocationContext.attributes[FILTER_FAILED] = false;
             //Set authenticationContext data
             authenticationContext.authenticated = true;
@@ -125,10 +130,6 @@ public type BasicAuthProvider object {
         } else {
             return prepareError("Failed to authenticate with basic auth hanndler.", isAuthorized);
         }
-        
-        
-
-        
     }
 
-};    
+};

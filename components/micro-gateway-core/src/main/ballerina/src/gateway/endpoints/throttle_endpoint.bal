@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,25 +14,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
 import ballerina/http;
+import ballerina/log;
 
 string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL,
-    "https://localhost:9443/endpoints");
+"https://localhost:9443/endpoints");
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
-    "admin:admin");
+"admin:admin");
 
-http:Client throttleEndpoint = new(throttleEndpointUrl,
-    {cache: { enabled: false },
-        secureSocket:{
-            trustStore: {
-                  path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                      "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                  password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
-            },
-            verifyHostname:getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
-        }
-    });
+http:Client throttleEndpoint = new (throttleEndpointUrl,
+{
+    cache: {enabled: false},
+    secureSocket: {
+        trustStore: {
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+        },
+        verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    }
+});
 
 public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEvent) {
 

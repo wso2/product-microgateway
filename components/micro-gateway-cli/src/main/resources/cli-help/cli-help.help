@@ -20,7 +20,7 @@ COMMAND is one of the available commands listed below:
     1. micro-gw init : Initialize a project.
     2. micro-gw build : Build the project.
     3. micro-gw import : Import a single API or multiple APIs to the project
-    4. micro-gw reset : Reset microgateway configurations to default.
+    4. micro-gw reset : Reset microgateway configurations to prompt different user credentials.
 
 OPTIONS
     "micro-gw help" has no command line options

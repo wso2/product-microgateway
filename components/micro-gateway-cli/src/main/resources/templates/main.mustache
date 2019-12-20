@@ -7,7 +7,9 @@ public function main() {
     gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
     {{/each}}
 
+    addTokenServicesFilterAnnotation();
     initThrottlePolicies();
+    gateway:startObservabilityListener();
 
     {{>jwtRevocation}}
     startupExtension();

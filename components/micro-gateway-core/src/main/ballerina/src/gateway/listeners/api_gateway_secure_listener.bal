@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/crypto;
-import ballerina/'lang\.object as lang;
+import ballerina/http;
+import ballerina/ 'lang\.object as lang;
 
 public type APIGatewaySecureListener object {
     *lang:Listener;
@@ -24,7 +24,7 @@ public type APIGatewaySecureListener object {
 
     public function __init(int port, http:ListenerConfiguration config) {
         initiateGatewaySecureConfigurations(config);
-        self.apiGatewayListener = new(getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port), config);
+        self.apiGatewayListener = new (getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port), config);
     }
 
 
@@ -37,11 +37,11 @@ public type APIGatewaySecureListener object {
     }
 
     public function __gracefulStop() returns error? {
-            return self.apiGatewayListener.__gracefulStop();
+        return self.apiGatewayListener.__gracefulStop();
     }
 
     public function __immediateStop() returns error? {
-            return self.apiGatewayListener.__immediateStop();
+        return self.apiGatewayListener.__immediateStop();
     }
 
     public function __detach(service s) returns error? {
@@ -52,15 +52,15 @@ public type APIGatewaySecureListener object {
 
 function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) {
     string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
-        "${ballerina.home}/bre/security/ballerinaKeystore.p12");
+    "${ballerina.home}/bre/security/ballerinaKeystore.p12");
     string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-        LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina");
+    LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina");
     string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-        TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12");
+    TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12");
     string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-        TRUST_STORE_PASSWORD, "ballerina");
+    TRUST_STORE_PASSWORD, "ballerina");
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID,
-        MTSL_CONF_PROTOCOL_NAME, "TLS");
+    MTSL_CONF_PROTOCOL_NAME, "TLS");
     string defaultProtocolVersions = "TLSv1.2,TLSv1.1";
     string defaultCiphers = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
     TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
@@ -83,10 +83,14 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
     string[] ciphers = split(getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, defaultCiphers), ",");
     string sslVerifyClient = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
 
-    crypto:TrustStore trustStore = { path: trustStorePath, password: trustStorePassword };
-    crypto:KeyStore keyStore = { path: keyStorePath, password: keyStorePassword };
-    http:Protocols protocol = { name: protocolName, versions: protocolVersions };
-    http:ListenerSecureSocket secureSocket = { trustStore: trustStore, keyStore: keyStore,
-        sslVerifyClient: sslVerifyClient, ciphers: ciphers };
+    crypto:TrustStore trustStore = {path: trustStorePath, password: trustStorePassword};
+    crypto:KeyStore keyStore = {path: keyStorePath, password: keyStorePassword};
+    http:Protocols protocol = {name: protocolName, versions: protocolVersions};
+    http:ListenerSecureSocket secureSocket = {
+        trustStore: trustStore,
+        keyStore: keyStore,
+        sslVerifyClient: sslVerifyClient,
+        ciphers: ciphers
+    };
     config.secureSocket = secureSocket;
 }

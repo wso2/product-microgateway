@@ -36,3 +36,11 @@ public type ResourceConfiguration record {
 };
 
 public annotation ResourceConfiguration Resource on resource function;
+
+public type FilterConfiguration record {
+    boolean skipAll = false;
+};
+
+public annotation FilterConfiguration Filters on service;
+
+

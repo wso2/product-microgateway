@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -28,9 +28,9 @@ public type TimeBatch object {
     public any[] windowParameters;
     public function (streams:StreamEvent?[])? nextProcessPointer;
 
-    public function __init(function(streams:StreamEvent?[])? nextProcessPointer, any[] windowParameters) {
-        self.scheduler = new(function (@tainted streams:StreamEvent?[] e) {
-                        self.process(e);
+    public function __init(function (streams:StreamEvent?[])? nextProcessPointer, any[] windowParameters) {
+        self.scheduler = new (function (@tainted streams:StreamEvent?[] e) {
+            self.process(e);
         });
         self.expiredEventQueue = new;
         self.attrExpiredTimestamp = "expiryTimeStamp";
@@ -104,8 +104,8 @@ public type TimeBatch object {
         }
 
         if (streamEventsCopy.length() > 0) {
-            function (streams:StreamEvent?[]) nextProcessor =
-                    <function (streams:StreamEvent?[])>self.nextProcessPointer;
+            function(streams:StreamEvent?[]) nextProcessor =
+            <function(streams:StreamEvent?[])>self.nextProcessPointer;
             nextProcessor(streamEventsCopy);
         }
     }
@@ -116,17 +116,17 @@ public type TimeBatch object {
     }
 
     public function getCandidateEvents(
-                            streams:StreamEvent originEvent,
-                            (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
-                            boolean isLHSTrigger = true)
-                            returns [streams:StreamEvent?, streams:StreamEvent?][] {
+    streams:StreamEvent originEvent,
+    (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+    boolean isLHSTrigger = true)
+    returns [streams:StreamEvent?, streams:StreamEvent?][] {
         // do nothing;
         return [[(), ()]];
     }
 };
 
 public function timeBatch(any[] windowParameters, function (streams:StreamEvent?[])? nextProcessPointer = ())
-                    returns streams:Window {
-    TimeBatch timeBatchProcessor = new(nextProcessPointer, windowParameters);
+returns streams:Window {
+    TimeBatch timeBatchProcessor = new (nextProcessPointer, windowParameters);
     return timeBatchProcessor;
 }
