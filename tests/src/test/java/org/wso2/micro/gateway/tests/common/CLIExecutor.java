@@ -21,7 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.micro.gateway.tests.context.Constants;
 import org.wso2.micro.gateway.tests.context.MicroGWTestException;
 import org.wso2.micro.gateway.tests.context.ServerLogReader;
@@ -55,7 +55,7 @@ public class CLIExecutor {
         //This config file is relevant to the publisher API
         String config = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("confs" +
                 "/default-cli-test-config.toml")).getPath()).getAbsolutePath();
-        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        String mgwCommand = this.cliHome + File.separator + CliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
         //todo: check using prompt as well
         String[] importCmdArray = {"-l", label, "-u", "admin", "-p", "admin", "-s", "https://localhost:9443",
@@ -104,7 +104,7 @@ public class CLIExecutor {
             throws MicroGWTestException {
 
         createBackgroundEnv();
-        String mgwCommand = this.cliHome + File.separator + GatewayCliConstants.CLI_BIN + File.separator + "micro-gw";
+        String mgwCommand = this.cliHome + File.separator + CliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
         copyOpenAPIDefinitionsToProject(project, openAPIFileNames);
         copyCustomizedPolicyFileFromResources(project);
@@ -120,7 +120,7 @@ public class CLIExecutor {
             throw new MicroGWTestException("The directory " + baseDir + " doesnot exist.", e);
         }
         log.info("CLI Project Home: " + path.toString());
-        System.setProperty(GatewayCliConstants.CLI_HOME, this.cliHome);
+        System.setProperty(CliConstants.CLI_HOME, this.cliHome);
         log.info("CLI Home: " + this.cliHome);
         System.setProperty("user.dir", path.toString());
         homeDirectory = path.toString();
@@ -207,12 +207,12 @@ public class CLIExecutor {
             File desPath;
             if (openAPIFileName.contains(".bal")) {
                 desPath = new File(homeDirectory + File.separator + project + File.separator +
-                        GatewayCliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
+                        CliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
                         openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
             } else {
                 desPath = new File(
                         homeDirectory + File.separator + project + File.separator +
-                                GatewayCliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
                                 .substring(openAPIFileName.lastIndexOf("/") + 1));
             }
             try {
@@ -236,13 +236,13 @@ public class CLIExecutor {
     }
 
     /**
-     * Get the absolute path for the compiled ballerina project executable (balx file).
+     * Get the absolute path for the compiled ballerina project executable (jar file).
      *
      * @param project project name
      * @return the absolute path of the project's executable
      */
-    public String getLabelBalx(String project) {
+    public String getLabelJar(String project) {
         return homeDirectory + File.separator + project + File.separator + "target" + File.separator + project +
-                ".balx";
+                ".jar";
     }
 }

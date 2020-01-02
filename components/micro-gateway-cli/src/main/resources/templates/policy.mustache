@@ -1,21 +1,17 @@
-import ballerina/io;
-import ballerina/runtime;
-import ballerina/http;
-import ballerina/log;
 import wso2/gateway;
 
 stream<gateway:IntermediateStream> s{{name}}intermediateStream = new;
 stream<gateway:GlobalThrottleStreamDTO> s{{name}}resultStream = new;
 stream<gateway:EligibilityStreamDTO> s{{name}}eligibilityStream = new;
-stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:requestStream;
-stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:globalThrottleStream;
+stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:getRequestStream();
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:getGlobalThrottleStream();
 
 function {{funcName}}() {
 
     forever {
         from s{{name}}reqCopy
         select s{{name}}reqCopy.messageID as messageID, (s{{name}}reqCopy.{{tierType}} == "{{name}}") as
-        isEligible, s{{name}}reqCopy.{{policyKey}} as throttleKey, 0 as expiryTimestamp
+        isEligible, s{{name}}reqCopy.{{policyKey}} as throttleKey, 0 as expiryTimeStamp
         => (gateway:EligibilityStreamDTO[] counts) {
         foreach var c in counts{
             s{{name}}eligibilityStream.publish(c);
@@ -23,10 +19,10 @@ function {{funcName}}() {
         }
 
         from s{{name}}eligibilityStream
-        throttler:timeBatch({{unitTime}})
+        window gateway:timeBatch({{unitTime}})
         where s{{name}}eligibilityStream.isEligible == true
         select s{{name}}eligibilityStream.throttleKey as throttleKey, count() as eventCount, {{stopOnQuotaReach}} as
-        stopOnQuota, expiryTimeStamp
+        stopOnQuota, s{{name}}eligibilityStream.expiryTimeStamp as expiryTimeStamp
         group by s{{name}}eligibilityStream.throttleKey
         => (gateway:IntermediateStream[] counts) {
         foreach var c in counts{
@@ -37,7 +33,7 @@ function {{funcName}}() {
         from s{{name}}intermediateStream
         select s{{name}}intermediateStream.throttleKey, s{{name}}intermediateStream.eventCount>= {{count}} as isThrottled,
         s{{name}}intermediateStream.stopOnQuota, s{{name}}intermediateStream.expiryTimeStamp
-        group by s{{name}}eligibilityStream.throttleKey
+        group by s{{name}}intermediateStream.throttleKey
         => (gateway:GlobalThrottleStreamDTO[] counts) {
         foreach var c in counts{
             s{{name}}resultStream.publish(c);
@@ -45,7 +41,7 @@ function {{funcName}}() {
         }
 
         from s{{name}}resultStream
-        throttler:emitOnStateChange(s{{name}}resultStream.throttleKey, s{{name}}resultStream.isThrottled)
+        window gateway:emitOnStateChange(s{{name}}resultStream.throttleKey, s{{name}}resultStream.isThrottled, "s{{name}}resultStream")
         select s{{name}}resultStream.throttleKey as throttleKey, s{{name}}resultStream.isThrottled,
         s{{name}}resultStream.stopOnQuota, s{{name}}resultStream.expiryTimeStamp
         => (gateway:GlobalThrottleStreamDTO[] counts) {

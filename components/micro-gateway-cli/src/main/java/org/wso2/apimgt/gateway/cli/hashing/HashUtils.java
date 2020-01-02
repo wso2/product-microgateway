@@ -29,7 +29,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyDTO;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -103,7 +103,7 @@ public class HashUtils {
      * @throws IOException error while loading the stored hashes
      */
     private static Map<String, String> loadStoredResourceHashes(String projectName) throws IOException {
-        String content = GatewayCmdUtils.loadStoredResourceHashes(projectName);
+        String content = CmdUtils.loadStoredResourceHashes(projectName);
         Map<String, String> hashes = new HashMap<>();
         if (StringUtils.isNotEmpty(content)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -122,7 +122,7 @@ public class HashUtils {
     private static void storeResourceHashes(Map<String, String> hashesMap, String projectName) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         String stringifiedHashes = mapper.writeValueAsString(hashesMap);
-        GatewayCmdUtils.storeResourceHashesFileContent(stringifiedHashes, projectName);
+        CmdUtils.storeResourceHashesFileContent(stringifiedHashes, projectName);
     }
 
     /**

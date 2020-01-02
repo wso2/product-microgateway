@@ -35,6 +35,7 @@ SET JAVA_XMX_VALUE="512m"
 REM Get the location of this(gateway.bat) file
 SET PRGDIR=%~dp0
 SET GWHOME=%PRGDIR%..
+SET MGW_VERSION="3.1.0"
 REM  set BALLERINA_HOME
 set BALLERINA_HOME=%GWHOME%\runtime
 set JAVA_HOME=%GWHOME%\lib\jdk8u202-b08-jre
@@ -44,9 +45,7 @@ if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
 REM Check if path to runtime executable is available
 set last=""
 for %%a in (%*) do set last=%%a
-echo %last%
 if %last%=="" set isInvalidPath=T
-echo %last%
 if not exist %last% set isInvalidPath=T
 if "%isInvalidPath%"=="T" (
 	echo Path to executable balx file is invalid
@@ -55,10 +54,10 @@ if "%isInvalidPath%"=="T" (
 
 REM Extract ballerina runtime
 if not exist %GW_HOME%\runtime\ (
+    REM TODO: Evaluate the use of powershell `tee` here
     call "%PRGDIR%\tools.exe"
     if ERRORLEVEL 0 (
         xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul
-        xcopy /sy "%GWHOME%\lib\gateway\balo\wso2" "%GWHOME%\runtime\lib\repo\wso2\" >nul
     )
 )
 
@@ -154,10 +153,10 @@ goto end
 		echo [%date% %time%] Starting Micro-Gateway
 		IF !PSVersion! LEQ 3 (
 			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
+			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.http.accesslog.path=\"%unix_style_path%\" --b7a.config.file=".\conf\micro-gw.conf" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
 		 ) else (
 			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run -e api.usage.data.path=\"%usage_data_path%\" -e b7a.http.accesslog.path=\"%unix_style_path%\" --config .\conf\micro-gw.conf %BAL_ARGS% | tee -Append .\logs\microgateway.log"
+			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.http.accesslog.path=\"%unix_style_path%\" --b7a.config.file=".\conf\micro-gw.conf" | tee -Append .\logs\microgateway.log"
 		)
 	)
 :end

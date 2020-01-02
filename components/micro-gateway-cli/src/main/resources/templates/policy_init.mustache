@@ -1,14 +1,16 @@
 import ballerina/log;
-import ballerina/runtime;
 import wso2/gateway;
 
 
 function initThrottlePolicies() {
-    boolean globalThrottlingEnabled=gateway:initiateThrottlingJmsListener();
+    //TODO : move this to a future function call in throttle_util.bal once
+    future<()> ftr = start gateway:initializeThrottleSubscription();
+    //TODO: Enable once the jms module with ballerina
+    boolean globalThrottlingEnabled = gateway:initiateThrottlingJmsListener();
 
      if(!globalThrottlingEnabled){
          while (true) {
-             if(gateway:isStreamsInitialized == true) {
+             if(gateway:getIsStreamsInitialized()) {
                             log:printDebug("Throttle streams initialized.");
                             break;
              }

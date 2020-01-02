@@ -191,7 +191,7 @@ public final class RouteUtils {
             switch (endpointType) {
                 case http:
                     //if endpointList size is greater than one but the given type is http, verbose log will be printed.
-                    GatewayCmdUtils.printVerbose("'" + EndpointType.http + "' is not effective with many urls. " +
+                    CmdUtils.printVerbose("'" + EndpointType.http + "' is not effective with many urls. " +
                             "Only the first url will be used.");
                     destObject.setType(endpointType);
                     break;
@@ -210,7 +210,7 @@ public final class RouteUtils {
             //if endpointList size is one, we ignore the user input for 'type'
             destObject.setType(EndpointType.http);
             if (endpointType.equals(EndpointType.failover) || endpointType.equals(EndpointType.load_balance)) {
-                GatewayCmdUtils.printVerbose(endpointType + " is changed to " + EndpointType.http +
+                CmdUtils.printVerbose(endpointType + " is changed to " + EndpointType.http +
                         " as one endpoint is available.");
             }
         }

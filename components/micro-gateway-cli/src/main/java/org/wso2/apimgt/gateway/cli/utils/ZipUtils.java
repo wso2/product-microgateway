@@ -19,7 +19,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIZipException;
 
 import java.io.BufferedOutputStream;
@@ -104,12 +104,12 @@ public final class ZipUtils {
                     unzipFiles(zipInputStream, filePath);
 
                     //Explicitly set execution permission to files inside bin folders.
-                    String binPath = File.separator + GatewayCliConstants.GW_DIST_BIN + File.separator;
+                    String binPath = File.separator + CliConstants.GW_DIST_BIN + File.separator;
                     if (filePath.toString().contains(binPath)) {
                         filePath.toFile().setExecutable(true, false);
                     }
                     //If file is a jar add it to the class loader dynamically.
-                    if (isAddToClasspath && entry.getName().endsWith(GatewayCliConstants.EXTENSION_JAR)) {
+                    if (isAddToClasspath && entry.getName().endsWith(CliConstants.EXTENSION_JAR)) {
                         addJarToClasspath(new File(filePath.toString()));
                     }
                 } else {

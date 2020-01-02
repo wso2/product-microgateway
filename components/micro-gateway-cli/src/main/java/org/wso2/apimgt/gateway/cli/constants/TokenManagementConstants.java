@@ -28,7 +28,7 @@ public class TokenManagementConstants {
     public static final String OWNER = "owner";
     public static final String SAAS_APP = "saasApp";
     public static final String GRANT_TYPE = "grantType";
-    public static final String APPLICATION_NAME = "Micro Gateway Cli";
+    public static final String APPLICATION_NAME = "Micro_Gateway_Cli";
     public static final String APPLICATION_CALLBACK_URL = "https://wso2.org";
     public static final String POLICY_VIEW_TOKEN_SCOPE = "apim:tier_view";
     public static final String VIEW_API_SCOPE = "apim:api_view";
@@ -44,4 +44,5 @@ public class TokenManagementConstants {
     public static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String PASSWORD = "password";
     public static final String ACCESS_TOKEN = "access_token";
+    public static final String TLS = "TLS";
 }

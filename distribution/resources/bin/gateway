@@ -47,10 +47,42 @@ PRGDIR=`dirname "$PRG"`
 GWHOME=`cd "$PRGDIR/.." ; pwd`
 export BALLERINA_HOME=$GWHOME'/runtime'
 export JAVA_HOME=$GWHOME'/lib/jdk8u202-b08-jre'
+export MGW_VERSION="3.1.0"
+export GW_HOME="$GWHOME"
 
 if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
+
+#To run the Java classes
+java_cmd () {
+  if [ -z "$JAVACMD" ] ; then
+      if [ -n "$JAVA_HOME"  ] ; then
+          if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+              # IBM's JDK on AIX uses strange locations for the executables
+              JAVACMD="$JAVA_HOME/jre/sh/java"
+          else
+              JAVACMD="$JAVA_HOME/bin/java"
+          fi
+      else
+          JAVACMD=java
+      fi
+  fi
+
+  METRIC_CLASSPATH=""
+      for j in "$GWHOME"/lib/gateway/*.jar
+      do
+          METRIC_CLASSPATH="$METRIC_CLASSPATH":$j
+      done
+
+  $JAVACMD \
+      -Xms256m -Xmx1024m \
+      -XX:+HeapDumpOnOutOfMemoryError \
+      -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+      $JAVA_OPTS \
+      -classpath "$METRIC_CLASSPATH" \
+      org.wso2.micro.gateway.tools.Main $1 | tee -a $GWHOME/logs/microgateway.log
+}
 
 # ----- Process the input command ----------------------------------------------
 args=""
@@ -81,18 +113,19 @@ done
 for last; do true; done
 
 if [ ! "$CMD" = "stop" ]; then
-  if [[ ! -f "$last" ]]; then
-      echo "Path to executable balx file is invalid"
+  if [[ ! -f "$1" ]]; then
+      echo "Path to executable jar file is invalid"
       exit 0
   fi
 fi
 
+
 # Extract ballerina runtime
 if [ ! -d "$GWHOME/runtime" ]; then
-    $PRGDIR/tools
+    echo "Initializing Runtime..."
+    java_cmd "unzip"
     if [ $? -eq 0 ]; then
         cp $GWHOME/lib/gateway/*.jar $GWHOME/runtime/bre/lib/
-        cp -r $GWHOME/lib/gateway/balo/wso2 $GWHOME/runtime/lib/repo/
     fi
 fi
 
@@ -100,6 +133,40 @@ fi
 sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
 sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
 rm $BALLERINA_HOME/bin/ballerina.back
+
+FLAG="false"
+CONFIG_FILE="$GWHOME/conf/micro-gw.conf"
+CONFIG_OUT_FILE="$GWHOME/.config"
+
+if [[ $b7a_observability_metrics_enabled == "true" ]]; then
+    FLAG="true"
+else
+    for c in $*
+    do
+        if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
+            FLAG="true"
+            break    
+        fi
+    done    
+fi
+
+java_cmd "getConfig $CONFIG_FILE $CONFIG_OUT_FILE"
+
+if [ -f "$CONFIG_OUT_FILE" ]; then
+    if [ "$FLAG" != "true" ]; then 
+        if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
+            FLAG="true"
+        fi
+    fi
+    if [ "$FLAG" == "true" ]; then
+        jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
+        export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
+    fi
+else
+    echo "Error while reading Observability configurations from the file"
+fi
+
+rm $CONFIG_OUT_FILE
 
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
@@ -112,7 +179,7 @@ if [ "$CMD" = "start" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-    sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
+    $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
@@ -153,7 +220,7 @@ elif [ "$CMD" = "restart" ]; then
   rm -f file $GWHOME/bin/gateway.pid
   # using nohup sh to avoid erros in solaris OS.TODO
   nohup $SHELL <<EOF &
-   sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf $args 2>&1  | tee -a $GWHOME/logs/microgateway.log
+   $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
 EOF
   SESS_PID=$!
   PROCESS_ID=""
@@ -175,4 +242,4 @@ EOF
 fi
 
 # run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
-sh $BALLERINA_HOME/bin/ballerina run -e api.usage.data.path=$GWHOME/api-usage-data -e b7a.http.accesslog.path=$GWHOME/logs/access_logs --config $GWHOME/conf/micro-gw.conf "$@" 2>&1  | tee -a $GWHOME/logs/microgateway.log
+$BALLERINA_HOME/bin/ballerina run  "$@" --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log

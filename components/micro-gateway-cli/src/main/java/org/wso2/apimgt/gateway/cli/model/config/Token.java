@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -29,6 +29,7 @@ public class Token {
 
     private String baseURL;
     private String restVersion;
+    private String dcrVersion;
     private String publisherEndpoint;
     private String adminEndpoint;
     private String registrationEndpoint;
@@ -47,7 +48,7 @@ public class Token {
         String absoluteTrustoreLocation = trustStoreLocation;
         File file = new File(absoluteTrustoreLocation);
         if (!file.isAbsolute()) {
-            absoluteTrustoreLocation = GatewayCmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
+            absoluteTrustoreLocation = CmdUtils.getCLIHome() + File.separator + absoluteTrustoreLocation;
             file = new File(absoluteTrustoreLocation);
             if (!file.exists()) {
                 PrintStream err = System.err;
@@ -140,5 +141,13 @@ public class Token {
 
     public void setBaseURL(String baseURL) {
         this.baseURL = baseURL;
+    }
+
+    public String getDcrVersion() {
+        return dcrVersion;
+    }
+
+    public void setDcrVersion(String dcrVersion) {
+        this.dcrVersion = dcrVersion;
     }
 }

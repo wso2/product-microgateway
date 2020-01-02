@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
@@ -28,12 +29,13 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
@@ -46,7 +48,9 @@ import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,6 +69,7 @@ import java.util.regex.Pattern;
  */
 public class OpenAPICodegenUtils {
     private static final Logger logger = LoggerFactory.getLogger(OpenAPICodegenUtils.class);
+    private static PrintStream outStream = System.out;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -118,7 +123,7 @@ public class OpenAPICodegenUtils {
         } else if (rootNode.has("openapi") && rootNode.get("openapi").asText().trim().startsWith("3")) {
             return openAPISpec3;
         }
-        throw new CLIRuntimeException("Error while reading the swagger file, check again.");
+        throw new CLIRuntimeException("Error while reading the open API version from file, Check the open API format");
     }
 
     /**
@@ -127,21 +132,27 @@ public class OpenAPICodegenUtils {
      * @param api ExtendedAPI object
      * @return openAPI definition as a String
      */
-    static String generateSwaggerString(ExtendedAPI api) {
+    static String generateSwaggerString(ExtendedAPI api, boolean isExpand) {
 
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
-
-        RouteEndpointConfig mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+        RouteEndpointConfig mgwEndpointConfigDTO = null;
+        if (isExpand) {
+            mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+        }
 
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                if (isExpand) {
+                    swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Json.pretty(swagger);
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-                openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                if (isExpand) {
+                    openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Yaml.pretty(openAPI);
 
             default:
@@ -182,7 +193,16 @@ public class OpenAPICodegenUtils {
         }
     }
 
-    private static Map<String, Object> getExtensionMap(ExtendedAPI api, RouteEndpointConfig mgwEndpointConfigDTO) {
+    public static String convertYamlToJson(String yaml) throws IOException {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Object obj = yamlReader.readValue(yaml, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
+    }
+
+
+        private static Map<String, Object> getExtensionMap(ExtendedAPI api, RouteEndpointConfig mgwEndpointConfigDTO) {
         Map<String, Object> extensionsMap = new HashMap<>();
         String basePath = api.getContext() + "/" + api.getVersion();
         extensionsMap.put(OpenAPIConstants.BASEPATH, basePath);
@@ -213,7 +233,8 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      * @return Extended API object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, Path openAPIPath) throws IOException {
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent, Path openAPIPath)
+            throws IOException {
 
         String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
         ExtendedAPI api = new ExtendedAPI();
@@ -222,8 +243,7 @@ public class OpenAPICodegenUtils {
         api.setVersion(openAPI.getInfo().getVersion());
         api.setTransport(Arrays.asList("http", "https"));
         //open API content should be set in json in order to validation filter to work.
-        String openAPIContent = new String(Files.readAllBytes(openAPIPath), StandardCharsets.UTF_8);
-        api.setApiDefinition(getOpenAPIAsJson(openAPI, openAPIContent, openAPIPath));
+        api.setApiDefinition(openAPIContent);
         return api;
     }
 
@@ -246,15 +266,17 @@ public class OpenAPICodegenUtils {
     }
 
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
-
+        Map<String, Object> extensions = openAPI.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                openAPI.getServers());
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(api.getId());
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
+                openAPI.getServers());
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
         }
@@ -290,21 +312,25 @@ public class OpenAPICodegenUtils {
      * @return {@link MgwEndpointConfigDTO} object
      */
     public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
+        Map<String, Object> extensions = operation.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS));
+                extensions != null ? operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                operation.getServers());
         // if endpoint name is empty set operation id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(operation.getOperationId());
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS));
+                extensions != null ? operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
+                operation.getServers());
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(operation.getOperationId());
         }
         return RouteUtils.convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
     }
 
-    private static EndpointListRouteDTO extractEndpointFromOpenAPI(Object endpointExtensionObject) {
+    private static EndpointListRouteDTO extractEndpointFromOpenAPI(Object endpointExtensionObject,
+            List<Server> servers) {
         EndpointListRouteDTO endpointListRouteDTO = null;
         if (endpointExtensionObject != null) {
             String endpointExtensionObjectValue = endpointExtensionObject.toString();
@@ -339,6 +365,12 @@ public class OpenAPICodegenUtils {
                             + endpointExtensionObjectValue);
                 }
             }
+        } else if (servers != null) {
+            endpointListRouteDTO = new EndpointListRouteDTO();
+            for (Server server : servers) {
+                //server url templating can have urls similar to 'https://{customerId}.saas-app.com:{port}/v2'
+                endpointListRouteDTO.addEndpoint(replaceOpenAPIServerTemplate(server));
+            }
         }
         return endpointListRouteDTO;
     }
@@ -348,20 +380,56 @@ public class OpenAPICodegenUtils {
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openApiFilePath OpenAPI definition file
+     * @param openAPIVersion OpenAPI version
      */
-    private static void validateBasepath(OpenAPI openAPI, String openApiFilePath) {
-        String basePath = (String) openAPI.getExtensions().get(OpenAPIConstants.BASEPATH);
-        if (basePath == null || basePath.isEmpty()) {
-            throw new CLIRuntimeException("'" + OpenAPIConstants.BASEPATH + "' property is not included in openAPI " +
-                    "definition '" + openApiFilePath + "'.");
+    private static void validateBasePath(OpenAPI openAPI, String openApiFilePath, String openAPIVersion) {
+        List<Server> servers = openAPI.getServers();
+        Map<String, Object> openAPIExtensions = openAPI.getExtensions();
+        String basePath = null;
+        if (openAPIExtensions != null && openAPIExtensions.get(OpenAPIConstants.BASEPATH) != null) {
+            basePath = (String) openAPIExtensions.get(OpenAPIConstants.BASEPATH);
+        } else if (servers != null) {
+            //We  need to check only the first server url to derive the base path. Each and every server url
+            // should contains the same base path.
+            Server server = servers.get(0);
+            if (server.getUrl() != null) {
+                String url = replaceOpenAPIServerTemplate(server);
+                try {
+                    basePath = new URI(url).getPath();
+                } catch (URISyntaxException e) {
+                    String message;
+                    if (openAPISpec2.equals(openAPIVersion)) {
+                        message = "Scheme, host, base path combination of openAPI '" + openApiFilePath
+                                + "' resolves to : " + url + ", which is a malformed url";
+                    } else {
+                        message = "Server url: " + url + " of openAPI '" + openApiFilePath + "' is a malformed url";
+                    }
+                    throw new CLIRuntimeException(message);
+                }
+            }
         }
-        basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
-        if (basePathMap.containsKey(basePath)) {
-            throw new CLIRuntimeException("The value for '" + OpenAPIConstants.BASEPATH + "' " + basePath +
-                    " property is duplicated in the following openAPI definitions.\n" + basePathMap.get(basePath) +
-                    "\n" + openApiFilePath);
+
+        if (basePath == null || basePath.isEmpty()) {
+            basePath = "/";
+            String message;
+            if (openAPISpec2.equals(openAPIVersion)) {
+                message = "basePath not found in the open API '" + openApiFilePath + "'. Hence defaults to '/'";
+            } else {
+                message = "servers url in the open API '" + openApiFilePath
+                        + "' does not adhere to pattern '<scheme>://<host>/<basePath>/'. "
+                        + "Hence the base path defaults to '/'";
+            }
+            outStream.println(CliConstants.WARN_LOG_PATTERN + message);
+        } else {
+            basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
+            if (basePathMap.containsKey(basePath)) {
+                throw new CLIRuntimeException("The derived value for the base path '" + basePath
+                        + "'  is duplicated in the following openAPI definitions.\n" + basePathMap.get(basePath) + "\n"
+                        + openApiFilePath);
+            }
         }
         basePathMap.put(basePath, openApiFilePath);
+        openAPI.addExtension(OpenAPIConstants.BASEPATH, basePath);
     }
 
     /**
@@ -370,14 +438,14 @@ public class OpenAPICodegenUtils {
      * @throws IOException if an error occurred while reading the bal files inside interceptor directory
      */
     public static void setInterceptors(String projectName) throws IOException {
-        String interceptorsDirectoryPath = GatewayCmdUtils.getProjectInterceptorsDirectoryPath(projectName);
+        String interceptorsDirectoryPath = CmdUtils.getProjectInterceptorsPath(projectName);
         Files.walk(Paths.get(interceptorsDirectoryPath)).filter(path -> {
             Path fileName = path.getFileName();
-            return fileName != null && fileName.toString().endsWith(GatewayCliConstants.EXTENSION_BAL);
+            return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_BAL);
         }).forEach(path -> {
             String balSrcCode = null;
             try {
-                balSrcCode = GatewayCmdUtils.readFileAsString(path.toString(), false);
+                balSrcCode = CmdUtils.readFileAsString(path.toString(), false);
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }
@@ -446,6 +514,35 @@ public class OpenAPICodegenUtils {
     }
 
     /**
+     * Open API server object can have server templating. Ex: https://{customerId}.saas-app.com:{port}/v2.
+     * When adding the back end url this method will replace the template values with the default value.
+     *
+     * @param server  {@link Server} object of the open API definition
+     * @return templated server url replaced with default values
+     */
+    private static String replaceOpenAPIServerTemplate(Server server) {
+        //server url templating can have urls similar to 'https://{customerId}.saas-app.com:{port}/v2'
+        String url = server.getUrl();
+        Pattern serverTemplate = Pattern.compile("\\{.*?}");
+        Matcher matcher = serverTemplate.matcher(url);
+        while (matcher.find()) {
+            if (server.getVariables() != null && server.getVariables()
+                    .containsKey(matcher.group(0).substring(1, matcher.group(0).length() - 1))) {
+                String defaultValue = server.getVariables()
+                        .get(matcher.group(0).substring(1, matcher.group(0).length() - 1)).getDefault();
+                url = url.replaceAll("\\" + matcher.group(0), defaultValue);
+            } else {
+                outStream.println(
+                        CliConstants.WARN_LOG_PATTERN + "Open API server url templating is used for the url : " + url
+                                + ". But default values is not provided for the variable '" + matcher.group(0)
+                                + "'. Hence correct url will not be resolved during the runtime "
+                                + "unless url is overridden during the runtime");
+            }
+        }
+        return url;
+    }
+
+    /**
      * Find and store the request interceptors included in a ballerina source code.
      *
      * @param balSrcCode          the ballerina source code
@@ -495,7 +592,7 @@ public class OpenAPICodegenUtils {
             if (path != null && operation != null) {
                 errorMsg += "under path:'" + path + "' operation:'" + operation + "' ";
             }
-            errorMsg += "is not available in any function in the " + GatewayCliConstants.PROJECT_INTERCEPTORS_DIR +
+            errorMsg += "is not available in any function in the " + CliConstants.PROJECT_INTERCEPTORS_DIR +
                     " directory.";
             throw new CLIRuntimeException(errorMsg);
         }
@@ -508,14 +605,16 @@ public class OpenAPICodegenUtils {
      * @param openAPIFilePath file path to openAPI definition
      */
     private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
-        Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        apiRequestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
-                true, openAPIFilePath, null, null));
-        Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        apiResponseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(),
-                false, openAPIFilePath, null, null));
+        if (openAPI.getExtensions() != null) {
+            Optional<Object> apiRequestInterceptor = Optional
+                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+            apiRequestInterceptor.ifPresent(
+                    value -> validateInterceptorAvailability(value.toString(), true, openAPIFilePath, null, null));
+            Optional<Object> apiResponseInterceptor = Optional
+                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+            apiResponseInterceptor.ifPresent(
+                    value -> validateInterceptorAvailability(value.toString(), false, openAPIFilePath, null, null));
+        }
     }
 
     /**
@@ -727,10 +826,10 @@ public class OpenAPICodegenUtils {
      * @param openAPI         {@link OpenAPI} object
      * @param openAPIFilePath file path to openAPI definition
      */
-    public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath) {
+    public static void validateOpenAPIDefinition(OpenAPI openAPI, String openAPIFilePath, String openAPIVersion) {
         validateAPINameAndVersion(openAPI, openAPIFilePath);
-        validateBasepath(openAPI, openAPIFilePath);
-        validateEndpointAvailability(openAPI, openAPIFilePath);
+        validateBasePath(openAPI, openAPIFilePath, openAPIVersion);
+        validateEndpointAvailability(openAPI, openAPIFilePath, openAPIVersion);
         validateAPIInterceptors(openAPI, openAPIFilePath);
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
@@ -783,7 +882,7 @@ public class OpenAPICodegenUtils {
      * @param extensions {@link Map<String,Object>} object
      */
     private static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
-        if (extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
+        if (extensions != null && extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
             try {
                 TypeReference<List<Map<Object, Object>>> typeRef1 = new TypeReference<List<Map<Object, Object>>>() {
 
@@ -805,8 +904,12 @@ public class OpenAPICodegenUtils {
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openAPIFilePath file path to openAPI definition
+     * @param openAPIVersion the version of the open API used
      */
-    private static void validateEndpointAvailability(OpenAPI openAPI, String openAPIFilePath) {
+    private static void validateEndpointAvailability(OpenAPI openAPI, String openAPIFilePath, String openAPIVersion) {
+        if (openAPI.getServers() != null && openAPI.getServers().get(0).getUrl() != null) {
+            return;
+        }
         if (openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) != null ||
                 openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) != null) {
             return;
@@ -824,10 +927,18 @@ public class OpenAPICodegenUtils {
         );
 
         if (epsUnavailableForAll) {
-            throw new CLIRuntimeException("'" + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' and '" +
-                    OpenAPIConstants.SANDBOX_ENDPOINTS + "' properties are not included under API Level in openAPI " +
-                    "definition '" + openAPIFilePath + "'. Please include at least one of them under API Level or " +
-                    "provide those properties for all the resources to overcome this issue.");
+            String message;
+            if (openAPISpec2.equals(openAPIVersion)) {
+                message = "Either open API default attributes 'host' and 'basePath' values or ";
+            } else {
+                message = "Either open API default attribute 'servers' or ";
+            }
+            throw new CLIRuntimeException(
+                    message + "wso2 specific extensions '" + OpenAPIConstants.PRODUCTION_ENDPOINTS + "' and '"
+                            + OpenAPIConstants.SANDBOX_ENDPOINTS
+                            + "' properties are not included under API Level in openAPI " + "definition '"
+                            + openAPIFilePath + "'. Please include at least one of them under API Level or "
+                            + "provide those properties for all the resources to overcome this issue.");
         }
     }
 
@@ -835,6 +946,8 @@ public class OpenAPICodegenUtils {
         if (operation != null && operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) == null &&
                 operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) == null) {
             return true;
+        } else if (operation != null && operation.getServers() != null && operation.getServers().get(0) != null) {
+            return operation.getServers().get(0).getUrl() != null;
         }
         return false;
     }

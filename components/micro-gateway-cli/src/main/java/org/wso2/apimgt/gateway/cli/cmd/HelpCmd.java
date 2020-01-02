@@ -21,7 +21,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 
@@ -29,7 +29,7 @@ import java.io.PrintStream;
  * This class represents the "help" command and it holds arguments and flags specified by the user.
  */
 @Parameters(commandNames = "help", commandDescription = "display command help")
-public class HelpCmd implements GatewayLauncherCmd {
+public class HelpCmd implements LauncherCmd {
     private static PrintStream outStream = System.err;
 
     @SuppressWarnings("unused")
@@ -50,7 +50,7 @@ public class HelpCmd implements GatewayLauncherCmd {
         }
 
         if (parentCmdParser.getCommands().get(helpCommand) == null) {
-            throw GatewayCmdUtils.createUsageException("unknown help topic `" + helpCommand + "`");
+            throw CmdUtils.createUsageException("unknown help topic `" + helpCommand + "`");
         }
 
         String commandUsageInfo = getCommandUsageInfo(helpCommand);
@@ -59,7 +59,7 @@ public class HelpCmd implements GatewayLauncherCmd {
 
     @Override
     public String getName() {
-        return GatewayCliCommands.HELP;
+        return CliCommands.HELP;
     }
 
     @Override

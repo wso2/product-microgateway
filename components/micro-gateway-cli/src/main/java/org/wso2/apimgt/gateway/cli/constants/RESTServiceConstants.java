@@ -37,17 +37,20 @@ public class RESTServiceConstants {
     public static final String BEARER = "Bearer";
     public static final String GET = "GET";
     public static final String APIS_GET_URI =
-            "apis?query=label:" + GatewayCliConstants.LABEL_PLACEHOLDER + "%20status:PUBLISHED&expand=true&limit=500";
+            "apis?query=label:" + CliConstants.LABEL_PLACEHOLDER + "%20status:PUBLISHED&expand="
+                    + CliConstants.EXPAND_PLACEHOLDER + "&limit=500";
     public static final String API_GET_BY_NAME_VERSION_URI =
-            "apis?query=name:" + GatewayCliConstants.API_NAME_PLACEHOLDER + "%20version:"
-                    + GatewayCliConstants.VERSION_PLACEHOLDER + "%20status:PUBLISHED&expand=true";
+            "apis?query=name:" + CliConstants.API_NAME_PLACEHOLDER + "%20version:" + CliConstants.VERSION_PLACEHOLDER
+                    + "%20status:PUBLISHED&expand=" + CliConstants.EXPAND_PLACEHOLDER;
+    public static final String API_OPEN_API_GET_URI = "apis/" + CliConstants.API_ID_PLACEHOLDER + "/swagger";
 
     public static final String CONFIG_REST_VERSION = "v0.14";
     public static final String CONFIG_PUBLISHER_ENDPOINT = "{baseURL}/api/am/publisher/{restVersion}";
     public static final String CONFIG_ADMIN_ENDPOINT = "{baseURL}/api/am/admin/{restVersion}";
-    public static final String CONFIG_REGISTRATION_ENDPOINT = "{baseURL}/client-registration/{restVersion}/register";
+    public static final String CONFIG_REGISTRATION_ENDPOINT = "{baseURL}/client-registration/{dcrVersion}/register";
     public static final String CONFIG_TOKEN_ENDPOINT = "{baseURL}/oauth2/token";
     public static final String REST_VERSION_TAG = "{restVersion}";
+    public static final String DCR_VERSION_TAG = "{dcrVersion}";
     public static final String BASE_URL_TAG = "{baseURL}";
 
     public static final String DEFAULT_HOST = "https://localhost:9443";

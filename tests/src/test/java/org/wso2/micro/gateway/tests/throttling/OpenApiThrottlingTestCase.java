@@ -63,7 +63,7 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         response = invokeAndAssert(jwtTokenProd,
                 getServiceURLHttp("/petstore/v1/pet/findByStatus?status=available"));
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), ResponseConstants.PER_API_THROTTLING_RESPONSE);
+        Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_THROTTLING_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
     }
 
@@ -96,14 +96,18 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         } else {
             retryCount = 10;
         }
-        int retry = retryCount;
+        int retry = 5;
         while (retry > 0) {
             for (int i = 0; i < retryCount; i++) {
                 response = HttpClientRequest.doGet(url, headers);
                 Thread.sleep(1000);
                 Assert.assertNotNull(response);
-                retry--;
+                int responseCode = response.getResponseCode();
+                if (responseCode == 429) {
+                    return response;
+                }
             }
+            retry--;
         }
         return response;
     }

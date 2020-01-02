@@ -37,10 +37,6 @@
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/conf</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/resources/tokenServices</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/services</outputDirectory>
-        </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>
@@ -62,16 +58,12 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/definitions</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>
-                ${project.build.directory}/lib/repo/
-            </directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/balo</outputDirectory>
+            <directory>${project.build.directory}/lib/gw/</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/bir-cache</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>
-                ${project.build.directory}/lib/repo/
-            </directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/balo</outputDirectory>
+            <directory>${project.build.directory}/lib/jar/</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
         </fileSet>
 
         <!--create an empty logs folder-->
@@ -127,26 +119,15 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform/</outputDirectory>
-            <scope>runtime</scope>
-            <includes>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/runtime</outputDirectory>
-            <scope>runtime</scope>
-            <includes>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
+                <include>org.ballerinax.docker:docker-extension:jar</include>
+                <include>org.ballerinax.kubernetes:kubernetes-extension:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -158,7 +139,6 @@
                 <include>org.apache.commons:commons-lang3</include>
             </includes>
         </dependencySet>
-
     </dependencySets>
 
 </assembly>

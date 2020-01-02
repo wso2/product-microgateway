@@ -4,6 +4,6 @@ json payload = {
     ERROR_CODE: "900901",
     ERROR_MESSAGE: "Production key offered to the API with no production endpoint"
 };
-runtime:getInvocationContext().attributes["error_code"] = "900901";
+invocationContext.attributes["error_code"] = "900901";
 res.setPayload(payload);
 clientResponse = res;

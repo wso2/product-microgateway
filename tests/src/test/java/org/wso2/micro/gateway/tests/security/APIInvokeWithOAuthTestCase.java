@@ -103,7 +103,7 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         invoke(jwtTokenSand, MockHttpServer.SAND_ENDPOINT_RESPONSE, 200);
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(60000);
         } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
         }

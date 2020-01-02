@@ -47,6 +47,14 @@
             <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
         </dependency>
@@ -175,6 +183,8 @@
                                     <include>io.swagger.parser.v3:swagger-parser-core</include>
                                     <include>io.swagger.parser.v3:swagger-parser-v2-converter</include>
                                     <include>io.swagger.parser.v3:swagger-parser-v3</include>
+                                    <include>com.fasterxml.jackson.core:jackson-core</include>
+                                    <include>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</include>
                                     <include>javax.validation:validation-api</include>
                                     <include>com.google.code.gson:gson</include>
                                     <include>org.ballerinalang:ballerina-to-swagger</include>

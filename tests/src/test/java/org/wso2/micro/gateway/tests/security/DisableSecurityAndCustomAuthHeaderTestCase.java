@@ -92,7 +92,7 @@ public class DisableSecurityAndCustomAuthHeaderTestCase extends BaseTestCase {
     @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using auth header 'Authorization'")
     public void testEnableSecurityOverriddenResourceLevelWithWrongAuthHeader() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put("Authorization", "Bearer " + jwtTokenProd);
         //test endpoint with token
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("petstore/v2/pet/1"), headers);

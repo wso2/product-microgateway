@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.logging;
 
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class CLILogConfigReader {
 
     public CLILogConfigReader() {
         CLILogManager logManager = (CLILogManager) LogManager.getLogManager();
-        String initialFile = GatewayCmdUtils.getLoggingPropertiesFileLocation();
+        String initialFile = CmdUtils.getLoggingPropertiesFileLocation();
         try (InputStream configStream = new FileInputStream(initialFile)) {
             logManager.readConfiguration(configStream);
         } catch (IOException var4) {

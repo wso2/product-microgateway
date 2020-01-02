@@ -26,6 +26,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.oauth.builder.DCRRequestBuilder;
 import org.wso2.apimgt.gateway.cli.oauth.builder.OAuthTokenRequestBuilder;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 
 import java.io.IOException;
@@ -50,13 +51,14 @@ public class OAuthServiceImpl implements OAuthService {
                                       String clientSecret, boolean inSecure) {
 
         URL url;
+        if (inSecure) {
+            CmdUtils.useInsecureSSL();
+        }
         HttpsURLConnection urlConn = null;
         try {
             url = new URL(tokenEndpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
-            if (inSecure) {
-                urlConn.setHostnameVerifier((s, sslSession) -> true);
-            }
+
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
@@ -98,6 +100,9 @@ public class OAuthServiceImpl implements OAuthService {
     public String[] generateClientIdAndSecret(String dcrEndpoint, String username, char[] password, boolean inSecure) {
 
         URL url;
+        if (inSecure) {
+            CmdUtils.useInsecureSSL();
+        }
         HttpsURLConnection urlConn = null;
         try {
             String requestBody = new DCRRequestBuilder()
@@ -108,9 +113,7 @@ public class OAuthServiceImpl implements OAuthService {
             ObjectMapper mapper = new ObjectMapper();
             url = new URL(dcrEndpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
-            if (inSecure) {
-                urlConn.setHostnameVerifier((s, sslSession) -> true);
-            }
+
             urlConn.setRequestMethod(TokenManagementConstants.POST);
             urlConn.setRequestProperty(TokenManagementConstants.CONTENT_TYPE,
                     TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);

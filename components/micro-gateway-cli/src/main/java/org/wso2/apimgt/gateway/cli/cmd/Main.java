@@ -22,11 +22,11 @@ import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.ParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.apimgt.gateway.cli.constants.GatewayCliConstants;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.CliLauncherException;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -44,8 +44,8 @@ public class Main {
 
     public static void main(String... args) {
         try {
-            Optional<GatewayLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
-            optionalInvokedCmd.ifPresent(GatewayLauncherCmd::execute);
+            Optional<LauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
+            optionalInvokedCmd.ifPresent(LauncherCmd::execute);
         } catch (CliLauncherException e) {
             outStream.println(e.getMessages());
             Throwable cause = e.getCause();
@@ -77,7 +77,7 @@ public class Main {
      * @param args list of arguments
      * @return invoked CMD
      */
-    private static Optional<GatewayLauncherCmd> getInvokedCmd(String... args) {
+    private static Optional<LauncherCmd> getInvokedCmd(String... args) {
         try {
             HelpCmd helpCmd = new HelpCmd();
             InitCmd initCmd = new InitCmd();
@@ -86,13 +86,13 @@ public class Main {
             ImportCmd importCmd = new ImportCmd();
 
             JCommander cmdParser = JCommander.newBuilder()
-                    .addCommand(GatewayCliCommands.HELP, helpCmd)
-                    .addCommand(GatewayCliCommands.INIT, initCmd)
-                    .addCommand(GatewayCliCommands.BUILD, buildCmd)
-                    .addCommand(GatewayCliCommands.RESET, resetCmd)
-                    .addCommand(GatewayCliCommands.IMPORT, importCmd)
+                    .addCommand(CliCommands.HELP, helpCmd)
+                    .addCommand(CliCommands.INIT, initCmd)
+                    .addCommand(CliCommands.BUILD, buildCmd)
+                    .addCommand(CliCommands.RESET, resetCmd)
+                    .addCommand(CliCommands.IMPORT, importCmd)
                     .build();
-            cmdParser.setProgramName(GatewayCliConstants.MICRO_GW);
+            cmdParser.setProgramName(CliConstants.MICRO_GW);
 
             helpCmd.setParentCmdParser(cmdParser);
             initCmd.setParentCmdParser(cmdParser);
@@ -111,10 +111,10 @@ public class Main {
                 throw paramEx;
             }
             commanderMap = cmdParser.getCommands();
-            return Optional.of((GatewayLauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
+            return Optional.of((LauncherCmd) commanderMap.get(parsedCmdName).getObjects().get(0));
         } catch (MissingCommandException e) {
             String errorMsg = "Unknown command '" + e.getUnknownCommand() + "'";
-            throw GatewayCmdUtils.createUsageException(errorMsg);
+            throw CmdUtils.createUsageException(errorMsg);
         } catch (ParameterException e) {
             String msg = e.getMessage();
             CliLauncherException cliEx = new CliLauncherException(e);

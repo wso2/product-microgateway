@@ -150,6 +150,8 @@ public class ThrottlePolicy {
                         + GeneratorConstants.INIT_FUNC_SUFFIX;
                 this.policyKey = GeneratorConstants.SUBSCRIPTION_KEY;
                 this.tierType = GeneratorConstants.SUBSCRIPTION_TIER_TYPE;
+                this.stopOnQuotaReach = policy
+                        .getStopOnQuotaReach(); //stop on quota enabled in subscription level only.
                 break;
         }
         return this;

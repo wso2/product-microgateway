@@ -21,8 +21,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
@@ -37,7 +38,7 @@ import java.nio.file.Paths;
  * Command will create the basic directory structure for a microgateway project.
  */
 @Parameters(commandNames = "init", commandDescription = "initialize a new project")
-public class InitCmd implements GatewayLauncherCmd {
+public class InitCmd implements LauncherCmd {
     private static final Logger LOGGER = LoggerFactory.getLogger(InitCmd.class);
     private static final PrintStream OUT = System.out;
 
@@ -61,6 +62,22 @@ public class InitCmd implements GatewayLauncherCmd {
     @Parameter(names = "--java.debug", hidden = true)
     private String javaDebugPort;
 
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-a", "--api-definition"})
+    private String apiDefinition;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--headers")
+    private String headers;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = "--values")
+    private String values;
+
+    @SuppressWarnings("unused")
+    @Parameter(names = {"-k", "--insecure"})
+    private boolean insecure;
+
     @Override
     public void execute() {
         if (helpFlag) {
@@ -69,30 +86,34 @@ public class InitCmd implements GatewayLauncherCmd {
             return;
         }
 
-        String workspace = GatewayCmdUtils.getUserDir();
+        String workspace = CmdUtils.getUserDir();
         Path projectLocation = Paths.get(workspace + File.separator + projectName);
         boolean isDirectory = Files.isDirectory(projectLocation);
 
         if (isDirectory && !isForceful) {
-            throw GatewayCmdUtils.createUsageException("Project name `" + projectName
+            throw CmdUtils.createUsageException("Project name `" + projectName
                     + "` already exist. use -f or --force to forcefully update the project directory.");
         }
 
         // This is a valid force init
         if (isDirectory) {
-            GatewayCmdUtils.deleteProject(projectName);
+            CmdUtils.deleteProject(projectName);
         }
 
         // Extract the zipped ballerina platform and runtime
         ToolkitLibExtractionUtils.extractPlatformAndRuntime();
-        init(projectName, deploymentConfigPath);
+        init(projectName, deploymentConfigPath, apiDefinition, headers, values, insecure);
 
         OUT.println("Project '" + projectName + "' is initialized successfully.");
+        OUT.println("\n(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.BUILD + ' ' + projectName
+                + "\" after copying the api definitions)");
+        OUT.println("(Use \"" + CliConstants.MICRO_GW + ' ' + CliCommands.IMPORT + ' ' + projectName
+                + " [-l]|[-a -v]\" to import APIs from WSO2 API Manager)");
     }
 
     @Override
     public String getName() {
-        return GatewayCliCommands.INIT;
+        return CliCommands.INIT;
     }
 
     @Override
@@ -105,10 +126,11 @@ public class InitCmd implements GatewayLauncherCmd {
      * @param projectName          name of the project being initialized
      * @param deploymentConfigPath path to deployment config file (used in k8s scenarios)
      */
-    private static void init(String projectName, String deploymentConfigPath) {
+    private static void init(String projectName, String deploymentConfigPath, String apiDefinition, String headers,
+                             String values, boolean insecure) {
         try {
-            GatewayCmdUtils.createProjectStructure(projectName);
-            GatewayCmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
+            CmdUtils.createProjectStructure(projectName, apiDefinition, headers, values, insecure);
+            CmdUtils.createDeploymentConfig(projectName, deploymentConfigPath);
         } catch (IOException e) {
             LOGGER.error("Error occurred while generating project configurations", e);
             throw new CLIInternalException("Error occurred while loading configurations.");

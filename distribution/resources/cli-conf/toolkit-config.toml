@@ -3,10 +3,11 @@ httpRequestTimeout = 1000000
 
 [token]
 baseURL = ""
-restVersion = "v0.14"
+restVersion = "v1.0"
+dcrVersion = "v0.14"
 publisherEndpoint = "{baseURL}/api/am/publisher/{restVersion}"
 adminEndpoint = "{baseURL}/api/am/admin/{restVersion}"
-registrationEndpoint = "{baseURL}/client-registration/{restVersion}/register"
+registrationEndpoint = "{baseURL}/client-registration/{dcrVersion}/register"
 tokenEndpoint = "{baseURL}/oauth2/token"
 username = ""
 clientId = ""
@@ -15,7 +16,7 @@ trustStoreLocation = ""
 trustStorePassword = ""
 
 [corsConfiguration]
-corsConfigurationEnabled = true
+corsConfigurationEnabled = false
 accessControlAllowCredentials = false
 accessControlAllowOrigins = ["*"]
 accessControlAllowHeaders = ["authorization", "Access-Control-Allow-Origin", "Content-Type", "SOAPAction"]
