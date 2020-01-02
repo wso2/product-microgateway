@@ -50,6 +50,12 @@
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
+        <!-- Copying the in-place update tools-->
+        <fileSet>
+            <directory>${basedir}/target/update/</directory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/bin/</outputDirectory>
+            <fileMode>744</fileMode>
+        </fileSet>
     </fileSets>
 
     <files>
