@@ -1,0 +1,6 @@
+language: java
+dist: trusty
+script: mvn clean install -B -q -V; test ${PIPESTATUS[0]} -eq 0;
+cache:
+  directories:
+  - $HOME/.m2
