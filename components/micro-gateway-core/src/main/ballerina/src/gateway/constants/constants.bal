@@ -237,12 +237,15 @@ public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
-public const string API_KEY_INSTANCE_ID = "apiKeyIssuer";
-public const string API_KEY_ISSUER_ENABLED = "enabled";
-public const string API_KEY_VALIDITY_PERIOD = "validityPeriod";
-public const string KEYSTORE_ALIAS = "keyStoreAlias";
-public const string API_KEY = "apikey";
+
 public const string API_KEY_HEADER = "apikey";
+public const string API_KEY_INSTANCE_ID = "apiKeyConfig";
+public const string API_KEY_ISSUER = "issuer";
+public const string API_KEY_AUDIENCE = "audience";
+public const string API_KEY_VALIDATE_SUBSCRIPTION = "validateSubscription";
+public const string API_KEY_KEYSTORE_ALIAS = "keyStoreAlias";
+public const string API_KEY_ISSUER_INSTANCE_ID = "apiKeyConfig.apiKeyIssuer";
+public const string API_KEY_VALIDITY_PERIOD = "validityPeriod";
 
 public const string CACHING_ID = "caching";
 public const string TOKEN_CACHE_ENABLED = "enabled";
@@ -332,6 +335,7 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
+const string API_KEY_UTIL = "APIKeyUtil";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds

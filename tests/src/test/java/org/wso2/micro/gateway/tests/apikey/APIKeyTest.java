@@ -40,9 +40,6 @@ public class APIKeyTest extends BaseTestCase {
         super.init(label, project, configPath);
     }
 
-    /**
-     * Method to start the mock ETCD server
-     */
     @Test(description = "Test to check jwt token is issued successfully")
     private void getTokenTest() throws Exception {
 
@@ -53,7 +50,7 @@ public class APIKeyTest extends BaseTestCase {
         //get token from token endpoint
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + basicAuthToken);
         HttpResponse response = HttpClientRequest
-                .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_TOKEN_PORT + "/apikey", headers);
+                .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_PORT + "/apikey", headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -61,19 +58,7 @@ public class APIKeyTest extends BaseTestCase {
         token = response.getData();
     }
 
-    @Test(description = "Test to check the issued token is a valid jwt token", dependsOnMethods = "getTokenTest")
-    private void invokeApiWithTokenTest() throws Exception {
-
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-    }
-
-    @Test(description = "Test to check the issued token is a valid jwt token", dependsOnMethods = "getTokenTest")
+    @Test(description = "Test to check the issued token is a valid apikey", dependsOnMethods = "getTokenTest")
     private void invokeApiWithAPIKeyTest() throws Exception {
 
         Map<String, String> headers = new HashMap<>();
@@ -85,33 +70,14 @@ public class APIKeyTest extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
-    @Test(description = "Server restart", dependsOnMethods = {"invokeApiWithAPIKeyTest","invokeApiWithTokenTest"} )
-    private void restartServer() throws Exception {
-        microGWServer.stopServer(true);
-        mockHttpServer.stopIt();
-        String withoutUserConfigPath = "confs/base.conf";
-        super.init(label, project, withoutUserConfigPath);
-    }
+//    @Test(description = "Server restart", dependsOnMethods = "invokeApiWithAPIKeyTest" )
+//    private void restartServer() throws Exception {
+//        microGWServer.stopServer(true);
+//        mockHttpServer.stopIt();
+//        String withoutUserConfigPath = "confs/base.conf";
+//        super.init(label, project, withoutUserConfigPath);
+//    }
 
-    @Test(description = "Test to check api key is validating the user", dependsOnMethods = "restartServer")
-    private void invokeApiWithUnauthenticatedTokenTest() throws Exception {      
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-    }
-
-    @Test(description = "Test to check api key is validating the user", dependsOnMethods = "restartServer")
-    private void invokeApiWithUnauthenticatedAPIKeyTest() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put("apikey", token);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-    }
 
     @AfterClass
     public void stop() throws Exception {

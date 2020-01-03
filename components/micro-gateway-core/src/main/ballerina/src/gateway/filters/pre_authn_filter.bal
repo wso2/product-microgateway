@@ -17,6 +17,7 @@
 import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/stringutils;
 
 // Pre Authentication filter
 
@@ -98,6 +99,8 @@ returns boolean {
                 authHeader = authCookie;
             }
         }
+    } else if (request.hasHeader(API_KEY_HEADER)) {
+        authHeader = API_KEY_HEADER;
     }
     string providerId;
     if (!isCookie) {
@@ -138,10 +141,14 @@ returns boolean {
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
+    printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
     if (contains(authHeader, AUTH_SCHEME_BASIC)) {
         return AUTHN_SCHEME_BASIC;
     } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
+    } else if (stringutils:equalsIgnoreCase(API_KEY_HEADER,authHeader)) {
+        printDebug(KEY_PRE_AUTHN_FILTER, "apikey header detected");
+        return API_KEY_HEADER;
     } else {
         return AUTH_SCHEME_OAUTH2;
     }
@@ -151,6 +158,9 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
 function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
     if (contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
+    } else if (contains(authHeader, API_KEY_HEADER)) {
+        printDebug(KEY_PRE_AUTHN_FILTER, "apikey header detected in cookie");
+        return API_KEY_HEADER;
     } else {
         return AUTH_SCHEME_OAUTH2;
     }

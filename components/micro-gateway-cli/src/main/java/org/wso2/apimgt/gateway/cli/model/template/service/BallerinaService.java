@@ -25,6 +25,7 @@ import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -59,6 +60,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private String basepath;
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
 
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private ExtendedAPI api;
@@ -259,8 +263,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     }
 
     private void setSecuritySchemas(String schemas) {
-        Config config = CmdUtils.getConfig();
-        config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
+        BasicAuth basicAuth = OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas);
+        boolean apiKeyEnabled = OpenAPICodegenUtils.isAPIKeyEnabled(schemas);
+        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth, apiKeyEnabled);
     }
 
     public void setIsDevFirst(boolean value) {

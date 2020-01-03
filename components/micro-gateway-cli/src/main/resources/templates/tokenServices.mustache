@@ -144,6 +144,47 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
 }
 
 @http:ServiceConfig {
+    basePath:"/apikey",
+    auth: {
+        enabled: true
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+@gateway:Filters {
+    skipAll: true
+}
+service apiKeyService on apiSecureListener {
+    @http:ResourceConfig {
+        path: "/*",
+        auth: {
+            enabled: true
+        }
+    }
+    resource function apiKeyResource(http:Caller caller, http:Request req) {
+        string | error apikey = gateway:provideAPIKey();
+        if (apikey is string) {
+            error? result = caller->respond(apikey);
+            if (result is error) {
+                log:printError("Error when responding during the token endpoint request: ", err = result);
+            }
+        }
+        else {
+            log:printError("Error while generating API Key token: ", err = apikey);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while generating API Key token" };
+            errorResponse.setJsonPayload(errMsg);
+            var result = caller->respond(errorResponse);
+        }
+    }
+}
+
+@http:ServiceConfig {
     basePath:"/userinfo",
     auth: {
         enabled: false
@@ -193,6 +234,7 @@ public function addTokenServicesFilterAnnotation() {
     map<gateway:FilterConfiguration?> filterConfigAnnotationMap = gateway:getFilterConfigAnnotationMap();
     filterConfigAnnotationMap["authorizeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(authorizeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["tokenService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(tokenService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["apiKeyService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(apiKeyService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["revokeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(revokeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["userInfoService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(userInfoService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
 }

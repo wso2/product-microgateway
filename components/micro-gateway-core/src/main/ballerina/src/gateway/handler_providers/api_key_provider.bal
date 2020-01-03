@@ -39,12 +39,11 @@ public type APIKeyProvider object {
     public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
         var handleVar = self.inboundJwtAuthProviderforAPIKey.authenticate(credential);
         if(handleVar is boolean) {
-            if (handleVar && validateIfAPIKey(credential)) {            
-                return true;
-            } else {
+            if (!handleVar) {            
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return false;
-            }
+            } 
+            return true;
         } else {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             return prepareError("Failed to authenticate with jwt auth provider.", handleVar);

@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -61,6 +62,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
     private BasicAuth basicAuth;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<APIKey> apiKeys;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -88,6 +93,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        this.apiKeys = OpenAPICodegenUtils.getMgwResourceAPIKey(operation);
+        this.authProviders = OpenAPICodegenUtils.setAuthProviders(this.basicAuth, apiKeys.size() > 0);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -273,5 +280,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         if (this.basicAuth == null) {
             this.basicAuth = basicAuth;
         }
+        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth, apiKeys.size() > 0);
     }
 }

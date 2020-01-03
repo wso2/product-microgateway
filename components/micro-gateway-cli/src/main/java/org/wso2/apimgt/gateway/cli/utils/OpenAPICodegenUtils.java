@@ -39,6 +39,7 @@ import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
+import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
@@ -82,10 +83,13 @@ public class OpenAPICodegenUtils {
     private static List<Map<Object, Object>> endPointReferenceExtensions;
     private static List<String> oauthSecuritySchemaList = new ArrayList<>();
     private static List<String> basicSecuritySchemaList = new ArrayList<>();
+    private static Map apiKeySecuritySchemaMap = new HashMap();
 
     enum APISecurity {
         basic,
-        oauth2
+        oauth2,
+        apikey,
+        jwt
     }
 
     /**
@@ -726,6 +730,9 @@ public class OpenAPICodegenUtils {
                 } else if (basicSecuritySchemaList.contains(k) &&
                         !securitySchemaList.contains(APISecurity.basic.name())) {
                     securitySchemaList.add(APISecurity.basic.name());
+                } else if (apiKeySecuritySchemaMap.containsKey(k) &&
+                        !securitySchemaList.contains(APISecurity.apikey.name())) {
+                    securitySchemaList.add(APISecurity.apikey.name());
                 }
             }));
             //generate security schema String
@@ -760,6 +767,19 @@ public class OpenAPICodegenUtils {
             return null;
         }
         return generateBasicAuthFromSecurity(securitySchemas);
+    }
+
+    public static List<APIKey> getMgwResourceAPIKey(Operation operation) {
+        List<SecurityRequirement> securityRequirementList = operation.getSecurity();
+        List<APIKey> apiKeys = new ArrayList<>();
+        if (securityRequirementList != null) {
+            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
+                if (apiKeySecuritySchemaMap.containsKey(k)) {
+                    apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(k));
+                }
+            }));
+        }
+        return apiKeys;
     }
 
     /**
@@ -804,6 +824,11 @@ public class OpenAPICodegenUtils {
         return basicAuth;
     }
 
+    public static boolean isAPIKeyEnabled(String schemas) {
+        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+        return Arrays.asList(schemasArray).contains(APISecurity.apikey.name());
+    }
+
     /**
      * validate API name and version.
      *
@@ -834,6 +859,7 @@ public class OpenAPICodegenUtils {
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setBasicSecuritySchemaList(openAPI);
+        setAPIKeySecuritySchemaList(openAPI);
         setOpenAPIDefinitionEndpointReferenceExtensions(openAPI.getExtensions());
     }
 
@@ -872,6 +898,27 @@ public class OpenAPICodegenUtils {
             if (val.getType() == SecurityScheme.Type.HTTP &&
                     val.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
                 basicSecuritySchemaList.add(key);
+            }
+        });
+    }
+
+    /**
+     * store the security schemas of type "basic"
+     *
+     * @param openAPI {@link OpenAPI} object
+     */
+    private static void setAPIKeySecuritySchemaList(OpenAPI openAPI) {
+        //Since the security schema list needs to instantiated per each API
+        apiKeySecuritySchemaMap = new HashMap();
+        if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
+            return;
+        }
+        openAPI.getComponents().getSecuritySchemes().forEach((key, val) -> {
+            if (val.getType() == SecurityScheme.Type.APIKEY) {
+                APIKey apiKey = new APIKey();
+                apiKey.setIn(val.getIn());
+                apiKey.setName(val.getName());
+                apiKeySecuritySchemaMap.put(key, apiKey);
             }
         });
     }
@@ -950,5 +997,24 @@ public class OpenAPICodegenUtils {
             return operation.getServers().get(0).getUrl() != null;
         }
         return false;
+    }
+
+    public static List<String> setAuthProviders(BasicAuth basicAuth, boolean isAPIKeyEnabled) {
+        List<String> authProviders = new ArrayList<>();
+        if (basicAuth != null && basicAuth.getOptional()) {
+            authProviders.add(APISecurity.basic.name());
+            authProviders.add(APISecurity.oauth2.name());
+            authProviders.add(APISecurity.jwt.name());
+        } else if (basicAuth != null && basicAuth.getRequired()) {
+            authProviders.add(APISecurity.basic.name());
+        } else {
+            authProviders.add(APISecurity.oauth2.name());
+            authProviders.add(APISecurity.jwt.name());
+        }
+
+        if (isAPIKeyEnabled) {
+            authProviders.add(APISecurity.apikey.name());
+        }
+        return authProviders;
     }
 }
