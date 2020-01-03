@@ -1,6 +1,8 @@
 language: java
 dist: trusty
-script: mvn clean install -B -q -V; test ${PIPESTATUS[0]} -eq 0;
+# Run maven build in quiet mode to avoid log file limit in Travis CI.
+# Only errors and Maven version information will be printed in the CI logs.
+script: mvn clean install -B -q -V | grep -e "\[ERROR\]" -e Maven; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
   - $HOME/.m2
