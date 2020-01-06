@@ -1,7 +1,9 @@
 ---
-name: "\U0001f41b Report a bug"
-about: "If something doesn't work as it is suppose to. \U0001f615"
-labels: 'Priority/Normal, Type/Bug'
+name: "❗️Report a bug"
+about: If something doesn't work as it is suppose to.
+title: ''
+labels: Priority/Normal, Type/Bug
+assignees: ''
 
 ---
 
@@ -10,14 +12,12 @@ labels: 'Priority/Normal, Type/Bug'
 
 ### Steps to reproduce:
 
-
 ### Affected Product Version:
-<!-- Committers can use Affected/*** labels -->
+<!-- Members can use Affected/*** labels -->
 
-### OS, DB, other environment details and versions:
+### Environment details (with versions):
 - OS:
 - Client:
-- DB:
 - Env (Docker/K8s):
 
 ---
@@ -26,7 +26,7 @@ labels: 'Priority/Normal, Type/Bug'
 <!-- Any related issues from this/other repositories-->
 
 #### Suggested Labels:
-<!--Only to be used by non-committers-->
+<!--Only to be used by non-members-->
 
 #### Suggested Assignees:
-<!--Only to be used by non-committers-->
+<!--Only to be used by non-members-->
