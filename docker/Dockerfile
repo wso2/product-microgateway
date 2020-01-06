@@ -46,4 +46,4 @@ VOLUME /home/wso2
 
 USER wso2
 
-CMD ballerina run --config /wso2/mgw/conf/micro-gw.conf /home/exec/${project}.jar
+CMD /wso2/mgw/bin/./gateway /home/exec/${project}.jar

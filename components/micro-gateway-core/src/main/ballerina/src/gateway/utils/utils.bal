@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,26 +14,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
-import ballerina/log;
 import ballerina/auth;
 import ballerina/config;
-import ballerina/runtime;
-import ballerina/time;
-import ballerina/io;
 import ballerina/file;
-import ballerina/reflect;
-import ballerina/system;
+import ballerina/http;
+import ballerina/io;
 import ballerina/lang.'int;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
+import ballerina/log;
+import ballerina/reflect;
+import ballerina/runtime;
 import ballerina/stringutils;
+import ballerina/system;
+import ballerina/time;
 
 map<http:HttpResourceConfig?> resourceAnnotationMap = {};
 map<http:HttpServiceConfig?> serviceAnnotationMap = {};
 map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
+map<FilterConfiguration?> filterConfigAnnotationMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -43,11 +44,13 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     }
     serviceAnnotationMap[serviceName] = <http:HttpServiceConfig?>reflect:getServiceAnnotations(s, SERVICE_ANN_NAME, ANN_PACKAGE);
     apiConfigAnnotationMap[serviceName] = <APIConfiguration?>reflect:getServiceAnnotations(s, API_ANN_NAME, GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap[serviceName] = <FilterConfiguration?>reflect:getServiceAnnotations(s, FILTER_ANN_NAME, GATEWAY_ANN_PACKAGE);
     printDebug(KEY_UTILS, "Service annotation map: " + serviceAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource annotation map: " + resourceAnnotationMap.toString());
     printDebug(KEY_UTILS, "API config annotation map: " + apiConfigAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource Configuration annotation map: " + resourceConfigAnnotationMap.toString());
+    printDebug(KEY_UTILS, "Filter Configuration annotation map: " + filterConfigAnnotationMap.toString());
 }
 
 # Retrieve the key validation request dto from filter context.
@@ -60,22 +63,22 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     string resourceName = runtime:getInvocationContext().attributes[http:RESOURCE_NAME].toString();
     printDebug(KEY_UTILS, "Service Name : " + serviceName);
     printDebug(KEY_UTILS, "Resource Name : " + resourceName);
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
+    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     io:println(httpServiceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
-       apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
-       apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
+        apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
+        apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
     }
     string apiContext = <string>httpServiceConfig.basePath;
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
-    string apiVersion="";
+    string apiVersion = "";
     if (apiConfig is APIConfiguration) {
-     apiVersion = <string>apiConfig.apiVersion;
-     }
+        apiVersion = <string>apiConfig.apiVersion;
+    }
     apiKeyValidationRequest.apiVersion = apiVersion;
-    if (!contains(apiContext,apiVersion)) {
-        if (hasSuffix(apiContext,PATH_SEPERATOR)) {
+    if (!contains(apiContext, apiVersion)) {
+        if (hasSuffix(apiContext, PATH_SEPERATOR)) {
             apiContext = apiContext + apiVersion;
         } else {
             apiContext = apiContext + PATH_SEPERATOR + apiVersion;
@@ -84,11 +87,11 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
-    
+
     apiKeyValidationRequest.accessToken = accessToken;
     printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
-            + ", resource: " + apiKeyValidationRequest.matchingResource
-            + ", verb: " + apiKeyValidationRequest.httpVerb);
+    + ", resource: " + apiKeyValidationRequest.matchingResource
+    + ", verb: " + apiKeyValidationRequest.httpVerb);
     return apiKeyValidationRequest;
 
 }
@@ -100,14 +103,14 @@ public function getTenantFromBasePath(string basePath) returns string {
 }
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
-    int|error validityPeriod=0;
-    int|error issuedTime=0;
+    int | error validityPeriod = 0;
+    int | error issuedTime = 0;
     string? validPeriod = apiKeyValidationDto?.validityPeriod;
     string? issueTime = apiKeyValidationDto?.issuedTime;
     if (validPeriod is string) {
-        validityPeriod =  'int:fromString(validPeriod);
+        validityPeriod = 'int:fromString(validPeriod);
     }
-    if (issueTime is string ) {
+    if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
     int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
@@ -117,11 +120,11 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
         error e = error("Error while converting time stamps to integer when retrieved from cache");
         panic e;
     }
-    if(validityPeriod is int && issuedTime is int) {
-        if( validityPeriod != intMaxValue &&
-                // For cases where validityPeriod is closer to int.MAX_VALUE (then issuedTime + validityPeriod would spill
-                // over and would produce a negative value)
-                (currentTime - timestampSkew) > validityPeriod) {
+    if (validityPeriod is int && issuedTime is int) {
+        if (validityPeriod != intMaxValue &&
+        // For cases where validityPeriod is closer to int.MAX_VALUE (then issuedTime + validityPeriod would spill
+        // over and would produce a negative value)
+        (currentTime - timestampSkew) > validityPeriod) {
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                 apiKeyValidationDto.validationStatus = API_AUTH_INVALID_CREDENTIALS_STRING;
                 return true;
@@ -150,16 +153,16 @@ public function getClientIp(http:Request request, http:Caller caller) returns (s
     return clientIp;
 }
 
-public function extractAccessToken(http:Request req, string authHeaderName) returns (string|error) {
+public function extractAccessToken(http:Request req, string authHeaderName) returns (string | error) {
     string authHeader = req.getHeader(authHeaderName);
     string[] authHeaderComponents = split(authHeader, " ");
-    if (authHeaderComponents.length() != 2){
+    if (authHeaderComponents.length() != 2) {
         return handleError("Incorrect bearer authentication header format");
     }
     return authHeaderComponents[1];
 }
 
-public function handleError(string message) returns (error) {
+public function handleError(string message) returns ( error) {
     return error(message);
 }
 
@@ -167,7 +170,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
     string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3){
+    if (splittedContext.length() > 3) {
         // this check if basepath have /t/domain in
         return splittedContext[2];
     } else {
@@ -187,10 +190,10 @@ public function getApiName(http:FilterContext context) returns (string) {
 }
 
 public function getConfigValue(string instanceId, string property, string defaultValue) returns string {
-    if(stringutils:equalsIgnoreCase("", instanceId)) {
-        return config:getAsString(property,  defaultValue);
+    if (stringutils:equalsIgnoreCase("", instanceId)) {
+        return config:getAsString(property, defaultValue);
     }
-    return config:getAsString(instanceId + "." + property,  defaultValue);
+    return config:getAsString(instanceId + "." + property, defaultValue);
 }
 
 public function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
@@ -214,12 +217,12 @@ public function setErrorMessageToFilterContext(http:FilterContext context, int e
     if (errorCode == API_AUTH_GENERAL_ERROR) {
         status = INTERNAL_SERVER_ERROR;
     } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE ||
-        errorCode == API_AUTH_FORBIDDEN ||
-        errorCode == INVALID_SCOPE) {
+    errorCode == API_AUTH_FORBIDDEN ||
+    errorCode == INVALID_SCOPE) {
         status = FORBIDDEN;
-    } else if(errorCode == INVALID_ENTITY) {
+    } else if (errorCode == INVALID_ENTITY) {
         status = UNPROCESSABLE_ENTITY;
-    } else if(errorCode == INVALID_RESPONSE) {
+    } else if (errorCode == INVALID_RESPONSE) {
         status = INTERNAL_SERVER_ERROR;
     } else {
         status = UNAUTHORIZED;
@@ -238,8 +241,8 @@ public function setErrorMessageToInvocationContext(int errorCode) {
     int status;
     if (errorCode == API_AUTH_GENERAL_ERROR) {
         status = INTERNAL_SERVER_ERROR;
-    } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE ||errorCode == API_AUTH_FORBIDDEN ||
-        errorCode == INVALID_SCOPE) {
+    } else if (errorCode == API_AUTH_INCORRECT_API_RESOURCE || errorCode == API_AUTH_FORBIDDEN ||
+    errorCode == INVALID_SCOPE) {
         status = FORBIDDEN;
     } else if (errorCode == INVALID_ENTITY) {
         status = UNPROCESSABLE_ENTITY;
@@ -267,32 +270,36 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     http:Response response = new;
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = { fault: {
-        code: errorCode,
-        message: errorMesssage,
-        description: errorDescription
-    } };
+    json payload = {
+        fault: {
+            code: errorCode,
+            message: errorMesssage,
+            description: errorDescription
+        }
+    };
     response.setJsonPayload(payload);
     var value = caller->respond(response);
-    if(value is error) {
-    log:printError("Error occurred while sending the error response", err = value);
+    if (value is error) {
+        log:printError("Error occurred while sending the error response", err = value);
     }
 }
 
 # Default error response sender with json error response.
 # + response - http response object.
 public function sendErrorResponseFromInvocationContext(http:Response response) {
-    runtime: InvocationContext context = runtime:getInvocationContext();
+    runtime:InvocationContext context = runtime:getInvocationContext();
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
     string errorMessage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = { fault: {
-        code: errorCode,
-        message: errorMessage,
-        description: errorDescription
-    } };
+    json payload = {
+        fault: {
+            code: errorCode,
+            message: errorMessage,
+            description: errorDescription
+        }
+    };
     response.setJsonPayload(payload);
 }
 
@@ -301,7 +308,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
-    if(annotatedHeadeName is string) {
+    if (annotatedHeadeName is string) {
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
@@ -316,7 +323,7 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
     string authHeader = "";
     string? annotatedHeadeName = apiConfig["authorizationHeader"];
-    if(annotatedHeadeName is string) {
+    if (annotatedHeadeName is string) {
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
@@ -332,24 +339,23 @@ public function getCurrentTime() returns int {
 
 }
 
-public function rotateFile(string filePath) returns string|error {
+public function rotateFile(string filePath) returns string | error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
     string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
     var compressResult = compress(filePath, zipName);
-    if(compressResult is error) {
+    if (compressResult is error) {
         printFullError(KEY_UTILS, compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
         var deleteResult = file:remove(filePath);
-            if(deleteResult is ()) {
-                printInfo(KEY_UTILS, "Existing file deleted successfully");
-            }
-            else {
-                printFullError(KEY_UTILS, deleteResult);
-            }
+        if (deleteResult is ()) {
+            printInfo(KEY_UTILS, "Existing file deleted successfully");
+        } else {
+            printFullError(KEY_UTILS, deleteResult);
+        }
         return zipName;
     }
 }
@@ -380,7 +386,7 @@ public function mask(string text) returns string {
 # + return - The UUID of current context
 public function getMessageId() returns string {
     any messageId = runtime:getInvocationContext().attributes[MESSAGE_ID];
-    if(messageId is string) {
+    if (messageId is string) {
         if (messageId == "") {
             return "-";
         } else {
@@ -403,7 +409,8 @@ public function printError(string key, string message) {
 # + message - The message to be logged.
 public function printDebug(string key, string message) {
     log:printDebug(function() returns string {
-            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
+        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+    });
 }
 
 # Add a warn log with provided key (class) and message ID.
@@ -411,7 +418,8 @@ public function printDebug(string key, string message) {
 # + message - The message to be logged.
 public function printWarn(string key, string message) {
     log:printWarn(function() returns string {
-            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
+        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+    });
 }
 
 # Add a trace log with provided key (class) and message ID.
@@ -419,7 +427,8 @@ public function printWarn(string key, string message) {
 # + message - The message to be logged.
 public function printTrace(string key, string message) {
     log:printTrace(function() returns string {
-            return io:sprintf("[%s] [%s] %s",  key, getMessageId(), message); });
+        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+    });
 }
 
 # Add a info log with provided key (class) and message ID.
@@ -472,8 +481,8 @@ public function encodeValueToBase64(string value) returns string {
 public function decodeValueToBase10(string value) returns string {
     string decodedValue = "";
     var result = arrays:fromBase64(value);
-    if(result is byte[]) {
-        string|error decodedValueFromBytes =  strings:fromBytes(result);
+    if (result is byte[]) {
+        string | error decodedValueFromBytes = strings:fromBytes(result);
         if (decodedValueFromBytes is string) {
             decodedValue = decodedValueFromBytes;
         } else {
@@ -489,8 +498,8 @@ public function decodeValueToBase10(string value) returns string {
 # Extracts host header from request and set it to the filter context
 # + request - http request object.
 # + context - http filter context object.
-public function setHostHeaderToFilterContext(http:Request request, @tainted http:FilterContext context) {
-    if(context.attributes[HOSTNAME_PROPERTY] == ()) {
+public function setHostHeaderToFilterContext(http:Request request,@tainted http:FilterContext context) {
+    if (context.attributes[HOSTNAME_PROPERTY] == ()) {
         printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
         if (request.hasHeader(HOST_HEADER_NAME)) {
             context.attributes[HOSTNAME_PROPERTY] = request.getHeader(HOST_HEADER_NAME);
@@ -499,17 +508,17 @@ public function setHostHeaderToFilterContext(http:Request request, @tainted http
             context.attributes[HOSTNAME_PROPERTY] = "localhost";
         }
         printDebug(KEY_UTILS, "Hostname attribute of the filter context is set to : " +
-                    <string>context.attributes[HOSTNAME_PROPERTY]);
+        <string>context.attributes[HOSTNAME_PROPERTY]);
     } else {
         printDebug(KEY_UTILS, "Hostname attribute of the filter context is already set to : " +
-                            <string>context.attributes[HOSTNAME_PROPERTY]);
+        <string>context.attributes[HOSTNAME_PROPERTY]);
     }
 }
 
-public function isSecured(string serviceName, string resourceName) returns boolean{
+public function isSecured(string serviceName, string resourceName) returns boolean {
     http:ServiceResourceAuth? resourceLevelAuthAnn = ();
     http:ServiceResourceAuth? serviceLevelAuthAnn = ();
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
+    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
         resourceLevelAuthAnn = httpResourceConfig?.auth;
@@ -545,14 +554,14 @@ public function getAuthProviders(string serviceName, string resourceName) return
     printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
     string[] authProviders = [];
     ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
-    if(resourceConfig is ResourceConfiguration) {
+    if (resourceConfig is ResourceConfiguration) {
         authProviders = resourceConfig.authProviders;
-        if(authProviders.length() > 0) {
+        if (authProviders.length() > 0) {
             return authProviders;
         }
     }
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
-    if(apiConfig is APIConfiguration) {
+    if (apiConfig is APIConfiguration) {
         authProviders = apiConfig.authProviders;
     }
     return authProviders;
@@ -580,13 +589,35 @@ public function prepareError(string message, error? err = ()) returns auth:Error
 # + err - The `error` instance.
 # + return - Returns the prepared `AuthenticationError` instance.
 function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    log:printDebug(function () returns string { return message; });
+    log:printDebug(function () returns string {
+        return message;
+    });
     if (err is error) {
         http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
         return preparedError;
     }
     http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message);
     return preparedError;
+}
+
+# Read the filter skip annotation from service and set to the filter context
+#
+# + context - Filter Context object.
+public function setFilterSkipToFilterContext(http:FilterContext context) {
+    if (context.attributes.hasKey(SKIP_ALL_FILTERS)) {
+        return;
+    }
+    string serviceName = context.getServiceName();
+    boolean skipFilter = false;
+    FilterConfiguration? filterConfigAnn = filterConfigAnnotationMap[serviceName];
+    if (filterConfigAnn is FilterConfiguration) {
+        skipFilter = filterConfigAnn.skipAll;
+    }
+    context.attributes[SKIP_ALL_FILTERS] = skipFilter;
+}
+
+public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
+    return filterConfigAnnotationMap;
 }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file   except
@@ -14,27 +14,43 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/config;
+import ballerina/http;
 import ballerina/runtime;
 
 // Pre Authentication filter
 
 public type PreAuthnFilter object {
 
-    public function filterRequest(http:Caller caller, http:Request request, @tainted http:FilterContext context)
-                        returns boolean {
+    public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
+        setFilterSkipToFilterContext(context);
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         //Setting UUID
         int startingTime = getCurrentTime();
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
-        return doAuthnFilterRequest(caller, request, <@untainted>context);
+        boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
+        return result;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if(response.statusCode == 401) {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
+        if (response.statusCode == 401) {
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            //This handles the case where the empty Bearer/Basic value provided for authorization header. If all the
+            //auth handlers are invoked and returning 401 without proper error message in the context means, invalid
+            //credentials are provided. Hence we seth invalid credentials message to context
+            if (!invocationContext.attributes.hasKey(ERROR_CODE)) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            }
             sendErrorResponseFromInvocationContext(response);
         }
         return true;
@@ -42,7 +58,7 @@ public type PreAuthnFilter object {
 };
 
 function doAuthnFilterRequest(http:Caller caller, http:Request request, http:FilterContext context)
-             returns boolean {
+returns boolean {
     boolean isOauth2Enabled = false;
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     invocationContext.attributes[MESSAGE_ID] = <string>context.attributes[MESSAGE_ID];
@@ -58,11 +74,13 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
     printDebug(KEY_PRE_AUTHN_FILTER, "Resource secured : " + isSecuredResource.toString());
     invocationContext.attributes[IS_SECURED] = isSecuredResource;
     context.attributes[IS_SECURED] = isSecuredResource;
+    invocationContext.attributes[REQUEST_METHOD] = request.method;
+    invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
 
     boolean isCookie = false;
     string authHeader = "";
     string? authCookie = "";
-    string|error extractedToken = "";
+    string | error extractedToken = "";
     string authHeaderName = getAuthHeaderFromFilterContext(context);
     printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header name : " + authHeaderName);
     invocationContext.attributes[AUTH_HEADER] = authHeaderName;
@@ -95,31 +113,33 @@ function doAuthnFilterRequest(http:Caller caller, http:Request request, http:Fil
         }
     }
 
-    if(isSecuredResource && !request.hasHeader(authHeaderName)) {
-        printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
-        setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
-        setErrorMessageToFilterContext(context,API_AUTH_MISSING_CREDENTIALS);
-        sendErrorResponse(caller, request, context);
-        return false;
+    if (isSecuredResource) {
+        if (!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
+            setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
+            setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
     }
 
     if (!canHandleAuthentication) {
         setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
-        setErrorMessageToFilterContext(context,API_AUTH_PROVIDER_INVALID);
+        setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
         return false;
     }
     // if auth providers are there, use those to authenticate
 
-        //TODO: Move this to post authentication handler
-        //checkAndRemoveAuthHeaders(request, authHeaderName);
+    //TODO: Move this to post authentication handler
+    //checkAndRemoveAuthHeaders(request, authHeaderName);
     return true;
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
-    if (contains(authHeader, AUTH_SCHEME_BASIC)){
+    if (contains(authHeader, AUTH_SCHEME_BASIC)) {
         return AUTHN_SCHEME_BASIC;
-    } else if (contains(authHeader,AUTH_SCHEME_BEARER) && contains(authHeader,".")) {
+    } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
@@ -128,7 +148,7 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
 
 
 function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
-    if (contains(authHeader,".")) {
+    if (contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;

@@ -37,10 +37,6 @@
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/conf</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/resources/tokenServices</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/services</outputDirectory>
-        </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>
@@ -123,6 +119,8 @@
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
+                <include>org.ballerinax.docker:docker-extension:jar</include>
+                <include>org.ballerinax.kubernetes:kubernetes-extension:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>

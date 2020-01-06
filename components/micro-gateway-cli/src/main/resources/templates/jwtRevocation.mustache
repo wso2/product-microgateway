@@ -1,5 +1,5 @@
 map<string> receivedRevokedTokenMap = gateway:getRevokedTokenMap();
-    //boolean jmsListenerStarted = gateway:initiateTokenRevocationJmsListener();
+    boolean jmsListenerStarted = gateway:initiateTokenRevocationJmsListener();
 
     boolean useDefault = gateway:getConfigBooleanValue(gateway:PERSISTENT_MESSAGE_INSTANCE_ID,
     gateway:PERSISTENT_USE_DEFAULT, false);

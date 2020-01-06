@@ -15,54 +15,54 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/runtime;
 import ballerina/lang.'int;
+import ballerina/runtime;
 import ballerina/stringutils;
 
 
 public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO : " + requestResponseExecutionDTO.toString());
     string output =
-        requestResponseExecutionDTO.applicationConsumerKey + OBJ +
-        requestResponseExecutionDTO.applicationName + OBJ + requestResponseExecutionDTO.applicationId + OBJ +
-        requestResponseExecutionDTO.applicationOwner + OBJ + requestResponseExecutionDTO.apiContext + OBJ +
-        requestResponseExecutionDTO.apiName + OBJ + requestResponseExecutionDTO.apiVersion + OBJ +
-        requestResponseExecutionDTO.apiResourcePath + OBJ + requestResponseExecutionDTO.apiResourceTemplate + OBJ +
-        requestResponseExecutionDTO.apiMethod + OBJ + requestResponseExecutionDTO.apiCreator + OBJ +
-        requestResponseExecutionDTO.apiCreatorTenantDomain + OBJ + requestResponseExecutionDTO.apiTier + OBJ +
-        requestResponseExecutionDTO.apiHostname + OBJ + requestResponseExecutionDTO.userName + OBJ +
-        requestResponseExecutionDTO.userTenantDomain + OBJ +
-        requestResponseExecutionDTO.userIp + OBJ +
-        requestResponseExecutionDTO.userAgent + OBJ +
-        requestResponseExecutionDTO.requestTimestamp.toString() + OBJ +
-        requestResponseExecutionDTO.throttledOut.toString() + OBJ +
-        requestResponseExecutionDTO.responseTime.toString() + OBJ +
-        requestResponseExecutionDTO.serviceTime.toString() + OBJ +
-        requestResponseExecutionDTO.backendTime.toString() + OBJ +
-        requestResponseExecutionDTO.responseCacheHit.toString() + OBJ +
-        requestResponseExecutionDTO.responseSize.toString() + OBJ +
-        requestResponseExecutionDTO.protocol + OBJ +
-        requestResponseExecutionDTO.responseCode.toString() + OBJ +
-        requestResponseExecutionDTO.destination + OBJ +
-        requestResponseExecutionDTO.executionTime.securityLatency.toString()+ OBJ +
-        requestResponseExecutionDTO.executionTime.throttlingLatency.toString() + OBJ +
-        requestResponseExecutionDTO.executionTime.requestMediationLatency.toString() + OBJ +
-        requestResponseExecutionDTO.executionTime.responseMediationLatency.toString() + OBJ +
-        requestResponseExecutionDTO.executionTime.backEndLatency.toString() + OBJ +
-        requestResponseExecutionDTO.executionTime.otherLatency.toString() + OBJ +
-        requestResponseExecutionDTO.gatewayType + OBJ +
-        requestResponseExecutionDTO.label;
-        printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
+    requestResponseExecutionDTO.applicationConsumerKey + OBJ +
+    requestResponseExecutionDTO.applicationName + OBJ + requestResponseExecutionDTO.applicationId + OBJ +
+    requestResponseExecutionDTO.applicationOwner + OBJ + requestResponseExecutionDTO.apiContext + OBJ +
+    requestResponseExecutionDTO.apiName + OBJ + requestResponseExecutionDTO.apiVersion + OBJ +
+    requestResponseExecutionDTO.apiResourcePath + OBJ + requestResponseExecutionDTO.apiResourceTemplate + OBJ +
+    requestResponseExecutionDTO.apiMethod + OBJ + requestResponseExecutionDTO.apiCreator + OBJ +
+    requestResponseExecutionDTO.apiCreatorTenantDomain + OBJ + requestResponseExecutionDTO.apiTier + OBJ +
+    requestResponseExecutionDTO.apiHostname + OBJ + requestResponseExecutionDTO.userName + OBJ +
+    requestResponseExecutionDTO.userTenantDomain + OBJ +
+    requestResponseExecutionDTO.userIp + OBJ +
+    requestResponseExecutionDTO.userAgent + OBJ +
+    requestResponseExecutionDTO.requestTimestamp.toString() + OBJ +
+    requestResponseExecutionDTO.throttledOut.toString() + OBJ +
+    requestResponseExecutionDTO.responseTime.toString() + OBJ +
+    requestResponseExecutionDTO.serviceTime.toString() + OBJ +
+    requestResponseExecutionDTO.backendTime.toString() + OBJ +
+    requestResponseExecutionDTO.responseCacheHit.toString() + OBJ +
+    requestResponseExecutionDTO.responseSize.toString() + OBJ +
+    requestResponseExecutionDTO.protocol + OBJ +
+    requestResponseExecutionDTO.responseCode.toString() + OBJ +
+    requestResponseExecutionDTO.destination + OBJ +
+    requestResponseExecutionDTO.executionTime.securityLatency.toString() + OBJ +
+    requestResponseExecutionDTO.executionTime.throttlingLatency.toString() + OBJ +
+    requestResponseExecutionDTO.executionTime.requestMediationLatency.toString() + OBJ +
+    requestResponseExecutionDTO.executionTime.responseMediationLatency.toString() + OBJ +
+    requestResponseExecutionDTO.executionTime.backEndLatency.toString() + OBJ +
+    requestResponseExecutionDTO.executionTime.otherLatency.toString() + OBJ +
+    requestResponseExecutionDTO.gatewayType + OBJ +
+    requestResponseExecutionDTO.label;
+    printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
     return output;
 }
 
 public function getMetaDataForRequestResponseExecutionData(RequestResponseExecutionDTO dto) returns string {
-    json metaData = { "clientType": dto.metaClientType, "correlationID": dto.correlationId };
+    json metaData = {"clientType": dto.metaClientType, "correlationID": dto.correlationId};
     return metaData.toString();
 }
 
 function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
-                                                                                                                   EventDTO|error
+EventDTO | error
 {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.request:3.0.0";
@@ -74,7 +74,7 @@ function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDT
 }
 
 public function generateRequestResponseExecutionDataEvent(http:Response response, http:FilterContext context) returns
-                                                                                 @tainted RequestResponseExecutionDTO|error
+@tainted RequestResponseExecutionDTO | error
 {
     RequestResponseExecutionDTO requestResponseExecutionDTO = {};
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -99,7 +99,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     }
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
-        if(! stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
@@ -108,8 +108,8 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
 
     // apim analytics requires context to be '<basePath>/<version>'
     string mgContext = getContext(context);
-    mgContext = split(mgContext, "/(?=$)")[0]; //split from last '/'
-    string analyticsContext  = mgContext;
+    mgContext = split(mgContext, "/(?=$)")[0];    //split from last '/'
+    string analyticsContext = mgContext;
 
     if (!hasSuffix(mgContext, requestResponseExecutionDTO.apiVersion)) {
         analyticsContext = mgContext + "/" + requestResponseExecutionDTO.apiVersion;
@@ -119,12 +119,12 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     requestResponseExecutionDTO.correlationId = <string>context.attributes[MESSAGE_ID];
     http:ResponseCacheControl? responseCacheControl = response.cacheControl;
     if (responseCacheControl is http:ResponseCacheControl) {
-      var res = responseCacheControl.noCache;
-      requestResponseExecutionDTO.cacheHit = res;
+        var res = responseCacheControl.noCache;
+        requestResponseExecutionDTO.cacheHit = res;
     }
 
     requestResponseExecutionDTO.apiHostname = retrieveHostname(DATACENTER_ID, <string>context.attributes[
-        HOSTNAME_PROPERTY]);
+    HOSTNAME_PROPERTY]);
     // if response contains Content-Length header that value will be taken
     if (response.hasHeader(CONTENT_LENGHT_HEADER)) {
         var respSize = 'int:fromString(response.getHeader(CONTENT_LENGHT_HEADER));
@@ -134,13 +134,13 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         } else {
             requestResponseExecutionDTO.responseSize = 0;
         }
-    } else { //TODO: we are not building message in order to get the response size if the message is chunk
+    } else {        //TODO: we are not building message in order to get the response size if the message is chunk
         requestResponseExecutionDTO.responseSize = 0;
     }
     requestResponseExecutionDTO.responseCode = response.statusCode;
     string resourceName = context.getResourceName();
     string serviceName = context.getServiceName();
-    http:HttpServiceConfig httpServiceConfig =  <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
+    http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
         requestResponseExecutionDTO.apiResourcePath = httpResourceConfig.path;

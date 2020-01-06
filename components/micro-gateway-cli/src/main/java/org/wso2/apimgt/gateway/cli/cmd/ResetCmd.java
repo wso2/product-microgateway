@@ -21,10 +21,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.apimgt.gateway.cli.model.config.Client;
+import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
+import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.Token;
-import org.wso2.apimgt.gateway.cli.model.config.TokenBuilder;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.PrintStream;
@@ -58,19 +59,17 @@ public class ResetCmd implements LauncherCmd {
             Runtime.getRuntime().exit(1);
         }
 
-        //Write empty config to config
-        Config newConfig = new Config();
-        Client client = new Client();
-        client.setHttpRequestTimeout(1000000);
-        newConfig.setClient(client);
-        Token token = new TokenBuilder().setBaseURL(StringUtils.EMPTY).setRestVersion(StringUtils.EMPTY)
-                .setPublisherEndpoint(StringUtils.EMPTY).setAdminEndpoint(StringUtils.EMPTY)
-                .setRegistrationEndpoint(StringUtils.EMPTY).setTokenEndpoint(StringUtils.EMPTY)
-                .setUsername(StringUtils.EMPTY).setClientId(StringUtils.EMPTY).setClientSecret(StringUtils.EMPTY)
-                .setTrustStoreLocation(StringUtils.EMPTY).setTrustStorePassword(StringUtils.EMPTY).build();
-        newConfig.setToken(token);
-        newConfig.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
-        CmdUtils.saveConfig(newConfig, configPath);
+        //Reset only the token related configurations and keep the rest of the configuration.
+        try {
+            Config newConfig = TOMLConfigParser.parse(configPath, Config.class);
+            Token token = newConfig.getToken();
+            token.setClientId(StringUtils.EMPTY);
+            token.setClientSecret(StringUtils.EMPTY);
+            token.setUsername(StringUtils.EMPTY);
+            CmdUtils.saveConfig(newConfig, configPath);
+        } catch (ConfigParserException e) {
+            throw new CLIInternalException("Error occurred while parsing the configuration : " + configPath, e);
+        }
     }
 
     @Override

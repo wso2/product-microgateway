@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -21,6 +21,10 @@ import ballerina/log;
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled || isgRPCAnalyticsEnabled) {
             checkOrSetMessageID(context);
@@ -84,7 +88,7 @@ public type AnalyticsRequestFilter object {
 function doFilterRequest(http:Request request, http:FilterContext context) {
     log:printDebug( "doFilterRequestMehtod called");
     error? result = trap setRequestAttributesToContext(request, context);
-    if(result is error) {
+    if (result is error) {
         printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path");
         printFullError(KEY_ANALYTICS_FILTER, result);
     }
@@ -153,7 +157,7 @@ function doFilterAll(http:Response response, http:FilterContext context) {
     if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
-    } else if(resp is string) {
+    } else if (resp is string) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }

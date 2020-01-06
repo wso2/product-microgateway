@@ -51,6 +51,8 @@ public class CliConstants {
     public static final String CLI_PLATFORM = "platform";
     public static final String CLI_GATEWAY = "gateway";
     public static final String CLI_BRE = "bre";
+    public static final String DEFAULT_DOCKER_BASE_IMAGE = "wso2/wso2micro-gw:latest";
+    public static final String DEFAULT_VERSION = "v1";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_JAR = ".jar";
     public static final String EXTENSION_BAL = ".bal";
@@ -75,7 +77,10 @@ public class CliConstants {
     public static final String SYS_PROP_USER_DIR = "user.dir";
     public static final String SYS_PROP_CURRENT_DIR = "current.dir";
     public static final String SYS_PROP_SECURITY = "security";
+    public static final String WSO2 = "wso2";
+    public static final String MGW = "mgw";
     public static final String MICRO_GW = "micro-gw";
+    public static final String MICRO_GW_CONF_FILE = "micro-gw.conf";
     public static final String KEEP_FILE = ".keep";
     public static final String BALLERINA_TOML_FILE = "Ballerina.toml";
 

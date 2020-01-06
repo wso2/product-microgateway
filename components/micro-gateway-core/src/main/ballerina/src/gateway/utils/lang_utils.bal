@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerinax/java;
-import ballerinax/'java\.arrays as arrays;
+import ballerinax/ 'java\.arrays as arrays;
 
 public function split(string str, string delimeter) returns string[] {
     handle delim = java:fromString(delimeter);
@@ -29,7 +29,7 @@ public function split(string str, string delimeter) returns string[] {
         splitArr[splitArr.length()] = val;
         i = i + 1;
     }
-    
+
     return splitArr;
 }
 
@@ -54,28 +54,28 @@ public function replaceFirst(string str, string regex, string replacement) retur
 public function contains(string str, string s) returns boolean {
     handle seq = java:fromString(s);
     handle rec = java:fromString(str);
-    
+
     return jContains(rec, seq);
 }
 
 public function lastIndexOf(string str, string indexOf) returns int {
     handle index = java:fromString(indexOf);
     handle rec = java:fromString(str);
-    
+
     return jLastIndexOf(rec, index);
 }
 
 public function hasSuffix(string str, string suffix) returns boolean {
     handle suf = java:fromString(suffix);
     handle rec = java:fromString(str);
-    
+
     return jEndsWith(rec, suf);
 }
 
 public function hasPrefix(string str, string prefix) returns boolean {
     handle pref = java:fromString(prefix);
     handle rec = java:fromString(str);
-    
+
     return jStartsWith(rec, pref);
 }
 

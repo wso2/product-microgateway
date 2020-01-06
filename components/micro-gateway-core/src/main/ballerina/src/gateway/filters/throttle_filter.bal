@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -24,6 +24,10 @@ public type ThrottleFilter object {
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+            printDebug(KEY_THROTTLE_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+            return true;
+        }
         int startingTime = getCurrentTime();
         checkOrSetMessageID(context);
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
@@ -37,8 +41,8 @@ public type ThrottleFilter object {
 };
 
 // TODO: need to refactor this function.
-function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context,map<boolean>
-    deployedPolicies) returns boolean {
+function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context, map<boolean>
+deployedPolicies) returns boolean {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
     //Throttle Tiers
@@ -58,21 +62,21 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         keyValidationResult = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         if (isRequestBlocked(caller, request, context, keyValidationResult)) {
             setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
-                BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
+            BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyValidationResult.
-                tier + "' exist.");
+        tier + "' exist.");
         string? resourceLevelPolicyName = getResourceLevelPolicy(context);
-        if(resourceLevelPolicyName is string) {
+        if (resourceLevelPolicyName is string) {
             printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy : " + resourceLevelPolicyName);
-            if(resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
+            if (resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
                 printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
-                        + "' does not exist.");
+                + "' does not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                    INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                    INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
+                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
                 sendErrorResponse(caller, request, context);
                 return false;
             }
@@ -83,7 +87,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
             context.attributes[IS_THROTTLE_OUT] = true;
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
-                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -92,24 +96,24 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
 
         if (keyValidationResult.tier != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, keyValidationResult.tier)) {
             printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyValidationResult.tier
-                    + "' does not exist.");
+            + "' does not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
+            INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+            INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
         [isThrottled, stopOnQuota] = isSubscriptionLevelThrottled(context, keyValidationResult);
         printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
-                + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
+        + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
         if (isThrottled) {
             if (stopOnQuota) {
                 printDebug(KEY_THROTTLE_FILTER, "Sending throttled out responses.");
                 context.attributes[IS_THROTTLE_OUT] = true;
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
-                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(caller, request, context);
                 return false;
             } else {
@@ -119,14 +123,14 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
             }
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
-                + keyValidationResult.applicationTier + "' exist.");
+        + keyValidationResult.applicationTier + "' exist.");
         if (keyValidationResult.applicationTier != UNLIMITED_TIER &&
-            !isPolicyExist(deployedPolicies, keyValidationResult.applicationTier)) {
+        !isPolicyExist(deployedPolicies, keyValidationResult.applicationTier)) {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
-                    + keyValidationResult.applicationTier + "' does not exist.");
+            + keyValidationResult.applicationTier + "' does not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
+            INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+            INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         }
@@ -136,7 +140,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
             context.attributes[IS_THROTTLE_OUT] = true;
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
-                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -149,26 +153,26 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         invocationContext.attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
 
         printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
-                + "' exist.");
+        + "' exist.");
         if (!isPolicyExist(deployedPolicies, UNAUTHENTICATED_TIER)) {
             printDebug(KEY_THROTTLE_FILTER, "Unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
-                    + "' is not exist.");
+            + "' is not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
+            INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+            INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
             sendErrorResponse(caller, request, context);
             return false;
         }
         [isThrottled, stopOnQuota] = isUnauthenticateLevelThrottled(context);
         printDebug(KEY_THROTTLE_FILTER, "Unauthenticated tier throttled out result:: isThrottled:"
-                + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
+        + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
         if (isThrottled) {
             if (stopOnQuota) {
                 printDebug(KEY_THROTTLE_FILTER, "Sending throttled out response.");
                 context.attributes[IS_THROTTLE_OUT] = true;
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
-                    THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 sendErrorResponse(caller, request, context);
                 return false;
             } else {
@@ -190,7 +194,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     } else {
         printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
         setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
-            INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+        INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
         sendErrorResponse(caller, request, context);
         return false;
     }
@@ -208,7 +212,7 @@ function asyncPublishEvent(RequestStreamDTO throttleEvent) {
 }
 
 function setThrottleErrorMessageToContext(http:FilterContext context, int statusCode, int errorCode, string
-    errorMessage, string errorDescription) {
+errorMessage, string errorDescription) {
     context.attributes[HTTP_STATUS_CODE] = statusCode;
     context.attributes[FILTER_FAILED] = true;
     context.attributes[ERROR_CODE] = errorCode;
@@ -217,7 +221,7 @@ function setThrottleErrorMessageToContext(http:FilterContext context, int status
 }
 
 function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns [
-    boolean, boolean] {
+ boolean, boolean] {
     if (keyValidationDto.tier == UNLIMITED_TIER) {
         return [false, false];
     }
@@ -244,19 +248,19 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 }
 
 
-function isResourceLevelThrottled(http:FilterContext context,AuthenticationContext keyValidationDto, string? policy) returns (boolean) {
+function isResourceLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto, string? policy) returns (boolean) {
     if (policy is string) {
         if (policy == UNLIMITED_TIER) {
             return false;
         }
-        
+
         // TODO: Need to discuss if we should valdate the () case of apiVersion property
         string? apiVersion = getVersion(context);
         string resourceLevelThrottleKey = replaceAll(context.getResourceName(), "_", "");
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
-        if(enabledGlobalTMEventPublishing) {
+        if (enabledGlobalTMEventPublishing) {
             resourceLevelThrottleKey += "_default";
         }
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
@@ -297,7 +301,7 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
 }
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
-    returns (RequestStreamDTO) {
+returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDto = {};
     string? apiVersion = getVersion(context);
     requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
@@ -312,7 +316,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     TierConfiguration? tier = resourceTierAnnotationMap[resourcekey];
     string? policy = (tier is TierConfiguration) ? tier.policy : ();
     if (policy is string) {
-       requestStreamDto.resourceTier = policy;
+        requestStreamDto.resourceTier = policy;
     }
 
     requestStreamDto.userId = keyValidationDto.username;
@@ -327,7 +331,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 
     if (apiVersion is string) {
         requestStreamDto.apiKey += ":" + apiVersion;
-        requestStreamDto.subscriptionKey +=":" + apiVersion;
+        requestStreamDto.subscriptionKey += ":" + apiVersion;
         requestStreamDto.resourceKey += ":" + apiVersion;
     }
     printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDto.resourceKey);
@@ -344,7 +348,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     return requestStreamDto;
 }
 
-function getVersion(http:FilterContext context) returns string|() {
+function getVersion(http:FilterContext context) returns string | () {
     string? apiVersion = "";
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {

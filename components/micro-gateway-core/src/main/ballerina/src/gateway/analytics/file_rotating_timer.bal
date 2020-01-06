@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/task;
 import ballerina/file;
 import ballerina/filepath;
 import ballerina/stringutils;
+import ballerina/task;
 
 function sendFileRotatingEvent() returns error? {
     int cnt = 0;
@@ -26,7 +26,7 @@ function sendFileRotatingEvent() returns error? {
     string path = fileLocation + API_USAGE_FILE;
     if (file:exists(path)) {
         var result = rotateFile(path);
-        if(result is string) {
+        if (result is string) {
             printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
         } else {
             printFullError(KEY_ROTATE_TASK, result);
@@ -40,13 +40,13 @@ function sendFileRotatingEvent() returns error? {
 
 function rotatingTask() {
     map<any> vals = getConfigMapValue(ANALYTICS);
-    int timeSpan =  <int> vals[ROTATING_TIME];
-    int delay = <int> vals[INITIAL_DELAY];
+    int timeSpan = <int>vals[ROTATING_TIME];
+    int delay = <int>vals[INITIAL_DELAY];
     task:TimerConfiguration timerConfiguration = {
-            intervalInMillis: timeSpan,
-            initialDelayInMillis: delay
+        intervalInMillis: timeSpan,
+        initialDelayInMillis: delay
     };
-    task:Scheduler timer = new(timerConfiguration);
+    task:Scheduler timer = new (timerConfiguration);
     var attachResult = timer.attach(fileRotating);
     if (attachResult is error) {
         printError(KEY_ROTATE_TASK, attachResult.toString());
@@ -60,13 +60,13 @@ function rotatingTask() {
 
 service fileRotating = service {
     resource function onTrigger() {
-    error? triggerFunction = sendFileRotatingEvent();
-     if (triggerFunction is error) {
-        if(stringutils:equalsIgnoreCase("No files present to rotate.", triggerFunction.reason())) {
-            printDebug(KEY_ROTATE_TASK, "No files present to rotate.");
-        } else {
-            printError(KEY_ROTATE_TASK, "Error occurred while rotating event." + triggerFunction.reason());
+        error? triggerFunction = sendFileRotatingEvent();
+        if (triggerFunction is error) {
+            if (stringutils:equalsIgnoreCase("No files present to rotate.", triggerFunction.reason())) {
+                printDebug(KEY_ROTATE_TASK, "No files present to rotate.");
+            } else {
+                printError(KEY_ROTATE_TASK, "Error occurred while rotating event." + triggerFunction.reason());
+            }
         }
-     }
     }
 };

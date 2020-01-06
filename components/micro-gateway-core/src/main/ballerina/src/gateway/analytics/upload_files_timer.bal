@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/task;
 import ballerina/file;
-import ballerina/http;
 import ballerina/filepath;
+import ballerina/http;
 import ballerina/stringutils;
+import ballerina/task;
 
 string uploadingUrl = "";
 string analyticsUsername = "";
@@ -34,7 +34,7 @@ function searchFilesToUpload() returns (error?) {
         return ();
     }
 
-    file:FileInfo[]|error pathList = file:readDir(fileLocation);
+    file:FileInfo[] | error pathList = file:readDir(fileLocation);
 
     if (pathList is error) {
         printError(KEY_UPLOAD_TASK, "Error occured in getting path lists");
@@ -45,7 +45,7 @@ function searchFilesToUpload() returns (error?) {
 
             if (contains(fileName, ZIP_EXTENSION)) {
                 http:Response response = multipartSender(fileLocation, pathEntry.getName(),
-                    analyticsUsername, analyticsPassword);
+                analyticsUsername, analyticsPassword);
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                     var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
@@ -53,7 +53,7 @@ function searchFilesToUpload() returns (error?) {
                     printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned
                     with status code : " + response.statusCode.toString());
                 }
-                cnt=cnt +1;
+                cnt = cnt + 1;
             }
         }
         if (cnt == 0) {
@@ -66,29 +66,29 @@ function searchFilesToUpload() returns (error?) {
 }
 
 function timerTask() {
-    map<any> vals= getConfigMapValue(ANALYTICS);
+    map<any> vals = getConfigMapValue(ANALYTICS);
     boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
-        int|error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
+        int | error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
         int delay = <int>vals[INITIAL_DELAY];
-        if (timeSpan is int ) {
+        if (timeSpan is int) {
             // The Task Timer configuration record to configure the Task Listener.
-          task:TimerConfiguration timerConfiguration = {
-            intervalInMillis: timeSpan,
-            initialDelayInMillis: delay
-          };
-          task:Scheduler timer = new(timerConfiguration);
-          var searchResult = timer.attach(searchFiles);
-          if (searchResult is error) {
-             printError(KEY_UPLOAD_TASK, searchResult.toString());
-          }
-          var startResult = timer.start();
-          if (startResult is error) {
-             printError(KEY_UPLOAD_TASK, "Starting the uploading task is failed.");
-          } 
+            task:TimerConfiguration timerConfiguration = {
+                intervalInMillis: timeSpan,
+                initialDelayInMillis: delay
+            };
+            task:Scheduler timer = new (timerConfiguration);
+            var searchResult = timer.attach(searchFiles);
+            if (searchResult is error) {
+                printError(KEY_UPLOAD_TASK, searchResult.toString());
+            }
+            var startResult = timer.start();
+            if (startResult is error) {
+                printError(KEY_UPLOAD_TASK, "Starting the uploading task is failed.");
+            }
         }
     } else {
         printInfo(KEY_UPLOAD_TASK, "Disabled file uploading task.");
@@ -98,14 +98,14 @@ function timerTask() {
 // Creating a service on the task Listener.
 service searchFiles = service {
     resource function onTrigger() {
-     error? onTriggerFunction = searchFilesToUpload();
-     if (onTriggerFunction is error) {
-        if(stringutils:equalsIgnoreCase("No files present to upload.", onTriggerFunction.reason())) {
-            printDebug(KEY_UPLOAD_TASK, "No files present to upload.");
-        } else {
-            printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.toString());
+        error? onTriggerFunction = searchFilesToUpload();
+        if (onTriggerFunction is error) {
+            if (stringutils:equalsIgnoreCase("No files present to upload.", onTriggerFunction.reason())) {
+                printDebug(KEY_UPLOAD_TASK, "No files present to upload.");
+            } else {
+                printError(KEY_UPLOAD_TASK, "Error occured while searching files to Upload: " + onTriggerFunction.toString());
+            }
         }
-     }
     }
 };
 

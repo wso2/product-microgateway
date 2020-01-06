@@ -1,4 +1,4 @@
-// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -26,61 +26,61 @@ public type APIKeyValidationDto record {
     string authorizedDomains?;
     string consumerKey = UNKNOWN_VALUE;
     string contentAware?;
-    string endUserName="";
+    string endUserName = "";
     string endUserToken?;
     string issuedTime?;
     string spikeArrestLimit = "0";
-    string spikeArrestUnit="";
+    string spikeArrestUnit = "";
     string stopOnQuotaReach = "false";
-    string subscriber= UNKNOWN_VALUE;
+    string subscriber = UNKNOWN_VALUE;
     string subscriberTenantDomain = UNKNOWN_VALUE;
     string throttlingDataList?;
     string tier = DEFAULT_SUBSCRIPTION_TIER;
     string keyType = PRODUCTION_KEY_TYPE;
     string userType?;
-    string validationStatus="";
+    string validationStatus = "";
     string validityPeriod?;
 };
 
 public type APIRequestMetaDataDto record {
-    string context="";
-    string apiVersion="";
-    string accessToken="";
-    string requiredAuthenticationLevel=ANY_AUTHENTICATION_LEVEL;
-    string clientDomain="*";
-    string matchingResource="";
-    string httpVerb="";
+    string context = "";
+    string apiVersion = "";
+    string accessToken = "";
+    string requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
+    string clientDomain = "*";
+    string matchingResource = "";
+    string httpVerb = "";
 };
 
 public type AuthenticationContext record {
-    boolean authenticated=false;
-    string username="";
-    string applicationTier=UNLIMITED_TIER;
-    string tier=DEFAULT_SUBSCRIPTION_TIER;
-    string apiTier=UNLIMITED_TIER;
-    boolean isContentAwareTierPresent=false;
-    string apiKey="";
-    string keyType=PRODUCTION_KEY_TYPE;
+    boolean authenticated = false;
+    string username = "";
+    string applicationTier = UNLIMITED_TIER;
+    string tier = DEFAULT_SUBSCRIPTION_TIER;
+    string apiTier = UNLIMITED_TIER;
+    boolean isContentAwareTierPresent = false;
+    string apiKey = "";
+    string keyType = PRODUCTION_KEY_TYPE;
     string callerToken?;
-    string applicationId=UNKNOWN_VALUE;
-    string applicationName=UNKNOWN_VALUE;
-    string consumerKey=UNKNOWN_VALUE;
-    string subscriber=UNKNOWN_VALUE;
+    string applicationId = UNKNOWN_VALUE;
+    string applicationName = UNKNOWN_VALUE;
+    string consumerKey = UNKNOWN_VALUE;
+    string subscriber = UNKNOWN_VALUE;
     string[] throttlingDataList?;
-    int spikeArrestLimit=0;
-    string subscriberTenantDomain=UNKNOWN_VALUE;
-    string spikeArrestUnit="";
-    boolean stopOnQuotaReach=false;
-    string apiPublisher=UNKNOWN_VALUE;
+    int spikeArrestLimit = 0;
+    string subscriberTenantDomain = UNKNOWN_VALUE;
+    string spikeArrestUnit = "";
+    boolean stopOnQuotaReach = false;
+    string apiPublisher = UNKNOWN_VALUE;
 };
 
 public type KeyManagerConf record {
-   string serverUrl="";
-   Credentials credentials?;
+    string serverUrl = "";
+    Credentials credentials?;
 };
 
 public type Credentials record {
-   string username="";
-   string password="";
+    string username = "";
+    string password = "";
 };
 
