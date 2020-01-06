@@ -17,7 +17,6 @@
 import ballerina/http;
 import wso2/gateway;
 
-
 # Represents the extension filter, which used to customize and extend the request and response handling
 #
 #

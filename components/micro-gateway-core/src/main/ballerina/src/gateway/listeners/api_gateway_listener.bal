@@ -80,7 +80,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     //TODO : migrate this method and re enable
-    io:println("initiateGatewayConfigurations method in api gateway listner calledcalled");
+    io:println("initiateGatewayConfigurations method in api gateway listner called");
     initializeAnalytics();
     initializegRPCAnalytics();
 

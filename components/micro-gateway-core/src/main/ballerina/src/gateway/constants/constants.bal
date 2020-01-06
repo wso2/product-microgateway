@@ -155,6 +155,7 @@
  public const string KEYSTORE_PASSWORD = "keyStorePassword";
  public const string TURSTSTORE_FILE_PATH = "trustStorePath";
  public const string TRUSTSTORE_PASSWORD = "trustStorePassword";
+ public const string gRPC_RetryTimeMilliseconds = "reconnectTimeInMillies";
  
 //validation_filter related constatnts
  public const string PATHS = "paths";

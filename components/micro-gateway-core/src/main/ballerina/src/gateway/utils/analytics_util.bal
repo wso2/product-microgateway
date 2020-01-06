@@ -27,10 +27,11 @@ boolean configsRead = false;
 boolean isgRPCAnalyticsEnabled = false;
 boolean gRPCConfigsRead = false;
 string endpointURL = "";
-string keyStoreFile = "";
-string keyStorePassword = "";
-string trustStoreFile = "";
-string trustStorePassword = "";
+string gRPCKeyStoreFile = "";
+string gRPCKeyStorePassword = "";
+string gRPCTrustStoreFile = "";
+string gRPCTrustStorePassword = "";
+int gRPCReconnectTime = 3000;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO|error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -145,30 +146,32 @@ function getAnalyticsEnableConfig() {
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
-function getGRPCAnalyticsEnableConfig() returns boolean{
+function getGRPCAnalyticsEnableConfig(){
+    printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
     isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
     endpointURL = <string>gRPCConfigs[GRPC_ENDPOINT_URL];
-    keyStoreFile = <string>gRPCConfigs[KEYSTORE_FILE_PATH];
-    keyStorePassword = <string>gRPCConfigs[KEYSTORE_PASSWORD];
-    trustStoreFile = <string>gRPCConfigs[TURSTSTORE_FILE_PATH];
-    trustStorePassword = <string>gRPCConfigs[TRUSTSTORE_PASSWORD];
+    gRPCKeyStoreFile = <string>gRPCConfigs[KEYSTORE_FILE_PATH];
+    gRPCKeyStorePassword = <string>gRPCConfigs[KEYSTORE_PASSWORD];
+    gRPCTrustStoreFile = <string>gRPCConfigs[TURSTSTORE_FILE_PATH];
+    gRPCTrustStorePassword = <string>gRPCConfigs[TRUSTSTORE_PASSWORD];
+    gRPCReconnectTime = <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
 
     log:printDebug( "Endpint : " + endpointURL);
-    log:printDebug( "K_Store : " + keyStoreFile);
-    log:printDebug( "K_Pass  : " + keyStorePassword);
-    log:printDebug( "T_Store : " + trustStoreFile);
-    log:printDebug( "T_Pass  : " + trustStorePassword);
+    log:printDebug( "K_Store : " + gRPCKeyStoreFile);
+    log:printDebug( "K_Pass  : " + gRPCKeyStorePassword);
+    log:printDebug( "T_Store : " + gRPCTrustStoreFile);
+    log:printDebug( "T_Pass  : " + gRPCTrustStorePassword);
+    log:printDebug( "Retry_time  : " + gRPCReconnectTime.toString());
 
-    initGRPCService();
-
-    printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
-    return isgRPCAnalyticsEnabled;
+    if(isgRPCAnalyticsEnabled == true){
+        initGRPCService();
+    }
 }
 
 function initializegRPCAnalytics(){
     log:printDebug("getgRPCAnalyticsEnableConfig method in analytics util bal called");
-    boolean result = getGRPCAnalyticsEnableConfig();
+    getGRPCAnalyticsEnableConfig();
 }
 
 function initializeAnalytics() {
