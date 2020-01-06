@@ -17,18 +17,25 @@
 import ballerina/auth;
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/oauth2;
 
 # Representation of the key validation  handler
 #
 # + oauth2KeyValidationProvider - The reference to the key validation provider instance
+# + introspectProvider - The reference to the standard oauth2 introspect service provider
+# + externalKM - Is external key mananager is used or default wso2 key validation service is used.
 public type KeyValidationHandler object {
 
     *http:InboundAuthHandler;
 
     public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
+    public oauth2:InboundOAuth2Provider introspectProvider;
+    public boolean externalKM;
 
-    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider) {
+    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
+        self.introspectProvider = introspectProvider;
+        self.externalKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, EXTERNAL, false);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -61,25 +68,44 @@ public type KeyValidationHandler object {
         string authHeader = invocationContext.attributes[AUTH_HEADER].toString();
         string headerValue = req.getHeader(authHeader);
         string credential = <@untainted>headerValue.substring(6, headerValue.length()).trim();
-        var authenticationResult = self.oauth2KeyValidationProvider.authenticate(credential);
-        if (authenticationResult is boolean) {
-            if (authenticationResult) {
+        string authHeaderName = getAuthorizationHeader(invocationContext);
+        boolean|auth:Error authenticationResult = false;
+        if (self.externalKM) {
+            authenticationResult = self.introspectProvider.authenticate(credential);
+            if (authenticationResult is auth:Error) {
+                return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
+            } else {
                 AuthenticationContext authenticationContext = {};
-                authenticationContext = <AuthenticationContext>invocationContext.attributes[
-                AUTHENTICATION_CONTEXT];
-
-                if (authenticationContext?.callerToken is string && authenticationContext?.callerToken != () && authenticationContext?.callerToken != "") {
-                    printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
-                    callerToken);
-                    string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
-                    req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
+                authenticationContext.authenticated = authenticationResult;
+                runtime:Principal? principal = invocationContext?.principal;
+                if (principal is runtime:Principal) {
+                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                 }
-                string authHeaderName = getAuthorizationHeader(invocationContext);
                 checkAndRemoveAuthHeaders(req, authHeaderName);
+                invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                return authenticationResult;
             }
-            return authenticationResult;
         } else {
-            return prepareAuthenticationError("Failed to authenticate with key validation auth handler.", authenticationResult);
+            authenticationResult = self.oauth2KeyValidationProvider.authenticate(credential);
+            if (authenticationResult is boolean) {
+                if (authenticationResult) {
+                    AuthenticationContext authenticationContext = {};
+                    authenticationContext = <AuthenticationContext>invocationContext.attributes[
+                    AUTHENTICATION_CONTEXT];
+
+                    if (authenticationContext?.callerToken is string && authenticationContext?.callerToken != () 
+                            && authenticationContext?.callerToken != "") {
+                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
+                        callerToken);
+                        string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
+                        req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
+                    }
+                    checkAndRemoveAuthHeaders(req, authHeaderName);
+                }
+                return authenticationResult;
+            } else {
+                return prepareAuthenticationError("Failed to authenticate with key validation auth handler.", authenticationResult);
+            }
         }
     }
 
