@@ -62,7 +62,7 @@ public function initGRPCService(){
     }
 }
 
-
+//publishes data to relevant stream
 public function dataToAnalytics(AnalyticsStreamMessage message){
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
