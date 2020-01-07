@@ -619,3 +619,5 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
 }
+
+

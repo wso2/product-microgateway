@@ -239,12 +239,12 @@ public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
 public const string API_KEY_HEADER = "apikey";
-public const string API_KEY_INSTANCE_ID = "apiKeyConfig";
+public const string API_KEY_ISSUER_TOKEN_CONFIG = "apikey.issuer.tokenConfig";
 public const string API_KEY_ISSUER = "issuer";
-public const string API_KEY_AUDIENCE = "audience";
-public const string API_KEY_VALIDATE_SUBSCRIPTION = "validateSubscription";
-public const string API_KEY_KEYSTORE_ALIAS = "keyStoreAlias";
-public const string API_KEY_ISSUER_INSTANCE_ID = "apiKeyConfig.apiKeyIssuer";
+public const string API_KEY_ISSUER_AUDIENCE = "audience";
+public const string API_KEY_ISSUER_KEY_STORE_PATH = "keyStorePath";
+public const string API_KEY_ISSUER_KEY_STORE_PASSWORD = "keyStorePassword";
+public const string API_KEY_ISSUER_KEYSTORE_ALIAS = "keyStoreAlias";
 public const string API_KEY_VALIDITY_PERIOD = "validityPeriod";
 
 public const string CACHING_ID = "caching";
