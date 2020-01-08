@@ -98,15 +98,16 @@ public function provideAPIKey(http:Request req) returns string | error {
             string name = <string>apiMap.get("name");
             string basepath = <string>apiMap.get("basepath");
             if (!apiMap.hasKey("versions") || stringutils:equalsIgnoreCase("*", <string>apiMap.get("versions"))) {
-                json api = {subscriberTenantDomain: "undefined", name: name, context: basepath + "/*" , publisher: "undefined", subscriptionTier:"Default", 'version: "*" };
+                json api = {name: name, context: basepath + "/*" , 'version: "*" };
                 apis.push(api);  
-                break; 
             }
-            string allowedVersionsfromConfig = <string>apiMap.get("versions");
-            string[] allowedVersionList = split(allowedVersionsfromConfig, ",");
-            foreach string v in allowedVersionList {
-                json api = {subscriberTenantDomain: "undefined", name: name, context: basepath + "/" + v.trim(), publisher: "undefined", subscriptionTier:"Default", 'version: v.trim() };           
-                apis.push(api);                           
+            else{
+                string allowedVersionsfromConfig = <string>apiMap.get("versions");
+                string[] allowedVersionList = split(allowedVersionsfromConfig, ",");
+                foreach string v in allowedVersionList {
+                    json api = { name: name, context: basepath + "/" + v.trim(), 'version: v.trim() };           
+                    apis.push(api);                           
+                }
             }                 
         }
         else {
@@ -136,3 +137,67 @@ public function provideAPIKey(http:Request req) returns string | error {
 //     }
 //     return false;
 // }
+
+# If api key is given. validate the user in sub claim.
+#
+# + apiKeyToken - api key token string.
+# + return - Returns boolean value.
+public function validateAPIKey(string apiKeyToken) returns boolean {
+    //decode jwt
+    [jwt:JwtHeader,jwt:JwtPayload]|jwt:Error decodedJWT = jwt:decodeJwt(apiKeyToken);
+    if (decodedJWT is error) {
+        printDebug(API_KEY_UTIL, "Error while decoding the JWT token");
+        return false;
+    }
+    [jwt:JwtHeader,jwt:JwtPayload] [jwtHeader,payload] = <[jwt:JwtHeader,jwt:JwtPayload]> decodedJWT;
+    map<json>? customClaims = payload?.customClaims;
+    string? username = payload?.sub;
+
+    //invocation context
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();  
+    AuthenticationContext authenticationContext = {};
+    authenticationContext.apiKey = apiKeyToken;
+    authenticationContext.callerToken = apiKeyToken;
+    authenticationContext.authenticated = false;
+    if (username is string) {
+        printDebug(API_KEY_UTIL, "set username : " + username);
+        authenticationContext.username = username;
+    }
+
+
+    if (customClaims is map<json> && customClaims.hasKey("subscribedAPIs")){
+    //handle subscribed
+    }
+
+    //////////
+    if (customClaims is map<json> && customClaims.hasKey("allowedAPIs")){
+        printDebug(API_KEY_UTIL, "allowedAPIs claim found in the jwt");
+        //set keytype
+        printDebug(API_KEY_UTIL, "set keytype as apikey ");
+        authenticationContext.keyType = "apikey";
+        invocationContext.attributes[KEY_TYPE_ATTR] = "apikey";
+
+        json subscribedAPIList = customClaims.get("allowedAPIs");
+        if (subscribedAPIList is json[]) {  
+            APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes["SERVICE_NAME"]];
+            if (apiConfig is APIConfiguration) {
+                string apiName = apiConfig.name;
+                string apiVersion = apiConfig.apiVersion;
+                int l = subscribedAPIList.length();
+                int index = 0;
+                while (index < l) {
+                    var subscription = subscribedAPIList[index];
+                    if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+                        authenticationContext.authenticated = true;
+                        printDebug(API_KEY_UTIL, "Found a matching allowed api with name:" + subscription.name.toString() + " version:" + subscription.'version.toString());
+                        invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                        return true;
+                    }
+                    index += 1;
+                }
+            }
+        }
+    }
+    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+    return true;
+}

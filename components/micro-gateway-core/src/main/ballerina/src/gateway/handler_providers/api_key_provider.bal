@@ -16,6 +16,7 @@
 
 import ballerina/jwt;
 import ballerina/auth;
+import ballerina/runtime;
 
 
 # Represents inbound api key auth provider.
@@ -37,16 +38,30 @@ public type APIKeyProvider object {
     }
 
     public function authenticate(string credential) returns @tainted (boolean|auth:Error) {
+        //Start a span attaching to the system span.
+        int | error | () spanIdAuth = startSpan(API_KEY_PROVIDER_AUTHENTICATE);
         var handleVar = self.inboundJwtAuthProviderforAPIKey.authenticate(credential);
+        //finishing span
+        finishSpan(API_KEY_PROVIDER_AUTHENTICATE, spanIdAuth);       
         if(handleVar is boolean) {
+            boolean validated = false;
             if (!handleVar) {            
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return false;
             } 
-            return true;
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;             
+            if (authContext is runtime:AuthenticationContext) {
+                authContext.scheme = AUTH_SCHEME_API_KEY;
+                validated = validateAPIKey(credential);
+            }
+            if (!validated) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            }
+            return validated;
         } else {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-            return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
-        }
-    }    
+            return prepareError("Failed to authenticate with api key auth provider.", handleVar);
+        }  
+    }  
 };

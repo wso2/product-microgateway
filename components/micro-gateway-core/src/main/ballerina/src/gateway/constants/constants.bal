@@ -17,6 +17,7 @@
 public const string AUTHN_SCHEME_BASIC = "basic";
 public const string AUTH_SCHEME_JWT = "jwt";
 public const string AUTH_SCHEME_OAUTH2 = "oauth2";
+public const string AUTH_SCHEME_API_KEY = "apikey";
 public const string AUTH_PROVIDER_CONFIG = "config";
 public const string AUTH_HEADER = "Authorization";
 public const string TEMP_AUTH_HEADER = "WSO2-Authorization";
