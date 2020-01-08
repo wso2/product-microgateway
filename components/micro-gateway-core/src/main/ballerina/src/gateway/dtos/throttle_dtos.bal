@@ -72,3 +72,36 @@ public type IntermediateStream record {
     boolean stopOnQuota = false;
     int expiryTimeStamp = 0;
 };
+
+public type InputRequest record {
+    int resetTimestamp = 0;
+    int remainingQuota = 0;
+    boolean isThrottled = false;
+    string messageID = "";
+    string apiKey = "";
+    string appKey = "";
+    boolean stopOnQuota = false;
+    string subscriptionKey = "";
+    string policyKey="";
+    string appTier = "";
+    string apiTier = "";
+    string subscriptionTier = "";
+    string resourceKey = "";
+    string resourceTier = "";
+    string userId = "";
+    string apiContext = "";
+    string apiVersion = "";
+    string appTenant = "";
+    string apiTenant = "";
+    string appId = "";
+    string apiName = "";
+    string properties = "";
+};
+
+public type ThrottledRequest record{
+    string policyKey ="";
+    boolean stopOnQuota = false;
+    int? resetTimestamp;
+    int? remainingQuota;
+    boolean isThrottled = false;
+};

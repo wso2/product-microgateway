@@ -28,23 +28,28 @@ service messageServ = service {
         printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage received.");
         if (message is jms:MapMessage) {
             string?|error throttleKey = message.getString(THROTTLE_KEY);
+            string?|error policyKey = message.getString(POLICY_KEY);
+            int? resetTimestamp=0;
+            int? remainingQuota=0;
+
             boolean|error throttleEnable = message.getBoolean(IS_THROTTLED);
-            int|error expiryTime = message.getLong(EXPIRY_TIMESTAMP);
             string?|error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
-            if (throttleKey is string) {
-                printDebug(KEY_THROTTLE_UTIL, "Throttle Key : " + throttleKey.toString() + " Throttle status : " +
+            if (policyKey is string && throttleKey is string) {
+                printDebug(KEY_THROTTLE_UTIL, "policy Key : " + policyKey.toString() + " Throttle status : " +
                 throttleEnable.toString());
-                if (throttleEnable is boolean && expiryTime is int) {
-                    GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
-                    throttleKey: throttleKey,
-                    isThrottled: throttleEnable,
-                    expiryTimeStamp: expiryTime };
-                    if (globalThrottleStreamDtoTM.isThrottled == true) {
+                if (throttleEnable is boolean ) {
+                    ThrottledRequest throttledRequest = {
+                    policyKey: policyKey,
+                    resetTimestamp:resetTimestamp,
+                    remainingQuota:remainingQuota,
+                    isThrottled: throttleEnable
+                     };
+                    if (throttledRequest.isThrottled == true) {
                         printDebug(KEY_THROTTLE_UTIL, "Adding to throttledata map.");
-                        putThrottleData(globalThrottleStreamDtoTM);
+                        putThrottleData(throttledRequest,throttleKey);
                     } else {
                         printDebug(KEY_THROTTLE_UTIL, "Romoving from throttledata map.");
-                        removeThrottleData(globalThrottleStreamDtoTM.throttleKey);
+                        removeThrottleData(throttleKey);
                     }
                 }  else {
                      printDebug(KEY_THROTTLE_UTIL, "Throlling configs values are wrong.");
@@ -58,6 +63,7 @@ service messageServ = service {
         }
     }
 };
+
 
  # `startSubscriberService` function create jms connection, jms session and jms topic subscriber.
  # It binds the subscriber endpoint and jms listener
