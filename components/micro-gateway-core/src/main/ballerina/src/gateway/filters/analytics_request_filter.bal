@@ -329,8 +329,8 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
 
 
 
-     subscriber : " ",
-     throttledOutReason : " ",
+     subscriber : "",
+     throttledOutReason : "",
      throttledOutTimestamp : 0,
      hostname : faultDTO.hostName,
  
