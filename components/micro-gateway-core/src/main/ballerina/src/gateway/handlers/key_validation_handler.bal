@@ -77,12 +77,14 @@ public type KeyValidationHandler object {
             } else {
                 AuthenticationContext authenticationContext = {};
                 authenticationContext.authenticated = authenticationResult;
+                authenticationContext.keyType = PRODUCTION_KEY_TYPE;
                 runtime:Principal? principal = invocationContext?.principal;
                 if (principal is runtime:Principal) {
                     authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                 }
                 checkAndRemoveAuthHeaders(req, authHeaderName);
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                 return authenticationResult;
             }
         } else {

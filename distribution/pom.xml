@@ -56,6 +56,12 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
+            <type>zip</type>
+            <classifier>mgw-balo</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
@@ -107,6 +113,17 @@
                         <configuration>
                             <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>
                             <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-gw-balo</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeClassifiers>mgw-balo</includeClassifiers>
+                            <outputDirectory>${project.build.directory}/lib/gw-balo/</outputDirectory>
                         </configuration>
                     </execution>
 <!--                    <execution>-->
@@ -200,18 +217,18 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>extract-zip</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>extract-zip</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <configuration>-->
+<!--                            <tasks>-->
+<!--                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>-->
+<!--                            </tasks>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                     <execution>
                         <phase>verify</phase>
                         <goals>

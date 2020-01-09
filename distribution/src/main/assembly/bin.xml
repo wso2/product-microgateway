@@ -62,6 +62,10 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/bir-cache</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/lib/gw-balo/</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway-balo</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/lib/jar/</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
         </fileSet>

@@ -40,7 +40,7 @@ public function putBlockCondition(jms:MapMessage m) {
     string?|error conditionState = m.getString(BLOCKING_CONDITION_STATE);
     if (conditionState == TRUE && conditionState is string && conditionValue is string) {
         blockConditionExist = true;
-        blockConditions[conditionValue] = conditionValue;
+        blockConditions[conditionValue] = <@untainted>conditionValue;
     } else {
         if (conditionValue is string) {
         _ = blockConditions.remove(conditionValue);
@@ -131,7 +131,7 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
 }
 
 public function putThrottleData(GlobalThrottleStreamDTO throttleEvent) {
-    throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
+    throttleDataMap[throttleEvent.throttleKey] = <@untainted>throttleEvent;
 }
 public function removeThrottleData(string key) {
     _ = throttleDataMap.remove(key);

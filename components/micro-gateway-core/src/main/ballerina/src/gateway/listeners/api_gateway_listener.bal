@@ -315,7 +315,6 @@ function getCredentialBearer() returns http:CredentialBearer {
         return http:AUTH_HEADER_BEARER;
     } else if (stringutils:equalsIgnoreCase(crednetailBearerString, http:POST_BODY_BEARER)) {
         return http:POST_BODY_BEARER;
-    } else {
-        return http:NO_BEARER;
-    }
+    } 
+    return http:NO_BEARER;
 }

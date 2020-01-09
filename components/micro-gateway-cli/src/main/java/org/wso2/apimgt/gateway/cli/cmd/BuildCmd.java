@@ -270,7 +270,10 @@ public class BuildCmd implements LauncherCmd {
     private void updateProjectOrganizationName(String projectName) throws IOException {
         String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
                 + CliConstants.BALLERINA_TOML_FILE;
-        String fileContent = CmdUtils.readFileAsString(ballerinaTomlFile, false);
+        String templateFile = CmdUtils.getMicroGWConfResourceLocation() + File.separator
+                + CliConstants.BALLERINA_TOML_FILE;
+        String fileContent = CmdUtils.readFileAsString(templateFile, false);
+        fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, CmdUtils.getCLIHome());
         fileContent = fileContent.replaceFirst("org-name=.*\"", "org-name= \"wso2\"");
         Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
