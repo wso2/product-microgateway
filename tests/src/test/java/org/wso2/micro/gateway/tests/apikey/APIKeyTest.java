@@ -59,15 +59,14 @@ public class APIKeyTest extends BaseTestCase {
     }
 
     @Test(description = "Test to check the issued token is a valid apikey", dependsOnMethods = "getTokenTest")
-    private void invokeApiWithAPIKeyTest() throws Exception {
+    private void invokeNoAPIKeySchemeApiWithAPIKeyTest() throws Exception {
 
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put("apikey", token);
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
 
 //    @Test(description = "Server restart", dependsOnMethods = "invokeApiWithAPIKeyTest" )

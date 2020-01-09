@@ -240,6 +240,8 @@ public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
 public const string API_KEY_HEADER = "apikey";
+public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
+public const string API_KEY_VALIDATE_ALLOWED_APIS = "validateAllowedAPIs";
 public const string API_KEY_ISSUER_TOKEN_CONFIG = "apikey.issuer.tokenConfig";
 public const string API_KEY_ISSUER = "issuer";
 public const string API_KEY_ISSUER_AUDIENCE = "audience";
@@ -337,6 +339,7 @@ const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 const string API_KEY_UTIL = "APIKeyUtil";
+const string API_KEY_HANDLER = "APIKeyHandler";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds

@@ -88,6 +88,7 @@ returns boolean {
     string[] authProvidersIds = getAuthProviders(context.getServiceName(), context.getResourceName());
     printDebug(KEY_PRE_AUTHN_FILTER, "Auth providers array  : " + authProvidersIds.toString());
 
+    boolean apiKeyAuth = ((request.hasHeader(API_KEY_HEADER)) || (request.getQueryParamValue(API_KEY_HEADER) is string)) ? true : false;
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);
     } else if (request.hasHeader(COOKIE_HEADER)) {
@@ -99,7 +100,7 @@ returns boolean {
                 authHeader = authCookie;
             }
         }
-    } else if (request.hasHeader(API_KEY_HEADER)) {
+    } else if (apiKeyAuth) {
         authHeader = API_KEY_HEADER;
     }
     string providerId;
@@ -116,15 +117,14 @@ returns boolean {
         }
     }
 
-    boolean isMissingAuthCredentials = isSecuredResource && (!request.hasHeader(authHeaderName) 
-        || request.getHeader(authHeaderName).length() == 0) && (!request.hasHeader(API_KEY_HEADER) 
-        || request.getHeader(API_KEY_HEADER).length() == 0);
-    if (isMissingAuthCredentials) {
+    if (isSecuredResource) {
+        if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !apiKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
             sendErrorResponse(caller, request, context);
             return false;
+        }
     }
 
     if (!canHandleAuthentication) {
@@ -158,9 +158,6 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
 function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
     if (contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
-    } else if (contains(authHeader, API_KEY_HEADER)) {
-        printDebug(KEY_PRE_AUTHN_FILTER, "apikey header detected in cookie");
-        return API_KEY_HEADER;
     } else {
         return AUTH_SCHEME_OAUTH2;
     }

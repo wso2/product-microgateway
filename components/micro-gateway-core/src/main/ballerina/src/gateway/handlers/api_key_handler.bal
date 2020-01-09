@@ -34,7 +34,16 @@ public type APIKeyHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        return req.hasHeader(API_KEY_HEADER);
+        if (req.hasHeader(API_KEY_HEADER)) {
+            return true;
+        } else {
+            string? apikeyQuery =  req.getQueryParamValue(API_KEY_HEADER);
+            if ( apikeyQuery is string) {
+                printDebug(API_KEY_HANDLER, "apikey provided in request query : " + apikeyQuery );
+                return true;
+            }
+        }        
+        return false;
     }
 
     # Authenticates the incoming request with the use of credentials passed as the Bearer Auth header.
@@ -43,7 +52,16 @@ public type APIKeyHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
-        string credentials = req.getHeader(API_KEY_HEADER);
+        string credentials = "";
+        if (req.hasHeader(API_KEY_HEADER)) {
+            credentials = req.getHeader(API_KEY_HEADER);
+        } else {
+            string? apikeyQuery =  req.getQueryParamValue(API_KEY_HEADER);
+            if ( apikeyQuery is string) {
+                credentials = apikeyQuery;
+            }
+        }
+        
         var authenticationResult = self.apiKeyProvider.authenticate(credentials);
         if (authenticationResult is boolean) {
             return authenticationResult;
