@@ -347,6 +347,7 @@ public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
 //jwt claims
 const string APPLICATION = "application";
 const string SUBSCRIBED_APIS = "subscribedAPIs";
+const string ALLOWED_APIS = "allowedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
 

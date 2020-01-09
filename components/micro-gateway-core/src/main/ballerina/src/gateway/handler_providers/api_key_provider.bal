@@ -80,30 +80,26 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
         return false;
     }
     [jwt:JwtHeader,jwt:JwtPayload] [jwtHeader,payload] = <[jwt:JwtHeader,jwt:JwtPayload]> decodedJWT;
-    map<json>? customClaims = payload?.customClaims;
-    string? username = payload?.sub;
 
     //invocation context 
     AuthenticationContext authenticationContext = {};
     authenticationContext.apiKey = apiKeyToken;
     authenticationContext.callerToken = apiKeyToken;
     authenticationContext.authenticated = false;
+
+    string? username = payload?.sub;
     if (username is string) {
         printDebug(API_KEY_UTIL, "set username : " + username);
         authenticationContext.username = username;
     }
 
+    map<json>? customClaims = payload?.customClaims;
     //set keytype
-    if (customClaims is map<json> && customClaims.hasKey("keytype")) {
-        json keyType = customClaims.get("keytype");
+    if (customClaims is map<json> && customClaims.hasKey(KEY_TYPE)) {
+        json keyType = customClaims.get(KEY_TYPE);
         printDebug(API_KEY_UTIL, "set keytype as " + keyType.toString());
         authenticationContext.keyType = keyType.toString();
         invocationContext.attributes[KEY_TYPE_ATTR] = keyType;
-    }
-    else {
-        printDebug(API_KEY_UTIL, "set keytype as apikey.");
-        authenticationContext.keyType = "apikey";
-        invocationContext.attributes[KEY_TYPE_ATTR] = "apikey";
     }
     //set application attribs if present in token
     if (customClaims is map<json> && customClaims.hasKey("application")) {
@@ -127,19 +123,18 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
             }
         }
     }
-
     //validate allowed apis
     boolean validateAllowedAPIs = getConfigBooleanValue(API_KEY_INSTANCE_ID, API_KEY_VALIDATE_ALLOWED_APIS,false);
     if (validateAllowedAPIs) {
         //get allowed apis
         json subscribedAPIList = ();
         if (customClaims is map<json>) {
-            if (customClaims.hasKey("subscribedAPIs")) {
+            if (customClaims.hasKey(SUBSCRIBED_APIS)) {
                 printDebug(API_KEY_UTIL, "subscribedAPIs claim found in the jwt");
-                subscribedAPIList = customClaims.get("subscribedAPIs");
-            } else if (customClaims.hasKey("allowedAPIs")) {
+                subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
+            } else if (customClaims.hasKey(ALLOWED_APIS)) {
                 printDebug(API_KEY_UTIL, "allowedAPIs claim found in the jwt");
-                subscribedAPIList = customClaims.get("allowedAPIs");
+                subscribedAPIList = customClaims.get(ALLOWED_APIS);
             }
         }
             

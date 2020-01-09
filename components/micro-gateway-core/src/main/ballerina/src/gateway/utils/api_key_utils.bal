@@ -43,52 +43,6 @@ public function provideAPIKey(http:Request req) returns string | error {
     jwtPayload.exp = currentTime + expiryTime;
     jwtPayload.iat = currentTime;
 
-
-    // Add additional claims
-    // var payload = req.getJsonPayload();
-    // if (payload is json) {
-    //     json|error jsonName = payload.name;
-    //     json|error jsonVerson = payload.'version;
-    //     json[] apis = [];
-
-    //     //if request has payload
-    //     if (jsonName is json && isAPIExists(<@untainted> jsonName.toJsonString())) {
-    //         string name = <@untainted>jsonName.toJsonString();
-    //         string verson = "";
-    //         string basepath = getConfigValue("apikey.issuer.apis" + "." + name , "basepath", " ");
-    //         if (jsonVerson is json) {
-    //             verson = <@untainted>jsonVerson.toJsonString();
-    //             string[] allowedVersionList = split(getConfigValue("apikey.issuer.apis" + "." + name , "versions", " "), ",");
-
-    //             if (!stringutils:equalsIgnoreCase(verson,"")) {
-    //                 io:println("63");
-    //                 foreach string v in allowedVersionList {
-    //                     if (stringutils:equalsIgnoreCase(v,verson)) {
-    //                         io:println("66");
-    //                         json api = {subscriberTenantDomain: "undefined", name: name, context: basepath + "/" + v, publisher: "undefined", subscriptionTier:"Default", 'version: v };
-    //                         apis.push(api);
-    //                     }
-    //                 }
-    //             } else {
-    //                 io:println("72");
-    //                 foreach string v in allowedVersionList {
-    //                     io:println("74");
-    //                     json api = {subscriberTenantDomain: "undefined", name: name, context: basepath + "/" + v, publisher: "undefined", subscriptionTier:"Default", 'version: v };
-    //                     apis.push(api);                           
-    //                 }
-    //             }              
-    //         } else {
-    //             printDebug(API_KEY_UTIL, "error while getting request version.");
-    //         }
-
-    //     } else {
-    //             printDebug(API_KEY_UTIL, "error while processing request API name.");
-    //     }
-        
-    // } else {
-    //     printDebug(API_KEY_UTIL, "error while getting request payload.");
-    // }
-  
     json[] apis = [];
     int counter = 1;
     while (true) {  
@@ -116,7 +70,8 @@ public function provideAPIKey(http:Request req) returns string | error {
     }
     map<json[]> customClaims = {};
     json[] subscribedAPIs = apis;
-    customClaims["allowedAPIs"] = subscribedAPIs;
+    customClaims[ALLOWED_APIS] = subscribedAPIs;
+    customClaims[KEY_TYPE] = <json[]> PRODUCTION_KEY_TYPE;
     jwtPayload.customClaims = customClaims;
 
     printDebug(API_KEY_UTIL, "API Key is being issued.. .");
@@ -124,16 +79,3 @@ public function provideAPIKey(http:Request req) returns string | error {
     printDebug(API_KEY_UTIL, "API Key issuing process completed");
     return apiKey;
 }
-
-// # Read the config and check whether the api exists.
-// #
-// # + apiName - api name.
-// # + return - Returns boolean value.
-// public function isAPIExists(string apiName) returns boolean {
-//     string basepath = getConfigValue("apikey.issuer.apis" + "." + apiName , "basepath", " ");
-//     if (!stringutils:equalsIgnoreCase(" ", basepath)) {
-//         printDebug(API_KEY_UTIL, "api" + apiName + "exists. basepath: " + basepath);
-//         return true;
-//     }
-//     return false;
-// }
