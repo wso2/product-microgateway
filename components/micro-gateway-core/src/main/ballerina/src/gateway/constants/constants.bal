@@ -123,7 +123,6 @@ public const string REQUIRE = "require";
 
 
 //Analytics filter related constants
-<<<<<<< HEAD
  public const string ZIP_EXTENSION = ".zip";
  public const string UPLOADING_URL = "uploadingUrl";
  public const string API_USAGE_FILE = "api-usage-data.dat";
@@ -150,37 +149,9 @@ public const string REQUIRE = "require";
  public const string FILE_UPLOAD_TASK = "taskUploadFiles";
  public const string INITIAL_DELAY = "initialDelayInMillis";
  public const string DESTINATION = "destination";
-=======
-public const string ZIP_EXTENSION = ".zip";
-public const string UPLOADING_URL = "uploadingUrl";
-public const string API_USAGE_FILE = "api-usage-data.dat";
-public const string TIME_INTERVAL = "timeInterval";
-public const string FILE_NAME = "FileName";
-public const string ACCEPT = "Accept";
-public const string ANALYTICS = "analytics";
-public const string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
-public const string ROTATING_TIME = "rotatingPeriod";
-public const string UPLOADING_EP = "uploadingEndpoint";
-public const string REQUEST_TIME = "REQUEST_TIME";
-public const string DATACENTER_ID = "datacenterId";
-public const string THROTTLE_LATENCY = "THROTTLE_LATENCY";
-public const string SECURITY_LATENCY_AUTHN = "SECURITY_LATENCY_AUTHN";
-public const string SECURITY_LATENCY_AUTHZ = "SECURITY_LATENCY_AUTHZ";
-public const string SECURITY_LATENCY_AUTHZ_RESPONSE = "SECURITY_LATENCY_AUTHZ_RESPONSE";
-public const string SECURITY_LATENCY_SUBS = "SECURITY_LATENCY_SUBS";
-public const string SECURITY_LATENCY_VALIDATION = "SECURITY_LATENCY_VALIDATION";
-public const string METHOD = "METHOD";
-public const string TS_REQUEST_OUT = "timeStampRequestOut";
-public const string TS_RESPONSE_IN = "timeStampResponseIn";
-public const string API_USAGE_PATH = "api.usage.data.path";
-public const string API_USAGE_DIR = "api-usage-data";
-public const string FILE_UPLOAD_TASK = "taskUploadFiles";
-public const string INITIAL_DELAY = "initialDelayInMillis";
-public const string DESTINATION = "destination";
->>>>>>> d090932d80bca3d426fd25e88f5e697819c7ab6a
 
  //gRPC analytics related constants
- public const string GRPC_ANALYTICS = "analytics.gRPCAnaltics";
+ public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
  public const string GRPC_ENDPOINT_URL = "endpointURL";
  public const string KEYSTORE_FILE_PATH = "keyStorePath";
  public const string KEYSTORE_PASSWORD = "keyStorePassword";
@@ -355,6 +326,7 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
+// const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins

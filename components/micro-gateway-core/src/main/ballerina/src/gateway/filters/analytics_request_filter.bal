@@ -148,7 +148,6 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
     }
 
-    //###Commented
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
@@ -162,6 +161,7 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         doFilterFault(context, resp);
     }
 }
+//new Implementations for gRPC Analytics
 //#####################################################################
 
 public function createResponseMessage(RequestResponseExecutionDTO requestResponseExecutionDTO) returns AnalyticsStreamMessage {

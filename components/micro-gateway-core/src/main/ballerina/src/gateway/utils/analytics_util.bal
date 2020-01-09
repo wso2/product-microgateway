@@ -23,6 +23,16 @@ import ballerina/time;
 boolean isAnalyticsEnabled = false;
 boolean configsRead = false;
 
+//gRPCConfigs
+boolean isgRPCAnalyticsEnabled = false;
+boolean gRPCConfigsRead = false;
+string endpointURL = "";
+string gRPCKeyStoreFile = "";
+string gRPCKeyStorePassword = "";
+string gRPCTrustStoreFile = "";
+string gRPCTrustStorePassword = "";
+int gRPCReconnectTime = 3000;
+
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO | error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};

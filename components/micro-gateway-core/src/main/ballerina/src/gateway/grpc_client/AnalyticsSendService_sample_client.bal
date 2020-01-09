@@ -1,5 +1,4 @@
 import ballerina/grpc;
-import ballerina/io;
 import ballerina/log;
 import ballerina/task;
 
@@ -20,7 +19,7 @@ service connectGRPC = service {
     resource function onTrigger(){
         if(gRPCConnection == false){
             initGRPCService();
-            io:println("Connection will retry again in "+ reConnectTime.toString() +" milliseconds if there is a connection error.");
+            log:printWarn("Connection will retry again in "+ reConnectTime.toString() +" milliseconds if there is a connection error.");
         }
     }
 };
@@ -46,14 +45,14 @@ config = {
 public function initGRPCService(){
     var attachResult = gRPCConnectTimer.attach(connectGRPC);
      if (attachResult is error) {
-        io:println("Error attaching the service1.");
+        log:printError("Error attaching the service1.");
         return;
     }
 
-    io:println("gRPC Analytics initiating...");
+    log:printWarn("gRPC Analytics initiating...");// info
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
     if (gRPCres is grpc:Error) {
-        io:println("Error from Connector: " + gRPCres.reason() + " - "
+        log:printError("Error from Connector: " + gRPCres.reason() + " - "
                                            + <string> gRPCres.detail()["message"]);
         return;
     } else {
@@ -66,7 +65,7 @@ public function initGRPCService(){
 public function dataToAnalytics(AnalyticsStreamMessage message){
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            io:println("Error from Connector: " + connErr.reason() + " - "
+            log:printError("Error from Connector: " + connErr.reason() + " - "
                                        + <string> connErr.detail()["message"]);
             
         } else {
@@ -75,7 +74,7 @@ public function dataToAnalytics(AnalyticsStreamMessage message){
                 //terminates the timer if gRPPCConnection variable assigned as false
                 var stop = gRPCConnectTimer.stop();
                 if (stop is error) {
-                    io:println("Stopping the task is failed.");
+                    log:printError("Stopping the task is failed.");
                     return;
                 }
             }
@@ -92,7 +91,7 @@ service AnalyticsSendServiceMessageListener = service {
     resource function onError(error err) {
         //Triggers @ when startup when gRPC connection is closed.
         if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false){
-            io:println("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
+            log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
             
             var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
@@ -105,10 +104,10 @@ service AnalyticsSendServiceMessageListener = service {
         //(Triggers when wroked gRPC connection get closed)
         if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == true){
             gRPCConnection = false;
-            io:println("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
+            log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
             var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
-                    io:println("Starting the task is failed.");
+                    log:printError("Starting the task is failed.");
                     return;
             }
         }
