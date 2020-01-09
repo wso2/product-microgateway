@@ -20,6 +20,7 @@ import ballerina/log;
 import ballerina/runtime;
 import ballerina/stringutils;
 import ballerina/time;
+import ballerina/oauth2;
 
 
 xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
@@ -30,7 +31,6 @@ xmlns "http://dto.impl.apimgt.carbon.wso2.org/xsd" as apim;
 #
 # + keyValidationClient - key validation client endpoint
 # + gatewayCache - the `APIGatewayCache instence`
-# + encodedBasicAuthHeader - encode Header
 # 
 public type OAuth2KeyValidationProvider object {
 
@@ -38,12 +38,8 @@ public type OAuth2KeyValidationProvider object {
 
     public http:Client keyValidationClient;
     public APIGatewayCache gatewayCache = new;
-    string encodedBasicAuthHeader;
 
-    public function __init(KeyValidationServerConfig config) {
-        string base64Header = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin") + ":" +
-        getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
-        self.encodedBasicAuthHeader = base64Header.toBytes().toBase64();
+    public function __init(oauth2:IntrospectionServerConfig config) {
         self.keyValidationClient = new (config.url, config.clientConfig);
     }
 
@@ -192,7 +188,6 @@ public type OAuth2KeyValidationProvider object {
                                     </soapenv:Body>
                                 </soapenv:Envelope>`;
         keyValidationRequest.setXmlPayload(soapEnvelope, contentType = TEXT_XML);
-        keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + self.encodedBasicAuthHeader);
         keyValidationRequest.setHeader(SOAP_ACTION, VALIDATE_KEY_SOAP_ACTION);
         time:Time time = time:currentTime();
         int startTimeMills = time.time;
