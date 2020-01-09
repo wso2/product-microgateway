@@ -49,7 +49,7 @@ public function initGRPCService(){
         return;
     }
 
-    log:printWarn("gRPC Analytics initiating...");// info
+    log:printInfo("gRPC Analytics initiating...");
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
     if (gRPCres is grpc:Error) {
         log:printError("Error from Connector: " + gRPCres.reason() + " - "

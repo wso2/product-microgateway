@@ -211,13 +211,13 @@ public function createResponseMessage(RequestResponseExecutionDTO requestRespons
 
 
 
-     subscriber : " ",
-     throttledOutReason : " ",
+     subscriber : "",
+     throttledOutReason : "",
      throttledOutTimestamp : 0,
-     hostname : " ",
+     hostname : "",
  
-    errorCode : " ",
-    errorMessage : " "
+    errorCode : "",
+    errorMessage : ""
     };
 
     return responseAnalyticsMessage;
@@ -230,24 +230,24 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
 
      messageStreamName: "ThrottledOutStream",
      meta_clientType : throttleAnalyticsEventDTO.metaClientType,
-     applicationConsumerKey : " ",
+     applicationConsumerKey : "",
      applicationName : throttleAnalyticsEventDTO.applicationName,
      applicationId : throttleAnalyticsEventDTO.applicationId,
-     applicationOwner : " ",
+     applicationOwner : "",
      apiContext : throttleAnalyticsEventDTO.apiContext,
      apiName : throttleAnalyticsEventDTO.apiName,
      apiVersion : throttleAnalyticsEventDTO.apiVersion,
-     apiResourcePath : " ",
-     apiResourceTemplate : " ",
-     apiMethod : " ",
+     apiResourcePath : "",
+     apiResourceTemplate : "",
+     apiMethod : "",
      apiCreator : throttleAnalyticsEventDTO.apiCreator,
      apiCreatorTenantDomain : throttleAnalyticsEventDTO.apiCreatorTenantDomain,
-     apiTier : " ",
-     apiHostname : " ",
+     apiTier : "",
+     apiHostname : "",
      username : throttleAnalyticsEventDTO.userName,
      userTenantDomain : throttleAnalyticsEventDTO.userTenantDomain,
-     userIp : " ",
-     userAgent : " ",
+     userIp : "",
+     userAgent : "",
      requestTimestamp : 0,
      throttledOut : false,
      responseTime :0,
@@ -255,9 +255,9 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
      backendTime : 0,
      responseCacheHit : false,
      responseSize : 0,
-     protocol : " ",
+     protocol : "",
      responseCode  : 0,
-     destination : " ",
+     destination : "",
      securityLatency  : 0,
      throttlingLatency  : 0,
      requestMedLat : 0 ,
@@ -265,7 +265,7 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
      backendLatency : 0 ,
      otherLatency : 0,
      gatewayType : throttleAnalyticsEventDTO.gatewayType,
-     label  : " ",
+     label  : "",
 
 
 
@@ -274,8 +274,8 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
      throttledOutTimestamp : throttleAnalyticsEventDTO.throttledTime,
      hostname : throttleAnalyticsEventDTO.hostname,
  
-    errorCode : " ",
-    errorMessage : " "
+    errorCode : "",
+    errorMessage : ""
     };
     return throttleAnalyticsMessage;
 }
@@ -293,21 +293,21 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
      applicationConsumerKey : faultDTO.consumerKey,
      applicationName : faultDTO.applicationName,
      applicationId : faultDTO.applicationId,
-     applicationOwner : " ",
+     applicationOwner : "",
      apiContext : faultDTO.apiContext,
      apiName : faultDTO.apiName,
      apiVersion : faultDTO.apiVersion,
      apiResourcePath : faultDTO.resourcePath,
-     apiResourceTemplate : " ",
+     apiResourceTemplate : "",
      apiMethod : faultDTO.method,
      apiCreator : faultDTO.apiCreator,
      apiCreatorTenantDomain : faultDTO.apiCreatorTenantDomain,
-     apiTier : " ",
-     apiHostname : " ",
+     apiTier : "",
+     apiHostname : "",
      username : faultDTO.userName,
      userTenantDomain : faultDTO.userTenantDomain,
-     userIp : " ",
-     userAgent : " ",
+     userIp : "",
+     userAgent : "",
      requestTimestamp : faultDTO.faultTime,
      throttledOut : false,
      responseTime :0,
@@ -317,15 +317,15 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
      responseSize : 0,
      protocol : faultDTO.protocol,
      responseCode  : 0,
-     destination : " ",
+     destination : "",
      securityLatency  : 0,
      throttlingLatency  : 0,
      requestMedLat : 0 ,
      responseMedLat : 0,
      backendLatency : 0 ,
      otherLatency : 0,
-     gatewayType : " ",
-     label  : " ",
+     gatewayType : "",
+     label  : "",
 
 
 
