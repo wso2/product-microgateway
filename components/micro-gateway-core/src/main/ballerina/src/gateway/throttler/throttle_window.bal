@@ -62,7 +62,7 @@ import ballerina/time;
 # + scheduler - scheduler which emits timer events
 # + counts - counts map to hold current event count per partition
 #
-#x
+
 public type ThrottleWindow object {
     *streams:Window;
     public int quota = 0;
@@ -132,21 +132,22 @@ public type ThrottleWindow object {
     # + streamEvents - The array of stream events to be processed.
     public function process(streams:StreamEvent?[] streamEvents) {
         streams:StreamEvent?[] currentEvents = [];
-        foreach var evt in streamEvents {
-            streams:StreamEvent event = <streams:StreamEvent>evt;
-            string pk = self.getPartitionKey(event, self.partitionAttribute);
-            if (event.eventType == "CURRENT") {
-                self.counts[pk] = <int>self.counts[pk] + 1;
-                self.addThrottleData(event, <int>self.counts[pk]);
-                currentEvents[currentEvents.length()] = event;
-            }
-            if (event.eventType == "TIMER") {
-                self.counts.removeAll();
-            } else {
-                continue;
+        lock {
+            foreach var evt in streamEvents {
+                streams:StreamEvent event = <streams:StreamEvent>evt;
+                string pk = self.getPartitionKey(event, self.partitionAttribute);
+                if (event.eventType == "CURRENT") {
+                    self.counts[pk] = <int>self.counts[pk] + 1;
+                    self.addThrottleData(event, <int>self.counts[pk]);
+                    currentEvents[currentEvents.length()] = event;
+                }
+                if (event.eventType == "TIMER") {
+                    self.counts.removeAll();
+                } else {
+                    continue;
+                }
             }
         }
-
         any nextProcessFuncPointer = self.nextProcessPointer;
         if (nextProcessFuncPointer is function(streams:StreamEvent?[])) {
             nextProcessFuncPointer(currentEvents);

@@ -1,7 +1,7 @@
 import wso2/gateway;
 
-stream<gateway:RequestStreamDTO> s{{name}}requestStream =gateway:getrequestStream();
-stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrottleStream = gateway:getglobalThrottleStream();
+stream<gateway:RequestStreamDTO> s{{name}}requestStream =gateway:getRequestStream();
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrottleStream = gateway:getGlobalThrottleStream();
 
 function {{funcName}}() {
     forever {

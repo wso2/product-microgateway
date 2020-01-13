@@ -53,7 +53,7 @@ public type RequestStreamDTO record {
     string messageID = "";
     string apiKey = "";
     string appKey = "";
-    boolean stopOnQuota = false;
+    boolean stopOnQuota = true;
     string subscriptionKey = "";
     string policyKey = "";
     string appTier = "";
@@ -73,7 +73,7 @@ public type RequestStreamDTO record {
 
 public type GlobalThrottleStreamDTO record {
     string policyKey = "";
-    boolean stopOnQuota = false;
+    boolean stopOnQuota = true;
     int? resetTimestamp;
     int? remainingQuota;
     boolean isThrottled = false;

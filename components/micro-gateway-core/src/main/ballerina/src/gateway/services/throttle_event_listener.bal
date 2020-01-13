@@ -64,7 +64,6 @@ service messageServ = service {
     }
 };
 
-
 # `startSubscriberService` function create jms connection, jms session and jms topic subscriber.
 # It binds the subscriber endpoint and jms listener
 #

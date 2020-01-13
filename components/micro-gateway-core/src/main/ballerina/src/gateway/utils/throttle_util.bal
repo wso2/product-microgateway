@@ -140,11 +140,11 @@ public function isPolicyExist(map<boolean> deployedPolicies, string policyName) 
     return true;
 }
 
-public function getrequestStream() returns stream<RequestStreamDTO> {
+public function getRequestStream() returns stream<RequestStreamDTO> {
     return requestStream;
 }
 
-public function getglobalThrottleStream() returns stream<GlobalThrottleStreamDTO> {
+public function getGlobalThrottleStream() returns stream<GlobalThrottleStreamDTO> {
     return globalThrottleStream;
 }
 
