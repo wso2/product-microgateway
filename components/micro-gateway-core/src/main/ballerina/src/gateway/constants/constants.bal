@@ -50,7 +50,7 @@ public const string AUTHENTICATION_CONTEXT = "AUTHENTICATION_CONTEXT";
 public const string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 public const int SUPER_TENANT_ID = -1234;
 public const string THROTTLE_KEY = "throttleKey";
-public const string POLICY_KEY="policyKey";
+public const string POLICY_KEY = "policyKey";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
 public const string RESOURCE_CONFIGURATION_ANN_NAME = "Resource";
@@ -114,14 +114,12 @@ public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
 
-
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";
 public const string USERNAME = "username";
 public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
-
 
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
@@ -193,7 +191,6 @@ public const string TIMESTAMP_SKEW = "timestampSkew";
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
 
-
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
 public const string BLOCKING_CONDITION_VALUE = "conditionValue";
@@ -264,16 +261,13 @@ public const string PERSISTENT_USE_DEFAULT = "useDefault";
 public const string PERSISTENT_MESSAGE_HOSTNAME = "hostname";
 public const string PERSISTENT_MESSAGE_USERNAME = "username";
 public const string PERSISTENT_MESSAGE_PASSWORD = "password";
-
 public const string CONFIG_USER_SECTION = "b7a.users";
 
 // end of config constants
-
 public const string IS_THROTTLED = "isThrottled";
 public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 const string TRUE = "true";
 const string REQUEST_BLOCKED = "REQUEST_BLOCKED";
-
 
 const string INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured";
 const string UNPROCESSABLE_ENTITY_MESSAGE = "Unable to process the entity";
@@ -287,7 +281,6 @@ public const int THROTTLED_OUT = 429;
 public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
-
 const string PATH_SEPERATOR = "/";
 
 //http2 constants
@@ -295,7 +288,6 @@ public const string HTTP2_INSTANCE_ID = "http2";
 public const string HTTP2_PROPERTY = "enable";
 public const string HTTP2 = "2.0";
 public const string HTTP11 = "1.1";
-
 
 // logging keys
 const string KEY_GW_LISTNER = "APIGatewayListener";
@@ -318,7 +310,6 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
-
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds

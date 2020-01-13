@@ -201,13 +201,13 @@ deployedPolicies) returns boolean {
     }
 
     //Publish throttle event to another worker flow to publish to internal policies or traffic manager
-    InputRequest throttleEvent = generateThrottleEvent(request, context, keyValidationResult);
+    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult);
     future<()> publishedEvent = start asyncPublishEvent(throttleEvent);
     printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
     return true;
 }
 
-function asyncPublishEvent(InputRequest throttleEvent) {
+function asyncPublishEvent(RequestStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
     publishNonThrottleEvent(throttleEvent);
 }
@@ -302,54 +302,54 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
 }
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
-returns (InputRequest) {
-        InputRequest inputRequest = {};
-        inputRequest.resetTimestamp = 0;
-        inputRequest.remainingQuota = 0;
-        inputRequest.isThrottled = false;
-        string? apiVersion = getVersion(context);
-        inputRequest.messageID = <string>context.attributes[MESSAGE_ID];
-        inputRequest.apiKey = getContext(context);
-        inputRequest.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
-        inputRequest.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
-        inputRequest.appTier = keyValidationDto.applicationTier;
-        inputRequest.apiTier = keyValidationDto.apiTier;
-        inputRequest.subscriptionTier = keyValidationDto.tier;
-        string resourcekey = context.getResourceName();
-        inputRequest.resourceKey = replaceAll(resourcekey, "_", "");
-        TierConfiguration? tier = resourceTierAnnotationMap[resourcekey];
-        string? policy = (tier is TierConfiguration) ? tier.policy : ();
-        if (policy is string) {
-            inputRequest.resourceTier = policy;
-        }
+returns (RequestStreamDTO) {
+    RequestStreamDTO requestStreamDTO = {};
+    requestStreamDTO.resetTimestamp = 0;
+    requestStreamDTO.remainingQuota = 0;
+    requestStreamDTO.isThrottled = false;
+    string? apiVersion = getVersion(context);
+    requestStreamDTO.messageID = <string>context.attributes[MESSAGE_ID];
+    requestStreamDTO.apiKey = getContext(context);
+    requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
+    requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
+    requestStreamDTO.appTier = keyValidationDto.applicationTier;
+    requestStreamDTO.apiTier = keyValidationDto.apiTier;
+    requestStreamDTO.subscriptionTier = keyValidationDto.tier;
+    string resourcekey = context.getResourceName();
+    requestStreamDTO.resourceKey = replaceAll(resourcekey, "_", "");
+    TierConfiguration? tier = resourceTierAnnotationMap[resourcekey];
+    string? policy = (tier is TierConfiguration) ? tier.policy : ();
+    if (policy is string) {
+        requestStreamDTO.resourceTier = policy;
+    }
 
-        inputRequest.userId = keyValidationDto.username;
-        inputRequest.apiContext = getContext(context);
-        if (apiVersion is string) {
-            inputRequest.apiVersion = apiVersion;
-        }
-        inputRequest.appTenant = keyValidationDto.subscriberTenantDomain;
-        inputRequest.apiTenant = getTenantDomain(context);
-        inputRequest.apiName = getApiName(context);
-        inputRequest.appId = keyValidationDto.applicationId;
+    requestStreamDTO.userId = keyValidationDto.username;
+    requestStreamDTO.apiContext = getContext(context);
+    if (apiVersion is string) {
+        requestStreamDTO.apiVersion = apiVersion;
+    }
+    requestStreamDTO.appTenant = keyValidationDto.subscriberTenantDomain;
+    requestStreamDTO.apiTenant = getTenantDomain(context);
+    requestStreamDTO.apiName = getApiName(context);
+    requestStreamDTO.appId = keyValidationDto.applicationId;
 
-        if (apiVersion is string) {
-            inputRequest.apiKey += ":" + apiVersion;
-            inputRequest.subscriptionKey += ":" + apiVersion;
-            inputRequest.resourceKey += ":" + apiVersion;
-        }
-        printDebug(KEY_THROTTLE_FILTER, "Resource key : " + inputRequest.resourceKey);
-        printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + inputRequest.subscriptionKey);
-        printDebug(KEY_THROTTLE_FILTER, "App key : " + inputRequest.appKey);
-        printDebug(KEY_THROTTLE_FILTER, "API key : " + inputRequest.apiKey);
-        printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + inputRequest.resourceTier);
-        printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + inputRequest.subscriptionTier);
-        printDebug(KEY_THROTTLE_FILTER, "App Tier : " + inputRequest.appTier);
-        printDebug(KEY_THROTTLE_FILTER, "API Tier : " + inputRequest.apiTier);
+    if (apiVersion is string) {
+        requestStreamDTO.apiKey += ":" + apiVersion;
+        requestStreamDTO.subscriptionKey += ":" + apiVersion;
+        requestStreamDTO.resourceKey += ":" + apiVersion;
+    }
+    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDTO.subscriptionKey);
+    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDTO.appKey);
+    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDTO.apiKey);
+    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDTO.resourceTier);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDTO.subscriptionTier);
+    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDTO.appTier);
+    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDTO.apiTier);
 
-        json properties = {};
-        inputRequest.properties = properties.toString();
-        return inputRequest;
+    json properties = {};
+    requestStreamDTO.properties = properties.toString();
+    return requestStreamDTO;
 
 
 }
@@ -362,4 +362,3 @@ function getVersion(http:FilterContext context) returns string | () {
 
     return apiVersion;
 }
-

@@ -18,8 +18,7 @@ import wso2/jms;
 
 map<string> blockConditions = {};
 map<any> throttleDataMap = {};
-stream<InputRequest> inputStream =new;
-stream<ThrottledRequest> outputStream = new;
+stream<RequestStreamDTO> requestStream = new;
 stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 boolean isStreamsInitialized = false;
 future<()> ftr = start initializeThrottleSubscription();
@@ -35,17 +34,17 @@ public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
 }
 public function putBlockCondition(jms:MapMessage m) {
-    string?|error condition = m.getString(BLOCKING_CONDITION_KEY);
-    string?|error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
-    string?|error conditionState = m.getString(BLOCKING_CONDITION_STATE);
+    string? | error condition = m.getString(BLOCKING_CONDITION_KEY);
+    string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
+    string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
     if (conditionState == TRUE && conditionState is string && conditionValue is string) {
         blockConditionExist = true;
         blockConditions[conditionValue] = <@untainted>conditionValue;
     } else {
         if (conditionValue is string) {
-        _ = blockConditions.remove(conditionValue);
+            _ = blockConditions.remove(conditionValue);
             if (blockConditions.keys().length() == 0) {
-               blockConditionExist = false;
+                blockConditionExist = false;
             }
         }
     }
@@ -57,7 +56,7 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
     printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
-        ThrottledRequest dto = <ThrottledRequest>throttleDataMap[key];
+        GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         boolean stopOnQuota = dto.stopOnQuota;
         if (enabledGlobalTMEventPublishing == true) {
             stopOnQuota = true;
@@ -68,7 +67,7 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
     return [isThrottled, false];
 }
 
-public function publishNonThrottleEvent(InputRequest throttleEvent) {
+public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     //Publish throttle event to traffic manager
     if (enabledGlobalTMEventPublishing == true) {
         publishThrottleEventToTrafficManager(throttleEvent);
@@ -76,33 +75,31 @@ public function publishNonThrottleEvent(InputRequest throttleEvent) {
     }
     //Publish throttle event to internal policies
     else {
-        inputStream.publish(throttleEvent);
-        printDebug(KEY_THROTTLE_UTIL, "Request stream : " + inputStream.toString());
+        requestStream.publish(throttleEvent);
+        printDebug(KEY_THROTTLE_UTIL, "Request stream : " + requestStream.toString());
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
     }
 }
 
 public function initializeThrottleSubscription() {
-    outputStream.subscribe(onReceiveThrottleEvent);
+    globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
     printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
 }
 
-
 // insert throttleevent into the map if it is throttled other wise remove the throttle key it from the throttledata map
-
-public function onReceiveThrottleEvent(ThrottledRequest throttleEvent) {
-    printDebug(KEY_THROTTLE_UTIL, "Event OutputThrottleStream: throttleKey: " + throttleEvent.policyKey +
-    " ,isThrottled:" + throttleEvent.isThrottled.toString() );
+public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
+    printDebug(KEY_THROTTLE_UTIL, "Event globalThrottleStream: throttleKey: " + throttleEvent.policyKey +
+    " ,isThrottled:" + throttleEvent.isThrottled.toString());
     if (throttleEvent.isThrottled) {
-        if(throttleEvent.policyKey.length() > 0  ){
-        throttleDataMap[throttleEvent.policyKey] = throttleEvent;
+        if (throttleEvent.policyKey.length() > 0) {
+            throttleDataMap[throttleEvent.policyKey] = throttleEvent;
         }
     }
     else {
-    if(throttleEvent.policyKey.length() > 0 ){
+        if (throttleEvent.policyKey.length() > 0) {
             _ = throttleDataMap.remove(throttleEvent.policyKey);
-            }
+        }
     }
 }
 
@@ -118,7 +115,7 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns st
 
 }
 
-public function getEventFromThrottleData( ThrottleAnalyticsEventDTO dto) returns EventDTO | error {
+public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO | error {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
     eventDTO.timeStamp = getCurrentTime();
@@ -128,7 +125,7 @@ public function getEventFromThrottleData( ThrottleAnalyticsEventDTO dto) returns
     return eventDTO;
 }
 
-public function putThrottleData(ThrottledRequest throttleEvent,string throttleKey) {
+public function putThrottleData(GlobalThrottleStreamDTO throttleEvent, string throttleKey) {
     throttleDataMap[throttleKey] = <@untainted>throttleEvent;
 }
 public function removeThrottleData(string key) {
@@ -143,15 +140,14 @@ public function isPolicyExist(map<boolean> deployedPolicies, string policyName) 
     return true;
 }
 
-public function getinputStream() returns stream<InputRequest> {
-    return inputStream;
+public function getrequestStream() returns stream<RequestStreamDTO> {
+    return requestStream;
 }
 
-public function getoutputStream() returns stream<ThrottledRequest> {
-    return outputStream;
+public function getglobalThrottleStream() returns stream<GlobalThrottleStreamDTO> {
+    return globalThrottleStream;
 }
 
 public function getIsStreamsInitialized() returns boolean {
     return isStreamsInitialized;
 }
-

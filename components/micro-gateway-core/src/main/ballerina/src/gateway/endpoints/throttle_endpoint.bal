@@ -35,7 +35,7 @@ http:Client throttleEndpoint = new (throttleEndpointUrl,
     }
 });
 
-public function publishThrottleEventToTrafficManager(InputRequest throttleEvent) {
+public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEvent) {
 
     json sendEvent = {
         event: {

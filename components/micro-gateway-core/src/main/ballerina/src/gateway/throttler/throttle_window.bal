@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/time;
-import ballerina/task;
 import ballerina/streams;
+import ballerina/task;
+import ballerina/time;
 
 # ThrottleWindow `throttle(quota, windowSize, partitionAttr)` is a fixed rate time window, which keeps track of
 # number of events received (per partition) for a given time period, and notifies whether that number exceeds a given
@@ -78,7 +78,7 @@ public type ThrottleWindow object {
         self.nextProcessPointer = nextProcessPointer;
         self.windowParameters = windowParameters;
         self.initParameters(self.windowParameters);
-        self.scheduler = new({
+        self.scheduler = new ({
             intervalInMillis: self.windowSizeInMilliSeconds,
             initialDelayInMillis: self.initialDelayInMilliSeconds
         });
@@ -87,8 +87,8 @@ public type ThrottleWindow object {
     }
 
     public function getScheduler() returns task:Scheduler {
-            return <task:Scheduler> self.scheduler;
-        }
+        return <task:Scheduler>self.scheduler;
+    }
 
     # The `initParameters` function verify and sets the parameters for the ThrottleWindow.
     # + parameters - Parameters for the ThrottleWindow.
@@ -122,7 +122,7 @@ public type ThrottleWindow object {
                 }
             }
         } else {
-            error err = error("ThrottleWindow should only have two parameters (<int> quota, <int> windowSizeInMs, " + 
+            error err = error("ThrottleWindow should only have two parameters (<int> quota, <int> windowSizeInMs, " +
             "<string> partitionAttribute), but found " + parameters.length().toString() + " input attributes");
             panic err;
         }
@@ -132,23 +132,23 @@ public type ThrottleWindow object {
     # + streamEvents - The array of stream events to be processed.
     public function process(streams:StreamEvent?[] streamEvents) {
         streams:StreamEvent?[] currentEvents = [];
-        lock {
-            foreach var evt in streamEvents {
-                streams:StreamEvent event = <streams:StreamEvent>evt;
-                string pk = self.getPartitionKey(event, self.partitionAttribute);
-                if (event.eventType == "CURRENT") {
-                    self.counts[pk] = <int>self.counts[pk] + 1;
-                    self.addThrottleData(event, <int>self.counts[pk]);
-                    currentEvents[currentEvents.length()] = event;
-                } if (event.eventType == "TIMER") {
-                    self.counts.removeAll();
-                } else {
-                    continue;
-                }
+        foreach var evt in streamEvents {
+            streams:StreamEvent event = <streams:StreamEvent>evt;
+            string pk = self.getPartitionKey(event, self.partitionAttribute);
+            if (event.eventType == "CURRENT") {
+                self.counts[pk] = <int>self.counts[pk] + 1;
+                self.addThrottleData(event, <int>self.counts[pk]);
+                currentEvents[currentEvents.length()] = event;
+            }
+            if (event.eventType == "TIMER") {
+                self.counts.removeAll();
+            } else {
+                continue;
             }
         }
+
         any nextProcessFuncPointer = self.nextProcessPointer;
-        if (nextProcessFuncPointer is function (streams:StreamEvent?[])) {
+        if (nextProcessFuncPointer is function(streams:StreamEvent?[])) {
             nextProcessFuncPointer(currentEvents);
         }
     }
@@ -158,8 +158,8 @@ public type ThrottleWindow object {
     # + currentCount - Current usage (count).
     public function addThrottleData(streams:StreamEvent evt, int currentCount) {
         map<anydata> throttleData = {};
-        int resetTimestamp =  self.getStartOfNextBatch(self.windowSizeInMilliSeconds);
-        int remainingQuota =  self.quota - currentCount;
+        int resetTimestamp = self.getStartOfNextBatch(self.windowSizeInMilliSeconds);
+        int remainingQuota = self.quota - currentCount;
         boolean isThrottled = self.quota < currentCount;
         throttleData[evt.getStreamName() + ".resetTimestamp"] = resetTimestamp;
         throttleData[evt.getStreamName() + ".remainingQuota"] = remainingQuota;
@@ -201,10 +201,10 @@ public type ThrottleWindow object {
     # + return - Returns an array of 2 element tuples of events. A tuple contains the matching events one from lhs
     #            stream and one from rhs stream.
     public function getCandidateEvents(
-                        streams:StreamEvent originEvent,
-                        (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
-                        public boolean isLHSTrigger = true)
-                        returns @tainted [streams:StreamEvent?, streams:StreamEvent?][] {
+    streams:StreamEvent originEvent,
+ (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+    public boolean isLHSTrigger = true)
+    returns @tainted [streams:StreamEvent?, streams:StreamEvent?][] {
         // do nothing;
         return [[(), ()]];
     }
@@ -219,9 +219,9 @@ public type ThrottleWindow object {
     # Restores the saved state which is passed as a map of `any` typed values.
     # + state - A map of typed `any` values. This map contains the values to be restored from the persisted data.
     public function restoreState(map<any> state) {
-        // do nothing;
+    // do nothing;
     }
-    
+
 };
 
 # Triggers the timer event generation at the given timestamp.
@@ -229,7 +229,7 @@ service eventInjectorService = service {
     resource function onTrigger(@tainted ThrottleWindow throttleWindow) {
         map<anydata> data = {};
         int currentTime = time:currentTime().time;
-        streams:StreamEvent timerEvent = new(["timer", data], "TIMER", currentTime);
+        streams:StreamEvent timerEvent = new (["timer", data], "TIMER", currentTime);
         streams:StreamEvent?[] timerEventWrapper = [];
         timerEventWrapper[0] = timerEvent;
         throttleWindow.process(timerEventWrapper);
@@ -242,7 +242,7 @@ service eventInjectorService = service {
 # + nextProcessPointer - The function pointer to the `process` function of the next processor.
 # + return - Returns the created window.
 public function throttle(any[] windowParameters, public function (streams:StreamEvent?[])? nextProcessPointer = ())
-        returns streams:Window {
-    ThrottleWindow throttleWindow = new(nextProcessPointer, windowParameters);
+returns streams:Window {
+    ThrottleWindow throttleWindow = new (nextProcessPointer, windowParameters);
     return throttleWindow;
 }

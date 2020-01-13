@@ -1,19 +1,17 @@
 import wso2/gateway;
 
-stream<gateway:InputRequest> s{{name}}inputStream =gateway:getinputStream();
-stream<gateway:ThrottledRequest> s{{name}}outputStream = gateway:getoutputStream();
+stream<gateway:RequestStreamDTO> s{{name}}requestStream =gateway:getrequestStream();
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrottleStream = gateway:getglobalThrottleStream();
 
 function {{funcName}}() {
     forever {
-        from s{{name}}inputStream window gateway:throttle({{count}},{{unitTime}},s{{name}}inputStream.{{policyKey}})
-           where s{{name}}inputStream.{{tierType}} == "{{name}}"
-           select s{{name}}inputStream.{{policyKey}} as policyKey,{{stopOnQuotaReach}} as stopOnQuota, s{{name}}inputStream.resetTimestamp,s{{name}}inputStream.remainingQuota,s{{name}}inputStream.isThrottled
-           => (gateway:ThrottledRequest [] requests) {
+        from s{{name}}requestStream window gateway:throttle({{count}},{{unitTime}},s{{name}}requestStream.{{policyKey}})
+           where s{{name}}requestStream.{{tierType}} == "{{name}}"
+           select s{{name}}requestStream.{{policyKey}} as policyKey,{{stopOnQuotaReach}} as stopOnQuota, s{{name}}requestStream.resetTimestamp,s{{name}}requestStream.remainingQuota,s{{name}}requestStream.isThrottled
+           => (gateway:GlobalThrottleStreamDTO [] requests) {
                foreach var r in requests {
-                  s{{name}}outputStream.publish(r);
+                  s{{name}}globalThrottleStream.publish(r);
                }
            }
     }
 }
-
-
