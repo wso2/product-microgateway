@@ -146,32 +146,23 @@ function getAnalyticsEnableConfig() {
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
-function getGRPCAnalyticsEnableConfig(){
+function initializegRPCAnalytics(){
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
     isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
     endpointURL = <string>gRPCConfigs[GRPC_ENDPOINT_URL];
-    gRPCKeyStoreFile = <string>gRPCConfigs[KEYSTORE_FILE_PATH];
-    gRPCKeyStorePassword = <string>gRPCConfigs[KEYSTORE_PASSWORD];
-    gRPCTrustStoreFile = <string>gRPCConfigs[TURSTSTORE_FILE_PATH];
-    gRPCTrustStorePassword = <string>gRPCConfigs[TRUSTSTORE_PASSWORD];
     gRPCReconnectTime = <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
 
-    log:printDebug( "Endpint : " + endpointURL);
-    log:printDebug( "K_Store : " + gRPCKeyStoreFile);
-    log:printDebug( "K_Pass  : " + gRPCKeyStorePassword);
-    log:printDebug( "T_Store : " + gRPCTrustStoreFile);
-    log:printDebug( "T_Pass  : " + gRPCTrustStorePassword);
-    log:printDebug( "Retry_time  : " + gRPCReconnectTime.toString());
+    log:printDebug( "gRPC endpoint URL : " + endpointURL);
+    log:printDebug( "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"));
+    log:printDebug( "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina"));
+    log:printDebug( "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"));
+    log:printDebug( "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
+    log:printDebug( "gRPC retry time  : " + gRPCReconnectTime.toString());
 
     if(isgRPCAnalyticsEnabled == true){
         initGRPCService();
     }
-}
-
-function initializegRPCAnalytics(){
-    log:printDebug("getgRPCAnalyticsEnableConfig method in analytics util bal called");
-    getGRPCAnalyticsEnableConfig();
 }
 
 function initializeAnalytics() {

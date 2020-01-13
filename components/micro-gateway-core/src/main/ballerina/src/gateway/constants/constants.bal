@@ -153,10 +153,6 @@ public const string REQUIRE = "require";
  //gRPC analytics related constants
  public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
  public const string GRPC_ENDPOINT_URL = "endpointURL";
- public const string KEYSTORE_FILE_PATH = "keyStorePath";
- public const string KEYSTORE_PASSWORD = "keyStorePassword";
- public const string TURSTSTORE_FILE_PATH = "trustStorePath";
- public const string TRUSTSTORE_PASSWORD = "trustStorePassword";
  public const string gRPC_RetryTimeMilliseconds = "reconnectTimeInMillies";
  
 //validation_filter related constatnts
@@ -326,7 +322,6 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
-// const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins

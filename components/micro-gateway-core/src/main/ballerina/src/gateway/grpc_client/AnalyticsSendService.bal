@@ -29,12 +29,12 @@ AnalyticsSendServiceClient nonblockingGRPCAnalyticsClient = new(getConfigValue(G
 config = {
             secureSocket: {
                  keyStore: {
-                       path : getConfigValue(GRPC_ANALYTICS, gRPCKeyStoreFile, "${ballerina.home}/bre/security/ballerinaKeystore.p12"), 
-                       password : getConfigValue(GRPC_ANALYTICS, gRPCKeyStorePassword, "ballerina") 
+                       path : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"), 
+                       password : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina") 
                 },
                 trustStore: {
-                    path : getConfigValue(GRPC_ANALYTICS, gRPCTrustStoreFile, "${ballerina.home}/bre/security/ballerinaTruststore.p12"), 
-                    password :  getConfigValue(GRPC_ANALYTICS, gRPCTrustStorePassword, "ballerina") 
+                    path : getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"), 
+                    password :  getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina") 
                 },
                 verifyHostname:false //to avoid SSL certificate validation error
             },
@@ -45,11 +45,9 @@ config = {
 public function initGRPCService(){
     var attachResult = gRPCConnectTimer.attach(connectGRPC);
      if (attachResult is error) {
-        log:printError("Error attaching the service1.");
+        log:printError("Error attaching the service.");
         return;
     }
-
-    log:printInfo("gRPC Analytics initiating...");
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
     if (gRPCres is grpc:Error) {
         log:printError("Error from Connector: " + gRPCres.reason() + " - "
@@ -65,7 +63,7 @@ public function initGRPCService(){
 public function dataToAnalytics(AnalyticsStreamMessage message){
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            log:printError("Error from Connector: " + connErr.reason() + " - "
+            log:printDebug("Error from Connector: " + connErr.reason() + " - "
                                        + <string> connErr.detail()["message"]);
             
         } else {
@@ -116,4 +114,58 @@ service AnalyticsSendServiceMessageListener = service {
     resource function onComplete() {
     }
 };
+
+
+// //Ping message used to stop gRPC reconnect Task
+// AnalyticsStreamMessage gRPCPingMessage = {
+
+//      messageStreamName: "PingMessage",
+//      meta_clientType : "" ,
+//      applicationConsumerKey : "" ,
+//      applicationName : "" ,
+//      applicationId : "" ,
+//      applicationOwner : "" ,
+//      apiContext : "" ,
+//      apiName : "" ,
+//      apiVersion : "" ,
+//      apiResourcePath : "" ,
+//      apiResourceTemplate : "" ,
+//      apiMethod : "" ,
+//      apiCreator : "" ,
+//      apiCreatorTenantDomain : "" ,
+//      apiTier : "" ,
+//      apiHostname : "" ,
+//      username : "" ,
+//      userTenantDomain : "" ,
+//      userIp : "" ,
+//      userAgent : "" ,
+//      requestTimestamp : 0 ,
+//      throttledOut : false ,
+//      responseTime :0 ,
+//      serviceTime : 0 ,
+//      backendTime : 0 ,
+//      responseCacheHit : false,
+//      responseSize : 0 ,
+//      protocol : "" ,
+//      responseCode  : 0 ,
+//      destination : "" ,
+//      securityLatency  : 0 ,
+//      throttlingLatency  : 0 , 
+//      requestMedLat : 0 ,
+//      responseMedLat : 0 , 
+//      backendLatency : 0 , 
+//      otherLatency : 0 , 
+//      gatewayType : "" , 
+//      label  : "",
+
+
+
+//      subscriber : "",
+//      throttledOutReason : "",
+//      throttledOutTimestamp : 0,
+//      hostname : "",
+ 
+//     errorCode : "",
+//     errorMessage : ""
+//     };
 
