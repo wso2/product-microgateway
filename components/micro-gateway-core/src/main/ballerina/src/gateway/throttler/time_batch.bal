@@ -52,7 +52,7 @@ public type TimeBatch object {
     }
 
     public function getScheduler() returns streams:Scheduler {
-        return <streams:Scheduler> self.scheduler;
+        return <streams:Scheduler>self.scheduler;
     }
 
     public function process(streams:StreamEvent?[] streamEvents) {
@@ -121,7 +121,7 @@ public type TimeBatch object {
 
     public function getCandidateEvents(
     streams:StreamEvent originEvent,
-    (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+ (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
     boolean isLHSTrigger = true)
     returns [streams:StreamEvent?, streams:StreamEvent?][] {
         // do nothing;

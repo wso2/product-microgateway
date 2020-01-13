@@ -14,33 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type RequestStreamDTO record {
-    string messageID = "";
-    string apiKey = "";
-    string appKey = "";
-    string subscriptionKey = "";
-    string appTier = "";
-    string apiTier = "";
-    string subscriptionTier = "";
-    string resourceKey = "";
-    string resourceTier = "";
-    string userId = "";
-    string apiContext = "";
-    string apiVersion = "";
-    string appTenant = "";
-    string apiTenant = "";
-    string appId = "";
-    string apiName = "";
-    string properties = "";
-};
-
-public type GlobalThrottleStreamDTO record {
-    string throttleKey = "";
-    boolean isThrottled = false;
-    boolean stopOnQuota = false;
-    int expiryTimeStamp = 0;
-};
-
 public type EligibilityStreamDTO record {
     string messageID = "";
     boolean isEligible = false;
@@ -71,4 +44,37 @@ public type IntermediateStream record {
     int eventCount = 0;
     boolean stopOnQuota = false;
     int expiryTimeStamp = 0;
+};
+
+public type RequestStreamDTO record {
+    int resetTimestamp = 0;
+    int remainingQuota = 0;
+    boolean isThrottled = false;
+    string messageID = "";
+    string apiKey = "";
+    string appKey = "";
+    boolean stopOnQuota = true;
+    string subscriptionKey = "";
+    string policyKey = "";
+    string appTier = "";
+    string apiTier = "";
+    string subscriptionTier = "";
+    string resourceKey = "";
+    string resourceTier = "";
+    string userId = "";
+    string apiContext = "";
+    string apiVersion = "";
+    string appTenant = "";
+    string apiTenant = "";
+    string appId = "";
+    string apiName = "";
+    string properties = "";
+};
+
+public type GlobalThrottleStreamDTO record {
+    string policyKey = "";
+    boolean stopOnQuota = true;
+    int? resetTimestamp;
+    int? remainingQuota;
+    boolean isThrottled = false;
 };
