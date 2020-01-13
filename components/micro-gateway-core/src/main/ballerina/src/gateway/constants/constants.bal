@@ -185,8 +185,24 @@ public const string INT = "int";
 // config constants
 public const string KM_CONF_INSTANCE_ID = "keyManager";
 public const string KM_SERVER_URL = "serverUrl";
-public const string KM_TOKEN_CONTEXT = "/oauth2";
+public const string KM_TOKEN_CONTEXT = "tokenContext";
 public const string TIMESTAMP_SKEW = "timestampSkew";
+public const string EXTERNAL = "external";
+public const string KM_CONF_SECURITY_BASIC_INSTANCE_ID = "keymanager.security.basic";
+public const string KM_CONF_SECURITY_OAUTH2_INSTANCE_ID = "keymanager.security.oauth2";
+public const string KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID = "keymanager.security.oauth2.clientCredential";
+public const string KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID = "keymanager.security.oauth2.password";
+public const string KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID = "keymanager.security.oauth2.directToken";
+public const string KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID = "keymanager.security.oauth2.refresh";
+public const string ENABLED = "enabled";
+public const string CLIENT_ID = "clientId";
+public const string CLIENT_SECRET = "clientSecret";
+public const string SCOPES = "scopes";
+public const string REFRESH_URL = "refreshUrl";
+public const string TOKEN_URL = "tokenUrl";
+public const string REFRESH_TOKEN = "refreshToken";
+public const string ACCESS_TOKEN = "accessToken";
+public const string CREDENTIAL_BEARER = "credentialBearer";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
@@ -319,3 +335,5 @@ const string APPLICATION = "application";
 const string SUBSCRIBED_APIS = "subscribedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
+
+public const string INTROSPECT_CONTEXT = "introspect";

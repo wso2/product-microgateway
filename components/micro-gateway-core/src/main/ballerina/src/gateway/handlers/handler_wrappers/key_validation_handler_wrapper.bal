@@ -14,20 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/oauth2;
 import ballerina/http;
 import ballerina/observe;
 
 # Representation of the key validation  handler
 #
-# + oauth2KeyValidationProvider - The reference to the key validation provider instance
+# + keyValidationHandler - The reference to the key validation handler instance
 public type KeyValidationHandlerWrapper object {
     *http:InboundAuthHandler;
-    public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     KeyValidationHandler keyValidationHandler;
 
-    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider) {
-        self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
-        self.keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider);
+    public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
+        self.keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider, introspectProvider);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
