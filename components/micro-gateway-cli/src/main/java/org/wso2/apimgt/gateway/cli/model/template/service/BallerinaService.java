@@ -274,7 +274,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     }
 
     private void setAPIKeySecuritySchemes(List<SecurityRequirement> securityRequirementList) {
-        apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeyFromSecurity(securityRequirementList));
+        apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeysFromSecurity(securityRequirementList));
     }
 
     public void setIsDevFirst(boolean value) {
