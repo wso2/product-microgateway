@@ -766,19 +766,6 @@ public class OpenAPICodegenUtils {
         return generateBasicAuthFromSecurity(securitySchemas);
     }
 
-    public static List<APIKey> getMgwResourceAPIKey(Operation operation) {
-        List<SecurityRequirement> securityRequirementList = operation.getSecurity();
-        List<APIKey> apiKeys = new ArrayList<>();
-        if (securityRequirementList != null) {
-            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
-                if (apiKeySecuritySchemaMap.containsKey(k)) {
-                    apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(k));
-                }
-            }));
-        }
-        return apiKeys;
-    }
-
     /**
      * Get resource level security scopes of {@link Operation} if the security scheme is oauth2.
      *
@@ -827,7 +814,7 @@ public class OpenAPICodegenUtils {
      * @param securityRequirementList {@link List<SecurityRequirement>} object
      * @return {@link BasicAuth} object
      */
-    public static List<APIKey> generateAPIKeyFromSecurity(List<SecurityRequirement> securityRequirementList) {
+    public static List<APIKey> generateAPIKeysFromSecurity(List<SecurityRequirement> securityRequirementList) {
         List<APIKey> apiKeys = new ArrayList<>();
         if (securityRequirementList != null) {
             securityRequirementList.forEach(value -> value.forEach((k, v) -> {

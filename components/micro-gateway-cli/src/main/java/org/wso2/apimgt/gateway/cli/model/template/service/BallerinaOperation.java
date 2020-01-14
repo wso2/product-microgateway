@@ -93,7 +93,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
-        this.apiKeys = new Gson().toJson(OpenAPICodegenUtils.getMgwResourceAPIKey(operation));
+        this.apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity()));
         this.authProviders = OpenAPICodegenUtils.setAuthProviders(this.basicAuth);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
