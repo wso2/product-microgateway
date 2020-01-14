@@ -85,7 +85,8 @@ public class OpenAPICodegenUtils {
 
     enum APISecurity {
         basic,
-        oauth2
+        oauth2,
+        jwt
     }
 
     /**
@@ -950,5 +951,20 @@ public class OpenAPICodegenUtils {
             return operation.getServers().get(0).getUrl() != null;
         }
         return false;
+    }
+
+    public static List<String> setAuthProviders(BasicAuth basicAuth) {
+        List<String> authProviders = new ArrayList<>();
+        if (basicAuth != null && basicAuth.getOptional()) {
+            authProviders.add(APISecurity.basic.name());
+            authProviders.add(APISecurity.oauth2.name());
+            authProviders.add(APISecurity.jwt.name());
+        } else if (basicAuth != null && basicAuth.getRequired()) {
+            authProviders.add(APISecurity.basic.name());
+        } else {
+            authProviders.add(APISecurity.oauth2.name());
+            authProviders.add(APISecurity.jwt.name());
+        }
+        return authProviders;
     }
 }
