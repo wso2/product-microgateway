@@ -279,7 +279,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
         if (this.basicAuth == null) {
             this.basicAuth = basicAuth;
+            authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
         }
-        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
     }
 }
