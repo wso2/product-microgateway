@@ -955,11 +955,11 @@ public class OpenAPICodegenUtils {
 
     public static List<String> setAuthProviders(BasicAuth basicAuth) {
         List<String> authProviders = new ArrayList<>();
-        if (basicAuth != null && basicAuth.getOptional()) {
+        if (basicAuth != null && basicAuth.isOptional()) {
             authProviders.add(APISecurity.basic.name());
             authProviders.add(APISecurity.oauth2.name());
             authProviders.add(APISecurity.jwt.name());
-        } else if (basicAuth != null && basicAuth.getRequired()) {
+        } else if (basicAuth != null && basicAuth.isRequired()) {
             authProviders.add(APISecurity.basic.name());
         } else {
             authProviders.add(APISecurity.oauth2.name());

@@ -23,34 +23,22 @@ package org.wso2.apimgt.gateway.cli.model.config;
  */
 public class BasicAuth {
 
-    boolean isOptional;
-    boolean isRequired;
+    private boolean isOptional;
+    private boolean isRequired;
 
-    public boolean getOptional() {
-        boolean optional;
-        if (isOptional == true) {
-            optional = true;
-        } else {
-            optional = false;
-        }
-        return optional;
+    public boolean isOptional() {
+        return this.isOptional;
     }
 
     public void setOptional(boolean optional) {
-        isOptional = optional;
+        this.isOptional = optional;
     }
 
-    public boolean getRequired() {
-        boolean required;
-        if (isRequired == true) {
-            required = true;
-        } else {
-            required = false;
-        }
-        return required;
+    public boolean isRequired() {
+        return this.isRequired;
     }
 
     public void setRequired(boolean required) {
-        isRequired = required;
+        this.isRequired = required;
     }
 }
