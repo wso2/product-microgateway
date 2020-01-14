@@ -730,9 +730,6 @@ public class OpenAPICodegenUtils {
                 } else if (basicSecuritySchemaList.contains(k) &&
                         !securitySchemaList.contains(APISecurity.basic.name())) {
                     securitySchemaList.add(APISecurity.basic.name());
-                } else if (apiKeySecuritySchemaMap.containsKey(k) &&
-                        !securitySchemaList.contains(APISecurity.apikey.name())) {
-                    securitySchemaList.add(APISecurity.apikey.name());
                 }
             }));
             //generate security schema String
@@ -825,19 +822,21 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * When the security schema string is provided as a comma separated set of values
-     * generate the corresponding schema string.
+     * Provide api keys for a given security requirement list
      *
-     * @param schemas comma separated security security schema types (ex. basic,oauth2)
+     * @param securityRequirementList {@link List<SecurityRequirement>} object
      * @return {@link BasicAuth} object
      */
-    public static List<APIKey> generateAPIKeyFromSecurity(String schemas) {
-        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+    public static List<APIKey> generateAPIKeyFromSecurity(List<SecurityRequirement> securityRequirementList) {
         List<APIKey> apiKeys = new ArrayList<>();
-        for (String scheme : schemasArray) {
-            if (apiKeySecuritySchemaMap.containsKey(scheme)) {
-                apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(scheme));
-            }
+        if (securityRequirementList != null) {
+            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
+                //check if the key is in apikey list
+                if (apiKeySecuritySchemaMap.containsKey(k)) {
+                    apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(k));
+                }
+
+            }));
         }
         return apiKeys;
     }

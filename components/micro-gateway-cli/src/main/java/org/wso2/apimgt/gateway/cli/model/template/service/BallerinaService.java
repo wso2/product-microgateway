@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
@@ -97,6 +98,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.setBasepath(api.getSpecificBasepath());
         setSecuritySchemas(api.getMgwApiSecurity());
+        setAPIKeySecuritySchemes(definition.getSecurity());
         setPaths(definition);
 
         return buildContext(definition);
@@ -268,8 +270,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     private void setSecuritySchemas(String schemas) {
         BasicAuth basicAuth = OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas);
-        apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeyFromSecurity(schemas));
         authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
+    }
+
+    private void setAPIKeySecuritySchemes(List<SecurityRequirement> securityRequirementList) {
+        apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeyFromSecurity(securityRequirementList));
     }
 
     public void setIsDevFirst(boolean value) {
