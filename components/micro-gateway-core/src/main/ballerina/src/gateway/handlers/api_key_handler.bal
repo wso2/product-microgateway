@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/stringutils;
 
 # Representation of the api key validating handler
 #
@@ -34,15 +35,21 @@ public type APIKeyHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        if (req.hasHeader(API_KEY_HEADER)) {
-            return true;
-        } else {
-            string? apikeyQuery =  req.getQueryParamValue(API_KEY_HEADER);
-            if ( apikeyQuery is string) {
-                printDebug(API_KEY_HANDLER, "apikey provided in request query : " + apikeyQuery );
-                return true;
+        string? inName = apikeyMap["inName"];
+        string? name = apikeyMap["name"];
+        if (inName is string && name is string) {
+            if (stringutils:equalsIgnoreCase(HEADER, inName)) {
+                if (req.hasHeader(name)) {
+                    return true;
+                }
+            } else if (stringutils:equalsIgnoreCase("query", inName)) {
+                string? apikeyQuery =  req.getQueryParamValue(name);
+                if ( apikeyQuery is string) {
+                    return true;
+                }
             }
-        }        
+        }
+        
         return false;
     }
 
@@ -53,15 +60,20 @@ public type APIKeyHandler object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns @tainted boolean|http:AuthenticationError {
         string credentials = "";
-        if (req.hasHeader(API_KEY_HEADER)) {
-            credentials = req.getHeader(API_KEY_HEADER);
-        } else {
-            string? apikeyQuery =  req.getQueryParamValue(API_KEY_HEADER);
-            if ( apikeyQuery is string) {
-                credentials = apikeyQuery;
+        string? inName = apikeyMap["inName"];
+        string? name = apikeyMap["name"];
+
+        if (inName is string && name is string) {
+            if (stringutils:equalsIgnoreCase(HEADER, inName)) {
+                credentials = req.getHeader(name);
+            } else {
+                string? apikeyQuery =  req.getQueryParamValue(name);
+                if ( apikeyQuery is string) {
+                    credentials = apikeyQuery;
+                }
             }
         }
-        
+        printDebug(API_KEY_HANDLER, "credentials: " + credentials);
         var authenticationResult = self.apiKeyProvider.authenticate(credentials);
         if (authenticationResult is boolean) {
             return authenticationResult;

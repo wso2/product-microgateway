@@ -16,6 +16,7 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
+import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -63,6 +64,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<String> authProviders;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private String apiKeys;
 
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private ExtendedAPI api;
@@ -264,8 +268,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     private void setSecuritySchemas(String schemas) {
         BasicAuth basicAuth = OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas);
-        boolean apiKeyEnabled = OpenAPICodegenUtils.isAPIKeyEnabled(schemas);
-        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth, apiKeyEnabled);
+        apiKeys = new Gson().toJson(OpenAPICodegenUtils.generateAPIKeyFromSecurity(schemas));
+        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
     }
 
     public void setIsDevFirst(boolean value) {

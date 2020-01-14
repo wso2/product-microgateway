@@ -88,7 +88,7 @@ returns boolean {
     string[] authProvidersIds = getAuthProviders(context.getServiceName(), context.getResourceName());
     printDebug(KEY_PRE_AUTHN_FILTER, "Auth providers array  : " + authProvidersIds.toString());
 
-    boolean apiKeyAuth = ((request.hasHeader(API_KEY_HEADER)) || (request.getQueryParamValue(API_KEY_HEADER) is string)) ? true : false;
+    boolean isAPIKeyAuth = false;
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);
     } else if (request.hasHeader(COOKIE_HEADER)) {
@@ -100,8 +100,35 @@ returns boolean {
                 authHeader = authCookie;
             }
         }
-    } else if (apiKeyAuth) {
-        authHeader = API_KEY_HEADER;
+    } else {
+        //process apikey authentication
+        json[] apiKeys = getAPIKeys(context.getServiceName(), context.getResourceName());
+        printDebug(KEY_PRE_AUTHN_FILTER, apiKeys.toString());
+        if (apiKeys.length() > 0) {
+            foreach json apiKey in apiKeys { 
+                map<json> apiKeyMap = <map<json>> apiKey;
+                string inName = apiKeyMap["in"].toString();
+                string name = apiKeyMap["name"].toString();
+                printDebug(KEY_PRE_AUTHN_FILTER, "Detected apikey security in : " + inName + " name: " + name);
+                if (stringutils:equalsIgnoreCase(HEADER, inName)) {
+                    if (request.hasHeader(name)) {
+                        printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey header : " + name);
+                        isAPIKeyAuth = true;
+                        configureAPIKeyAuth(inName, name);
+                        authHeader = AUTH_SCHEME_API_KEY;
+                        break;
+                    }
+                } else if (stringutils:equalsIgnoreCase("query", inName)) {
+                    if (request.getQueryParamValue(name) is string) {
+                        printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
+                        isAPIKeyAuth = true;
+                        configureAPIKeyAuth(inName, name);
+                        authHeader = AUTH_SCHEME_API_KEY;
+                        break;
+                    }
+                }
+            }
+        }       
     }
     string providerId;
     if (!isCookie) {
@@ -110,7 +137,7 @@ returns boolean {
         providerId = getAuthenticationProviderTypeWithCookie(authHeader);
     }
     printDebug(KEY_PRE_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
-    boolean canHandleAuthentication = false;
+    boolean canHandleAuthentication = isAPIKeyAuth;
     foreach string provider in authProvidersIds {
         if (provider == providerId) {
             canHandleAuthentication = true;
@@ -118,7 +145,7 @@ returns boolean {
     }
 
     if (isSecuredResource) {
-        if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !apiKeyAuth) {
+        if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !isAPIKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
@@ -146,9 +173,6 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
         return AUTHN_SCHEME_BASIC;
     } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
-    } else if (stringutils:equalsIgnoreCase(API_KEY_HEADER,authHeader)) {
-        printDebug(KEY_PRE_AUTHN_FILTER, "apikey header detected");
-        return API_KEY_HEADER;
     } else {
         return AUTH_SCHEME_OAUTH2;
     }

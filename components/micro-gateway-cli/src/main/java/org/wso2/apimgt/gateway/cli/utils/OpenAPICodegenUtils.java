@@ -824,9 +824,22 @@ public class OpenAPICodegenUtils {
         return basicAuth;
     }
 
-    public static boolean isAPIKeyEnabled(String schemas) {
+    /**
+     * When the security schema string is provided as a comma separated set of values
+     * generate the corresponding schema string.
+     *
+     * @param schemas comma separated security security schema types (ex. basic,oauth2)
+     * @return {@link BasicAuth} object
+     */
+    public static List<APIKey> generateAPIKeyFromSecurity(String schemas) {
         String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-        return Arrays.asList(schemasArray).contains(APISecurity.apikey.name());
+        List<APIKey> apiKeys = new ArrayList<>();
+        for (String scheme : schemasArray) {
+            if (apiKeySecuritySchemaMap.containsKey(scheme)) {
+                apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(scheme));
+            }
+        }
+        return apiKeys;
     }
 
     /**
@@ -999,7 +1012,7 @@ public class OpenAPICodegenUtils {
         return false;
     }
 
-    public static List<String> setAuthProviders(BasicAuth basicAuth, boolean isAPIKeyEnabled) {
+    public static List<String> setAuthProviders(BasicAuth basicAuth) {
         List<String> authProviders = new ArrayList<>();
         if (basicAuth != null && basicAuth.getOptional()) {
             authProviders.add(APISecurity.basic.name());
@@ -1010,10 +1023,6 @@ public class OpenAPICodegenUtils {
         } else {
             authProviders.add(APISecurity.oauth2.name());
             authProviders.add(APISecurity.jwt.name());
-        }
-
-        if (isAPIKeyEnabled) {
-            authProviders.add(APISecurity.apikey.name());
         }
         return authProviders;
     }

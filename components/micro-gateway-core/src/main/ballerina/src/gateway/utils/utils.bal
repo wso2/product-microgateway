@@ -35,6 +35,7 @@ map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
+map<string> apikeyMap = {};
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -51,6 +52,11 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
     printDebug(KEY_UTILS, "Resource tier annotation map: " + resourceTierAnnotationMap.toString());
     printDebug(KEY_UTILS, "Resource Configuration annotation map: " + resourceConfigAnnotationMap.toString());
     printDebug(KEY_UTILS, "Filter Configuration annotation map: " + filterConfigAnnotationMap.toString());
+}
+
+public function configureAPIKeyAuth(string inName, string name) {
+    apikeyMap["inName"] = inName;
+    apikeyMap["name"] = name;
 }
 
 # Retrieve the key validation request dto from filter context.
@@ -548,6 +554,27 @@ function isServiceResourceSecured(http:ResourceAuth? resourceAuth) returns boole
         secured = resourceAuth["enabled"] ?: true;
     }
     return secured;
+}
+
+public function getAPIKeys(string serviceName, string resourceName) returns json[] {
+    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
+    json[] apiKeys = [];
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>> resourceConfig.security;
+        json apiKeysJson = securityMap["apikey"];
+        apiKeys = <json[]> apiKeysJson;
+        if (apiKeys.length() > 0) {
+            return apiKeys;
+        }
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        map<json> securityMap = <map<json>> apiConfig.security;
+        json apiKeysJson = securityMap["apikey"];
+        apiKeys = <json[]> apiKeysJson;
+    }
+    return apiKeys;
 }
 
 public function getAuthProviders(string serviceName, string resourceName) returns string[] {

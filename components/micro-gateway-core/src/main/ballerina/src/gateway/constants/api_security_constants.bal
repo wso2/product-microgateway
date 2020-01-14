@@ -29,7 +29,7 @@ public const string API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
 public const int API_AUTH_MISSING_CREDENTIALS = 900902;
 public const string API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
 public const string API_AUTH_MISSING_CREDENTIALS_DESCRIPTION =
-"Make sure your API invocation call has a header: \"Authorization: Bearer ACCESS_TOKEN\"";
+"Make sure your API invocation call is provided required credentials";
 
 public const int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
 public const string API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE = "Access Token Expired";
