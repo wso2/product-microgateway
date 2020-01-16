@@ -98,6 +98,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
     if(faultDTO is FaultDTO) {
         log:printDebug( "doFilterFalut method called. Client type : " + faultDTO. metaClientType + " applicationName :"+faultDTO.applicationName);
         if(isgRPCAnalyticsEnabled != false ){
+            //fault stream gRPC Analytics
             log:printDebug("gRPC fault stream message creating --->");
             AnalyticsStreamMessage message = createFaultMessage(faultDTO);
                 future<()> publishedGRPCFaultStream = start dataToAnalytics(message);
@@ -106,7 +107,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if(eventDTO is EventDTO) {
             if(isAnalyticsEnabled != false){
-                log:printDebug("F_Upload eventFaultStream called");
+                log:printDebug("File Upload eventFaultStream : " + eventDTO.payloadData);
                 eventStream.publish(eventDTO);
             }
             
@@ -126,6 +127,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
     if(isgRPCAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO){
+        //Response stream gRPC Analyrics
         AnalyticsStreamMessage message = createResponseMessage(requestResponseExecutionDTO);
         log:printDebug("\n\ngRPC response stream Data starting to publish");
         future<()> publishedGRPCResponseStream = start dataToAnalytics(message);

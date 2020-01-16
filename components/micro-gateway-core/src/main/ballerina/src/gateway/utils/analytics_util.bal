@@ -142,7 +142,7 @@ function getAnalyticsEnableConfig() {
     rotatingTime = <int>vals[ROTATING_TIME];
     uploadingUrl = <string>vals[UPLOADING_EP];
     configsRead = true;
-    log:printDebug("Uploading url : "+ uploadingUrl);
+    log:printDebug("File upload analytics uploading URL : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
