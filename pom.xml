@@ -370,6 +370,12 @@
                 <artifactId>geronimo-jms_1.1_spec</artifactId>
                 <version>${orbit.version.geronimo-jms_1.1_spec}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.everit.json</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${everit.version}</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -576,6 +582,8 @@
         <jms-module.version>0.6.3</jms-module.version>
         <jmx.api.version>2.0.1</jmx.api.version>
         <orbit.version.geronimo-jms_1.1_spec>1.1.1.wso2v1</orbit.version.geronimo-jms_1.1_spec>
+        <everit.version>1.5.0.wso2.v1</everit.version>
+        <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
     </properties>
 
 </project>

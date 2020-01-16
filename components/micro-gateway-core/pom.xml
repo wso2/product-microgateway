@@ -39,6 +39,23 @@
             <artifactId>junit</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.orbit.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>javax.jms-api</artifactId>
             <version>${jmx.api.version}</version>
