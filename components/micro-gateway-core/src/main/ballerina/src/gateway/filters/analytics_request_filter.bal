@@ -44,18 +44,17 @@ public type AnalyticsRequestFilter object {
                     ThrottleAnalyticsEventDTO|error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
                     if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
                         if(isgRPCAnalyticsEnabled != false){
-                            // ####################################################
+                            // throttle stream gRPC Analytics
                             AnalyticsStreamMessage message = createThrottleMessage(throttleAnalyticsEventDTO);
                             log:printDebug("\n\n>>> gRPC throttle stream message created.");
                                     future<()> publishedGRPCThrottleStream = start dataToAnalytics(message);
                                     log:printDebug( "gRPC throttle stream message published.");
-                            // ####################################################
                         }
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                         if(eventDTO is EventDTO) {
                             if(isAnalyticsEnabled != false){
                                 eventStream.publish(eventDTO);
-                                log:printDebug( "File upload throttle stream data published.");
+                                log:printDebug( "File upload throttle stream data published." + eventDTO.streamId);
                             }
                              
                             
@@ -123,7 +122,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
     log:printDebug( "doFilterResponseData method called");
-    //Response data publishing
+    //Response analytics data publishing
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
     if(isgRPCAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO){
@@ -136,7 +135,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
             if(isAnalyticsEnabled != false){
-                log:printDebug("F_Upload eventRequestStream called");
+                log:printDebug("F_Upload eventRequestStream called" + event.payloadData);
                 eventStream.publish(event);
             }
         } else {
@@ -161,15 +160,11 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         doFilterFault(context, resp);
     }
 }
-//new Implementations for gRPC Analytics
-//#####################################################################
 
+//creates response stream gRPC Analytics message
 public function createResponseMessage(RequestResponseExecutionDTO requestResponseExecutionDTO) returns AnalyticsStreamMessage {
-
-
     log:printDebug( "createResponse stream method called.");
     AnalyticsStreamMessage responseAnalyticsMessage = {
-
      messageStreamName: "InComingRequestStream",
      meta_clientType : <string>requestResponseExecutionDTO.metaClientType ,
      applicationConsumerKey : <string>requestResponseExecutionDTO.applicationConsumerKey ,
@@ -209,8 +204,6 @@ public function createResponseMessage(RequestResponseExecutionDTO requestRespons
      gatewayType : <string>requestResponseExecutionDTO.gatewayType , 
      label  : <string>requestResponseExecutionDTO.label,
 
-
-
      subscriber : "",
      throttledOutReason : "",
      throttledOutTimestamp : 0,
@@ -223,11 +216,10 @@ public function createResponseMessage(RequestResponseExecutionDTO requestRespons
     return responseAnalyticsMessage;
 }
 
-
+//creates throttle stream gRPC Analytics message
 public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalyticsEventDTO) returns AnalyticsStreamMessage{
     log:printDebug( "createThrottleMessage method called");
     AnalyticsStreamMessage throttleAnalyticsMessage = {
-
      messageStreamName: "ThrottledOutStream",
      meta_clientType : throttleAnalyticsEventDTO.metaClientType,
      applicationConsumerKey : "",
@@ -267,8 +259,6 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
      gatewayType : throttleAnalyticsEventDTO.gatewayType,
      label  : "",
 
-
-
      subscriber : throttleAnalyticsEventDTO.subscriber,
      throttledOutReason : throttleAnalyticsEventDTO.throttledOutReason,
      throttledOutTimestamp : throttleAnalyticsEventDTO.throttledTime,
@@ -281,13 +271,11 @@ public function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalytic
 }
 
 
-
+//creates fault stream gRPC Analytics message
 public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMessage{
     log:printDebug( "createFaultMessage method called.");
     int errorCodeValue = faultDTO.errorCode;
-
     AnalyticsStreamMessage faultAnalyticsMessage = {
-
      messageStreamName: "FaultStream",
      meta_clientType : faultDTO. metaClientType,
      applicationConsumerKey : faultDTO.consumerKey,
@@ -327,8 +315,6 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
      gatewayType : "",
      label  : "",
 
-
-
      subscriber : "",
      throttledOutReason : "",
      throttledOutTimestamp : 0,
@@ -341,148 +327,3 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
 
     return faultAnalyticsMessage;
 }
-
-
-//###################################################################################################
-
-    // RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
-    //     context);
-    // if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
-    //     EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
-    //     if(event is EventDTO) {
-    //         if(isAnalyticsEnabled != false){
-    //             log:printDebug("F_Upload eventRequestStream called");
-    //             eventStream.publish(event);
-    //         }
-    //         // ###############################################
-    //         log:printDebug("This is the Response event DTO --->");
-    //         json analyticsResponseJSON = createAnalyticsJSON(requestResponseExecutionDTO);
-    //         //json|error analyticsResponseJSON = json.constructFrom(requestResponseExecutionDTO);
-    //         log:printDebug("\n\n###########GRPC Enable Value in response stream : ");
-    //         //      log:printDebug(isgRPCAnalyticsEnabled);  && analyticsResponseJSON is json
-    //         //io:println("1 -->  Before method call");
-    //         if(isgRPCAnalyticsEnabled != false ){
-    //             //io:println("2 -->  Inside if call");
-    //             log:printDebug("\n\n###########GRPC Data going to publish");
-    //             future<()> publishedGRPCResponseStream = start dataToAnalytics(analyticsResponseJSON.toJsonString() , "InComingRequestStream");
-    //         }
-    //         //io:println("4 -->  After method call");
-    //         // io:println("\n\n\nTo json string : " + analyticsResponseJSON.toJsonString() );
-    //         // io:println("\n\n\nTo  string : " + analyticsResponseJSON.toString() );
-    //         // ##############################################
-    //     } else {
-    //         printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
-    //         printFullError(KEY_ANALYTICS_FILTER, event);
-    //     }
-    // } else {
-    //     printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data");
-    //     printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
-    // }
-
-
-
-
-// ##################################################################################################
-
-
-//    json throttleJSON = {
-//             meta_clientType : throttleAnalyticsEventDTO.metaClientType,
-//             username : throttleAnalyticsEventDTO.userName,
-//             userTenantDomain : throttleAnalyticsEventDTO.userTenantDomain,
-
-//             apiName :throttleAnalyticsEventDTO.apiName,
-//             apiVersion : throttleAnalyticsEventDTO.apiVersion,
-//             apiContext : throttleAnalyticsEventDTO.apiContext,
-
-//             apiCreator : throttleAnalyticsEventDTO.apiCreator,
-//             apiCreatorTenantDomain : throttleAnalyticsEventDTO.apiCreatorTenantDomain,
-//             applicationId : throttleAnalyticsEventDTO.applicationId,
-
-//             applicationName : throttleAnalyticsEventDTO.applicationName,
-//             subscriber : throttleAnalyticsEventDTO.subscriber,
-//             throttledOutReason : throttleAnalyticsEventDTO.throttledOutReason,
-
-//             gatewayType : throttleAnalyticsEventDTO.gatewayType,
-//             throttledOutTimestamp : throttleAnalyticsEventDTO.throttledTime,
-//             hostname : throttleAnalyticsEventDTO.hostname
-//         };
-
-
-
-
-// ##################################################################################################
-// json falutJSON = {
-//         meta_clientType : faultDTO. metaClientType,
-//         applicationConsumerKey : faultDTO.consumerKey,
-//         apiName : faultDTO.apiName,
-//         apiVersion : faultDTO.apiVersion,
-//         apiContext : faultDTO.apiContext,
-//         apiResourcePath : faultDTO.resourcePath,
-//         apiMethod : faultDTO.method,
-//         apiCreator : faultDTO.apiCreator,
-//         username : faultDTO.userName,
-//         userTenantDomain : faultDTO.userTenantDomain,
-//         apiCreatorTenantDomain : faultDTO.apiCreatorTenantDomain,
-//         hostname : faultDTO.hostName,
-//         applicationId : faultDTO.applicationId,
-//         applicationName : faultDTO.applicationName,
-//         protocol : faultDTO.protocol,
-//         errorCode : faultDTO.errorCode,
-//         errorMessage : faultDTO.errorMessage,
-//         requestTimestamp : faultDTO.faultTime
-//     };
-
-
-
-// ############################################################
-
-
-
-//  json analyticsJSON = {
-//         meta_clientType : <string>requestResponseExecutionDTO.metaClientType ,
-//         applicationConsumerKey : <string>requestResponseExecutionDTO.applicationConsumerKey ,
-//         applicationName : <string>requestResponseExecutionDTO.applicationName ,
-//         applicationId : <string>requestResponseExecutionDTO.applicationId ,
-//         applicationOwner : <string>requestResponseExecutionDTO.applicationOwner ,
-
-//         apiContext : <string>requestResponseExecutionDTO.apiContext ,
-//         apiName : <string> requestResponseExecutionDTO.apiName ,
-//         apiVersion : <string>requestResponseExecutionDTO.apiVersion ,
-//         apiResourcePath : <string>requestResponseExecutionDTO.apiResourcePath ,
-//         apiResourceTemplate : <string>requestResponseExecutionDTO.apiResourceTemplate ,
-
-//         apiMethod : <string>requestResponseExecutionDTO.apiMethod ,
-//         apiCreator : <string>requestResponseExecutionDTO.apiCreator ,
-//         apiCreatorTenantDomain : <string>requestResponseExecutionDTO.apiCreatorTenantDomain ,
-//         apiTier :  <string>requestResponseExecutionDTO.apiTier ,
-//         apiHostname : <string>requestResponseExecutionDTO.apiHostname ,
-
-//         username : <string>requestResponseExecutionDTO.userName ,
-//         userTenantDomain :  <string>requestResponseExecutionDTO.userTenantDomain ,
-//         userIp :  <string>requestResponseExecutionDTO.userIp ,
-//         userAgent : <string>requestResponseExecutionDTO.userAgent ,
-//         requestTimestamp : requestResponseExecutionDTO.requestTimestamp ,
-
-//         throttledOut : requestResponseExecutionDTO.throttledOut ,
-//         responseTime : requestResponseExecutionDTO.responseTime ,
-//         serviceTime : requestResponseExecutionDTO.serviceTime ,
-//         backendTime : requestResponseExecutionDTO.backendTime ,
-//         responseCacheHit : requestResponseExecutionDTO.responseCacheHit ,
-
-//         responseSize : requestResponseExecutionDTO.responseSize ,
-//         protocol : requestResponseExecutionDTO.protocol ,
-//         responseCode : requestResponseExecutionDTO.responseCode ,
-//         destination : requestResponseExecutionDTO.destination ,
-//         securityLatency : requestResponseExecutionDTO.executionTime.securityLatency ,
-
-//         throttlingLatency : requestResponseExecutionDTO.executionTime.throttlingLatency , 
-//         requestMedLat : requestResponseExecutionDTO.executionTime.requestMediationLatency ,
-//         responseMedLat :requestResponseExecutionDTO.executionTime.responseMediationLatency , 
-//         backendLatency : requestResponseExecutionDTO.executionTime.backEndLatency , 
-//         otherLatency : requestResponseExecutionDTO.executionTime.otherLatency , 
-
-//         gatewayType : <string>requestResponseExecutionDTO.gatewayType , 
-//         label : <string>requestResponseExecutionDTO.label
-//     };  
-
-//     return analyticsJSON;
