@@ -78,7 +78,6 @@ public function pingMessage(AnalyticsStreamMessage message){
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
             printDebug(KEY_ANALYTICS_FILTER,"Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
-            
         } else {
             printDebug(KEY_ANALYTICS_FILTER,"Completed Sending gRPC Analytics data: ");
             gRPCConnection = true;
