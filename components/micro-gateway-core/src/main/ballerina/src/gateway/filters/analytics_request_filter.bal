@@ -41,8 +41,8 @@ public type AnalyticsRequestFilter object {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
                     ThrottleAnalyticsEventDTO|error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
-                    if(throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
-                        if(isgRPCAnalyticsEnabled != false) {
+                    if (throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
+                        if (isgRPCAnalyticsEnabled != false) {
                             // throttle stream gRPC Analytics
                             AnalyticsStreamMessage message = createThrottleMessage(throttleAnalyticsEventDTO);
                             printDebug(KEY_ANALYTICS_FILTER,"gRPC throttle stream message created.");
@@ -50,8 +50,8 @@ public type AnalyticsRequestFilter object {
                             printDebug(KEY_ANALYTICS_FILTER,"gRPC throttle stream message published.");
                         }
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
-                        if(eventDTO is EventDTO) {
-                            if(isAnalyticsEnabled != false) {
+                        if (eventDTO is EventDTO) {
+                            if (isAnalyticsEnabled != false) {
                                 eventStream.publish(eventDTO);
                                 printDebug(KEY_ANALYTICS_FILTER,"File upload throttle stream data published." + eventDTO.streamId);
                             }
@@ -91,9 +91,9 @@ function doFilterRequest(http:Request request, http:FilterContext context) {
 
 function doFilterFault(http:FilterContext context, string errorMessage) {
     FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
-    if(faultDTO is FaultDTO) {
+    if (faultDTO is FaultDTO) {
         printDebug(KEY_ANALYTICS_FILTER,"doFilterFalut method called. Client type : " + faultDTO. metaClientType + " applicationName :"+faultDTO.applicationName);
-        if(isgRPCAnalyticsEnabled != false ) {
+        if (isgRPCAnalyticsEnabled != false ) {
             //fault stream gRPC Analytics
             printDebug(KEY_ANALYTICS_FILTER,"gRPC fault stream message creating.");
             AnalyticsStreamMessage message = createFaultMessage(faultDTO);
@@ -101,8 +101,8 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
             return;
         }
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
-        if(eventDTO is EventDTO) {
-            if(isAnalyticsEnabled != false) {
+        if (eventDTO is EventDTO) {
+            if (isAnalyticsEnabled != false) {
                 printDebug(KEY_ANALYTICS_FILTER,"File Upload eventFaultStream : " + eventDTO.payloadData);
                 eventStream.publish(eventDTO);
             }
@@ -121,17 +121,17 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     //Response analytics data publishing
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
-    if(isgRPCAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+    if (isgRPCAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         //Response stream gRPC Analyrics
         AnalyticsStreamMessage message = createResponseMessage(requestResponseExecutionDTO);
         printDebug(KEY_ANALYTICS_FILTER,"gRPC response stream Data starting to publish");
         future<()> publishedGRPCResponseStream = start dataToAnalytics(message);
         return;
     }
-    if(requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+    if (requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
-            if(isAnalyticsEnabled != false) {
+            if (isAnalyticsEnabled != false) {
                 printDebug(KEY_ANALYTICS_FILTER,"F_Upload eventRequestStream called" + event.payloadData);
                 eventStream.publish(event);
             }

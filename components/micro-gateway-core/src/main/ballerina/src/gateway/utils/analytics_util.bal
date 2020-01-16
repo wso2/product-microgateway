@@ -159,7 +159,7 @@ function initializegRPCAnalytics() {
     printDebug(KEY_ANALYTICS_FILTER, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
     printDebug(KEY_ANALYTICS_FILTER, "gRPC retry time  : " + gRPCReconnectTime.toString());
 
-    if(isgRPCAnalyticsEnabled == true) {
+    if (isgRPCAnalyticsEnabled == true) {
         initGRPCService();
     }
 }

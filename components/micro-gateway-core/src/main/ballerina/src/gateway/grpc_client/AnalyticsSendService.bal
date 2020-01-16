@@ -20,12 +20,12 @@ service connectGRPC = service {
     resource function onTrigger(){
         printDebug(KEY_ANALYTICS_FILTER,"gRPC Reconnect Task Still Running.");
         taskStarted = true;
-        if(gRPCConnection == false){
+        if (gRPCConnection == false) {
             initGRPCService();
             log:printWarn("Connection will retry again in "+ reConnectTime.toString() +" milliseconds.");
             pingMessage(gRPCPingMessage);
         }
-        else{
+        else {
             log:printInfo("Successfully connected to gRPC server.");
             // terminates the timer if gRPPCConnection variable assigned as false
             var stop = gRPCConnectTimer.stop();
@@ -107,11 +107,11 @@ service AnalyticsSendServiceMessageListener = service {
         printDebug(KEY_ANALYTICS_FILTER,"On error method in gRPC listner.");
         gRPCConnection = false;
         //Triggers @ when startup when there is a gRPC connection error.
-        if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false){
+        if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false) {
             printDebug(KEY_ANALYTICS_FILTER,"gRPC unavaliable error identified.");
             log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
             //starts gRPC reconnect task
-            if(taskStarted == false){
+            if (taskStarted == false) {
                 var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
                     printDebug(KEY_ANALYTICS_FILTER,"Starting the gRPC reconnect task is failed.");
