@@ -146,7 +146,7 @@ function getAnalyticsEnableConfig() {
     printDebug(KEY_UTILS, "Analytics configuration values read");
 }
 
-function initializegRPCAnalytics(){
+function initializegRPCAnalytics() {
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
     map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
     isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
@@ -158,7 +158,8 @@ function initializegRPCAnalytics(){
     printDebug(KEY_ANALYTICS_FILTER, "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"));
     printDebug(KEY_ANALYTICS_FILTER, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
     printDebug(KEY_ANALYTICS_FILTER, "gRPC retry time  : " + gRPCReconnectTime.toString());
-    if(isgRPCAnalyticsEnabled == true){
+
+    if(isgRPCAnalyticsEnabled == true) {
         initGRPCService();
     }
 }
