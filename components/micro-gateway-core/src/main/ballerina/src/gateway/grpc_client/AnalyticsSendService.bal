@@ -18,7 +18,7 @@ task:Scheduler gRPCConnectTimer = new({
 
 service connectGRPC = service {
     resource function onTrigger(){
-        log:printDebug("gRPC Reconnect Task Still Running.");
+        printDebug(KEY_ANALYTICS_FILTER,"gRPC Reconnect Task Still Running.");
         taskStarted = true;
         if(gRPCConnection == false){
             initGRPCService();
@@ -28,12 +28,12 @@ service connectGRPC = service {
         else{
             log:printInfo("Successfully connected to gRPC server.");
             // terminates the timer if gRPPCConnection variable assigned as false
-                var stop = gRPCConnectTimer.stop();
-                if (stop is error) {
-                    log:printError("Stopping the gRPC reconnect task is failed.");
-                    return;
-                }
-                taskStarted = false;
+            var stop = gRPCConnectTimer.stop();
+            if (stop is error) {
+                log:printError("Stopping the gRPC reconnect task is failed.");
+                return;
+            }
+            taskStarted = false;
         }
     }
 };
@@ -55,8 +55,8 @@ config = {
             timeoutInMillis : 2147483647
 } );
 
-//registers server message listner (AnalyticsSendServiceMessageListener)
 public function initGRPCService(){
+    //registers server message listner (AnalyticsSendServiceMessageListener)
     var attachResult = gRPCConnectTimer.attach(connectGRPC);
      if (attachResult is error) {
         log:printError("Error attaching the gRPC reconnect service.");
@@ -64,60 +64,58 @@ public function initGRPCService(){
     }
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
     if (gRPCres is grpc:Error) {
-        log:printError("Error from Connector: " + gRPCres.reason() + " - "
-                                           + <string> gRPCres.detail()["message"]);
+        log:printError("Error from Connector: " + gRPCres.reason() + " - " + <string> gRPCres.detail()["message"]);
         return;
     } else {
-        log:printDebug("Initialized gRPC connection sucessfully.");
+        printDebug(KEY_ANALYTICS_FILTER,"Initialized gRPC connection sucessfully.");
         gRPCEp = gRPCres;
     }
 }
 
-//ping MessageSend
 public function pingMessage(AnalyticsStreamMessage message){
-    log:printDebug("gRPC reconnect Ping Message executed.");
+    //ping Message used to check gRPC server availability
+    printDebug(KEY_ANALYTICS_FILTER,"gRPC reconnect Ping Message executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            log:printDebug("Error from Connector: " + connErr.reason() + " - "
-                                       + <string> connErr.detail()["message"]);
+            printDebug(KEY_ANALYTICS_FILTER,"Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
             
         } else {
-            log:printDebug("Completed Sending gRPC Analytics data: ");
+            printDebug(KEY_ANALYTICS_FILTER,"Completed Sending gRPC Analytics data: ");
             gRPCConnection = true;
         }
 }
 
-//publishes data to relevant stream
+
 public function dataToAnalytics(AnalyticsStreamMessage message){
-    log:printDebug("gRPC analytics data publishing method executed.");
+    //publishes data to relevant stream
+    printDebug(KEY_ANALYTICS_FILTER,"gRPC analytics data publishing method executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            log:printInfo("Error from Connector: " + connErr.reason() + " - "
-                                       + <string> connErr.detail()["message"]);
+            log:printInfo("Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
            
         } else {
-            log:printDebug("gRPC analytics data published successfully: ");
+            printDebug(KEY_ANALYTICS_FILTER,"gRPC analytics data published successfully: ");
         }
 }
 
-//server message listner
-service AnalyticsSendServiceMessageListener = service {
 
+service AnalyticsSendServiceMessageListener = service {
+    //server message listner
     resource function onMessage(string message) {
     }
 
     resource function onError(error err) {
-        log:printDebug("On error method in gRPC listner.");
+        printDebug(KEY_ANALYTICS_FILTER,"On error method in gRPC listner.");
         gRPCConnection = false;
         //Triggers @ when startup when there is a gRPC connection error.
         if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false){
-            log:printDebug("gRPC unavaliable error identified.");
+            printDebug(KEY_ANALYTICS_FILTER,"gRPC unavaliable error identified.");
             log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
             //starts gRPC reconnect task
             if(taskStarted == false){
                 var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
-                    log:printDebug("Starting the gRPC reconnect task is failed.");
+                    printDebug(KEY_ANALYTICS_FILTER,"Starting the gRPC reconnect task is failed.");
                     return;
                 }   
             }
@@ -128,10 +126,8 @@ service AnalyticsSendServiceMessageListener = service {
     }
 };
 
-
-//Ping message used to stop gRPC reconnect Task
 AnalyticsStreamMessage gRPCPingMessage = {
-
+     //Ping message used to stop gRPC reconnect Task
      messageStreamName: "PingMessage",
      meta_clientType : "" ,
      applicationConsumerKey : "" ,
@@ -170,8 +166,6 @@ AnalyticsStreamMessage gRPCPingMessage = {
      otherLatency : 0 , 
      gatewayType : "" , 
      label  : "",
-
-
 
      subscriber : "",
      throttledOutReason : "",

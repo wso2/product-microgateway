@@ -47,8 +47,8 @@ public type AnalyticsRequestFilter object {
                             // throttle stream gRPC Analytics
                             AnalyticsStreamMessage message = createThrottleMessage(throttleAnalyticsEventDTO);
                             log:printDebug("\n\n>>> gRPC throttle stream message created.");
-                                    future<()> publishedGRPCThrottleStream = start dataToAnalytics(message);
-                                    log:printDebug( "gRPC throttle stream message published.");
+                            future<()> publishedGRPCThrottleStream = start dataToAnalytics(message);
+                            log:printDebug( "gRPC throttle stream message published.");
                         }
                         EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                         if(eventDTO is EventDTO) {
@@ -56,8 +56,6 @@ public type AnalyticsRequestFilter object {
                                 eventStream.publish(eventDTO);
                                 log:printDebug( "File upload throttle stream data published." + eventDTO.streamId);
                             }
-                             
-                            
                         } else {
                             printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
                             printFullError(KEY_ANALYTICS_FILTER, eventDTO);
@@ -80,7 +78,6 @@ public type AnalyticsRequestFilter object {
         }
         return true;
     }
-
 };
 
 
@@ -101,7 +98,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
             //fault stream gRPC Analytics
             log:printDebug("gRPC fault stream message creating --->");
             AnalyticsStreamMessage message = createFaultMessage(faultDTO);
-                future<()> publishedGRPCFaultStream = start dataToAnalytics(message);
+            future<()> publishedGRPCFaultStream = start dataToAnalytics(message);
             return;
         }
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
@@ -110,7 +107,6 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
                 log:printDebug("File Upload eventFaultStream : " + eventDTO.payloadData);
                 eventStream.publish(eventDTO);
             }
-            
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
             printFullError(KEY_ANALYTICS_FILTER, eventDTO);
@@ -214,7 +210,6 @@ public function createResponseMessage(RequestResponseExecutionDTO requestRespons
     errorCode : "",
     errorMessage : ""
     };
-
     return responseAnalyticsMessage;
 }
 
@@ -325,7 +320,5 @@ public function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMess
     errorCode : errorCodeValue.toString(),
     errorMessage : faultDTO.errorMessage
     };
-
-
     return faultAnalyticsMessage;
 }

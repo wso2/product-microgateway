@@ -153,12 +153,12 @@ function initializegRPCAnalytics(){
     endpointURL = <string>gRPCConfigs[GRPC_ENDPOINT_URL];
     gRPCReconnectTime = <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
 
-    log:printDebug( "gRPC endpoint URL : " + endpointURL);
-    log:printDebug( "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"));
-    log:printDebug( "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina"));
-    log:printDebug( "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"));
-    log:printDebug( "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
-    log:printDebug( "gRPC retry time  : " + gRPCReconnectTime.toString());
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC endpoint URL : " + endpointURL);
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"));
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina"));
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"));
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
+    printDebug(KEY_ANALYTICS_FILTER, "gRPC retry time  : " + gRPCReconnectTime.toString());
 
     if(isgRPCAnalyticsEnabled == true){
         initGRPCService();
