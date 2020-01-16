@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 
-option java_package = "io.wso2.apim.analytics.proto";
+option java_package = "org.wso2.analytics.mgw.grpc.service";
 
 import "google/protobuf/empty.proto";
 

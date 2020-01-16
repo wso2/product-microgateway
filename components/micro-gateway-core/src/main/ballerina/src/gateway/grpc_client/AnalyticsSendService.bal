@@ -6,9 +6,10 @@ import ballerina/task;
 //AnalyticsSendServiceClient nonblockingGRPCAnalyticsClient = new(getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, "http://localhost:9806"));
 
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
-boolean gRPCConnection = false;
+boolean gRPCConnection = false; //check gRPC connection
 map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
 int reConnectTime =  <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
+boolean taskStarted = false;    //to check gRPC reconnect task
 
 task:Scheduler gRPCConnectTimer = new({
         intervalInMillis :  reConnectTime,
@@ -17,9 +18,22 @@ task:Scheduler gRPCConnectTimer = new({
 
 service connectGRPC = service {
     resource function onTrigger(){
+        log:printDebug("gRPC Reconnect Task Still Running.");
+        taskStarted = true;
         if(gRPCConnection == false){
             initGRPCService();
-            log:printWarn("Connection will retry again in "+ reConnectTime.toString() +" milliseconds if there is a connection error.");
+            log:printWarn("Connection will retry again in "+ reConnectTime.toString() +" milliseconds.");
+            pingMessage(gRPCPingMessage);
+        }
+        else{
+            log:printInfo("Successfully connected to gRPC server.");
+            // terminates the timer if gRPPCConnection variable assigned as false
+                var stop = gRPCConnectTimer.stop();
+                if (stop is error) {
+                    log:printError("Stopping the gRPC reconnect task is failed.");
+                    return;
+                }
+                taskStarted = false;
         }
     }
 };
@@ -45,7 +59,7 @@ config = {
 public function initGRPCService(){
     var attachResult = gRPCConnectTimer.attach(connectGRPC);
      if (attachResult is error) {
-        log:printError("Error attaching the service.");
+        log:printError("Error attaching the gRPC reconnect service.");
         return;
     }
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
@@ -59,8 +73,9 @@ public function initGRPCService(){
     }
 }
 
-//publishes data to relevant stream
-public function dataToAnalytics(AnalyticsStreamMessage message){
+//ping MessageSend
+public function pingMessage(AnalyticsStreamMessage message){
+    log:printDebug("gRPC reconnect Ping Message executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
             log:printDebug("Error from Connector: " + connErr.reason() + " - "
@@ -68,15 +83,20 @@ public function dataToAnalytics(AnalyticsStreamMessage message){
             
         } else {
             log:printDebug("Completed Sending gRPC Analytics data: ");
-            if(gRPCConnection == false){
-                //terminates the timer if gRPPCConnection variable assigned as false
-                var stop = gRPCConnectTimer.stop();
-                if (stop is error) {
-                    log:printError("Stopping the task is failed.");
-                    return;
-                }
-            }
             gRPCConnection = true;
+        }
+}
+
+//publishes data to relevant stream
+public function dataToAnalytics(AnalyticsStreamMessage message){
+    log:printDebug("gRPC analytics data publishing method executed.");
+    grpc:Error? connErr = gRPCEp->send(message);
+        if (connErr is grpc:Error) {
+            log:printInfo("Error from Connector: " + connErr.reason() + " - "
+                                       + <string> connErr.detail()["message"]);
+           
+        } else {
+            log:printDebug("gRPC analytics data published successfully: ");
         }
 }
 
@@ -87,26 +107,19 @@ service AnalyticsSendServiceMessageListener = service {
     }
 
     resource function onError(error err) {
-        //Triggers @ when startup when gRPC connection is closed.
+        log:printDebug("On error method in gRPC listner.");
+        gRPCConnection = false;
+        //Triggers @ when startup when there is a gRPC connection error.
         if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false){
+            log:printDebug("gRPC unavaliable error identified.");
             log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
-            
-            var startResult = gRPCConnectTimer.start();
+            //starts gRPC reconnect task
+            if(taskStarted == false){
+                var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
-                    log:printDebug("Starting the task is failed.");
+                    log:printDebug("Starting the gRPC reconnect task is failed.");
                     return;
-            }   
-            gRPCConnection = false;
-        }
-        //starts the timer if error is gRPC unavailable and gRPCConnection has established previously.
-        //(Triggers when wroked gRPC connection get closed)
-        if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == true){
-            gRPCConnection = false;
-            log:printError("Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
-            var startResult = gRPCConnectTimer.start();
-                if (startResult is error ) {
-                    log:printError("Starting the task is failed.");
-                    return;
+                }   
             }
         }
     }
@@ -116,56 +129,56 @@ service AnalyticsSendServiceMessageListener = service {
 };
 
 
-// //Ping message used to stop gRPC reconnect Task
-// AnalyticsStreamMessage gRPCPingMessage = {
+//Ping message used to stop gRPC reconnect Task
+AnalyticsStreamMessage gRPCPingMessage = {
 
-//      messageStreamName: "PingMessage",
-//      meta_clientType : "" ,
-//      applicationConsumerKey : "" ,
-//      applicationName : "" ,
-//      applicationId : "" ,
-//      applicationOwner : "" ,
-//      apiContext : "" ,
-//      apiName : "" ,
-//      apiVersion : "" ,
-//      apiResourcePath : "" ,
-//      apiResourceTemplate : "" ,
-//      apiMethod : "" ,
-//      apiCreator : "" ,
-//      apiCreatorTenantDomain : "" ,
-//      apiTier : "" ,
-//      apiHostname : "" ,
-//      username : "" ,
-//      userTenantDomain : "" ,
-//      userIp : "" ,
-//      userAgent : "" ,
-//      requestTimestamp : 0 ,
-//      throttledOut : false ,
-//      responseTime :0 ,
-//      serviceTime : 0 ,
-//      backendTime : 0 ,
-//      responseCacheHit : false,
-//      responseSize : 0 ,
-//      protocol : "" ,
-//      responseCode  : 0 ,
-//      destination : "" ,
-//      securityLatency  : 0 ,
-//      throttlingLatency  : 0 , 
-//      requestMedLat : 0 ,
-//      responseMedLat : 0 , 
-//      backendLatency : 0 , 
-//      otherLatency : 0 , 
-//      gatewayType : "" , 
-//      label  : "",
+     messageStreamName: "PingMessage",
+     meta_clientType : "" ,
+     applicationConsumerKey : "" ,
+     applicationName : "" ,
+     applicationId : "" ,
+     applicationOwner : "" ,
+     apiContext : "" ,
+     apiName : "" ,
+     apiVersion : "" ,
+     apiResourcePath : "" ,
+     apiResourceTemplate : "" ,
+     apiMethod : "" ,
+     apiCreator : "" ,
+     apiCreatorTenantDomain : "" ,
+     apiTier : "" ,
+     apiHostname : "" ,
+     username : "" ,
+     userTenantDomain : "" ,
+     userIp : "" ,
+     userAgent : "" ,
+     requestTimestamp : 0 ,
+     throttledOut : false ,
+     responseTime :0 ,
+     serviceTime : 0 ,
+     backendTime : 0 ,
+     responseCacheHit : false,
+     responseSize : 0 ,
+     protocol : "" ,
+     responseCode  : 0 ,
+     destination : "" ,
+     securityLatency  : 0 ,
+     throttlingLatency  : 0 , 
+     requestMedLat : 0 ,
+     responseMedLat : 0 , 
+     backendLatency : 0 , 
+     otherLatency : 0 , 
+     gatewayType : "" , 
+     label  : "",
 
 
 
-//      subscriber : "",
-//      throttledOutReason : "",
-//      throttledOutTimestamp : 0,
-//      hostname : "",
+     subscriber : "",
+     throttledOutReason : "",
+     throttledOutTimestamp : 0,
+     hostname : "",
  
-//     errorCode : "",
-//     errorMessage : ""
-//     };
+    errorCode : "",
+    errorMessage : ""
+    };
 
