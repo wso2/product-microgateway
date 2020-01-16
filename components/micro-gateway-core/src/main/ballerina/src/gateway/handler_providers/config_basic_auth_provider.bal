@@ -61,19 +61,25 @@ public type BasicAuthProvider object {
         string userName;
         string password;
         if (decodedCredentials is byte[]) {
-            string decodedCredentialsString = check strings:fromBytes(decodedCredentials);
-            if (decodedCredentialsString.indexOf(":", 0) == ()) {
-                setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
+            string | error decodedCredentialsString = strings:fromBytes(decodedCredentials);
+            if (decodedCredentialsString is string) {
+                if (decodedCredentialsString.indexOf(":", 0) == ()) {
+                    setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
+                    return false;
+                }
+                string[] decodedCred = split(decodedCredentialsString.trim(), ":");
+                userName = decodedCred[0];
+                printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
+                if (decodedCred.length() < 2) {
+                    setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
+                    return false;
+                }
+                password = decodedCred[1];
+            } else {
+                printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
+                setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
                 return false;
             }
-            string[] decodedCred = split(decodedCredentialsString.trim(), ":");
-            userName = decodedCred[0];
-            printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
-            if (decodedCred.length() < 2) {
-                setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                return false;
-            }
-            password = decodedCred[1];
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);

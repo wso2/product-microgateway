@@ -110,7 +110,6 @@ public class CodeGenerator {
         CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
                 projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
-
     }
 
 

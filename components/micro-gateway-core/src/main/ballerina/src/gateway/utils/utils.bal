@@ -516,8 +516,8 @@ public function setHostHeaderToFilterContext(http:Request request,@tainted http:
 }
 
 public function isSecured(string serviceName, string resourceName) returns boolean {
-    http:ServiceResourceAuth? resourceLevelAuthAnn = ();
-    http:ServiceResourceAuth? serviceLevelAuthAnn = ();
+    http:ResourceAuth? resourceLevelAuthAnn = ();
+    http:ResourceAuth? serviceLevelAuthAnn = ();
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
@@ -540,12 +540,12 @@ public function isSecured(string serviceName, string resourceName) returns boole
 
 # Check for the service or the resource is secured by evaluating the enabled flag configured by the user.
 #
-# + serviceResourceAuth - Service or resource auth annotation
+# + resourceAuth - Service or resource auth annotation
 # + return - Whether the service or resource secured or not
-function isServiceResourceSecured(http:ServiceResourceAuth? serviceResourceAuth) returns boolean {
+function isServiceResourceSecured(http:ResourceAuth? resourceAuth) returns boolean {
     boolean secured = true;
-    if (serviceResourceAuth is http:ServiceResourceAuth) {
-        secured = serviceResourceAuth.enabled;
+    if (resourceAuth is http:ResourceAuth) {
+        secured = resourceAuth["enabled"] ?: true;
     }
     return secured;
 }

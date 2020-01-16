@@ -57,13 +57,7 @@ import wso2/gateway;
     name:"{{api.name}}",
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
-    {{#if basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}}
+    authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}]
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -82,13 +76,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         }
     }
     @gateway:Resource {
-        {{#if basicAuth.isOptional}}
-            authProviders:["basic","oauth2","jwt"]
-        {{else if basicAuth.isRequired}}
-            authProviders:["basic"]
-        {{else}}
-            authProviders:["jwt","oauth2"]
-        {{/if}}
+        authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}]
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {

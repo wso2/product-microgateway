@@ -1,0 +1,11 @@
+
+[project]
+org-name= "wso2"
+version= "3.1.0"
+
+[platform]
+target = "java8"
+
+[dependencies]
+"wso2/gateway" = { path = "${MICROGW_HOME}/lib/gateway-balo/gateway-2019r3-java8-3.1.0.balo"}
+

@@ -28,3 +28,5 @@ POPD
 
 cp -r %GATEWAY_PROJECT%\target\caches\bir_cache %MAVEN_PROJECT_ROOT%\target
 cp -r %GATEWAY_PROJECT%\target\caches\jar_cache %MAVEN_PROJECT_ROOT%\target
+cp -r %GATEWAY_PROJECT%\target\balo %MAVEN_PROJECT_ROOT%\target
+

@@ -135,11 +135,11 @@ goto :end
                 if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jar"
 
                 REM Build project using ballerina
-                call ballerina build -c --experimental %project_name%
+                call ballerina build --experimental %project_name%
 
                 if ERRORLEVEL 0 (
                     REM move all executable ballerina build outputs to MGW_PROJECT/target directory
-                    MOVE /y %TARGET_DIR%\gen\target\caches\jar_cache\wso2\%project_name%\0.1.0\*  %TARGET_DIR%\ 2> nul
+                    MOVE /y %TARGET_DIR%\gen\target\bin\*.jar  %TARGET_DIR%\ 2> nul
                 )
 
                 ECHO

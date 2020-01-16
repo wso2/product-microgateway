@@ -19,20 +19,20 @@ import ballerina/time;
 
 public type TimeBatch object {
 
-    public string attrExpiredTimestamp;
+    public string attrExpiredTimestamp = "";
     public int timeInMilliSeconds = -1;
     public streams:LinkedList expiredEventQueue;
-    public streams:Scheduler scheduler;
+    public streams:Scheduler? scheduler = ();
     public int expiredEventTime = -1;
     public int startTime = -1;
-    public any[] windowParameters;
-    public function (streams:StreamEvent?[])? nextProcessPointer;
+    public any[]? windowParameters = ();
+    public function (streams:StreamEvent?[])? nextProcessPointer = ();
 
     public function __init(function (streams:StreamEvent?[])? nextProcessPointer, any[] windowParameters) {
+        self.expiredEventQueue = new;
         self.scheduler = new (function (@tainted streams:StreamEvent?[] e) {
             self.process(e);
         });
-        self.expiredEventQueue = new;
         self.attrExpiredTimestamp = "expiryTimeStamp";
         self.windowParameters = windowParameters;
         self.nextProcessPointer = nextProcessPointer;
@@ -51,6 +51,10 @@ public type TimeBatch object {
         }
     }
 
+    public function getScheduler() returns streams:Scheduler {
+        return <streams:Scheduler>self.scheduler;
+    }
+
     public function process(streams:StreamEvent?[] streamEvents) {
         streams:StreamEvent[] streamEventsCopy = [];
         lock {
@@ -61,14 +65,14 @@ public type TimeBatch object {
                 } else {
                     self.expiredEventTime = time:currentTime().time + self.timeInMilliSeconds;
                 }
-                self.scheduler.notifyAt(self.expiredEventTime);
+                self.getScheduler().notifyAt(self.expiredEventTime);
             }
 
             int currentTime = time:currentTime().time;
             boolean sendEvents;
             if (currentTime >= self.expiredEventTime) {
                 self.expiredEventTime += self.timeInMilliSeconds;
-                self.scheduler.notifyAt(self.expiredEventTime);
+                self.getScheduler().notifyAt(self.expiredEventTime);
                 sendEvents = true;
             } else {
                 sendEvents = false;
@@ -117,7 +121,7 @@ public type TimeBatch object {
 
     public function getCandidateEvents(
     streams:StreamEvent originEvent,
-    (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
+ (function (map<anydata> e1Data, map<anydata> e2Data) returns boolean)? conditionFunc,
     boolean isLHSTrigger = true)
     returns [streams:StreamEvent?, streams:StreamEvent?][] {
         // do nothing;

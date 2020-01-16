@@ -1,54 +1,17 @@
 import wso2/gateway;
 
-stream<gateway:IntermediateStream> s{{name}}intermediateStream = new;
-stream<gateway:GlobalThrottleStreamDTO> s{{name}}resultStream = new;
-stream<gateway:EligibilityStreamDTO> s{{name}}eligibilityStream = new;
-stream<gateway:RequestStreamDTO> s{{name}}reqCopy= gateway:getRequestStream();
-stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrotCopy = gateway:getGlobalThrottleStream();
+stream<gateway:RequestStreamDTO> s{{name}}requestStream =gateway:getRequestStream();
+stream<gateway:GlobalThrottleStreamDTO> s{{name}}globalThrottleStream = gateway:getGlobalThrottleStream();
 
 function {{funcName}}() {
-
     forever {
-        from s{{name}}reqCopy
-        select s{{name}}reqCopy.messageID as messageID, (s{{name}}reqCopy.{{tierType}} == "{{name}}") as
-        isEligible, s{{name}}reqCopy.{{policyKey}} as throttleKey, 0 as expiryTimeStamp
-        => (gateway:EligibilityStreamDTO[] counts) {
-        foreach var c in counts{
-            s{{name}}eligibilityStream.publish(c);
-        }
-        }
-
-        from s{{name}}eligibilityStream
-        window gateway:timeBatch({{unitTime}})
-        where s{{name}}eligibilityStream.isEligible == true
-        select s{{name}}eligibilityStream.throttleKey as throttleKey, count() as eventCount, {{stopOnQuotaReach}} as
-        stopOnQuota, s{{name}}eligibilityStream.expiryTimeStamp as expiryTimeStamp
-        group by s{{name}}eligibilityStream.throttleKey
-        => (gateway:IntermediateStream[] counts) {
-        foreach var c in counts{
-            s{{name}}intermediateStream.publish(c);
-        }
-        }
-
-        from s{{name}}intermediateStream
-        select s{{name}}intermediateStream.throttleKey, s{{name}}intermediateStream.eventCount>= {{count}} as isThrottled,
-        s{{name}}intermediateStream.stopOnQuota, s{{name}}intermediateStream.expiryTimeStamp
-        group by s{{name}}intermediateStream.throttleKey
-        => (gateway:GlobalThrottleStreamDTO[] counts) {
-        foreach var c in counts{
-            s{{name}}resultStream.publish(c);
-        }
-        }
-
-        from s{{name}}resultStream
-        window gateway:emitOnStateChange(s{{name}}resultStream.throttleKey, s{{name}}resultStream.isThrottled, "s{{name}}resultStream")
-        select s{{name}}resultStream.throttleKey as throttleKey, s{{name}}resultStream.isThrottled,
-        s{{name}}resultStream.stopOnQuota, s{{name}}resultStream.expiryTimeStamp
-        => (gateway:GlobalThrottleStreamDTO[] counts) {
-        foreach var c in counts{
-            s{{name}}globalThrotCopy.publish(c);
-        }
-        }
+        from s{{name}}requestStream window gateway:throttle({{count}},{{unitTime}},s{{name}}requestStream.{{policyKey}})
+           where s{{name}}requestStream.{{tierType}} == "{{name}}"
+           select s{{name}}requestStream.{{policyKey}} as policyKey,{{stopOnQuotaReach}} as stopOnQuota, s{{name}}requestStream.resetTimestamp,s{{name}}requestStream.remainingQuota,s{{name}}requestStream.isThrottled
+           => (gateway:GlobalThrottleStreamDTO [] requests) {
+               foreach var r in requests {
+                  s{{name}}globalThrottleStream.publish(r);
+               }
+           }
     }
 }
-

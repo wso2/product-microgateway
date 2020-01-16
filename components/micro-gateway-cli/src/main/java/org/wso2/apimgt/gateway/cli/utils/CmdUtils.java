@@ -1169,4 +1169,9 @@ public final class CmdUtils {
             logger.error(message, e);
         }
     }
+
+    public static String getMicroGWConfResourceLocation() {
+        return getCLIHome() + File.separator + CliConstants.GW_DIST_RESOURCES + File.separator
+                + CliConstants.GW_DIST_CONF;
+    }
 }

@@ -61,6 +61,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
     private BasicAuth basicAuth;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -88,6 +90,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        this.authProviders = OpenAPICodegenUtils.setAuthProviders(this.basicAuth);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -272,6 +275,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
         if (this.basicAuth == null) {
             this.basicAuth = basicAuth;
+            authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
         }
     }
 }

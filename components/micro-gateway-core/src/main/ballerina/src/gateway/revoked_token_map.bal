@@ -22,7 +22,7 @@ public function getRevokedTokenMap() returns map<string> {
 
 public function addToRevokedTokenMap(map<string> revokedTokens) returns (boolean | ()) {
     foreach var [revokedTokenKey, revokedTokenValue] in revokedTokens.entries() {
-        revokedTokenMap[<string>revokedTokenKey] = <string>revokedTokenValue;
+        revokedTokenMap[<string>revokedTokenKey] = <@untainted>revokedTokenValue;
     }
     return true;
 }

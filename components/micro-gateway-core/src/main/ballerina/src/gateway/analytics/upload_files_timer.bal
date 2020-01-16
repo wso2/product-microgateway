@@ -50,8 +50,8 @@ function searchFilesToUpload() returns (error?) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                     var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
                 } else {
-                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned
-                    with status code : " + response.statusCode.toString());
+                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned" +
+                    "with status code : " + response.statusCode.toString());
                 }
                 cnt = cnt + 1;
             }

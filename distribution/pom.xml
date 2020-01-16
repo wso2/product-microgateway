@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,6 +52,12 @@
             <artifactId>org.wso2.micro.gateway.core</artifactId>
             <type>zip</type>
             <classifier>mgw-jar</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.core</artifactId>
+            <type>zip</type>
+            <classifier>mgw-balo</classifier>
         </dependency>
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
@@ -107,6 +113,17 @@
                         <configuration>
                             <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>
                             <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-gw-balo</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeClassifiers>mgw-balo</includeClassifiers>
+                            <outputDirectory>${project.build.directory}/lib/gw-balo/</outputDirectory>
                         </configuration>
                     </execution>
 <!--                    <execution>-->
@@ -169,6 +186,24 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>add-in-place-tool</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- download file -->
+                                <get src="https://product-dist.wso2.com/downloads/in-place/release/update.zip"
+                                     dest="${project.build.directory}/update.zip"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <unzip src="${project.build.directory}/update.zip"
+                                       dest="${project.build.directory}" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>extract-jre</id>
                         <phase>generate-resources</phase>
                         <configuration>
@@ -182,18 +217,18 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>extract-zip</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>extract-zip</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <configuration>-->
+<!--                            <tasks>-->
+<!--                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>-->
+<!--                            </tasks>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                     <execution>
                         <phase>verify</phase>
                         <goals>
