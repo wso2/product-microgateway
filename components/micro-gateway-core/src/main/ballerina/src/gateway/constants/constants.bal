@@ -122,7 +122,7 @@ public const string ENABLE = "enable";
 public const string REQUIRE = "require";
 
 //Analytics filter related constants
- public const string ZIP_EXTENSION = ".zip";
+public const string ZIP_EXTENSION = ".zip";
  public const string UPLOADING_URL = "uploadingUrl";
  public const string API_USAGE_FILE = "api-usage-data.dat";
  public const string TIME_INTERVAL = "timeInterval";
