@@ -76,26 +76,31 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
     });
     if (connection is error) {
         printError(KEY_THROTTLE_UTIL, "Error while creating the jms connection.");
+        printFullError(KEY_THROTTLE_UTIL, connection);
         return connection;
     } else {
         jms:Session | error session = trap connection->createSession({acknowledgementMode: "AUTO_ACKNOWLEDGE"});
         if (session is error) {
             printError(KEY_THROTTLE_UTIL, "Error while creating the jms session.");
+            printFullError(KEY_THROTTLE_UTIL, session);
             return session;
         } else {
         jms:Destination dest = check session->createTopic("throttleData");
         jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-1");
         if (subscriberEndpoint is error) {
             printError(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.");
+            printFullError(KEY_THROTTLE_UTIL, subscriberEndpoint);
         } else {
             var attachResult = subscriberEndpoint.__attach(messageServ);
             if (attachResult is error) {
-                printDebug(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.");
+                printError(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.");
+                printFullError(KEY_THROTTLE_UTIL, attachResult);
                 return attachResult;
             }
             var startResult = subscriberEndpoint.__start();
             if (startResult is error) {
-                printDebug(KEY_THROTTLE_UTIL, "Starting the task is failed.");
+                printError(KEY_THROTTLE_UTIL, "Starting the task is failed.");
+                printFullError(KEY_THROTTLE_UTIL, startResult);
                 return startResult;
             }
             printDebug(KEY_THROTTLE_UTIL, "Successfully created jms connection");
@@ -121,7 +126,7 @@ public function initiateThrottlingJmsListener() returns boolean {
             printDebug(KEY_THROTTLE_UTIL, "subscriber service for global throttling is started.");
             return true;
         } else {
-            printDebug(KEY_THROTTLE_UTIL, "Error while starting subscriber service for global throttling");
+            printError(KEY_THROTTLE_UTIL, "Error while starting subscriber service for global throttling");
             return false;
         }
     }
