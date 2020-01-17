@@ -55,7 +55,6 @@ message AnalyticsStreamMessage {
     string errorMessage = 44;
 }
 
-
 service AnalyticsSendService {
     rpc sendAnalytics(stream AnalyticsStreamMessage) returns(google.protobuf.Empty);
 }

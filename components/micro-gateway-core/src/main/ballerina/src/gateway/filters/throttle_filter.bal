@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/runtime;
+
 public type ThrottleFilter object {
     public map<boolean> deployedPolicies = {};
 
