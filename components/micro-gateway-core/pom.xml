@@ -132,10 +132,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>${basedir}/assembly/jar.xml</descriptor>
-                                <descriptor>${basedir}/assembly/bir.xml</descriptor>
                                 <descriptor>${basedir}/assembly/balo.xml</descriptor>
-<!--                                <descriptor>${basedir}/assembly/jms_zip.xml</descriptor>-->
                             </descriptors>
                         </configuration>
                     </execution>

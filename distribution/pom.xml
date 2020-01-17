@@ -45,18 +45,6 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
             <type>zip</type>
-            <classifier>mgw-bir</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <type>zip</type>
-            <classifier>mgw-jar</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <type>zip</type>
             <classifier>mgw-balo</classifier>
         </dependency>
         <dependency>
@@ -104,17 +92,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>unpack-gw-lib</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>
-                            <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>unpack-gw-lib</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>unpack-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>-->
+<!--                            <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                         <id>unpack-gw-balo</id>
                         <phase>generate-resources</phase>
@@ -245,22 +233,22 @@
                             </target>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <move todir="${project.build.directory}/lib/jar" flatten="true" >
-                                    <fileset dir="${project.build.directory}/lib/gw">
-                                        <include name="**/*.jar" />
-                                    </fileset>
-                                </move>
-                            </target>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>copy-resources</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <move todir="${project.build.directory}/lib/jar" flatten="true" >-->
+<!--                                    <fileset dir="${project.build.directory}/lib/gw">-->
+<!--                                        <include name="**/*.jar" />-->
+<!--                                    </fileset>-->
+<!--                                </move>-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
