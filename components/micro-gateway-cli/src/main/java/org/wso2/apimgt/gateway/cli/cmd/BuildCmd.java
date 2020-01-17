@@ -274,7 +274,6 @@ public class BuildCmd implements LauncherCmd {
                 + CliConstants.BALLERINA_TOML_FILE;
         String fileContent = CmdUtils.readFileAsString(templateFile, false);
         fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, CmdUtils.getCLIHome());
-        fileContent = fileContent.replaceFirst("org-name=.*\"", "org-name= \"wso2\"");
         Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
 }
