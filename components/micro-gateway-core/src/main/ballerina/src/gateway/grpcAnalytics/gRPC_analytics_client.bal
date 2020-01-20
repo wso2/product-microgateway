@@ -50,7 +50,7 @@ config = {
     timeoutInMillis : 2147483647
 } );
 
-# `initGRPCService` function binds gRPC streaming client endpoint with server message listner
+# `initGRPCService` function binds gRPC streaming client endpoint with server message listner.
 
 public function initGRPCService(){
     //registers server message listner (AnalyticsSendServiceMessageListener)
