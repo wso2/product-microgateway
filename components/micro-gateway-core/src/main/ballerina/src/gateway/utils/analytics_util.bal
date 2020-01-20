@@ -25,12 +25,7 @@ boolean configsRead = false;
 
 //gRPCConfigs
 boolean isgRPCAnalyticsEnabled = false;
-boolean gRPCConfigsRead = false;
 string endpointURL = "";
-string gRPCKeyStoreFile = "";
-string gRPCKeyStorePassword = "";
-string gRPCTrustStoreFile = "";
-string gRPCTrustStorePassword = "";
 int gRPCReconnectTime = 3000;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO | error) {
@@ -137,10 +132,9 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
 
 function getAnalyticsEnableConfig() {
-    map<any> vals = getConfigMapValue(ANALYTICS);
-    isAnalyticsEnabled = <boolean>vals[ENABLE];
-    rotatingTime = <int>vals[ROTATING_TIME];
-    uploadingUrl = <string>vals[UPLOADING_EP];
+    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false); 
+    rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
+    uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
     configsRead = true;
     log:printDebug("File upload analytics uploading URL : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");

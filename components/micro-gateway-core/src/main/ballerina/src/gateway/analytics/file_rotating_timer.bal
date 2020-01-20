@@ -39,7 +39,7 @@ function sendFileRotatingEvent() returns error? {
 }
 
 function rotatingTask() {
-    map<any> vals = getConfigMapValue(ANALYTICS);
+    map<any> vals = getConfigMapValue(FILE_UPLOAD_ANALYTICS);
     int timeSpan = <int>vals[ROTATING_TIME];
     int delay = <int>vals[INITIAL_DELAY];
     task:TimerConfiguration timerConfiguration = {

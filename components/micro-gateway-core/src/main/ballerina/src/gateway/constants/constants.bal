@@ -128,7 +128,7 @@ public const string ZIP_EXTENSION = ".zip";
  public const string TIME_INTERVAL = "timeInterval";
  public const string FILE_NAME = "FileName";
  public const string ACCEPT = "Accept";
- public const string ANALYTICS = "analytics.fileUpload";
+ public const string FILE_UPLOAD_ANALYTICS = "analytics.fileUpload";
  public const string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
  public const string ROTATING_TIME = "rotatingPeriod";
  public const string UPLOADING_EP = "uploadingEndpoint";
@@ -148,6 +148,7 @@ public const string ZIP_EXTENSION = ".zip";
  public const string FILE_UPLOAD_TASK = "taskUploadFiles";
  public const string INITIAL_DELAY = "initialDelayInMillis";
  public const string DESTINATION = "destination";
+ public const string FILE_UPLOAD_ENABLE = "enable";
 
  //gRPC analytics related constants
  public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";

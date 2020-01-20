@@ -32,7 +32,7 @@ getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
 });
 
 http:Client analyticsFileUploadEndpoint = new (
-getConfigValue(ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
+getConfigValue(FILE_UPLOAD_ANALYTICS, UPLOADING_EP, "https://localhost:9444/analytics/v1.0/usage/upload-file"),
 {
     cache: {enabled: false},
     secureSocket: {

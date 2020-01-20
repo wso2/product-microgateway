@@ -4,8 +4,7 @@ import ballerina/task;
 
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
 boolean gRPCConnection = false; //check gRPC connection
-map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
-int reConnectTime =  <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
+int reConnectTime =  <int>getConfigIntValue(GRPC_ANALYTICS,gRPC_RetryTimeMilliseconds,6000);
 boolean isTaskStarted = false;    //to check gRPC reconnect task
 
 task:Scheduler gRPCConnectTimer = new({
@@ -52,8 +51,7 @@ config = {
 } );
 
 # `initGRPCService` function binds gRPC streaming client endpoint with server message listner
-#
-# + return - N/A
+
 public function initGRPCService(){
     //registers server message listner (AnalyticsSendServiceMessageListener)
     var attachResult = gRPCConnectTimer.attach(connectGRPC);
@@ -76,7 +74,6 @@ public function initGRPCService(){
 # 
 # + message - 'AnalyticsStreamMessage' Message structure defined in the Analytics.proto file
 # 
-# + return - N/A
 public function pingMessage(AnalyticsStreamMessage message){
     //ping Message used to check gRPC server availability
     printDebug(KEY_ANALYTICS_FILTER,"gRPC reconnect Ping Message executed.");
@@ -94,7 +91,6 @@ public function pingMessage(AnalyticsStreamMessage message){
 # 
 # + message - 'AnalyticsStreamMessage' Message structure defined in the Analytics.proto file
 # 
-# + return - N/A
 public function dataToAnalytics(AnalyticsStreamMessage message){
     //publishes data to relevant stream
     printDebug(KEY_ANALYTICS_FILTER,"gRPC analytics data publishing method executed.");

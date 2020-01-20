@@ -66,7 +66,7 @@ function searchFilesToUpload() returns (error?) {
 }
 
 function timerTask() {
-    map<any> vals = getConfigMapValue(ANALYTICS);
+    map<any> vals = getConfigMapValue(FILE_UPLOAD_ANALYTICS);
     boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];
     analyticsUsername = <string>vals[USERNAME];
     analyticsPassword = <string>vals[PASSWORD];
