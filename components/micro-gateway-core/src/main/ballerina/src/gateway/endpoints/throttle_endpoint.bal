@@ -28,7 +28,7 @@ http:Client throttleEndpoint = new (throttleEndpointUrl,
     secureSocket: {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+            "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)

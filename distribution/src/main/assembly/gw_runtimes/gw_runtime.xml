@@ -26,18 +26,9 @@
 
     <fileSets>
         <fileSet>
-            <directory>${basedir}/target/jms-artifact/</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/lib/gateway</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-${project.version}/conf</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/lib/jar/</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/lib/gateway</outputDirectory>
-        </fileSet>
-
         <fileSet>
             <directory>${basedir}/resources/runtime_logs</directory>
             <outputDirectory>wso2am-micro-gw-${project.version}/logs</outputDirectory>
@@ -60,11 +51,6 @@
 
     <files>
         <file>
-            <source>${basedir}/target/runtime.zip</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/</outputDirectory>
-            <destName>runtime.zip</destName>
-        </file>
-        <file>
             <source>${basedir}/resources/bin/gateway</source>
             <outputDirectory>wso2am-micro-gw-${project.version}/bin</outputDirectory>
             <fileMode>755</fileMode>
@@ -72,6 +58,14 @@
         <file>
             <source>${basedir}/resources/bin/gateway.bat</source>
             <outputDirectory>wso2am-micro-gw-${project.version}/bin</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/ballerinaTruststore.p12</source>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/target/ballerina/jballerina-tools-${ballerina.platform.version}/bre/security/ballerinaKeystore.p12</source>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
         </file>
         <file>
             <source>${basedir}/../README.md</source>
@@ -98,12 +92,8 @@
             <outputDirectory>wso2am-micro-gw-${project.version}/lib/gateway</outputDirectory>
             <scope>runtime</scope>
             <includes>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>io.prometheus.jmx:jmx_prometheus_javaagent:jar</include>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.tools:jar</include>
-                <include>org.wso2.orbit.org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar</include>
-                <include>javax.jms:javax.jms-api:jar:</include>
-                <include>org.wso2.andes.wso2:andes-client:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>

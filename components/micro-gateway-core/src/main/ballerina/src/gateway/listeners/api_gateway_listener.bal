@@ -99,7 +99,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         trustStoreConfig: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"),
                 password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
             },
             certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
@@ -118,7 +118,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     http:ClientSecureSocket secureSocket = {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+            "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
@@ -225,7 +225,7 @@ function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider|error
         secureSocket : {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"),
                 password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
             },
             verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
