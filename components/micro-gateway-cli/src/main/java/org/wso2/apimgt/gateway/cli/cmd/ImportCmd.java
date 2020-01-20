@@ -493,7 +493,7 @@ public class ImportCmd implements LauncherCmd {
     private void informRestVersionToUser(String restVersion, String dcrVersion) {
         outStream.println("You are using REST version - " + restVersion + " and dynamic client registration version - "
                 + dcrVersion + " of API Manager. \n (If you want to change this, go to "
-                + "<MICROGW_HOME>/conf/toolkit-config.toml)");
+                + "<MGW-TK_HOME>/conf/toolkit-config.toml)");
     }
 
     /**
