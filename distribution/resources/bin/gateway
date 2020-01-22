@@ -49,25 +49,102 @@ export JAVA_HOME=$GWHOME'/lib/jdk8u202-b08-jre'
 export MGW_VERSION="3.1.0"
 export GW_HOME="$GWHOME"
 
+JAVA_PATH=$GWHOME/lib/jdk8u202-b08-jre
+if test -d "$JAVA_PATH"; then
+  JAVA_HOME=$JAVA_PATH
+fi
+
+BASE_DIR=$PWD
+cygwin=false;
+darwin=false;
+os400=false;
+mingw=false;
+case "`uname`" in
+CYGWIN*) cygwin=true;;
+MINGW*) mingw=true;;
+OS400*) os400=true;;
+Darwin*) darwin=true
+esac
+
+# For Cygwin, ensure paths are in UNIX format before anything is touched
+if $cygwin; then
+  [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+fi
+
+# For OS400
+if $os400; then
+  # Set job priority to standard for interactive (interactive - 6) by using
+  # the interactive priority - 6, the helper threads that respond to requests
+  # will be running at the same priority as interactive jobs.
+  COMMAND='chgjob job('$JOBNAME') runpty(6)'
+  system $COMMAND
+
+  # Enable multi threading
+  QIBM_MULTI_THREADED=Y
+  export QIBM_MULTI_THREADED
+fi
+
+# For Migwn, ensure paths are in UNIX format before anything is touched
+if $mingw ; then
+  [ -n "$JAVA_HOME" ] &&
+    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+fi
+
+if [ -z "$JAVACMD" ] ; then
+    if [ -n "$JAVA_HOME"  ] ; then
+        if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+            # IBM's JDK on AIX uses strange locations for the executables
+            JAVACMD="$JAVA_HOME/jre/sh/java"
+        else
+            JAVACMD="$JAVA_HOME/bin/java"
+        fi
+    else
+          JAVACMD=java
+    fi
+fi
+
+# For Cygwin, switch paths to Windows format before running java
+if $cygwin; then
+    JAVACMD=`cygpath --absolute --windows "$JAVACMD"`
+fi
+
+if [ ! -x "$JAVACMD" ] ; then
+  echo "Error: JAVA Package inside the microgateway runtime distribution is not working."
+  exit 1
+fi
+
+# Ballerina test/debug command
+argsLength=$#
+args=($@)
+for (( i=0; i<argsLength; i++ )); do
+  if [  "${args[$i]}" = "test" ]; then
+    for (( j=0; j<argsLength; j++ )); do
+      if [ "${args[$j]}" = "--debug" ]; then
+        BAL_JAVA_DEBUG=${args[$j+1]}
+      fi
+    done
+  fi
+done
+
+if [ -n "${BAL_JAVA_DEBUG+set}" ]; then
+    if [ -z "$BAL_JAVA_DEBUG" ]; then
+        echo "Please specify the debug port for the BAL_JAVA_DEBUG variable"
+  exit 1
+    else
+  if [ -n "$JAVA_OPTS" ]; then
+    echo "Warning !!!. User specified JAVA_OPTS may interfere with BAL_JAVA_DEBUG"
+  fi
+  # 'quiet=y' avoids breaking LSP protocol in debug mode
+  JAVA_OPTS="$JAVA_OPTS -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$BAL_JAVA_DEBUG,quiet=y"
+    fi
+fi
+
 if [ -e "$GWHOME/bin/gateway.pid" ]; then
   PID=`cat "$GWHOME"/bin/gateway.pid`
 fi
 
-#To run the Java classes
-java_cmd () {
-  if [ -z "$JAVACMD" ] ; then
-      if [ -n "$JAVA_HOME"  ] ; then
-          if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-              # IBM's JDK on AIX uses strange locations for the executables
-              JAVACMD="$JAVA_HOME/jre/sh/java"
-          else
-              JAVACMD="$JAVA_HOME/bin/java"
-          fi
-      else
-          JAVACMD=java
-      fi
-  fi
-
+#To run the Java classes required for the identification of observability
+java_cmd_tools () {
   METRIC_CLASSPATH=""
       for j in "$GWHOME"/lib/gateway/*.jar
       do
@@ -81,6 +158,31 @@ java_cmd () {
       $JAVA_OPTS \
       -classpath "$METRIC_CLASSPATH" \
       org.wso2.micro.gateway.tools.Main $1 | tee -a $GWHOME/logs/microgateway.log
+}
+
+java_cmd_gateway () {
+  $JAVACMD \
+    -Xms${JAVA_XMS_VALUE} -Xmx$JAVA_XMX_VALUE \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -Dmgw-runtime.home=${GWHOME} \
+    -Dballerina.home=${GWHOME} \
+    -jar $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
+}
+
+java_cmd_gateway_background () {
+  # using nohup sh to avoid erros in solaris OS.TODO
+  nohup $SHELL <<EOF &
+  $JAVACMD \
+    -Xms${JAVA_XMS_VALUE} -Xmx$JAVA_XMX_VALUE \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath="$GWHOME/heap-dump.hprof" \
+    $JAVA_OPTS \
+    -Dmgw-runtime.home=${GWHOME} \
+    -Dballerina.home=${GWHOME} \
+    -jar $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
+EOF
 }
 
 # ----- Process the input command ----------------------------------------------
@@ -112,51 +214,52 @@ done
 for last; do true; done
 
 if [ ! "$CMD" = "stop" ]; then
-  if [[ ! -f "$1" ]]; then
+  if [[ "$CMD" == "" ]]; then
+    if [[ ! -f "$1" ]]; then
+      echo "Path to executable jar file is invalid"
+      exit 0
+    fi
+  elif [[ ! -f "${args[1]}" ]]; then
       echo "Path to executable jar file is invalid"
       exit 0
   fi
 fi
 
-# Set JAVA Xms and Xmx values in Ballerina runtime
-#sed -i".back" "s/-Xms[0-9]*m/-Xms$JAVA_XMS_VALUE/" $BALLERINA_HOME/bin/ballerina
-#sed -i".back" "s/-Xmx[0-9]*m/-Xmx$JAVA_XMX_VALUE/" $BALLERINA_HOME/bin/ballerina
-#rm $BALLERINA_HOME/bin/ballerina.back
-
-# todo: introduce proper variable name
-FLAG="false"
+OBSERVABILITY_FLAG="false"
 CONFIG_FILE="$GWHOME/conf/micro-gw.conf"
 CONFIG_OUT_FILE="$GWHOME/.config"
 
 if [[ $b7a_observability_metrics_enabled == "true" ]]; then
-    FLAG="true"
+    OBSERVABILITY_FLAG="true"
 else
     for c in $*
     do
-        if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then 
-            FLAG="true"
-            break    
+        if [ "$c" = "--b7a.observability.enabled=true" ] || [ "$c" = "--b7a.observability.metrics.enabled=true" ]; then
+            OBSERVABILITY_FLAG="true"
+            break
         fi
-    done    
+    done
 fi
 
-java_cmd "$CONFIG_FILE $CONFIG_OUT_FILE"
-
-if [ -f "$CONFIG_OUT_FILE" ]; then
-    if [ "$FLAG" != "true" ]; then 
-        if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
-            FLAG="true"
-        fi
-    fi
-    if [ "$FLAG" == "true" ]; then
-        jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
-        export JAVA_OPTS="-javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
-    fi
-else
-    echo "Error while reading Observability configurations from the file"
+if [ ! "$CMD" = "stop" ]; then
+java_cmd_tools "$CONFIG_FILE $CONFIG_OUT_FILE"
+  if [ -f "$CONFIG_OUT_FILE" ]; then
+      if [ "$OBSERVABILITY_FLAG" != "true" ]; then
+          if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
+              OBSERVABILITY_FLAG="true"
+          fi
+      fi
+      if [ "$OBSERVABILITY_FLAG" == "true" ]; then
+          jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
+          export JAVA_OPTS="$JAVA_OPTS -javaagent:$GWHOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GWHOME/conf/Prometheus/config.yml"
+      fi
+  else
+      echo "Error while reading Observability configurations from the file"
+  fi
+  if [ -a "$CONFIG_OUT_FILE" ];then
+      rm $CONFIG_OUT_FILE
+  fi
 fi
-
-rm $CONFIG_OUT_FILE
 
 if [ "$CMD" = "start" ]; then
   if [ -e "$GWHOME/bin/gateway.pid" ]; then
@@ -167,10 +270,9 @@ if [ "$CMD" = "start" ]; then
   fi
   export GWHOME="$GWHOME"
   rm -f file $GWHOME/bin/gateway.pid
-  # using nohup sh to avoid erros in solaris OS.TODO
-  nohup $SHELL <<EOF &
-    $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
-EOF
+
+  java_cmd_gateway_background
+
   SESS_PID=$!
   #getting the process id of the child process which spawn by the parent process
   PROCESS_ID=""
@@ -191,14 +293,13 @@ EOF
   done
 elif [ "$CMD" = "stop" ]; then
   export GWHOME="$GWHOME"
-  kill -term `cat "$GWHOME"/bin/gateway.pid`
-  kill -9 `lsof -t $GWHOME/logs/access_logs`
+  kill -term `cat $GWHOME/bin/gateway.pid`
   rm -f file $GWHOME/bin/gateway.pid
+  echo "Microgateway has been stopped successfully"
   exit 0
 elif [ "$CMD" = "restart" ]; then
   export GWHOME="$GWHOME"
-  kill -term `cat "$GWHOME"/bin/gateway.pid`
-  kill -9 `lsof -t $GWHOME/logs/access_logs`
+  kill -term `cat $GWHOME/bin/gateway.pid`
   process_status=0
   pid=`cat "$GWHOME"/bin/gateway.pid`
   while [ "$process_status" -eq "0" ]
@@ -208,10 +309,7 @@ elif [ "$CMD" = "restart" ]; then
         process_status=$?
   done
   rm -f file $GWHOME/bin/gateway.pid
-  # using nohup sh to avoid erros in solaris OS.TODO
-  nohup $SHELL <<EOF &
-   $BALLERINA_HOME/bin/ballerina run $args --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
-EOF
+  java_cmd_gateway_background
   SESS_PID=$!
   PROCESS_ID=""
   TEMP_PID=""
@@ -231,5 +329,5 @@ EOF
   done
 fi
 
-# run the balx created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
-$JAVACMD -Dmgw-runtime.home=${GWHOME} -Dballerina.home=${GWHOME} -jar "$@" --api.usage.data.path=$GWHOME/api-usage-data --b7a.http.accesslog.path=$GWHOME/logs/access_logs --b7a.config.file=$GWHOME/conf/micro-gw.conf 2>&1 | tee -a $GWHOME/logs/microgateway.log
+# run the jar artifact created for ${label} APIs and redirect stderr to stdout and append stdout to $GWHOME/logs/microgateway.log
+java_cmd_gateway
