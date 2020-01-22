@@ -17,10 +17,10 @@
 import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
-import ballerina/log;
 import ballerina/time;
 
 boolean isAnalyticsEnabled = false;
+boolean isOldAnalyticsEnalbed = false;
 boolean configsRead = false;
 
 //gRPCConfigs
@@ -132,20 +132,27 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
 
 function getAnalyticsEnableConfig() {
-    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false); 
-    rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
-    uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
-    configsRead = true;
-    log:printDebug("File upload analytics uploading URL : "+ uploadingUrl);
+    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
+    isOldAnalyticsEnalbed =  <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
+    if (isOldAnalyticsEnalbed) {
+        rotatingTime = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
+        uploadingUrl = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
+        configsRead = true;
+    } else {
+        rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
+        uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
+        configsRead = true;
+    }
+    printDebug(KEY_ANALYTICS_FILTER,"File upload analytics uploading URL : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");
+    
 }
 
 function initializegRPCAnalytics() {
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
-    map<any> gRPCConfigs = getConfigMapValue(GRPC_ANALYTICS);
-    isgRPCAnalyticsEnabled = <boolean>gRPCConfigs[ENABLE];
-    endpointURL = <string>gRPCConfigs[GRPC_ENDPOINT_URL];
-    gRPCReconnectTime = <int>gRPCConfigs[gRPC_RetryTimeMilliseconds];
+    isgRPCAnalyticsEnabled = <boolean>getConfigBooleanValue(GRPC_ANALYTICS,GRPC_ANALYTICS_ENABLE,false);
+    endpointURL = <string>getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, "https://localhost:9806");
+    gRPCReconnectTime = <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_RETRY_TIME_MILLISECONDS,6000);
     printDebug(KEY_ANALYTICS_FILTER, "gRPC endpoint URL : " + endpointURL);
     printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"));
     printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina"));
@@ -153,7 +160,7 @@ function initializegRPCAnalytics() {
     printDebug(KEY_ANALYTICS_FILTER, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
     printDebug(KEY_ANALYTICS_FILTER, "gRPC retry time  : " + gRPCReconnectTime.toString());
 
-    if (isgRPCAnalyticsEnabled == true) {
+    if (isgRPCAnalyticsEnabled) {
         initGRPCService();
     }
 }
