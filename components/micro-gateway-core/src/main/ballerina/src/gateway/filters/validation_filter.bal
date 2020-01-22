@@ -33,10 +33,10 @@
 // string[] pathKeys = [];
 // string pathType = "";
 
-// boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, REQUEST_VALIDATION_ENABLED, false
-// );
+// boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, REQUEST_VALIDATION_ENABLED, 
+//     DEFAULT_REQUEST_VALIDATION_ENABLED);
 // boolean enableResponseValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, RESPONSE_VALIDATION_ENABLED,
-//     false);
+//     DEFAULT_RESPONSE_VALIDATION_ENABLED);
 
 // public type ValidationFilter object {
 
