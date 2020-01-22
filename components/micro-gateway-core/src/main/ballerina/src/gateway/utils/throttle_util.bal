@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/time;
 import wso2/jms;
 
 map<string> blockConditions = {};
@@ -59,8 +60,20 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
         GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         boolean stopOnQuota = dto.stopOnQuota;
         if (enabledGlobalTMEventPublishing == true) {
+            int currentTime = time:currentTime().time;
+            int? resetTimestamp = dto.resetTimestamp;
             stopOnQuota = true;
-            return [isThrottled, stopOnQuota];
+            if (resetTimestamp is int) {
+                if (resetTimestamp < currentTime) {
+                    var value = throttleDataMap.remove(key);
+                    return [false, stopOnQuota];
+                }
+            } else {
+                //if the resetTimestamp is not included, throttling is disabled
+                printDebug(KEY_THROTTLE_UTIL, "throttle event for the throttle key:" + key +
+                    "does not contain expiry timestamp.");
+                return [false, stopOnQuota];
+            }
         }
         return [isThrottled, stopOnQuota];
     }
