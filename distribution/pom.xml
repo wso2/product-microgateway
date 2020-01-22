@@ -97,6 +97,17 @@
             <artifactId>kubernetes-extension</artifactId>
             <version>${ballerina.platform.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+            <version>${andes-client.version}</version>
+        </dependency>
+        <!--required for the message broker-->
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+            <version>${org.wso2.securevault.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -179,6 +190,19 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault</includeArtifactIds>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
             <plugin>
