@@ -123,11 +123,19 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     };
+
     http:OutboundAuthConfig? auth = ();
+    // support backward compatibility in reading the basic auth credentials when connecting with KM.
+    string username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "");
+    string password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "");
+    if (username.length() == 0 && password.length() == 0) {
+        username = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, "admin");
+        password = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, "admin");
+    }
     if (getConfigBooleanValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, ENABLED, true)) {
         auth:OutboundBasicAuthProvider basicAuthOutboundProvider = new({
-            username: getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, "admin"),
-            password: getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, "admin")
+            username: username,
+            password: password
         });
         http:BasicAuthHandler basicAuthOutboundHandler = new(basicAuthOutboundProvider);
         auth = {authHandler: basicAuthOutboundHandler};
