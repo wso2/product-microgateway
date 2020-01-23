@@ -67,10 +67,10 @@ listener http:Listener tokenListenerEndpoint = new (
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
         secureSocket: {
             keyStore: {
-                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                     "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
                 password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                    gateway:KEY_STORE_PASSWORD, "ballerina")
             }
         }
     {{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
@@ -78,10 +78,10 @@ listener http:Listener tokenListenerEndpoint = new (
             host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
             secureSocket: {
                 keyStore: {
-                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                         "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
                     password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                        gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                        gateway:KEY_STORE_PASSWORD, "ballerina")
                 }
             }
     {{else}}
@@ -89,10 +89,10 @@ listener http:Listener tokenListenerEndpoint = new (
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
         secureSocket: {
             keyStore: {
-                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                     "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
                 password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                    gateway:KEY_STORE_PASSWORD, "ballerina")
             }
         }
     {{/if}}

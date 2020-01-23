@@ -178,8 +178,6 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Pet not found
-      security:
-        - api_key: []
     post:
       tags:
         - pet
@@ -298,8 +296,6 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int32
-      security:
-        - api_key: []
   /store/order:
     post:
       tags:

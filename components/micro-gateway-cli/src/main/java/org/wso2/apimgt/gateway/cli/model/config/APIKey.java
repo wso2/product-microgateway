@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,28 +17,29 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
+
 /**
- * Definition of basic authentication passed in to mustache
+ * Definition of APIKey passed in to mustache
  * templates.
  */
-public class BasicAuth {
+public class APIKey {
+    private In in;
+    private String name;
 
-    private boolean isOptional;
-    private boolean isRequired;
-
-    public boolean isOptional() {
-        return this.isOptional;
+    public In getIn() {
+        return in;
     }
 
-    public void setOptional(boolean isOptional) {
-        this.isOptional = isOptional;
+    public void setIn(In in) {
+        this.in = in;
     }
 
-    public boolean isRequired() {
-        return this.isRequired;
+    public String getName() {
+        return name;
     }
 
-    public void setRequired(boolean isRequired) {
-        this.isRequired = isRequired;
+    public void setName(String name) {
+        this.name = name;
     }
 }

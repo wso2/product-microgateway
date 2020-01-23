@@ -57,7 +57,8 @@ import wso2/gateway;
     name:"{{api.name}}",
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
-    authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}]
+    authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
+    security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -76,7 +77,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         }
     }
     @gateway:Resource {
-        authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}]
+        authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
+        security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {

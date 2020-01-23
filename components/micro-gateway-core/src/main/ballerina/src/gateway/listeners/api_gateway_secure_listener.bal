@@ -51,10 +51,10 @@ public type APIGatewaySecureListener object {
 };
 
 function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) {
-    string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
+    string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH,
     "${ballerina.home}/bre/security/ballerinaKeystore.p12");
     string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-    LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina");
+    KEY_STORE_PASSWORD, "ballerina");
     string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID,
     TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12");
     string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
