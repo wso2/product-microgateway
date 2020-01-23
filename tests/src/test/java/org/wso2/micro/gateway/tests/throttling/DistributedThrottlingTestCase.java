@@ -32,8 +32,10 @@ import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class DistributedThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
@@ -150,6 +152,10 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
         responseCode = invokeAndAssert2(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
+        TimeUnit.MINUTES.sleep(1);
+        responseCode = invokeAPIForOnce(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
+        Assert.assertEquals(responseCode, 200, "Request should not have throttled out with oauth token after" +
+                "1 minute time gap" );
     }
 
     @Test(description = "Test application throttling with a JWT token")
@@ -174,6 +180,17 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
         responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+    }
+
+    public int invokeAPIForOnce(String token, String url) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+
+        if (token != null) {
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        }
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+        Assert.assertNotNull(response);
+        return response.getResponseCode();
     }
 
     public int invokeAndAssert2(String token, String url) throws Exception {

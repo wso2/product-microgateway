@@ -37,7 +37,6 @@ import wso2/gateway;
     {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
-
 {{>kubernetes}}
 
 @http:ServiceConfig {
@@ -87,7 +86,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    if(!gateway:hasPrefix(urlPostfix,"/")) {
+    if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
         urlPostfix = "/" + urlPostfix;
     }
         http:Response|error clientResponse;

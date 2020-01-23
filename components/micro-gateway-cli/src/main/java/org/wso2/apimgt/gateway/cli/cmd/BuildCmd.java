@@ -218,7 +218,8 @@ public class BuildCmd implements LauncherCmd {
 
                 CopyFile copyFile = new CopyFile();
                 copyFile.setIsBallerinaConf("true");
-                copyFile.setSource(CmdUtils.getResourceFolderLocation());
+                copyFile.setSource(CmdUtils.getResourceFolderLocation() + File.separator + CliConstants.GW_DIST_CONF
+                        + File.separator + CliConstants.MICRO_GW_CONF_FILE);
                 copyFile.setTarget(File.separator + CliConstants.WSO2 + File.separator + CliConstants.MGW
                         + File.separator + CliConstants.GW_DIST_CONF + File.separator
                         + CliConstants.MICRO_GW_CONF_FILE);
@@ -274,7 +275,6 @@ public class BuildCmd implements LauncherCmd {
                 + CliConstants.BALLERINA_TOML_FILE;
         String fileContent = CmdUtils.readFileAsString(templateFile, false);
         fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, CmdUtils.getCLIHome());
-        fileContent = fileContent.replaceFirst("org-name=.*\"", "org-name= \"wso2\"");
         Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
 }

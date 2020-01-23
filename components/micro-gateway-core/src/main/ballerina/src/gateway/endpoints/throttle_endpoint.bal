@@ -17,19 +17,17 @@
 import ballerina/http;
 import ballerina/log;
 
-string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL,
-"https://localhost:9443/endpoints");
+string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL, DEFAULT_THROTTLE_ENDPOINT_URL);
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
-"admin:admin");
+DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER);
 
 http:Client throttleEndpoint = new (throttleEndpointUrl,
 {
     cache: {enabled: false},
     secureSocket: {
         trustStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     }

@@ -121,7 +121,7 @@ public type OAuth2KeyValidationProvider object {
         string accessToken = apiRequestMetaDataDto.accessToken;
         boolean authorized;
         APIKeyValidationDto apiKeyValidationDto;
-        if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+        if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
             printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the gateway token cache.");
             var isTokenCached = self.gatewayCache.retrieveFromTokenCache(accessToken);
             if (isTokenCached is boolean) {
@@ -235,7 +235,7 @@ public type OAuth2KeyValidationProvider object {
                 apiKeyValidationDto = convertXmlToKeyValidationObject(keyValidationInfoXML);
                 printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
                 authorized = auth;
-                if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+                if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
                     string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
                     self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                     self.gatewayCache.addToTokenCache(accessToken, true);
@@ -243,7 +243,7 @@ public type OAuth2KeyValidationProvider object {
             } else {
                 apiKeyValidationDto.authorized = false;
                 apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
-                if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, true)) {
+                if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
                     self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
                 }
             }

@@ -186,7 +186,7 @@ function getAuthenticationProviderTypeWithCookie(string authHeader) returns (str
 }
 
 function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) {
-    if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, true)) {
+    if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, DEFAULT_REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE)) {
         request.removeHeader(authHeaderName);
         printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
     }
