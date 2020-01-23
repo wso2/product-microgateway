@@ -24,7 +24,7 @@ import ballerina/runtime;
 // OAuthnFilter will handle the subscription validation as well.
 public type SubscriptionFilter object {
 
-    public boolean subsciptionEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, false);
+    public boolean subsciptionEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, DEFAULT_VALIDATE_SUBSCRIPTION);
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext filterContext)
     returns boolean {

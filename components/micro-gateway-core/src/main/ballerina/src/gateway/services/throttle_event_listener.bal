@@ -16,12 +16,12 @@
 
 import wso2/jms;
 
-string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID,
-JMS_CONNECTION_INITIAL_CONTEXT_FACTORY, "org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
+string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
+    DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
 string jmsConnectionProviderUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PROVIDER_URL,
-"amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'");
-string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, "");
-string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, "");
+    DEFAULT_JMS_CONNECTION_PROVIDER_URL);
+string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, DEFAULT_JMS_CONNECTION_PASSWORD);
+string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, DEFAULT_JMS_CONNECTION_USERNAME);
 
 service messageServ = service {
     resource function onMessage(jms:Message message) {
@@ -116,8 +116,8 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
 #
 # + return - boolean value of jmslistener started or not
 public function initiateThrottlingJmsListener() returns boolean {
-    enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
-    GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
+    enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, GLOBAL_TM_EVENT_PUBLISH_ENABLED,
+        DEFAULT_GLOBAL_TM_EVENT_PUBLISH_ENABLED);
     if (!enabledGlobalTMEventPublishing) {
         return false;
     } else {
