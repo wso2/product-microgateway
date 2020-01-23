@@ -29,7 +29,7 @@ string tokenRevocationJMSTopic = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, RE
 
 service jmsTokenRevocation = service {
     resource function onMessage(jms:Message message) {
-        printDebug(KEY_TOKEN_REVOCATION_JMS, "token revoked jms Message Received");
+        printDebug(KEY_TOKEN_REVOCATION_JMS, "Token revoked jms Message Received");
         if (message is jms:MapMessage) {
             string? | error ttl = message.getString("ttl");
             string? | error revokedToken = message.getString("revokedToken");
