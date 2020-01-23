@@ -23,7 +23,6 @@ import ballerina/stringutils;
 public type APIKeyHandler object {
 
     *http:InboundAuthHandler;
-
     public APIKeyProvider apiKeyProvider;
 
     public function __init(APIKeyProvider apiKeyProvider) {

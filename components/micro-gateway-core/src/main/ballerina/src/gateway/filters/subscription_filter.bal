@@ -97,6 +97,4 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
         }
     }
     return true;
-
 }
-

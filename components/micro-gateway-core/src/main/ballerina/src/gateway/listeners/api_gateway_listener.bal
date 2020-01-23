@@ -114,8 +114,8 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
 
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
-        issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, "https://localhost:9095/apikey"),
-        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, "ballerina"),
+        issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
+        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
         clockSkewInSeconds: 60,
         trustStoreConfig: {
             trustStore: {
@@ -123,7 +123,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
                 "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
                 password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
             },
-            certificateAlias: getConfigValue(API_KEY_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
+            certificateAlias: getConfigValue(API_KEY_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_API_KEY_ALIAS)
         },
         jwtCache: jwtCache
     };
