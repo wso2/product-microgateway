@@ -4,7 +4,7 @@ During each release, we execute various automated performance test scenarios and
 
 | Test Scenarios | Description |
 | --- | --- |
-| Microgateway-Passthrough-OAuth2 | A secured API, which directly invokes the backend through Microgateway using OAuth2 tokens |
+| Microgateway-Passthrough-NoFilters | A secured API, which directly invokes the backend through Microgateway using OAuth2 tokens |
 
 Our test client is [Apache JMeter](https://jmeter.apache.org/index.html). We test each scenario for a fixed duration of
 time. We split the test results into warmup and measurement parts and use the measurement part to compute the
@@ -54,21 +54,21 @@ The following is the summary of performance test results collected for the measu
 
 |  Scenario Name | Heap Size | Concurrent Users | Message Size (Bytes) | Back-end Service Delay (ms) | Error % | Throughput (Requests/sec) | Average Response Time (ms) | Standard Deviation of Response Time (ms) | 99th Percentile of Response Time (ms) | WSO2 API Microgateway GC Throughput (%) | Average WSO2 API Microgateway Memory Footprint After Full GC (M) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 50 | 0 | 0 | 5957.06 | 16.75 | 10.63 | 54 | 94.32 | 27.335 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 50 | 30 | 0 | 3068.41 | 32.55 | 2.8 | 43 | 97.11 | 20.273 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 1024 | 0 | 0 | 5454.73 | 18.28 | 9.74 | 50 | 94.72 | 20.323 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 1024 | 30 | 0 | 3051.49 | 32.73 | 2.75 | 43 | 97.07 | 20.304 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 10240 | 0 | 0 | 2531.26 | 39.41 | 10.9 | 71 | 97.07 | 22.241 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 100 | 10240 | 30 | 0 | 2307.7 | 43.25 | 6.64 | 63 | 97.23 | 20.303 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 50 | 0 | 0 | 5730.62 | 34.83 | 21.83 | 111 | 89.51 | 34.4 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 50 | 30 | 0 | 4778.53 | 41.79 | 8.82 | 70 | 91.82 | 24.065 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 1024 | 0 | 0 | 5363.86 | 37.21 | 20.42 | 106 | 89.76 | 32.907 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 1024 | 30 | 0 | 4569.47 | 43.7 | 9.14 | 72 | 91.92 | 20.265 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 10240 | 0 | 0 | 2548.66 | 78.32 | 27.48 | 151 | 94.19 | 20.275 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 200 | 10240 | 30 | 0 | 2413.89 | 82.73 | 16.89 | 128 | 94.58 | 20.261 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 50 | 0 | 0 | 4221.7 | 118.28 | 54.12 | 335 | 72.51 | 54.285 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 50 | 30 | 0 | 4240.83 | 117.75 | 39.45 | 293 | 73.66 | 54.102 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 1024 | 0 | 0 | 4032.41 | 123.87 | 56.18 | 349 | 72.57 | 55.449 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 1024 | 30 | 0 | 4102.04 | 121.75 | 41.13 | 303 | 73.11 | 55.259 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 10240 | 0 | 0 | 2178.95 | 229.25 | 81.73 | 497 | 81.2 | 58.444 |
-|  Microgateway-Passthrough-OAuth2 | 256M | 500 | 10240 | 30 | 0 | 2168.52 | 230.4 | 72.21 | 479 | 81.35 | 58.152 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 50 | 0 | 0 | 5957.06 | 16.75 | 10.63 | 54 | 94.32 | 27.335 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 50 | 30 | 0 | 3068.41 | 32.55 | 2.8 | 43 | 97.11 | 20.273 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 1024 | 0 | 0 | 5454.73 | 18.28 | 9.74 | 50 | 94.72 | 20.323 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 1024 | 30 | 0 | 3051.49 | 32.73 | 2.75 | 43 | 97.07 | 20.304 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 10240 | 0 | 0 | 2531.26 | 39.41 | 10.9 | 71 | 97.07 | 22.241 |
+|  Microgateway-Passthrough-NoFilters | 256M | 100 | 10240 | 30 | 0 | 2307.7 | 43.25 | 6.64 | 63 | 97.23 | 20.303 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 50 | 0 | 0 | 5730.62 | 34.83 | 21.83 | 111 | 89.51 | 34.4 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 50 | 30 | 0 | 4778.53 | 41.79 | 8.82 | 70 | 91.82 | 24.065 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 1024 | 0 | 0 | 5363.86 | 37.21 | 20.42 | 106 | 89.76 | 32.907 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 1024 | 30 | 0 | 4569.47 | 43.7 | 9.14 | 72 | 91.92 | 20.265 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 10240 | 0 | 0 | 2548.66 | 78.32 | 27.48 | 151 | 94.19 | 20.275 |
+|  Microgateway-Passthrough-NoFilters | 256M | 200 | 10240 | 30 | 0 | 2413.89 | 82.73 | 16.89 | 128 | 94.58 | 20.261 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 50 | 0 | 0 | 4221.7 | 118.28 | 54.12 | 335 | 72.51 | 54.285 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 50 | 30 | 0 | 4240.83 | 117.75 | 39.45 | 293 | 73.66 | 54.102 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 1024 | 0 | 0 | 4032.41 | 123.87 | 56.18 | 349 | 72.57 | 55.449 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 1024 | 30 | 0 | 4102.04 | 121.75 | 41.13 | 303 | 73.11 | 55.259 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 10240 | 0 | 0 | 2178.95 | 229.25 | 81.73 | 497 | 81.2 | 58.444 |
+|  Microgateway-Passthrough-NoFilters | 256M | 500 | 10240 | 30 | 0 | 2168.52 | 230.4 | 72.21 | 479 | 81.35 | 58.152 |
