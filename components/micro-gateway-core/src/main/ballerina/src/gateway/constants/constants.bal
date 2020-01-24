@@ -261,7 +261,6 @@ public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 
-public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
 public const string REALTIME_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.realtime";
 public const string REALTIME_MESSAGE_ENABLED = "enableRealtimeMessageRetrieval";
 public const string REALTIME_JMS_CONNECTION_TOPIC = "jmsConnectionTopic";
