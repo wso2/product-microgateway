@@ -35,7 +35,7 @@ public type KeyValidationHandler object {
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.introspectProvider = introspectProvider;
-        self.externalKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, EXTERNAL, false);
+        self.externalKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, EXTERNAL, DEFAULT_EXTERNAL);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -99,7 +99,7 @@ public type KeyValidationHandler object {
                             && authenticationContext?.callerToken != "") {
                         printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
                         callerToken);
-                        string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, JWT_HEADER_NAME);
+                        string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
                         req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
                     }
                     checkAndRemoveAuthHeaders(req, authHeaderName);

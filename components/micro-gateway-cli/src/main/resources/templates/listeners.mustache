@@ -27,7 +27,7 @@ http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
 {{>docker}}
 {{>secureKubernetesIngress}}
 {{>kubernetesServiceHttps}}
-listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
+listener gateway:APIGatewaySecureListener apiSecureListener = new(gateway:DEFAULT_HTTPS_PORT, secureServiceEndpointConfiguration);
 
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                                      auth: {
@@ -40,59 +40,59 @@ http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
 
 {{>kubernetesIngress}}
 {{>kubernetesServiceHttp}}
-listener gateway:APIGatewayListener apiListener = new(9090, serviceEndpointConfiguration);
+listener gateway:APIGatewayListener apiListener = new(gateway:DEFAULT_HTTP_PORT, serviceEndpointConfiguration);
 
 
 {{>secureKubernetesIngress}}
 {{>kubernetesServiceToken}}
 listener http:Listener tokenListenerEndpoint = new (
     {{#if containerConfig.kubernetes.secureKubernetesIngress.enable}}
-        9096, config = {
+        gateway:DEFAULT_TOKEN_LISTENER_PORT, config = {
         secureSocket: {
             keyStore: {
                 path:  {{#if containerConfig.kubernetes.secureKubernetesIngress.keyStorePath}}
                     "{{containerConfig.kubernetes.secureKubernetesIngress.keyStorePath}}",
                 {{else}}
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12",
+                    gateway:DEFAULT_KEY_STORE_PATH,
                 {{/if}}
                 password: {{#if containerConfig.kubernetes.secureKubernetesIngress.keyStorePassword}}
                     "{{containerConfig.kubernetes.secureKubernetesIngress.keyStorePassword}}"
                 {{else}}
-                    "ballerina"
+                    gateway:DEFAULT_KEY_STORE_PASSWORD
                 {{/if}}
             }
         }
     {{else if containerConfig.kubernetes.kubernetesService.enable}}
-        9096, config = {
-        host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
+        gateway:DEFAULT_TOKEN_LISTENER_PORT, config = {
+        host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
                 path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+                    gateway:DEFAULT_KEY_STORE_PATH),
                 password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
             }
         }
     {{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
-            9096, config = {
-            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
+            gateway:DEFAULT_TOKEN_LISTENER_PORT, config = {
+            host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
             secureSocket: {
                 keyStore: {
                     path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
-                        "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+                        gateway:DEFAULT_KEY_STORE_PATH),
                     password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                        gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                        gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
                 }
             }
     {{else}}
-        gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TOKEN_LISTENER_PORT, 9096), config = {
-        host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, "localhost"),
+        gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TOKEN_LISTENER_PORT, gateway:DEFAULT_TOKEN_LISTENER_PORT), config = {
+        host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
                 path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaKeystore.p12"),
+                    gateway:DEFAULT_KEY_STORE_PATH),
                 password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina")
+                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
             }
         }
     {{/if}}
@@ -116,7 +116,8 @@ public function getFilters() returns http:RequestFilter[] {
     // Authorization filter
     gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
 
-    boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
+    boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) 
+        || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
     
     if (isObservable) {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();

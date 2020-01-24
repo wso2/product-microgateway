@@ -24,8 +24,10 @@
 // import ballerina/internal;
 // import ballerina/system;
 
-// string etcdPasswordTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_PASSWORD, "");
-// string etcdUsernameTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_USERNAME, "");
+// string etcdPasswordTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_PASSWORD, 
+//      DEFAULT_PERSISTENT_MESSAGE_PASSWORD);
+// string etcdUsernameTokenRevocation = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_USERNAME, 
+//      DEFAULT_PERSISTENT_MESSAGE_USERNAME);
 
 // #value:"Query etcd by passing the revoked token and retrieves relevant value"
 // # + return - string
@@ -112,7 +114,7 @@
 // #
 // public function etcdRevokedTokenRetrieverTask() {
 //     boolean enabledPersistentMessage = getConfigBooleanValue(PERSISTENT_MESSAGE_INSTANCE_ID,
-//         PERSISTENT_MESSAGE_ENABLED, false);
+//         PERSISTENT_MESSAGE_ENABLED, DEFAULT_TOKEN_REVOCATION_ENABLED);
 
 //     if (enabledPersistentMessage) {
 //         printInfo(KEY_TOKEN_REVOCATION_ETCD_UTIL, "One time ETCD revoked token retriever task initiated");
