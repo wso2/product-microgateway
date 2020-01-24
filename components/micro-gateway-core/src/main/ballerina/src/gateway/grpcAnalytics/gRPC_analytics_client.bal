@@ -14,14 +14,14 @@ task:Scheduler gRPCConnectTimer = new({
 
 service connectGRPC = service {
     resource function onTrigger(){
-        printDebug(KEY_GRPC_ANALYTICS,"gRPC Reconnect Task Still Running.");
+        printDebug(KEY_GRPC_ANALYTICS, "gRPC Reconnect Task Still Running.");
         isTaskStarted = true;
         if (!gRPCConnection) {
             initGRPCService();
-            log:printWarn("Connection will retry again in "+ reConnectTime.toString() +" milliseconds.");
+            printWarn(KEY_GRPC_ANALYTICS , "Connection will retry again in "+ reConnectTime.toString() +" milliseconds.");
             pingMessage(gRPCPingMessage);
         } else {
-            log:printInfo("Successfully connected to gRPC server.");
+            printInfo(KEY_GRPC_ANALYTICS, "Successfully connected to gRPC server.");
             // terminates the timer if gRPPCConnection variable assigned as false
             var stop = gRPCConnectTimer.stop();
             if (stop is error) {
@@ -61,10 +61,10 @@ public function initGRPCService(){
     }
     var gRPCres = nonblockingGRPCAnalyticsClient -> sendAnalytics(AnalyticsSendServiceMessageListener);
     if (gRPCres is grpc:Error) {
-        printError(KEY_GRPC_ANALYTICS,"Error from Connector: " + gRPCres.reason() + " - " + <string> gRPCres.detail()["message"]);
+        printError(KEY_GRPC_ANALYTICS, "Error from Connector: " + gRPCres.reason() + " - " + <string> gRPCres.detail()["message"]);
         return;
     } else {
-        printDebug(KEY_GRPC_ANALYTICS,"Initialized gRPC connection sucessfully.");
+        printDebug(KEY_GRPC_ANALYTICS, "Initialized gRPC connection sucessfully.");
         gRPCEp = gRPCres;
     }
 }
@@ -76,12 +76,12 @@ public function initGRPCService(){
 # 
 public function pingMessage(AnalyticsStreamMessage message){
     //ping Message used to check gRPC server availability
-    printDebug(KEY_GRPC_ANALYTICS,"gRPC reconnect Ping Message executed.");
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC reconnect Ping Message executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            printDebug(KEY_GRPC_ANALYTICS,"Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
+            printDebug(KEY_GRPC_ANALYTICS, "Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
         } else {
-            printDebug(KEY_GRPC_ANALYTICS,"Completed Sending gRPC Analytics data: ");
+            printDebug(KEY_GRPC_ANALYTICS, "Completed Sending gRPC Analytics data.");
             gRPCConnection = true;
         }
 }

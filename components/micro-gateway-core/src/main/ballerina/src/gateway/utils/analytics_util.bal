@@ -20,11 +20,11 @@ import ballerina/runtime;
 import ballerina/time;
 
 boolean isAnalyticsEnabled = false;
-boolean isOldAnalyticsEnalbed = false;
+boolean isOldAnalyticsEnabled = false;
 boolean configsRead = false;
 
 //gRPCConfigs
-boolean isgRPCAnalyticsEnabled = false;
+boolean isGrpcAnalyticsEnabled = false;
 string endpointURL = "";
 int gRPCReconnectTime = 3000;
 
@@ -133,8 +133,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
 function getAnalyticsEnableConfig() {
     isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
-    isOldAnalyticsEnalbed =  <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
-    if (isOldAnalyticsEnalbed) {
+    isOldAnalyticsEnabled =  <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
+    if (isOldAnalyticsEnabled) {
         rotatingTime = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
         uploadingUrl = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
         configsRead = true;
@@ -143,7 +143,7 @@ function getAnalyticsEnableConfig() {
         uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
         configsRead = true;
     }
-    printDebug(KEY_ANALYTICS_FILTER,"File upload analytics uploading URL : "+ uploadingUrl);
+    printDebug(KEY_ANALYTICS_FILTER, "File upload analytics uploading URL : "+ uploadingUrl);
     printDebug(KEY_UTILS, "Analytics configuration values read");
     
 }

@@ -41,7 +41,7 @@ function sendFileRotatingEvent() returns error? {
 function rotatingTask() {
     int timeSpan = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000);
     int delay = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);
-    if (isOldAnalyticsEnalbed) {
+    if (isOldAnalyticsEnabled) {
         //enables config read support for old versions
         timeSpan = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000);
         delay = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);

@@ -69,7 +69,7 @@ function timerTask() {
     boolean uploadFiles = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK,true);
     analyticsUsername = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,USERNAME,"admin");
     analyticsPassword = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,PASSWORD,"admin");
-    if (isOldAnalyticsEnalbed) {
+    if (isOldAnalyticsEnabled) {
         //enables config reads for older versions
         uploadFiles = <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK,true);
         analyticsUsername = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,USERNAME,"admin");
@@ -80,7 +80,7 @@ function timerTask() {
         //below config reads enable analytics suppot for old versions
         int | error timeSpan = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,UPLOADING_TIME_SPAN,600000);
         int delay = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);
-        if (isOldAnalyticsEnalbed) {
+        if (isOldAnalyticsEnabled) {
             timeSpan = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,UPLOADING_TIME_SPAN,600000);
             delay = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);
         }   
