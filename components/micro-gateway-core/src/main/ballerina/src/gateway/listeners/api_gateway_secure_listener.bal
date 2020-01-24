@@ -71,5 +71,10 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
         sslVerifyClient: sslVerifyClient,
         ciphers: ciphers
     };
+    http:ListenerAuth auth = {
+         authHandlers: getAuthHandlers(),
+         position: 1
+    };
+    config.auth = auth;
     config.secureSocket = secureSocket;
 }
