@@ -65,7 +65,7 @@
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
         </file>
         <file>
-            <source>${basedir}/target/ballerina/jballerina-tools-${ballerina.platform.version}/bre/security/ballerinaKeystore.p12</source>
+            <source>${project.build.directory}/ballerina/jballerina-tools-${ballerina.platform.version}/bre/security/ballerinaKeystore.p12</source>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
         </file>
         <file>
