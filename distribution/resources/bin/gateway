@@ -242,7 +242,7 @@ else
 fi
 
 if [ ! "$CMD" = "stop" ]; then
-java_cmd_tools "$CONFIG_FILE $CONFIG_OUT_FILE"
+    java_cmd_tools "$CONFIG_FILE $CONFIG_OUT_FILE"
   if [ -f "$CONFIG_OUT_FILE" ]; then
       if [ "$OBSERVABILITY_FLAG" != "true" ]; then
           if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
