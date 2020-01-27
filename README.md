@@ -39,7 +39,7 @@ It also has the following characteristics that makes it a perfect fit for micros
       * [Initializing a microgateway project](#initializing-a-microgateway-project)
       * [Building the microgateway project](#building-the-microgateway-project)
       * [Running the microgateway](#running-the-microgateway)
-   * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
+   * [WSO2 API Microgateway commands](#wso2-api-microgateway-toolkit-commands)
       * [Init](#init)
       * [Build](#build)
    * [Project Structure](#project-structure)

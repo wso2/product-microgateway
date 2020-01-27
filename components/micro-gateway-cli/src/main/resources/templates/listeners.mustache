@@ -17,10 +17,6 @@ import ballerina/log;
 
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                            {{>mutualSSL}}
-                                                                           auth: {
-                                                                                authHandlers: gateway:getAuthHandlers(),
-                                                                                position: 1
-                                                                           },
                                                                            filters:getFilters()
                                                                        };
 
@@ -30,11 +26,6 @@ http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
 listener gateway:APIGatewaySecureListener apiSecureListener = new(gateway:DEFAULT_HTTPS_PORT, secureServiceEndpointConfiguration);
 
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
-                                                                     auth: {
-                                                                         authHandlers: gateway:getAuthHandlers(),
-                                                                         mandateSecureSocket: false,
-                                                                         position: 1
-                                                                     },
                                                                      filters:getFilters()
                                                                  };
 
