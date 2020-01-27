@@ -125,13 +125,14 @@ for (( i=0; i<argsLength; i++ )); do
   fi
 done
 
+#BAL_JAVA_DEBUG=<port> needs to be set if it is required to remote debug the java implementation
 if [ -n "${BAL_JAVA_DEBUG+set}" ]; then
     if [ -z "$BAL_JAVA_DEBUG" ]; then
         echo "Please specify the debug port for debug parameter"
         exit 1
     else
       if [ -n "$JAVA_OPTS" ]; then
-        echo "Warning !!!. User specified JAVA_OPTS may interfere with BAL_JAVA_DEBUG"
+        echo "Warn: User specified JAVA_OPTS may interfere with BAL_JAVA_DEBUG"
       fi
       # 'quiet=y' avoids breaking LSP protocol in debug mode
       JAVA_OPTS="$JAVA_OPTS -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$BAL_JAVA_DEBUG,quiet=y"
