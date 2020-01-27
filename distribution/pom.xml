@@ -45,23 +45,7 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.core</artifactId>
             <type>zip</type>
-            <classifier>mgw-bir</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <type>zip</type>
-            <classifier>mgw-jar</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
-            <type>zip</type>
             <classifier>mgw-balo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
@@ -76,16 +60,6 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.tools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.andes.wso2</groupId>
-            <artifactId>andes-client</artifactId>
-            <version>${andes.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jms_1.1_spec</artifactId>
-            <version>${orbit.version.geronimo-jms_1.1_spec}</version>
         </dependency>
         <dependency>
             <groupId>org.ballerinax.docker</groupId>
@@ -104,17 +78,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>unpack-gw-lib</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeClassifiers>mgw-bir,mgw-jar</includeClassifiers>
-                            <outputDirectory>${project.build.directory}/lib/gw/</outputDirectory>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>unpack-gw-balo</id>
                         <phase>generate-resources</phase>
@@ -217,18 +180,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>extract-zip</id>-->
-<!--                        <phase>generate-resources</phase>-->
-<!--                        <configuration>-->
-<!--                            <tasks>-->
-<!--                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>-->
-<!--                            </tasks>-->
-<!--                        </configuration>-->
-<!--                        <goals>-->
-<!--                            <goal>run</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
                     <execution>
                         <phase>verify</phase>
                         <goals>
@@ -241,23 +192,6 @@
                                 <delete dir="${project.build.directory}/extracted-jre-macos" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/extracted-jre-windows" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/ballerina-jre-artifacts-zip" includeemptydirs="true" />
-                                <delete dir="${project.build.directory}/jms-artifact" includeemptydirs="true" />
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <move todir="${project.build.directory}/lib/jar" flatten="true" >
-                                    <fileset dir="${project.build.directory}/lib/gw">
-                                        <include name="**/*.jar" />
-                                    </fileset>
-                                </move>
                             </target>
                         </configuration>
                     </execution>
@@ -281,23 +215,6 @@
                                 <descriptor>src/main/assembly/platform_zip.xml</descriptor>
                             </descriptors>
                             <finalName>platform</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>ballerina-runtime</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/runtime_zip.xml</descriptor>
-                            </descriptors>
-                            <finalName>runtime</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
