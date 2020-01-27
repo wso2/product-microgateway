@@ -95,7 +95,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
         printDebug(KEY_ANALYTICS_FILTER, "doFilterFault method called. Client type : " + faultDTO. metaClientType + " applicationName :" + faultDTO.applicationName);
         if (isGrpcAnalyticsEnabled) {
             //fault stream gRPC Analytics
-            printDebug(KEY_ANALYTICS_FILTER, "gRPC fault stream message creating.");
+            printDebug(KEY_ANALYTICS_FILTER, "gRPC fault stream message publishing for API : " + faultDTO.apiName);
             AnalyticsStreamMessage message = createFaultMessage(faultDTO);
             future<()> faultDataPublishFuture = start dataToAnalytics(message);
             return;
@@ -103,7 +103,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
         EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if (eventDTO is EventDTO) {
             if (isAnalyticsEnabled != false) {
-                printDebug(KEY_ANALYTICS_FILTER, "File Upload eventFaultStream : " + eventDTO.payloadData);
+                printDebug(KEY_ANALYTICS_FILTER, "File Upload fault stream invoked for API : " + faultDTO.apiName);
                 eventStream.publish(eventDTO);
             }
         } else {
@@ -132,7 +132,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
             if (isAnalyticsEnabled) {
-                printDebug(KEY_ANALYTICS_FILTER, "File Upload eventRequestStream called" + event.payloadData);
+                printDebug(KEY_ANALYTICS_FILTER, "File Upload eventRequestStream called for API : " + requestResponseExecutionDTO.apiName);
                 eventStream.publish(event);
             }
         } else {

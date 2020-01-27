@@ -113,7 +113,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
+    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -312,7 +312,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 
@@ -327,7 +327,7 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 }

@@ -39,12 +39,12 @@ function sendFileRotatingEvent() returns error? {
 }
 
 function rotatingTask() {
-    int timeSpan = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000);
-    int delay = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);
+    int timeSpan = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME, DEFAULT_ROTATING_PERIOD_IN_MILLIS);
+    int delay = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS, INITIAL_DELAY, DEFAULT_INITIAL_DELAY_IN_MILLIS);
     if (isOldAnalyticsEnabled) {
         //enables config read support for old versions
-        timeSpan = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000);
-        delay = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,INITIAL_DELAY,5000);
+        timeSpan = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME, DEFAULT_ROTATING_PERIOD_IN_MILLIS);
+        delay = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS, INITIAL_DELAY, DEFAULT_INITIAL_DELAY_IN_MILLIS);
     }
     task:TimerConfiguration timerConfiguration = {
         intervalInMillis: timeSpan,

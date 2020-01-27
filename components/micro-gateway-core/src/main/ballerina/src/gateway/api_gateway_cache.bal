@@ -23,9 +23,9 @@ cache:Cache invalidTokenCache = new;
 cache:Cache jwtCache = new;
 
 public function initGatewayCaches() {
-    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
-    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 10000);
-    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
     gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);

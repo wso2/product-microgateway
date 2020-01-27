@@ -74,8 +74,7 @@ public type APIGatewayListener object {
 
 
 public function initiateGatewayConfigurations(http:ListenerConfiguration config) {
-    // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
-    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
+    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, DEFAULT_CONF_HOST);
     initiateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
     initGatewayCaches();
@@ -85,7 +84,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     initializegRPCAnalytics();
 
     //Change the httpVersion
-    if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {
+    if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {
         config.httpVersion = "2.0";
         log:printDebug("httpVersion = " + config.httpVersion);
     }
@@ -94,16 +93,15 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
 public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes jwt handler
     jwt:JwtValidatorConfig jwtValidatorConfig = {
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
         clockSkewInSeconds: 60,
         trustStoreConfig: {
             trustStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
             },
-            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
+            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
         },
         jwtCache: jwtCache
     };
@@ -118,21 +116,28 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     // Initializes the key validation handler
     http:ClientSecureSocket secureSocket = {
         trustStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-            "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     };
+
     http:OutboundAuthConfig? auth = ();
+    // support backward compatibility in reading the basic auth credentials when connecting with KM.
+    string username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "");
+    string password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "");
+    if (username.length() == 0 && password.length() == 0) {
+        username = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
+        password = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
+    }
     if (getConfigBooleanValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, ENABLED, true)) {
         auth:OutboundBasicAuthProvider basicAuthOutboundProvider = new({
-            username: getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, "admin"),
-            password: getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, "admin")
+            username: username,
+            password: password
         });
         http:BasicAuthHandler basicAuthOutboundHandler = new(basicAuthOutboundProvider);
         auth = {authHandler: basicAuthOutboundHandler};
-    } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, ENABLED, false)) {
+    } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
         oauth2:OutboundOAuth2Provider|error oauth2Provider = getOauth2OutboundProvider();
         if (oauth2Provider is oauth2:OutboundOAuth2Provider) {
             http:BearerAuthHandler bearerAuthOutboundHandler = new(oauth2Provider);
@@ -149,11 +154,11 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         secureSocket: secureSocket
     };
     oauth2:IntrospectionServerConfig  keyValidationConfig = {
-        url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
+        url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
         clientConfig: clientConfig
     };
-    string introspectURL = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
-    string keymanagerContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, "oauth2");
+    string introspectURL = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
+    string keymanagerContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, DEFAULT_KM_TOKEN_CONTEXT);
     introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + keymanagerContext : introspectURL + PATH_SEPERATOR + keymanagerContext;
     introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + INTROSPECT_CONTEXT : introspectURL + PATH_SEPERATOR + INTROSPECT_CONTEXT;
     oauth2:IntrospectionServerConfig  introspectionServerConfig = {
@@ -196,9 +201,9 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
 
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {
-    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
-    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
-    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
     cache:Cache positiveAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     cache:Cache negativeAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     if (isTracingEnabled || isMetricsEnabled) {
@@ -213,9 +218,9 @@ public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFil
 function initiateKeyManagerConfigurations() {
     KeyManagerConf keyManagerConf = {};
     Credentials credentials = {};
-    keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
-    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin");
-    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
+    keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
+    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
+    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }
@@ -225,39 +230,44 @@ function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider|error
     http:ClientConfiguration clientConfig  = {
         secureSocket : {
             trustStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
             },
             verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
         }
     };
-    if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, ENABLED, false)) {
-        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED, false)) {
+    if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
             oauth2Provider = new({
-                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, ""),
-                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, ""),
-                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, ""),
-                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, ""),
-                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_SECRET, ""),
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, 
+                    CLIENT_SECRET, DEFAULT_KM_CONF_SECURITY_OAUTH2),
                 scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, SCOPES),
                 credentialBearer: getCredentialBearer(),
                 refreshConfig: {
-                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL, ""),
+                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL, 
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
                     scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, SCOPES),
                     clientConfig: clientConfig
                 },
                 clientConfig: clientConfig
             });
-        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED, false)) {
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED, 
+                DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
             oauth2Provider = new({
-                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, ""),
+                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, DEFAULT_KM_CONF_SECURITY_OAUTH2),
                 credentialBearer: getCredentialBearer(),
                 refreshConfig: {
-                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL, ""),
-                    refreshToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_TOKEN, ""),
-                    clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_ID, ""),
-                    clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_SECRET, ""),
+                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL, 
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    refreshToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_TOKEN, 
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_SECRET, 
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
                     scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, SCOPES),
                     credentialBearer: getCredentialBearer(),
                     clientConfig: clientConfig
@@ -268,29 +278,33 @@ function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider|error
             return err;
         }
     } else {
-        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, ENABLED, false)) {
+        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, ENABLED, 
+            DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
             oauth2Provider = new({
-                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, ""),
-                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_ID, ""),
-                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_SECRET, ""),
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_ID, 
+                    DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_SECRET, 
+                    DEFAULT_KM_CONF_SECURITY_OAUTH2),
                 scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, SCOPES),
                 credentialBearer: getCredentialBearer(),
                 clientConfig: clientConfig
             });
-        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED, false)) {
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED, 
+                DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
             oauth2Provider = new({
-                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, ""),
-                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, ""),
-                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, ""),
-                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, ""),
-                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_SECRET, ""),
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_SECRET, DEFAULT_KM_CONF_SECURITY_OAUTH2),
                 scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, SCOPES),
                 credentialBearer: getCredentialBearer(),
                 clientConfig: clientConfig
             });
-        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED, false)) {
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
             oauth2Provider = new({
-                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, ""),
+                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, DEFAULT_KM_CONF_SECURITY_OAUTH2),
                 credentialBearer: getCredentialBearer()
             });
         } else {
@@ -311,7 +325,8 @@ function readScpoesAsArray(string instanceId, string key) returns string[] {
 }
 
 function getCredentialBearer() returns http:CredentialBearer {
-    string crednetailBearerString= getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, CREDENTIAL_BEARER, http:AUTH_HEADER_BEARER);
+    string crednetailBearerString= getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, CREDENTIAL_BEARER, 
+        DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER);
     if (stringutils:equalsIgnoreCase(crednetailBearerString, http:AUTH_HEADER_BEARER)) {
         return http:AUTH_HEADER_BEARER;
     } else if (stringutils:equalsIgnoreCase(crednetailBearerString, http:POST_BODY_BEARER)) {

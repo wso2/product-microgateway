@@ -34,7 +34,7 @@ public type OAuthzFilter object {
             printDebug(KEY_AUTHZ_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, "");
+        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, DEFAULT_SSL_VERIFY_CLIENT);
         if (checkAuthentication != "require") {
             //Setting UUID
             int startingTime = getCurrentTime();

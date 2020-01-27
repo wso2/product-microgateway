@@ -4,7 +4,7 @@ import ballerina/task;
 
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
 boolean gRPCConnection = false; //check gRPC connection
-int reConnectTime =  <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_RETRY_TIME_MILLISECONDS,6000);
+int reConnectTime =  <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_RETRY_TIME_MILLISECONDS, DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES);
 boolean isTaskStarted = false;    //to check gRPC reconnect task
 
 task:Scheduler gRPCConnectTimer = new({
@@ -18,14 +18,14 @@ service connectGRPC = service {
         isTaskStarted = true;
         if (!gRPCConnection) {
             initGRPCService();
-            printWarn(KEY_GRPC_ANALYTICS , "Connection will retry again in "+ reConnectTime.toString() +" milliseconds.");
+            printWarn(KEY_GRPC_ANALYTICS , "Connection will retry again in "+ reConnectTime.toString() + " milliseconds.");
             pingMessage(gRPCPingMessage);
         } else {
             printInfo(KEY_GRPC_ANALYTICS, "Successfully connected to gRPC server.");
             // terminates the timer if gRPPCConnection variable assigned as false
             var stop = gRPCConnectTimer.stop();
             if (stop is error) {
-                printError(KEY_GRPC_ANALYTICS,"Stopping the gRPC reconnect task is failed.");
+                printError(KEY_GRPC_ANALYTICS, "Stopping the gRPC reconnect task is failed.");
                 return;
             }
             isTaskStarted = false;
@@ -34,16 +34,16 @@ service connectGRPC = service {
 };
 
 //gRPC secured client endpoint configuraion  
-AnalyticsSendServiceClient nonblockingGRPCAnalyticsClient = new(getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, "https://localhost:9806"),
+AnalyticsSendServiceClient nonblockingGRPCAnalyticsClient = new(getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, DEFAULT_GRPC_ENDPOINT_URL),
 config = {
     secureSocket: {
         keyStore: {
-            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"), 
-            password : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina") 
+            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH), 
+            password : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD) 
         },
         trustStore: {
-            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"), 
-            password :  getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina") 
+            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH), 
+            password :  getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD) 
         },
         verifyHostname:false //to avoid SSL certificate validation error
     },
@@ -93,13 +93,13 @@ public function pingMessage(AnalyticsStreamMessage message){
 # 
 public function dataToAnalytics(AnalyticsStreamMessage message){
     //publishes data to relevant stream
-    printDebug(KEY_GRPC_ANALYTICS,"gRPC analytics data publishing method executed.");
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data publishing method executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
             log:printInfo("Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
            
         } else {
-            printDebug(KEY_GRPC_ANALYTICS,"gRPC analytics data published successfully: ");
+            printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data published successfully: ");
         }
 }
 
@@ -113,13 +113,13 @@ service AnalyticsSendServiceMessageListener = service {
         gRPCConnection = false;
         //Triggers when there is a gRPC connection error.
         if (err.reason() == "{ballerina/grpc}UnavailableError" && gRPCConnection == false) {
-            printDebug(KEY_GRPC_ANALYTICS,"gRPC unavaliable error identified.");
-            printError(KEY_GRPC_ANALYTICS,"Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
+            printDebug(KEY_GRPC_ANALYTICS, "gRPC unavaliable error identified.");
+            printError(KEY_GRPC_ANALYTICS, "Error reported from server: " + err.reason() + " - " + <string> err.detail()["message"]);
             //starts gRPC reconnect task
             if (isTaskStarted == false) {
                 var startResult = gRPCConnectTimer.start();
                 if (startResult is error ) {
-                    printDebug(KEY_GRPC_ANALYTICS,"Starting the gRPC reconnect task is failed.");
+                    printDebug(KEY_GRPC_ANALYTICS, "Starting the gRPC reconnect task is failed.");
                     return;
                 }   
             }
