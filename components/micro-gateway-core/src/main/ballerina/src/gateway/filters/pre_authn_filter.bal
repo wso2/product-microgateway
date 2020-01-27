@@ -107,22 +107,23 @@ returns boolean {
             printDebug(KEY_PRE_AUTHN_FILTER, apiKeys.toString());
             if (apiKeys.length() > 0) {
                 foreach json apiKey in apiKeys {
-                    map<json> apiKeyMap = <map<json>>apiKey;
-                    string inName = apiKeyMap[API_KEY_IN].toString();
-                    string name = apiKeyMap[API_KEY_NAME].toString();
-                    printDebug(KEY_PRE_AUTHN_FILTER, "Detected apikey security in : " + inName + " name: " + name);
-                    if (stringutils:equalsIgnoreCase(HEADER, inName) && request.hasHeader(name)) {
-                        printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey header : " + name);
-                        isAPIKeyAuth = true;
-                        setAPIKeyAuth(inName, name);
-                        authHeader = AUTH_SCHEME_API_KEY;
-                        break;
-                    } else if (stringutils:equalsIgnoreCase(QUERY, inName) && request.getQueryParamValue(name) is string) {
-                        printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
-                        isAPIKeyAuth = true;
-                        setAPIKeyAuth(inName, name);
-                        authHeader = AUTH_SCHEME_API_KEY;
-                        break;
+                    if (apiKey is  map<json>) {
+                        string inName = apiKey[API_KEY_IN].toString();
+                        string name = apiKey[API_KEY_NAME].toString();
+                        printDebug(KEY_PRE_AUTHN_FILTER, "Detected apikey security in : " + inName + " name: " + name);
+                        if (stringutils:equalsIgnoreCase(HEADER, inName) && request.hasHeader(name)) {
+                            printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey header : " + name);
+                            isAPIKeyAuth = true;
+                            setAPIKeyAuth(inName, name);
+                            authHeader = AUTH_SCHEME_API_KEY;
+                            break;
+                        } else if (stringutils:equalsIgnoreCase(QUERY, inName) && request.getQueryParamValue(name) is string) {
+                            printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
+                            isAPIKeyAuth = true;
+                            setAPIKeyAuth(inName, name);
+                            authHeader = AUTH_SCHEME_API_KEY;
+                            break;
+                        }
                     }
                 }
             }

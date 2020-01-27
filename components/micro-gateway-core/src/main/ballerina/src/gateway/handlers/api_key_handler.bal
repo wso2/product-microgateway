@@ -29,7 +29,7 @@ public type APIKeyHandler object {
         self.apiKeyProvider = apiKeyProvider;
     }
 
-    # Checks if the request can be authenticated with the Bearer Auth header.
+    # Checks if the request can be authenticated with the Bearer API Key.
     #
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
@@ -54,7 +54,7 @@ public type APIKeyHandler object {
         return false;
     }
 
-    # Authenticates the incoming request with the use of credentials passed as the Bearer Auth header.
+    # Authenticates the incoming request with the use of credentials passed as API Key.
     #
     # + req - The `Request` instance.
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
