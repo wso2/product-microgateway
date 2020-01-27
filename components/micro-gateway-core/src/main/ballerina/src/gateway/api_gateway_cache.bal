@@ -20,6 +20,8 @@ import ballerina/cache;
 int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
 int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
 float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
+// Caches are globally defined in order to initialize them before the authentication handlers are initialized.
+// These cache objects are passed in authentication handlers while handler init phase.
 cache:Cache gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);

@@ -71,6 +71,8 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
         sslVerifyClient: sslVerifyClient,
         ciphers: ciphers
     };
+    //Initiate handlers without listener annotation to make sure that, the handlers get initialized
+    //after the gateway cache objects are initialized.
     http:ListenerAuth auth = {
          authHandlers: getAuthHandlers(),
          position: 1
