@@ -290,13 +290,19 @@ if [ "$CMD" = "start" ]; then
     sleep 0.1
   done
 elif [ "$CMD" = "stop" ]; then
-  kill -term `cat $GW_HOME/bin/gateway.pid`
-  rm -f file $GW_HOME/bin/gateway.pid
-  exit_code=$?
+  if [ -e "$GW_HOME/bin/gateway.pid" ]; then
+    kill -term `cat $GW_HOME/bin/gateway.pid`
+    rm -f file $GW_HOME/bin/gateway.pid
+    exit_code=$?
     if [ $exit_code -eq 0 ]; then
       echo "Microgateway has been stopped successfully"
     fi
     exit $exit_code
+  else
+    echo "No running microgateway is available"
+    exit 0
+  fi
+
 elif [ "$CMD" = "restart" ]; then
   kill -term `cat $GW_HOME/bin/gateway.pid`
   process_status=0
