@@ -128,7 +128,7 @@ done
 
 if [ -n "${BAL_JAVA_DEBUG+set}" ]; then
     if [ -z "$BAL_JAVA_DEBUG" ]; then
-        echo "Please specify the debug port for the BAL_JAVA_DEBUG variable"
+        echo "Please specify the debug port for debug parameter"
   exit 1
     else
   if [ -n "$JAVA_OPTS" ]; then
