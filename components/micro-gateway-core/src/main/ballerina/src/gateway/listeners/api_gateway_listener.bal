@@ -23,6 +23,8 @@ import ballerina/log;
 import ballerina/oauth2;
 import ballerina/stringutils;
 
+boolean isConfigInitiated = false;
+
 public type APIGatewayListener object {
     *lang:Listener;
 
@@ -31,17 +33,23 @@ public type APIGatewayListener object {
     public http:Listener httpListener;
 
     public function __init(int port, http:ListenerConfiguration config) {
+        // Since http listeners is wrapped inside https listener also, this init method get invoked twice per
+        // each listener. This check will make sure that configurations are read only once and respective
+        //objects are initialized only once.
+        if (!isConfigInitiated) {
+            initiateGatewayConfigurations(config);
+        }
         if ((config.secureSocket is ())) {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
+            //Initiate handlers without listener annotation to make sure that, the handlers get initialized
+            //after the gateway cache objects are initialized.
+            initiateAuthenticationHandlers(config);
         } else {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
             self.listenerType = "HTTPS";
         }
-        initiateGatewayConfigurations(config);
         printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort.toString());
-
         self.httpListener = new (self.listenerPort, config = config);
-
         printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort.toString());
     }
 
@@ -68,16 +76,21 @@ public type APIGatewayListener object {
     public function __detach(service s) returns error? {
         return self.httpListener.__detach(s);
     }
-
-
 };
 
+function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
+    http:ListenerAuth auth = {
+         authHandlers: getAuthHandlers(),
+         mandateSecureSocket: false,
+         position: 1
+    };
+    config.auth = auth;
+}
 
 public function initiateGatewayConfigurations(http:ListenerConfiguration config) {
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, DEFAULT_CONF_HOST);
     initiateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
-    initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     //TODO : migrate this method and re enable
     initializeAnalytics();
@@ -87,6 +100,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
         config.httpVersion = "2.0";
         log:printDebug("httpVersion = " + config.httpVersion);
     }
+    isConfigInitiated = true;
 }
 
 public function getAuthHandlers() returns http:InboundAuthHandler[] {
