@@ -50,7 +50,7 @@ export MGW_VERSION="3.1.0"
 export GW_HOME="$GWHOME"
 
 JAVA_PATH=$GWHOME/lib/jdk8u202-b08-jre
-if test -d "$JAVA_PATH"; then
+if [ -d "$JAVA_PATH" ]; then
   JAVA_HOME=$JAVA_PATH
 fi
 
