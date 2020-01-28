@@ -74,6 +74,7 @@ public const string IS_THROTTLE_OUT = "IS_THROTTLE_OUT";
 public const string ALLOWED_ON_QUOTA_REACHED = "ALLOWED_ON_QUOTA_REACHED";
 public const string IS_SECURED = "IS_SECURED";
 public const string THROTTLE_OUT_REASON = "THROTTLE_REASON";
+public const string JWT_HEADER_NAME = "X-JWT-Assertion";
 public const string PRODUCTION_KEY_TYPE = "PRODUCTION";
 public const string ANY_AUTHENTICATION_LEVEL = "Any";
 public const string API_VERSION = "apiVersion";
@@ -133,7 +134,8 @@ public const string API_USAGE_FILE = "api-usage-data.dat";
 public const string TIME_INTERVAL = "timeInterval";
 public const string FILE_NAME = "FileName";
 public const string ACCEPT = "Accept";
-public const string ANALYTICS = "analytics";
+public const string FILE_UPLOAD_ANALYTICS = "analytics.fileUpload";
+public const string OLD_FILE_UPLOAD_ANALYTICS = "analytics";
 public const string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
 public const string ROTATING_TIME = "rotatingPeriod";
 public const string UPLOADING_EP = "uploadingEndpoint";
@@ -153,7 +155,14 @@ public const string API_USAGE_DIR = "api-usage-data";
 public const string FILE_UPLOAD_TASK = "taskUploadFiles";
 public const string INITIAL_DELAY = "initialDelayInMillis";
 public const string DESTINATION = "destination";
+public const string FILE_UPLOAD_ENABLE = "enable";
 
+//gRPC analytics related constants
+public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
+public const string GRPC_ANALYTICS_ENABLE = "enable";
+public const string GRPC_ENDPOINT_URL = "endpointURL";
+public const string GRPC_RETRY_TIME_MILLISECONDS = "reconnectTimeInMillies";
+ 
 //validation_filter related constatnts
 public const string PATHS = "paths";
 public const string PARAMETERS = "parameters";
@@ -274,8 +283,14 @@ public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 
+public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
+public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
 public const string REALTIME_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.realtime";
 public const string REALTIME_MESSAGE_ENABLED = "enableRealtimeMessageRetrieval";
+public const string REALTIME_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "jmsConnectioninitialContextFactory";
+public const string REALTIME_JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";
+public const string REALTIME_JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
+public const string REALTIME_JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string REALTIME_JMS_CONNECTION_TOPIC = "jmsConnectionTopic";
 public const string PERSISTENT_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.persistent";
 public const string PERSISTENT_MESSAGE_ENABLED = "enablePersistentStorageRetrieval";
@@ -332,6 +347,7 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
+public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 const string API_KEY_UTIL = "APIKeyUtil";
 const string JWT_UTIL = "JWTUtil";
 const string API_KEY_HANDLER = "APIKeyHandler";

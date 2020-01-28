@@ -33,7 +33,6 @@
     </test>
     <test name="micro-gw-services" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.micro.gateway.tests.apikey.APIKeyTestCase" />
             <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.AuthenticationFailureTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />

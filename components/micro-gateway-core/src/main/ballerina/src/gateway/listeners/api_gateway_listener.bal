@@ -94,6 +94,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     //TODO : migrate this method and re enable
     initializeAnalytics();
+    initializegRPCAnalytics();
 
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {
