@@ -58,10 +58,10 @@ listener http:Listener tokenListenerEndpoint = new (
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
-                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                     gateway:DEFAULT_KEY_STORE_PATH),
-                password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
+                password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PASSWORD,
+                    gateway:DEFAULT_KEY_STORE_PASSWORD)
             }
         }
     {{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
@@ -69,10 +69,10 @@ listener http:Listener tokenListenerEndpoint = new (
             host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
             secureSocket: {
                 keyStore: {
-                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                    path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                         gateway:DEFAULT_KEY_STORE_PATH),
-                    password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                        gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
+                    password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PASSWORD,
+                        gateway:DEFAULT_KEY_STORE_PASSWORD)
                 }
             }
     {{else}}
@@ -80,10 +80,10 @@ listener http:Listener tokenListenerEndpoint = new (
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
-                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_KEY_STORE_PATH,
+                path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
                     gateway:DEFAULT_KEY_STORE_PATH),
-                password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID,
-                    gateway:LISTENER_CONF_KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
+                password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PASSWORD,
+                    gateway:DEFAULT_KEY_STORE_PASSWORD)
             }
         }
     {{/if}}
@@ -107,7 +107,7 @@ public function getFilters() returns http:RequestFilter[] {
     // Authorization filter
     gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
 
-    boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false) 
+    boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false)
         || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
     
     if (isObservable) {

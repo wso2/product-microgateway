@@ -17,6 +17,7 @@
 import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/stringutils;
 
 // Pre Authentication filter
 
@@ -87,6 +88,7 @@ returns boolean {
     string[] authProvidersIds = getAuthProviders(context.getServiceName(), context.getResourceName());
     printDebug(KEY_PRE_AUTHN_FILTER, "Auth providers array  : " + authProvidersIds.toString());
 
+    boolean isAPIKeyAuth = false;
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);
     } else if (request.hasHeader(COOKIE_HEADER)) {
@@ -98,6 +100,34 @@ returns boolean {
                 authHeader = authCookie;
             }
         }
+    } else {
+        //process apikey authentication
+        if (authProvidersIds.indexOf(AUTH_SCHEME_API_KEY) != ()) {
+            json[] apiKeys = getAPIKeysforResource(context.getServiceName(), context.getResourceName());
+            printDebug(KEY_PRE_AUTHN_FILTER, apiKeys.toString());
+            if (apiKeys.length() > 0) {
+                foreach json apiKey in apiKeys {
+                    if (apiKey is  map<json>) {
+                        string inName = apiKey[API_KEY_IN].toString();
+                        string name = apiKey[API_KEY_NAME].toString();
+                        printDebug(KEY_PRE_AUTHN_FILTER, "Detected apikey security in : " + inName + " name: " + name);
+                        if (stringutils:equalsIgnoreCase(HEADER, inName) && request.hasHeader(name)) {
+                            printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey header : " + name);
+                            isAPIKeyAuth = true;
+                            setAPIKeyAuth(inName, name);
+                            authHeader = AUTH_SCHEME_API_KEY;
+                            break;
+                        } else if (stringutils:equalsIgnoreCase(QUERY, inName) && request.getQueryParamValue(name) is string) {
+                            printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
+                            isAPIKeyAuth = true;
+                            setAPIKeyAuth(inName, name);
+                            authHeader = AUTH_SCHEME_API_KEY;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
     string providerId;
     if (!isCookie) {
@@ -106,7 +136,7 @@ returns boolean {
         providerId = getAuthenticationProviderTypeWithCookie(authHeader);
     }
     printDebug(KEY_PRE_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
-    boolean canHandleAuthentication = false;
+    boolean canHandleAuthentication = isAPIKeyAuth;
     foreach string provider in authProvidersIds {
         if (provider == providerId) {
             canHandleAuthentication = true;
@@ -114,7 +144,7 @@ returns boolean {
     }
 
     if (isSecuredResource) {
-        if (!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) {
+        if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !isAPIKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
@@ -137,6 +167,7 @@ returns boolean {
 }
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
+    printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
     if (contains(authHeader, AUTH_SCHEME_BASIC)) {
         return AUTHN_SCHEME_BASIC;
     } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {

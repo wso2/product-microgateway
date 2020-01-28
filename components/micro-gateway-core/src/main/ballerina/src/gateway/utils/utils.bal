@@ -133,6 +133,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     }
     return false;
 }
+
 public function getContext(http:FilterContext context) returns (string) {
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[context.getServiceName()];
     return <string>httpServiceConfig.basePath;
@@ -567,6 +568,27 @@ public function getAuthProviders(string serviceName, string resourceName) return
     return authProviders;
 }
 
+public function getAPIKeysforResource(string serviceName, string resourceName) returns json[] {
+    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
+    json[] apiKeys = [];
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>>resourceConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+        if (apiKeys.length() > 0) {
+            return apiKeys;
+        }
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        map<json> securityMap = <map<json>>apiConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+    }
+    return apiKeys;
+}
+
 # Log and prepare `error` as a `Error`.
 #
 # + message - Error message
@@ -619,5 +641,3 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
 }
-
-
