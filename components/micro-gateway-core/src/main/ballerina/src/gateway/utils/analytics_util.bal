@@ -154,8 +154,8 @@ function initializegRPCAnalytics() {
     endpointURL = <string>getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, DEFAULT_GRPC_ENDPOINT_URL);
     gRPCReconnectTime = <int>getConfigIntValue(GRPC_ANALYTICS, GRPC_RETRY_TIME_MILLISECONDS, DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES);
     printDebug(KEY_GRPC_ANALYTICS, "gRPC endpoint URL : " + endpointURL);
-    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH));
-    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD));
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH));
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC retry time  : " + gRPCReconnectTime.toString());

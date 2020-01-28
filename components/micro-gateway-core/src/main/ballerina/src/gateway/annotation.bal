@@ -26,12 +26,14 @@ public type APIConfiguration record {
     string name;
     string publisher;
     string authorizationHeader?;
+    json security;
     string[] authProviders = [];
 };
 
 public annotation APIConfiguration API on service;
 
 public type ResourceConfiguration record {
+    json security;
     string[] authProviders = [];
 };
 

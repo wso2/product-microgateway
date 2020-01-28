@@ -51,9 +51,8 @@ public type APIGatewaySecureListener object {
 };
 
 function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) {
-    string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH);
-    string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,LISTENER_CONF_KEY_STORE_PASSWORD, 
-        DEFAULT_KEY_STORE_PASSWORD);
+    string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH);
+    string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD);
     string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
     string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
     string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_NAME, DEFAULT_PROTOCOL_NAME);

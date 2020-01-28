@@ -98,3 +98,10 @@ public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";
 
 public const boolean DEFAULT_HOSTNAME_VERIFICATION_ENABLED = true;
+
+public const string DEFAULT_API_KEY_ISSUER = "https://localhost:9095/apikey";
+public const string DEFAULT_API_KEY_ALIAS = "ballerina";
+public const boolean DEFAULT_VALIDATE_APIS_ENABLED = false;
+
+public const boolean DEFAULT_API_KEY_ISSUER_ENABLED = true;
+public const int DEFAULT_API_KEY_VALIDITY_TIME = -1;

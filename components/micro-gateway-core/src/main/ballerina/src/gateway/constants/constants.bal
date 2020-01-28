@@ -17,7 +17,12 @@
 public const string AUTHN_SCHEME_BASIC = "basic";
 public const string AUTH_SCHEME_JWT = "jwt";
 public const string AUTH_SCHEME_OAUTH2 = "oauth2";
+public const string AUTH_SCHEME_API_KEY = "apikey";
 public const string AUTH_PROVIDER_CONFIG = "config";
+public const string HEADER = "header";
+public const string QUERY = "query";
+public const string API_KEY_IN = "in";
+public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
 public const string TEMP_AUTH_HEADER = "WSO2-Authorization";
 public const string AUTH_SCHEME_BASIC = "Basic";
@@ -53,6 +58,7 @@ public const string THROTTLE_KEY = "throttleKey";
 public const string POLICY_KEY = "policyKey";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
+public const string RESOURCE_SECURITY_ANN_NAME = "Security";
 public const string RESOURCE_CONFIGURATION_ANN_NAME = "Resource";
 public const string UNLIMITED_TIER = "Unlimited";
 public const string UNAUTHENTICATED_TIER = "Unauthenticated";
@@ -223,8 +229,8 @@ public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
 public const string LISTENER_CONF_HTTP_PORT = "httpPort";
 public const string LISTENER_CONF_HTTPS_PORT = "httpsPort";
-public const string LISTENER_CONF_KEY_STORE_PATH = "keyStorePath";
-public const string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStorePassword";
+public const string KEY_STORE_PATH = "keyStorePath";
+public const string KEY_STORE_PASSWORD = "keyStorePassword";
 public const string TOKEN_LISTENER_PORT = "tokenListenerPort";
 public const string FILTERS = "filters";
 
@@ -245,6 +251,13 @@ public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
+
+public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
+public const string API_KEY_ISSUER_ENABLED = "enabled";
+public const string API_KEY_VALIDATE_ALLOWED_APIS = "validateAllowedAPIs";
+public const string API_KEY_ISSUER_TOKEN_CONFIG = "apikey.issuer.tokenConfig";
+public const string API_KEY_VALIDITY_TIME = "validityTime";
+public const string API_KEY_ISSUER_APIS = "apikey.issuer.apis";
 
 public const string CACHING_ID = "caching";
 public const string TOKEN_CACHE_ENABLED = "enabled";
@@ -335,6 +348,11 @@ const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
+const string API_KEY_UTIL = "APIKeyUtil";
+const string JWT_UTIL = "JWTUtil";
+const string API_KEY_HANDLER = "APIKeyHandler";
+const string API_KEY_PROVIDER = "APIKeyProvider";
+public const string TOKEN_SERVICE = "TokenService";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
@@ -342,6 +360,7 @@ public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
 //jwt claims
 const string APPLICATION = "application";
 const string SUBSCRIBED_APIS = "subscribedAPIs";
+const string ALLOWED_APIS = "allowedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
 
