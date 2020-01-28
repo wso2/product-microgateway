@@ -67,13 +67,13 @@ function searchFilesToUpload() returns (error?) {
 
 function timerTask() {
     boolean uploadFiles = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK, DEFAULT_TASK_UPLOAD_FILES_ENABLED);
-    analyticsUsername = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_FILE_UPLOAD_ANALYTICS_USERNAME);
-    analyticsPassword = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_FILE_UPLOAD_ANALYTICS_PASSWORD);
+    analyticsUsername = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_USERNAME);
+    analyticsPassword = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_PASSWORD);
     if (isOldAnalyticsEnabled) {
         //enables config reads for older versions
         uploadFiles = <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK, DEFAULT_TASK_UPLOAD_FILES_ENABLED);
-        analyticsUsername = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_FILE_UPLOAD_ANALYTICS_USERNAME);
-        analyticsPassword = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_FILE_UPLOAD_ANALYTICS_PASSWORD);
+        analyticsUsername = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_USERNAME);
+        analyticsPassword = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_PASSWORD);
     }
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");

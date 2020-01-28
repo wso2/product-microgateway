@@ -96,7 +96,7 @@ public function dataToAnalytics(AnalyticsStreamMessage message){
     printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data publishing method executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            log:printInfo("Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
+            printInfo(KEY_GRPC_ANALYTICS, "Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
            
         } else {
             printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data published successfully: ");
