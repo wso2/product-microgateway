@@ -45,11 +45,13 @@ PRGDIR=`dirname "$PRG"`
 
 # set BALLERINA_HOME
 GW_HOME=`cd "$PRGDIR/.." ; pwd`
-export JAVA_HOME=$GW_HOME'/lib/jdk8u202-b08-jre'
 export MGW_VERSION="3.1.0"
 
 JAVA_PATH=$GW_HOME/lib/jdk8u202-b08-jre
-if [ -d "$JAVA_PATH" ]; then
+if [ -d "$JAVA_HOME" ]; then
+  echo "JAVA_HOME is externally set: $JAVA_HOME"
+else
+  echo "JAVA_HOME..."
   JAVA_HOME=$JAVA_PATH
 fi
 
@@ -85,8 +87,8 @@ fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+  echo $JAVA_HOME
+  [ -n "$JAVA_HOME" ] && JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
 fi
 
 if [ -z "$JAVACMD" ] ; then
@@ -100,6 +102,12 @@ if [ -z "$JAVACMD" ] ; then
     else
           JAVACMD=java
     fi
+fi
+
+JDK_18=`$JAVACMD -version 2>&1 | grep "1.8."`
+if [ "$JDK_18" = "" ]; then
+    echo "Error: Microgateway is supported only on JDK 1.8"
+    exit 1
 fi
 
 # For Cygwin, switch paths to Windows format before running java
