@@ -1,5 +1,4 @@
 import ballerina/grpc;
-import ballerina/log;
 import ballerina/task;
 
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
