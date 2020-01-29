@@ -56,6 +56,8 @@ RUN \
         netcat-openbsd \
     && rm -rf /var/cache/apk/*
 
+COPY gc.log /home/ballerina/gc.log
+COPY heap-dump.hprof /home/ballerina/heap-dump.hprof
 # Create folders, unzip distribution
 RUN \
     wget -O /root/${MGW_SERVER}.zip "${MGW_SERVER_DIST_URL}" \
@@ -64,7 +66,7 @@ RUN \
     && mkdir -p /home/ballerina/conf \
     && mv /home/ballerina/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
     && cp ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
-    && chown ${USER}:${USER_GROUP} -R ${MGW_RUNTIME_HOME}  \
+    && chown ${USER}:${USER_GROUP} -R ${USER_HOME}  \
     && rm -rf /root/${MGW_SERVER}.zip > /dev/null 2>&1
 
 ENV BALLERINA_HOME ${MGW_RUNTIME_HOME}/runtime
@@ -74,6 +76,8 @@ ENV PATH $GW_HOME/bin:$PATH
 WORKDIR /home/ballerina
 
 USER ballerina
+
+ENV JAVA_OPTS="${JAVA_OPTS}"
 
 # expose ports
 EXPOSE 9090 9095 9096

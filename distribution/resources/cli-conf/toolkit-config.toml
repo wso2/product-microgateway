@@ -3,7 +3,7 @@ httpRequestTimeout = 1000000
 
 [token]
 baseURL = ""
-restVersion = "v1.0"
+restVersion = "v0.14"
 dcrVersion = "v0.14"
 publisherEndpoint = "{baseURL}/api/am/publisher/{restVersion}"
 adminEndpoint = "{baseURL}/api/am/admin/{restVersion}"
