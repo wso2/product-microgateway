@@ -104,6 +104,10 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
             printDebug(KEY_ANALYTICS_FILTER, "API creator : " + requestResponseExecutionDTO.apiCreator);
             requestResponseExecutionDTO.userTenantDomain = <string>getUserTenantDomain(apiConfiguration.publisher);
             printDebug(KEY_ANALYTICS_FILTER, "User Tenant Domain : " + requestResponseExecutionDTO.userTenantDomain);
+        } else {
+            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
+            requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
+            requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }

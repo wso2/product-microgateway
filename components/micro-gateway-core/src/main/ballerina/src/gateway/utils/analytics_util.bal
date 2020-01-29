@@ -18,6 +18,7 @@ import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/time;
+import ballerina/stringutils;
 
 boolean isAnalyticsEnabled = false;
 boolean isOldAnalyticsEnabled = false;
@@ -35,9 +36,15 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
-        eventDto.userTenantDomain = getUserTenantDomain(apiConfiguration.publisher);
-        eventDto.apiCreator = <string>apiConfiguration.publisher;
-    }
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+            eventDto.userTenantDomain = getUserTenantDomain(apiConfiguration.publisher);
+            eventDto.apiCreator = <string>apiConfiguration.publisher;
+        } else {
+            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
+            eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+            eventDto.apiCreator = UNKNOWN_VALUE;
+    } 
+}
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
@@ -85,9 +92,15 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     if (apiConfig is APIConfiguration) {
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
-        eventDto.userTenantDomain = getUserTenantDomain(apiConfig.publisher);
-        eventDto.apiCreator = <string>apiConfig.publisher;
-    }
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfig .publisher)) {
+            eventDto.userTenantDomain = getUserTenantDomain(apiConfig.publisher);
+            eventDto.apiCreator = <string>apiConfig.publisher;
+        } else {
+            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
+            eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+            eventDto.apiCreator = UNKNOWN_VALUE;
+        }
+    } 
     eventDto.apiName = getApiName(context);
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
     if (httpResourceConfig is http:HttpResourceConfig) {
