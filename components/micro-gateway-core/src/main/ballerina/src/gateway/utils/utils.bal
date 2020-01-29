@@ -641,26 +641,3 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
 }
-
-# Gets API publisher string and provides extracted userTenantDomain value.
-# 
-# + publisherString - API publisher string value
-# + return - Returns userTenantDomain 'string' value after extraction.
-public function getUserTenantDomain(string publisherString) returns string {
-    string[] resultSet = stringutils:split(publisherString , "@");
-    int resultSetLength = resultSet.length();
-    //for super tenant domain users
-    if (resultSetLength == 1) {
-          return "carbon.super";
-    }
-    //for users not from the super tenant domain
-    if (resultSetLength == 2) {
-          return resultSet[1];
-    }
-    //for email signup users
-    if (resultSetLength == 3) {
-          return resultSet[2];
-    }
-    return "not available";
-}
-

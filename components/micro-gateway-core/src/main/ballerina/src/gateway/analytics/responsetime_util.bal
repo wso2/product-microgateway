@@ -86,28 +86,27 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.userName = authContext.username;
         requestResponseExecutionDTO.applicationId = authContext.applicationId;
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
+        requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain; 
     } else {
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
         requestResponseExecutionDTO.applicationId = ANONYMOUS_APP_ID;
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
+        requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
 
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
         printInfo(KEY_ANALYTICS_FILTER, apiConfigAnnotationMap.toString());
     if (apiConfiguration is APIConfiguration) {
         if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            //sets API creator and userTenantDomain
+            //sets API creator
             printDebug(KEY_ANALYTICS_FILTER, "API publisher : " + apiConfiguration.publisher);
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
             printDebug(KEY_ANALYTICS_FILTER, "API creator : " + requestResponseExecutionDTO.apiCreator);
-            requestResponseExecutionDTO.userTenantDomain = <string>getUserTenantDomain(apiConfiguration.publisher);
-            printDebug(KEY_ANALYTICS_FILTER, "User Tenant Domain : " + requestResponseExecutionDTO.userTenantDomain);
         } else {
-            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
+            //sets API creator if x-wso2-owner extension not specified.
             requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
-            requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }

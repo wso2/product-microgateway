@@ -37,11 +37,9 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
         if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            eventDto.userTenantDomain = getUserTenantDomain(apiConfiguration.publisher);
             eventDto.apiCreator = <string>apiConfiguration.publisher;
         } else {
-            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
-            eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+            //sets API creator if x-wso2-owner extension not specified.
             eventDto.apiCreator = UNKNOWN_VALUE;
     } 
 }
@@ -49,6 +47,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     int currentTimeMills = time.time;
 
     map<json> metaInfo = {};
+    eventDto.userTenantDomain = getTenantDomain(context);
     eventDto.apiName = getApiName(context);
     eventDto.apiContext = getContext(context);
     eventDto.throttledTime = currentTimeMills;
@@ -93,11 +92,9 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
         if (!stringutils:equalsIgnoreCase("", <string>apiConfig .publisher)) {
-            eventDto.userTenantDomain = getUserTenantDomain(apiConfig.publisher);
             eventDto.apiCreator = <string>apiConfig.publisher;
         } else {
-            //sets API creator and userTenantDomain if x-wso2-owner extension not specified.
-            eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+            //sets API creator if x-wso2-owner extension not specified.
             eventDto.apiCreator = UNKNOWN_VALUE;
         }
     } 
@@ -121,12 +118,14 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         eventDto.userName = authContext.username;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
+        eventDto.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
+        eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
