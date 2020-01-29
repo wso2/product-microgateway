@@ -35,12 +35,13 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
+        eventDto.userTenantDomain = getUserTenantDomain(apiConfiguration.publisher);
+        eventDto.apiCreator = <string>apiConfiguration.publisher;
     }
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
     map<json> metaInfo = {};
-    eventDto.userTenantDomain = getTenantDomain(context);
     eventDto.apiName = getApiName(context);
     eventDto.apiContext = getContext(context);
     eventDto.throttledTime = currentTimeMills;
@@ -54,7 +55,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         .attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.userName = authContext.username;
-        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
@@ -62,10 +62,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
         APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfig is APIConfiguration) {
-            var api_Creator = apiConfig.publisher;
-            eventDto.apiCreator = api_Creator;
-        }
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
@@ -89,6 +85,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     if (apiConfig is APIConfiguration) {
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
+        eventDto.userTenantDomain = getUserTenantDomain(apiConfig.publisher);
+        eventDto.apiCreator = <string>apiConfig.publisher;
     }
     eventDto.apiName = getApiName(context);
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
@@ -107,23 +105,15 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.consumerKey = authContext.consumerKey;
-        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.userName = authContext.username;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
-        eventDto.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        APIConfiguration? apiConfigs = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfigs is APIConfiguration) {
-            var api_Creater = apiConfigs.publisher;
-            eventDto.apiCreator = api_Creater;
-        }
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
-        eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
