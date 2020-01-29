@@ -3,7 +3,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.1.0-SNAPSHOT</version>
+        <version>3.1.0-m1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -160,11 +160,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <replaceregexp
-                                    file="src/main/ballerina/Ballerina.toml"
-                                    match="org\.wso2\.micro\.gateway\.core-.*.jar"
-                                    replace="org.wso2.micro.gateway.core-${project.version}.jar"
-                                    byline="true"/>
+                                <replaceregexp file="src/main/ballerina/Ballerina.toml" match="org\.wso2\.micro\.gateway\.core-.*.jar" replace="org.wso2.micro.gateway.core-${project.version}.jar" byline="true" />
                             </tasks>
                         </configuration>
                     </execution>

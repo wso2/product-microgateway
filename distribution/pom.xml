@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.0-SNAPSHOT</version>
+        <version>3.1.0-m1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -218,12 +218,8 @@
                         <configuration>
                             <target>
                                 <!-- download file -->
-                                <get src="https://product-dist.wso2.com/downloads/in-place/release/update.zip"
-                                     dest="${project.build.directory}/update.zip"
-                                     verbose="false"
-                                     usetimestamp="true"/>
-                                <unzip src="${project.build.directory}/update.zip"
-                                       dest="${project.build.directory}" />
+                                <get src="https://product-dist.wso2.com/downloads/in-place/release/update.zip" dest="${project.build.directory}/update.zip" verbose="false" usetimestamp="true" />
+                                <unzip src="${project.build.directory}/update.zip" dest="${project.build.directory}" />
                             </target>
                         </configuration>
                     </execution>
@@ -246,7 +242,7 @@
 <!--                        <phase>generate-resources</phase>-->
 <!--                        <configuration>-->
 <!--                            <tasks>-->
-<!--                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact"/>-->
+<!--                                <unzip src="${basedir}/../components/micro-gateway-core/target/org.wso2.micro.gateway.core-${project.version}-jms.zip" dest="${project.build.directory}/jms-artifact" />-->
 <!--                            </tasks>-->
 <!--                        </configuration>-->
 <!--                        <goals>-->
@@ -277,7 +273,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <move todir="${project.build.directory}/lib/jar" flatten="true" >
+                                <move todir="${project.build.directory}/lib/jar" flatten="true">
                                     <fileset dir="${project.build.directory}/lib/gw">
                                         <include name="**/*.jar" />
                                     </fileset>
