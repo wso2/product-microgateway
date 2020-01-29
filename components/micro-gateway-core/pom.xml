@@ -150,6 +150,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <replaceregexp
+                                    file="src/main/ballerina/Ballerina.toml"
+                                    match="org\.wso2\.micro\.gateway\.core-.*.jar"
+                                    replace="org.wso2.micro.gateway.core-${project.version}.jar"
+                                    byline="true"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
     </build>
