@@ -38,7 +38,6 @@ import wso2/gateway;
     {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
-
 {{>kubernetes}}
 
 @http:ServiceConfig {
@@ -58,13 +57,8 @@ import wso2/gateway;
     name:"{{api.name}}",
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
-    {{#if basicAuth.isOptional}}
-        authProviders:["basic","oauth2","jwt"]
-    {{else if basicAuth.isRequired}}
-        authProviders:["basic"]
-    {{else}}
-        authProviders:["jwt","oauth2"]
-    {{/if}}
+    authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
+    security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -83,13 +77,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         }
     }
     @gateway:Resource {
-        {{#if basicAuth.isOptional}}
-            authProviders:["basic","oauth2","jwt"]
-        {{else if basicAuth.isRequired}}
-            authProviders:["basic"]
-        {{else}}
-            authProviders:["jwt","oauth2"]
-        {{/if}}
+        authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
+        security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
@@ -98,7 +87,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
     string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    if(!gateway:hasPrefix(urlPostfix,"/")) {
+    if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
         urlPostfix = "/" + urlPostfix;
     }
         http:Response|error clientResponse;

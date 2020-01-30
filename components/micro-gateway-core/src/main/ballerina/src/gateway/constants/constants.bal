@@ -17,7 +17,12 @@
 public const string AUTHN_SCHEME_BASIC = "basic";
 public const string AUTH_SCHEME_JWT = "jwt";
 public const string AUTH_SCHEME_OAUTH2 = "oauth2";
+public const string AUTH_SCHEME_API_KEY = "apikey";
 public const string AUTH_PROVIDER_CONFIG = "config";
+public const string HEADER = "header";
+public const string QUERY = "query";
+public const string API_KEY_IN = "in";
+public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
 public const string TEMP_AUTH_HEADER = "WSO2-Authorization";
 public const string AUTH_SCHEME_BASIC = "Basic";
@@ -50,8 +55,10 @@ public const string AUTHENTICATION_CONTEXT = "AUTHENTICATION_CONTEXT";
 public const string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 public const int SUPER_TENANT_ID = -1234;
 public const string THROTTLE_KEY = "throttleKey";
+public const string POLICY_KEY = "policyKey";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
+public const string RESOURCE_SECURITY_ANN_NAME = "Security";
 public const string RESOURCE_CONFIGURATION_ANN_NAME = "Resource";
 public const string UNLIMITED_TIER = "Unlimited";
 public const string UNAUTHENTICATED_TIER = "Unauthenticated";
@@ -113,14 +120,12 @@ public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
 
-
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";
 public const string USERNAME = "username";
 public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
-
 
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
@@ -129,7 +134,8 @@ public const string API_USAGE_FILE = "api-usage-data.dat";
 public const string TIME_INTERVAL = "timeInterval";
 public const string FILE_NAME = "FileName";
 public const string ACCEPT = "Accept";
-public const string ANALYTICS = "analytics";
+public const string FILE_UPLOAD_ANALYTICS = "analytics.fileUpload";
+public const string OLD_FILE_UPLOAD_ANALYTICS = "analytics";
 public const string UPLOADING_TIME_SPAN = "uploadingTimeSpanInMillis";
 public const string ROTATING_TIME = "rotatingPeriod";
 public const string UPLOADING_EP = "uploadingEndpoint";
@@ -149,7 +155,14 @@ public const string API_USAGE_DIR = "api-usage-data";
 public const string FILE_UPLOAD_TASK = "taskUploadFiles";
 public const string INITIAL_DELAY = "initialDelayInMillis";
 public const string DESTINATION = "destination";
+public const string FILE_UPLOAD_ENABLE = "enable";
 
+//gRPC analytics related constants
+public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
+public const string GRPC_ANALYTICS_ENABLE = "enable";
+public const string GRPC_ENDPOINT_URL = "endpointURL";
+public const string GRPC_RETRY_TIME_MILLISECONDS = "reconnectTimeInMillies";
+ 
 //validation_filter related constatnts
 public const string PATHS = "paths";
 public const string PARAMETERS = "parameters";
@@ -186,12 +199,27 @@ public const string INT = "int";
 // config constants
 public const string KM_CONF_INSTANCE_ID = "keyManager";
 public const string KM_SERVER_URL = "serverUrl";
-public const string KM_TOKEN_CONTEXT = "/oauth2";
+public const string KM_TOKEN_CONTEXT = "tokenContext";
 public const string TIMESTAMP_SKEW = "timestampSkew";
+public const string EXTERNAL = "external";
+public const string KM_CONF_SECURITY_BASIC_INSTANCE_ID = "keymanager.security.basic";
+public const string KM_CONF_SECURITY_OAUTH2_INSTANCE_ID = "keymanager.security.oauth2";
+public const string KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID = "keymanager.security.oauth2.clientCredential";
+public const string KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID = "keymanager.security.oauth2.password";
+public const string KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID = "keymanager.security.oauth2.directToken";
+public const string KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID = "keymanager.security.oauth2.refresh";
+public const string ENABLED = "enabled";
+public const string CLIENT_ID = "clientId";
+public const string CLIENT_SECRET = "clientSecret";
+public const string SCOPES = "scopes";
+public const string REFRESH_URL = "refreshUrl";
+public const string TOKEN_URL = "tokenUrl";
+public const string REFRESH_TOKEN = "refreshToken";
+public const string ACCESS_TOKEN = "accessToken";
+public const string CREDENTIAL_BEARER = "credentialBearer";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
-
 
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
@@ -201,8 +229,8 @@ public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
 public const string LISTENER_CONF_HTTP_PORT = "httpPort";
 public const string LISTENER_CONF_HTTPS_PORT = "httpsPort";
-public const string LISTENER_CONF_KEY_STORE_PATH = "keyStorePath";
-public const string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStorePassword";
+public const string KEY_STORE_PATH = "keyStorePath";
+public const string KEY_STORE_PASSWORD = "keyStorePassword";
 public const string TOKEN_LISTENER_PORT = "tokenListenerPort";
 public const string FILTERS = "filters";
 
@@ -223,6 +251,13 @@ public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
+
+public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
+public const string API_KEY_ISSUER_ENABLED = "enabled";
+public const string API_KEY_VALIDATE_ALLOWED_APIS = "validateAllowedAPIs";
+public const string API_KEY_ISSUER_TOKEN_CONFIG = "apikey.issuer.tokenConfig";
+public const string API_KEY_VALIDITY_TIME = "validityTime";
+public const string API_KEY_ISSUER_APIS = "apikey.issuer.apis";
 
 public const string CACHING_ID = "caching";
 public const string TOKEN_CACHE_ENABLED = "enabled";
@@ -263,16 +298,13 @@ public const string PERSISTENT_USE_DEFAULT = "useDefault";
 public const string PERSISTENT_MESSAGE_HOSTNAME = "hostname";
 public const string PERSISTENT_MESSAGE_USERNAME = "username";
 public const string PERSISTENT_MESSAGE_PASSWORD = "password";
-
 public const string CONFIG_USER_SECTION = "b7a.users";
 
 // end of config constants
-
 public const string IS_THROTTLED = "isThrottled";
 public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 const string TRUE = "true";
 const string REQUEST_BLOCKED = "REQUEST_BLOCKED";
-
 
 const string INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured";
 const string UNPROCESSABLE_ENTITY_MESSAGE = "Unable to process the entity";
@@ -286,7 +318,6 @@ public const int THROTTLED_OUT = 429;
 public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
-
 const string PATH_SEPERATOR = "/";
 
 //http2 constants
@@ -294,7 +325,6 @@ public const string HTTP2_INSTANCE_ID = "http2";
 public const string HTTP2_PROPERTY = "enable";
 public const string HTTP2 = "2.0";
 public const string HTTP11 = "1.1";
-
 
 // logging keys
 const string KEY_GW_LISTNER = "APIGatewayListener";
@@ -317,7 +347,12 @@ const string KEY_ETCD_UTIL = "EtcdUtil";
 const string KEY_TOKEN_REVOCATION_ETCD_UTIL = "TokenRevocationETCDUtil";
 const string KEY_TOKEN_REVOCATION_JMS = "TokenRevocationJMS";
 const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
-
+public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
+const string API_KEY_UTIL = "APIKeyUtil";
+const string JWT_UTIL = "JWTUtil";
+const string API_KEY_HANDLER = "APIKeyHandler";
+const string API_KEY_PROVIDER = "APIKeyProvider";
+public const string TOKEN_SERVICE = "TokenService";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
@@ -325,5 +360,8 @@ public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
 //jwt claims
 const string APPLICATION = "application";
 const string SUBSCRIBED_APIS = "subscribedAPIs";
+const string ALLOWED_APIS = "allowedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
+
+public const string INTROSPECT_CONTEXT = "introspect";

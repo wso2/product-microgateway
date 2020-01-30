@@ -39,7 +39,7 @@ import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
-import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
+import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -87,10 +87,13 @@ public class OpenAPICodegenUtils {
     private static List<Map<Object, Object>> endPointReferenceExtensions;
     private static List<String> oauthSecuritySchemaList = new ArrayList<>();
     private static List<String> basicSecuritySchemaList = new ArrayList<>();
+    private static Map apiKeySecuritySchemaMap = new HashMap();
 
     enum APISecurity {
         basic,
-        oauth2
+        oauth2,
+        jwt,
+        apikey
     }
 
     /**
@@ -750,7 +753,11 @@ public class OpenAPICodegenUtils {
                 } else if (basicSecuritySchemaList.contains(k) &&
                         !securitySchemaList.contains(APISecurity.basic.name())) {
                     securitySchemaList.add(APISecurity.basic.name());
+                }  else if (apiKeySecuritySchemaMap.containsKey(k) &&
+                        !securitySchemaList.contains(APISecurity.apikey.name())) {
+                    securitySchemaList.add(APISecurity.apikey.name());
                 }
+
             }));
             //generate security schema String
             StringBuilder secSchemaBuilder = new StringBuilder();
@@ -778,12 +785,9 @@ public class OpenAPICodegenUtils {
         return new String[]{securitySchemas, scopes};
     }
 
-    public static BasicAuth getMgwResourceBasicAuth(Operation operation) {
+    public static List<String> getMgwResourceSecurity(Operation operation) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
-        if (StringUtils.isEmpty(securitySchemas)) {
-            return null;
-        }
-        return generateBasicAuthFromSecurity(securitySchemas);
+        return getAuthProviders(securitySchemas);
     }
 
     /**
@@ -797,35 +801,22 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * When the security schema string is provided as a comma separated set of values
-     * generate the corresponding schema string.
+     * Provide api keys for a given security requirement list
      *
-     * @param schemas comma separated security security schema types (ex. basic,oauth2)
-     * @return {@link BasicAuth} object
+     * @param securityRequirementList {@link List<SecurityRequirement>} object
+     * @return list of API Keys
      */
-    public static BasicAuth generateBasicAuthFromSecurity(String schemas) {
-        BasicAuth basicAuth = new BasicAuth();
-        boolean basic = false;
-        boolean oauth2 = false;
-        String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-        for (String s : schemasArray) {
-            if (s.equalsIgnoreCase("basic")) {
-                basic = true;
-            } else if (s.equalsIgnoreCase("oauth2")) {
-                oauth2 = true;
-            }
+    public static List<APIKey> generateAPIKeysFromSecurity(List<SecurityRequirement> securityRequirementList) {
+        List<APIKey> apiKeys = new ArrayList<>();
+        if (securityRequirementList != null) {
+            securityRequirementList.forEach(value -> value.forEach((k, v) -> {
+                //check if the key is in apikey list
+                if (apiKeySecuritySchemaMap.containsKey(k)) {
+                    apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(k));
+                }
+            }));
         }
-        if (basic && oauth2) {
-            basicAuth.setOptional(true);
-            basicAuth.setRequired(false);
-        } else if (basic) {
-            basicAuth.setRequired(true);
-            basicAuth.setOptional(false);
-        } else if (oauth2) {
-            basicAuth.setOptional(false);
-            basicAuth.setRequired(false);
-        }
-        return basicAuth;
+        return apiKeys;
     }
 
     /**
@@ -858,7 +849,7 @@ public class OpenAPICodegenUtils {
         validateInterceptors(openAPI.getExtensions(), null, null, openAPIFilePath);
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
-        setBasicSecuritySchemaList(openAPI);
+        setSecuritySchemaList(openAPI);
         setOpenAPIDefinitionEndpointReferenceExtensions(openAPI.getExtensions());
     }
 
@@ -883,13 +874,14 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the security schemas of type "basic"
+     * store the security schemas of type "basic" and "apikey"
      *
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setBasicSecuritySchemaList(OpenAPI openAPI) {
+    private static void setSecuritySchemaList(OpenAPI openAPI) {
         //Since the security schema list needs to instantiated per each API
         basicSecuritySchemaList = new ArrayList<>();
+        apiKeySecuritySchemaMap = new HashMap();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
             return;
         }
@@ -897,6 +889,11 @@ public class OpenAPICodegenUtils {
             if (val.getType() == SecurityScheme.Type.HTTP &&
                     val.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
                 basicSecuritySchemaList.add(key);
+            } else if (val.getType() == SecurityScheme.Type.APIKEY) {
+                APIKey apiKey = new APIKey();
+                apiKey.setIn(val.getIn());
+                apiKey.setName(val.getName());
+                apiKeySecuritySchemaMap.put(key, apiKey);
             }
         });
     }
@@ -1009,5 +1006,29 @@ public class OpenAPICodegenUtils {
             moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
         }
         return moduleVersion;
+    }
+
+    public static List<String> getAuthProviders(String schemas) {
+        List<String> authProviders = new ArrayList<>();
+        boolean basic = false;
+        boolean oauth2 = false;
+        if (schemas != null) {
+            String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+            for (String s : schemasArray) {
+                if (s.equalsIgnoreCase(APISecurity.basic.name())) {
+                    authProviders.add(APISecurity.basic.name());
+                } else if (s.equalsIgnoreCase(APISecurity.apikey.name())) {
+                    authProviders.add(APISecurity.apikey.name());
+                } else if (s.equalsIgnoreCase(APISecurity.oauth2.name())) {
+                    authProviders.add(APISecurity.oauth2.name());
+                    authProviders.add(APISecurity.jwt.name());
+                }
+            }
+        }
+        if (authProviders.size() < 1) {
+            authProviders.add(APISecurity.oauth2.name());
+            authProviders.add(APISecurity.jwt.name());
+        }
+        return authProviders;
     }
 }

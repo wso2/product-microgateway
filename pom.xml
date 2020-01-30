@@ -22,7 +22,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.1.0-m2-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>http://wso2.org</url>
@@ -243,6 +243,13 @@
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.core</artifactId>
                 <type>zip</type>
+                <classifier>mgw-balo</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>org.wso2.micro.gateway.core</artifactId>
+                <type>zip</type>
                 <classifier>mgw-jar</classifier>
                 <version>${project.version}</version>
             </dependency>
@@ -413,28 +420,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <!-- start - jenkins exclusion -->
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${maven.spotbugs.version}</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>analyze-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- end - jenkins exclusion -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -508,7 +493,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.0.0</ballerina.platform.version>
+        <ballerina.platform.version>1.1.0</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -566,9 +551,11 @@
         <kotlin.stdlib.version>1.3.31</kotlin.stdlib.version>
         <asm.version>7.1</asm.version>
         <prometheus.jmx.agent.version>0.12.0</prometheus.jmx.agent.version>
-        <jms-module.version>0.6.2</jms-module.version>
+        <jms-module.version>0.6.3</jms-module.version>
         <jmx.api.version>2.0.1</jmx.api.version>
         <orbit.version.geronimo-jms_1.1_spec>1.1.1.wso2v1</orbit.version.geronimo-jms_1.1_spec>
+        <andes-client.version>3.3.9</andes-client.version>
+        <org.wso2.securevault.version>1.1.1</org.wso2.securevault.version>
     </properties>
 
 </project>

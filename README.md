@@ -39,7 +39,7 @@ It also has the following characteristics that makes it a perfect fit for micros
       * [Initializing a microgateway project](#initializing-a-microgateway-project)
       * [Building the microgateway project](#building-the-microgateway-project)
       * [Running the microgateway](#running-the-microgateway)
-   * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
+   * [WSO2 API Microgateway commands](#wso2-api-microgateway-toolkit-commands)
       * [Init](#init)
       * [Build](#build)
    * [Project Structure](#project-structure)
@@ -668,7 +668,7 @@ Enter Password for admin:
 
 Enter APIM base URL [https://localhost:9443]:
 
-You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MICROGW_HOME>/conf/toolkit-config.toml)
+You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MGW-TK_HOME>/conf/toolkit-config.toml)
 Enter Trust store location: [lib/platform/bre/security/ballerinaTruststore.p12]
 
 Enter Trust store password: [ use default? ]

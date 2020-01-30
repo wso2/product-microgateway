@@ -113,7 +113,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
+    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -133,6 +133,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     }
     return false;
 }
+
 public function getContext(http:FilterContext context) returns (string) {
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[context.getServiceName()];
     return <string>httpServiceConfig.basePath;
@@ -312,7 +313,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 
@@ -327,7 +328,7 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 }
@@ -516,8 +517,8 @@ public function setHostHeaderToFilterContext(http:Request request,@tainted http:
 }
 
 public function isSecured(string serviceName, string resourceName) returns boolean {
-    http:ServiceResourceAuth? resourceLevelAuthAnn = ();
-    http:ServiceResourceAuth? serviceLevelAuthAnn = ();
+    http:ResourceAuth? resourceLevelAuthAnn = ();
+    http:ResourceAuth? serviceLevelAuthAnn = ();
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
@@ -540,12 +541,12 @@ public function isSecured(string serviceName, string resourceName) returns boole
 
 # Check for the service or the resource is secured by evaluating the enabled flag configured by the user.
 #
-# + serviceResourceAuth - Service or resource auth annotation
+# + resourceAuth - Service or resource auth annotation
 # + return - Whether the service or resource secured or not
-function isServiceResourceSecured(http:ServiceResourceAuth? serviceResourceAuth) returns boolean {
+function isServiceResourceSecured(http:ResourceAuth? resourceAuth) returns boolean {
     boolean secured = true;
-    if (serviceResourceAuth is http:ServiceResourceAuth) {
-        secured = serviceResourceAuth.enabled;
+    if (resourceAuth is http:ResourceAuth) {
+        secured = resourceAuth["enabled"] ?: true;
     }
     return secured;
 }
@@ -565,6 +566,27 @@ public function getAuthProviders(string serviceName, string resourceName) return
         authProviders = apiConfig.authProviders;
     }
     return authProviders;
+}
+
+public function getAPIKeysforResource(string serviceName, string resourceName) returns json[] {
+    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
+    json[] apiKeys = [];
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>>resourceConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+        if (apiKeys.length() > 0) {
+            return apiKeys;
+        }
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        map<json> securityMap = <map<json>>apiConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+    }
+    return apiKeys;
 }
 
 # Log and prepare `error` as a `Error`.
@@ -619,5 +641,3 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
 }
-
-

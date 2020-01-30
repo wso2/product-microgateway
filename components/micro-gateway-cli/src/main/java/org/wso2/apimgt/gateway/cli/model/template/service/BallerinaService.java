@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -66,6 +67,12 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<APIKey> apiKeys;
+
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private ExtendedAPI api;
 
@@ -94,7 +101,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.setBasepath(api.getSpecificBasepath());
-        setSecuritySchemas(api.getMgwApiSecurity());
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity());
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity());
         setPaths(definition);
         // to extract the module names of ballerina modules to be imported from the Ballerina Central
         // if specified in api level interceptors
@@ -262,9 +270,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                 String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                 operation.getValue().setOperationId(operationId);
-                //to set BasicAuth property corresponding to the security schema in API-level
-                operation.getValue().setBasicAuth(OpenAPICodegenUtils
-                        .generateBasicAuthFromSecurity(this.api.getMgwApiSecurity()));
 
                 /*
                 Set the import modules specified in the operation level request interceptors with identifiers when the
@@ -327,6 +332,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             + OpenAPIConstants.WHITESPACE + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT
                             + OpenAPIConstants.WHITESPACE + responseInterceptorIdentifier);
                 }
+
+                //to set auth providers property corresponding to the security schema in API-level
+                operation.getValue().setSecuritySchemas(this.api.getMgwApiSecurity());
 
                 //if it is the developer first approach
                 if (isDevFirst) {
@@ -476,11 +484,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     public void setBasepath(String basepath) {
         this.basepath = basepath;
-    }
-
-    private void setSecuritySchemas(String schemas) {
-        Config config = CmdUtils.getConfig();
-        config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
     }
 
     public void setIsDevFirst(boolean value) {

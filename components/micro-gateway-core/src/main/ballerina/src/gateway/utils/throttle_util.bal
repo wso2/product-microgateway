@@ -35,17 +35,17 @@ public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
 }
 public function putBlockCondition(jms:MapMessage m) {
-    string?|error condition = m.getString(BLOCKING_CONDITION_KEY);
-    string?|error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
-    string?|error conditionState = m.getString(BLOCKING_CONDITION_STATE);
+    string? | error condition = m.getString(BLOCKING_CONDITION_KEY);
+    string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
+    string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
     if (conditionState == TRUE && conditionState is string && conditionValue is string) {
         blockConditionExist = true;
-        blockConditions[conditionValue] = conditionValue;
+        blockConditions[conditionValue] = <@untainted>conditionValue;
     } else {
         if (conditionValue is string) {
-        _ = blockConditions.remove(conditionValue);
+            _ = blockConditions.remove(conditionValue);
             if (blockConditions.keys().length() == 0) {
-               blockConditionExist = false;
+                blockConditionExist = false;
             }
         }
     }
@@ -57,19 +57,25 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
     printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
     if (isThrottled) {
-        int currentTime = time:currentTime().time;
         GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
-        int timeStamp = dto.expiryTimeStamp;
         boolean stopOnQuota = dto.stopOnQuota;
         if (enabledGlobalTMEventPublishing == true) {
+            int currentTime = time:currentTime().time;
+            int? resetTimestamp = dto.resetTimestamp;
             stopOnQuota = true;
+            if (resetTimestamp is int) {
+                if (resetTimestamp < currentTime) {
+                    var value = throttleDataMap.remove(key);
+                    return [false, stopOnQuota];
+                }
+            } else {
+                //if the resetTimestamp is not included, throttling is disabled
+                printDebug(KEY_THROTTLE_UTIL, "throttle event for the throttle key:" + key +
+                    "does not contain expiry timestamp.");
+                return [false, stopOnQuota];
+            }
         }
-        if (timeStamp >= currentTime) {
-            return [isThrottled, stopOnQuota];
-        } else {
-            var value = throttleDataMap.remove(key);
-            return [false, stopOnQuota];
-        }
+        return [isThrottled, stopOnQuota];
     }
     return [isThrottled, false];
 }
@@ -94,17 +100,19 @@ public function initializeThrottleSubscription() {
     printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
 }
 
-//public function getInitThrottleSubscriptionFuture() returns future<()>{
-//return ftr;
-//}
+// insert throttleevent into the map if it is throttled other wise remove the throttle key it from the throttledata map
 public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
-    printDebug(KEY_THROTTLE_UTIL, "Event GlobalThrottleStream: throttleKey: " + throttleEvent.throttleKey +
-    " ,isThrottled:" + throttleEvent.isThrottled.toString() + ",expiryTimeStamp:" + throttleEvent.expiryTimeStamp.toString());
+    printDebug(KEY_THROTTLE_UTIL, "Event globalThrottleStream: throttleKey: " + throttleEvent.policyKey +
+    " ,isThrottled:" + throttleEvent.isThrottled.toString());
     if (throttleEvent.isThrottled) {
-        throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
+        if (throttleEvent.policyKey.length() > 0) {
+            throttleDataMap[throttleEvent.policyKey] = throttleEvent;
+        }
     }
     else {
-        _ = throttleDataMap.remove(throttleEvent.throttleKey);
+        if (throttleEvent.policyKey.length() > 0) {
+            _ = throttleDataMap.remove(throttleEvent.policyKey);
+        }
     }
 }
 
@@ -130,8 +138,8 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
     return eventDTO;
 }
 
-public function putThrottleData(GlobalThrottleStreamDTO throttleEvent) {
-    throttleDataMap[throttleEvent.throttleKey] = throttleEvent;
+public function putThrottleData(GlobalThrottleStreamDTO throttleEvent, string throttleKey) {
+    throttleDataMap[throttleKey] = <@untainted>throttleEvent;
 }
 public function removeThrottleData(string key) {
     _ = throttleDataMap.remove(key);
@@ -156,4 +164,3 @@ public function getGlobalThrottleStream() returns stream<GlobalThrottleStreamDTO
 public function getIsStreamsInitialized() returns boolean {
     return isStreamsInitialized;
 }
-

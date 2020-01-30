@@ -102,4 +102,5 @@ public class CliConstants {
     public static final String YAML_EXTENSION = ".yaml";
 
     public static final String WARN_LOG_PATTERN = "WARN: ";
+    public static final String MICROGW_HOME_PLACEHOLDER = "${MGW-TK_HOME}";
 }

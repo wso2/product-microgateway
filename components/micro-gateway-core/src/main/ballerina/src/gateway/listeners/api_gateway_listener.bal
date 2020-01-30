@@ -20,6 +20,10 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/ 'lang\.object as lang;
 import ballerina/log;
+import ballerina/oauth2;
+import ballerina/stringutils;
+
+boolean isConfigInitiated = false;
 
 public type APIGatewayListener object {
     *lang:Listener;
@@ -29,17 +33,23 @@ public type APIGatewayListener object {
     public http:Listener httpListener;
 
     public function __init(int port, http:ListenerConfiguration config) {
+        // Since http listeners is wrapped inside https listener also, this init method get invoked twice per
+        // each listener. This check will make sure that configurations are read only once and respective
+        //objects are initialized only once.
+        if (!isConfigInitiated) {
+            initiateGatewayConfigurations(config);
+        }
         if ((config.secureSocket is ())) {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, port);
+            //Initiate handlers without listener annotation to make sure that, the handlers get initialized
+            //after the gateway cache objects are initialized.
+            initiateAuthenticationHandlers(config);
         } else {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
             self.listenerType = "HTTPS";
         }
-        initiateGatewayConfigurations(config);
         printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort.toString());
-
         self.httpListener = new (self.listenerPort, config = config);
-
         printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort.toString());
     }
 
@@ -66,41 +76,46 @@ public type APIGatewayListener object {
     public function __detach(service s) returns error? {
         return self.httpListener.__detach(s);
     }
-
-
 };
 
+function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
+    http:ListenerAuth auth = {
+         authHandlers: getAuthHandlers(),
+         mandateSecureSocket: false,
+         position: 1
+    };
+    config.auth = auth;
+}
 
 public function initiateGatewayConfigurations(http:ListenerConfiguration config) {
-    // default should bind to 0.0.0.0, not localhost. Else will not work in dockerized environments.
-    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, "0.0.0.0");
+    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST, DEFAULT_CONF_HOST);
     initiateKeyManagerConfigurations();
     printDebug(KEY_GW_LISTNER, "Initialized key manager configurations");
-    initGatewayCaches();
     printDebug(KEY_GW_LISTNER, "Initialized gateway caches");
     //TODO : migrate this method and re enable
     initializeAnalytics();
+    initializegRPCAnalytics();
 
     //Change the httpVersion
-    if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, false)) {
+    if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {
         config.httpVersion = "2.0";
         log:printDebug("httpVersion = " + config.httpVersion);
     }
+    isConfigInitiated = true;
 }
 
 public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes jwt handler
     jwt:JwtValidatorConfig jwtValidatorConfig = {
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://localhost:9443/oauth2/token"),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
         clockSkewInSeconds: 60,
         trustStoreConfig: {
             trustStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
             },
-            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina")
+            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
         },
         jwtCache: jwtCache
     };
@@ -112,29 +127,88 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
         jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
     }
 
+    //Initializes apikey handler
+    jwt:JwtValidatorConfig apiKeyValidatorConfig = {
+        issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
+        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
+        clockSkewInSeconds: 60,
+        trustStoreConfig: {
+            trustStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            certificateAlias: getConfigValue(API_KEY_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_API_KEY_ALIAS)
+        },
+        jwtCache: jwtCache
+    };
+    APIKeyProvider apiKeyProvider = new (apiKeyValidatorConfig);
+    APIKeyHandler | APIKeyHandlerWrapper apiKeyHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        apiKeyHandler = new APIKeyHandlerWrapper(apiKeyProvider);
+    } else {
+        apiKeyHandler = new APIKeyHandler(apiKeyProvider);
+    }
 
     // Initializes the key validation handler
-    KeyValidationServerConfig keyValidationServerConfig = {
-        url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443"),
-        clientConfig:
-        {
-            cache: {enabled: false},
-            secureSocket: {
-                trustStore: {
-                    path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-                    "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
-                    password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
-                },
-                verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
-            }
-        }
+    http:ClientSecureSocket secureSocket = {
+        trustStore: {
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+        },
+        verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     };
-    OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationServerConfig);
+
+    http:OutboundAuthConfig? auth = ();
+    // support backward compatibility in reading the basic auth credentials when connecting with KM.
+    string username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "");
+    string password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "");
+    if (username.length() == 0 && password.length() == 0) {
+        username = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
+        password = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
+    }
+    if (getConfigBooleanValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, ENABLED, true)) {
+        auth:OutboundBasicAuthProvider basicAuthOutboundProvider = new ({
+            username: username,
+            password: password
+        });
+        http:BasicAuthHandler basicAuthOutboundHandler = new (basicAuthOutboundProvider);
+        auth = {authHandler: basicAuthOutboundHandler};
+    } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+        oauth2:OutboundOAuth2Provider | error oauth2Provider = getOauth2OutboundProvider();
+        if (oauth2Provider is oauth2:OutboundOAuth2Provider) {
+            http:BearerAuthHandler bearerAuthOutboundHandler = new (oauth2Provider);
+            auth = {authHandler: bearerAuthOutboundHandler};
+        } else {
+            printFullError(KEY_GW_LISTNER, oauth2Provider);
+        }
+    } else {
+        printWarn(KEY_GW_LISTNER, "Key validation service security confogurations not enabled.");
+    }
+    http:ClientConfiguration clientConfig = {
+        auth: auth,
+        cache: {enabled: false},
+        secureSocket: secureSocket
+    };
+    oauth2:IntrospectionServerConfig keyValidationConfig = {
+        url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
+        clientConfig: clientConfig
+    };
+    string introspectURL = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
+    string keymanagerContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, DEFAULT_KM_TOKEN_CONTEXT);
+    introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + keymanagerContext : introspectURL + PATH_SEPERATOR + keymanagerContext;
+    introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + INTROSPECT_CONTEXT : introspectURL + PATH_SEPERATOR + INTROSPECT_CONTEXT;
+    oauth2:IntrospectionServerConfig introspectionServerConfig = {
+        url: introspectURL,
+        clientConfig: clientConfig
+    };
+    OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationConfig);
+    oauth2:InboundOAuth2Provider introspectionProvider = new (introspectionServerConfig);
     KeyValidationHandler | KeyValidationHandlerWrapper keyValidationHandler;
     if (isMetricsEnabled || isTracingEnabled) {
-        keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider);
+        keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider, introspectionProvider);
     } else {
-        keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider);
+        keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider, introspectionProvider);
     }
 
 
@@ -159,14 +233,13 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     //Initializes the cookie based handler
     CookieAuthHandler cookieBasedHandler = new;
 
-    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, keyValidationHandler, basicAuthHandler];
+    return [mutualSSLHandler, cookieBasedHandler, jwtAuthHandler, apiKeyHandler, keyValidationHandler, basicAuthHandler];
 }
 
-
 public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {
-    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
-    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 100);
-    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
+    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
+    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
     cache:Cache positiveAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     cache:Cache negativeAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
     if (isTracingEnabled || isMetricsEnabled) {
@@ -181,9 +254,127 @@ public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFil
 function initiateKeyManagerConfigurations() {
     KeyManagerConf keyManagerConf = {};
     Credentials credentials = {};
-    keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
-    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "admin");
-    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "admin");
+    keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
+    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
+    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
+}
+
+public function getBasicAuthHandler() returns http:InboundAuthHandler[] {
+    // Initializes the basic auth handler
+    auth:BasicAuthConfig authConfig = {tableName: CONFIG_USER_SECTION};
+    BasicAuthProvider authProvider = new (authConfig);
+    http:BasicAuthHandler authHandler = new (authProvider);
+    return [authHandler];
+}
+
+function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider | error {
+    oauth2:OutboundOAuth2Provider oauth2Provider = new ();
+    http:ClientConfiguration clientConfig = {
+        secureSocket: {
+            trustStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+            },
+            verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        }
+    };
+    if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+            oauth2Provider = new ({
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_SECRET,
+                    DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, SCOPES),
+                credentialBearer: getCredentialBearer(),
+                refreshConfig: {
+                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL,
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, SCOPES),
+                    clientConfig: clientConfig
+                },
+                clientConfig: clientConfig
+            });
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED,
+                DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+            oauth2Provider = new ({
+                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                credentialBearer: getCredentialBearer(),
+                refreshConfig: {
+                    refreshUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_URL,
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    refreshToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, REFRESH_TOKEN,
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, CLIENT_SECRET,
+                        DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                    scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, SCOPES),
+                    credentialBearer: getCredentialBearer(),
+                    clientConfig: clientConfig
+                }
+            });
+        } else {
+            error err = error("Key manager OAuth2 security enabled, but no secirity configurations provided");
+            return err;
+        }
+    } else {
+        if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, ENABLED,
+            DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+            oauth2Provider = new ({
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_ID,
+                    DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, CLIENT_SECRET,
+                    DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID, SCOPES),
+                credentialBearer: getCredentialBearer(),
+                clientConfig: clientConfig
+            });
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, ENABLED,
+                DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+            oauth2Provider = new ({
+                tokenUrl: getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, TOKEN_URL, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                username: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, USERNAME, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                password: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, PASSWORD, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientId: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_ID, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                clientSecret: getConfigValue(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, CLIENT_SECRET, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                scopes: readScpoesAsArray(KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID, SCOPES),
+                credentialBearer: getCredentialBearer(),
+                clientConfig: clientConfig
+            });
+        } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+            oauth2Provider = new ({
+                accessToken: getConfigValue(KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID, ACCESS_TOKEN, DEFAULT_KM_CONF_SECURITY_OAUTH2),
+                credentialBearer: getCredentialBearer()
+            });
+        } else {
+            error err = error("Key manager OAuth2 security enabled, but no secirity configurations provided");
+            return err;
+        }
+    }
+    return oauth2Provider;
+}
+
+function readScpoesAsArray(string instanceId, string key) returns string[] {
+    string scopes = getConfigValue(instanceId, key, "");
+    string[] scopesArray = [];
+    if (scopes.length() > 0) {
+        scopesArray = split(scopes.trim(), ",");
+    }
+    return scopesArray;
+}
+
+function getCredentialBearer() returns http:CredentialBearer {
+    string crednetailBearerString = getConfigValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, CREDENTIAL_BEARER,
+        DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER);
+    if (stringutils:equalsIgnoreCase(crednetailBearerString, http:AUTH_HEADER_BEARER)) {
+        return http:AUTH_HEADER_BEARER;
+    } else if (stringutils:equalsIgnoreCase(crednetailBearerString, http:POST_BODY_BEARER)) {
+        return http:POST_BODY_BEARER;
+    }
+    return http:NO_BEARER;
 }

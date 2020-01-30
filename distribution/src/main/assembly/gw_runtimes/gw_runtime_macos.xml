@@ -32,6 +32,9 @@
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-macos-${project.version}/conf</outputDirectory>
+            <excludes>
+                <exclude>Ballerina.toml</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/lib/jar/</directory>
@@ -92,6 +95,11 @@
             <outputDirectory>wso2am-micro-gw-macos-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/target/update/update_darwin</source>
+            <outputDirectory>wso2am-micro-gw-macos-${project.version}/bin</outputDirectory>
+            <fileMode>744</fileMode>
         </file>
     </files>
     <dependencySets>

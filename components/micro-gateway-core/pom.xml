@@ -3,7 +3,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.1.0-m2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -134,7 +134,8 @@
                             <descriptors>
                                 <descriptor>${basedir}/assembly/jar.xml</descriptor>
                                 <descriptor>${basedir}/assembly/bir.xml</descriptor>
-                                <descriptor>${basedir}/assembly/jms_zip.xml</descriptor>
+                                <descriptor>${basedir}/assembly/balo.xml</descriptor>
+<!--                                <descriptor>${basedir}/assembly/jms_zip.xml</descriptor>-->
                             </descriptors>
                         </configuration>
                     </execution>
@@ -149,6 +150,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <replaceregexp file="src/main/ballerina/Ballerina.toml" match="org\.wso2\.micro\.gateway\.core-.*.jar" replace="org.wso2.micro.gateway.core-${project.version}.jar" byline="true" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
     </build>

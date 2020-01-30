@@ -25,7 +25,7 @@ public type AnalyticsRequestFilter object {
             return true;
         }
         //Filter only if analytics is enabled.
-        if (isAnalyticsEnabled) {
+        if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
             checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
@@ -34,19 +34,30 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if (isAnalyticsEnabled) {
+        printDebug(KEY_ANALYTICS_FILTER, "FilterResponse method invoked.");
+        if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
-                    ThrottleAnalyticsEventDTO | error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
+                    ThrottleAnalyticsEventDTO|error throttleAnalyticsEventDTO = trap populateThrottleAnalyticsDTO(context);
                     if (throttleAnalyticsEventDTO is ThrottleAnalyticsEventDTO) {
-                        EventDTO | error eventDTO = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
-                        if (eventDTO is EventDTO) {
-                            eventStream.publish(eventDTO);
-                        } else {
-                            printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
-                            printFullError(KEY_ANALYTICS_FILTER, eventDTO);
+                        if (isGrpcAnalyticsEnabled) {
+                            // throttle stream gRPC Analytics
+                            AnalyticsStreamMessage message = createThrottleMessage(throttleAnalyticsEventDTO);
+                            printDebug(KEY_ANALYTICS_FILTER, "gRPC throttle stream message created.");
+                            future<()> throttleDataPublishFuture = start dataToAnalytics(message);
+                            printDebug(KEY_ANALYTICS_FILTER, "gRPC throttle stream message published.");
+                        }
+                        if (isAnalyticsEnabled) {
+                            EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
+                            if (eventDTO is EventDTO) {
+                                eventStream.publish(eventDTO);
+                                printDebug(KEY_ANALYTICS_FILTER, "File upload throttle stream data published." + eventDTO.streamId);
+                            } else {
+                                printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event");
+                                printFullError(KEY_ANALYTICS_FILTER, eventDTO);
+                            }
                         }
                     } else {
                         printError(KEY_ANALYTICS_FILTER, "Error while populating throttle analytics event data");
@@ -66,11 +77,11 @@ public type AnalyticsRequestFilter object {
         }
         return true;
     }
-
 };
 
 
 function doFilterRequest(http:Request request, http:FilterContext context) {
+    printDebug(KEY_ANALYTICS_FILTER, "doFilterRequest Mehtod called");
     error? result = trap setRequestAttributesToContext(request, context);
     if (result is error) {
         printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path");
@@ -79,11 +90,22 @@ function doFilterRequest(http:Request request, http:FilterContext context) {
 }
 
 function doFilterFault(http:FilterContext context, string errorMessage) {
-    FaultDTO | error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
+    FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
     if (faultDTO is FaultDTO) {
-        EventDTO | error eventDTO = trap getEventFromFaultData(faultDTO);
+        printDebug(KEY_ANALYTICS_FILTER, "doFilterFault method called. Client type : " + faultDTO. metaClientType + " applicationName :" + faultDTO.applicationName);
+        if (isGrpcAnalyticsEnabled) {
+            //fault stream gRPC Analytics
+            printDebug(KEY_ANALYTICS_FILTER, "gRPC fault stream message publishing for API : " + faultDTO.apiName);
+            AnalyticsStreamMessage message = createFaultMessage(faultDTO);
+            future<()> faultDataPublishFuture = start dataToAnalytics(message);
+            return;
+        }
+        EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if (eventDTO is EventDTO) {
-            eventStream.publish(eventDTO);
+            if (isAnalyticsEnabled != false) {
+                printDebug(KEY_ANALYTICS_FILTER, "File Upload fault stream invoked for API : " + faultDTO.apiName);
+                eventStream.publish(eventDTO);
+            }
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event");
             printFullError(KEY_ANALYTICS_FILTER, eventDTO);
@@ -95,13 +117,24 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
 }
 
 function doFilterResponseData(http:Response response, http:FilterContext context) {
-    //Response data publishing
-    RequestResponseExecutionDTO | error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
-    context);
+    printDebug(KEY_ANALYTICS_FILTER, "doFilterResponseData method called");
+    //Response analytics data publishing
+    RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
+        context);
+    if (isGrpcAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO) {
+        //Response stream gRPC Analyrics
+        AnalyticsStreamMessage message = createResponseMessage(requestResponseExecutionDTO);
+        printDebug(KEY_ANALYTICS_FILTER,"gRPC response stream Data starting to publish");
+        future<()> responseDataPublishFuture = start dataToAnalytics(message);
+        return;
+    }
     if (requestResponseExecutionDTO is RequestResponseExecutionDTO) {
-        EventDTO | error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
-        if (event is EventDTO) {
-            eventStream.publish(event);
+        EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
+        if(event is EventDTO) {
+            if (isAnalyticsEnabled) {
+                printDebug(KEY_ANALYTICS_FILTER, "File Upload eventRequestStream called for API : " + requestResponseExecutionDTO.apiName);
+                eventStream.publish(event);
+            }
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event");
             printFullError(KEY_ANALYTICS_FILTER, event);
@@ -110,10 +143,12 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data");
         printFullError(KEY_ANALYTICS_FILTER, requestResponseExecutionDTO);
     }
+
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
     var resp = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
+    printDebug(KEY_ANALYTICS_FILTER, "doFilterAll method resp value : "+ resp.toString());
     if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
         doFilterResponseData(response, context);
@@ -121,4 +156,167 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }
+}
+
+function createResponseMessage(RequestResponseExecutionDTO requestResponseExecutionDTO) returns AnalyticsStreamMessage {
+    //creates response stream gRPC Analytics message
+    printDebug(KEY_ANALYTICS_FILTER, "createResponse stream method called.");
+    AnalyticsStreamMessage responseAnalyticsMessage = {
+        messageStreamName: "InComingRequestStream",
+        meta_clientType : <string>requestResponseExecutionDTO.metaClientType ,
+        applicationConsumerKey : <string>requestResponseExecutionDTO.applicationConsumerKey ,
+        applicationName : <string>requestResponseExecutionDTO.applicationName ,
+        applicationId : <string>requestResponseExecutionDTO.applicationId ,
+        applicationOwner : <string>requestResponseExecutionDTO.applicationOwner ,
+        apiContext : <string>requestResponseExecutionDTO.apiContext ,
+        apiName : <string> requestResponseExecutionDTO.apiName ,
+        apiVersion : <string>requestResponseExecutionDTO.apiVersion ,
+        apiResourcePath : <string>requestResponseExecutionDTO.apiResourcePath ,
+        apiResourceTemplate : <string>requestResponseExecutionDTO.apiResourceTemplate ,
+        apiMethod : <string>requestResponseExecutionDTO.apiMethod ,
+        apiCreator : <string>requestResponseExecutionDTO.apiCreator ,
+        apiCreatorTenantDomain : <string>requestResponseExecutionDTO.apiCreatorTenantDomain ,
+        apiTier : <string>requestResponseExecutionDTO.apiTier ,
+        apiHostname : <string>requestResponseExecutionDTO.apiHostname ,
+        username : <string>requestResponseExecutionDTO.userName ,
+        userTenantDomain : <string>requestResponseExecutionDTO.userTenantDomain ,
+        userIp : <string>requestResponseExecutionDTO.userIp ,
+        userAgent : <string>requestResponseExecutionDTO.userAgent ,
+        requestTimestamp : requestResponseExecutionDTO.requestTimestamp ,
+        throttledOut : requestResponseExecutionDTO.throttledOut ,
+        responseTime :requestResponseExecutionDTO.responseTime ,
+        serviceTime : requestResponseExecutionDTO.serviceTime ,
+        backendTime : requestResponseExecutionDTO.backendTime ,
+        responseCacheHit : requestResponseExecutionDTO.responseCacheHit ,
+        responseSize : requestResponseExecutionDTO.responseSize ,
+        protocol : requestResponseExecutionDTO.protocol ,
+        responseCode  : requestResponseExecutionDTO.responseCode ,
+        destination : requestResponseExecutionDTO.destination ,
+        securityLatency  : requestResponseExecutionDTO.executionTime.securityLatency ,
+        throttlingLatency  : requestResponseExecutionDTO.executionTime.throttlingLatency , 
+        requestMedLat : requestResponseExecutionDTO.executionTime.requestMediationLatency ,
+        responseMedLat : requestResponseExecutionDTO.executionTime.responseMediationLatency , 
+        backendLatency : requestResponseExecutionDTO.executionTime.backEndLatency , 
+        otherLatency : requestResponseExecutionDTO.executionTime.otherLatency , 
+        gatewayType : <string>requestResponseExecutionDTO.gatewayType , 
+        label  : <string>requestResponseExecutionDTO.label,
+
+        subscriber : "",
+        throttledOutReason : "",
+        throttledOutTimestamp : 0,
+        hostname : "",
+    
+        errorCode : "",
+        errorMessage : ""
+    };
+    return responseAnalyticsMessage;
+}
+
+function createThrottleMessage(ThrottleAnalyticsEventDTO throttleAnalyticsEventDTO) returns AnalyticsStreamMessage {
+    //creates throttle stream gRPC Analytics message
+    printDebug(KEY_ANALYTICS_FILTER, "createThrottleMessage method called");
+    AnalyticsStreamMessage throttleAnalyticsMessage = {
+        messageStreamName: "ThrottledOutStream",
+        meta_clientType : throttleAnalyticsEventDTO.metaClientType,
+        applicationConsumerKey : "",
+        applicationName : throttleAnalyticsEventDTO.applicationName,
+        applicationId : throttleAnalyticsEventDTO.applicationId,
+        applicationOwner : "",
+        apiContext : throttleAnalyticsEventDTO.apiContext,
+        apiName : throttleAnalyticsEventDTO.apiName,
+        apiVersion : throttleAnalyticsEventDTO.apiVersion,
+        apiResourcePath : "",
+        apiResourceTemplate : "",
+        apiMethod : "",
+        apiCreator : throttleAnalyticsEventDTO.apiCreator,
+        apiCreatorTenantDomain : throttleAnalyticsEventDTO.apiCreatorTenantDomain,
+        apiTier : "",
+        apiHostname : "",
+        username : throttleAnalyticsEventDTO.userName,
+        userTenantDomain : throttleAnalyticsEventDTO.userTenantDomain,
+        userIp : "",
+        userAgent : "",
+        requestTimestamp : 0,
+        throttledOut : false,
+        responseTime :0,
+        serviceTime : 0,
+        backendTime : 0,
+        responseCacheHit : false,
+        responseSize : 0,
+        protocol : "",
+        responseCode  : 0,
+        destination : "",
+        securityLatency  : 0,
+        throttlingLatency  : 0,
+        requestMedLat : 0 ,
+        responseMedLat : 0,
+        backendLatency : 0 ,
+        otherLatency : 0,
+        gatewayType : throttleAnalyticsEventDTO.gatewayType,
+        label  : "",
+
+        subscriber : throttleAnalyticsEventDTO.subscriber,
+        throttledOutReason : throttleAnalyticsEventDTO.throttledOutReason,
+        throttledOutTimestamp : throttleAnalyticsEventDTO.throttledTime,
+        hostname : throttleAnalyticsEventDTO.hostname,
+    
+        errorCode : "",
+        errorMessage : ""
+    };
+    return throttleAnalyticsMessage;
+}
+
+function createFaultMessage(FaultDTO faultDTO)returns AnalyticsStreamMessage {
+    //creates fault stream gRPC Analytics message
+    printDebug(KEY_ANALYTICS_FILTER, "createFaultMessage method called.");
+    int errorCodeValue = faultDTO.errorCode;
+    AnalyticsStreamMessage faultAnalyticsMessage = {
+        messageStreamName: "FaultStream",
+        meta_clientType : faultDTO. metaClientType,
+        applicationConsumerKey : faultDTO.consumerKey,
+        applicationName : faultDTO.applicationName,
+        applicationId : faultDTO.applicationId,
+        applicationOwner : "",
+        apiContext : faultDTO.apiContext,
+        apiName : faultDTO.apiName,
+        apiVersion : faultDTO.apiVersion,
+        apiResourcePath : faultDTO.resourcePath,
+        apiResourceTemplate : "",
+        apiMethod : faultDTO.method,
+        apiCreator : faultDTO.apiCreator,
+        apiCreatorTenantDomain : faultDTO.apiCreatorTenantDomain,
+        apiTier : "",
+        apiHostname : "",
+        username : faultDTO.userName,
+        userTenantDomain : faultDTO.userTenantDomain,
+        userIp : "",
+        userAgent : "",
+        requestTimestamp : faultDTO.faultTime,
+        throttledOut : false,
+        responseTime :0,
+        serviceTime : 0,
+        backendTime : 0,
+        responseCacheHit : false,
+        responseSize : 0,
+        protocol : faultDTO.protocol,
+        responseCode  : 0,
+        destination : "",
+        securityLatency  : 0,
+        throttlingLatency  : 0,
+        requestMedLat : 0 ,
+        responseMedLat : 0,
+        backendLatency : 0 ,
+        otherLatency : 0,
+        gatewayType : "",
+        label  : "",
+
+        subscriber : "",
+        throttledOutReason : "",
+        throttledOutTimestamp : 0,
+        hostname : faultDTO.hostName,
+    
+        errorCode : errorCodeValue.toString(),
+        errorMessage : faultDTO.errorMessage
+    };
+    return faultAnalyticsMessage;
 }

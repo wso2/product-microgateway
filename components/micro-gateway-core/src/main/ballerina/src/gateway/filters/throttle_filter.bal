@@ -303,52 +303,56 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
 
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
 returns (RequestStreamDTO) {
-    RequestStreamDTO requestStreamDto = {};
+    RequestStreamDTO requestStreamDTO = {};
+    requestStreamDTO.resetTimestamp = 0;
+    requestStreamDTO.remainingQuota = 0;
+    requestStreamDTO.isThrottled = false;
     string? apiVersion = getVersion(context);
-    requestStreamDto.messageID = <string>context.attributes[MESSAGE_ID];
-    requestStreamDto.apiKey = getContext(context);
-    requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
-    requestStreamDto.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
-    requestStreamDto.appTier = keyValidationDto.applicationTier;
-    requestStreamDto.apiTier = keyValidationDto.apiTier;
-    requestStreamDto.subscriptionTier = keyValidationDto.tier;
+    requestStreamDTO.messageID = <string>context.attributes[MESSAGE_ID];
+    requestStreamDTO.apiKey = getContext(context);
+    requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
+    requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
+    requestStreamDTO.appTier = keyValidationDto.applicationTier;
+    requestStreamDTO.apiTier = keyValidationDto.apiTier;
+    requestStreamDTO.subscriptionTier = keyValidationDto.tier;
     string resourcekey = context.getResourceName();
-    requestStreamDto.resourceKey = replaceAll(resourcekey, "_", "");
+    requestStreamDTO.resourceKey = replaceAll(resourcekey, "_", "");
     TierConfiguration? tier = resourceTierAnnotationMap[resourcekey];
     string? policy = (tier is TierConfiguration) ? tier.policy : ();
     if (policy is string) {
-        requestStreamDto.resourceTier = policy;
+        requestStreamDTO.resourceTier = policy;
     }
 
-    requestStreamDto.userId = keyValidationDto.username;
-    requestStreamDto.apiContext = getContext(context);
+    requestStreamDTO.userId = keyValidationDto.username;
+    requestStreamDTO.apiContext = getContext(context);
     if (apiVersion is string) {
-        requestStreamDto.apiVersion = apiVersion;
+        requestStreamDTO.apiVersion = apiVersion;
     }
-    requestStreamDto.appTenant = keyValidationDto.subscriberTenantDomain;
-    requestStreamDto.apiTenant = getTenantDomain(context);
-    requestStreamDto.apiName = getApiName(context);
-    requestStreamDto.appId = keyValidationDto.applicationId;
+    requestStreamDTO.appTenant = keyValidationDto.subscriberTenantDomain;
+    requestStreamDTO.apiTenant = getTenantDomain(context);
+    requestStreamDTO.apiName = getApiName(context);
+    requestStreamDTO.appId = keyValidationDto.applicationId;
 
     if (apiVersion is string) {
-        requestStreamDto.apiKey += ":" + apiVersion;
-        requestStreamDto.subscriptionKey += ":" + apiVersion;
-        requestStreamDto.resourceKey += ":" + apiVersion;
+        requestStreamDTO.apiKey += ":" + apiVersion;
+        requestStreamDTO.subscriptionKey += ":" + apiVersion;
+        requestStreamDTO.resourceKey += ":" + apiVersion;
     }
-    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDto.resourceKey);
-    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDto.subscriptionKey);
-    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDto.appKey);
-    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDto.apiKey);
-    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDto.resourceTier);
-    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDto.subscriptionTier);
-    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDto.appTier);
-    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDto.apiTier);
+    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDTO.subscriptionKey);
+    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDTO.appKey);
+    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDTO.apiKey);
+    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDTO.resourceTier);
+    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDTO.subscriptionTier);
+    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDTO.appTier);
+    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDTO.apiTier);
 
     json properties = {};
-    requestStreamDto.properties = properties.toString();
-    return requestStreamDto;
-}
+    requestStreamDTO.properties = properties.toString();
+    return requestStreamDTO;
 
+
+}
 function getVersion(http:FilterContext context) returns string | () {
     string? apiVersion = "";
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];

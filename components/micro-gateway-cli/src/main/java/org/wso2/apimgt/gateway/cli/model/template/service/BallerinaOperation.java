@@ -23,7 +23,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
+import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -64,7 +64,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String apiResponseInterceptor;
     private String requestInterceptorModule;
     private String responseInterceptorModule;
-    private BasicAuth basicAuth;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<APIKey> apiKeys;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -91,7 +96,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity());
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -379,10 +385,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
     }
 
-    public void setBasicAuth(BasicAuth basicAuth) {
-        //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
-        if (this.basicAuth == null) {
-            this.basicAuth = basicAuth;
+    public void setSecuritySchemas(String schemas) {
+        //update the Resource auth providers property only if there is no security scheme provided during instantiation
+        if (this.authProviders.size() < 1) {
+            authProviders = OpenAPICodegenUtils.getAuthProviders(schemas);
         }
     }
 }

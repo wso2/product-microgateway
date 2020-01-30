@@ -17,7 +17,6 @@
 public const string MICRO_GATEWAY_METRICS = "b7a.observability.metrics";
 public const string MICRO_GATEWAY_TRACING = "b7a.observability.tracing";
 public const string MICRO_GATEWAY_METRICS_PORTS = "b7a.observability.metrics.prometheus";
-public const string ENABLED = "enabled";
 public const string PORT = "port";
 public const string JMX_PORT = "jmx_port";
 public const string SECURE_PORT = "secure_port";
@@ -33,6 +32,9 @@ public const string JWT_CACHE = "Jwt_Cache";
 public const string KEY_VALIDATION_HANDLER_PROCESS = "KeyValidation_Handler_Process";
 public const string OAUTH_VALIDATION_PROVIDER_CACHE_CHECK = "OAuth_ValidationProvider_CacheCheck";
 public const string OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION = "OAuth_AuthProvider_InvokeKeyValidation";
+
+public const string API_KEY_AUTHEN_HANDLER_PROCESS = "API_Key_Authen_Handler_Process";
+public const string API_KEY_PROVIDER_AUTHENTICATE = "API_Key_Provider_Authenticate";
 
 public const string ANALYTICS_FILTER_REQUEST = "Analytics_Filter_Request";
 public const string ANALYTICS_FILTER_RESPONSE = "Analytics_Filter_Response";
