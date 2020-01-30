@@ -683,7 +683,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
              requestInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
                              true, openAPIFilePath, pathItem, operationName);
                  }
@@ -691,7 +691,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
              responseInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
                              false, openAPIFilePath, pathItem, operationName);
                  }
@@ -978,58 +978,36 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Includes the Pattern Matching logic for modules to be imported from the Ballerina Central.
-     *
-     * @param interceptorStatement request and response interceptor statements
-     * @return                     statement for the module to be imported along with the respective organization name
-     */
-    public static String modulePatternMatcher (String interceptorStatement) {
-        String matchedModule = null;
-        // Regular Expression which indicates the Ballerina Module
-        String moduleRegEx = "[a-z0-9_]+[/][a-zA-Z0-9._]+";
-        Pattern p = Pattern.compile(moduleRegEx);
-        Matcher m = p.matcher(interceptorStatement);
-        while (m.find()) {
-            matchedModule = m.group();
-        }
-        return matchedModule;
-    }
-
-    /**
-     * Includes the Pattern Matching logic for the versions of the modules to be imported from the Ballerina Central.
-     *
-     * @param interceptorStatement request and response interceptor statements
-     * @return                     the version of the interceptor module
-     */
-    public static String moduleVersionMatcher (String interceptorStatement) {
-        String matchedVersion = null;
-        String moduleVersionWithFunction = interceptorStatement.split("/")[2];
-        // Regular Expression which indicates the version of the Ballerina Module
-        String moduleVersionRegEx = "[0-9]+[.][0-9]+[.][0-9]+";
-        Pattern p = Pattern.compile(moduleVersionRegEx);
-        Matcher m = p.matcher(moduleVersionWithFunction);
-        while (m.find()) {
-            matchedVersion = m.group();
-        }
-        return matchedVersion;
-    }
-
-    /**
-     * Determines whether the interceptor module version is stated in the swagger definition
+     * Extracts the module name from the interceptor statement
      *
      * @param interceptorStatement the interceptor statement
-     * @return                     true if the module version is being stated
+     * @return                     the module name
      */
-    public static boolean moduleVersionSpecifier (String interceptorStatement) {
-        boolean isVersionSpecified = false;
-        // Regular Expression which indicates the module version has been specified in the swagger definition
-        String interceptorModuleWithVersionRegEx =
-                "central[:][a-z0-9_]+[/][a-zA-Z0-9._]+[/][0-9]+[.][0-9]+[.][0-9]+[:]";
-        Pattern p = Pattern.compile(interceptorModuleWithVersionRegEx);
-        Matcher m = p.matcher(interceptorStatement);
-        while (m.find()) {
-            isVersionSpecified = true;
+    public static String  buildModuleStatement (String interceptorStatement) {
+        String moduleName = null;
+        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
+        if (splitArray.length == 2) {
+          // set module name when the version is not specified in the swagger definition
+          moduleName = splitArray[1].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
         }
-        return isVersionSpecified;
+        if (splitArray.length == 3) {
+          moduleName = splitArray[1];
+        }
+        return moduleName;
+    }
+
+    /**
+     * Extracts the module version from the interceptor statement
+     *
+     * @param interceptorStatement the interceptor statement
+     * @return                     the module version
+     */
+    public static String buildModuleVersion (String interceptorStatement) {
+        String moduleVersion = null;
+        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
+        if (splitArray.length == 3) {
+            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
+        }
+        return moduleVersion;
     }
 }

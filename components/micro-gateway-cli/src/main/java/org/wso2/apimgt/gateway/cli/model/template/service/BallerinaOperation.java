@@ -114,16 +114,16 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             */
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            if (requestInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            if (requestInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
                 requestInterceptor.ifPresent(value -> {
-                    this.requestInterceptorModule = OpenAPICodegenUtils.modulePatternMatcher(value.toString());
+                    // set the organization name with the module name
+                    this.requestInterceptorModule = value.toString().
+                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
+                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
+                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
                     this.requestInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[2];
-                    boolean isVersionSpecified = OpenAPICodegenUtils.moduleVersionSpecifier(value.toString());
-                    if (isVersionSpecified) {
-                        this.requestInterceptorModuleVersion = OpenAPICodegenUtils.
-                                moduleVersionMatcher(value.toString());
-                    }
+                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                    this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
                 });
             } else {
                 requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
@@ -134,16 +134,16 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             */
             Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            if (responseInterceptor.toString().contains(OpenAPIConstants.BALLERINA_CENTRAL_KEYWORD)) {
+            if (responseInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
                 responseInterceptor.ifPresent(value -> {
-                    this.responseInterceptorModule = OpenAPICodegenUtils.modulePatternMatcher(value.toString());
+                    // set the organization name with the module name
+                    this.responseInterceptorModule = value.toString().
+                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
+                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
+                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
                     this.responseInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[2];
-                    boolean isVersionSpecified = OpenAPICodegenUtils.moduleVersionSpecifier(value.toString());
-                    if (isVersionSpecified) {
-                        this.responseInterceptorModuleVersion = OpenAPICodegenUtils.
-                                moduleVersionMatcher(value.toString());
-                    }
+                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                    this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
                 });
             } else {
                 responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
