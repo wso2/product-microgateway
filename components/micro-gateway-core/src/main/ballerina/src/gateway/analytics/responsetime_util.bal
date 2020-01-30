@@ -86,7 +86,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.userName = authContext.username;
         requestResponseExecutionDTO.applicationId = authContext.applicationId;
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
-        requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain; 
+        requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
