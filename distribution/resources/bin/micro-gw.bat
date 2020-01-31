@@ -92,7 +92,7 @@ goto setupArgs
 
 :usageInfo
 	ECHO Missing command operand
-	ECHO "Use: micro-gw [--verbose] (init | import | build)"
+	ECHO "Use: micro-gw (init | import | build | reset)"
 goto :end
 
 :commandBuild
@@ -123,6 +123,7 @@ goto :end
         :continueBuild
             call :passToJar
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
+			ECHO [DONE]
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%BALLERINA_HOME%\bin\;%PATH%
@@ -142,12 +143,11 @@ goto :end
                     MOVE /y %TARGET_DIR%\gen\target\bin\*.jar  %TARGET_DIR%\ 2> nul
                 )
 
-                ECHO
                 if EXIST "%TARGET_FILE%" (
-                    ECHO "BUILD SUCCESSFUL"
-                    ECHO "Target: %TARGET_FILE%"
+                    ECHO. & ECHO BUILD SUCCESSFUL
+                    ECHO Target: "%TARGET_FILE%"
                 ) else (
-                    ECHO "BUILD FAILED"
+                    ECHO. & ECHO BUILD FAILED
                 )
             POPD
 goto :end
