@@ -45,10 +45,15 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -602,25 +607,6 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * validate API level interceptors
-     *
-     * @param openAPI         {@link OpenAPI} object
-     * @param openAPIFilePath file path to openAPI definition
-     */
-    private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
-        if (openAPI.getExtensions() != null) {
-            Optional<Object> apiRequestInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            apiRequestInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), true, openAPIFilePath, null, null));
-            Optional<Object> apiResponseInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            apiResponseInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), false, openAPIFilePath, null, null));
-        }
-    }
-
-    /**
      * validate all resource extensions for single path
      *
      * @param openAPI         {@link OpenAPI} object
@@ -640,6 +626,36 @@ public class OpenAPICodegenUtils {
     }
 
     /**
+     * Writes the dependencies in Ballerina.toml file for the interceptors which are being referred from
+     * the Ballerina Central
+     *
+     * @param projectName       The project name
+     * @param definitionContext Currently built ballerina service context
+     */
+    public static void writeDependency (String projectName, BallerinaService definitionContext) {
+        if (definitionContext.getModuleVersionMap() != null) {
+            HashMap<String, String> moduleVersionMap = definitionContext.getModuleVersionMap();
+            String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
+                    + CliConstants.BALLERINA_TOML_FILE;
+            File file = new File(ballerinaTomlFile);
+            for (HashMap.Entry<String, String> entry : moduleVersionMap.entrySet()) {
+                try {
+                    List<String> content = Files.readAllLines(Paths.get(ballerinaTomlFile));
+                    Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
+                    String dependency = "\r\"" + entry.getKey() + "\" = \"" + entry.getValue() + "\"";
+                    if (!content.toString().contains(entry.getKey())) {
+                        PrintWriter printWriter = new PrintWriter(fileWriter);
+                        printWriter.print(dependency);
+                        printWriter.close();
+                    }
+                } catch (IOException e) {
+                    logger.error("Error occurred while writing module dependency to Ballerina.toml file.");
+                }
+            }
+        }
+    }
+
+    /**
      * Validate Resource level extensions for Single Resource
      *
      * @param operation       {@link Operation} object
@@ -653,29 +669,37 @@ public class OpenAPICodegenUtils {
             return;
         }
         //todo: validate policy
-        validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
+       validateInterceptors(operation.getExtensions(), pathItem, operationName, openAPIFilePath);
     }
 
     /**
-     * Validate Resource interceptors for Single Resource
+     * Validate API Level and Resource Level interceptors
      *
-     * @param operation       {@link Operation} object
+     * @param extensions      {@link Map} object to access api level and operation level extensions
      * @param pathItem        path name
      * @param operationName   operation name
      * @param openAPIFilePath file path to openAPI definition
      */
-    private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
-                                                           String openAPIFilePath) {
-        //validate request interceptor
-        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions()
-                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
-                openAPIFilePath, pathItem, operationName));
-        //validate response interceptor
-        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions()
-                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        responseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), false,
-                openAPIFilePath, pathItem, operationName));
+    private static void validateInterceptors(Map<String, Object> extensions, String pathItem, String operationName,
+                                        String openAPIFilePath) {
+        if (extensions != null) {
+             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
+                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+             requestInterceptor.ifPresent(value -> {
+                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                     validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
+                             true, openAPIFilePath, pathItem, operationName);
+                 }
+             });
+             Optional<Object> responseInterceptor = Optional.ofNullable(extensions
+                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+             responseInterceptor.ifPresent(value -> {
+                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                     validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
+                             false, openAPIFilePath, pathItem, operationName);
+                 }
+             });
+        }
     }
 
     /**
@@ -821,7 +845,8 @@ public class OpenAPICodegenUtils {
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasePath(openAPI, openAPIFilePath, openAPIVersion);
         validateEndpointAvailability(openAPI, openAPIFilePath, openAPIVersion);
-        validateAPIInterceptors(openAPI, openAPIFilePath);
+        // validates API level interceptors
+        validateInterceptors(openAPI.getExtensions(), null, null, openAPIFilePath);
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setSecuritySchemaList(openAPI);
@@ -947,6 +972,40 @@ public class OpenAPICodegenUtils {
             return operation.getServers().get(0).getUrl() != null;
         }
         return false;
+    }
+
+    /**
+     * Extracts the module name from the interceptor statement
+     *
+     * @param interceptorStatement the interceptor statement
+     * @return                     the module name
+     */
+    public static String  buildModuleStatement (String interceptorStatement) {
+        String moduleName = null;
+        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
+        if (splitArray.length == 2) {
+          // set module name when the version is not specified in the swagger definition
+          moduleName = splitArray[1].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
+        }
+        if (splitArray.length == 3) {
+          moduleName = splitArray[1];
+        }
+        return moduleName;
+    }
+
+    /**
+     * Extracts the module version from the interceptor statement
+     *
+     * @param interceptorStatement the interceptor statement
+     * @return                     the module version
+     */
+    public static String buildModuleVersion (String interceptorStatement) {
+        String moduleVersion = null;
+        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
+        if (splitArray.length == 3) {
+            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
+        }
+        return moduleVersion;
     }
 
     public static List<String> getAuthProviders(String schemas) {
