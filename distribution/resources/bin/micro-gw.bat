@@ -100,7 +100,7 @@ goto :end
 
 	REM Immediate next parameter should be project name after the `build` command
 	SHIFT
-	SET "project_name=%1"
+	SET project_name=%1
 	if [%project_name%] == [] ( goto :noName ) else ( goto :nameFound )
 
 	:noName
@@ -111,8 +111,8 @@ goto :end
 		if %verbose%==T ECHO Building micro gateway for project %project_name:\=%
 
 		REM Set micro gateway project directory relative to CD (current directory)
-		SET MICRO_GW_PROJECT_DIR="%CURRENT_D%\%project_name:\=%"
-		if EXIST %MICRO_GW_PROJECT_DIR% goto :continueBuild
+		SET MICRO_GW_PROJECT_DIR=%CURRENT_D%\%project_name:\=%
+		if EXIST "%MICRO_GW_PROJECT_DIR%" goto :continueBuild
 			REM Exit, if can not find a project with given project name
 			if %verbose%==T ECHO Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
@@ -131,8 +131,8 @@ goto :end
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
                 if %verbose%==T ECHO current dir %CD%
-                SET TARGET_DIR="%MICRO_GW_PROJECT_DIR%\target"
-                SET TARGET_FILE="%TARGET_DIR%\%project_name%.jar"
+                SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
+                SET TARGET_FILE=%TARGET_DIR%\%project_name%.jar
                 if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jar"
 
                 REM Build project using ballerina
@@ -140,7 +140,7 @@ goto :end
 
                 if ERRORLEVEL 0 (
                     REM move all executable ballerina build outputs to MGW_PROJECT/target directory
-                    MOVE /y %TARGET_DIR%\gen\target\bin\*.jar  %TARGET_DIR%\ 2> nul
+                    MOVE /y "%TARGET_DIR%\gen\target\bin\*.jar"  "%TARGET_DIR%\" >NUL 2>NUL
                 )
 
                 if EXIST "%TARGET_FILE%" (
@@ -173,9 +173,7 @@ goto end
 	if %verbose%==T echo Running passToJar
 	SET CLI_CLASSPATH=
 	if EXIST "%BALLERINA_HOME%"\bre\lib (
-		for %%i in ("%BALLERINA_HOME%"\bre\lib\*.jar) do (
-			SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\platform\bre\lib\%%~ni%%~xi
-		)
+		SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\platform\bre\lib\*
 	) else (
 		REM Ballerina platform is not extracted yet.
 		REM Therefore we need to set cli init jars to the classpath
