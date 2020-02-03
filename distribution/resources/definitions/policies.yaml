@@ -42,6 +42,6 @@ subscriptionPolicies:
      unitTime: 1
      timeUnit: min
   - Default:
-      count: 500000000000
+      count: 500
       unitTime: 1
       timeUnit: min
