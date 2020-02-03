@@ -33,12 +33,25 @@ REM Set global variables
 SET PRGDIR=%~dp0
 SET GW_HOME=%PRGDIR%..
 SET MGW_VERSION="3.1.0"
-SET JAVA_HOME=%GW_HOME%\lib\jdk8u202-b08-jre
 SET CONF_FILE=%GW_HOME%\conf\micro-gw.conf
 SET CONF_OUT_FILE=%GW_HOME%\.config
 SET IS_METRICS_ENABLED=F
 SET EXEC_FILE=
 SET BAL_ARGS=
+
+REM If java_home is set and version is 1.8 in the running environment,
+REM pick that as the java_home for MGW. If not set internal jre home
+IF EXIST %JAVA_HOME% (
+    SET JAVA_CMD="%JAVA_HOME%\bin\java.exe"
+    SET JAVA_VERSION=
+    FOR /F "tokens=* USEBACKQ" %%F IN (`%JAVA_CMD% -fullversion 2^>^&1`) DO (
+        SET JAVA_VERSION=%%F
+    )
+
+    REM External java_home was detected, now check if it is java8
+    ECHO "%JAVA_VERSION%"|find "1.8." >NUL
+    IF %ERRORLEVEL% NEQ 0 SET JAVA_HOME=%GW_HOME%\lib\jdk8u202-b08-jre
+) ELSE SET JAVA_HOME=%GW_HOME%\lib\jdk8u202-b08-jre
 
 REM -----------------------------------------------------------------------------
 REM --- END OF GLOBAL VARIABLES ---
@@ -125,6 +138,9 @@ REM Start the gateway using internal ballerina distribution as the runtime
 
         EXIT /B %ERRORLEVEL%
     ) ELSE (
+        REM Get short path for java_home in case java_home was picked from a
+        REM standard installation dir with space in the path ex: "program files"
+        FOR %%I IN ("%JAVA_HOME%") DO SET JAVA_HOME=%%~sI
         FOR /f "skip=3 tokens=2 delims=:" %%A IN ('powershell -command "get-host"') DO (
             SET /a n=!n!+1
             SET c=%%A
@@ -139,7 +155,7 @@ REM Start the gateway using internal ballerina distribution as the runtime
             EXIT /B %ERRORLEVEL%
         ) ELSE (
             REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-            CALL POWERSHELL "%JAVA_HOME%\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%'  --b7a.http.accesslog.path='%ACCESS_LOG_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%'  --b7a.http.accesslog.path='%ACCESS_LOG_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
             EXIT /B %ERRORLEVEL%
         )
     )
@@ -180,11 +196,11 @@ REM arg0: command and other arguments to pass to tool library
 REM Check JAVA availability
 :checkJava
     IF "%JAVA_HOME%"=="" (
-        ECHO ERROR: Invalid built-in JAVA_HOME.
+        ECHO ERROR: JAVA_HOME is invalid.
         EXIT /B 1
     )
     IF NOT EXIST "%JAVA_HOME%\bin\java.exe" (
-        ECHO ERROR: Invalid built-in JAVA_HOME.
+        ECHO ERROR: JAVA_HOME is invalid.
         EXIT /B 1
     )
     EXIT /B 0
