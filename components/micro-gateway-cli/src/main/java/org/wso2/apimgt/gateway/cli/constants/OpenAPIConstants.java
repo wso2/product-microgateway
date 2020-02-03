@@ -1,5 +1,10 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Constants for wso2 OpenAPI extensions.
  */
@@ -15,4 +20,25 @@ public class OpenAPIConstants {
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
+
+    /**
+     * API security types supported by mgw
+     */
+    public enum APISecurity {
+        basic,
+        oauth2,
+        jwt,
+        apikey
+    }
+    public static final String SWAGGER_X_WSO2_API_SECURITY = "x-wso2-api-security";
+    public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
+    //map x-wso2-api-security security types to mgw security types
+    public static final Map<String, String> APPLICATION_LEVEL_SECURITY;
+    static {
+        Map<String, String> map = new HashMap<>();
+        map.put("basic_auth", APISecurity.basic.name());
+        map.put("api_key", APISecurity.apikey.name());
+        map.put("oauth2", APISecurity.oauth2.name());
+        APPLICATION_LEVEL_SECURITY = Collections.unmodifiableMap(map);
+    }
 }

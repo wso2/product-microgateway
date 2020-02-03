@@ -27,6 +27,11 @@ public class APIKey {
     private In in;
     private String name;
 
+    public APIKey(In in, String name) {
+        this.in = in;
+        this.name = name;
+    }
+
     public In getIn() {
         return in;
     }

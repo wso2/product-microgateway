@@ -95,8 +95,10 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.setBasepath(api.getSpecificBasepath());
-        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity());
-        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity());
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(),
+                api.getAPISecurityByExtension());
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
+                this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         setPaths(definition);
 
         return buildContext(definition);
@@ -163,7 +165,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
                 operation.getValue().setOperationId(operationId);
                 //to set auth providers property corresponding to the security schema in API-level
-                operation.getValue().setSecuritySchemas(this.api.getMgwApiSecurity());
+                operation.getValue().setSecuritySchemas(this.api.getMgwApiSecurity(),
+                        this.api.getAPISecurityByExtension());
                 //if it is the developer first approach
                 if (isDevFirst) {
                     //to add API level request interceptor
