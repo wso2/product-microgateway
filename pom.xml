@@ -167,11 +167,6 @@
                 <version>${ballerina.platform.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ballerinalang</groupId>
-                <artifactId>ballerina-lang</artifactId>
-                <version>${ballerina.platform.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-tcnative-boringssl-static</artifactId>
                 <version>${netty-tcnative-boringssl-static.version}</version>
@@ -532,7 +527,7 @@
         <awaitility.version>3.0.0</awaitility.version>
         <project.scm.id>scm-server</project.scm.id>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>
-        <andes.version>3.2.99</andes.version>
+        <andes.version>3.3.9</andes.version>
         <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
@@ -554,7 +549,6 @@
         <jms-module.version>0.6.3</jms-module.version>
         <jmx.api.version>2.0.1</jmx.api.version>
         <orbit.version.geronimo-jms_1.1_spec>1.1.1.wso2v1</orbit.version.geronimo-jms_1.1_spec>
-        <andes-client.version>3.3.9</andes-client.version>
         <org.wso2.securevault.version>1.1.1</org.wso2.securevault.version>
     </properties>
 

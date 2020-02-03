@@ -104,6 +104,7 @@
     </files>
     <dependencySets>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
             <scope>runtime</scope>
             <includes>
