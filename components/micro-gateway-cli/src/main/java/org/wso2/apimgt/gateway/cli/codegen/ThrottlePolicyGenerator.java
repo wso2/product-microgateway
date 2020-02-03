@@ -97,7 +97,7 @@ public class ThrottlePolicyGenerator {
         if (applicationPolicies != null) {
             List<GenSrcFile> genAppFiles = generateGenericPolicies(applicationPolicies,
                     GeneratorConstants.PolicyType.APPLICATION);
-            genFiles.addAll(genAppFiles);
+            //genFiles.addAll(genAppFiles);
         } else {
             //declare empty object to avoid null pointer issue
             applicationPolicies = new ArrayList<>();
@@ -106,7 +106,7 @@ public class ThrottlePolicyGenerator {
         if (subscriptionPolicies != null) {
             List<GenSrcFile> genSubsFiles = generateGenericPolicies(subscriptionPolicies,
                     GeneratorConstants.PolicyType.SUBSCRIPTION);
-            genFiles.addAll(genSubsFiles);
+            //genFiles.addAll(genSubsFiles);
         } else {
             //declare empty object to avoid null pointer issue
             subscriptionPolicies = new ArrayList<>();
@@ -115,7 +115,7 @@ public class ThrottlePolicyGenerator {
         if (resourcePolicies != null) {
             List<GenSrcFile> genSubsFiles = generateGenericPolicies(resourcePolicies,
                     GeneratorConstants.PolicyType.RESOURCE);
-            genFiles.addAll(genSubsFiles);
+            //genFiles.addAll(genSubsFiles);
         } else {
             //declare empty object to avoid null pointer issue
             resourcePolicies = new ArrayList<>();

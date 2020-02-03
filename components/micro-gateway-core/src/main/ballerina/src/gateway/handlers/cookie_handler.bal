@@ -32,7 +32,8 @@ public type CookieAuthHandler object {
 
             //extract cookies from the incoming request
             string authHead = req.getHeader(COOKIE_HEADER);
-            string[] cookies = split(authHead.trim(), ";");
+            string[] cookies =
+            split(authHead.trim(), ";");
             foreach var cookie in cookies {
                 string converted = replaceFirst(cookie, "=", "::");
                 string[] splitedStrings = split(converted.trim(), "::");

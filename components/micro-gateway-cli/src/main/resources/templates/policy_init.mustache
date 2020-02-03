@@ -16,12 +16,15 @@ function initThrottlePolicies() {
              }
          }
      }
-{{#policyInitNames}}
-    future<()> {{.}}Ftr = start {{.}}();
-{{/policyInitNames}}
-    log:printDebug("Throttle policies initialized.");
 }
 
-function getDeployedPolicies() returns map<boolean> {
-    return { {{#policyNames}}"{{.}}":true{{#unless @last}},{{/unless}}{{/policyNames}} };
+function getDeployedPolicies() returns map<json> {
+    return {
+    {{#policyList}}"{{name}}": {
+        count : "{{count}}",
+        unitTime : "{{unitTime}}",
+        timeUnit : "{{timeUnit}}",
+        stopOnQuota : {{stopOnQuotaReach}}
+    } {{#unless @last}},{{/unless}}{{/policyList}}
+    };
 }

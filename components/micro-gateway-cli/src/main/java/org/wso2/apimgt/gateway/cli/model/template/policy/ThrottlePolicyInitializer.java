@@ -32,10 +32,12 @@ import java.util.List;
 public class ThrottlePolicyInitializer {
     private List<String> policyInitNames;
     private List<String> policyNames;
+    private List<ThrottlePolicyMapper> policyList;
 
     public ThrottlePolicyInitializer() {
         policyInitNames = new ArrayList<>();
         policyNames = new ArrayList<>();
+        policyList = new ArrayList<>();
     }
 
     public List<String> getPolicyInitNames() {
@@ -85,6 +87,8 @@ public class ThrottlePolicyInitializer {
                     break;
             }
             policyNames.add(escapedPolicyName);
+            policyList.add(policyDTO);
+
         }
         return this;
     }

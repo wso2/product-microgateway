@@ -16,11 +16,12 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/time;
 
 public type ThrottleFilter object {
-    public map<boolean> deployedPolicies = {};
+    public map<json> deployedPolicies = {};
 
-    public function __init(map<boolean> deployedPolicies) {
+    public function __init(map<json> deployedPolicies) {
         self.deployedPolicies = deployedPolicies;
     }
 
@@ -42,7 +43,7 @@ public type ThrottleFilter object {
 };
 
 // TODO: need to refactor this function.
-function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context, map<boolean>
+function doThrottleFilterRequest(http:Caller caller, http:Request request, http:FilterContext context, map<json>
 deployedPolicies) returns boolean {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     printDebug(KEY_THROTTLE_FILTER, "Processing the request in ThrottleFilter");
@@ -83,12 +84,14 @@ deployedPolicies) returns boolean {
             }
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking resource level throttling-out.");
-        if (isResourceLevelThrottled(context, keyValidationResult, resourceLevelPolicyName)) {
+        if (isResourceLevelThrottled(context, keyValidationResult, resourceLevelPolicyName, deployedPolicies)) {
             printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
             context.attributes[IS_THROTTLE_OUT] = true;
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
+            publishEvent(throttleEvent);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -105,7 +108,7 @@ deployedPolicies) returns boolean {
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
-        [isThrottled, stopOnQuota] = isSubscriptionLevelThrottled(context, keyValidationResult);
+        [isThrottled, stopOnQuota] = isSubscriptionLevelThrottled(context, keyValidationResult, deployedPolicies);
         printDebug(KEY_THROTTLE_FILTER, "Subscription level throttling result:: isThrottled:"
         + isThrottled.toString() + ", stopOnQuota:" + stopOnQuota.toString());
         if (isThrottled) {
@@ -115,6 +118,8 @@ deployedPolicies) returns boolean {
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                 THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+                RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
+                publishEvent(throttleEvent);
                 sendErrorResponse(caller, request, context);
                 return false;
             } else {
@@ -136,12 +141,14 @@ deployedPolicies) returns boolean {
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
-        if (isApplicationLevelThrottled(keyValidationResult)) {
+        if (isApplicationLevelThrottled(keyValidationResult, deployedPolicies)) {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttled out. Sending throttled out response.");
             context.attributes[IS_THROTTLE_OUT] = true;
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
+            publishEvent(throttleEvent);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -201,13 +208,13 @@ deployedPolicies) returns boolean {
     }
 
     //Publish throttle event to another worker flow to publish to internal policies or traffic manager
-    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult);
-    future<()> publishedEvent = start asyncPublishEvent(throttleEvent);
+    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
+    publishEvent(throttleEvent);
     printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
     return true;
 }
 
-function asyncPublishEvent(RequestStreamDTO throttleEvent) {
+function publishEvent(RequestStreamDTO throttleEvent) {
     printDebug(KEY_THROTTLE_FILTER, "Checking application sending throttle event to another worker.");
     publishNonThrottleEvent(throttleEvent);
 }
@@ -221,7 +228,8 @@ errorMessage, string errorDescription) {
     context.attributes[ERROR_DESCRIPTION] = errorDescription;
 }
 
-function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns [
+function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto, map<json>
+                                                                                                          deployedPolicies) returns [
  boolean, boolean] {
     if (keyValidationDto.tier == UNLIMITED_TIER) {
         return [false, false];
@@ -233,10 +241,17 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
         subscriptionLevelThrottleKey += ":" + apiVersion;
     }
     printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle key : " + subscriptionLevelThrottleKey);
+    if (!enabledGlobalTMEventPublishing) {
+        boolean stopOnQuota = <boolean>deployedPolicies.get(keyValidationDto.tier).stopOnQuota;
+        subscriptionLevelThrottleKey = keyValidationDto.tier + ":" + subscriptionLevelThrottleKey;
+        boolean isThrottled = isSubLevelThrottled(subscriptionLevelThrottleKey);
+        return [isThrottled, stopOnQuota];
+    }
     return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
-function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
+function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map<json>
+                                                                             deployedPolicies) returns (boolean) {
     if (keyValidationDto.applicationTier == UNLIMITED_TIER) {
         return false;
     }
@@ -244,12 +259,17 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
     printDebug(KEY_THROTTLE_FILTER, "Application level throttle key : " + applicationLevelThrottleKey);
     boolean throttled;
     boolean stopOnQuota;
+    if (!enabledGlobalTMEventPublishing) {
+        applicationLevelThrottleKey = keyValidationDto.applicationTier + ":" + applicationLevelThrottleKey;
+        return isAppLevelThrottled(applicationLevelThrottleKey);
+    }
     [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey);
     return throttled;
 }
 
 
-function isResourceLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto, string? policy) returns (boolean) {
+function isResourceLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto, string? policy, map<json>
+                                                                                                                      deployedPolicies) returns (boolean) {
     if (policy is string) {
         if (policy == UNLIMITED_TIER) {
             return false;
@@ -267,6 +287,10 @@ function isResourceLevelThrottled(http:FilterContext context, AuthenticationCont
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
         boolean throttled;
         boolean stopOnQuota;
+        if (!enabledGlobalTMEventPublishing) {
+            resourceLevelThrottleKey = policy + ":" + resourceLevelThrottleKey;
+            return isResourceThrottled(resourceLevelThrottleKey);
+        }
         [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey);
         return throttled;
     }
@@ -301,7 +325,7 @@ function isRequestBlocked(http:Caller caller, http:Request request, http:FilterC
     }
 }
 
-function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
+function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto, map<json> deployedPolicies)
 returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDTO = {};
     requestStreamDTO.resetTimestamp = 0;
@@ -313,6 +337,15 @@ returns (RequestStreamDTO) {
     requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
     requestStreamDTO.appTier = keyValidationDto.applicationTier;
+    map<json> appPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.applicationTier);
+    requestStreamDTO.appTierCount = appPolicyDetails.count.toString();
+    requestStreamDTO.appTierUnitTime = appPolicyDetails.unitTime.toString();
+    requestStreamDTO.appTierTimeUnit = appPolicyDetails.timeUnit.toString();
+    map<json> subPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.tier);
+    requestStreamDTO.subscriptionTierCount = subPolicyDetails.count.toString();
+    requestStreamDTO.subscriptionTierUnitTime = subPolicyDetails.unitTime.toString();
+    requestStreamDTO.subscriptionTierTimeUnit = subPolicyDetails.timeUnit.toString();
+    requestStreamDTO.stopOnQuota = <boolean>subPolicyDetails.stopOnQuota;
     requestStreamDTO.apiTier = keyValidationDto.apiTier;
     requestStreamDTO.subscriptionTier = keyValidationDto.tier;
     string resourcekey = context.getResourceName();
@@ -321,6 +354,10 @@ returns (RequestStreamDTO) {
     string? policy = (tier is TierConfiguration) ? tier.policy : ();
     if (policy is string) {
         requestStreamDTO.resourceTier = policy;
+        map<json> resourcePolicyDetails = getPolicyDetails(deployedPolicies, policy);
+        requestStreamDTO.resourceTierCount = resourcePolicyDetails.count.toString();
+        requestStreamDTO.resourceTierUnitTime = resourcePolicyDetails.unitTime.toString();
+        requestStreamDTO.resourceTierTimeUnit = resourcePolicyDetails.timeUnit.toString();
     }
 
     requestStreamDTO.userId = keyValidationDto.username;
@@ -338,6 +375,8 @@ returns (RequestStreamDTO) {
         requestStreamDTO.subscriptionKey += ":" + apiVersion;
         requestStreamDTO.resourceKey += ":" + apiVersion;
     }
+    time:Time time = time:currentTime();
+    requestStreamDTO.timestamp = time.time.toString();
     printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey);
     printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDTO.subscriptionKey);
     printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDTO.appKey);

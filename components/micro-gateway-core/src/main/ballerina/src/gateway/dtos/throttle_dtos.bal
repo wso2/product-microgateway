@@ -69,6 +69,16 @@ public type RequestStreamDTO record {
     string appId = "";
     string apiName = "";
     string properties = "";
+    string resourceTierCount = "";
+    string resourceTierUnitTime = "";
+    string resourceTierTimeUnit = "";
+    string appTierCount = "";
+    string appTierUnitTime = "";
+    string appTierTimeUnit = "";
+    string subscriptionTierCount = "";
+    string subscriptionTierUnitTime = "";
+    string subscriptionTierTimeUnit = "";
+    string timestamp = "";
 };
 
 public type GlobalThrottleStreamDTO record {

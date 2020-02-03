@@ -275,6 +275,13 @@ public const string RESPONSE_VALIDATION_ENABLED = "enableResponseValidation";
 public const string SWAGGER_ABSOLUTE_PATH = "absolutePathToSwagger";
 
 public const string THROTTLE_CONF_INSTANCE_ID = "throttlingConfig";
+public const string LOCAL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.nodeLocal";
+public const string PROCESS_POOL_MAX_IDLE = "processPoolMaxIdle";
+public const string PROCESS_POOL_INIT_IDLE_CAPACITY = "processPoolInitIdleCapacity";
+public const string PROCESS_THREAD_POOL_CORE_SIZE = "processThreadPoolCoreSize";
+public const string PROCESS_THREAD_POOL_MAXIMUM_SIZE = "processThreadPoolMaximumSize";
+public const string PROCESS_THREAD_POOL_KEEP_ALIVE_TIME = "processThreadPoolKeepAliveTime";
+public const string THROTTLE_CLEANUP_FREQUENCY = "cleanUpFrequency";
 public const string GLOBAL_TM_EVENT_PUBLISH_ENABLED = "enabledGlobalTMEventPublishing";
 public const string JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "jmsConnectioninitialContextFactory";
 public const string JMS_CONNECTION_PROVIDER_URL = "jmsConnectionProviderUrl";

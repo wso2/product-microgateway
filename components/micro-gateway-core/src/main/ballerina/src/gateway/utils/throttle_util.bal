@@ -16,6 +16,7 @@
 
 import ballerina/time;
 import wso2/jms;
+import ballerina/stringutils;
 
 map<string> blockConditions = {};
 map<any> throttleDataMap = {};
@@ -83,12 +84,12 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
 public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     //Publish throttle event to traffic manager
     if (enabledGlobalTMEventPublishing == true) {
-        publishThrottleEventToTrafficManager(throttleEvent);
+        future<()> publishedEvent = start publishThrottleEventToTrafficManager(throttleEvent);
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the traffic manager.");
     }
     //Publish throttle event to internal policies
     else {
-        requestStream.publish(throttleEvent);
+        publishNonThrottledEvent(throttleEvent);
         printDebug(KEY_THROTTLE_UTIL, "Request stream : " + requestStream.toString());
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
     }
@@ -146,11 +147,22 @@ public function removeThrottleData(string key) {
 }
 
 //check whether the throttle policy is available if in built throttling is used
-public function isPolicyExist(map<boolean> deployedPolicies, string policyName) returns boolean {
+public function isPolicyExist(map<json> deployedPolicies, string policyName) returns boolean {
     if (!enabledGlobalTMEventPublishing) {
         return deployedPolicies.hasKey(policyName);
     }
     return true;
+}
+
+public function getPolicyDetails(map<json> deployedPolicies, string policyName) returns (map<json>) {
+    if (stringutils:equalsIgnoreCase(policyName, UNLIMITED_TIER) || policyName.length() == 0) {
+        return { count : "-1", unitTime :"-1", timeUnit : "min", stopOnQuota : true };
+    }
+    return <map<json>>deployedPolicies.get(policyName);
+}
+
+public function calculateUnitTimeInMillis(int unitTime, string timeUnit) {
+
 }
 
 public function getRequestStream() returns stream<RequestStreamDTO> {

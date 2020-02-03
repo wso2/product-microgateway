@@ -91,7 +91,7 @@ listener http:Listener tokenListenerEndpoint = new (
 );
 
 public function getFilters() returns http:RequestFilter[] {
-    map<boolean> deployedPolicies = getDeployedPolicies();
+    map<json> deployedPolicies = getDeployedPolicies();
     map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
 
     // Authentication filter
