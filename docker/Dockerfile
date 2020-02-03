@@ -37,10 +37,11 @@ ARG INTERNAL_JRE=jdk8u202-b08-jre
 
 # build argument for MOTD
 ARG MOTD='printf "\n\
- Welcome to WSO2 Docker resources.\n\
-     The Docker container contains the WSO2 product with its latest updates, which are under the End User License Agreement (EULA) 2.0.\n\
-     \n\
-     Read more about EULA 2.0 (https://wso2.com/licenses/wso2-update/2.0).\n"'
+ Welcome to WSO2 Docker Resources \n\
+ --------------------------------- \n\
+ This Docker container comprises of a WSO2 product, running with its latest GA release \n\
+ which is under the Apache License, Version 2.0. \n\
+ Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"'
 ENV ENV=${USER_HOME}"/.ashrc"
 
 # create the non-root user and group and set MOTD login message
@@ -56,12 +57,10 @@ RUN \
         netcat-openbsd \
     && rm -rf /var/cache/apk/*
 
-COPY gc.log /home/ballerina/gc.log
-COPY heap-dump.hprof /home/ballerina/heap-dump.hprof
+COPY  runtime/ /root/
 # Create folders, unzip distribution
 RUN \
-    wget -O /root/${MGW_SERVER}.zip "${MGW_SERVER_DIST_URL}" \
-    && unzip /root/${MGW_SERVER}.zip -d /home/ballerina/ >/dev/null 2>&1 \
+    unzip /root/${MGW_SERVER}.zip -d /home/ballerina/ >/dev/null 2>&1 \
     && rm -rf /home/ballerina/${MGW_SERVER}/lib/${INTERNAL_JRE} \
     && mkdir -p /home/ballerina/conf \
     && mv /home/ballerina/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
@@ -79,7 +78,11 @@ USER ballerina
 
 ENV JAVA_OPTS="${JAVA_OPTS}"
 
+RUN \
+    touch ${USER_HOME}/gc.log \
+    && touch ${USER_HOME}/heapdump.hprof
+
 # expose ports
 EXPOSE 9090 9095 9096
 
-CMD gateway /home/exec/${project}.jar
+CMD gateway /home/exec/${project}.jar --b7a.config.file=${USER_HOME}/conf/micro-gw.conf

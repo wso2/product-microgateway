@@ -220,8 +220,7 @@ public class BuildCmd implements LauncherCmd {
                 copyFile.setIsBallerinaConf("true");
                 copyFile.setSource(CmdUtils.getResourceFolderLocation() + File.separator + CliConstants.GW_DIST_CONF
                         + File.separator + CliConstants.MICRO_GW_CONF_FILE);
-                copyFile.setTarget(File.separator + CliConstants.WSO2 + File.separator + CliConstants.MGW
-                        + File.separator + CliConstants.GW_DIST_CONF + File.separator
+                copyFile.setTarget(CliConstants.GW_DIST_CONF + File.separator
                         + CliConstants.MICRO_GW_CONF_FILE);
                 dockerCopyFiles.setFiles(new ArrayList<>(Collections.singletonList(copyFile)));
             }
