@@ -526,7 +526,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
         // if resource is not secured, no need to check further
         if (!resourceSecured) {
-            log:printWarn("Resource is not secured. `enabled: false`.");
+            printDebug(KEY_UTILS, "Resource is not secured. `enabled: false`.");
             return false;
         }
     }
