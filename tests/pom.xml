@@ -178,12 +178,12 @@
                         <id>extract-packs</id>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x" />
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
