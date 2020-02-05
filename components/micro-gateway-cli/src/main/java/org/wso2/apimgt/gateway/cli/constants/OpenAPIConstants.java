@@ -20,6 +20,7 @@ public class OpenAPIConstants {
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
+    public static final String API_SECURITY = "x-wso2-api-security";
 
     /**
      * API security types supported by mgw
@@ -30,7 +31,6 @@ public class OpenAPIConstants {
         jwt,
         apikey
     }
-    public static final String SWAGGER_X_WSO2_API_SECURITY = "x-wso2-api-security";
     public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     //map x-wso2-api-security security types to mgw security types
     public static final Map<String, String> APPLICATION_LEVEL_SECURITY;

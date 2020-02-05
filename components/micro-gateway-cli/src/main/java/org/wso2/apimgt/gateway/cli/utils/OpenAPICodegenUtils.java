@@ -681,9 +681,9 @@ public class OpenAPICodegenUtils {
     private static void setMgwAPISecurityAndScopes(ExtendedAPI api, OpenAPI openAPI) {
         String[] securitySchemasAndScopes = generateMgwSecuritySchemasAndScopes(openAPI.getSecurity());
         if (isOverrideSecuritybyExtension(openAPI)) {
-            logger.debug(OpenAPIConstants.SWAGGER_X_WSO2_API_SECURITY + " extension found in the API Definition");
+            logger.debug(OpenAPIConstants.API_SECURITY + " extension found in the API Definition");
             api.setAPISecurityByExtension(
-                    (List<String>) openAPI.getExtensions().get(OpenAPIConstants.SWAGGER_X_WSO2_API_SECURITY));
+                    (List<String>) openAPI.getExtensions().get(OpenAPIConstants.API_SECURITY));
         }
         String securitySchemas = securitySchemasAndScopes[0];
         String scopes = securitySchemasAndScopes[1];
@@ -697,7 +697,7 @@ public class OpenAPICodegenUtils {
 
     private static boolean isOverrideSecuritybyExtension(OpenAPI openAPI) {
         return openAPI.getExtensions() != null && !openAPI.getExtensions().isEmpty() &&
-                openAPI.getExtensions().containsKey(OpenAPIConstants.SWAGGER_X_WSO2_API_SECURITY);
+                openAPI.getExtensions().containsKey(OpenAPIConstants.API_SECURITY);
     }
     /**
      * generate String array with security schema and scopes when the {@link SecurityRequirement} list mentioned
