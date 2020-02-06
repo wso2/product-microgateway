@@ -457,8 +457,9 @@ public class OpenAPICodegenUtils {
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }
-            findRequestInterceptors(balSrcCode, path.toString());
-            findResponseInterceptors(balSrcCode, path.toString());
+
+            findInterceptors(balSrcCode, path.toString(), true, requestInterceptorMap);
+            findInterceptors(balSrcCode, path.toString(), false, responseInterceptorMap);
         });
     }
 
@@ -548,26 +549,6 @@ public class OpenAPICodegenUtils {
             }
         }
         return url;
-    }
-
-    /**
-     * Find and store the request interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findRequestInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, true, requestInterceptorMap);
-    }
-
-    /**
-     * Find and store the response interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findResponseInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, false, responseInterceptorMap);
     }
 
     /**
