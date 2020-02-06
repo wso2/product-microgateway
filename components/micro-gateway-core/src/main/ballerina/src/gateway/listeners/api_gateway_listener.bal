@@ -200,6 +200,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
     introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + INTROSPECT_CONTEXT : introspectURL + PATH_SEPERATOR + INTROSPECT_CONTEXT;
     oauth2:IntrospectionServerConfig introspectionServerConfig = {
         url: introspectURL,
+        oauth2Cache: introspectCache,
         clientConfig: clientConfig
     };
     OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationConfig);

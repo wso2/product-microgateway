@@ -25,10 +25,6 @@
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-http</artifactId>
             <version>${ballerina.platform.version}</version>
             <type>zip</type>
@@ -159,9 +155,9 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <replaceregexp file="src/main/ballerina/Ballerina.toml" match="org\.wso2\.micro\.gateway\.core-.*.jar" replace="org.wso2.micro.gateway.core-${project.version}.jar" byline="true" />
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
