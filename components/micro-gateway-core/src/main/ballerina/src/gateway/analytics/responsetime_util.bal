@@ -81,6 +81,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
+        requestResponseExecutionDTO.apiCreator = authContext.apiPublisher;
         requestResponseExecutionDTO.metaClientType = authContext.keyType;
         requestResponseExecutionDTO.applicationConsumerKey = authContext.consumerKey;
         requestResponseExecutionDTO.userName = authContext.username;
@@ -95,17 +96,11 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
         requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
-
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
-        printInfo(KEY_ANALYTICS_FILTER, apiConfigAnnotationMap.toString());
     if (apiConfiguration is APIConfiguration) {
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            //sets API creator
-            printDebug(KEY_ANALYTICS_FILTER, "API publisher : " + apiConfiguration.publisher);
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher) && stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) {
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
-            printDebug(KEY_ANALYTICS_FILTER, "API creator : " + requestResponseExecutionDTO.apiCreator);
-        } else {
-            //sets API creator if x-wso2-owner extension not specified.
+        } else if (stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) { 
             requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
