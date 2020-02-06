@@ -127,6 +127,7 @@
 
     <dependencySets>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
             <scope>runtime</scope>
             <includes>
@@ -139,6 +140,7 @@
             </includes>
         </dependencySet>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/cli</outputDirectory>
             <scope>runtime</scope>
             <includes>

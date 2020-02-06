@@ -26,6 +26,7 @@ cache:Cache gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor)
 cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
 
 public type APIGatewayCache object {
