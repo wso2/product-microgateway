@@ -146,6 +146,10 @@ public class OpenAPICodegenUtils {
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
+                //Sets title name similar to API name in swagger definition.
+                //Without this modification, two seperate rows will be added to APIM analytics dashboard tables.
+                //(For APIM and Microgateway API invokes)
+                swagger.getInfo().setTitle(api.getName());
                 if (isExpand) {
                     swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
@@ -153,6 +157,10 @@ public class OpenAPICodegenUtils {
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+                //Sets title similar to API name in open API definition
+                //Without this modification, two seperate rows will be added to analytics dashboard tables.
+                //(For APIM and Microgateway API invokes)
+                openAPI.getInfo().setTitle(api.getName());
                 if (isExpand) {
                     openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
@@ -220,6 +228,9 @@ public class OpenAPICodegenUtils {
         }
         if (api.getAuthorizationHeader() != null) {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+        }
+        if (api.getProvider() != null) {
+            extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
         }
 
         return extensionsMap;
@@ -289,6 +300,10 @@ public class OpenAPICodegenUtils {
 
         setMgwAPISecurityAndScopes(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
+        //assigns x-wso2-owner value to API provider
+        if (openAPI.getExtensions().containsKey(OpenAPIConstants.API_OWNER)) {
+            api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
+        }
         try {
             if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
                 api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
