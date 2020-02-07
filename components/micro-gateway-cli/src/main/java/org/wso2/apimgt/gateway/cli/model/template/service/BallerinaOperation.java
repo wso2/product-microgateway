@@ -120,15 +120,15 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             */
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            if (requestInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+            if (requestInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                 requestInterceptor.ifPresent(value -> {
                     // set the organization name with the module name
                     this.requestInterceptorModule = value.toString().
-                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
+                            split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
+                            + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
+                            + OpenAPICodegenUtils.extractModuleName(value.toString());
                     this.requestInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                            split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
                     this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
                 });
             } else {
@@ -140,15 +140,15 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             */
             Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            if (responseInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+            if (responseInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                 responseInterceptor.ifPresent(value -> {
                     // set the organization name with the module name
                     this.responseInterceptorModule = value.toString().
-                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
+                            split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
+                            + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
+                            + OpenAPICodegenUtils.extractModuleName(value.toString());
                     this.responseInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                            split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
                     this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
                 });
             } else {

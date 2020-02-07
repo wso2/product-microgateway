@@ -241,9 +241,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI {@link OpenAPI} object
      * @return Extended API object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent, Path openAPIPath)
-            throws IOException {
-
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent, Path openAPIPath) {
         String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
         ExtendedAPI api = new ExtendedAPI();
         api.setId(apiId);
@@ -276,14 +274,14 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
         Map<String, Object> extensions = openAPI.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
                 openAPI.getServers());
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(api.getId());
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
                 openAPI.getServers());
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
@@ -293,16 +291,16 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
+        api.setSpecificBasepath(extensions.get(OpenAPIConstants.BASEPATH).toString());
         try {
-            if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
-                api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
+            if (extensions.get(OpenAPIConstants.CORS) != null) {
+                api.setCorsConfiguration(objectMapper.convertValue(extensions.get(OpenAPIConstants.CORS),
                         APICorsConfigurationDTO.class));
                 // explicitly set the cors enabled value to true if cors config found in the open API definition
                 api.getCorsConfiguration().setCorsConfigurationEnabled(true);
             }
             // set authorization header from the open API extension
-            Object authHeader = openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER);
+            Object authHeader = extensions.get(OpenAPIConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
                 api.setAuthorizationHeader(authHeader.toString());
             }
@@ -667,7 +665,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
              requestInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
                              true, openAPIFilePath, pathItem, operationName);
                  }
@@ -675,7 +673,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
              responseInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
                              false, openAPIFilePath, pathItem, operationName);
                  }
@@ -956,35 +954,45 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Extracts the module name from the interceptor statement
+     * Extracts the module name from the interceptor statement.
+     * <p>
+     *     First example shows how the interceptor statement will look like if version is
+     *     provided. Second Example shows how it will be without the version.
+     * </p>
+     * Ex:
+     * <ol>
+     *     <li>{@code org/module/1.0.0:funcName}</li>
+     *     <li>{@code org/module:funcName}</li>
+     * </ol>
      *
-     * @param interceptorStatement the interceptor statement
-     * @return                     the module name
+     * @param stmt complete interceptor statement in openapi definition
+     * @return module name
      */
-    public static String  buildModuleStatement (String interceptorStatement) {
-        String moduleName = null;
-        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
-        if (splitArray.length == 2) {
-          // set module name when the version is not specified in the swagger definition
-          moduleName = splitArray[1].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
+    public static String extractModuleName(String stmt) {
+        String module = null;
+        String[] parts = stmt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
+
+        if (parts.length == 2) {
+            // set module name when the version is not specified in the swagger definition
+            module = parts[1].split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[0];
+        } else if (parts.length == 3) {
+            module = parts[1];
         }
-        if (splitArray.length == 3) {
-          moduleName = splitArray[1];
-        }
-        return moduleName;
+
+        return module;
     }
 
     /**
      * Extracts the module version from the interceptor statement
      *
      * @param interceptorStatement the interceptor statement
-     * @return                     the module version
+     * @return the module version
      */
-    public static String buildModuleVersion (String interceptorStatement) {
+    public static String buildModuleVersion(String interceptorStatement) {
         String moduleVersion = null;
-        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
+        String[] splitArray = interceptorStatement.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
         if (splitArray.length == 3) {
-            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
+            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[0];
         }
         return moduleVersion;
     }

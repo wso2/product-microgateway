@@ -16,7 +16,6 @@
 
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
-import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -47,6 +46,11 @@ import java.util.UUID;
 
 /**
  * Wrapper for {@link OpenAPI}.
+ * <p>
+ *     Parsing {@link OpenAPI} object model from the mustache/handlebars templates
+ *     makes the template logic complex. These Ballerina... classes helps the process
+ *     by wrapping all required attributes into a easily parsable object model.
+ * </p>
  * <p>This class can be used to push additional context variables for handlebars</p>
  */
 public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService, OpenAPI> {
@@ -61,7 +65,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
-    private HashMap<String, String> identifierMap = new HashMap<>();
+    private HashMap<String, String> pickedIdentifiers = new HashMap<>();
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> moduleVersionMap = new HashMap<>();
     //to recognize whether it is a devfirst approach
@@ -90,6 +94,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.tags = openAPI.getTags();
         this.containerConfig = CmdUtils.getContainerConfig();
         this.config = CmdUtils.getConfig();
+
         return this;
     }
 
@@ -104,9 +109,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity());
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity());
         setPaths(definition);
-        // to extract the module names of ballerina modules to be imported from the Ballerina Central
-        // if specified in api level interceptors
-        extractImportModules(definition);
+        genImports(definition.getExtensions());
+
         return buildContext(definition);
     }
 
@@ -145,25 +149,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return tags;
     }
 
-    public HashMap<String, String> getIdentifierMap() {
-        return identifierMap;
-    }
-
-    /**
-     * To add unique module identifier values for each interceptor as per the operation
-     *
-     * @param interceptorModule       Ballerina interceptor module with relevant organization
-     * @param moduleIdentifierArray  The ballerina module identifier string Array
-     */
-    public void setIdentifierMap(String interceptorModule, ImmutableList<String> moduleIdentifierArray) {
-        for (int iteratorCount = 0; iteratorCount < moduleIdentifierArray.size(); iteratorCount++) {
-            while (!this.identifierMap.containsValue(moduleIdentifierArray.get(iteratorCount)) &&
-                    !this.identifierMap.containsKey(interceptorModule) && interceptorModule != null) {
-                this.identifierMap.put(interceptorModule, moduleIdentifierArray.get(iteratorCount));
-            }
-        }
-    }
-
     /**
      * Returns the map which contains the interceptor module name with organization and the module version.
      *
@@ -173,80 +158,38 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return moduleVersionMap;
     }
 
-    /**
-     * Maps the interceptor's Module Name with the specific version when the interceptors are being looked-up from
-     * the Ballerina Central.
-     *
-     * @param interceptorModuleName The interceptor module name with the organization
-     * @param moduleVersion         The interceptor module version
-     */
-    public void setModuleVersionMap(String interceptorModuleName, String moduleVersion) {
-        if ((!this.moduleVersionMap.containsKey(interceptorModuleName)) && (moduleVersion != null)) {
-            this.moduleVersionMap.put(interceptorModuleName, moduleVersion);
-        }
-    }
-
     public ArrayList<String> getImportModules() {
         return importModules;
     }
 
-    /**
-     * To set the names of all the modules to be imported from the Ballerina Central
-     *
-     * @param moduleName     The name of the module which is stored in Ballerina Central
-     */
-    public void setImportModules(String moduleName) {
-        if (!this.importModules.contains(moduleName) && (moduleName != null)) {
-            this.importModules.add(moduleName);
-        }
-    }
-
-    /**
-     * To extract the ballerina module name from the openAPI definitions, if the api level interceptors are to be
-     * accessed from the Ballerina Central
-     *
-     * @param openAPI       {@link OpenAPI} object
-     */
-    public void extractImportModules (OpenAPI openAPI) {
-        // set ballerina modules to be imported for api level request interceptors
-        Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        if (apiRequestInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
-           apiRequestInterceptor.ifPresent(value -> {
-               // set the organization name with the module name
-               String requestInterceptorModule = value.toString().split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                       + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                       + OpenAPICodegenUtils.buildModuleStatement(value.toString());
-               setIdentifierMap(requestInterceptorModule, OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-               String apiRequestInterceptorIdentifierValue = getIdentifierMap().get(requestInterceptorModule);
-               String importStatement = requestInterceptorModule + OpenAPIConstants.WHITESPACE
-                       + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + OpenAPIConstants.WHITESPACE
-                       + apiRequestInterceptorIdentifierValue;
-               setImportModules(importStatement);
-            });
-        }
-        // set ballerina modules to be imported for api level response interceptors
-        Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        if (apiResponseInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
-            apiResponseInterceptor.ifPresent(value -> {
-                // set the organization name with the module name
-                String responseInterceptorModule = value.toString().
-                        split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                        + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                        + OpenAPICodegenUtils.buildModuleStatement(value.toString());
-                setIdentifierMap(responseInterceptorModule, OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-                String apiResponseInterceptorIdentifierValue = getIdentifierMap().get(responseInterceptorModule);
-                String importStatement = responseInterceptorModule + OpenAPIConstants.WHITESPACE
-                        + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + OpenAPIConstants.WHITESPACE
-                        + apiResponseInterceptorIdentifierValue;
-                setImportModules(importStatement);
-            });
-        }
-    }
-
     public Set<Map.Entry<String, BallerinaPath>> getPaths() {
         return paths;
+    }
+
+    /**
+     * Pick a unique identifier for a given module.
+     * This will put each picked identifier into a global map. Which will then be used
+     * to identify the picked identifiers.
+     *
+     * @param module ballerina interceptor module with relevant organization
+     * @return selected identifier for the module
+     */
+    private String pickModuleIdentifier(String module) {
+        // import identifier is already set for this module. No need to set a new identifier
+        if (pickedIdentifiers.containsKey(module)) {
+            return pickedIdentifiers.get(module);
+        }
+
+        for (String id : OpenAPIConstants.MODULE_IDENTIFIER_LIST) {
+            // if current identifier value is not there as a value of the picked identifier map,
+            // select it as the identifier for this interceptor module.
+            if (!this.pickedIdentifiers.containsValue(id)) {
+                this.pickedIdentifiers.put(module, id);
+                return id;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -287,19 +230,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                                 requestInterceptorModuleVersion);
                     }
                     // maps the operation level request interceptor module name with an identifier from the list
-                    setIdentifierMap(operation.getValue().getRequestInterceptorModule(),
-                            OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-                    String requestInterceptorIdentifier = getIdentifierMap().get(operation.getValue()
+                    pickModuleIdentifier(operation.getValue().getRequestInterceptorModule());
+                    String requestInterceptorIdentifier = pickedIdentifiers.get(operation.getValue()
                             .getRequestInterceptorModule());
                     String requestInterceptorFunctionCallStatement = requestInterceptorIdentifier
-                            + OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR
+                            + OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR
                             + operation.getValue().getRequestInterceptor();
                     // set the operation level request interceptor
                     operation.getValue().setRequestInterceptor(requestInterceptorFunctionCallStatement);
                     // set the import statement for the operation level request interceptor module
-                    setImportModules(operation.getValue().getRequestInterceptorModule()
-                            + OpenAPIConstants.WHITESPACE + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT
-                            + OpenAPIConstants.WHITESPACE + requestInterceptorIdentifier);
+                    addImport(operation.getValue().getRequestInterceptorModule() + ' ' +
+                            OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + requestInterceptorIdentifier);
                 }
 
                 /*
@@ -318,19 +259,18 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                                 responseInterceptorModuleVersion);
                     }
                     // maps the operation level response interceptor module name with an identifier from the list
-                    setIdentifierMap(operation.getValue().getResponseInterceptorModule(),
-                            OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-                    String responseInterceptorIdentifier = getIdentifierMap().get(operation.getValue()
+                    pickModuleIdentifier(operation.getValue().getResponseInterceptorModule());
+                    String responseInterceptorIdentifier = pickedIdentifiers.get(operation.getValue()
                             .getResponseInterceptorModule());
                     String responseInterceptorFunctionCallStatement = responseInterceptorIdentifier
-                            + OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR
+                            + OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR
                             + operation.getValue().getResponseInterceptor();
                     // set the operation level response interceptor
                     operation.getValue().setResponseInterceptor(responseInterceptorFunctionCallStatement);
                     // set the import statement for the operation level response interceptor module
-                    setImportModules(operation.getValue().getResponseInterceptorModule()
-                            + OpenAPIConstants.WHITESPACE + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT
-                            + OpenAPIConstants.WHITESPACE + responseInterceptorIdentifier);
+                    addImport(operation.getValue().getResponseInterceptorModule()
+                            + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT
+                            + ' ' + responseInterceptorIdentifier);
                 }
 
                 //to set auth providers property corresponding to the security schema in API-level
@@ -342,13 +282,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     // for the purpose of adding API level request interceptors
                     Optional<Object> apiRequestInterceptor = Optional
                             .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-                    if (apiRequestInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                    if (apiRequestInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                         apiRequestInterceptor.ifPresent(value -> {
                         // set the organization name with the module name
                         String requestInterceptorModule = value.toString().
-                                split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                                + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                                + OpenAPICodegenUtils.buildModuleStatement(value.toString());
+                                split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
+                                + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
+                                + OpenAPICodegenUtils.extractModuleName(value.toString());
                         // The version of the api level request interceptor module
                         String requestInterceptorModuleVersion = OpenAPICodegenUtils.
                                 buildModuleVersion(value.toString());
@@ -356,11 +296,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             if (requestInterceptorModuleVersion != null) {
                                 setModuleVersionMap(requestInterceptorModule, requestInterceptorModuleVersion);
                             }
-                        setIdentifierMap(requestInterceptorModule, OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-                        String apiRequestInterceptorIdentifierValue = getIdentifierMap().get(requestInterceptorModule);
+                        pickModuleIdentifier(requestInterceptorModule);
+                        String apiRequestInterceptorIdentifierValue = pickedIdentifiers.get(requestInterceptorModule);
                         String apiRequestInterceptorFunctionCallStatement = apiRequestInterceptorIdentifierValue +
-                                OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR +
-                                value.toString().split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                                OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR +
+                                value.toString().split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
                         operation.getValue().setApiRequestInterceptor(apiRequestInterceptorFunctionCallStatement);
                       });
                     } else {
@@ -371,13 +311,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     // for the purpose of adding API level response interceptors
                     Optional<Object> apiResponseInterceptor = Optional
                             .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-                    if (apiResponseInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                    if (apiResponseInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
                        apiResponseInterceptor.ifPresent(value -> {
                        // set the organization name with the module name
                        String responseInterceptorModule = value.toString().
-                               split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                               + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                               + OpenAPICodegenUtils.buildModuleStatement(value.toString());
+                               split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
+                               + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
+                               + OpenAPICodegenUtils.extractModuleName(value.toString());
                        // The version of the api level response interceptor module
                        String responseInterceptorModuleVersion = OpenAPICodegenUtils.
                                buildModuleVersion(value.toString());
@@ -385,11 +325,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                            if (responseInterceptorModuleVersion != null) {
                                setModuleVersionMap(responseInterceptorModule, responseInterceptorModuleVersion);
                            }
-                       setIdentifierMap(responseInterceptorModule, OpenAPIConstants.MODULE_IDENTIFIER_LIST);
-                       String apiResponseInterceptorIdentifierValue = getIdentifierMap().get(responseInterceptorModule);
+                       pickModuleIdentifier(responseInterceptorModule);
+                       String apiResponseInterceptorIdentifierValue = pickedIdentifiers.get(responseInterceptorModule);
                        String apiResponseInterceptorFunctionCallStatement = apiResponseInterceptorIdentifierValue +
-                               OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR +
-                               value.toString().split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
+                               OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR +
+                               value.toString().split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
                        operation.getValue().setApiResponseInterceptor(apiResponseInterceptorFunctionCallStatement);
                        });
                     } else {
@@ -423,6 +363,66 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
+        }
+    }
+
+    /**
+     * Add new import statement to the import statement list if it is already not there
+     * in the list.
+     *
+     * @param importStmt The name of the module which is stored in Ballerina Central
+     */
+    private void addImport(String importStmt) {
+        if (!this.importModules.contains(importStmt) && (importStmt != null)) {
+            this.importModules.add(importStmt);
+        }
+    }
+
+    private void extractImports(String interceptorExt) throws BallerinaServiceGenException {
+        if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+            String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
+            String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+
+            // set the organization name with the module name
+            String fqn = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
+            String id = pickModuleIdentifier(fqn);
+            if (id == null) {
+                throw new BallerinaServiceGenException("Couldn't pick an unique identifier for module " + fqn);
+            }
+            String importStatement = fqn + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id;
+            addImport(importStatement);
+        }
+    }
+
+    /**
+     * Extracts the ballerina module names of interceptors provided in OpenAPI definition.
+     * Import statements will also be assigned with an alias for easy reference. Final format
+     * of a import statement will look like below.
+     * <p>
+     *     Ex:
+     *     {@code import foo/bar as colombo}
+     * </p>
+     *
+     * @param exts OpenAPI Extensions map
+     * @throws BallerinaServiceGenException when fails to generate module identifier
+     */
+    private void genImports(Map<String, Object> exts) throws BallerinaServiceGenException {
+        Optional<Object> reqInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+        extractImports(reqInterceptor.toString());
+        Optional<Object> resInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+        extractImports(resInterceptor.toString());
+    }
+
+    /**
+     * Maps the interceptor's Module Name with the specific version when the interceptors are being looked-up from
+     * the Ballerina Central.
+     *
+     * @param interceptorModuleName The interceptor module name with the organization
+     * @param moduleVersion         The interceptor module version
+     */
+    private void setModuleVersionMap(String interceptorModuleName, String moduleVersion) {
+        if ((!this.moduleVersionMap.containsKey(interceptorModuleName)) && (moduleVersion != null)) {
+            this.moduleVersionMap.put(interceptorModuleName, moduleVersion);
         }
     }
 
