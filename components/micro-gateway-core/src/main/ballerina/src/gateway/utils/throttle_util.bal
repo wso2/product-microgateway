@@ -156,7 +156,7 @@ public function isPolicyExist(map<json> deployedPolicies, string policyName) ret
 
 public function getPolicyDetails(map<json> deployedPolicies, string policyName) returns (map<json>) {
     if (stringutils:equalsIgnoreCase(policyName, UNLIMITED_TIER) || policyName.length() == 0) {
-        return { count : "-1", unitTime :"-1", timeUnit : "min", stopOnQuota : true };
+        return { count : -1, unitTime :-1, timeUnit : "min", stopOnQuota : true };
     }
     return <map<json>>deployedPolicies.get(policyName);
 }
