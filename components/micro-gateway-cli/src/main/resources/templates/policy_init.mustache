@@ -21,8 +21,8 @@ function initThrottlePolicies() {
 function getDeployedPolicies() returns map<json> {
     return {
     {{#policyList}}"{{name}}": {
-        count : "{{count}}",
-        unitTime : "{{unitTime}}",
+        count : {{count}},
+        unitTime : {{unitTime}},
         timeUnit : "{{timeUnit}}",
         stopOnQuota : {{stopOnQuotaReach}}
     } {{#unless @last}},{{/unless}}{{/policyList}}

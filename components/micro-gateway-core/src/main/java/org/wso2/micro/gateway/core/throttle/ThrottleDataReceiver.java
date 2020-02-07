@@ -16,6 +16,7 @@
 
 package org.wso2.micro.gateway.core.throttle;
 
+import org.ballerinalang.jvm.values.MapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,9 @@ import java.util.concurrent.TimeUnit;
  * calculate throttle counters against each unique throttle key.
  */
 public class ThrottleDataReceiver {
-    private static ThrottleDataPublisherPool dataPublisherPool;
-    private static final ThrottleDataCleanUpTask throttleDataCleanUpTask = new ThrottleDataCleanUpTask();
+    private static ThrottleDataCleanUpTask throttleDataCleanUpTask;
 
-    private static final Logger log = LoggerFactory.getLogger(ThrottleDataReceiver.class);
+    private static final Logger log = LoggerFactory.getLogger("ballerina");
 
     public static ThrottleCounter getThrottleCounter() {
         return throttleCounter;
@@ -53,12 +53,12 @@ public class ThrottleDataReceiver {
                 .setData(processPoolMaxIdle, processPoolInitIdleCapacity, processThreadPoolCoreSize,
                         processThreadPoolMaximumSize, processThreadPoolKeepAliveTime, throttleFrequency);
         initThrottleExecutors();
+        throttleDataCleanUpTask = new ThrottleDataCleanUpTask();
     }
 
     private static void initThrottleExecutors() {
         ThrottleConfigHolder throttleConfigHolder = ThrottleConfigHolder.getInstance();
-        dataPublisherPool = ThrottleDataPublisherPool.getInstance();
-        executor = new DataProcessThreadPoolExecutor(throttleConfigHolder.getProcessThreadPoolCoreSize(),
+        executor = new ThreadPoolExecutor(throttleConfigHolder.getProcessThreadPoolCoreSize(),
                 throttleConfigHolder.getProcessThreadPoolMaximumSize(),
                 throttleConfigHolder.getProcessThreadPoolKeepAliveTime(), TimeUnit.SECONDS,
                 new LinkedBlockingDeque<Runnable>() {
@@ -68,59 +68,19 @@ public class ThrottleDataReceiver {
 
     /**
      * This method used to pass throttle data and let it run within separate thread.
-     *
      */
-    public static void processNonThrottledEvent(String apiKey, String appKey, String stopOnQuota,
-            String subscriptionKey, String appTierCount, String appTierUnitTime, String appTierTimeUnit,
-            String subscriptionTierCount, String subscriptionTierUnitTime, String subscriptionTierTimeUnit,
-            String resourceKey, String resourceTierCount, String resourceTierUnitTime, String resourceTierTimeUnit,
-            String timestamp, String appTier, String apiTier, String resourceTier, String subscriptionTier) {
+    public static void processNonThrottledEvent(MapValue throttleEvent) {
+        //check for a dto
         try {
-            if (dataPublisherPool != null) {
-                log.info("Throttle event recieved");
-                DataProcessAgent agent = dataPublisherPool.get();
-                agent.setDataReference(apiKey, appKey, stopOnQuota, subscriptionKey, appTierCount, appTierUnitTime,
-                        appTierTimeUnit, subscriptionTierCount, subscriptionTierUnitTime, subscriptionTierTimeUnit,
-                        resourceKey, resourceTierCount, resourceTierUnitTime, resourceTierTimeUnit, timestamp, appTier,
-                        apiTier, resourceTier, subscriptionTier);
-
-                executor.execute(agent);
-
-            } else {
-                log.debug("Throttle data publisher pool is not initialized.");
-            }
+            DataProcessAgent agent = new DataProcessAgent();
+            agent.setDataReference(throttleEvent);
+            executor.execute(agent);
         } catch (Exception e) {
-            log.error("Error while publishing throttling events to global policy server", e);
+            log.error("Error while processing throttling event", e);
         }
     }
 
-    /**
-     * This class will act as thread pool executor and after executing each thread it will return runnable
-     * object back to pool. This implementation specifically used to minimize number of objects created during
-     * runtime. In this queuing strategy the submitted task will wait in the queue if the corePoolsize threads are
-     * busy and the task will be allocated if any of the threads become idle.Thus ThreadPool will always have number
-     * of threads running  as mentioned in the corePoolSize.
-     * LinkedBlockingQueue without the capacity can be used for this queuing strategy.If the corePoolsize of the
-     * thread pool is less and there are more number of time consuming task were submitted,there is more possibility
-     * that the task has to wait in the queue for more time before it is run by any of the ideal thread.
-     * So tuning core pool size is something we need to tune properly.
-     * Also no task will be rejected in Threadpool until the thread pool was shutdown.
-     */
-    private static class DataProcessThreadPoolExecutor extends ThreadPoolExecutor {
-        public DataProcessThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-                LinkedBlockingDeque<Runnable> workQueue) {
-            super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
-        }
 
-        protected void afterExecute(java.lang.Runnable r, java.lang.Throwable t) {
-            try {
-                DataProcessAgent agent = (DataProcessAgent) r;
-                ThrottleDataReceiver.dataPublisherPool.release(agent);
-            } catch (Exception e) {
-                log.error("Error while returning Throttle data publishing agent back to pool" + e.getMessage());
-            }
-        }
-    }
 
     public static boolean isResourceThrottled(String resourceKey) {
         return ThrottleCounter.isResourceThrottled(resourceKey);

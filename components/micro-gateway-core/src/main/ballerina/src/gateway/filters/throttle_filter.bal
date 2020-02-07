@@ -91,7 +91,6 @@ deployedPolicies) returns boolean {
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
             RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
-            publishEvent(throttleEvent);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -119,7 +118,6 @@ deployedPolicies) returns boolean {
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                 THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
                 RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
-                publishEvent(throttleEvent);
                 sendErrorResponse(caller, request, context);
                 return false;
             } else {
@@ -148,7 +146,6 @@ deployedPolicies) returns boolean {
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
             RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
-            publishEvent(throttleEvent);
             sendErrorResponse(caller, request, context);
             return false;
         } else {
@@ -243,7 +240,6 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
     printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle key : " + subscriptionLevelThrottleKey);
     if (!enabledGlobalTMEventPublishing) {
         boolean stopOnQuota = <boolean>deployedPolicies.get(keyValidationDto.tier).stopOnQuota;
-        subscriptionLevelThrottleKey = keyValidationDto.tier + ":" + subscriptionLevelThrottleKey;
         boolean isThrottled = isSubLevelThrottled(subscriptionLevelThrottleKey);
         return [isThrottled, stopOnQuota];
     }
@@ -260,7 +256,6 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map
     boolean throttled;
     boolean stopOnQuota;
     if (!enabledGlobalTMEventPublishing) {
-        applicationLevelThrottleKey = keyValidationDto.applicationTier + ":" + applicationLevelThrottleKey;
         return isAppLevelThrottled(applicationLevelThrottleKey);
     }
     [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey);
@@ -288,7 +283,6 @@ function isResourceLevelThrottled(http:FilterContext context, AuthenticationCont
         boolean throttled;
         boolean stopOnQuota;
         if (!enabledGlobalTMEventPublishing) {
-            resourceLevelThrottleKey = policy + ":" + resourceLevelThrottleKey;
             return isResourceThrottled(resourceLevelThrottleKey);
         }
         [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey);
@@ -338,12 +332,13 @@ returns (RequestStreamDTO) {
     requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
     requestStreamDTO.appTier = keyValidationDto.applicationTier;
     map<json> appPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.applicationTier);
-    requestStreamDTO.appTierCount = appPolicyDetails.count.toString();
-    requestStreamDTO.appTierUnitTime = appPolicyDetails.unitTime.toString();
+
+    requestStreamDTO.appTierCount = <int>appPolicyDetails.count;
+    requestStreamDTO.appTierUnitTime = <int>appPolicyDetails.unitTime;
     requestStreamDTO.appTierTimeUnit = appPolicyDetails.timeUnit.toString();
     map<json> subPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.tier);
-    requestStreamDTO.subscriptionTierCount = subPolicyDetails.count.toString();
-    requestStreamDTO.subscriptionTierUnitTime = subPolicyDetails.unitTime.toString();
+    requestStreamDTO.subscriptionTierCount = <int>subPolicyDetails.count;
+    requestStreamDTO.subscriptionTierUnitTime = <int>subPolicyDetails.unitTime;
     requestStreamDTO.subscriptionTierTimeUnit = subPolicyDetails.timeUnit.toString();
     requestStreamDTO.stopOnQuota = <boolean>subPolicyDetails.stopOnQuota;
     requestStreamDTO.apiTier = keyValidationDto.apiTier;
@@ -355,8 +350,8 @@ returns (RequestStreamDTO) {
     if (policy is string) {
         requestStreamDTO.resourceTier = policy;
         map<json> resourcePolicyDetails = getPolicyDetails(deployedPolicies, policy);
-        requestStreamDTO.resourceTierCount = resourcePolicyDetails.count.toString();
-        requestStreamDTO.resourceTierUnitTime = resourcePolicyDetails.unitTime.toString();
+        requestStreamDTO.resourceTierCount = <int>resourcePolicyDetails.count;
+        requestStreamDTO.resourceTierUnitTime = <int>resourcePolicyDetails.unitTime;
         requestStreamDTO.resourceTierTimeUnit = resourcePolicyDetails.timeUnit.toString();
     }
 
@@ -367,7 +362,7 @@ returns (RequestStreamDTO) {
     }
     requestStreamDTO.appTenant = keyValidationDto.subscriberTenantDomain;
     requestStreamDTO.apiTenant = getTenantDomain(context);
-    requestStreamDTO.apiName = getApiName(context);
+    requestStreamDTO.apiName = context.getServiceName();
     requestStreamDTO.appId = keyValidationDto.applicationId;
 
     if (apiVersion is string) {
@@ -376,15 +371,15 @@ returns (RequestStreamDTO) {
         requestStreamDTO.resourceKey += ":" + apiVersion;
     }
     time:Time time = time:currentTime();
-    requestStreamDTO.timestamp = time.time.toString();
-    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey);
-    printDebug(KEY_THROTTLE_FILTER, "Subscription key : " + requestStreamDTO.subscriptionKey);
-    printDebug(KEY_THROTTLE_FILTER, "App key : " + requestStreamDTO.appKey);
-    printDebug(KEY_THROTTLE_FILTER, "API key : " + requestStreamDTO.apiKey);
-    printDebug(KEY_THROTTLE_FILTER, "Resource Tier : " + requestStreamDTO.resourceTier);
-    printDebug(KEY_THROTTLE_FILTER, "Subscription Tier : " + requestStreamDTO.subscriptionTier);
-    printDebug(KEY_THROTTLE_FILTER, "App Tier : " + requestStreamDTO.appTier);
-    printDebug(KEY_THROTTLE_FILTER, "API Tier : " + requestStreamDTO.apiTier);
+    requestStreamDTO.timestamp = time.time;
+    printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey +
+    "\nSubscription key : " + requestStreamDTO.subscriptionKey +
+    "\nApp key : " + requestStreamDTO.appKey +
+    "\nAPI key : " + requestStreamDTO.apiKey +
+    "\nResource Tier : " + requestStreamDTO.resourceTier +
+    "\nSubscription Tier : " + requestStreamDTO.subscriptionTier +
+    "\nApp Tier : " + requestStreamDTO.appTier +
+    "\nAPI Tier : " + requestStreamDTO.apiTier);
 
     json properties = {};
     requestStreamDTO.properties = properties.toString();

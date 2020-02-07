@@ -31,7 +31,6 @@ public class ThrottleData {
     }
 
     private long windowStartTime = 0;
-    private long windowResetTime;
     private long unitTime;
     private AtomicLong count = new AtomicLong();
     private long remainingQuota;
@@ -46,14 +45,6 @@ public class ThrottleData {
 
     public void setWindowStartTime(long windowStartTime) {
         this.windowStartTime = windowStartTime;
-    }
-
-    public long getWindowResetTime() {
-        return windowResetTime;
-    }
-
-    public void setWindowResetTime(long windowResetTime) {
-        this.windowResetTime = windowResetTime;
     }
 
     public long getUnitTime() {
@@ -104,19 +95,23 @@ public class ThrottleData {
         this.throttleType = throttleType;
     }
 
+    public void setThrottleKey(String throttleKey) {
+        this.throttleKey = throttleKey;
+    }
+
     public boolean cleanThrottleData(long timeStamp) {
         if (this.windowStartTime + this.unitTime < timeStamp) {
             switch (getThrottleType()) {
                 case APP: {
-                    ThrottleCounter.removeFromApplicationCounterMap(throttleKey);
+                    ThrottleCounter.removeFromApplicationCounterMap(this.throttleKey);
                     break;
                 }
                 case RESOURCE: {
-                    ThrottleCounter.removeFromResourceCounterMap(throttleKey);
+                    ThrottleCounter.removeFromResourceCounterMap(this.throttleKey);
                     break;
                 }
                 case SUBSCRIPTION: {
-                    ThrottleCounter.removeFromSubscriptionCounterMap(throttleKey);
+                    ThrottleCounter.removeFromSubscriptionCounterMap(this.throttleKey);
                     break;
                 }
             }

@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.core.throttle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import java.io.PrintStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -35,43 +34,33 @@ public class ThrottleCounter {
     private static final Map<String, ThrottleData> subscriptionLevelCounter = new ConcurrentHashMap<>();
 
     public void updateCounters(String apiKey, String appKey, boolean stopOnQuota, String subscriptionKey,
-            long appTierCount, int appTierUnitTime, String appTierTimeUnit, long apiTierCount, int apiTierUnitTime,
-            long subscriptionTierCount, int subcriptionTierUnitTime, String subcriptionTierTimeUnit, String resourceKey,
-            long resourceTierCount, int resourceTierUnitTime, String resourceTierTimeUnit, long timestamp,
-            String appTier, String apiTier, String resourceTier, String subscriptionTier) {
-        String resourceMapKey = resourceTier + ":" + resourceKey;
-        String applicationMapKey = appTier + ":" + appKey;
-        String subscriptionMapKey = subscriptionTier + ":" + subscriptionKey;
-        updateMapCounters(resourceLevelCounter, resourceMapKey, stopOnQuota, resourceTierCount,
-                resourceTierUnitTime, resourceTierTimeUnit, timestamp,
-                ThrottleData.ThrottleType.RESOURCE);
-        updateMapCounters(applicationLevelCounter, applicationMapKey, stopOnQuota, appTierCount,
-                appTierUnitTime, appTierTimeUnit, timestamp, ThrottleData.ThrottleType.APP);
-        updateMapCounters(subscriptionLevelCounter, subscriptionMapKey, stopOnQuota, subscriptionTierCount,
-                subcriptionTierUnitTime, subcriptionTierTimeUnit, timestamp,
-                ThrottleData.ThrottleType.SUBSCRIPTION);
+            long appTierCount, long appTierUnitTime, String appTierTimeUnit, long apiTierCount, long apiTierUnitTime,
+            long subscriptionTierCount, long subscriptionTierUnitTime, String subcriptionTierTimeUnit,
+            String resourceKey, long resourceTierCount, long resourceTierUnitTime, String resourceTierTimeUnit,
+            long timestamp) {
+        updateMapCounters(resourceLevelCounter, resourceKey, stopOnQuota, resourceTierCount, resourceTierUnitTime,
+                resourceTierTimeUnit, timestamp, ThrottleData.ThrottleType.RESOURCE);
+        updateMapCounters(applicationLevelCounter, appKey, stopOnQuota, appTierCount, appTierUnitTime, appTierTimeUnit,
+                timestamp, ThrottleData.ThrottleType.APP);
+        updateMapCounters(subscriptionLevelCounter, subscriptionKey, stopOnQuota, subscriptionTierCount,
+                subscriptionTierUnitTime, subcriptionTierTimeUnit, timestamp, ThrottleData.ThrottleType.SUBSCRIPTION);
     }
 
     private void updateMapCounters(Map<String, ThrottleData> counterMap, String throttleKey, boolean stopOnQuota,
             long limit, long unitTime, String timeUnit, long timestamp, ThrottleData.ThrottleType throttleType) {
-        //PrintStream out = System.out;
-
         ThrottleData existingThrottleData = counterMap.computeIfPresent(throttleKey, (key, throttleData) -> {
-            //out.println(" ######### throttleKey : " + key);
-            //out.println(" ######### count : " + throttleData.getCount());
-            //log.info("$$$$$$$$$$$$$$$$$$$$$$$$$");
-            //out.println("##### timestamp : " + timestamp);
-            //out.println("######## window start time :" + throttleData.getWindowStartTime());
             if (limit > 0 && throttleData.getCount().incrementAndGet() > limit) {
                 throttleData.setThrottled(true);
             } else {
                 throttleData.setThrottled(false);
             }
             if (timestamp > throttleData.getWindowStartTime() + throttleData.getUnitTime()) {
-                throttleData.getCount().set(0);
+                throttleData.getCount().set(1);
                 long startTime = timestamp - (timestamp % getTimeInMilliSeconds(1, timeUnit));
                 throttleData.setWindowStartTime(startTime);
-                //out.println("$$$$$$$$$$$$$$ window resetted. New start time" + startTime);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Throttle count for the key '" + throttleKey + "' is " + throttleData.getCount());
             }
             return throttleData;
         });
@@ -83,7 +72,19 @@ public class ThrottleCounter {
                 throttleData.setStopOnQuota(stopOnQuota);
                 throttleData.setUnitTime(getTimeInMilliSeconds(unitTime, timeUnit));
                 throttleData.setThrottleType(throttleType);
+                throttleData.getCount().set(0);
+                throttleData.setThrottleKey(key);
                 ThrottleDataReceiver.getThrottleDataCleanUpTask().addThrottleData(throttleData);
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle key inserted " + throttleKey);
+                }
+                return throttleData;
+            });
+            //There can be scenarios where the two threads stops at computeIfAbsent and one thread adds it to the map
+            //and the second thread will go without incrementing the count. This additional computation is done to avoid
+            // that scenario
+            counterMap.computeIfPresent(throttleKey, (key, throttleData) -> {
+                throttleData.getCount().incrementAndGet();
                 return throttleData;
             });
         }
@@ -118,9 +119,17 @@ public class ThrottleCounter {
             long currentTime = System.currentTimeMillis();
             ThrottleData throttleData = counterMap.get(throttleKey);
             if (currentTime > throttleData.getWindowStartTime() + throttleData.getUnitTime()) {
+                counterMap.computeIfPresent(throttleKey, (key, throttleData1) -> {
+                    throttleData1.setThrottled(false);
+                    return throttleData1;
+                });
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle window has expired. CurrentTime : " + currentTime + "\n Window start time : "
+                            + throttleData.getWindowStartTime() + "\n Unit time : " + throttleData.getUnitTime());
+                }
                 return false;
             }
-            return counterMap.get(throttleKey).isThrottled();
+            return throttleData.isThrottled();
         }
         return false;
     }

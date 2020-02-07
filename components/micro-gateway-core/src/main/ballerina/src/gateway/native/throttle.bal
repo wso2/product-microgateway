@@ -29,29 +29,7 @@ public function initThrottleDataPublisher() {
 }
 
 public function publishNonThrottledEvent(RequestStreamDTO throttleEvent) {
-    handle apiKey = java:fromString(throttleEvent.apiKey);
-    handle appKey = java:fromString(throttleEvent.appKey);
-    handle stopOnQuota = java:fromString(throttleEvent.stopOnQuota.toString());
-    handle subscriptionKey = java:fromString(throttleEvent.subscriptionKey);
-    handle appTierCount = java:fromString(throttleEvent.appTierCount);
-    handle appTierUnitTime = java:fromString(throttleEvent.appTierUnitTime);
-    handle appTierTimeUnit = java:fromString(throttleEvent.appTierTimeUnit);
-    handle subscriptionTierCount = java:fromString(throttleEvent.subscriptionTierCount);
-    handle subscriptionTierUnitTime = java:fromString(throttleEvent.subscriptionTierUnitTime);
-    handle subscriptionTierTimeUnit = java:fromString(throttleEvent.subscriptionTierTimeUnit);
-    handle resourceKey = java:fromString(throttleEvent.resourceKey);
-    handle resourceTierCount = java:fromString(throttleEvent.resourceTierCount);
-    handle resourceTierUnitTime = java:fromString(throttleEvent.resourceTierUnitTime);
-    handle resourceTierTimeUnit = java:fromString(throttleEvent.resourceTierTimeUnit);
-    handle timestamp = java:fromString(throttleEvent.timestamp);
-    handle appTier = java:fromString(throttleEvent.appTier);
-    handle apiTier = java:fromString(throttleEvent.apiTier);
-    handle resourceTier = java:fromString(throttleEvent.resourceTier);
-    handle subscriptionTier = java:fromString(throttleEvent.subscriptionTier);
-
-    jPublishNonThrottledEvent(apiKey, appKey, stopOnQuota, subscriptionKey, appTierCount, appTierUnitTime, appTierTimeUnit,
-    subscriptionTierCount, subscriptionTierUnitTime, subscriptionTierTimeUnit, resourceKey, resourceTierCount, resourceTierUnitTime, resourceTierTimeUnit,
-    timestamp, appTier, apiTier, resourceTier, subscriptionTier);
+    jPublishNonThrottledEvent(throttleEvent);
 }
 
 public function isResourceThrottled(string resourceKey) returns boolean {
@@ -93,11 +71,7 @@ public function jInitThrottleDataPublisher(int processPoolMaxIdle, int processPo
 } external;
 
 
-public function jPublishNonThrottledEvent(handle apiKey, handle appKey, handle stopOnQuota, handle subscriptionKey,
- handle appTierCount, handle appTierUnitTime, handle appTierTimeUnit, handle subscriptionTierCount, handle subscriptionTierUnitTime,
- handle subscriptionTierTimeUnit, handle resourceKey, handle resourceTierCount, handle resourceTierUnitTime, handle resourceTierTimeUnit, handle timestamp, handle appTier,
- handle apiTier, handle resourceTier, handle subscriptionTier) = @java:Method {
+public function jPublishNonThrottledEvent(RequestStreamDTO throttleEvent) = @java:Method {
     name: "processNonThrottledEvent",
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
 } external;
-
