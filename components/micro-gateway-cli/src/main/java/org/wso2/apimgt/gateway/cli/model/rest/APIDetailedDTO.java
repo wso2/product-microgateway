@@ -103,6 +103,8 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
+    //provider string (used to set x-wso2-ownerin swagger definition)
+    private String provider = null;
 
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n
@@ -454,5 +456,16 @@ public class APIDetailedDTO extends APIInfoDTO {
 
     public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
+    }
+
+    /**
+     * Retrieves API creator &  assignes value.
+     **/
+    @JsonProperty("provider")
+    public String getProvider() {
+        return provider;
+    }
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }

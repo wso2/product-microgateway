@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.0-m2-SNAPSHOT</version>
+        <version>3.1.0-m3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -96,11 +96,6 @@
             <groupId>org.ballerinax.kubernetes</groupId>
             <artifactId>kubernetes-extension</artifactId>
             <version>${ballerina.platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.andes.wso2</groupId>
-            <artifactId>andes-client</artifactId>
-            <version>${andes-client.version}</version>
         </dependency>
         <!--required for the message broker-->
         <dependency>
@@ -227,11 +222,11 @@
                         <id>extract-jre</id>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <unzip src="${jre.location}/jre-1.8-linux.zip" dest="${project.build.directory}/extracted-jre-linux" />
                                 <unzip src="${jre.location}/jre-1.8-macos.zip" dest="${project.build.directory}/extracted-jre-macos" />
                                 <unzip src="${jre.location}/jre-1.8-windows.zip" dest="${project.build.directory}/extracted-jre-windows" />
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

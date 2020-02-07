@@ -347,7 +347,7 @@ public function rotateFile(string filePath) returns string | error {
     string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
     var compressResult = compress(filePath, zipName);
     if (compressResult is error) {
-        printFullError(KEY_UTILS, compressResult);
+        printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
@@ -355,7 +355,7 @@ public function rotateFile(string filePath) returns string | error {
         if (deleteResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {
-            printFullError(KEY_UTILS, deleteResult);
+            printError(KEY_UTILS, "Failed to delete file", deleteResult);
         }
         return zipName;
     }
@@ -401,8 +401,9 @@ public function getMessageId() returns string {
 # Add a error log with provided key (class) and message ID.
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
-public function printError(string key, string message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+# + errorMessage - The error message to be logged.
+public function printError(string key, string message, error? errorMessage = ()) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message), err = errorMessage);
 }
 
 # Add a debug log with provided key (class) and message ID.
@@ -437,13 +438,6 @@ public function printTrace(string key, string message) {
 # + message - The message to be logged.
 public function printInfo(string key, string message) {
     log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
-}
-
-# Add a full error log with provided key (class) and message ID.
-# + key - The name of the bal file from which the log is printed.
-# + message - The message to be logged.
-public function printFullError(string key, error message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.reason()), err = message);
 }
 
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
@@ -526,7 +520,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
         // if resource is not secured, no need to check further
         if (!resourceSecured) {
-            log:printWarn("Resource is not secured. `enabled: false`.");
+            printDebug(KEY_UTILS, "Resource is not secured. `enabled: false`.");
             return false;
         }
     }

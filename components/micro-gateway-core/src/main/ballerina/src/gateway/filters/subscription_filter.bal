@@ -78,7 +78,8 @@ function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
                         sendErrorResponse(caller, request, <@untainted>filterContext);
                         return false;
                     }
-                    subscriptionValidated = handleSubscribedAPIs(jwtToken, payload, subscribedAPIList, subscriptionValEnabled);
+                    subscriptionValidated = handleSubscribedAPIs(jwtToken, payload, subscribedAPIList,
+                        subscriptionValEnabled);
                     if (subscriptionValidated || !subscriptionValEnabled) {
                         printDebug(KEY_SUBSCRIPTION_FILTER, "Subscriptions validated.");
                         return true;

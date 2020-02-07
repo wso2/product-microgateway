@@ -3,7 +3,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.1.0-m2-SNAPSHOT</version>
+        <version>3.1.0-m3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -22,10 +22,6 @@
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
@@ -174,9 +170,9 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <replaceregexp file="src/main/ballerina/Ballerina.toml" match="org\.wso2\.micro\.gateway\.core-.*.jar" replace="org.wso2.micro.gateway.core-${project.version}.jar" byline="true" />
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
