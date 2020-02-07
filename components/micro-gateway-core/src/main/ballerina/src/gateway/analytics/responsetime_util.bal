@@ -89,7 +89,6 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
@@ -99,8 +98,11 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     }
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher) 
+            && stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) {
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
+        } else if (stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) { 
+            requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }
