@@ -51,7 +51,8 @@ public type APIKeyHandlerWrapper object {
         int startingTime = getCurrentTime();
         map<string> | () gaugeTags = gaugeTagDetails_authn(req, FILTER_AUTHENTICATION);
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
-        observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
+        observe:Gauge | () localGaugeTotal =
+            initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_AUTHENTICATION});
         boolean | http:AuthenticationError result = self.apiKeyHandler.process(req);
         float | () latency = setGaugeDuration(startingTime);
         updateGauge(localGauge, latency);

@@ -117,7 +117,8 @@ returns boolean {
                             setAPIKeyAuth(inName, name);
                             authHeader = AUTH_SCHEME_API_KEY;
                             break;
-                        } else if (stringutils:equalsIgnoreCase(QUERY, inName) && request.getQueryParamValue(name) is string) {
+                        } else if (stringutils:equalsIgnoreCase(QUERY, inName)
+                                && request.getQueryParamValue(name) is string) {
                             printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
                             isAPIKeyAuth = true;
                             setAPIKeyAuth(inName, name);

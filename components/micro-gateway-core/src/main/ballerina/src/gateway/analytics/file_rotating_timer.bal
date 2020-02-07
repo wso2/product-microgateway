@@ -29,7 +29,7 @@ function sendFileRotatingEvent() returns error? {
         if (result is string) {
             printInfo(KEY_ROTATE_TASK, "File rotated successfully.");
         } else {
-            printFullError(KEY_ROTATE_TASK, result);
+            printErrorwithMessage(KEY_ROTATE_TASK, "File rotation failed.", result);
         }
         return;
     } else {

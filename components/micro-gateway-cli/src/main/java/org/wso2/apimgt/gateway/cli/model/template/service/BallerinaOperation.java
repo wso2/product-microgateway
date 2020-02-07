@@ -276,7 +276,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setSecuritySchemas(String schemas) {
         //update the Resource auth providers property only if there is no security scheme provided during instantiation
-        if (this.authProviders.size() < 1) {
+        if (this.authProviders.isEmpty()) {
             authProviders = OpenAPICodegenUtils.getAuthProviders(schemas);
         }
     }

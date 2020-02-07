@@ -1,7 +1,6 @@
 import ballerina/http;
 import ballerina/reflect;
 import wso2/gateway;
-import ballerina/log;
 
 @http:ServiceConfig {
     basePath:"/authorize",
@@ -36,7 +35,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the authorize endpoint", err = response);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error occurred while invoking the authorize endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -44,7 +43,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the authorize endpoint request", err = result);
+           gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error when responding during the authorize endpoint request", result);
         }
 
     }
@@ -83,7 +82,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the revoke endpoint", err = response);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error occurred while invoking the revoke endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -91,7 +90,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the revoke endpoint request", err = result);
+           gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error when responding during the revoke endpoint request", result);
         }
 
     }
@@ -130,7 +129,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the token endpoint", err = response);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error occurred while invoking the token endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -138,7 +137,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-            log:printError("Error when responding during the token endpoint request", err = result);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error when responding during the token endpoint request", result);
         }
     }
 }
@@ -173,12 +172,10 @@ service apiKeyService on apiSecureListener {
         if (apikey is string) {
             error? result = caller->respond(apikey);
             if (result is error) {
-                gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the token endpoint request");
-                gateway:printFullError(gateway:TOKEN_SERVICE, result);
+                gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error when responding during the token endpoint request", result);
             }
         } else {
-            gateway:printError(gateway:TOKEN_SERVICE, "Error while generating API Key token");
-            gateway:printFullError(gateway:TOKEN_SERVICE, apikey);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error while generating API Key token", apikey);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while generating API Key token" };
             errorResponse.setJsonPayload(errMsg);
@@ -220,7 +217,7 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the userinfo endpoint", err = response);
+            gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error occurred while invoking the userinfo endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the user info endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -228,7 +225,7 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the user info endpoint request", err = result);
+           gateway:printErrorwithMessage(gateway:TOKEN_SERVICE, "Error when responding during the user info endpoint request", result);
         }
     }
 }
