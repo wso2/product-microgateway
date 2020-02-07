@@ -334,10 +334,18 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
 }
 
 public function getCurrentTime() returns int {
+
     time:Time currentTime = time:currentTime();
     int time = currentTime.time;
     return time;
 
+}
+
+public function getCurrentTimeForAnalytics() returns int {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+        return 0;
+    }
+    return getCurrentTime();
 }
 
 public function rotateFile(string filePath) returns string | error {
@@ -410,9 +418,11 @@ public function printError(string key, string message, error? errorMessage = ())
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
 public function printDebug(string key, string message) {
-    log:printDebug(function() returns string {
-        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
-    });
+    if(isDebugEnabled) {
+        log:printDebug(function() returns string {
+            return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+        });
+    }
 }
 
 # Add a warn log with provided key (class) and message ID.
@@ -441,10 +451,13 @@ public function printInfo(string key, string message) {
 }
 
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+            return;
+    }
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
     int latency = ending - starting;
-    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + latency.toString() + "ms");
+    printDebug(KEY_THROTTLE_FILTER, latencyType + " latency: " + latency.toString() + "ms");
 }
 
 # Check MESSAGE_ID in context and set if it is not.

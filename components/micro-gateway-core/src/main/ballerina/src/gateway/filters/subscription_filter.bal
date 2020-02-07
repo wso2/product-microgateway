@@ -21,6 +21,9 @@ import ballerina/runtime;
 // Subscription filter to validate the subscriptions which is available in the  jwt token
 // This filter should only be engaged when jwt token is is used for authentication. For oauth2
 // OAuthnFilter will handle the subscription validation as well.
+
+boolean subscriptionValEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, false);
+
 public type SubscriptionFilter object {
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext filterContext)
     returns boolean {
@@ -28,8 +31,7 @@ public type SubscriptionFilter object {
             printDebug(KEY_SUBSCRIPTION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        int startingTime = getCurrentTime();
-        checkOrSetMessageID(filterContext);
+        int startingTime = getCurrentTimeForAnalytics();
         boolean result = doSubscriptionFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_SUBS);
         return result;
@@ -43,7 +45,6 @@ public type SubscriptionFilter object {
 function doSubscriptionFilterRequest(http:Caller caller, http:Request request,
 @tainted http:FilterContext filterContext) returns boolean {
     boolean subscriptionValidated = false;
-    boolean subscriptionValEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, false);
 
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;

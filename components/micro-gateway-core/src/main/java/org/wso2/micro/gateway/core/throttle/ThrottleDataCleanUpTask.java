@@ -58,7 +58,7 @@ public class ThrottleDataCleanUpTask {
 
     /**
      * Add the throttle data instances to be cleaned into the cleanup array list, which is iterated by the cleanup task
-     * which runs periodically
+     * which runs periodically.
      */
     public void addThrottleData(ThrottleData throttleData) {
         throttleDataList.add(throttleData);

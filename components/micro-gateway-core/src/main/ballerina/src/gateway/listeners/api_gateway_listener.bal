@@ -24,6 +24,7 @@ import ballerina/oauth2;
 import ballerina/stringutils;
 
 boolean isConfigInitiated = false;
+boolean isDebugEnabled = false;
 
 public type APIGatewayListener object {
     *lang:Listener;
@@ -37,6 +38,10 @@ public type APIGatewayListener object {
         // each listener. This check will make sure that configurations are read only once and respective
         //objects are initialized only once.
         if (!isConfigInitiated) {
+            string logLevel = getConfigValue(B7A_LOG, LOG_LEVEL, INFO);
+            if (stringutils:equalsIgnoreCase(DEBUG, logLevel) || stringutils:equalsIgnoreCase(TRACE, logLevel)) {
+                isDebugEnabled = true;
+            }
             initiateGatewayConfigurations(config);
         }
         if ((config.secureSocket is ())) {

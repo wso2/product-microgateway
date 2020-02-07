@@ -54,7 +54,7 @@ function doMTSLFilterRequest(http:Request request, runtime:InvocationContext con
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 
     context.attributes[IS_SECURED] = isSecured;
-    int startingTime = getCurrentTime();
+    int startingTime = getCurrentTimeForAnalytics();
     context.attributes[REQUEST_TIME] = startingTime;
     context.attributes[FILTER_FAILED] = false;
     //Set authenticationContext data

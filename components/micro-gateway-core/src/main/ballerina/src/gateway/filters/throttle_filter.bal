@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/runtime;
-import ballerina/time;
 
 public type ThrottleFilter object {
     public map<json> deployedPolicies = {};
@@ -30,8 +29,7 @@ public type ThrottleFilter object {
             printDebug(KEY_THROTTLE_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        int startingTime = getCurrentTime();
-        checkOrSetMessageID(context);
+        int startingTime = getCurrentTimeForAnalytics();
         boolean result = doThrottleFilterRequest(caller, request, context, self.deployedPolicies);
         setLatency(startingTime, context, THROTTLE_LATENCY);
         return result;
@@ -370,8 +368,7 @@ returns (RequestStreamDTO) {
         requestStreamDTO.subscriptionKey += ":" + apiVersion;
         requestStreamDTO.resourceKey += ":" + apiVersion;
     }
-    time:Time time = time:currentTime();
-    requestStreamDTO.timestamp = time.time;
+
     printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey +
     "\nSubscription key : " + requestStreamDTO.subscriptionKey +
     "\nApp key : " + requestStreamDTO.appKey +

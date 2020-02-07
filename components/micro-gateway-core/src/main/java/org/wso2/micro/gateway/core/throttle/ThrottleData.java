@@ -19,7 +19,7 @@ package org.wso2.micro.gateway.core.throttle;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Class to hold throttle counter data against a specific key
+ * Class to hold throttle counter data against a specific key.
  */
 public class ThrottleData {
 

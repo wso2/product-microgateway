@@ -306,6 +306,11 @@ public const string PERSISTENT_MESSAGE_HOSTNAME = "hostname";
 public const string PERSISTENT_MESSAGE_USERNAME = "username";
 public const string PERSISTENT_MESSAGE_PASSWORD = "password";
 public const string CONFIG_USER_SECTION = "b7a.users";
+public const string B7A_LOG = "b7a.log";
+public const string LOG_LEVEL = "level";
+public const string INFO = "INFO";
+public const string DEBUG = "DEBUG";
+public const string TRACE = "TRACE";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";

@@ -30,12 +30,12 @@ public type PreAuthnFilter object {
             return true;
         }
         //Setting UUID
-        int startingTime = getCurrentTime();
+        int startingTime = getCurrentTimeForAnalytics();
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return result;
     }
 

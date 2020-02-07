@@ -17,7 +17,7 @@
 package org.wso2.micro.gateway.core.throttle;
 
 /**
- * Static holder single pattern implementation to hold the configurations related local throttle processing,
+ * Static holder single pattern implementation to hold the configurations related local throttle processing.
  */
 public class ThrottleConfigHolder {
 

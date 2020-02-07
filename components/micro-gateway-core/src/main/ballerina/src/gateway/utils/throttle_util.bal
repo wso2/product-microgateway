@@ -161,10 +161,6 @@ public function getPolicyDetails(map<json> deployedPolicies, string policyName) 
     return <map<json>>deployedPolicies.get(policyName);
 }
 
-public function calculateUnitTimeInMillis(int unitTime, string timeUnit) {
-
-}
-
 public function getRequestStream() returns stream<RequestStreamDTO> {
     return requestStream;
 }

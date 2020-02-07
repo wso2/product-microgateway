@@ -80,8 +80,6 @@ public class ThrottleDataReceiver {
         }
     }
 
-
-
     public static boolean isResourceThrottled(String resourceKey) {
         return ThrottleCounter.isResourceThrottled(resourceKey);
     }

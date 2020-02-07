@@ -78,7 +78,6 @@ public type RequestStreamDTO record {
     int subscriptionTierCount = -1;
     int subscriptionTierUnitTime = -1;
     string subscriptionTierTimeUnit = "";
-    int timestamp = 0;
 };
 
 public type GlobalThrottleStreamDTO record {

@@ -25,7 +25,6 @@ import org.ballerinalang.jvm.values.MapValue;
 public class DataProcessAgent implements Runnable {
 
     private ThrottleCounter throttleCounter;
-
     private String apiKey;
     private String appKey;
     private boolean stopOnQuota;
@@ -46,7 +45,6 @@ public class DataProcessAgent implements Runnable {
 
 
     public DataProcessAgent() {
-
         throttleCounter = getDataPublisher();
     }
 
@@ -71,7 +69,7 @@ public class DataProcessAgent implements Runnable {
         this.resourceTierUnitTime = throttleData.getIntValue("resourceTierUnitTime");
         this.resourceTierTimeUnit = throttleData.getStringValue("resourceTierTimeUnit");
         this.stopOnQuota = throttleData.getBooleanValue("stopOnQuota");
-        this.timestamp = throttleData.getIntValue("timestamp");
+        this.timestamp = System.currentTimeMillis();
     }
 
     public void run() {
