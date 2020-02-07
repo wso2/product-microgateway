@@ -981,7 +981,7 @@ public class OpenAPICodegenUtils {
                 }
             }
         }
-        if (authProviders.size() < 1) {
+        if (authProviders.isEmpty()) {
             authProviders.add(APISecurity.oauth2.name());
             authProviders.add(APISecurity.jwt.name());
         }
