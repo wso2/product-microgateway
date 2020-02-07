@@ -301,7 +301,7 @@ public class OpenAPICodegenUtils {
         setMgwAPISecurityAndScopes(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         //assigns x-wso2-owner value to API provider
-        if (openAPI.getExtensions().get(OpenAPIConstants.API_OWNER) != null) {
+        if (openAPI.getExtensions().containsKey(OpenAPIConstants.API_OWNER)) {
             api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
         }
         try {

@@ -98,7 +98,8 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     }
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher) && stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) {
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher) 
+            && stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) {
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
         } else if (stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) { 
             requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
