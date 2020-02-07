@@ -180,7 +180,7 @@ public function getAuthHandlers() returns http:InboundAuthHandler[] {
             http:BearerAuthHandler bearerAuthOutboundHandler = new (oauth2Provider);
             auth = {authHandler: bearerAuthOutboundHandler};
         } else {
-            printErrorwithMessage(KEY_GW_LISTNER, "Failed to get oauth2 outbound provider", oauth2Provider);
+            printError(KEY_GW_LISTNER, "Failed to get oauth2 outbound provider", oauth2Provider);
         }
     } else {
         printWarn(KEY_GW_LISTNER, "Key validation service security confogurations not enabled.");

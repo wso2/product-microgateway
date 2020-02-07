@@ -75,27 +75,27 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
 
     });
     if (connection is error) {
-        printErrorwithMessage(KEY_THROTTLE_UTIL, "Error while creating the jms connection.", connection);
+        printError(KEY_THROTTLE_UTIL, "Error while creating the jms connection.", connection);
         return connection;
     } else {
         jms:Session | error session = trap connection->createSession({acknowledgementMode: "AUTO_ACKNOWLEDGE"});
         if (session is error) {
-            printErrorwithMessage(KEY_THROTTLE_UTIL, "Error while creating the jms session.", session);
+            printError(KEY_THROTTLE_UTIL, "Error while creating the jms session.", session);
             return session;
         } else {
         jms:Destination dest = check session->createTopic("throttleData");
         jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-1");
         if (subscriberEndpoint is error) {
-            printErrorwithMessage(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.", subscriberEndpoint);
+            printError(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.", subscriberEndpoint);
         } else {
             var attachResult = subscriberEndpoint.__attach(messageServ);
             if (attachResult is error) {
-                printErrorwithMessage(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.", attachResult);
+                printError(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.", attachResult);
                 return attachResult;
             }
             var startResult = subscriberEndpoint.__start();
             if (startResult is error) {
-                printErrorwithMessage(KEY_THROTTLE_UTIL, "Starting the task is failed.", startResult);
+                printError(KEY_THROTTLE_UTIL, "Starting the task is failed.", startResult);
                 return startResult;
             }
             printDebug(KEY_THROTTLE_UTIL, "Successfully created jms connection");

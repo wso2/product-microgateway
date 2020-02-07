@@ -55,11 +55,11 @@ public type AnalyticsRequestFilter object {
                                 eventStream.publish(eventDTO);
                                 printDebug(KEY_ANALYTICS_FILTER, "File upload throttle stream data published." + eventDTO.streamId);
                             } else {
-                                printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event", eventDTO);
+                                printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event", eventDTO);
                             }
                         }
                     } else {
-                        printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while populating throttle analytics event data", throttleAnalyticsEventDTO);
+                        printError(KEY_ANALYTICS_FILTER, "Error while populating throttle analytics event data", throttleAnalyticsEventDTO);
                     }
                 } else {
                     if (!filterFailed) {
@@ -82,7 +82,7 @@ function doFilterRequest(http:Request request, http:FilterContext context) {
     printDebug(KEY_ANALYTICS_FILTER, "doFilterRequest Mehtod called");
     error? result = trap setRequestAttributesToContext(request, context);
     if (result is error) {
-        printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path", result);
+        printError(KEY_ANALYTICS_FILTER, "Error while setting analytics data in request path", result);
     }
 }
 
@@ -104,10 +104,10 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
                 eventStream.publish(eventDTO);
             }
         } else {
-            printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event", eventDTO);
+            printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event", eventDTO);
         }
     } else {
-        printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while populating analytics fault event data", faultDTO);
+        printError(KEY_ANALYTICS_FILTER, "Error while populating analytics fault event data", faultDTO);
     }
 }
 
@@ -131,10 +131,10 @@ function doFilterResponseData(http:Response response, http:FilterContext context
                 eventStream.publish(event);
             }
         } else {
-            printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event", event);
+            printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event", event);
         }
     } else {
-        printErrorwithMessage(KEY_ANALYTICS_FILTER, "Error while publishing analytics data", requestResponseExecutionDTO);
+        printError(KEY_ANALYTICS_FILTER, "Error while publishing analytics data", requestResponseExecutionDTO);
     }
 
 }
