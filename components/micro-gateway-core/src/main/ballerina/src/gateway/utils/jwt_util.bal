@@ -17,7 +17,8 @@
 import ballerina/jwt;
 import ballerina/runtime;
 
-public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList, boolean validateAllowedAPIs) returns boolean {
+public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList,
+        boolean validateAllowedAPIs) returns boolean {
 
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     //invocation context
@@ -81,7 +82,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
             var subscription = subscribedAPIList[index];
             if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
                 authenticationContext.authenticated = true;
-                printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString() + " version:" + subscription.'version.toString());
+                printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString()
+                    + " version:" + subscription.'version.toString());
 
                 //set throttling attribs if present
                 if (subscription.subscriptionTier is json) {
@@ -97,7 +99,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
                     authenticationContext.apiPublisher = subscription.publisher.toString();
                 }
                 if (subscription.subscriberTenantDomain is json) {
-                    printDebug(JWT_UTIL, "set subscriberTenantDomain to " + subscription.subscriberTenantDomain.toString());
+                    printDebug(JWT_UTIL, "set subscriberTenantDomain to "
+                        + subscription.subscriberTenantDomain.toString());
                     authenticationContext.subscriberTenantDomain = subscription.subscriberTenantDomain.toString();
                 }
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
