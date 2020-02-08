@@ -26,7 +26,6 @@ public type AnalyticsRequestFilter object {
         }
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
-            checkOrSetMessageID(context);
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest(request, context);
         }

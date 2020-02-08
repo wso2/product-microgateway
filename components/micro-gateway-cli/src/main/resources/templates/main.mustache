@@ -9,6 +9,7 @@ public function main() {
 
     addTokenServicesFilterAnnotation();
     initThrottlePolicies();
+    gateway:initThrottleDataPublisher();
     gateway:startObservabilityListener();
 
     {{>jwtRevocation}}

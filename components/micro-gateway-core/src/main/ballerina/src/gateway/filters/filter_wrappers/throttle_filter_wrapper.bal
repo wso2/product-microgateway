@@ -20,7 +20,7 @@ import ballerina/observe;
 public type ThrottleFilterWrapper object {
     ThrottleFilter throttleFilter;
 
-    public function __init(map<boolean> deployedPolicies) {
+    public function __init(map<json> deployedPolicies) {
         self.throttleFilter = new ThrottleFilter(deployedPolicies);
     }
 

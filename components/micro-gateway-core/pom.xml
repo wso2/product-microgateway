@@ -39,6 +39,16 @@
             <artifactId>javax.jms-api</artifactId>
             <version>${jmx.api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool.wso2</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>${apache.commons.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>

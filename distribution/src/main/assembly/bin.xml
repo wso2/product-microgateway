@@ -147,6 +147,7 @@
                 <include>org.slf4j:slf4j-api</include>
                 <include>org.slf4j:slf4j-jdk14</include>
                 <include>org.apache.commons:commons-lang3</include>
+                <include>commons-pool.wso2:commons-pool</include>
             </includes>
         </dependencySet>
     </dependencySets>

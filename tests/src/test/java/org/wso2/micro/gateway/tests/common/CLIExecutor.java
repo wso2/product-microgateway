@@ -80,7 +80,7 @@ public class CLIExecutor {
                     + System.getenv("JAVA_HOME")}, new File(homeDirectory));
             new ServerLogReader("errorStream", process.getErrorStream()).start();
             new ServerLogReader("inputStream", process.getInputStream()).start();
-            boolean isCompleted = process.waitFor(2, TimeUnit.MINUTES);
+            boolean isCompleted = process.waitFor(5, TimeUnit.MINUTES);
             if (!isCompleted) {
                 throw new RuntimeException(errorMessage);
             }
