@@ -6,7 +6,7 @@ version= "3.1.0"
 target = "java8"
 
     [[platform.libraries]]
-    path = "../../../target/org.wso2.micro.gateway.core-3.1.0-m3-SNAPSHOT.jar"
+    path = "../../../target/org.wso2.micro.gateway.core-3.1.0-m2-SNAPSHOT.jar"
 
 [dependencies]
 "wso2/jms" = "0.7.0"
