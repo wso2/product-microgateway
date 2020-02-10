@@ -92,7 +92,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, api.getAPISecurityByExtension());
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, api.getApplicationSecurity());
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         //to set resource level scopes in dev-first approach
@@ -275,10 +275,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
     }
 
-    public void setSecuritySchemas(String schemas, List<String> apiSecurityByExtension) {
+    public void setSecuritySchemas(List<String> authProviders) {
         //update the Resource auth providers property only if there is no security scheme provided during instantiation
         if (this.authProviders.isEmpty()) {
-            authProviders = OpenAPICodegenUtils.getAuthProviders(schemas, apiSecurityByExtension);
+            this.authProviders = authProviders;
         }
     }
 }

@@ -15,10 +15,9 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
-
-import java.util.List;
 
 /**
  * Data mapper object defining a MGW API using OpenApi definition.
@@ -33,7 +32,7 @@ public class ExtendedAPI extends APIDetailedDTO {
     //Scopes
     private String mgwApiScope = null;
     //support apim application level security
-    private List<String> apiSecurityByExtension = null;
+    private ApplicationSecurity applicationSecurity = null;
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;
@@ -67,11 +66,11 @@ public class ExtendedAPI extends APIDetailedDTO {
         return mgwApiScope;
     }
 
-    public void setAPISecurityByExtension(List<String> apiSecurityByExtension) {
-        this.apiSecurityByExtension = apiSecurityByExtension;
+    public void setApplicationSecurity(ApplicationSecurity applicationSecurity) {
+        this.applicationSecurity = applicationSecurity;
     }
 
-    public List<String> getAPISecurityByExtension() {
-        return apiSecurityByExtension;
+    public ApplicationSecurity getApplicationSecurity() {
+        return applicationSecurity;
     }
 }
