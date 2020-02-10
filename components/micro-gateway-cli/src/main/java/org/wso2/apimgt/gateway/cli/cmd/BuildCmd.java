@@ -35,8 +35,6 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.config.CopyFile;
-import org.wso2.apimgt.gateway.cli.model.config.CopyFileConfig;
 import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
@@ -49,8 +47,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -182,49 +178,7 @@ public class BuildCmd implements LauncherCmd {
             }
             String deploymentConfigPath = CmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
-            if (isDocker) {
-                PrintStream outStream = System.out;
-
-                if (StringUtils.isEmpty(dockerImage)) {
-                    dockerImage = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ["
-                            + projectName + ":" + CliConstants.DEFAULT_VERSION + "]").trim();
-                }
-
-                if (StringUtils.isEmpty(dockerBaseImage)) {
-                    dockerBaseImage = CmdUtils.promptForTextInput(outStream,
-                            "Enter docker baseImage [" + CliConstants.DEFAULT_DOCKER_BASE_IMAGE + "]: ").trim();
-                }
-
-                if (StringUtils.isBlank(dockerImage)) {
-                    dockerImage = projectName + ":" + CliConstants.DEFAULT_VERSION;
-                }
-
-                if (StringUtils.isBlank(dockerBaseImage)) {
-                    dockerBaseImage = CliConstants.DEFAULT_DOCKER_BASE_IMAGE;
-                }
-
-                String[] dockerNameAndTag = dockerImage.split(":");
-                String dockerName = dockerNameAndTag[0];
-                String dockerTag = dockerNameAndTag[1];
-
-                DockerConfig dockerConfig = containerConfig.getDocker().getDockerConfig();
-                CopyFileConfig dockerCopyFiles = containerConfig.getDocker().getDockerCopyFiles();
-                dockerConfig.setEnable(true);
-                dockerConfig.setName(dockerName);
-                dockerConfig.setTag(dockerTag);
-                dockerConfig.setBaseImage(dockerBaseImage);
-
-                dockerCopyFiles.setEnable(true);
-
-                CopyFile copyFile = new CopyFile();
-                copyFile.setIsBallerinaConf("true");
-                copyFile.setSource(CmdUtils.getResourceFolderLocation() + File.separator + CliConstants.GW_DIST_CONF
-                        + File.separator + CliConstants.MICRO_GW_CONF_FILE);
-                copyFile.setTarget(CliConstants.GW_DIST_CONF + File.separator
-                        + CliConstants.MICRO_GW_CONF_FILE);
-                dockerCopyFiles.setFiles(new ArrayList<>(Collections.singletonList(copyFile)));
-            }
-
+            createDockerImageFromCLI(projectName, containerConfig);
             CmdUtils.setContainerConfig(containerConfig);
 
             CodeGenerationContext codeGenerationContext = new CodeGenerationContext();
@@ -237,6 +191,36 @@ public class BuildCmd implements LauncherCmd {
             throw new CLIInternalException("Error occurred while loading configurations.");
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while reading the deployment configuration", e);
+        }
+    }
+
+    private void createDockerImageFromCLI(String projectName, ContainerConfig containerConfig) {
+        if (isDocker) {
+            PrintStream outStream = System.out;
+            if (StringUtils.isEmpty(dockerImage)) {
+                dockerImage = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ["
+                        + projectName + ":" + CliConstants.DEFAULT_VERSION + "]").trim();
+            }
+            if (StringUtils.isEmpty(dockerBaseImage)) {
+                dockerBaseImage = CmdUtils.promptForTextInput(outStream,
+                        "Enter docker baseImage [" + CliConstants.DEFAULT_DOCKER_BASE_IMAGE + "]: ").trim();
+            }
+            if (StringUtils.isBlank(dockerImage)) {
+                dockerImage = projectName + ":" + CliConstants.DEFAULT_VERSION;
+            }
+            if (StringUtils.isBlank(dockerBaseImage)) {
+                dockerBaseImage = CliConstants.DEFAULT_DOCKER_BASE_IMAGE;
+            }
+
+            String[] dockerNameAndTag = dockerImage.split(":");
+            String dockerName = dockerNameAndTag[0];
+            String dockerTag = dockerNameAndTag[1];
+
+            DockerConfig dockerConfig = containerConfig.getDocker().getDockerConfig();
+            dockerConfig.setEnable(true);
+            dockerConfig.setName(dockerName);
+            dockerConfig.setTag(dockerTag);
+            dockerConfig.setBaseImage(dockerBaseImage);
         }
     }
 

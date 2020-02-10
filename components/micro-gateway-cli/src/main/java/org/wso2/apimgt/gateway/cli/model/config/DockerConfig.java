@@ -34,7 +34,7 @@ public class DockerConfig {
     private String push;
     private String username;
     private String password;
-    private String cmd = "CMD gateway ${APP} --b7a.config.file=conf/micro-gw.conf";
+    private String cmd = "CMD gateway ${APP}";
     private boolean enable = false;
 
     public String getName() {

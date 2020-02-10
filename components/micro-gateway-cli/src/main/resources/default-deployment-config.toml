@@ -13,7 +13,7 @@
     #push = ''
     #username = ''
     #password = ''
-    #cmd = 'CMD gateway ${APP} --b7a.config.file=conf/micro-gw.conf'
+    #cmd = 'CMD gateway ${APP}'
   [docker.dockerCopyFiles]
     enable = false
     [[docker.dockerCopyFiles.files]]

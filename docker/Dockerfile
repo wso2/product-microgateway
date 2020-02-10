@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------
 # Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -15,7 +14,8 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM openjdk:jre-alpine
+FROM openjdk:8u212-jre-alpine
+
 LABEL maintainer="dev@wso2.org"
 
 # Microgateway runtime distribution filename.
@@ -30,7 +30,6 @@ ARG USER_HOME=/home/${USER}
 ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
 ARG MGW_SERVER_VERSION=3.1.0-SNAPSHOT
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
-ARG MGW_SERVER_HOME=${USER_HOME}/${MGW_SERVER}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
 ARG INTERNAL_JRE=jdk8u202-b08-jre
 
@@ -63,17 +62,18 @@ RUN \
     && rm -rf /home/ballerina/${MGW_SERVER}/lib/${INTERNAL_JRE} \
     && mkdir -p /home/ballerina/conf \
     && mv /home/ballerina/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
-    && cp ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
+    && mv ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
     && chown ${USER}:${USER_GROUP} -R ${USER_HOME}  \
     && rm -rf /root/${MGW_SERVER}.zip > /dev/null 2>&1
 
 ENV BALLERINA_HOME ${MGW_RUNTIME_HOME}/runtime
 ENV GW_HOME ${MGW_RUNTIME_HOME}
 ENV PATH $GW_HOME/bin:$PATH
+ENV MGW_CONF_DIR=${USER_HOME}/conf
 
-WORKDIR /home/ballerina
+WORKDIR ${USER_HOME}
 
-USER ballerina
+USER ${USER}
 
 ENV JAVA_OPTS="${JAVA_OPTS}"
 
@@ -84,4 +84,4 @@ RUN \
 # expose ports
 EXPOSE 9090 9095 9096
 
-CMD gateway /home/exec/${project}.jar --b7a.config.file=${USER_HOME}/conf/micro-gw.conf
+CMD gateway /home/exec/${project}.jar
