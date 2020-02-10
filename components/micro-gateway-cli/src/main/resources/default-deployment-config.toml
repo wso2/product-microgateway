@@ -13,6 +13,7 @@
     #push = ''
     #username = ''
     #password = ''
+    #cmd = 'CMD gateway ${APP}'
   [docker.dockerCopyFiles]
     enable = false
     [[docker.dockerCopyFiles.files]]

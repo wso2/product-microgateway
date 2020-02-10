@@ -45,11 +45,12 @@ PRGDIR=`dirname "$PRG"`
 
 # set BALLERINA_HOME
 GW_HOME=`cd "$PRGDIR/.." ; pwd`
-export JAVA_HOME=$GW_HOME'/lib/jdk8u202-b08-jre'
 export MGW_VERSION="3.1.0"
 
 JAVA_PATH=$GW_HOME/lib/jdk8u202-b08-jre
-if [ -d "$JAVA_PATH" ]; then
+if [ -d "$JAVA_HOME" ]; then
+  echo "JAVA_HOME is externally set: $JAVA_HOME"
+else
   JAVA_HOME=$JAVA_PATH
 fi
 
@@ -85,8 +86,7 @@ fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+  [ -n "$JAVA_HOME" ] && JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
 fi
 
 if [ -z "$JAVACMD" ] ; then
@@ -102,6 +102,12 @@ if [ -z "$JAVACMD" ] ; then
     fi
 fi
 
+JDK_18=`$JAVACMD -version 2>&1 | grep "1.8."`
+if [ "$JDK_18" = "" ]; then
+    echo "Error: Microgateway is supported only on Java 1.8"
+    exit 1
+fi
+
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
     JAVACMD=`cygpath --absolute --windows "$JAVACMD"`
@@ -110,6 +116,16 @@ fi
 if [ ! -x "$JAVACMD" ] ; then
   echo "Error: JAVA Package inside the microgateway runtime distribution is not working."
   exit 1
+fi
+
+# As we use different directory to keep microgateway configuration for the docker image
+if [ -z "$MGW_CONF_DIR" ] ; then
+    MGW_CONF_DIR="$GW_HOME/conf"
+else
+    if [ ! -d "$MGW_CONF_DIR" ] ; then
+        echo "Error: Provided Microgateway Config Directory: ${MGW_CONF_DIR} is not available"
+        exit 1
+    fi
 fi
 
 # Ballerina test/debug command
@@ -168,7 +184,7 @@ java_cmd_gateway () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME} \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$GW_HOME/conf/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 }
 
 java_cmd_gateway_background () {
@@ -181,7 +197,7 @@ java_cmd_gateway_background () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME} \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$GW_HOME/conf/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 EOF
 }
 
