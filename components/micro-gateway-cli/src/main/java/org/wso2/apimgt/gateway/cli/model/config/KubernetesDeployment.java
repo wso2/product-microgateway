@@ -36,13 +36,16 @@ public class KubernetesDeployment {
     private String periodSeconds;
     private String livenessPort;
     private String imagePullPolicy;
+    private String[] imagePullSecrets;
     private String image;
     private String env;
     private String buildImage;
+    private String cmd = "CMD gateway ${APP} --b7a.config.file=conf/micro-gw.conf";
     private CopyFileConfig copyFiles;
     private String dockerHost;
     private String dockerCertPath;
     private String push;
+    private String registry;
     private String username;
     private String password;
     private String baseImage;
@@ -119,6 +122,14 @@ public class KubernetesDeployment {
         this.imagePullPolicy = imagePullPolicy;
     }
 
+    public String[] getImagePullSecrets() {
+        return imagePullSecrets;
+    }
+
+    public void setImagePullSecrets(String[] imagePullSecrets) {
+        this.imagePullSecrets = imagePullSecrets;
+    }
+
     public String getImage() {
         return image;
     }
@@ -141,6 +152,14 @@ public class KubernetesDeployment {
 
     public void setBuildImage(String buildImage) {
         this.buildImage = buildImage;
+    }
+
+    public String getCmd() {
+        return cmd;
+    }
+
+    public void setCmd(String cmd) {
+        this.cmd = cmd;
     }
 
     public CopyFileConfig getCopyFiles() {
@@ -173,6 +192,14 @@ public class KubernetesDeployment {
 
     public void setPush(String push) {
         this.push = push;
+    }
+
+    public String getRegistry() {
+        return registry;
+    }
+
+    public void setRegistry(String registry) {
+        this.registry = registry;
     }
 
     public String getUsername() {
