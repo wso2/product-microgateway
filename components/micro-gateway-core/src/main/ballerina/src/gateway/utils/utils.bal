@@ -113,7 +113,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, 5000);
+    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -133,6 +133,7 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     }
     return false;
 }
+
 public function getContext(http:FilterContext context) returns (string) {
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[context.getServiceName()];
     return <string>httpServiceConfig.basePath;
@@ -312,7 +313,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 
@@ -327,16 +328,24 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, AUTHORIZATION_HEADER);
+        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
     }
     return authHeader;
 }
 
 public function getCurrentTime() returns int {
+
     time:Time currentTime = time:currentTime();
     int time = currentTime.time;
     return time;
 
+}
+
+public function getCurrentTimeForAnalytics() returns int {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+        return 0;
+    }
+    return getCurrentTime();
 }
 
 public function rotateFile(string filePath) returns string | error {
@@ -346,7 +355,7 @@ public function rotateFile(string filePath) returns string | error {
     string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
     var compressResult = compress(filePath, zipName);
     if (compressResult is error) {
-        printFullError(KEY_UTILS, compressResult);
+        printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
@@ -354,7 +363,7 @@ public function rotateFile(string filePath) returns string | error {
         if (deleteResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {
-            printFullError(KEY_UTILS, deleteResult);
+            printError(KEY_UTILS, "Failed to delete file", deleteResult);
         }
         return zipName;
     }
@@ -400,17 +409,20 @@ public function getMessageId() returns string {
 # Add a error log with provided key (class) and message ID.
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
-public function printError(string key, string message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+# + errorMessage - The error message to be logged.
+public function printError(string key, string message, error? errorMessage = ()) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message), err = errorMessage);
 }
 
 # Add a debug log with provided key (class) and message ID.
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
 public function printDebug(string key, string message) {
-    log:printDebug(function() returns string {
-        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
-    });
+    if(isDebugEnabled) {
+        log:printDebug(function() returns string {
+            return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+        });
+    }
 }
 
 # Add a warn log with provided key (class) and message ID.
@@ -438,18 +450,14 @@ public function printInfo(string key, string message) {
     log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-# Add a full error log with provided key (class) and message ID.
-# + key - The name of the bal file from which the log is printed.
-# + message - The message to be logged.
-public function printFullError(string key, error message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.reason()), err = message);
-}
-
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+            return;
+    }
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
     int latency = ending - starting;
-    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + latency.toString() + "ms");
+    printDebug(KEY_THROTTLE_FILTER, latencyType + " latency: " + latency.toString() + "ms");
 }
 
 # Check MESSAGE_ID in context and set if it is not.
@@ -525,7 +533,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
         // if resource is not secured, no need to check further
         if (!resourceSecured) {
-            log:printWarn("Resource is not secured. `enabled: false`.");
+            printDebug(KEY_UTILS, "Resource is not secured. `enabled: false`.");
             return false;
         }
     }
@@ -565,6 +573,27 @@ public function getAuthProviders(string serviceName, string resourceName) return
         authProviders = apiConfig.authProviders;
     }
     return authProviders;
+}
+
+public function getAPIKeysforResource(string serviceName, string resourceName) returns json[] {
+    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
+    json[] apiKeys = [];
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>>resourceConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+        if (apiKeys.length() > 0) {
+            return apiKeys;
+        }
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        map<json> securityMap = <map<json>>apiConfig.security;
+        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
+        apiKeys = <json[]>apiKeysJson;
+    }
+    return apiKeys;
 }
 
 # Log and prepare `error` as a `Error`.
@@ -619,5 +648,3 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
 }
-
-

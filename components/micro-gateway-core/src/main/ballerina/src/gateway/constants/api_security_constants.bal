@@ -29,7 +29,7 @@ public const string API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
 public const int API_AUTH_MISSING_CREDENTIALS = 900902;
 public const string API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
 public const string API_AUTH_MISSING_CREDENTIALS_DESCRIPTION =
-"Make sure your API invocation call has a header: \"Authorization: Bearer ACCESS_TOKEN\"";
+"Make sure your API request provides required credentials";
 
 public const int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
 public const string API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE = "Access Token Expired";
@@ -151,7 +151,7 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_INACTIVE_DESCRIPTION;
     } else if (API_AUTH_MISSING_CREDENTIALS == errorCode) {
         string authHeaderName = getAuthorizationHeader(runtime:getInvocationContext());
-        errorDescription += DESCRIPTION_SEPARATOR + "Make sure your API invocation call has a header: \"" + authHeaderName + "\"";
+        errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION ;
     } else if (API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
     } else if (API_AUTH_INVALID_CREDENTIALS == errorCode) {

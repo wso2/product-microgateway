@@ -20,9 +20,8 @@ http:Client etcdEndpoint = new (
 retrieveConfig("etcdurl", "http://127.0.0.1:2379"), {
     secureSocket: {
         trustStore: {
-            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
-            "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"),
-            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
     }

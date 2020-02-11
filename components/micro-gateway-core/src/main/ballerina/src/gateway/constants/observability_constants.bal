@@ -33,6 +33,9 @@ public const string KEY_VALIDATION_HANDLER_PROCESS = "KeyValidation_Handler_Proc
 public const string OAUTH_VALIDATION_PROVIDER_CACHE_CHECK = "OAuth_ValidationProvider_CacheCheck";
 public const string OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION = "OAuth_AuthProvider_InvokeKeyValidation";
 
+public const string API_KEY_AUTHEN_HANDLER_PROCESS = "API_Key_Authen_Handler_Process";
+public const string API_KEY_PROVIDER_AUTHENTICATE = "API_Key_Provider_Authenticate";
+
 public const string ANALYTICS_FILTER_REQUEST = "Analytics_Filter_Request";
 public const string ANALYTICS_FILTER_RESPONSE = "Analytics_Filter_Response";
 

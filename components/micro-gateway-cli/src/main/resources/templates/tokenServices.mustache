@@ -1,7 +1,6 @@
 import ballerina/http;
 import ballerina/reflect;
 import wso2/gateway;
-import ballerina/log;
 
 @http:ServiceConfig {
     basePath:"/authorize",
@@ -30,13 +29,13 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
     resource function authorizeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
                  <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the authorize endpoint", err = response);
+            gateway:printError(gateway:TOKEN_SERVICE, "Error occurred while invoking the authorize endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -44,7 +43,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the authorize endpoint request", err = result);
+           gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the authorize endpoint request", result);
         }
 
     }
@@ -77,13 +76,13 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
     resource function revokeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
              <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the revoke endpoint", err = response);
+            gateway:printError(gateway:TOKEN_SERVICE, "Error occurred while invoking the revoke endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -91,7 +90,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the revoke endpoint request", err = result);
+           gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the revoke endpoint request", result);
         }
 
     }
@@ -124,13 +123,13 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
     resource function tokenResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
                  <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the token endpoint", err = response);
+            gateway:printError(gateway:TOKEN_SERVICE, "Error occurred while invoking the token endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -138,7 +137,49 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the token endpoint request", err = result);
+            gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the token endpoint request", result);
+        }
+    }
+}
+
+@http:ServiceConfig {
+    basePath:"/apikey",
+    auth: {
+        enabled: true,
+        authHandlers: gateway:getBasicAuthHandler()
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+         allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+@gateway:Filters {
+    skipAll: true
+}
+service apiKeyService on apiSecureListener {
+    @http:ResourceConfig {
+        path: "/*",
+        auth: {
+            enabled: true,
+            authHandlers: gateway:getBasicAuthHandler()
+        }
+    }
+    resource function apiKeyResource(http:Caller caller, http:Request req) {
+        var apikey = gateway:generateAPIKey(req);
+        if (apikey is string) {
+            error? result = caller->respond(apikey);
+            if (result is error) {
+                gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the token endpoint request", result);
+            }
+        } else {
+            gateway:printError(gateway:TOKEN_SERVICE, "Error while generating API Key token", apikey);
+            http:Response errorResponse = new;
+            json errMsg = { "error": "error occurred while generating API Key token" };
+            errorResponse.setJsonPayload(errMsg);
+            var result = caller->respond(errorResponse);
         }
     }
 }
@@ -170,13 +211,13 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
     resource function userInfoResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, "/oauth2") +
+        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
                  <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
         } else {
-            log:printError("Error occurred while invoking the userinfo endpoint", err = response);
+            gateway:printError(gateway:TOKEN_SERVICE, "Error occurred while invoking the userinfo endpoint", response);
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the user info endpoint" };
             errorResponse.setJsonPayload(errMsg);
@@ -184,7 +225,7 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
         }
         var result = caller->respond(forwardedResponse);
         if (result is error) {
-           log:printError("Error when responding during the user info endpoint request", err = result);
+           gateway:printError(gateway:TOKEN_SERVICE, "Error when responding during the user info endpoint request", result);
         }
     }
 }
@@ -193,6 +234,7 @@ public function addTokenServicesFilterAnnotation() {
     map<gateway:FilterConfiguration?> filterConfigAnnotationMap = gateway:getFilterConfigAnnotationMap();
     filterConfigAnnotationMap["authorizeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(authorizeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["tokenService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(tokenService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["apiKeyService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(apiKeyService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["revokeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(revokeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["userInfoService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(userInfoService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
 }

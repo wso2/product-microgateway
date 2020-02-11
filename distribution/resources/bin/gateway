@@ -183,7 +183,7 @@ java_cmd_gateway () {
     -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
-    -Dballerina.home=${GW_HOME} \
+    -Dballerina.home=${GW_HOME}/runtime \
     -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 }
 
@@ -196,7 +196,7 @@ java_cmd_gateway_background () {
     -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
-    -Dballerina.home=${GW_HOME} \
+    -Dballerina.home=${GW_HOME}/runtime \
     -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 EOF
 }
@@ -332,6 +332,7 @@ elif [ "$CMD" = "restart" ]; then
   done
   rm -f file $GW_HOME/bin/gateway.pid
   java_cmd_gateway_background
+
   SESS_PID=$!
   PROCESS_ID=""
   TEMP_PID=""

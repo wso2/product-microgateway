@@ -28,6 +28,9 @@
         <fileSet>
             <directory>${basedir}/resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/conf</outputDirectory>
+            <excludes>
+                <exclude>Ballerina.toml</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/runtime_logs</directory>
@@ -95,6 +98,7 @@
     </files>
     <dependencySets>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/gateway</outputDirectory>
             <scope>runtime</scope>
             <includes>

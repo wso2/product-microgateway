@@ -25,10 +25,9 @@ public type ObservabilityMetricListener object {
     public http:Listener metricListener;
 
     public function __init() {
-        string keystorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH,
-            "${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12");
-        string keystorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD,
-            "ballerina");
+        string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH);
+        string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD,
+            DEFAULT_KEY_STORE_PASSWORD);
         auth:InboundBasicAuthProvider basicAuthProvider = new;
         http:BasicAuthHandler basicAuthHandler = new (basicAuthProvider);
         self.listenerPort = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, SECURE_PORT, 9000);
@@ -38,8 +37,8 @@ public type ObservabilityMetricListener object {
             },
             secureSocket: {
                 keyStore: {
-                    path: keystorePath,
-                    password: keystorePassword
+                    path: keyStorePath,
+                    password: keyStorePassword
                 }
             }
         });

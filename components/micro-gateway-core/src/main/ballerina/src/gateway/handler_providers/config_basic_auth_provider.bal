@@ -110,7 +110,7 @@ public type BasicAuthProvider object {
                 //sendErrorResponse(caller, request, <@untainted> context);
                 return false;
             }
-            int startingTimeReq = getCurrentTime();
+            int startingTimeReq = getCurrentTimeForAnalytics();
             invocationContext.attributes[REQUEST_TIME] = startingTimeReq;
             invocationContext.attributes[FILTER_FAILED] = false;
             //Set authenticationContext data

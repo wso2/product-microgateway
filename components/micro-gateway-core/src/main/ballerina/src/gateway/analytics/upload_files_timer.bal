@@ -66,14 +66,24 @@ function searchFilesToUpload() returns (error?) {
 }
 
 function timerTask() {
-    map<any> vals = getConfigMapValue(ANALYTICS);
-    boolean uploadFiles = <boolean>vals[FILE_UPLOAD_TASK];
-    analyticsUsername = <string>vals[USERNAME];
-    analyticsPassword = <string>vals[PASSWORD];
+    boolean uploadFiles = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK, DEFAULT_TASK_UPLOAD_FILES_ENABLED);
+    analyticsUsername = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_USERNAME);
+    analyticsPassword = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_PASSWORD);
+    if (isOldAnalyticsEnabled) {
+        //enables config reads for older versions
+        uploadFiles = <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_TASK, DEFAULT_TASK_UPLOAD_FILES_ENABLED);
+        analyticsUsername = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,USERNAME, DEFAULT_USERNAME);
+        analyticsPassword = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,PASSWORD, DEFAULT_PASSWORD);
+    }
     if (uploadFiles) {
         printInfo(KEY_UPLOAD_TASK, "Enabled file uploading task.");
-        int | error timeSpan = <int>vals[UPLOADING_TIME_SPAN];
-        int delay = <int>vals[INITIAL_DELAY];
+        //below config reads enable analytics suppot for old versions
+        int | error timeSpan = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS, UPLOADING_TIME_SPAN, DEFAULT_UPLOADING_TIME_SPAN_IN_MILLIS);
+        int delay = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,INITIAL_DELAY, DEFAULT_INITIAL_DELAY_IN_MILLIS);
+        if (isOldAnalyticsEnabled) {
+            timeSpan = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS, UPLOADING_TIME_SPAN, DEFAULT_UPLOADING_TIME_SPAN_IN_MILLIS);
+            delay = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,INITIAL_DELAY, DEFAULT_INITIAL_DELAY_IN_MILLIS);
+        }   
         if (timeSpan is int) {
             // The Task Timer configuration record to configure the Task Listener.
             task:TimerConfiguration timerConfiguration = {

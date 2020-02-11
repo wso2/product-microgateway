@@ -17,20 +17,17 @@
 import ballerina/cache;
 
 // TODO: Refactor the cache
-cache:Cache gatewayTokenCache = new;
-cache:Cache gatewayKeyValidationCache = new;
-cache:Cache invalidTokenCache = new;
-cache:Cache jwtCache = new;
+int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
+int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
+float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
+// Caches are globally defined in order to initialize them before the authentication handlers are initialized.
+// These cache objects are passed in authentication handlers while handler init phase.
+cache:Cache gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
-public function initGatewayCaches() {
-    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, 900000);
-    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, 10000);
-    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, 0.25);
-    gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-    gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-    invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-    jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-}
 
 public type APIGatewayCache object {
 

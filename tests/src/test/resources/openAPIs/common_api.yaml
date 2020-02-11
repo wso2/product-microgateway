@@ -189,6 +189,8 @@ paths:
           description: Pet not found
       security:
         - api_key: []
+          api_key_query: []
+        - petstore_auth: []
     post:
       tags:
         - pet
@@ -313,6 +315,7 @@ paths:
                   format: int32
       security:
         - api_key: []
+        - petstore_auth: []
   /store/order:
     post:
       tags:
@@ -598,6 +601,10 @@ components:
       type: apiKey
       name: api_key
       in: header
+    api_key_query:
+      type: apiKey
+      name: api_key_query
+      in: query
   schemas:
     Order:
       type: object
