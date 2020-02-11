@@ -17,34 +17,30 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import io.swagger.v3.oas.models.security.SecurityScheme.In;
-
 /**
- * Definition of APIKey passed in to mustache
- * templates.
+ * Transport Security http, http2 and mutualSSL.
  */
-public class APIKey {
-    private In in;
-    private String name;
+public class TransportSecurity {
+    private boolean http = true;
+    private boolean https = true;
+    private String mutualSSL = "optional";
 
-    public APIKey(In in, String name) {
-        this.in = in;
-        this.name = name;
+    public void setHttp(boolean http) {
+        this.http = http;
     }
-
-    public In getIn() {
-        return in;
+    public boolean getHttp() {
+        return http;
     }
-
-    public void setIn(In in) {
-        this.in = in;
+    public void setHttps(boolean https) {
+        this.https = https;
     }
-
-    public String getName() {
-        return name;
+    public boolean getHttps() {
+        return https;
     }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setMutualSSL(String mutualSSL) {
+        this.mutualSSL = mutualSSL;
+    }
+    public String getMutualSSL() {
+        return mutualSSL;
     }
 }

@@ -17,34 +17,34 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import io.swagger.v3.oas.models.security.SecurityScheme.In;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Definition of APIKey passed in to mustache
- * templates.
+ * Application security.
  */
-public class APIKey {
-    private In in;
-    private String name;
+public class ApplicationSecurity {
 
-    public APIKey(In in, String name) {
-        this.in = in;
-        this.name = name;
+    @JsonProperty("security-types")
+    private List<String> securityTypes = new ArrayList<>();
+
+    private boolean optional = false;
+
+    public void setSecurityTypes(List<String> securityTypes) {
+        this.securityTypes = securityTypes;
     }
 
-    public In getIn() {
-        return in;
+    public List<String> getSecurityTypes() {
+        return this.securityTypes;
     }
 
-    public void setIn(In in) {
-        this.in = in;
+    public void setOptional(boolean optional) {
+        this.optional = optional;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public boolean isOptional() {
+        return this.optional;
     }
 }
