@@ -262,9 +262,8 @@ public class OpenAPICodegenUtils {
         if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
             logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
             try {
-                Object transportSecurityExtension = apiDefExtensions.get(OpenAPIConstants.TRANSPORT_SECURITY);
-                TransportSecurity transportSecurity =
-                        new ObjectMapper().convertValue(transportSecurityExtension, TransportSecurity.class);
+                TransportSecurity transportSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                        .get(OpenAPIConstants.TRANSPORT_SECURITY), TransportSecurity.class);
                 if (transportSecurity.getHttp()) {
                     transports.add(OpenAPIConstants.TRANSPORT_HTTP);
                 }
@@ -726,9 +725,8 @@ public class OpenAPICodegenUtils {
         if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
             logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
             try {
-                Object appSecurityExtension = apiDefExtensions.get(OpenAPIConstants.APPLICATION_SECURITY);
-                ApplicationSecurity appSecurity =
-                        new ObjectMapper().convertValue(appSecurityExtension, ApplicationSecurity.class);
+                ApplicationSecurity appSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                        .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
                 api.setApplicationSecurity(appSecurity);
             } catch (Exception exception) {
                 throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
@@ -816,8 +814,8 @@ public class OpenAPICodegenUtils {
         //override api level application security extension by operation level extension
         if (operationExtensions != null && operationExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
             try {
-                Object appSecurityExtension = operationExtensions.get(OpenAPIConstants.APPLICATION_SECURITY);
-                appSecurity = new ObjectMapper().convertValue(appSecurityExtension, ApplicationSecurity.class);
+                appSecurity = new ObjectMapper().convertValue(
+                        operationExtensions.get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
             } catch (Exception exception) {
                 throw new CLIRuntimeException("Operation contains " + OpenAPIConstants.TRANSPORT_SECURITY +
                         " extension but failed to match to the required format.");
