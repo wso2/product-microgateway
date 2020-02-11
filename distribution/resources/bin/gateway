@@ -184,7 +184,7 @@ java_cmd_gateway () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME}/runtime \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 }
 
 java_cmd_gateway_background () {
@@ -197,7 +197,7 @@ java_cmd_gateway_background () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME}/runtime \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.http.accesslog.path=$GW_HOME/logs/access_logs --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 EOF
 }
 
