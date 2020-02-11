@@ -41,6 +41,16 @@
         [[kubernetes.kubernetesDeployment.copyFiles.files]]
             source = ''
             target = ''
+    [kubernetes.kubernetesDeployment.livenessProbe]
+        enable = false
+        port = ''
+        initialDelaySeconds = ''
+        periodSeconds = ''
+    [kubernetes.kubernetesDeployment.readinessProbe]
+        enable = false
+        port = ''
+        initialDelaySeconds = ''
+        periodSeconds = ''
     #dockerHost = ''
     #dockerCertPath = ''
     #push = ''

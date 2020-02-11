@@ -29,6 +29,16 @@
     username:"$env{DOCKER_USERNAME}",
     password:"$env{DOCKER_PASSWORD}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.baseImage}},
     baseImage:"{{containerConfig.kubernetes.kubernetesDeployment.baseImage}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.singleYAML}},
-    singleYAML:{{containerConfig.kubernetes.kubernetesDeployment.singleYAML}}{{/if}}
+    singleYAML:{{containerConfig.kubernetes.kubernetesDeployment.singleYAML}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.livenessProbe.enable}},
+    livenessProbe:{ {{#if containerConfig.kubernetes.kubernetesDeployment.livenessProbe.port}}
+        port:{{containerConfig.kubernetes.kubernetesDeployment.livenessProbe.port}},{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.livenessProbe.initialDelaySeconds}}
+        initialDelaySeconds:{{containerConfig.kubernetes.kubernetesDeployment.livenessProbe.initialDelaySeconds}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.livenessProbe.periodSeconds}},
+        periodSeconds:{{containerConfig.kubernetes.kubernetesDeployment.livenessProbe.periodSeconds}} {{/if}}
+    } {{/if}} {{#if containerConfig.kubernetes.kubernetesDeployment.readinessProbe.enable}},
+    readinessProbe:{ {{#if containerConfig.kubernetes.kubernetesDeployment.readinessProbe.port}}
+        port:{{containerConfig.kubernetes.kubernetesDeployment.readinessProbe.port}},{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.readinessProbe.initialDelaySeconds}}
+        initialDelaySeconds:{{containerConfig.kubernetes.kubernetesDeployment.readinessProbe.initialDelaySeconds}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.readinessProbe.periodSeconds}},
+        periodSeconds:{{containerConfig.kubernetes.kubernetesDeployment.readinessProbe.periodSeconds}} {{/if}}
+    } {{/if}}
 }
 {{/if}}
