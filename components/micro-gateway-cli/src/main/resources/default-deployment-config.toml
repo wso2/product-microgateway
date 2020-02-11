@@ -31,9 +31,11 @@
     #periodSeconds = ''
     #livenessPort = ''
     #imagePullPolicy = ''
+    #imagePullSecrets = ['']
     #image = ''
     #env = ''
     #buildImage = ''
+    #cmd = 'CMD gateway ${APP} --b7a.config.file=conf/micro-gw.conf'
     [kubernetes.kubernetesDeployment.copyFiles]
         enable = false
         [[kubernetes.kubernetesDeployment.copyFiles.files]]
@@ -42,6 +44,7 @@
     #dockerHost = ''
     #dockerCertPath = ''
     #push = ''
+    #registry = 'index.docker.io/${DOCKER_USERNAME}'
     #username = ''
     #password = ''
     #baseImage = ''

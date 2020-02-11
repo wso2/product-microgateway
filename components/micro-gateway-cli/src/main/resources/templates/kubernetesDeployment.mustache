@@ -9,9 +9,11 @@
     periodSeconds:{{containerConfig.kubernetes.kubernetesDeployment.periodSeconds}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.livenessPort}},
     livenessPort:{{containerConfig.kubernetes.kubernetesDeployment.livenessPort}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.image}},
     image:"{{containerConfig.kubernetes.kubernetesDeployment.image}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.imagePullPolicy}},
-    imagePullPolicy:"{{containerConfig.kubernetes.kubernetesDeployment.imagePullPolicy}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.env}},
+    imagePullPolicy:"{{containerConfig.kubernetes.kubernetesDeployment.imagePullPolicy}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.imagePullSecrets}},
+    imagePullSecrets: [{{#containerConfig.kubernetes.kubernetesDeployment.imagePullSecrets}}"{{.}}"{{#unless @last}},{{/unless}}{{/containerConfig.kubernetes.kubernetesDeployment.imagePullSecrets}}]{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.env}},
     env:{{{containerConfig.kubernetes.kubernetesDeployment.env}}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.buildImage}},
-    buildImage:{{containerConfig.kubernetes.kubernetesDeployment.buildImage}}{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.copyFiles.enable}},
+    buildImage:{{containerConfig.kubernetes.kubernetesDeployment.buildImage}},
+    cmd:"{{{containerConfig.kubernetes.kubernetesDeployment.cmd}}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.copyFiles.enable}},
     copyFiles:[
       {{#containerConfig.kubernetes.kubernetesDeployment.copyFiles.files}}
           {
@@ -23,6 +25,7 @@
     dockerHost:"{{containerConfig.kubernetes.kubernetesDeployment.dockerHost}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}},
     dockerCertPath:"{{containerConfig.kubernetes.kubernetesDeployment.dockerCertPath}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.push}},
     push:{{containerConfig.kubernetes.kubernetesDeployment.push}},
+    registry:"{{containerConfig.kubernetes.kubernetesDeployment.registry}}",
     username:"$env{DOCKER_USERNAME}",
     password:"$env{DOCKER_PASSWORD}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.baseImage}},
     baseImage:"{{containerConfig.kubernetes.kubernetesDeployment.baseImage}}"{{/if}}{{#if containerConfig.kubernetes.kubernetesDeployment.singleYAML}},
