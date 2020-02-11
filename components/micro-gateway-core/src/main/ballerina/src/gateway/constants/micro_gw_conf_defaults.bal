@@ -83,8 +83,6 @@ public const boolean DEFAULT_REQUEST_VALIDATION_ENABLED = false;
 public const boolean DEFAULT_RESPONSE_VALIDATION_ENABLED = false;
 
 // Local throttling related constants
-public const int DEFAULT_PROCESS_POOL_MAX_IDLE = 1000;
-public const int DEFAULT_PROCESS_POOL_INIT_IDLE_CAPACITY = 200;
 public const int DEFAULT_PROCESS_THREAD_POOL_CORE_SIZE = 200;
 public const int DEFAULT_PROCESS_THREAD_POOL_MAXIMUM_SIZE = 1000;
 public const int DEFAULT_PROCESS_THREAD_POOL_KEEP_ALIVE_TIME = 200;

@@ -21,8 +21,8 @@ package org.wso2.micro.gateway.core.throttle;
  */
 public class ThrottleConfigHolder {
 
-    private int processPoolMaxIdle = 1000, processPoolInitIdleCapacity = 200, processThreadPoolCoreSize = 200,
-            processThreadPoolMaximumSize = 1000, processThreadPoolKeepAliveTime = 200, throttleFrequency = 3600;
+    private int processThreadPoolCoreSize = 200, processThreadPoolMaximumSize = 1000,
+            processThreadPoolKeepAliveTime = 200, throttleFrequency = 3600;
 
     private static class InnerConfigHolder {
         private static final ThrottleConfigHolder instance = new ThrottleConfigHolder();
@@ -35,22 +35,12 @@ public class ThrottleConfigHolder {
         return InnerConfigHolder.instance;
     }
 
-    public void setData(int processPoolMaxIdle, int processPoolInitIdleCapacity, int processThreadPoolCoreSize,
+    public void setData(int processThreadPoolCoreSize,
             int processThreadPoolMaximumSize, int processThreadPoolKeepAliveTime, int throttleFrequency) {
-        this.processPoolMaxIdle = processPoolMaxIdle;
-        this.processPoolInitIdleCapacity = processPoolInitIdleCapacity;
         this.processThreadPoolCoreSize = processThreadPoolCoreSize;
         this.processThreadPoolMaximumSize = processThreadPoolMaximumSize;
         this.processThreadPoolKeepAliveTime = processThreadPoolKeepAliveTime;
         this.throttleFrequency = throttleFrequency;
-    }
-
-    public int getProcessPoolMaxIdle() {
-        return processPoolMaxIdle;
-    }
-
-    public int getProcessPoolInitIdleCapacity() {
-        return processPoolInitIdleCapacity;
     }
 
     public int getProcessThreadPoolCoreSize() {

@@ -193,10 +193,6 @@
 [throttlingConfig]
   # Configurations related to node local throttling.
   [throttlingConfig.nodeLocal]
-    # Maximum number of idle threads for processing throttle counters.
-    processPoolMaxIdle = 1000
-    # Initial capacity of the thread pool.
-    processPoolInitIdleCapacity = 200
     # Core number of threads in the thread pool.
     processThreadPoolCoreSize = 200
     # Maximum number of threads in the thread pool.
