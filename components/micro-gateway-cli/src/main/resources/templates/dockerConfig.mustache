@@ -11,6 +11,7 @@
     debugPort:"{{containerConfig.docker.dockerConfig.debugPort}}"{{/if}}{{#if containerConfig.docker.dockerConfig.push}},
     push:{{containerConfig.docker.dockerConfig.push}}{{/if}}{{#if containerConfig.docker.dockerConfig.username}},
     username:"{{containerConfig.docker.dockerConfig.username}}"{{/if}}{{#if containerConfig.docker.dockerConfig.password}},
-    password:"{{containerConfig.docker.dockerConfig.password}}"{{/if}}
+    password:"{{containerConfig.docker.dockerConfig.password}}"{{/if}}{{#if containerConfig.docker.dockerConfig.cmd}},
+    cmd: "{{containerConfig.docker.dockerConfig.cmd}}"{{/if}}
 }
 {{/if}}
