@@ -51,6 +51,8 @@ public class KubernetesDeployment {
     private String baseImage;
     private String singleYAML;
     private boolean enable = false;
+    private ProbeConfig livenessProbe;
+    private ProbeConfig readinessProbe;
 
     public String getName() {
         if (name == null) {
@@ -240,5 +242,21 @@ public class KubernetesDeployment {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public ProbeConfig getLivenessProbe() {
+        return livenessProbe;
+    }
+
+    public void setLivenessProbe(ProbeConfig livenessProbe) {
+        this.livenessProbe = livenessProbe;
+    }
+
+    public ProbeConfig getReadinessProbe() {
+        return readinessProbe;
+    }
+
+    public void setReadinessProbe(ProbeConfig readinessProbe) {
+        this.readinessProbe = readinessProbe;
     }
 }
