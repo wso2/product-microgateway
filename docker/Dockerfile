@@ -14,36 +14,74 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM openjdk:jre-alpine
+FROM openjdk:8u212-jre-alpine
+
 LABEL maintainer="dev@wso2.org"
 
-# Ballerina runtime distribution filename.
+# Microgateway runtime distribution filename.
 ARG MGW_DIST
+ARG USER=ballerina
+ARG USER_ID=802
+ARG USER_GROUP=ballerina
+ARG USER_GROUP_ID=802
+ARG USER_HOME=/home/${USER}
 
-# Add Ballerina runtime.
-COPY ${MGW_DIST} /root/
+# build arguments for WSO2 product installation
+ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
+ARG MGW_SERVER_VERSION=3.1.0-SNAPSHOT
+ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
+ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
+ARG INTERNAL_JRE=jdk8u202-b08-jre
 
-# Create folders, unzip distribution, create users, & set permissions.
-RUN mkdir -p /wso2/files \
-    && addgroup wso2 \
-    && adduser -S -s /bin/bash -g 'wso2' -G wso2 -D wso2 \
-    && apk add --update --no-cache bash \
-    && unzip /root/${MGW_DIST} -d /wso2/ > /dev/null 2>&1 \
-    && mv /wso2/wso2* /wso2/mgw \
-    && mkdir -p /wso2/mgw/runtime \
-    && unzip /wso2/mgw/runtime.zip -d wso2/mgw/runtime \
-    && rm -rf /wso2/mgw/runtime.zip \
-    && cp /wso2/mgw/lib/gateway/*.jar /wso2/mgw/runtime/bre/lib/ \
-    && chown -R wso2:wso2 /wso2 \
-    && rm -rf /root/${MGW_DIST} > /dev/null 2>&1 \
+# build argument for MOTD
+ARG MOTD='printf "\n\
+ Welcome to WSO2 Docker Resources \n\
+ --------------------------------- \n\
+ This Docker container comprises of a WSO2 product, running with its latest GA release \n\
+ which is under the Apache License, Version 2.0. \n\
+ Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"'
+ENV ENV=${USER_HOME}"/.ashrc"
+
+# create the non-root user and group and set MOTD login message
+RUN \
+    addgroup -S -g ${USER_GROUP_ID} ${USER_GROUP} \
+    && adduser -S -u ${USER_ID} -h ${USER_HOME} -G ${USER_GROUP} ${USER} \
+    && echo ${MOTD} > "${ENV}"
+
+RUN \
+    apk add --update --no-cache \
+        bash \
+        libxml2-utils \
+        netcat-openbsd \
     && rm -rf /var/cache/apk/*
 
-ENV BALLERINA_HOME /wso2/mgw/runtime
-ENV PATH $BALLERINA_HOME/bin:$PATH
+COPY  runtime/ /root/
+# Create folders, unzip distribution
+RUN \
+    unzip /root/${MGW_SERVER}.zip -d /home/ballerina/ >/dev/null 2>&1 \
+    && rm -rf /home/ballerina/${MGW_SERVER}/lib/${INTERNAL_JRE} \
+    && mkdir -p /home/ballerina/conf \
+    && mv /home/ballerina/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
+    && mv ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
+    && chown ${USER}:${USER_GROUP} -R ${USER_HOME}  \
+    && rm -rf /root/${MGW_SERVER}.zip > /dev/null 2>&1
 
-WORKDIR /home/wso2
-VOLUME /home/wso2
+ENV BALLERINA_HOME ${MGW_RUNTIME_HOME}/runtime
+ENV GW_HOME ${MGW_RUNTIME_HOME}
+ENV PATH $GW_HOME/bin:$PATH
+ENV MGW_CONF_DIR=${USER_HOME}/conf
 
-USER wso2
+WORKDIR ${USER_HOME}
 
-CMD /wso2/mgw/bin/./gateway /home/exec/${project}.jar
+USER ${USER}
+
+ENV JAVA_OPTS="${JAVA_OPTS}"
+
+RUN \
+    touch ${USER_HOME}/gc.log \
+    && touch ${USER_HOME}/heapdump.hprof
+
+# expose ports
+EXPOSE 9090 9095 9096
+
+CMD gateway /home/exec/${project}.jar
