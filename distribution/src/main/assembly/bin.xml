@@ -62,16 +62,8 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/definitions</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/lib/gw/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/bir-cache</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/lib/gw-balo/</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway-balo</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/lib/jar/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
         </fileSet>
 
         <!--create an empty logs folder-->
@@ -132,7 +124,6 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
                 <include>org.ballerinax.docker:docker-extension:jar</include>

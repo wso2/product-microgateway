@@ -34,6 +34,7 @@ public class DockerConfig {
     private String push;
     private String username;
     private String password;
+    private String cmd = "CMD gateway ${APP}";
     private boolean enable = false;
 
     public String getName() {
@@ -138,5 +139,13 @@ public class DockerConfig {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public String getCmd() {
+        return cmd;
+    }
+
+    public void setCmd(String cmd) {
+        this.cmd = cmd;
     }
 }

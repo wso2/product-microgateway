@@ -17,151 +17,235 @@ REM  limitations under the License.
 REM ----------------------------------------------------------------------------
 REM Startup Script for Gateway Server
 REM
-REM Environment Variable Prerequisites
-REM
-REM   BALLERINA_HOME      Home of Ballerina installation.
-REM
 REM NOTE: Borrowed generously from Apache Tomcat startup scripts.
 REM -----------------------------------------------------------------------------
 setlocal EnableDelayedExpansion
 
-if ""%1%""==""-v"" ( set verbose=T ) else ( set verbose=F )
-if %verbose%==T ( echo Verbose mode enabled )
+REM -----------------------------------------------------------------------------
+REM --- START OF GLOBAL VARIABLES ---
+REM -----------------------------------------------------------------------------
 
 REM Set Java Xms and Xmx values. The values specified here will set in gateway runtime.
-SET JAVA_XMS_VALUE="256m"
-SET JAVA_XMX_VALUE="512m"
+SET JAVA_XMS_VALUE=256m
+SET JAVA_XMX_VALUE=512m
 
-REM Get the location of this(gateway.bat) file
+REM Set global variables
 SET PRGDIR=%~dp0
-SET GWHOME=%PRGDIR%..
+SET GW_HOME=%PRGDIR%..
 SET MGW_VERSION="3.1.0"
-REM  set BALLERINA_HOME
-set BALLERINA_HOME=%GWHOME%\runtime
-set JAVA_HOME=%GWHOME%\lib\jdk8u202-b08-jre
-if %verbose%==T echo BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-if %verbose%==T echo GWHOME environment variable is set to %GWHOME%
+SET CONF_FILE=%GW_HOME%\conf\micro-gw.conf
+SET CONF_OUT_FILE=%GW_HOME%\.config
+SET IS_METRICS_ENABLED=F
+SET EXEC_FILE=
+SET BAL_ARGS=
 
-REM Check if path to runtime executable is available
-set last=""
-for %%a in (%*) do set last=%%a
-if %last%=="" set isInvalidPath=T
-if not exist %last% set isInvalidPath=T
-if "%isInvalidPath%"=="T" (
-	echo Path to executable balx file is invalid
-    goto end
-)
-
-REM Extract ballerina runtime
-if not exist %GW_HOME%\runtime\ (
-    REM TODO: Evaluate the use of powershell `tee` here
-    call "%PRGDIR%\tools.exe"
-    if ERRORLEVEL 0 (
-        xcopy /y "%GWHOME%\lib\gateway\*.jar" "%GWHOME%\runtime\bre\lib\" >nul
+REM If java_home is set and version is 1.8 in the running environment,
+REM pick that as the java_home for MGW. If not set internal jre home
+IF EXIST %JAVA_HOME% (
+    SET JAVA_CMD="%JAVA_HOME%\bin\java.exe"
+    SET JAVA_VERSION=
+    FOR /F "tokens=* USEBACKQ" %%F IN (`%JAVA_CMD% -fullversion 2^>^&1`) DO (
+        SET JAVA_VERSION=%%F
     )
+
+    REM External java_home was detected, now check if it is java8
+    ECHO "%JAVA_VERSION%"|find "1.8." >NUL
+    IF %ERRORLEVEL% NEQ 0 SET JAVA_HOME=%GW_HOME%\lib\jdk8u202-b08-jre
+) ELSE SET JAVA_HOME=%GW_HOME%\lib\jdk8u202-b08-jre
+
+REM -----------------------------------------------------------------------------
+REM --- END OF GLOBAL VARIABLES ---
+REM -----------------------------------------------------------------------------
+
+REM -----------------------------------------------------------------------------
+REM --- START OF MAIN PROGRAM LOGIC ---
+REM -----------------------------------------------------------------------------
+
+CALL :checkJava
+IF %ERRORLEVEL% NEQ 0 GOTO END
+
+CALL :validateExecutable %*
+IF %ERRORLEVEL% NEQ 0 GOTO END
+
+SET EXEC_FILE=%~1
+CALL :buildBalArgs %*
+
+CALL :runTools "getConfig %CONF_FILE% %CONF_OUT_FILE%"
+
+IF "%b7a_observability_metrics_enabled%"=="true" (
+    SET IS_METRICS_ENABLED=T
+) ELSE (
+    CAll :isMetricsEnabled %*
 )
 
-REM Needs to identify the ballerina arguments and the last argument which is the path of executable.
-REM The path of executable should be provided as \"<path>\" to avoid ballerina when the path includes a space.
-REM BAL_ARGS variable is used to store formatted string
-set BAL_ARGS=
-:formatAndValidateCmdArgs
-    if "%~1"=="-e" (
-        set "BAL_ARGS=%BAL_ARGS% %1 %2=%3"
-        shift
-        shift
-        shift
-        goto :formatAndValidateCmdArgs
-    ) else (
-        if "%~2"=="" (
-            set "BAL_ARGS=%BAL_ARGS% \"%~1\""
-            goto :callBallerina
-        ) else (
-            if "%~1"=="--debug" (
-                 set "BAL_ARGS=%BAL_ARGS% %1 %2"
-                 shift
-                 shift
-                 goto :formatAndValidateCmdArgs
-            ) else (
-                 echo %*
-                 echo "Provided set of arguments are invalid."
-                 goto end
-            )
+IF EXIST %CONF_OUT_FILE% (
+    IF "%IS_METRICS_ENABLED%"=="F" (
+        FOR /F "delims=" %%i IN (%CONF_OUT_FILE%) DO (
+            IF %%i==true SET IS_METRICS_ENABLED=T
+            REM Prevent falling into else block
+            GOTO :enableAgent
+        )
+    )
+) ELSE (
+    ECHO Error while reading observability configurations from the file
+    GOTO :continueInit
+)
+
+:enableAgent
+    IF "%IS_METRICS_ENABLED%"=="T" (
+        FOR /F "skip=1 delims=" %%i IN (%CONF_OUT_FILE%) DO (
+            SET jmxPort=%%i
+            GOTO :setJavaOpts
+        )
+        :setJavaOpts
+            SET JAVA_OPTS="-javaagent:%GW_HOME%\lib\gateway\jmx_prometheus_javaagent-0.12.0.jar=%jmxPort%:%GW_HOME%\conf\Prometheus\config.yml"
+    )
+
+    DEL /Q /F %CONF_OUT_FILE%
+
+:continueInit
+    REM Change the windows style `\` path separator to unix style `/path/to/file` for log file path
+    SET "separator=/"
+    SET log_path="%GW_HOME%\logs\access_logs"
+    CALL SET ACCESS_LOG_PATH=%%log_path:\=%separator%%%
+
+    REM Do the same for analytics data file path
+    SET usage_path=%GW_HOME%\api-usage-data
+    CALL SET USAGE_DATA_PATH=%%usage_path:\=%separator%%%
+
+    CALL :startGateway %*
+
+    GOTO END
+
+REM -----------------------------------------------------------------------------
+REM --- END OF MAIN PROGRAM LOGIC ---
+REM -----------------------------------------------------------------------------
+
+REM -----------------------------------------------------------------------------
+REM --- START OF FUNCTION DEFINITION ---
+REM -----------------------------------------------------------------------------
+
+REM Start the gateway using internal ballerina distribution as the runtime
+:startGateway
+    REM Check if powershell is available
+    SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=%GW_HOME%\heap-dump.hprof
+    WHERE POWERSHELL >NUL 2>NUl
+
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO WARN: Can't find powershell in the system!
+        ECHO WARN: STDERR and STDOUT will be piped to %GW_HOME%\logs\microgateway.log
+        "%JAVA_HOME%\bin\java.exe" %JAVA_ARGS% -Dmgw-runtime.home=%GW_HOME% -Dballerina.home=%GW_HOME%/runtime -jar "%EXEC_FILE%" %BAL_ARGS% --api.usage.data.path=%USAGE_DATA_PATH% --b7a.config.file="%GW_HOME%\conf\micro-gw.conf" >> "%GW_HOME%\logs\microgateway.log" 2>&1
+
+        EXIT /B %ERRORLEVEL%
+    ) ELSE (
+        REM Get short path for java_home in case java_home was picked from a
+        REM standard installation dir with space in the path ex: "program files"
+        FOR %%I IN ("%JAVA_HOME%") DO SET JAVA_HOME=%%~sI
+        FOR /f "skip=3 tokens=2 delims=:" %%A IN ('powershell -command "get-host"') DO (
+            SET /a n=!n!+1
+            SET c=%%A
+            IF !n!==1 SET PSVersion=!c!
+        )
+        SET PSVersion=!PSVersion: =!
+        SET PSVersion=!PSVersion:~0,1!
+
+        REM TODO: Possible solution for this complexity can be Add-Content Cmdlet. Do some RnD on it.
+        IF !PSVersion! LEQ 3 (
+            CALL POWERSHELL "%JAVA_HOME%\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | out-file -encoding Unicode -filepath '%GW_HOME%\logs\microgateway.log' -Append"
+            EXIT /B %ERRORLEVEL%
+        ) ELSE (
+            REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
+            EXIT /B %ERRORLEVEL%
         )
     )
 
-REM Slurp the command line arguments. This loop allows for an unlimited number
-REM of arguments (up to the command line limit, anyway).
-:setupArgs
-	if %verbose%==T echo [%date% %time%] DEBUG: Processing argument : `%1`
-	if ""%1""=="""" goto :formatAndValidateCmdArgs
+REM Validate the provided runtime artifact
+:validateExecutable
+    REM Check if path to runtime executable is valid
+    SET isInvalidPath=F
+    SET xPath="%1"
+    IF "%xPath%"=="" SET isInvalidPath=T
+    REM Path should exists
+    IF EXIST "%xPath%" (
+        REM Path should not be a directory
+        IF EXIST %xPath%/* SET isInvalidPath=T
+    ) ELSE SET isInvalidPath=T
 
-	if ""%1""==""--debug""    goto commandDebug
-	shift
-goto setupArgs
+    IF "%isInvalidPath%"=="T" (
+        ECHO Path to executable jar file is invalid
+        EXIT /B 1
+    )
 
-:commandDebug
-	if %verbose%==T echo [%date% %time%] DEBUG: Running commandDebug
+    EXIT /B 0
 
-	shift
-	set DEBUG_PORT=%1
-	if "%DEBUG_PORT%"=="" goto noDebugPort
-	echo Please start the remote debugging client to continue...
-goto :formatAndValidateCmdArgs
+REM Run a command on external tool library
+REM arg0: command and other arguments to pass to tool library
+:runTools
+    SET METRIC_CLASSPATH=%GW_HOME%\lib\gateway\*
+    SET JAVA_CMD=-Xms256m -Xmx1024m ^
+        -XX:+HeapDumpOnOutOfMemoryError ^
+        -XX:HeapDumpPath="%GW_HOME%\heap-dump.hprof" ^
+        %JAVA_OPTS% ^
+        -classpath %METRIC_CLASSPATH%
 
-:noDebugPort
-	echo Please specify the debug port after the ballerina debug option
-goto end
+    "%JAVA_HOME%\bin\java.exe" %JAVA_CMD% org.wso2.micro.gateway.tools.Main %~1
 
+    EXIT /B %ERRORLEVEL%
 
-:callBallerina
-	REM ---------- Run balx with ballerina ----------------
-	REM Change the windows style `\` path separator to unix style `/path/to/file` for log file path
-	set "separator=/"
-	set log_path="%GWHOME%\logs\access_logs"
-	call set unix_style_path=%%log_path:\=%separator%%%
+REM Check JAVA availability
+:checkJava
+    IF "%JAVA_HOME%"=="" (
+        ECHO ERROR: JAVA_HOME is invalid.
+        EXIT /B 1
+    )
+    IF NOT EXIST "%JAVA_HOME%\bin\java.exe" (
+        ECHO ERROR: JAVA_HOME is invalid.
+        EXIT /B 1
+    )
+    EXIT /B 0
 
-	REM Do the same for analytics data file path
-	set usage_data_path=%GWHOME%\api-usage-data
-	call set usage_data_path=%%usage_data_path:\=%separator%%%
+REM Build the list of arguments for ballerina
+REM This has to be done in order to avoid issues when exec jar file path contain spaces
+REM We need to issolate the jar file path and wrap it with quotes
+:buildBalArgs
+    SHIFT
+    SET first=%~1
+    IF "%first%"=="" EXIT /B 0
+    IF "%first:~0,2%"=="--" (
+        SET BAL_ARGS=%BAL_ARGS% %first%=%2
+        SHIFT
+    ) ELSE (
+        SET BAL_ARGS=%BAL_ARGS% %first%
+    )
+    GOTO :buildBalArgs
 
-	if %verbose%==T echo [%date% %time%] DEBUG: b7a.http.accesslog.path = "%GWHOME%\logs\access_logs"
-	if %verbose%==T echo [%date% %time%] DEBUG: configs = %unix_style_path%
-	if %verbose%==T echo [%date% %time%] DEBUG: Starting micro gateway server...
+REM Find metrics is enabled or not via cmd args
+:isMetricsEnabled
+    SET first=%~1
+    IF "%first%"=="" EXIT /B 0
+    SET keyFound=F
+    IF "%first%"=="--b7a.observability.enabled" (
+        SET keyFound=T
+    ) ELSE "%first%"=="--b7a.observability.metrics.enabled" (
+        SET keyFound=T
+    )
 
-	REM Check if powershell is available
-	WHERE powershell >nul 2>nul
-	IF %ERRORLEVEL% NEQ 0 (
-		echo [%date% %time%] WARN: Can't find powershell in the system!
-		echo [%date% %time%] WARN: STDERR and STDOUT will be piped to %GWHOME%\logs\microgateway.log
-		REM To append to existing logs used `>>` to redirect STDERR to STDOUT used `2>&1`
-		"%GWHOME%\runtime\bin\ballerina" run -e api.usage.data.path=%usage_data_path%   --config "%GWHOME%\conf\micro-gw.conf" %BAL_ARGS% >> "%GWHOME%\logs\microgateway.log" 2>&1
-	) else (
-		REM Change Java heap Xmx and Xmx values
-		powershell -Command "(Get-Content \"%GWHOME%\runtime\bin\ballerina.bat\") | Foreach-Object {$_ -replace 'Xms.*?m','Xms%JAVA_XMS_VALUE% '} | Foreach-Object {$_ -replace 'Xmx.*?m','Xmx%JAVA_XMX_VALUE% '} | Set-Content \"%GWHOME%\runtime\bin\ballerina_1.bat\""
-		powershell -Command "Remove-Item \"%GWHOME%\runtime\bin\ballerina.bat\""
-		powershell -Command "Rename-Item -path \"%GWHOME%\runtime\bin\ballerina_1.bat\" -newName ballerina.bat"
-		CD "%GWHOME%"
-		for /f "skip=3 tokens=2 delims=:" %%A in ('powershell -command "get-host"') do (
-			set /a n=!n!+1
-			set c=%%A
-			if !n!==1 set PSVersion=!c!
-		)
-		set PSVersion=!PSVersion: =!
-		if %verbose%==T echo [%date% %time%] DEBUG: PowerShell version !PSVersion! detected!
-		set PSVersion=!PSVersion:~0,1!
-		echo [%date% %time%] Starting Micro-Gateway
-		IF !PSVersion! LEQ 3 (
-			echo [%date% %time%] Starting Micro-Gateway >>  .\logs\microgateway.log
-			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.config.file=".\conf\micro-gw.conf" | out-file -encoding ASCII -filepath .\logs\microgateway.log -Append"
-		 ) else (
-			REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-			call powershell ".\runtime\bin\ballerina run %BAL_ARGS% --api.usage.data.path=\"%usage_data_path%\" --b7a.config.file=".\conf\micro-gw.conf" | tee -Append .\logs\microgateway.log"
-		)
-	)
-:end
-goto endlocal
+    IF "%keyFound%"=="T" (
+        IF "%~2"=="true" SET IS_METRICS_ENABLED=T
+        EXIT /B 0
+    )
+    IF "%first:~0,2%"=="--" (
+        SHIFT
+        SHIFT
+    ) ELSE (
+        SHIFT
+    )
+    GOTO :isMetricsEnabled
 
-:endlocal
+REM -----------------------------------------------------------------------------
+REM --- END OF FUNCTION DEFINITION ---
+REM -----------------------------------------------------------------------------
 
 :END
+    EXIT /B %ERRORLEVEL%
