@@ -179,9 +179,8 @@ public function getResourceTier(string resourceName) returns string {
     if (policy is string) {
         if (policy.length() == 0) {
             return UNLIMITED_TIER;
-        } else {
-            return policy;
         }
+        return policy;
     }
     return UNLIMITED_TIER;
 }

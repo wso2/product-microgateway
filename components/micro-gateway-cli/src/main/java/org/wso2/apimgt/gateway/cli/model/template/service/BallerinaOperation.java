@@ -84,7 +84,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
         // OperationId with spaces with special characters will cause errors in ballerina code.
         // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
-        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", ""));
         this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();

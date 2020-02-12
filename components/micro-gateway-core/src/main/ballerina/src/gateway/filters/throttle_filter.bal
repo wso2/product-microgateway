@@ -267,7 +267,7 @@ function isResourceLevelThrottled(http:FilterContext context, AuthenticationCont
 
         // TODO: Need to discuss if we should valdate the () case of apiVersion property
         string? apiVersion = getVersion(context);
-        string resourceLevelThrottleKey = replaceAll(context.getResourceName(), "_", "");
+        string resourceLevelThrottleKey = context.getResourceName();
         if (apiVersion is string) {
             resourceLevelThrottleKey += ":" + apiVersion;
         }
@@ -381,7 +381,7 @@ function setCommonThrottleData(http:Request req, http:FilterContext context, Aut
     requestStreamDTO.apiTier = keyValidationDto.apiTier;
     requestStreamDTO.subscriptionTier = keyValidationDto.tier;
     string resourceKey = context.getResourceName();
-    requestStreamDTO.resourceKey = replaceAll(resourceKey, "_", "");
+    requestStreamDTO.resourceKey = resourceKey;
     requestStreamDTO.resourceTier = getResourceTier(resourceKey);
     requestStreamDTO.apiKey = getContext(context);
     requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
