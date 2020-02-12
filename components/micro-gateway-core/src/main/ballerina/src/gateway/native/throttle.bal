@@ -17,13 +17,11 @@
 import ballerinax/java;
 
 public function initThrottleDataPublisher() {
-    int processPoolMaxIdle = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_POOL_MAX_IDLE, DEFAULT_PROCESS_POOL_MAX_IDLE);
-    int processPoolInitIdleCapacity = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_POOL_INIT_IDLE_CAPACITY, DEFAULT_PROCESS_POOL_INIT_IDLE_CAPACITY);
     int processThreadPoolCoreSize = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_THREAD_POOL_CORE_SIZE, DEFAULT_PROCESS_THREAD_POOL_CORE_SIZE);
     int processThreadPoolMaximumSize = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_THREAD_POOL_MAXIMUM_SIZE, DEFAULT_PROCESS_THREAD_POOL_MAXIMUM_SIZE);
     int processThreadPoolKeepAliveTime = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_THREAD_POOL_KEEP_ALIVE_TIME, DEFAULT_PROCESS_THREAD_POOL_KEEP_ALIVE_TIME);
     int cleanUpFrequency = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, THROTTLE_CLEANUP_FREQUENCY, DEFAULT_THROTTLE_CLEANUP_FREQUENCY);
-    jInitThrottleDataPublisher (processPoolMaxIdle, processPoolInitIdleCapacity, processThreadPoolCoreSize,
+    jInitThrottleDataPublisher (processThreadPoolCoreSize,
         processThreadPoolMaximumSize, processThreadPoolKeepAliveTime, cleanUpFrequency);
 }
 
@@ -62,9 +60,8 @@ public function jIsAppLevelThrottled(handle appKey) returns boolean = @java:Meth
 } external;
 
 
-public function jInitThrottleDataPublisher(int processPoolMaxIdle, int processPoolInitIdleCapacity,
-    int processThreadPoolCoreSize, int processThreadPoolMaximumSize, int processThreadPoolKeepAliveTime,
-    int cleanUpFrequency) = @java:Method {
+public function jInitThrottleDataPublisher(int processThreadPoolCoreSize, int processThreadPoolMaximumSize,
+    int processThreadPoolKeepAliveTime, int cleanUpFrequency) = @java:Method {
     name: "initThrottleDataReceiver",
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
 } external;

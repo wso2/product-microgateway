@@ -161,8 +161,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             balPath.getOperations().forEach(operation -> {
-                // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                // set the ballerina function name as {http_method}{UUID} ex : get2345sdfd4324dfds
+                String operationId = operation.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
                 operation.getValue().setOperationId(operationId);
                 //to set auth providers property corresponding to the security schema in API-level
                 operation.getValue().setSecuritySchemas(this.authProviders);

@@ -53,19 +53,19 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
     if (customClaims is map<json> && customClaims.hasKey("application")) {
         json? application = customClaims.get("application");
         if (application is map<json>) {
-            if (application.id != null) {
+            if (application.hasKey("id")) {
                 printDebug(JWT_UTIL, "set application ID to " + application.id.toString());
                 authenticationContext.applicationId = application.id.toString();
             }
-            if (application.name != null) {
+            if (application.hasKey("name")) {
                 printDebug(JWT_UTIL, "set application name to " + application.name.toString());
                 authenticationContext.applicationName = application.name.toString();
             }
-            if (application.tier != null) {
+            if (application.hasKey("tier")) {
                 printDebug(JWT_UTIL, "set application tier to " + application.tier.toString());
                 authenticationContext.applicationTier = application.tier.toString();
             }
-            if (application.owner != null) {
+            if (application.hasKey("owner")) {
                 printDebug(JWT_UTIL, "set application owner to " + application.owner.toString());
                 authenticationContext.subscriber = application.owner.toString();
             }

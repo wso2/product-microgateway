@@ -35,6 +35,7 @@ map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
+string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -313,7 +314,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+        authHeader = authHeaderFromConfig;
     }
     return authHeader;
 
@@ -328,7 +329,7 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+        authHeader = authHeaderFromConfig;
     }
     return authHeader;
 }
@@ -507,6 +508,9 @@ public function decodeValueToBase10(string value) returns string {
 # + request - http request object.
 # + context - http filter context object.
 public function setHostHeaderToFilterContext(http:Request request,@tainted http:FilterContext context) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+        return;
+    }
     if (context.attributes[HOSTNAME_PROPERTY] == ()) {
         printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
         if (request.hasHeader(HOST_HEADER_NAME)) {

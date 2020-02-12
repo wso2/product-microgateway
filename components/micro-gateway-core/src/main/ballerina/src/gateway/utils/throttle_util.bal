@@ -172,3 +172,15 @@ public function getGlobalThrottleStream() returns stream<GlobalThrottleStreamDTO
 public function getIsStreamsInitialized() returns boolean {
     return isStreamsInitialized;
 }
+
+public function getResourceTier(string resourceName) returns string {
+    TierConfiguration? tier = resourceTierAnnotationMap[resourceName];
+    string? policy = (tier is TierConfiguration) ? tier.policy : ();
+    if (policy is string) {
+        if (policy.length() == 0) {
+            return UNLIMITED_TIER;
+        }
+        return policy;
+    }
+    return UNLIMITED_TIER;
+}

@@ -46,12 +46,11 @@ public class ThrottleDataReceiver {
      * This method will initialize throttle data counters. Inside this we will start executor and initialize data
      * counter which we used to maintain throttle count against each unique keys.
      */
-    public static void initThrottleDataReceiver(int processPoolMaxIdle, int processPoolInitIdleCapacity,
-            int processThreadPoolCoreSize, int processThreadPoolMaximumSize, int processThreadPoolKeepAliveTime,
-            int throttleFrequency) {
+    public static void initThrottleDataReceiver(int processThreadPoolCoreSize, int processThreadPoolMaximumSize,
+            int processThreadPoolKeepAliveTime, int throttleFrequency) {
         ThrottleConfigHolder.getInstance()
-                .setData(processPoolMaxIdle, processPoolInitIdleCapacity, processThreadPoolCoreSize,
-                        processThreadPoolMaximumSize, processThreadPoolKeepAliveTime, throttleFrequency);
+                .setData(processThreadPoolCoreSize, processThreadPoolMaximumSize, processThreadPoolKeepAliveTime,
+                        throttleFrequency);
         initThrottleExecutors();
         throttleDataCleanUpTask = new ThrottleDataCleanUpTask();
     }
