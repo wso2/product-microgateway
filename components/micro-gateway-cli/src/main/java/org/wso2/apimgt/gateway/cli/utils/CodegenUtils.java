@@ -78,25 +78,19 @@ public final class CodegenUtils {
         fileTemplateLoader.setSuffix(GeneratorConstants.TEMPLATES_SUFFIX);
 
         Handlebars handlebars = new Handlebars().with(cpTemplateLoader, fileTemplateLoader);
+        handlebars.setStringParams(true);
         handlebars.registerHelpers(StringHelpers.class);
         handlebars.registerHelper("equals", (object, options) -> {
-            CharSequence result;
-            Object param0 = options.param(0);
+            Object param0 = options.param(0, null);
 
             if (param0 == null) {
                 throw new IllegalArgumentException("found 'null', expected 'string'");
             }
-            if (object != null) {
-                if (object.toString().equals(param0.toString())) {
-                    result = options.fn(options.context);
-                } else {
-                    result = options.inverse();
-                }
-            } else {
-                result = null;
+            if (object != null && object.toString().equals(param0.toString())) {
+                    return options.fn(options.context);
             }
 
-            return result;
+            return options.inverse();
         });
 
         return handlebars.compile(templateName);
