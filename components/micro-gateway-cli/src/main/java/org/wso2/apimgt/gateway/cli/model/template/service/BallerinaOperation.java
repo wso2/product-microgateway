@@ -56,8 +56,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
     private MgwEndpointConfigDTO epConfig;
-    private String apiRequestInterceptor;
-    private String apiResponseInterceptor;
 
     /**
      * b7a module name of the request interceptor function.
@@ -332,30 +330,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setResponseInterceptor(String responseInterceptor) {
         this.responseInterceptor = responseInterceptor;
-    }
-
-    public String getApiRequestInterceptor() {
-        return apiRequestInterceptor;
-    }
-
-    public void setApiRequestInterceptor(String requestInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
-            this.apiRequestInterceptor = requestInterceptor;
-        }
-    }
-
-    public String getApiResponseInterceptor() {
-        return apiResponseInterceptor;
-    }
-
-    public void setApiResponseInterceptor(String responseInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
-            this.apiResponseInterceptor = responseInterceptor;
-        }
     }
 
     public void setSecuritySchemas(String schemas) {

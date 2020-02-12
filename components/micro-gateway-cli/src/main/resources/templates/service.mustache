@@ -83,13 +83,16 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
-    {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
-    {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
-    string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
-    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
-        urlPostfix = "/" + urlPostfix;
-    }
+        {{~#if @root.requestInterceptor}}
+        {{#equals @root.requestInterceptor requestInterceptor}}
+        {{else}}{{@root.requestInterceptor}}(outboundEp, req);{{/equals}}{{/if}}
+        {{#if requestInterceptor}}{{requestInterceptor}}(outboundEp, req);{{/if}}
+
+        string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
+            urlPostfix = "/" + urlPostfix;
+        }
         http:Response|error clientResponse;
         http:Response r = new;
         clientResponse = r;
@@ -182,8 +185,10 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
-            {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
-            {{#if apiResponseInterceptor}}{{apiResponseInterceptor}} (outboundEp, clientResponse);{{/if}}
+            {{#if responseInterceptor}}{{responseInterceptor}}(outboundEp, clientResponse);{{/if}}
+            {{~#if @root.responseInterceptor}}
+            {{#equals @root.responseInterceptor responseInterceptor}}
+            {{else}}{{@root.responseInterceptor}}(outboundEp, req);{{/equals}}{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);

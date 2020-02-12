@@ -81,6 +81,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ExtendedAPI api;
 
     /**
+     * API level request interceptor name.
+     * This should be a name of a b7a function.
+     */
+    private String requestInterceptor;
+    /**
+     * API level response interceptor name.
+     * This should be a name of a b7a function.
+     */
+    private String responseInterceptor;
+
+    /**
      * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
      * All non iterable objects using handlebars library is converted into
      * supported iterable object types.
@@ -109,7 +120,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity());
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity());
         setPaths(definition);
-        genImports(definition.getExtensions());
+        resolveInterceptors(definition.getExtensions());
 
         return buildContext(definition);
     }
@@ -265,20 +276,29 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         }
     }
 
-    private void extractImports(String interceptorExt) throws BallerinaServiceGenException {
-        if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-            String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
-            String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+    private String extractImport(String interceptorExt) throws BallerinaServiceGenException {
+        String id = "";
 
-            // set the organization name with the module name
+        if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+            String[] arr = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
+            String org = arr[0];
+            String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+            String version = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
             String fqn = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
-            String id = pickModuleIdentifier(fqn);
+            id = pickModuleIdentifier(fqn);
+
             if (id == null) {
                 throw new BallerinaServiceGenException("Couldn't pick an unique identifier for module " + fqn);
             }
+            if (version != null) {
+                addLibVersion(fqn, version);
+            }
+
             String importStatement = fqn + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id;
             addImport(importStatement);
         }
+
+        return id;
     }
 
     /**
@@ -293,11 +313,30 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      * @param exts OpenAPI Extensions map
      * @throws BallerinaServiceGenException when fails to generate module identifier
      */
-    private void genImports(Map<String, Object> exts) throws BallerinaServiceGenException {
-        Optional<Object> reqInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        extractImports(reqInterceptor.toString());
-        Optional<Object> resInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        extractImports(resInterceptor.toString());
+    private void resolveInterceptors(Map<String, Object> exts) throws BallerinaServiceGenException {
+        Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+        if (reqExt != null) {
+            if (reqExt.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                String[] arr = reqExt.toString().split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
+                String reqImportId = extractImport(reqExt.toString());
+                this.requestInterceptor = reqImportId + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + arr[1];
+            } else {
+                this.requestInterceptor = reqExt.toString();
+            }
+        }
+
+        Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+        if (resExt != null) {
+            if (resExt.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                String[] arr = resExt.toString().split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
+                String resImportId = extractImport(resExt.toString());
+                this.responseInterceptor = resImportId + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + arr[1];
+            } else {
+                this.responseInterceptor = resExt.toString();
+            }
+        }
+    }
+
     private void updateOperationInterceptors(BallerinaOperation operation) {
         String reqModule = operation.getRequestInterceptorModule();
         String reqVersion = operation.getRequestInterceptorModuleVersion();
