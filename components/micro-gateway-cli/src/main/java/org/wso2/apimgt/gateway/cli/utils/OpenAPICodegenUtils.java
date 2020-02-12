@@ -605,15 +605,16 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Writes the dependencies in Ballerina.toml file for the interceptors which are being referred from
-     * the Ballerina Central
+     * Write ballerina dependency libraries to Ballerina.toml.
+     * These dependencies will be pulled from ballerina central
+     * during the mgw project build.
      *
      * @param projectName       The project name
      * @param definitionContext Currently built ballerina service context
      */
-    public static void writeDependency (String projectName, BallerinaService definitionContext) {
-        if (definitionContext.getModuleVersionMap() != null) {
-            HashMap<String, String> moduleVersionMap = definitionContext.getModuleVersionMap();
+    public static void writeDependencies(String projectName, BallerinaService definitionContext) {
+        if (definitionContext.getLibVersions() != null) {
+            HashMap<String, String> moduleVersionMap = definitionContext.getLibVersions();
             String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
                     + CliConstants.BALLERINA_TOML_FILE;
             File file = new File(ballerinaTomlFile);
@@ -974,7 +975,7 @@ public class OpenAPICodegenUtils {
 
         if (parts.length == 2) {
             // set module name when the version is not specified in the swagger definition
-            module = parts[1].split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[0];
+            module = parts[1].split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[0];
         } else if (parts.length == 3) {
             module = parts[1];
         }
@@ -992,7 +993,7 @@ public class OpenAPICodegenUtils {
         String moduleVersion = null;
         String[] splitArray = interceptorStatement.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
         if (splitArray.length == 3) {
-            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[0];
+            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[0];
         }
         return moduleVersion;
     }

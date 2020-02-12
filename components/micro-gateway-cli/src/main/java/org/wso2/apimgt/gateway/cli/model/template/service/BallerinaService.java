@@ -67,7 +67,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private String basepath;
     private HashMap<String, String> pickedIdentifiers = new HashMap<>();
     private ArrayList<String> importModules = new ArrayList<>();
-    private HashMap<String, String> moduleVersionMap = new HashMap<>();
+    private HashMap<String, String> libVersions = new HashMap<>();
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -154,8 +154,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      *
      * @return  {@link HashMap} object
      */
-    public HashMap<String, String> getModuleVersionMap() {
-        return moduleVersionMap;
+    public HashMap<String, String> getLibVersions() {
+        return libVersions;
     }
 
     public ArrayList<String> getImportModules() {
@@ -194,8 +194,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     /**
      * Populate path models into iterable structure.
-     * This method will also add an operationId to each operation,
-     * if operationId not provided in openAPI definition
+     * Method is generally used populate any missing data in {@link BallerinaOperation} after
+     * building operation context. This happens when operation context requires
+     * additional data from its parents to populate its own context details.
      *
      * @param openAPI {@code OpenAPI} definition object with schema definition
      * @throws BallerinaServiceGenException when context building fails
@@ -209,140 +210,26 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         Paths pathList = openAPI.getPaths();
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
-            balPath.getOperations().forEach(operation -> {
+            balPath.getOperations().forEach(op -> {
+                BallerinaOperation operation = op.getValue();
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                String operationId = operation.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
-                operation.getValue().setOperationId(operationId);
+                String operationId = op.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                operation.setOperationId(operationId);
 
-                /*
-                Set the import modules specified in the operation level request interceptors with identifiers when the
-                interceptor is being looked-up from the Ballerina Central, and map the specific module with it's
-                version if it has been specified in the OpenAPI definition.
-                */
-                if ((operation.getValue().getRequestInterceptorModule() != null) &&
-                        (operation.getValue().getRequestInterceptor() != null)) {
-                    if (operation.getValue().getRequestInterceptorModuleVersion() != null) {
-                        // The version of the operation level request interceptor module
-                        String requestInterceptorModuleVersion = operation.getValue()
-                                .getRequestInterceptorModuleVersion();
-                        // maps the operation level request interceptor module name with it's version
-                        setModuleVersionMap(operation.getValue().getRequestInterceptorModule(),
-                                requestInterceptorModuleVersion);
-                    }
-                    // maps the operation level request interceptor module name with an identifier from the list
-                    pickModuleIdentifier(operation.getValue().getRequestInterceptorModule());
-                    String requestInterceptorIdentifier = pickedIdentifiers.get(operation.getValue()
-                            .getRequestInterceptorModule());
-                    String requestInterceptorFunctionCallStatement = requestInterceptorIdentifier
-                            + OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR
-                            + operation.getValue().getRequestInterceptor();
-                    // set the operation level request interceptor
-                    operation.getValue().setRequestInterceptor(requestInterceptorFunctionCallStatement);
-                    // set the import statement for the operation level request interceptor module
-                    addImport(operation.getValue().getRequestInterceptorModule() + ' ' +
-                            OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + requestInterceptorIdentifier);
-                }
+                // set import and function call statement for operation level interceptors
+                updateOperationInterceptors(operation);
 
-                /*
-                Set the import modules specified in the operation level response interceptors with identifiers when the
-                interceptor is being looked-up from the Ballerina Central, and map the specific module with it's
-                version if it has been specified in the OpenAPI definition.
-                */
-                if ((operation.getValue().getResponseInterceptorModule() != null) &&
-                        (operation.getValue().getResponseInterceptor() != null)) {
-                    if (operation.getValue().getResponseInterceptorModuleVersion() != null) {
-                        // The version of the operation level response interceptor module
-                        String responseInterceptorModuleVersion = operation.getValue()
-                                .getResponseInterceptorModuleVersion();
-                        // maps the operation level response interceptor module name with it's version
-                        setModuleVersionMap(operation.getValue().getResponseInterceptorModule(),
-                                responseInterceptorModuleVersion);
-                    }
-                    // maps the operation level response interceptor module name with an identifier from the list
-                    pickModuleIdentifier(operation.getValue().getResponseInterceptorModule());
-                    String responseInterceptorIdentifier = pickedIdentifiers.get(operation.getValue()
-                            .getResponseInterceptorModule());
-                    String responseInterceptorFunctionCallStatement = responseInterceptorIdentifier
-                            + OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR
-                            + operation.getValue().getResponseInterceptor();
-                    // set the operation level response interceptor
-                    operation.getValue().setResponseInterceptor(responseInterceptorFunctionCallStatement);
-                    // set the import statement for the operation level response interceptor module
-                    addImport(operation.getValue().getResponseInterceptorModule()
-                            + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT
-                            + ' ' + responseInterceptorIdentifier);
-                }
+                // set auth providers property corresponding to the security schema in API-level
+                operation.setSecuritySchemas(this.api.getMgwApiSecurity());
 
-                //to set auth providers property corresponding to the security schema in API-level
-                operation.getValue().setSecuritySchemas(this.api.getMgwApiSecurity());
-
-                //if it is the developer first approach
+                // if it is the developer first approach
                 if (isDevFirst) {
-
-                    // for the purpose of adding API level request interceptors
-                    Optional<Object> apiRequestInterceptor = Optional
-                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-                    if (apiRequestInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                        apiRequestInterceptor.ifPresent(value -> {
-                        // set the organization name with the module name
-                        String requestInterceptorModule = value.toString().
-                                split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
-                                + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
-                                + OpenAPICodegenUtils.extractModuleName(value.toString());
-                        // The version of the api level request interceptor module
-                        String requestInterceptorModuleVersion = OpenAPICodegenUtils.
-                                buildModuleVersion(value.toString());
-                            // maps the api level request interceptor module name with it's version if specified
-                            if (requestInterceptorModuleVersion != null) {
-                                setModuleVersionMap(requestInterceptorModule, requestInterceptorModuleVersion);
-                            }
-                        pickModuleIdentifier(requestInterceptorModule);
-                        String apiRequestInterceptorIdentifierValue = pickedIdentifiers.get(requestInterceptorModule);
-                        String apiRequestInterceptorFunctionCallStatement = apiRequestInterceptorIdentifierValue +
-                                OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR +
-                                value.toString().split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
-                        operation.getValue().setApiRequestInterceptor(apiRequestInterceptorFunctionCallStatement);
-                      });
-                    } else {
-                        apiRequestInterceptor.ifPresent(value -> operation.getValue()
-                                .setApiRequestInterceptor(value.toString()));
-                    }
-
-                    // for the purpose of adding API level response interceptors
-                    Optional<Object> apiResponseInterceptor = Optional
-                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-                    if (apiResponseInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                       apiResponseInterceptor.ifPresent(value -> {
-                       // set the organization name with the module name
-                       String responseInterceptorModule = value.toString().
-                               split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
-                               + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
-                               + OpenAPICodegenUtils.extractModuleName(value.toString());
-                       // The version of the api level response interceptor module
-                       String responseInterceptorModuleVersion = OpenAPICodegenUtils.
-                               buildModuleVersion(value.toString());
-                           // maps the api level response interceptor module name with it's version if specified
-                           if (responseInterceptorModuleVersion != null) {
-                               setModuleVersionMap(responseInterceptorModule, responseInterceptorModuleVersion);
-                           }
-                       pickModuleIdentifier(responseInterceptorModule);
-                       String apiResponseInterceptorIdentifierValue = pickedIdentifiers.get(responseInterceptorModule);
-                       String apiResponseInterceptorFunctionCallStatement = apiResponseInterceptorIdentifierValue +
-                               OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR +
-                               value.toString().split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
-                       operation.getValue().setApiResponseInterceptor(apiResponseInterceptorFunctionCallStatement);
-                       });
-                    } else {
-                        apiResponseInterceptor.ifPresent(value -> operation.getValue()
-                                .setApiResponseInterceptor(value.toString()));
-                    }
-
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
                     //api level throttle policy is added only if resource level resource tier is not available
-                    if (operation.getValue().getResourceTier() == null) {
-                        apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    if (operation.getResourceTier() == null) {
+                        apiThrottlePolicy.ifPresent(value -> operation.setResourceTier(value.toString()));
                     }
                     //to add API-level security disable
                     Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
@@ -352,14 +239,14 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             //Since we are considering based on 'x-wso2-disable-security', secured value should be the
                             // negation
                             boolean secured = !(Boolean) value;
-                            operation.getValue().setSecured(secured);
+                            operation.setSecured(secured);
                         } catch (ClassCastException e) {
                             throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
                                     "' should be a boolean value. But provided '" + value.toString() + "'.");
                         }
                     });
                     //to set scope property of API
-                    operation.getValue().setScope(api.getMgwApiScope());
+                    operation.setScope(api.getMgwApiScope());
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
@@ -411,18 +298,46 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         extractImports(reqInterceptor.toString());
         Optional<Object> resInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
         extractImports(resInterceptor.toString());
+    private void updateOperationInterceptors(BallerinaOperation operation) {
+        String reqModule = operation.getRequestInterceptorModule();
+        String reqVersion = operation.getRequestInterceptorModuleVersion();
+        String resModule = operation.getResponseInterceptorModule();
+        String resVersion = operation.getResponseInterceptorModuleVersion();
+
+        if (reqModule != null && operation.getRequestInterceptor() != null) {
+            if (reqVersion != null) {
+                addLibVersion(reqModule, reqVersion);
+            }
+            String id = pickModuleIdentifier(reqModule);
+            addImport(reqModule + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id);
+
+            String function = id + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + operation.getRequestInterceptor();
+            operation.setRequestInterceptor(function);
+        }
+
+        if (resModule != null && operation.getResponseInterceptor() != null) {
+            if (resVersion != null) {
+                addLibVersion(resModule, resVersion);
+            }
+            String id = pickModuleIdentifier(resModule);
+            addImport(resModule + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id);
+
+            String function = id + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + operation.getResponseInterceptor();
+            operation.setRequestInterceptor(function);
+        }
     }
 
     /**
-     * Maps the interceptor's Module Name with the specific version when the interceptors are being looked-up from
-     * the Ballerina Central.
+     * Add new item to map containing the ballerina library to version mapping.
+     * This map will be used to populate ballerina.toml file which will define
+     * specific b7a version for each ballerina module.
      *
-     * @param interceptorModuleName The interceptor module name with the organization
-     * @param moduleVersion         The interceptor module version
+     * @param libName    The interceptor module name with the organization
+     * @param libVersion The interceptor module version
      */
-    private void setModuleVersionMap(String interceptorModuleName, String moduleVersion) {
-        if ((!this.moduleVersionMap.containsKey(interceptorModuleName)) && (moduleVersion != null)) {
-            this.moduleVersionMap.put(interceptorModuleName, moduleVersion);
+    private void addLibVersion(String libName, String libVersion) {
+        if ((!this.libVersions.containsKey(libName)) && (libVersion != null)) {
+            this.libVersions.put(libName, libVersion);
         }
     }
 

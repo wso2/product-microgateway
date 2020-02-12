@@ -56,14 +56,27 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
     private MgwEndpointConfigDTO epConfig;
+    private String apiRequestInterceptor;
+    private String apiResponseInterceptor;
+
+    /**
+     * b7a module name of the request interceptor function.
+     */
+    private String requestInterceptorModule;
+    /**
+     * b7a module name of the response interceptor function.
+     */
+    private String responseInterceptorModule;
+    /**
+     * b7a function name of operation level request interceptor.
+     */
     private String requestInterceptor;
+    /**
+     * b7a function name of operation level response interceptor.
+     */
     private String responseInterceptor;
     private String requestInterceptorModuleVersion;
     private String responseInterceptorModuleVersion;
-    private String apiRequestInterceptor;
-    private String apiResponseInterceptor;
-    private String requestInterceptorModule;
-    private String responseInterceptorModule;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
@@ -102,66 +115,26 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
         setEpConfigDTO(operation);
-        Map<String, Object> extensions = operation.getExtensions();
-        if (extensions != null) {
-            Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
+        Map<String, Object> exts = operation.getExtensions();
+
+        if (exts != null) {
+            resolveInterceptors(exts);
+            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
+            Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
-            Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
+            Optional<Object> authType = Optional.ofNullable(exts.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
                     this.isSecured = false;
                 }
             });
 
-            /*
-            Set resource level request interceptors and set the ballerina module to be imported if specified.
-            */
-            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            if (requestInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                requestInterceptor.ifPresent(value -> {
-                    // set the organization name with the module name
-                    this.requestInterceptorModule = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
-                            + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
-                            + OpenAPICodegenUtils.extractModuleName(value.toString());
-                    this.requestInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
-                    this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
-                });
-            } else {
-                requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
-            }
-
-            /*
-            Set resource level response interceptors and set the ballerina module to be imported if specified.
-            */
-            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            if (responseInterceptor.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                responseInterceptor.ifPresent(value -> {
-                    // set the organization name with the module name
-                    this.responseInterceptorModule = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0]
-                            + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR
-                            + OpenAPICodegenUtils.extractModuleName(value.toString());
-                    this.responseInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_VERSION_SEPARATOR)[1];
-                    this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
-                });
-            } else {
-                responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
-            }
-
             //set dev-first resource level throttle policy
-            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.THROTTLING_TIER));
-            devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.DISABLE_SECURITY));
-            devFirstDisableSecurity.ifPresent(value -> {
+            Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
+            extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
+            extDisableSecurity.ifPresent(value -> {
                 try {
                     this.isSecured = !(Boolean) value;
                     this.isSecuredAssignedFromOperation = true;
@@ -390,5 +363,38 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         if (this.authProviders.size() < 1) {
             authProviders = OpenAPICodegenUtils.getAuthProviders(schemas);
         }
+    }
+
+    private void resolveInterceptors(Map<String, Object> exts) {
+        Optional<Object> reqInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+        reqInterceptor.ifPresent(val -> {
+            String interceptorExt = val.toString();
+            if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
+                String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+
+                this.requestInterceptorModule = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
+                this.requestInterceptor = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[1];
+                this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
+            } else {
+                this.requestInterceptor = interceptorExt;
+            }
+        });
+
+
+        Optional<Object> resInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+        resInterceptor.ifPresent(val -> {
+            String interceptorExt = val.toString();
+            if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
+                String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+
+                this.responseInterceptorModule = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
+                this.responseInterceptor = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[1];
+                this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
+            } else {
+                this.responseInterceptor = interceptorExt;
+            }
+        });
     }
 }

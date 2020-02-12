@@ -159,7 +159,7 @@ public class CodeGenerator {
 
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
-                        OpenAPICodegenUtils.writeDependency(projectName, definitionContext);
+                        OpenAPICodegenUtils.writeDependencies(projectName, definitionContext);
                         serviceList.add(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
