@@ -40,7 +40,10 @@ import wso2/gateway;
 {{>kubernetes}}
 
 @http:ServiceConfig {
-    basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}}
+    basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}},
+    auth: {
+        authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
+    }
    {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -57,7 +60,11 @@ import wso2/gateway;
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
     authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
-    security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
+    security: {
+            "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
+            "mutualSSL": "{{api.mutualSSL}}",
+            "applicationSecurityOptional": {{applicationSecurityOptional}}
+        }
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {

@@ -250,34 +250,72 @@ public class OpenAPICodegenUtils {
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
-        api.setTransport(getTransport(openAPI));
+        setTransportSecurity(api, getTransportSecurityfromDef(openAPI));
         //open API content should be set in json in order to validation filter to work.
         api.setApiDefinition(openAPIContent);
         return api;
     }
 
-    private static List<String> getTransport(OpenAPI openAPI) {
+    /**
+     * Set mutual SSL and http, https transport security to API.
+     *
+     * @param api Extended API object
+     * @param transportSecurity Transport security
+     */
+    private static void setTransportSecurity(ExtendedAPI api, TransportSecurity transportSecurity) {
         List<String> transports = new ArrayList<>();
+        if (transportSecurity != null) {
+            if (transportSecurity.getHttp()) {
+                transports.add(OpenAPIConstants.TRANSPORT_HTTP);
+            }
+            if (transportSecurity.getHttps()) {
+                transports.add(OpenAPIConstants.TRANSPORT_HTTPS);
+            }
+        }
+        if (transports.isEmpty()) {
+            transports = Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS);
+        }
+        api.setTransport(transports);
+        api.setMutualSSL(transportSecurity != null ? transportSecurity.getMutualSSL() : OpenAPIConstants.OPTIONAL);
+    }
+
+    /**
+     * Get transport security from API Definition extension
+     *
+     * @param openAPI API definition
+     * @return TransportSecurity
+     */
+    private static TransportSecurity getTransportSecurityfromDef(OpenAPI openAPI) {
+        TransportSecurity transportSecurity = null;
         Map<String, Object> apiDefExtensions = openAPI.getExtensions();
         if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
-            logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
+            }
             try {
-                TransportSecurity transportSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                transportSecurity = new ObjectMapper().convertValue(apiDefExtensions
                         .get(OpenAPIConstants.TRANSPORT_SECURITY), TransportSecurity.class);
-                if (transportSecurity.getHttp()) {
-                    transports.add(OpenAPIConstants.TRANSPORT_HTTP);
-                }
-                if (transportSecurity.getHttps()) {
-                    transports.add(OpenAPIConstants.TRANSPORT_HTTPS);
-                }
             } catch (Exception exception) {
                 throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
                         openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.TRANSPORT_SECURITY +
                         " extension but failed to match to the required format.");
             }
+            validateTransportSecurity(openAPI, transportSecurity);
         }
-        return transports.isEmpty() ? Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS)
-                : transports;
+        return transportSecurity;
+    }
+
+    private static void validateTransportSecurity(OpenAPI openAPI, TransportSecurity transportSecurity) {
+        if (!transportSecurity.getHttps() && !transportSecurity.getHttps()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Atleast one transport type(http, https) should be enabled.");
+            }
+            throw new CLIRuntimeException("Atleast one transport type(http, https) should be enabled for '"
+                    + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion() + "'");
+        }
+        if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(transportSecurity.getMutualSSL())) {
+            transportSecurity.setHttps(true);
+        }
     }
 
     public static void setAdditionalConfig(ExtendedAPI api) {
@@ -721,20 +759,6 @@ public class OpenAPICodegenUtils {
      */
     private static void setMgwAPISecurityAndScopes(ExtendedAPI api, OpenAPI openAPI) {
         String[] securitySchemasAndScopes = generateMgwSecuritySchemasAndScopes(openAPI.getSecurity());
-        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
-        if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
-            logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
-            try {
-                ApplicationSecurity appSecurity = new ObjectMapper().convertValue(apiDefExtensions
-                        .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
-                api.setApplicationSecurity(appSecurity);
-            } catch (Exception exception) {
-                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
-                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.APPLICATION_SECURITY +
-                        " extension but failed to match " + OpenAPIConstants.APPLICATION_SECURITY_TYPES +
-                        " to the required format.");
-            }
-        }
         String securitySchemas = securitySchemasAndScopes[0];
         String scopes = securitySchemasAndScopes[1];
         //if securitySchemas String is null, set to oauth2
@@ -743,6 +767,50 @@ public class OpenAPICodegenUtils {
         }
         api.setMgwApiSecurity(securitySchemas);
         api.setMgwApiScope(scopes);
+        ApplicationSecurity appSecurityfromDef = getApplicationSecurityfromDef(openAPI, api.getMutualSSL());
+        api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
+    }
+
+    /**
+     * Get application security from API Definition extension
+     *
+     * @param openAPI API definition
+     * @return ApplicationSecurity
+     */
+    private static ApplicationSecurity getApplicationSecurityfromDef(OpenAPI openAPI, String mutualSSL) {
+        ApplicationSecurity appSecurity = null;
+        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
+        if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
+            }
+            try {
+                appSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                        .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
+
+            } catch (Exception exception) {
+                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.APPLICATION_SECURITY +
+                        " extension but failed to match " + OpenAPIConstants.APPLICATION_SECURITY_TYPES +
+                        " to the required format.");
+            }
+            if (!validateAppSecurity(appSecurity, mutualSSL)) {
+                throw new CLIRuntimeException("Application security is mandatory for "
+                        + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion()
+                        + " but security types were not found");
+            }
+        }
+        return appSecurity;
+    }
+
+    private static boolean validateAppSecurity(ApplicationSecurity appSecurity, String mutualSSL) {
+        if (!appSecurity.isOptional()) {
+            return !appSecurity.getSecurityTypes().isEmpty();
+        }
+        if (!OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -817,7 +885,7 @@ public class OpenAPICodegenUtils {
                 appSecurity = new ObjectMapper().convertValue(
                         operationExtensions.get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
             } catch (Exception exception) {
-                throw new CLIRuntimeException("Operation contains " + OpenAPIConstants.TRANSPORT_SECURITY +
+                throw new CLIRuntimeException("Operation contains " + OpenAPIConstants.APPLICATION_SECURITY +
                         " extension but failed to match to the required format.");
             }
         }
