@@ -209,6 +209,11 @@ public class CLIExecutor {
                 desPath = new File(homeDirectory + File.separator + project + File.separator +
                         CliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
                         openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
+            } else if (openAPIFileName.endsWith(".proto")) {
+                desPath = new File(
+                        homeDirectory + File.separator + project + File.separator +
+                                CliConstants.PROJECT_GRPC_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                .substring(openAPIFileName.lastIndexOf("/") + 1));
             } else {
                 desPath = new File(
                         homeDirectory + File.separator + project + File.separator +

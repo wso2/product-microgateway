@@ -94,8 +94,10 @@ public function getFilters() returns http:RequestFilter[] {
     map<json> deployedPolicies = getDeployedPolicies();
     map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
 
+    // Grpc Filter
+    gateway:GrpcFilter grpcFilter = new gateway:GrpcFilter();
     // Authentication filter
-    gateway:PreAuthnFilter preAuthnFilter;
+    gateway:PreAuthnFilter | gateway:PreAuthnFilterWrapper preAuthnFilter;
     // Throttling filter
     gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
     // Analytic filter
@@ -129,7 +131,8 @@ public function getFilters() returns http:RequestFilter[] {
     // Extension filter
     ExtensionFilter extensionFilter = new;
 
-    return [preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter, extensionFilter];
+    return [grpcFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter,
+        extensionFilter];
 }
 
 public function getOpenAPIMapFromFile() returns @tainted map<json>{

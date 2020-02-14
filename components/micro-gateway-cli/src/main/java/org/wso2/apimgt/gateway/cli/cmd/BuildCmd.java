@@ -40,6 +40,7 @@ import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -104,11 +105,14 @@ public class BuildCmd implements LauncherCmd {
 
             String importedAPIDefLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
             String addedAPIDefLocation = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
-            boolean isImportedAPIsAvailable = checkDirContentAvailability(importedAPIDefLocation);
-            boolean isAddedAPIsAvailable = checkDirContentAvailability(addedAPIDefLocation);
+            String grpcProtoLocation = CmdUtils.getGrpcDefinitionsDirPath(projectName);
+            boolean isImportedAPIsAvailable = isOpenAPIsAvailable(importedAPIDefLocation);
+            boolean isAddedAPIsAvailable = isOpenAPIsAvailable(addedAPIDefLocation);
+            boolean isProtoFilesAvailable = isProtosAvailable(grpcProtoLocation);
 
-            if (!isImportedAPIsAvailable && !isAddedAPIsAvailable) {
-                throw new CLIRuntimeException("Nothing to build. API definitions does not exist.");
+            if (!isImportedAPIsAvailable && !isAddedAPIsAvailable && !isProtoFilesAvailable) {
+                throw new CLIRuntimeException("Nothing to build. API definitions/ Grpc Service definitions does " +
+                        "not exist.");
             }
             // Some times user might run the command from different directory other than the directory where the project
             // exists. In those cases we need to ask the users to run the command in directory where project
@@ -142,12 +146,28 @@ public class BuildCmd implements LauncherCmd {
         }
     }
 
-    private boolean checkDirContentAvailability(String fileLocation) {
+    private boolean isOpenAPIsAvailable(String fileLocation) {
         File file = new File(fileLocation);
         FilenameFilter filter = (f, name) -> (name.endsWith(".yaml") || name.endsWith(".json"));
         String[] fileNames = file.list(filter);
 
-        return file.list() != null && fileNames != null && fileNames.length > 0;
+        return fileNames != null && fileNames.length > 0;
+    }
+
+    private boolean isProtosAvailable(String fileLocation) {
+        File file = new File(fileLocation);
+        FilenameFilter protoFilter = (f, name) -> (name.endsWith(".proto"));
+        String[] fileNames = file.list(protoFilter);
+        if (fileNames != null && fileNames.length > 0) {
+            return true;
+        }
+        //allow the users to have proto definitions inside a directory if required
+        FileFilter dirFilter = (f) -> f.isDirectory();
+        File[] subDirectories = file.listFiles(dirFilter);
+        for (File dir : subDirectories) {
+            return isProtosAvailable(dir.getAbsolutePath());
+        }
+        return false;
     }
 
     @Override

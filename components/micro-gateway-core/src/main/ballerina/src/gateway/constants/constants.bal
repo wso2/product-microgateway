@@ -366,6 +366,7 @@ public const string TOKEN_SERVICE = "TokenService";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
+public const string KEY_GRPC_FILTER = "GrpcFilter";
 
 //jwt claims
 const string APPLICATION = "application";
@@ -375,3 +376,8 @@ const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
 
 public const string INTROSPECT_CONTEXT = "introspect";
+
+const string IS_GRPC = "isGrpc";
+const string GRPC_STATUS_HEADER = "grpc-status";
+const string GRPC_MESSAGE_HEADER = "grpc-message";
+const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";

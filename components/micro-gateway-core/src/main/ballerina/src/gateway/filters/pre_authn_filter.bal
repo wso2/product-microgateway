@@ -29,11 +29,8 @@ public type PreAuthnFilter object {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        //Setting UUID
         int startingTime = getCurrentTimeForAnalytics();
         context.attributes[REQUEST_TIME] = startingTime;
-        checkOrSetMessageID(context);
-        setHostHeaderToFilterContext(request, context);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return result;

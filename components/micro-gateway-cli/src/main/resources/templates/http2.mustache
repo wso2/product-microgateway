@@ -1,2 +1,2 @@
 
-    httpVersion: gateway:getHttpVersion()
+   {{#if isGrpc}} httpVersion: "2.0" {{else}} httpVersion: gateway:getHttpVersion() {{/if}}

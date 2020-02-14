@@ -272,14 +272,16 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     http:Response response = new;
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = {
-        fault: {
-            code: errorCode,
-            message: errorMesssage,
-            description: errorDescription
-        }
-    };
-    response.setJsonPayload(payload);
+    if (!isGrpcRequest(context)) {
+        json payload = {
+            fault: {
+                code: errorCode,
+                message: errorMesssage,
+                description: errorDescription
+            }
+        };
+        response.setJsonPayload(payload);
+    }
     var value = caller->respond(response);
     if (value is error) {
         log:printError("Error occurred while sending the error response", err = value);
@@ -295,14 +297,16 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
     int errorCode = <int>context.attributes[ERROR_CODE];
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = {
-        fault: {
+    if (! context.attributes.hasKey(IS_GRPC)) {
+        json payload = {
+            fault: {
             code: errorCode,
             message: errorMessage,
             description: errorDescription
         }
     };
     response.setJsonPayload(payload);
+    }
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
@@ -651,4 +655,9 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
+}
+
+function isGrpcRequest(http:FilterContext context) returns boolean {
+    //if the key is there, the value is always set to true.
+    return context.attributes.hasKey(IS_GRPC);
 }

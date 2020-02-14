@@ -58,6 +58,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
+    private boolean isGrpc;
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -94,6 +95,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
+        this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
         this.authProviders = OpenAPICodegenUtils
                 .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
