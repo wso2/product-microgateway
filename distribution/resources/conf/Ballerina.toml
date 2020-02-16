@@ -3,6 +3,9 @@
 org-name= "wso2"
 version= "3.1.0"
 
+[dependencies]
+"wso2/gateway" = { path = "${MGW-TK_HOME}/lib/gateway-balo/gateway-2019r3-java8-3.1.0.balo"}
+
 [platform]
 target = "java8"
 
@@ -20,6 +23,4 @@ target = "java8"
         version = "1.1.1"
         groupId = "org.wso2.securevault"
 
-[dependencies]
-"wso2/gateway" = { path = "${MGW-TK_HOME}/lib/gateway-balo/gateway-2019r3-java8-3.1.0.balo"}
 
