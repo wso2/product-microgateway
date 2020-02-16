@@ -1,0 +1,61 @@
+//  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+//  WSO2 Inc. licenses this file to you under the Apache License,
+//  Version 2.0 (the "License"); you may not use this file except
+//  in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
+
+syntax = "proto3";
+package wso2;
+
+option java_package = "org.wso2.apimgt.gateway.cli.protobuf";
+option java_outer_classname = "ExtensionHolder";
+
+import "google/protobuf/descriptor.proto";
+
+//service level extensions
+extend google.protobuf.ServiceOptions {
+  Endpoints production_endpoints = 50001;
+  Endpoints sandbox_endpoints = 50002;
+  repeated Security security = 50003;
+  string throttling_tier = 50004;
+}
+
+//method level extensions
+extend google.protobuf.MethodOptions {
+  	string method_throttling_tier = 50006;
+  	string method_scopes = 50007;
+}
+
+
+//to define endpoints
+message Endpoints {
+	repeated Endpoint endpoint = 1;
+	EndpointType type = 2;
+}
+
+message Endpoint {
+	string url = 1;
+}
+
+
+enum EndpointType {
+	DEFAULT = 0;
+	FAILOVER = 1;
+}
+
+enum Security {
+	NONE = 0;
+	BASIC = 1;
+	OAUTH2 = 2;
+	JWT = 3;
+}

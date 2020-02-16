@@ -7,12 +7,12 @@ public final class ExtensionHolder {
     private ExtensionHolder() {}
     public static void registerAllExtensions(
             com.google.protobuf.ExtensionRegistryLite registry) {
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2ProductionEndpoints);
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2SandboxEndpoints);
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2Security);
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2ThrottlingTier);
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2MethodThrottlingTier);
-        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.xWso2MethodScopes);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.productionEndpoints);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.sandboxEndpoints);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.security);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.throttlingTier);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.methodThrottlingTier);
+        registry.add(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.methodScopes);
     }
 
     public static void registerAllExtensions(
@@ -21,7 +21,7 @@ public final class ExtensionHolder {
                 (com.google.protobuf.ExtensionRegistryLite) registry);
     }
     /**
-     * Protobuf enum {@code EndpointType}
+     * Protobuf enum {@code wso2.EndpointType}
      */
     public enum EndpointType
             implements com.google.protobuf.ProtocolMessageEnum {
@@ -121,11 +121,11 @@ public final class ExtensionHolder {
             this.value = value;
         }
 
-        // @@protoc_insertion_point(enum_scope:EndpointType)
+        // @@protoc_insertion_point(enum_scope:wso2.EndpointType)
     }
 
     /**
-     * Protobuf enum {@code Security}
+     * Protobuf enum {@code wso2.Security}
      */
     public enum Security
             implements com.google.protobuf.ProtocolMessageEnum {
@@ -243,44 +243,44 @@ public final class ExtensionHolder {
             this.value = value;
         }
 
-        // @@protoc_insertion_point(enum_scope:Security)
+        // @@protoc_insertion_point(enum_scope:wso2.Security)
     }
 
     public interface EndpointsOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:Endpoints)
+            // @@protoc_insertion_point(interface_extends:wso2.Endpoints)
             com.google.protobuf.MessageOrBuilder {
 
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint>
         getEndpointList();
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index);
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         int getEndpointCount();
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
         getEndpointOrBuilderList();
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
                 int index);
 
         /**
-         * <code>.EndpointType type = 2;</code>
+         * <code>.wso2.EndpointType type = 2;</code>
          * @return The enum numeric value on the wire for type.
          */
         int getTypeValue();
         /**
-         * <code>.EndpointType type = 2;</code>
+         * <code>.wso2.EndpointType type = 2;</code>
          * @return The type.
          */
         org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType();
@@ -290,11 +290,11 @@ public final class ExtensionHolder {
      *to define endpoints
      * </pre>
      *
-     * Protobuf type {@code Endpoints}
+     * Protobuf type {@code wso2.Endpoints}
      */
     public  static final class Endpoints extends
             com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:Endpoints)
+            // @@protoc_insertion_point(message_implements:wso2.Endpoints)
             EndpointsOrBuilder {
         private static final long serialVersionUID = 0L;
         // Use Endpoints.newBuilder() to construct.
@@ -376,13 +376,13 @@ public final class ExtensionHolder {
         }
         public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoints_descriptor;
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoints_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoints_fieldAccessorTable
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoints_fieldAccessorTable
                     .ensureFieldAccessorsInitialized(
                             org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.Builder.class);
         }
@@ -390,32 +390,32 @@ public final class ExtensionHolder {
         public static final int ENDPOINT_FIELD_NUMBER = 1;
         private java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> endpoint_;
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> getEndpointList() {
             return endpoint_;
         }
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         public java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
         getEndpointOrBuilderList() {
             return endpoint_;
         }
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         public int getEndpointCount() {
             return endpoint_.size();
         }
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index) {
             return endpoint_.get(index);
         }
         /**
-         * <code>repeated .Endpoint endpoint = 1;</code>
+         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
          */
         public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
                 int index) {
@@ -425,14 +425,14 @@ public final class ExtensionHolder {
         public static final int TYPE_FIELD_NUMBER = 2;
         private int type_;
         /**
-         * <code>.EndpointType type = 2;</code>
+         * <code>.wso2.EndpointType type = 2;</code>
          * @return The enum numeric value on the wire for type.
          */
         public int getTypeValue() {
             return type_;
         }
         /**
-         * <code>.EndpointType type = 2;</code>
+         * <code>.wso2.EndpointType type = 2;</code>
          * @return The type.
          */
         public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType() {
@@ -613,21 +613,21 @@ public final class ExtensionHolder {
          *to define endpoints
          * </pre>
          *
-         * Protobuf type {@code Endpoints}
+         * Protobuf type {@code wso2.Endpoints}
          */
         public static final class Builder extends
                 com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:Endpoints)
+                // @@protoc_insertion_point(builder_implements:wso2.Endpoints)
                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointsOrBuilder {
             public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoints_descriptor;
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoints_descriptor;
             }
 
             @java.lang.Override
             protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoints_fieldAccessorTable
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoints_fieldAccessorTable
                         .ensureFieldAccessorsInitialized(
                                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.Builder.class);
             }
@@ -665,7 +665,7 @@ public final class ExtensionHolder {
             @java.lang.Override
             public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoints_descriptor;
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoints_descriptor;
             }
 
             @java.lang.Override
@@ -816,7 +816,7 @@ public final class ExtensionHolder {
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder> endpointBuilder_;
 
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> getEndpointList() {
                 if (endpointBuilder_ == null) {
@@ -826,7 +826,7 @@ public final class ExtensionHolder {
                 }
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public int getEndpointCount() {
                 if (endpointBuilder_ == null) {
@@ -836,7 +836,7 @@ public final class ExtensionHolder {
                 }
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index) {
                 if (endpointBuilder_ == null) {
@@ -846,7 +846,7 @@ public final class ExtensionHolder {
                 }
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder setEndpoint(
                     int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
@@ -863,7 +863,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder setEndpoint(
                     int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
@@ -877,7 +877,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder addEndpoint(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
                 if (endpointBuilder_ == null) {
@@ -893,7 +893,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder addEndpoint(
                     int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
@@ -910,7 +910,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder addEndpoint(
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
@@ -924,7 +924,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder addEndpoint(
                     int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
@@ -938,7 +938,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder addAllEndpoint(
                     java.lang.Iterable<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> values) {
@@ -953,7 +953,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder clearEndpoint() {
                 if (endpointBuilder_ == null) {
@@ -966,7 +966,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public Builder removeEndpoint(int index) {
                 if (endpointBuilder_ == null) {
@@ -979,14 +979,14 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder getEndpointBuilder(
                     int index) {
                 return getEndpointFieldBuilder().getBuilder(index);
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
                     int index) {
@@ -996,7 +996,7 @@ public final class ExtensionHolder {
                 }
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
             getEndpointOrBuilderList() {
@@ -1007,14 +1007,14 @@ public final class ExtensionHolder {
                 }
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder addEndpointBuilder() {
                 return getEndpointFieldBuilder().addBuilder(
                         org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance());
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder addEndpointBuilder(
                     int index) {
@@ -1022,7 +1022,7 @@ public final class ExtensionHolder {
                         index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance());
             }
             /**
-             * <code>repeated .Endpoint endpoint = 1;</code>
+             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
              */
             public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder>
             getEndpointBuilderList() {
@@ -1045,14 +1045,14 @@ public final class ExtensionHolder {
 
             private int type_ = 0;
             /**
-             * <code>.EndpointType type = 2;</code>
+             * <code>.wso2.EndpointType type = 2;</code>
              * @return The enum numeric value on the wire for type.
              */
             public int getTypeValue() {
                 return type_;
             }
             /**
-             * <code>.EndpointType type = 2;</code>
+             * <code>.wso2.EndpointType type = 2;</code>
              * @param value The enum numeric value on the wire for type to set.
              * @return This builder for chaining.
              */
@@ -1062,7 +1062,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>.EndpointType type = 2;</code>
+             * <code>.wso2.EndpointType type = 2;</code>
              * @return The type.
              */
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType() {
@@ -1071,7 +1071,7 @@ public final class ExtensionHolder {
                 return result == null ? org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.UNRECOGNIZED : result;
             }
             /**
-             * <code>.EndpointType type = 2;</code>
+             * <code>.wso2.EndpointType type = 2;</code>
              * @param value The type to set.
              * @return This builder for chaining.
              */
@@ -1085,7 +1085,7 @@ public final class ExtensionHolder {
                 return this;
             }
             /**
-             * <code>.EndpointType type = 2;</code>
+             * <code>.wso2.EndpointType type = 2;</code>
              * @return This builder for chaining.
              */
             public Builder clearType() {
@@ -1107,10 +1107,10 @@ public final class ExtensionHolder {
             }
 
 
-            // @@protoc_insertion_point(builder_scope:Endpoints)
+            // @@protoc_insertion_point(builder_scope:wso2.Endpoints)
         }
 
-        // @@protoc_insertion_point(class_scope:Endpoints)
+        // @@protoc_insertion_point(class_scope:wso2.Endpoints)
         private static final org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints DEFAULT_INSTANCE;
         static {
             DEFAULT_INSTANCE = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints();
@@ -1148,7 +1148,7 @@ public final class ExtensionHolder {
     }
 
     public interface EndpointOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:Endpoint)
+            // @@protoc_insertion_point(interface_extends:wso2.Endpoint)
             com.google.protobuf.MessageOrBuilder {
 
         /**
@@ -1164,11 +1164,11 @@ public final class ExtensionHolder {
         getUrlBytes();
     }
     /**
-     * Protobuf type {@code Endpoint}
+     * Protobuf type {@code wso2.Endpoint}
      */
     public  static final class Endpoint extends
             com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:Endpoint)
+            // @@protoc_insertion_point(message_implements:wso2.Endpoint)
             EndpointOrBuilder {
         private static final long serialVersionUID = 0L;
         // Use Endpoint.newBuilder() to construct.
@@ -1236,13 +1236,13 @@ public final class ExtensionHolder {
         }
         public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoint_descriptor;
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoint_fieldAccessorTable
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_fieldAccessorTable
                     .ensureFieldAccessorsInitialized(
                             org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder.class);
         }
@@ -1438,21 +1438,21 @@ public final class ExtensionHolder {
             return builder;
         }
         /**
-         * Protobuf type {@code Endpoint}
+         * Protobuf type {@code wso2.Endpoint}
          */
         public static final class Builder extends
                 com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:Endpoint)
+                // @@protoc_insertion_point(builder_implements:wso2.Endpoint)
                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder {
             public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoint_descriptor;
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
             }
 
             @java.lang.Override
             protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoint_fieldAccessorTable
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_fieldAccessorTable
                         .ensureFieldAccessorsInitialized(
                                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder.class);
             }
@@ -1483,7 +1483,7 @@ public final class ExtensionHolder {
             @java.lang.Override
             public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_Endpoint_descriptor;
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
             }
 
             @java.lang.Override
@@ -1673,10 +1673,10 @@ public final class ExtensionHolder {
             }
 
 
-            // @@protoc_insertion_point(builder_scope:Endpoint)
+            // @@protoc_insertion_point(builder_scope:wso2.Endpoint)
         }
 
-        // @@protoc_insertion_point(class_scope:Endpoint)
+        // @@protoc_insertion_point(class_scope:wso2.Endpoint)
         private static final org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint DEFAULT_INSTANCE;
         static {
             DEFAULT_INSTANCE = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint();
@@ -1713,82 +1713,82 @@ public final class ExtensionHolder {
 
     }
 
-    public static final int X_WSO2_PRODUCTION_ENDPOINTS_FIELD_NUMBER = 50001;
+    public static final int PRODUCTION_ENDPOINTS_FIELD_NUMBER = 50001;
     /**
      * <code>extend .google.protobuf.ServiceOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.ServiceOptions,
-            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints> xWso2ProductionEndpoints = com.google.protobuf.GeneratedMessage
+            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints> productionEndpoints = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.class,
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.getDefaultInstance());
-    public static final int X_WSO2_SANDBOX_ENDPOINTS_FIELD_NUMBER = 50002;
+    public static final int SANDBOX_ENDPOINTS_FIELD_NUMBER = 50002;
     /**
      * <code>extend .google.protobuf.ServiceOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.ServiceOptions,
-            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints> xWso2SandboxEndpoints = com.google.protobuf.GeneratedMessage
+            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints> sandboxEndpoints = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.class,
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.getDefaultInstance());
-    public static final int X_WSO2_SECURITY_FIELD_NUMBER = 50003;
+    public static final int SECURITY_FIELD_NUMBER = 50003;
     /**
      * <code>extend .google.protobuf.ServiceOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.ServiceOptions,
-            java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Security>> xWso2Security = com.google.protobuf.GeneratedMessage
+            java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Security>> security = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Security.class,
                     null);
-    public static final int X_WSO2_THROTTLING_TIER_FIELD_NUMBER = 50004;
+    public static final int THROTTLING_TIER_FIELD_NUMBER = 50004;
     /**
      * <code>extend .google.protobuf.ServiceOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.ServiceOptions,
-            java.lang.String> xWso2ThrottlingTier = com.google.protobuf.GeneratedMessage
+            java.lang.String> throttlingTier = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     java.lang.String.class,
                     null);
-    public static final int X_WSO2_METHOD_THROTTLING_TIER_FIELD_NUMBER = 50006;
+    public static final int METHOD_THROTTLING_TIER_FIELD_NUMBER = 50006;
     /**
      * <code>extend .google.protobuf.MethodOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.MethodOptions,
-            java.lang.String> xWso2MethodThrottlingTier = com.google.protobuf.GeneratedMessage
+            java.lang.String> methodThrottlingTier = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     java.lang.String.class,
                     null);
-    public static final int X_WSO2_METHOD_SCOPES_FIELD_NUMBER = 50007;
+    public static final int METHOD_SCOPES_FIELD_NUMBER = 50007;
     /**
      * <code>extend .google.protobuf.MethodOptions { ... }</code>
      */
     public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
             com.google.protobuf.DescriptorProtos.MethodOptions,
-            java.lang.String> xWso2MethodScopes = com.google.protobuf.GeneratedMessage
+            java.lang.String> methodScopes = com.google.protobuf.GeneratedMessage
             .newFileScopedGeneratedExtension(
                     java.lang.String.class,
                     null);
     private static final com.google.protobuf.Descriptors.Descriptor
-            internal_static_Endpoints_descriptor;
+            internal_static_wso2_Endpoints_descriptor;
     private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internal_static_Endpoints_fieldAccessorTable;
+            internal_static_wso2_Endpoints_fieldAccessorTable;
     private static final com.google.protobuf.Descriptors.Descriptor
-            internal_static_Endpoint_descriptor;
+            internal_static_wso2_Endpoint_descriptor;
     private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internal_static_Endpoint_fieldAccessorTable;
+            internal_static_wso2_Endpoint_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor
     getDescriptor() {
@@ -1798,49 +1798,49 @@ public final class ExtensionHolder {
             descriptor;
     static {
         java.lang.String[] descriptorData = {
-                "\n\027wso2CustomOptions.proto\032 google/protob" +
-                        "uf/descriptor.proto\"E\n\tEndpoints\022\033\n\010endp" +
-                        "oint\030\001 \003(\0132\t.Endpoint\022\033\n\004type\030\002 \001(\0162\r.En" +
-                        "dpointType\"\027\n\010Endpoint\022\013\n\003url\030\001 \001(\t*)\n\014E" +
-                        "ndpointType\022\013\n\007DEFAULT\020\000\022\014\n\010FAILOVER\020\001*4" +
-                        "\n\010Security\022\010\n\004NONE\020\000\022\t\n\005BASIC\020\001\022\n\n\006OAUTH" +
-                        "2\020\002\022\007\n\003JWT\020\003:R\n\033x_wso2_production_endpoi" +
-                        "nts\022\037.google.protobuf.ServiceOptions\030\321\206\003" +
-                        " \001(\0132\n.Endpoints:O\n\030x_wso2_sandbox_endpo" +
-                        "ints\022\037.google.protobuf.ServiceOptions\030\322\206" +
-                        "\003 \001(\0132\n.Endpoints:E\n\017x_wso2_security\022\037.g" +
-                        "oogle.protobuf.ServiceOptions\030\323\206\003 \003(\0162\t." +
-                        "Security:A\n\026x_wso2_throttling_tier\022\037.goo" +
-                        "gle.protobuf.ServiceOptions\030\324\206\003 \001(\t:G\n\035x" +
-                        "_wso2_method_throttling_tier\022\036.google.pr" +
-                        "otobuf.MethodOptions\030\326\206\003 \001(\t:>\n\024x_wso2_m" +
-                        "ethod_scopes\022\036.google.protobuf.MethodOpt" +
-                        "ions\030\327\206\003 \001(\tB7\n$org.wso2.apimgt.gateway." +
-                        "cli.protobufB\017ExtensionHolderb\006proto3"
+                "\n\027wso2CustomOptions.proto\022\004wso2\032 google/" +
+                        "protobuf/descriptor.proto\"O\n\tEndpoints\022 " +
+                        "\n\010endpoint\030\001 \003(\0132\016.wso2.Endpoint\022 \n\004type" +
+                        "\030\002 \001(\0162\022.wso2.EndpointType\"\027\n\010Endpoint\022\013" +
+                        "\n\003url\030\001 \001(\t*)\n\014EndpointType\022\013\n\007DEFAULT\020\000" +
+                        "\022\014\n\010FAILOVER\020\001*4\n\010Security\022\010\n\004NONE\020\000\022\t\n\005" +
+                        "BASIC\020\001\022\n\n\006OAUTH2\020\002\022\007\n\003JWT\020\003:P\n\024producti" +
+                        "on_endpoints\022\037.google.protobuf.ServiceOp" +
+                        "tions\030\321\206\003 \001(\0132\017.wso2.Endpoints:M\n\021sandbo" +
+                        "x_endpoints\022\037.google.protobuf.ServiceOpt" +
+                        "ions\030\322\206\003 \001(\0132\017.wso2.Endpoints:C\n\010securit" +
+                        "y\022\037.google.protobuf.ServiceOptions\030\323\206\003 \003" +
+                        "(\0162\016.wso2.Security::\n\017throttling_tier\022\037." +
+                        "google.protobuf.ServiceOptions\030\324\206\003 \001(\t:@" +
+                        "\n\026method_throttling_tier\022\036.google.protob" +
+                        "uf.MethodOptions\030\326\206\003 \001(\t:7\n\rmethod_scope" +
+                        "s\022\036.google.protobuf.MethodOptions\030\327\206\003 \001(" +
+                        "\tB7\n$org.wso2.apimgt.gateway.cli.protobu" +
+                        "fB\017ExtensionHolderb\006proto3"
         };
         descriptor = com.google.protobuf.Descriptors.FileDescriptor
                 .internalBuildGeneratedFileFrom(descriptorData,
                         new com.google.protobuf.Descriptors.FileDescriptor[] {
                                 com.google.protobuf.DescriptorProtos.getDescriptor(),
                         });
-        internal_static_Endpoints_descriptor =
+        internal_static_wso2_Endpoints_descriptor =
                 getDescriptor().getMessageTypes().get(0);
-        internal_static_Endpoints_fieldAccessorTable = new
+        internal_static_wso2_Endpoints_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_Endpoints_descriptor,
+                internal_static_wso2_Endpoints_descriptor,
                 new java.lang.String[] { "Endpoint", "Type", });
-        internal_static_Endpoint_descriptor =
+        internal_static_wso2_Endpoint_descriptor =
                 getDescriptor().getMessageTypes().get(1);
-        internal_static_Endpoint_fieldAccessorTable = new
+        internal_static_wso2_Endpoint_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_Endpoint_descriptor,
+                internal_static_wso2_Endpoint_descriptor,
                 new java.lang.String[] { "Url", });
-        xWso2ProductionEndpoints.internalInit(descriptor.getExtensions().get(0));
-        xWso2SandboxEndpoints.internalInit(descriptor.getExtensions().get(1));
-        xWso2Security.internalInit(descriptor.getExtensions().get(2));
-        xWso2ThrottlingTier.internalInit(descriptor.getExtensions().get(3));
-        xWso2MethodThrottlingTier.internalInit(descriptor.getExtensions().get(4));
-        xWso2MethodScopes.internalInit(descriptor.getExtensions().get(5));
+        productionEndpoints.internalInit(descriptor.getExtensions().get(0));
+        sandboxEndpoints.internalInit(descriptor.getExtensions().get(1));
+        security.internalInit(descriptor.getExtensions().get(2));
+        throttlingTier.internalInit(descriptor.getExtensions().get(3));
+        methodThrottlingTier.internalInit(descriptor.getExtensions().get(4));
+        methodScopes.internalInit(descriptor.getExtensions().get(5));
         com.google.protobuf.DescriptorProtos.getDescriptor();
     }
 

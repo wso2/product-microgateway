@@ -94,7 +94,7 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib</outputDirectory>
         </file>
         <file>
-            <source>${basedir}/resources/grpc/wso2CustomOptions.proto</source>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
             <fileMode>644</fileMode>
         </file>

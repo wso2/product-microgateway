@@ -45,7 +45,6 @@ public class ProtobufParser {
     /**
      * Compile the protobuf and generate descriptor file.
      *
-     * @param exePath        protoc.exe path
      * @param protoPath      protobuf file path
      * @param descriptorPath descriptor file path
      * @return {@link DescriptorProtos.FileDescriptorSet} object
@@ -151,12 +150,12 @@ public class ProtobufParser {
 
             //set endpoint configurations
             protoOpenAPI.addAPIProdEpExtension(generateEpList(service.getOptions()
-                    .getExtension(ExtensionHolder.xWso2ProductionEndpoints), service.getName()));
+                    .getExtension(ExtensionHolder.productionEndpoints), service.getName()));
             protoOpenAPI.addAPISandEpExtension(generateEpList(service.getOptions()
-                    .getExtension(ExtensionHolder.xWso2SandboxEndpoints), service.getName()));
+                    .getExtension(ExtensionHolder.sandboxEndpoints), service.getName()));
             //set API level security
             List<ExtensionHolder.Security> securityList = service.getOptions()
-                    .getExtension(ExtensionHolder.xWso2Security);
+                    .getExtension(ExtensionHolder.security);
             //if nothing is mentioned regarding the security, None will be selected.
             if (securityList.size() == 0) {
                 protoOpenAPI.disableAPISecurity();
@@ -174,13 +173,13 @@ public class ProtobufParser {
                 }
             }
             //set API level throttling tier
-            String throttlingTier = service.getOptions().getExtension(ExtensionHolder.xWso2ThrottlingTier);
+            String throttlingTier = service.getOptions().getExtension(ExtensionHolder.throttlingTier);
             protoOpenAPI.setAPIThrottlingTier(throttlingTier);
             service.getMethodList().forEach(method -> {
                 //set operation level scopes and throttling tiers
-                String methodScopesString = method.getOptions().getExtension(ExtensionHolder.xWso2MethodScopes);
+                String methodScopesString = method.getOptions().getExtension(ExtensionHolder.methodScopes);
                 String methodThrottlingTier = method.getOptions()
-                        .getExtension(ExtensionHolder.xWso2MethodThrottlingTier);
+                        .getExtension(ExtensionHolder.methodThrottlingTier);
                 String[] methodScopes = null;
                 if (!methodScopesString.isEmpty()) {
                     methodScopes = methodScopesString.split(",");
