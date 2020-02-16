@@ -42,14 +42,6 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/dependencies</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/resources/grpc/protoc</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
-            <includes>
-                <include>*.exe</include>
-            </includes>
-            <fileMode>755</fileMode>
-        </fileSet>
-        <fileSet>
             <directory>${basedir}/resources/grpc/stdlib</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc/google/protobuf</outputDirectory>
             <fileMode>644</fileMode>

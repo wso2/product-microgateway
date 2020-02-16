@@ -1147,24 +1147,10 @@ public final class CmdUtils {
     /**
      * get the path of the protoc executable.
      *
-     * @param projectName project name
      * @return the absolute path of the protoc executable
      */
-    public static String getProtocFilePath(String projectName) {
-        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR + File.separator +
-                getOsSpecificProtocFileName();
-    }
-
-    //todo: consider arch_type, and other os types and throw an error
-    private static String getOsSpecificProtocFileName() {
-        String osName = System.getProperty("os.name");
-        if (osName.toLowerCase().contains("windows")) {
-            return CliConstants.PROTOC_EXE_WINDOWS;
-        } else if (osName.toLowerCase().contains("mac")) {
-            return CliConstants.PROTOC_EXE_OSX;
-        } else {
-            return CliConstants.PROTOC_EXE_LINUX;
-        }
+    public static String getProtocDirPath() {
+        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
     }
 
     //todo: change the file location
@@ -1177,7 +1163,7 @@ public final class CmdUtils {
      * @return descriptor path
      */
     public static String getProtoDescriptorPath(String projectName, String protoFileName) {
-        String fileName = protoFileName.substring(0, protoFileName.length() - 7);
+        String fileName = protoFileName.substring(0, protoFileName.length() - 6);
         return getGrpcDefinitionsDirPath(projectName) + File.separator + fileName + ".desc";
     }
 

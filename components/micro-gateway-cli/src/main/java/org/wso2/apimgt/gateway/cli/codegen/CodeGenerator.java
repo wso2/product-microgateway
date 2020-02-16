@@ -180,10 +180,9 @@ public class CodeGenerator {
             Path filename = path.getFileName();
             return filename != null && (filename.toString().endsWith(".proto"));
         }).forEach(path -> {
-            String protocPath = CmdUtils.getProtocFilePath(projectName);
             String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
             try {
-                OpenAPI openAPI = new ProtobufParser().generateOpenAPI(protocPath, path.toString(), descriptorPath);
+                OpenAPI openAPI = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
                 if (openAPI != null) {
                     String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                     BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent, path, true);

@@ -100,65 +100,6 @@
                             <outputDirectory>${project.build.directory}/lib/gw-balo/</outputDirectory>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>copy</id>-->
-<!--                        <phase>generate-resources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <artifactItems>-->
-<!--                                <artifactItem>-->
-<!--                                    <groupId>org.wso2.am.microgw</groupId>-->
-<!--                                    <artifactId>org.wso2.micro.gateway.core</artifactId>-->
-<!--                                    <type>jar</type>-->
-<!--                                    <overWrite>true</overWrite>-->
-<!--                                </artifactItem>-->
-<!--                            </artifactItems>-->
-<!--                            <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-                    <execution>
-                        <id>copy-protoc</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protoc</artifactId>
-                                    <version>${com.google.protobuf.version}</version>
-                                    <classifier>windows-x86_64</classifier>
-                                    <type>exe</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/resources/grpc/protoc</outputDirectory>
-                                    <destFileName>protoc-windows.exe</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protoc</artifactId>
-                                    <version>${com.google.protobuf.version}</version>
-                                    <classifier>osx-x86_64</classifier>
-                                    <type>exe</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/resources/grpc/protoc</outputDirectory>
-                                    <destFileName>protoc-osx.exe</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protoc</artifactId>
-                                    <version>${com.google.protobuf.version}</version>
-                                    <classifier>linux-x86_64</classifier>
-                                    <type>exe</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/resources/grpc/protoc</outputDirectory>
-                                    <destFileName>protoc-linux.exe</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>unpack-jre</id>
                         <phase>generate-resources</phase>

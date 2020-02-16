@@ -50,10 +50,10 @@ public class ProtobufParser {
      * @param descriptorPath descriptor file path
      * @return {@link DescriptorProtos.FileDescriptorSet} object
      */
-    private static DescriptorProtos.FileDescriptorProto generateRootFileDescriptor(String exePath, String protoPath,
+    private static DescriptorProtos.FileDescriptorProto generateRootFileDescriptor(String protoPath,
                                                                                   String descriptorPath) {
         String command = new ProtocCommandBuilder
-                (exePath, protoPath, resolveProtoFolderPath(protoPath), descriptorPath).build();
+                (protoPath, resolveProtoFolderPath(protoPath), descriptorPath).build();
         generateDescriptor(command);
         File initialFile = new File(descriptorPath);
         try (InputStream targetStream = new FileInputStream(initialFile)) {
@@ -194,14 +194,13 @@ public class ProtobufParser {
     /**
      * Generate OpenAPI from protobuf.
      *
-     * @param exePath        protoc.exe path
      * @param protoPath      protobuf file path
      * @param descriptorPath descriptor file path
      * @return {@link OpenAPI} object
      */
-    public OpenAPI generateOpenAPI(String exePath, String protoPath, String descriptorPath) {
+    public OpenAPI generateOpenAPI(String protoPath, String descriptorPath) {
         DescriptorProtos.FileDescriptorProto descriptor =
-                generateRootFileDescriptor(exePath, protoPath, descriptorPath);
+                generateRootFileDescriptor(protoPath, descriptorPath);
         return generateOpenAPIFromProto(descriptor, protoPath);
     }
 
