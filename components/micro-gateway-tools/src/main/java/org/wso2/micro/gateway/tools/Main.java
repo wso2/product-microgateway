@@ -5,8 +5,8 @@ package org.wso2.micro.gateway.tools;
  */
 public class Main {
     public static void main(String[] args) {
-            String confFilePath = args [1];
-            String fileWritePath = args [2];
+            String confFilePath = args [0];
+            String fileWritePath = args [1];
             GetConfig getConfig = new GetConfig();
             try {
                 getConfig.getConfigurations(confFilePath, fileWritePath);

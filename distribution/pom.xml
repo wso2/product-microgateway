@@ -100,24 +100,6 @@
                             <outputDirectory>${project.build.directory}/lib/gw-balo/</outputDirectory>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>copy</id>-->
-<!--                        <phase>generate-resources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <artifactItems>-->
-<!--                                <artifactItem>-->
-<!--                                    <groupId>org.wso2.am.microgw</groupId>-->
-<!--                                    <artifactId>org.wso2.micro.gateway.core</artifactId>-->
-<!--                                    <type>jar</type>-->
-<!--                                    <overWrite>true</overWrite>-->
-<!--                                </artifactItem>-->
-<!--                            </artifactItems>-->
-<!--                            <outputDirectory>${project.basedir}/../docker/runtime</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
                     <execution>
                         <id>unpack-jre</id>
                         <phase>generate-resources</phase>

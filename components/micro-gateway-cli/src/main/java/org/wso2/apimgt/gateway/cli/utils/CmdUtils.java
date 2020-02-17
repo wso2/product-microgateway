@@ -246,6 +246,15 @@ public final class CmdUtils {
     }
 
     /**
+     * Get grpc directory location inside Resources Directory.
+     *
+     * @return protobuf directory location
+     */
+    public static String getResourcesGrpcDirLocation() {
+        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
+    }
+
+    /**
      * Get resources file directory path
      *
      * @return resources file directory path
@@ -428,6 +437,9 @@ public final class CmdUtils {
         if (!StringUtils.isEmpty(apiDefinition)) {
             setApiDefinition(projectName, apiDefinition, headers, values, insecure);
         }
+
+        String grpcDefinitionsPath = projectDir + File.separator + CliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
+        createDirectory(grpcDefinitionsPath, false);
 
         createFile(projectDir.getPath(), CliConstants.PROJECT_POLICIES_FILE, true);
         String policyResPath = getDefinitionsLocation() + File.separator + CliConstants.GW_DIST_POLICIES_FILE;
@@ -733,7 +745,18 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /grpc_service/client of a given project in the current working directory
+     * Returns path to the /grpc_definitions of a given project in the current directory.
+     *
+     * @param projectName project name
+     * @return path to the grpc_defintions of a given project in the current working directory
+     */
+    public static String getGrpcDefinitionsDirPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                CliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
+    }
+
+    /**
+     * Returns path to the /grpc_service/client of a given project in the current working directory.
      *
      * @return path to the /grpc_service/client of a given project in the current working directory
      */
@@ -744,7 +767,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /grpc_service of a given project in the current working directory
+     * Returns path to the /grpc_service of a given project in the current working directory.
      *
      * @return path to the /grpc_service of a given project in the current working directory
      */
@@ -754,7 +777,7 @@ public final class CmdUtils {
     }
 
     /**
-     * This function recursively copy all the sub folder and files from source to destination file paths
+     * This function recursively copy all the sub folder and files from source to destination file paths.
      *
      * @param source      source location
      * @param destination destination location
@@ -1125,6 +1148,29 @@ public final class CmdUtils {
     public static String getProjectSwaggerFilePath(String projectName, String apiId) {
         return getProjectAPIFilesDirectoryPath(projectName) + File.separator + apiId + File.separator +
                 CliConstants.API_SWAGGER;
+    }
+
+    /**
+     * get the path of the protoc executable.
+     *
+     * @return the absolute path of the protoc executable
+     */
+    public static String getProtocDirPath() {
+        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
+    }
+
+    //todo: change the file location
+
+    /**
+     * descriptor path of the grpc definition.
+     *
+     * @param projectName   project name
+     * @param protoFileName protobuf file name
+     * @return descriptor path
+     */
+    public static String getProtoDescriptorPath(String projectName, String protoFileName) {
+        String fileName = protoFileName.substring(0, protoFileName.length() - 6);
+        return getProjectTargetGenDirectoryPath(projectName) + File.separator + fileName + ".desc";
     }
 
     /**
