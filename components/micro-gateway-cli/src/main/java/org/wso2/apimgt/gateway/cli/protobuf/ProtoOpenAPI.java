@@ -29,7 +29,6 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.apimgt.gateway.cli.constants.GrpcConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
@@ -69,7 +68,7 @@ public class ProtoOpenAPI {
         info.setVersion("1.0.0");
         openAPI.setInfo(info);
         //todo: remove if basePath is not mandatory
-        openAPI.addExtension(OpenAPIConstants.BASEPATH, GrpcConstants.URL_SEPARATOR + name);
+        openAPI.addExtension(OpenAPIConstants.BASEPATH, "/" + name);
     }
 
     /**

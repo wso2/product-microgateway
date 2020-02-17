@@ -18,9 +18,7 @@ service TestService {
 
 	//production endpoints
 	option (wso2.production_endpoints) = {
-		endpoint {
-			url : "http://localhost:50051"
-		};
+		url : "http://localhost:50051";
 	};
 
 	//service level security

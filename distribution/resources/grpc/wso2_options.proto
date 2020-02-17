@@ -36,17 +36,11 @@ extend google.protobuf.MethodOptions {
   	string method_scopes = 50007;
 }
 
-
 //to define endpoints
 message Endpoints {
-	repeated Endpoint endpoint = 1;
+	repeated string url = 1;
 	EndpointType type = 2;
 }
-
-message Endpoint {
-	string url = 1;
-}
-
 
 enum EndpointType {
 	DEFAULT = 0;

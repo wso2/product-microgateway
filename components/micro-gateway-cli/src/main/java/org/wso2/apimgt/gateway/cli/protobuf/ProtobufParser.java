@@ -215,15 +215,15 @@ public class ProtobufParser {
     private static EndpointListRouteDTO generateEpList(ExtensionHolder.Endpoints protoEps, String service) {
         EndpointListRouteDTO epList = new EndpointListRouteDTO();
 
-        protoEps.getEndpointList().forEach(endpoint -> {
+        protoEps.getUrlList().forEach(endpointUrl -> {
             try {
-                new URL(endpoint.getUrl());
+                new URL(endpointUrl);
             }  catch (MalformedURLException e) {
                 //todo: decide if the service name or the proto file is more important
                 throw new CLIRuntimeException("The provided endpoint for the service \"" + service +
-                        "\" is invalid : \"" + endpoint.getUrl() + "\"");
+                        "\" is invalid : \"" + endpointUrl + "\"");
             }
-            epList.addEndpoint(endpoint.getUrl());
+            epList.addEndpoint(endpointUrl);
         });
         if (epList.getEndpoints() == null) {
             return null;

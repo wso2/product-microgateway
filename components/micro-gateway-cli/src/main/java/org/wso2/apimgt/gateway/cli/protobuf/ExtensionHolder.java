@@ -251,28 +251,29 @@ public final class ExtensionHolder {
             com.google.protobuf.MessageOrBuilder {
 
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @return A list containing the url.
          */
-        java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint>
-        getEndpointList();
+        java.util.List<java.lang.String>
+        getUrlList();
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @return The count of url.
          */
-        org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index);
+        int getUrlCount();
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @param index The index of the element to return.
+         * @return The url at the given index.
          */
-        int getEndpointCount();
+        java.lang.String getUrl(int index);
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @param index The index of the value to return.
+         * @return The bytes of the url at the given index.
          */
-        java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
-        getEndpointOrBuilderList();
-        /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-         */
-        org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
-                int index);
+        com.google.protobuf.ByteString
+        getUrlBytes(int index);
 
         /**
          * <code>.wso2.EndpointType type = 2;</code>
@@ -302,7 +303,7 @@ public final class ExtensionHolder {
             super(builder);
         }
         private Endpoints() {
-            endpoint_ = java.util.Collections.emptyList();
+            url_ = com.google.protobuf.LazyStringArrayList.EMPTY;
             type_ = 0;
         }
 
@@ -338,12 +339,12 @@ public final class ExtensionHolder {
                             done = true;
                             break;
                         case 10: {
+                            java.lang.String s = input.readStringRequireUtf8();
                             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                                endpoint_ = new java.util.ArrayList<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint>();
+                                url_ = new com.google.protobuf.LazyStringArrayList();
                                 mutable_bitField0_ |= 0x00000001;
                             }
-                            endpoint_.add(
-                                    input.readMessage(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.parser(), extensionRegistry));
+                            url_.add(s);
                             break;
                         }
                         case 16: {
@@ -368,7 +369,7 @@ public final class ExtensionHolder {
                         e).setUnfinishedMessage(this);
             } finally {
                 if (((mutable_bitField0_ & 0x00000001) != 0)) {
-                    endpoint_ = java.util.Collections.unmodifiableList(endpoint_);
+                    url_ = url_.getUnmodifiableView();
                 }
                 this.unknownFields = unknownFields.build();
                 makeExtensionsImmutable();
@@ -387,39 +388,39 @@ public final class ExtensionHolder {
                             org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.Builder.class);
         }
 
-        public static final int ENDPOINT_FIELD_NUMBER = 1;
-        private java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> endpoint_;
+        public static final int URL_FIELD_NUMBER = 1;
+        private com.google.protobuf.LazyStringList url_;
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @return A list containing the url.
          */
-        public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> getEndpointList() {
-            return endpoint_;
+        public com.google.protobuf.ProtocolStringList
+        getUrlList() {
+            return url_;
         }
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @return The count of url.
          */
-        public java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
-        getEndpointOrBuilderList() {
-            return endpoint_;
+        public int getUrlCount() {
+            return url_.size();
         }
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @param index The index of the element to return.
+         * @return The url at the given index.
          */
-        public int getEndpointCount() {
-            return endpoint_.size();
+        public java.lang.String getUrl(int index) {
+            return url_.get(index);
         }
         /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+         * <code>repeated string url = 1;</code>
+         * @param index The index of the value to return.
+         * @return The bytes of the url at the given index.
          */
-        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index) {
-            return endpoint_.get(index);
-        }
-        /**
-         * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-         */
-        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
-                int index) {
-            return endpoint_.get(index);
+        public com.google.protobuf.ByteString
+        getUrlBytes(int index) {
+            return url_.getByteString(index);
         }
 
         public static final int TYPE_FIELD_NUMBER = 2;
@@ -455,8 +456,8 @@ public final class ExtensionHolder {
         @java.lang.Override
         public void writeTo(com.google.protobuf.CodedOutputStream output)
                 throws java.io.IOException {
-            for (int i = 0; i < endpoint_.size(); i++) {
-                output.writeMessage(1, endpoint_.get(i));
+            for (int i = 0; i < url_.size(); i++) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_.getRaw(i));
             }
             if (type_ != org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.DEFAULT.getNumber()) {
                 output.writeEnum(2, type_);
@@ -470,9 +471,13 @@ public final class ExtensionHolder {
             if (size != -1) return size;
 
             size = 0;
-            for (int i = 0; i < endpoint_.size(); i++) {
-                size += com.google.protobuf.CodedOutputStream
-                        .computeMessageSize(1, endpoint_.get(i));
+            {
+                int dataSize = 0;
+                for (int i = 0; i < url_.size(); i++) {
+                    dataSize += computeStringSizeNoTag(url_.getRaw(i));
+                }
+                size += dataSize;
+                size += 1 * getUrlList().size();
             }
             if (type_ != org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.DEFAULT.getNumber()) {
                 size += com.google.protobuf.CodedOutputStream
@@ -493,8 +498,8 @@ public final class ExtensionHolder {
             }
             org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints other = (org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints) obj;
 
-            if (!getEndpointList()
-                    .equals(other.getEndpointList())) return false;
+            if (!getUrlList()
+                    .equals(other.getUrlList())) return false;
             if (type_ != other.type_) return false;
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
@@ -507,9 +512,9 @@ public final class ExtensionHolder {
             }
             int hash = 41;
             hash = (19 * hash) + getDescriptor().hashCode();
-            if (getEndpointCount() > 0) {
-                hash = (37 * hash) + ENDPOINT_FIELD_NUMBER;
-                hash = (53 * hash) + getEndpointList().hashCode();
+            if (getUrlCount() > 0) {
+                hash = (37 * hash) + URL_FIELD_NUMBER;
+                hash = (53 * hash) + getUrlList().hashCode();
             }
             hash = (37 * hash) + TYPE_FIELD_NUMBER;
             hash = (53 * hash) + type_;
@@ -645,18 +650,13 @@ public final class ExtensionHolder {
             private void maybeForceBuilderInitialization() {
                 if (com.google.protobuf.GeneratedMessageV3
                         .alwaysUseFieldBuilders) {
-                    getEndpointFieldBuilder();
                 }
             }
             @java.lang.Override
             public Builder clear() {
                 super.clear();
-                if (endpointBuilder_ == null) {
-                    endpoint_ = java.util.Collections.emptyList();
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                } else {
-                    endpointBuilder_.clear();
-                }
+                url_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
                 type_ = 0;
 
                 return this;
@@ -686,15 +686,11 @@ public final class ExtensionHolder {
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints buildPartial() {
                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints result = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints(this);
                 int from_bitField0_ = bitField0_;
-                if (endpointBuilder_ == null) {
-                    if (((bitField0_ & 0x00000001) != 0)) {
-                        endpoint_ = java.util.Collections.unmodifiableList(endpoint_);
-                        bitField0_ = (bitField0_ & ~0x00000001);
-                    }
-                    result.endpoint_ = endpoint_;
-                } else {
-                    result.endpoint_ = endpointBuilder_.build();
+                if (((bitField0_ & 0x00000001) != 0)) {
+                    url_ = url_.getUnmodifiableView();
+                    bitField0_ = (bitField0_ & ~0x00000001);
                 }
+                result.url_ = url_;
                 result.type_ = type_;
                 onBuilt();
                 return result;
@@ -744,31 +740,15 @@ public final class ExtensionHolder {
 
             public Builder mergeFrom(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints other) {
                 if (other == org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints.getDefaultInstance()) return this;
-                if (endpointBuilder_ == null) {
-                    if (!other.endpoint_.isEmpty()) {
-                        if (endpoint_.isEmpty()) {
-                            endpoint_ = other.endpoint_;
-                            bitField0_ = (bitField0_ & ~0x00000001);
-                        } else {
-                            ensureEndpointIsMutable();
-                            endpoint_.addAll(other.endpoint_);
-                        }
-                        onChanged();
+                if (!other.url_.isEmpty()) {
+                    if (url_.isEmpty()) {
+                        url_ = other.url_;
+                        bitField0_ = (bitField0_ & ~0x00000001);
+                    } else {
+                        ensureUrlIsMutable();
+                        url_.addAll(other.url_);
                     }
-                } else {
-                    if (!other.endpoint_.isEmpty()) {
-                        if (endpointBuilder_.isEmpty()) {
-                            endpointBuilder_.dispose();
-                            endpointBuilder_ = null;
-                            endpoint_ = other.endpoint_;
-                            bitField0_ = (bitField0_ & ~0x00000001);
-                            endpointBuilder_ =
-                                    com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                                            getEndpointFieldBuilder() : null;
-                        } else {
-                            endpointBuilder_.addAllMessages(other.endpoint_);
-                        }
-                    }
+                    onChanged();
                 }
                 if (other.type_ != 0) {
                     setTypeValue(other.getTypeValue());
@@ -803,244 +783,114 @@ public final class ExtensionHolder {
             }
             private int bitField0_;
 
-            private java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> endpoint_ =
-                    java.util.Collections.emptyList();
-            private void ensureEndpointIsMutable() {
+            private com.google.protobuf.LazyStringList url_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+            private void ensureUrlIsMutable() {
                 if (!((bitField0_ & 0x00000001) != 0)) {
-                    endpoint_ = new java.util.ArrayList<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint>(endpoint_);
+                    url_ = new com.google.protobuf.LazyStringArrayList(url_);
                     bitField0_ |= 0x00000001;
                 }
             }
-
-            private com.google.protobuf.RepeatedFieldBuilderV3<
-                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder> endpointBuilder_;
-
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @return A list containing the url.
              */
-            public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> getEndpointList() {
-                if (endpointBuilder_ == null) {
-                    return java.util.Collections.unmodifiableList(endpoint_);
-                } else {
-                    return endpointBuilder_.getMessageList();
-                }
+            public com.google.protobuf.ProtocolStringList
+            getUrlList() {
+                return url_.getUnmodifiableView();
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @return The count of url.
              */
-            public int getEndpointCount() {
-                if (endpointBuilder_ == null) {
-                    return endpoint_.size();
-                } else {
-                    return endpointBuilder_.getCount();
-                }
+            public int getUrlCount() {
+                return url_.size();
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @param index The index of the element to return.
+             * @return The url at the given index.
              */
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getEndpoint(int index) {
-                if (endpointBuilder_ == null) {
-                    return endpoint_.get(index);
-                } else {
-                    return endpointBuilder_.getMessage(index);
-                }
+            public java.lang.String getUrl(int index) {
+                return url_.get(index);
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @param index The index of the value to return.
+             * @return The bytes of the url at the given index.
              */
-            public Builder setEndpoint(
-                    int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
-                if (endpointBuilder_ == null) {
-                    if (value == null) {
-                        throw new NullPointerException();
-                    }
-                    ensureEndpointIsMutable();
-                    endpoint_.set(index, value);
-                    onChanged();
-                } else {
-                    endpointBuilder_.setMessage(index, value);
+            public com.google.protobuf.ByteString
+            getUrlBytes(int index) {
+                return url_.getByteString(index);
+            }
+            /**
+             * <code>repeated string url = 1;</code>
+             * @param index The index to set the value at.
+             * @param value The url to set.
+             * @return This builder for chaining.
+             */
+            public Builder setUrl(
+                    int index, java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
                 }
+                ensureUrlIsMutable();
+                url_.set(index, value);
+                onChanged();
                 return this;
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @param value The url to add.
+             * @return This builder for chaining.
              */
-            public Builder setEndpoint(
-                    int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
-                if (endpointBuilder_ == null) {
-                    ensureEndpointIsMutable();
-                    endpoint_.set(index, builderForValue.build());
-                    onChanged();
-                } else {
-                    endpointBuilder_.setMessage(index, builderForValue.build());
+            public Builder addUrl(
+                    java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
                 }
+                ensureUrlIsMutable();
+                url_.add(value);
+                onChanged();
                 return this;
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @param values The url to add.
+             * @return This builder for chaining.
              */
-            public Builder addEndpoint(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
-                if (endpointBuilder_ == null) {
-                    if (value == null) {
-                        throw new NullPointerException();
-                    }
-                    ensureEndpointIsMutable();
-                    endpoint_.add(value);
-                    onChanged();
-                } else {
-                    endpointBuilder_.addMessage(value);
-                }
+            public Builder addAllUrl(
+                    java.lang.Iterable<java.lang.String> values) {
+                ensureUrlIsMutable();
+                com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                        values, url_);
+                onChanged();
                 return this;
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @return This builder for chaining.
              */
-            public Builder addEndpoint(
-                    int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint value) {
-                if (endpointBuilder_ == null) {
-                    if (value == null) {
-                        throw new NullPointerException();
-                    }
-                    ensureEndpointIsMutable();
-                    endpoint_.add(index, value);
-                    onChanged();
-                } else {
-                    endpointBuilder_.addMessage(index, value);
-                }
+            public Builder clearUrl() {
+                url_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                onChanged();
                 return this;
             }
             /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
+             * <code>repeated string url = 1;</code>
+             * @param value The bytes of the url to add.
+             * @return This builder for chaining.
              */
-            public Builder addEndpoint(
-                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
-                if (endpointBuilder_ == null) {
-                    ensureEndpointIsMutable();
-                    endpoint_.add(builderForValue.build());
-                    onChanged();
-                } else {
-                    endpointBuilder_.addMessage(builderForValue.build());
+            public Builder addUrlBytes(
+                    com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
                 }
+                checkByteStringIsUtf8(value);
+                ensureUrlIsMutable();
+                url_.add(value);
+                onChanged();
                 return this;
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public Builder addEndpoint(
-                    int index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder builderForValue) {
-                if (endpointBuilder_ == null) {
-                    ensureEndpointIsMutable();
-                    endpoint_.add(index, builderForValue.build());
-                    onChanged();
-                } else {
-                    endpointBuilder_.addMessage(index, builderForValue.build());
-                }
-                return this;
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public Builder addAllEndpoint(
-                    java.lang.Iterable<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint> values) {
-                if (endpointBuilder_ == null) {
-                    ensureEndpointIsMutable();
-                    com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                            values, endpoint_);
-                    onChanged();
-                } else {
-                    endpointBuilder_.addAllMessages(values);
-                }
-                return this;
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public Builder clearEndpoint() {
-                if (endpointBuilder_ == null) {
-                    endpoint_ = java.util.Collections.emptyList();
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                    onChanged();
-                } else {
-                    endpointBuilder_.clear();
-                }
-                return this;
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public Builder removeEndpoint(int index) {
-                if (endpointBuilder_ == null) {
-                    ensureEndpointIsMutable();
-                    endpoint_.remove(index);
-                    onChanged();
-                } else {
-                    endpointBuilder_.remove(index);
-                }
-                return this;
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder getEndpointBuilder(
-                    int index) {
-                return getEndpointFieldBuilder().getBuilder(index);
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder getEndpointOrBuilder(
-                    int index) {
-                if (endpointBuilder_ == null) {
-                    return endpoint_.get(index);  } else {
-                    return endpointBuilder_.getMessageOrBuilder(index);
-                }
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public java.util.List<? extends org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
-            getEndpointOrBuilderList() {
-                if (endpointBuilder_ != null) {
-                    return endpointBuilder_.getMessageOrBuilderList();
-                } else {
-                    return java.util.Collections.unmodifiableList(endpoint_);
-                }
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder addEndpointBuilder() {
-                return getEndpointFieldBuilder().addBuilder(
-                        org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance());
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder addEndpointBuilder(
-                    int index) {
-                return getEndpointFieldBuilder().addBuilder(
-                        index, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance());
-            }
-            /**
-             * <code>repeated .wso2.Endpoint endpoint = 1;</code>
-             */
-            public java.util.List<org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder>
-            getEndpointBuilderList() {
-                return getEndpointFieldBuilder().getBuilderList();
-            }
-            private com.google.protobuf.RepeatedFieldBuilderV3<
-                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>
-            getEndpointFieldBuilder() {
-                if (endpointBuilder_ == null) {
-                    endpointBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder>(
-                            endpoint_,
-                            ((bitField0_ & 0x00000001) != 0),
-                            getParentForChildren(),
-                            isClean());
-                    endpoint_ = null;
-                }
-                return endpointBuilder_;
             }
 
             private int type_ = 0;
@@ -1147,572 +997,6 @@ public final class ExtensionHolder {
 
     }
 
-    public interface EndpointOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:wso2.Endpoint)
-            com.google.protobuf.MessageOrBuilder {
-
-        /**
-         * <code>string url = 1;</code>
-         * @return The url.
-         */
-        java.lang.String getUrl();
-        /**
-         * <code>string url = 1;</code>
-         * @return The bytes for url.
-         */
-        com.google.protobuf.ByteString
-        getUrlBytes();
-    }
-    /**
-     * Protobuf type {@code wso2.Endpoint}
-     */
-    public  static final class Endpoint extends
-            com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:wso2.Endpoint)
-            EndpointOrBuilder {
-        private static final long serialVersionUID = 0L;
-        // Use Endpoint.newBuilder() to construct.
-        private Endpoint(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-            super(builder);
-        }
-        private Endpoint() {
-            url_ = "";
-        }
-
-        @java.lang.Override
-        @SuppressWarnings({"unused"})
-        protected java.lang.Object newInstance(
-                UnusedPrivateParameter unused) {
-            return new Endpoint();
-        }
-
-        @java.lang.Override
-        public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-            return this.unknownFields;
-        }
-        private Endpoint(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            this();
-            if (extensionRegistry == null) {
-                throw new java.lang.NullPointerException();
-            }
-            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                    com.google.protobuf.UnknownFieldSet.newBuilder();
-            try {
-                boolean done = false;
-                while (!done) {
-                    int tag = input.readTag();
-                    switch (tag) {
-                        case 0:
-                            done = true;
-                            break;
-                        case 10: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            url_ = s;
-                            break;
-                        }
-                        default: {
-                            if (!parseUnknownField(
-                                    input, unknownFields, extensionRegistry, tag)) {
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                throw e.setUnfinishedMessage(this);
-            } catch (java.io.IOException e) {
-                throw new com.google.protobuf.InvalidProtocolBufferException(
-                        e).setUnfinishedMessage(this);
-            } finally {
-                this.unknownFields = unknownFields.build();
-                makeExtensionsImmutable();
-            }
-        }
-        public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder.class);
-        }
-
-        public static final int URL_FIELD_NUMBER = 1;
-        private volatile java.lang.Object url_;
-        /**
-         * <code>string url = 1;</code>
-         * @return The url.
-         */
-        public java.lang.String getUrl() {
-            java.lang.Object ref = url_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                url_ = s;
-                return s;
-            }
-        }
-        /**
-         * <code>string url = 1;</code>
-         * @return The bytes for url.
-         */
-        public com.google.protobuf.ByteString
-        getUrlBytes() {
-            java.lang.Object ref = url_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                url_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        private byte memoizedIsInitialized = -1;
-        @java.lang.Override
-        public final boolean isInitialized() {
-            byte isInitialized = memoizedIsInitialized;
-            if (isInitialized == 1) return true;
-            if (isInitialized == 0) return false;
-
-            memoizedIsInitialized = 1;
-            return true;
-        }
-
-        @java.lang.Override
-        public void writeTo(com.google.protobuf.CodedOutputStream output)
-                throws java.io.IOException {
-            if (!getUrlBytes().isEmpty()) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_);
-            }
-            unknownFields.writeTo(output);
-        }
-
-        @java.lang.Override
-        public int getSerializedSize() {
-            int size = memoizedSize;
-            if (size != -1) return size;
-
-            size = 0;
-            if (!getUrlBytes().isEmpty()) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, url_);
-            }
-            size += unknownFields.getSerializedSize();
-            memoizedSize = size;
-            return size;
-        }
-
-        @java.lang.Override
-        public boolean equals(final java.lang.Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint)) {
-                return super.equals(obj);
-            }
-            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint other = (org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint) obj;
-
-            if (!getUrl()
-                    .equals(other.getUrl())) return false;
-            if (!unknownFields.equals(other.unknownFields)) return false;
-            return true;
-        }
-
-        @java.lang.Override
-        public int hashCode() {
-            if (memoizedHashCode != 0) {
-                return memoizedHashCode;
-            }
-            int hash = 41;
-            hash = (19 * hash) + getDescriptor().hashCode();
-            hash = (37 * hash) + URL_FIELD_NUMBER;
-            hash = (53 * hash) + getUrl().hashCode();
-            hash = (29 * hash) + unknownFields.hashCode();
-            memoizedHashCode = hash;
-            return hash;
-        }
-
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                java.nio.ByteBuffer data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                java.nio.ByteBuffer data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                com.google.protobuf.ByteString data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                com.google.protobuf.ByteString data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(byte[] data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                byte[] data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseDelimitedFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseDelimitedFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                com.google.protobuf.CodedInputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parseFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        @java.lang.Override
-        public Builder newBuilderForType() { return newBuilder(); }
-        public static Builder newBuilder() {
-            return DEFAULT_INSTANCE.toBuilder();
-        }
-        public static Builder newBuilder(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint prototype) {
-            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-        }
-        @java.lang.Override
-        public Builder toBuilder() {
-            return this == DEFAULT_INSTANCE
-                    ? new Builder() : new Builder().mergeFrom(this);
-        }
-
-        @java.lang.Override
-        protected Builder newBuilderForType(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            Builder builder = new Builder(parent);
-            return builder;
-        }
-        /**
-         * Protobuf type {@code wso2.Endpoint}
-         */
-        public static final class Builder extends
-                com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:wso2.Endpoint)
-                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointOrBuilder {
-            public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
-            }
-
-            @java.lang.Override
-            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_fieldAccessorTable
-                        .ensureFieldAccessorsInitialized(
-                                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.Builder.class);
-            }
-
-            // Construct using org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.newBuilder()
-            private Builder() {
-                maybeForceBuilderInitialization();
-            }
-
-            private Builder(
-                    com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-                super(parent);
-                maybeForceBuilderInitialization();
-            }
-            private void maybeForceBuilderInitialization() {
-                if (com.google.protobuf.GeneratedMessageV3
-                        .alwaysUseFieldBuilders) {
-                }
-            }
-            @java.lang.Override
-            public Builder clear() {
-                super.clear();
-                url_ = "";
-
-                return this;
-            }
-
-            @java.lang.Override
-            public com.google.protobuf.Descriptors.Descriptor
-            getDescriptorForType() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_Endpoint_descriptor;
-            }
-
-            @java.lang.Override
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getDefaultInstanceForType() {
-                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance();
-            }
-
-            @java.lang.Override
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint build() {
-                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint result = buildPartial();
-                if (!result.isInitialized()) {
-                    throw newUninitializedMessageException(result);
-                }
-                return result;
-            }
-
-            @java.lang.Override
-            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint buildPartial() {
-                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint result = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint(this);
-                result.url_ = url_;
-                onBuilt();
-                return result;
-            }
-
-            @java.lang.Override
-            public Builder clone() {
-                return super.clone();
-            }
-            @java.lang.Override
-            public Builder setField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.setField(field, value);
-            }
-            @java.lang.Override
-            public Builder clearField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field) {
-                return super.clearField(field);
-            }
-            @java.lang.Override
-            public Builder clearOneof(
-                    com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-                return super.clearOneof(oneof);
-            }
-            @java.lang.Override
-            public Builder setRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    int index, java.lang.Object value) {
-                return super.setRepeatedField(field, index, value);
-            }
-            @java.lang.Override
-            public Builder addRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.addRepeatedField(field, value);
-            }
-            @java.lang.Override
-            public Builder mergeFrom(com.google.protobuf.Message other) {
-                if (other instanceof org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint) {
-                    return mergeFrom((org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint)other);
-                } else {
-                    super.mergeFrom(other);
-                    return this;
-                }
-            }
-
-            public Builder mergeFrom(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint other) {
-                if (other == org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint.getDefaultInstance()) return this;
-                if (!other.getUrl().isEmpty()) {
-                    url_ = other.url_;
-                    onChanged();
-                }
-                this.mergeUnknownFields(other.unknownFields);
-                onChanged();
-                return this;
-            }
-
-            @java.lang.Override
-            public final boolean isInitialized() {
-                return true;
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
-                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint parsedMessage = null;
-                try {
-                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                    parsedMessage = (org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint) e.getUnfinishedMessage();
-                    throw e.unwrapIOException();
-                } finally {
-                    if (parsedMessage != null) {
-                        mergeFrom(parsedMessage);
-                    }
-                }
-                return this;
-            }
-
-            private java.lang.Object url_ = "";
-            /**
-             * <code>string url = 1;</code>
-             * @return The url.
-             */
-            public java.lang.String getUrl() {
-                java.lang.Object ref = url_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    url_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-            /**
-             * <code>string url = 1;</code>
-             * @return The bytes for url.
-             */
-            public com.google.protobuf.ByteString
-            getUrlBytes() {
-                java.lang.Object ref = url_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    url_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-            /**
-             * <code>string url = 1;</code>
-             * @param value The url to set.
-             * @return This builder for chaining.
-             */
-            public Builder setUrl(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                url_ = value;
-                onChanged();
-                return this;
-            }
-            /**
-             * <code>string url = 1;</code>
-             * @return This builder for chaining.
-             */
-            public Builder clearUrl() {
-
-                url_ = getDefaultInstance().getUrl();
-                onChanged();
-                return this;
-            }
-            /**
-             * <code>string url = 1;</code>
-             * @param value The bytes for url to set.
-             * @return This builder for chaining.
-             */
-            public Builder setUrlBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                url_ = value;
-                onChanged();
-                return this;
-            }
-            @java.lang.Override
-            public final Builder setUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.setUnknownFields(unknownFields);
-            }
-
-            @java.lang.Override
-            public final Builder mergeUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.mergeUnknownFields(unknownFields);
-            }
-
-
-            // @@protoc_insertion_point(builder_scope:wso2.Endpoint)
-        }
-
-        // @@protoc_insertion_point(class_scope:wso2.Endpoint)
-        private static final org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint DEFAULT_INSTANCE;
-        static {
-            DEFAULT_INSTANCE = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint();
-        }
-
-        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getDefaultInstance() {
-            return DEFAULT_INSTANCE;
-        }
-
-        private static final com.google.protobuf.Parser<Endpoint>
-                PARSER = new com.google.protobuf.AbstractParser<Endpoint>() {
-            @java.lang.Override
-            public Endpoint parsePartialFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
-                return new Endpoint(input, extensionRegistry);
-            }
-        };
-
-        public static com.google.protobuf.Parser<Endpoint> parser() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Parser<Endpoint> getParserForType() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoint getDefaultInstanceForType() {
-            return DEFAULT_INSTANCE;
-        }
-
-    }
-
     public static final int PRODUCTION_ENDPOINTS_FIELD_NUMBER = 50001;
     /**
      * <code>extend .google.protobuf.ServiceOptions { ... }</code>
@@ -1784,11 +1068,6 @@ public final class ExtensionHolder {
     private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_wso2_Endpoints_fieldAccessorTable;
-    private static final com.google.protobuf.Descriptors.Descriptor
-            internal_static_wso2_Endpoint_descriptor;
-    private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internal_static_wso2_Endpoint_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor
     getDescriptor() {
@@ -1799,24 +1078,23 @@ public final class ExtensionHolder {
     static {
         java.lang.String[] descriptorData = {
                 "\n\022wso2_options.proto\022\004wso2\032 google/proto" +
-                        "buf/descriptor.proto\"O\n\tEndpoints\022 \n\010end" +
-                        "point\030\001 \003(\0132\016.wso2.Endpoint\022 \n\004type\030\002 \001(" +
-                        "\0162\022.wso2.EndpointType\"\027\n\010Endpoint\022\013\n\003url" +
-                        "\030\001 \001(\t*\033\n\014EndpointType\022\013\n\007DEFAULT\020\000*@\n\010S" +
-                        "ecurity\022\010\n\004NONE\020\000\022\t\n\005BASIC\020\001\022\n\n\006OAUTH2\020\002" +
-                        "\022\007\n\003JWT\020\003\022\n\n\006APIKEY\020\004:P\n\024production_endp" +
-                        "oints\022\037.google.protobuf.ServiceOptions\030\321" +
-                        "\206\003 \001(\0132\017.wso2.Endpoints:M\n\021sandbox_endpo" +
-                        "ints\022\037.google.protobuf.ServiceOptions\030\322\206" +
-                        "\003 \001(\0132\017.wso2.Endpoints:C\n\010security\022\037.goo" +
-                        "gle.protobuf.ServiceOptions\030\323\206\003 \003(\0162\016.ws" +
-                        "o2.Security::\n\017throttling_tier\022\037.google." +
-                        "protobuf.ServiceOptions\030\324\206\003 \001(\t:@\n\026metho" +
-                        "d_throttling_tier\022\036.google.protobuf.Meth" +
-                        "odOptions\030\326\206\003 \001(\t:7\n\rmethod_scopes\022\036.goo" +
-                        "gle.protobuf.MethodOptions\030\327\206\003 \001(\tB7\n$or" +
-                        "g.wso2.apimgt.gateway.cli.protobufB\017Exte" +
-                        "nsionHolderb\006proto3"
+                        "buf/descriptor.proto\":\n\tEndpoints\022\013\n\003url" +
+                        "\030\001 \003(\t\022 \n\004type\030\002 \001(\0162\022.wso2.EndpointType" +
+                        "*\033\n\014EndpointType\022\013\n\007DEFAULT\020\000*@\n\010Securit" +
+                        "y\022\010\n\004NONE\020\000\022\t\n\005BASIC\020\001\022\n\n\006OAUTH2\020\002\022\007\n\003JW" +
+                        "T\020\003\022\n\n\006APIKEY\020\004:P\n\024production_endpoints\022" +
+                        "\037.google.protobuf.ServiceOptions\030\321\206\003 \001(\013" +
+                        "2\017.wso2.Endpoints:M\n\021sandbox_endpoints\022\037" +
+                        ".google.protobuf.ServiceOptions\030\322\206\003 \001(\0132" +
+                        "\017.wso2.Endpoints:C\n\010security\022\037.google.pr" +
+                        "otobuf.ServiceOptions\030\323\206\003 \003(\0162\016.wso2.Sec" +
+                        "urity::\n\017throttling_tier\022\037.google.protob" +
+                        "uf.ServiceOptions\030\324\206\003 \001(\t:@\n\026method_thro" +
+                        "ttling_tier\022\036.google.protobuf.MethodOpti" +
+                        "ons\030\326\206\003 \001(\t:7\n\rmethod_scopes\022\036.google.pr" +
+                        "otobuf.MethodOptions\030\327\206\003 \001(\tB7\n$org.wso2" +
+                        ".apimgt.gateway.cli.protobufB\017ExtensionH" +
+                        "olderb\006proto3"
         };
         descriptor = com.google.protobuf.Descriptors.FileDescriptor
                 .internalBuildGeneratedFileFrom(descriptorData,
@@ -1828,13 +1106,7 @@ public final class ExtensionHolder {
         internal_static_wso2_Endpoints_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                 internal_static_wso2_Endpoints_descriptor,
-                new java.lang.String[] { "Endpoint", "Type", });
-        internal_static_wso2_Endpoint_descriptor =
-                getDescriptor().getMessageTypes().get(1);
-        internal_static_wso2_Endpoint_fieldAccessorTable = new
-                com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_wso2_Endpoint_descriptor,
-                new java.lang.String[] { "Url", });
+                new java.lang.String[] { "Url", "Type", });
         productionEndpoints.internalInit(descriptor.getExtensions().get(0));
         sandboxEndpoints.internalInit(descriptor.getExtensions().get(1));
         security.internalInit(descriptor.getExtensions().get(2));
