@@ -21,6 +21,8 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.ExtensionRegistry;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
@@ -41,6 +43,7 @@ import java.util.Locale;
  * Class for generate file descriptors for proto files and create OpenAPI objects out of those descriptors.
  */
 public class ProtobufParser {
+    private static final Logger logger = LoggerFactory.getLogger(ProtobufParser.class);
     /**
      * Compile the protobuf and generate descriptor file.
      *
@@ -60,6 +63,7 @@ public class ProtobufParser {
             ExtensionHolder.registerAllExtensions(extensionRegistry);
             DescriptorProtos.FileDescriptorSet set = DescriptorProtos.FileDescriptorSet.parseFrom(targetStream,
                     extensionRegistry);
+            logger.debug("Descriptor file is parsed successfully. file:" , descriptorPath);
             if (set.getFileList().size() > 0) {
                 return set.getFile(0);
             }
@@ -109,6 +113,7 @@ public class ProtobufParser {
                 throw new CLIInternalException("Invalid command syntax.", e);
             }
         }
+        logger.debug("Descriptor file is generation command : \"" + command + "\" is executed successfully.");
     }
 
     /**

@@ -27,12 +27,6 @@ public type GrpcFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context)
             returns boolean {
-        //Setting UUID
-        int startingTime = getCurrentTime();
-        context.attributes[REQUEST_TIME] = startingTime;
-        checkOrSetMessageID(context);
-        setHostHeaderToFilterContext(request, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         if ( request.getContentType() == GRPC_CONTENT_TYPE_HEADER) {
             addGrpcToFilterContext(context);
             printDebug(KEY_GRPC_FILTER, "Grpc filter is applied for request" + context.attributes[MESSAGE_ID].toString());
@@ -55,6 +49,7 @@ public type GrpcFilter object {
         if(statusCode == "") {
            response.setHeader(GRPC_STATUS_HEADER, "2");
            response.setHeader(GRPC_MESSAGE_HEADER, "Response is not recognized by the gateway.");
+            printDebug(KEY_GRPC_FILTER, "Response is not recognized by the gateway.");
            return true;
         }
         response.setHeader(GRPC_STATUS_HEADER, grpcStatus, mime:TRAILING);

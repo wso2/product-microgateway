@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -50,6 +51,7 @@ public class ProtocCommandBuilder {
     private String descriptorSetOutPath;
 
     private static final Logger logger = LoggerFactory.getLogger(ProtocCommandBuilder.class);
+    private static final PrintStream OUT = System.out;
 
     ProtocCommandBuilder(String protoPath, String protofolderPath, String descriptorSetOutPath) {
         this.exePath = getProtocExePath();
@@ -71,10 +73,12 @@ public class ProtocCommandBuilder {
             throw new CLIInternalException("Error while downloading the protoc executable : protoc-" +
                     OSDetector.getDetectedClassifier() + ".exe");
         }
-        return COMMAND_PLACEHOLDER.replace(EXE_PATH_PLACEHOLDER, exePath)
+        String finalCommand = COMMAND_PLACEHOLDER.replace(EXE_PATH_PLACEHOLDER, exePath)
                 .replace(PROTO_PATH_PLACEHOLDER, protoPath)
                 .replace(DESC_PATH_PLACEHOLDER, descriptorSetOutPath)
                 .replace(PROTO_FOLDER_PLACEHOLDER, protoFolderPath);
+        logger.debug("Protobuf compilation command : ", finalCommand);
+        return finalCommand;
     }
 
     /**
@@ -87,6 +91,7 @@ public class ProtocCommandBuilder {
         String protocExePath = protocExeFile.getAbsolutePath(); // if file already exists will do nothing
         if (!protocExeFile.exists()) {
             logger.info("Downloading protoc executor file - " + protocFilename);
+            OUT.println("Downloading protoc compiler: " + protocFilename);
             String protocDownloadurl = PROTOC_PLUGIN_EXE_URL_SUFFIX + protocVersion + "/protoc-" + protocVersion
                     + "-" + OSDetector.getDetectedClassifier() + PROTOC_PLUGIN_EXE_PREFIX;
             File tempDownloadFile = new File(protocDirPath,
@@ -100,7 +105,8 @@ public class ProtocCommandBuilder {
                 Files.deleteIfExists(Paths.get(protocExePath));
                 throw e;
             }
-            logger.debug("Download successfully completed. Executor file path - " + protocExeFile.getPath());
+            logger.debug("Download process is successfully completed. Executor file path - " + protocExeFile.getPath());
+            OUT.println("Download completed.");
         } else {
             grantPermission(protocExeFile);
             logger.info("Continue with existing protoc executor file at " + protocExeFile.getPath());

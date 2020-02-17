@@ -29,6 +29,8 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
@@ -40,6 +42,8 @@ import java.util.UUID;
  * custom OpenAPI object for mapping the grpc service definition (protobuf).
  */
 public class ProtoOpenAPI {
+    private static final Logger logger = LoggerFactory.getLogger(ProtoOpenAPI.class);
+
     private static final String OAUTH2_SCHEME = "grpc-oauth2-scheme";
     private static final String BASIC_SCHEME = "grpc-basic-scheme";
     private static final String APIKEY_SCHEME = "grpc-apikey-scheme";
@@ -323,6 +327,7 @@ public class ProtoOpenAPI {
     OpenAPI getOpenAPI(String protoPath) {
         checkEndpointAvailability(protoPath);
         checkSecurityTypeIncompatibility(protoPath);
+        logger.debug("Corresponding openAPI is successfully generated. \n" + openAPI.toString());
         return openAPI;
     }
 }

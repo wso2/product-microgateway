@@ -105,10 +105,5 @@ public class CliConstants {
     public static final String MICROGW_HOME_PLACEHOLDER = "${MGW-TK_HOME}";
 
     public static final String PROJECT_GRPC_DEFINITIONS_DIR = "grpc_definitions";
-    public static final String PROJECT_GRPC_OPTIONS_DIR = "gen";
-    public static final String PROJECT_GRPC_OPTIONS_FILE = "wso2CustomOptions.proto";
     public static final String RESOURCES_GRPC_DIR = "grpc";
-    public static final String PROTOC_EXE_WINDOWS = "protoc-windows.exe";
-    public static final String PROTOC_EXE_OSX = "protoc-osx.exe";
-    public static final String PROTOC_EXE_LINUX = "protoc-linux.exe";
 }
