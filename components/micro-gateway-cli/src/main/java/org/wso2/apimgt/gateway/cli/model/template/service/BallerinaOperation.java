@@ -56,15 +56,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
     private MgwEndpointConfigDTO epConfig;
+    private BallerinaInterceptor reqInterceptorContext;
+    private BallerinaInterceptor resInterceptorContext;
 
-    /**
-     * b7a module name of the request interceptor function.
-     */
-    private String requestInterceptorModule;
-    /**
-     * b7a module name of the response interceptor function.
-     */
-    private String responseInterceptorModule;
     /**
      * b7a function name of operation level request interceptor.
      */
@@ -73,8 +67,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
      * b7a function name of operation level response interceptor.
      */
     private String responseInterceptor;
-    private String requestInterceptorModuleVersion;
-    private String responseInterceptorModuleVersion;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
@@ -116,7 +108,18 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         Map<String, Object> exts = operation.getExtensions();
 
         if (exts != null) {
-            resolveInterceptors(exts);
+            // set interceptor details
+            Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+            Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+            if (reqExt != null) {
+                reqInterceptorContext = new BallerinaInterceptor(reqExt.toString());
+                requestInterceptor = reqInterceptorContext.getInvokeStatement();
+            }
+            if (resExt != null) {
+                resInterceptorContext = new BallerinaInterceptor(resExt.toString());
+                responseInterceptor = resInterceptorContext.getInvokeStatement();
+            }
+
             Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
             Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
@@ -150,80 +153,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
 
         return this;
-    }
-
-    /**
-     * Returns the module version relevant to operation level request interceptors
-     *
-     * @return  The request interceptor module version
-     */
-    public String getRequestInterceptorModuleVersion() {
-        return requestInterceptorModuleVersion;
-    }
-
-    /**
-     * Set the module version for the operation level request interceptors
-     *
-     * @param requestInterceptorModuleVersion The version of the request interceptor module
-     */
-    public void setRequestInterceptorModuleVersion(String requestInterceptorModuleVersion) {
-        this.requestInterceptorModuleVersion = requestInterceptorModuleVersion;
-    }
-
-    /**
-     * Returns the module version relevant to operation level response interceptors
-     *
-     * @return  The response interceptor module version
-     */
-    public String getResponseInterceptorModuleVersion() {
-        return responseInterceptorModuleVersion;
-    }
-
-    /**
-     * Set the module version for the operation level response interceptors
-     *
-     * @param responseInterceptorModuleVersion The version of the response interceptor module
-     */
-    public void setResponseInterceptorModuleVersion(String responseInterceptorModuleVersion) {
-        this.responseInterceptorModuleVersion = responseInterceptorModuleVersion;
-    }
-
-    /**
-     * Get the module located in the Ballerina Central, where the operation level request interceptors can be found
-     *
-     * @return     The module which contains the operation level request interceptors
-     */
-    public String getRequestInterceptorModule() {
-        return requestInterceptorModule;
-    }
-
-    /**
-     * Set the module located in the Ballerina Central, where the operation level request interceptor can be found
-     *
-     * @param requestInterceptorModule   Ballerina Central Module where the operation level request interceptor
-     *                                   can be found
-     */
-    public void setRequestInterceptorModule(String requestInterceptorModule) {
-        this.requestInterceptorModule = requestInterceptorModule;
-    }
-
-    /**
-     * Get the module located in the Ballerina Central, where the operation level response interceptor can be found
-     *
-     * @return     The module which contains the operation level response interceptors
-     */
-    public String getResponseInterceptorModule() {
-       return responseInterceptorModule;
-    }
-
-    /**
-     * Set the module located in the Ballerina Central, where the operation level response interceptors can be found
-     *
-     * @param responseInterceptorModule   Ballerina Central Module where the operation level response interceptor
-     *                                    can be found
-     */
-    public void setResponseInterceptorModule(String responseInterceptorModule) {
-        this.responseInterceptorModule = responseInterceptorModule;
     }
 
     @Override
@@ -339,36 +268,19 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
     }
 
-    private void resolveInterceptors(Map<String, Object> exts) {
-        Optional<Object> reqInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        reqInterceptor.ifPresent(val -> {
-            String interceptorExt = val.toString();
-            if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
-                String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
+    public BallerinaInterceptor getReqInterceptorContext() {
+        return reqInterceptorContext;
+    }
 
-                this.requestInterceptorModule = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
-                this.requestInterceptor = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[1];
-                this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
-            } else {
-                this.requestInterceptor = interceptorExt;
-            }
-        });
+    public void setReqInterceptorContext(BallerinaInterceptor reqInterceptorContext) {
+        this.reqInterceptorContext = reqInterceptorContext;
+    }
 
+    public BallerinaInterceptor getResInterceptorContext() {
+        return resInterceptorContext;
+    }
 
-        Optional<Object> resInterceptor = Optional.ofNullable(exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        resInterceptor.ifPresent(val -> {
-            String interceptorExt = val.toString();
-            if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                String org = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)[0];
-                String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
-
-                this.responseInterceptorModule = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
-                this.responseInterceptor = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[1];
-                this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
-            } else {
-                this.responseInterceptor = interceptorExt;
-            }
-        });
+    public void setResInterceptorContext(BallerinaInterceptor resInterceptorContext) {
+        this.resInterceptorContext = resInterceptorContext;
     }
 }

@@ -188,7 +188,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             {{#if responseInterceptor}}{{responseInterceptor}}(outboundEp, clientResponse);{{/if}}
             {{~#if @root.responseInterceptor}}
             {{#equals @root.responseInterceptor responseInterceptor}}
-            {{else}}{{@root.responseInterceptor}}(outboundEp, req);{{/equals}}{{/if}}
+            {{else}}{{@root.responseInterceptor}}(outboundEp, clientResponse);{{/equals}}{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);

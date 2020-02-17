@@ -666,7 +666,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
              requestInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
                              true, openAPIFilePath, pathItem, operationName);
                  }
@@ -674,7 +674,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
              responseInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
                              false, openAPIFilePath, pathItem, operationName);
                  }
@@ -954,54 +954,8 @@ public class OpenAPICodegenUtils {
         return false;
     }
 
-    /**
-     * Extracts the module name from the interceptor statement.
-     * <p>
-     *     First example shows how the interceptor statement will look like if version is
-     *     provided. Second Example shows how it will be without the version.
-     * </p>
-     * Ex:
-     * <ol>
-     *     <li>{@code org/module/1.0.0:funcName}</li>
-     *     <li>{@code org/module:funcName}</li>
-     * </ol>
-     *
-     * @param stmt complete interceptor statement in openapi definition
-     * @return module name
-     */
-    public static String extractModuleName(String stmt) {
-        String module = null;
-        String[] parts = stmt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
-
-        if (parts.length == 2) {
-            // set module name when the version is not specified in the swagger definition
-            module = parts[1].split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[0];
-        } else if (parts.length == 3) {
-            module = parts[1];
-        }
-
-        return module;
-    }
-
-    /**
-     * Extracts the module version from the interceptor statement
-     *
-     * @param interceptorStatement the interceptor statement
-     * @return the module version
-     */
-    public static String buildModuleVersion(String interceptorStatement) {
-        String moduleVersion = null;
-        String[] splitArray = interceptorStatement.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
-        if (splitArray.length == 3) {
-            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR)[0];
-        }
-        return moduleVersion;
-    }
-
     public static List<String> getAuthProviders(String schemas) {
         List<String> authProviders = new ArrayList<>();
-        boolean basic = false;
-        boolean oauth2 = false;
         if (schemas != null) {
             String[] schemasArray = schemas.trim().split("\\s*,\\s*");
             for (String s : schemasArray) {

@@ -65,9 +65,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
-    private HashMap<String, String> pickedIdentifiers = new HashMap<>();
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
+
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -169,38 +169,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return libVersions;
     }
 
-    public ArrayList<String> getImportModules() {
-        return importModules;
-    }
-
     public Set<Map.Entry<String, BallerinaPath>> getPaths() {
         return paths;
-    }
-
-    /**
-     * Pick a unique identifier for a given module.
-     * This will put each picked identifier into a global map. Which will then be used
-     * to identify the picked identifiers.
-     *
-     * @param module ballerina interceptor module with relevant organization
-     * @return selected identifier for the module
-     */
-    private String pickModuleIdentifier(String module) {
-        // import identifier is already set for this module. No need to set a new identifier
-        if (pickedIdentifiers.containsKey(module)) {
-            return pickedIdentifiers.get(module);
-        }
-
-        for (String id : OpenAPIConstants.MODULE_IDENTIFIER_LIST) {
-            // if current identifier value is not there as a value of the picked identifier map,
-            // select it as the identifier for this interceptor module.
-            if (!this.pickedIdentifiers.containsValue(id)) {
-                this.pickedIdentifiers.put(module, id);
-                return id;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -276,31 +246,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         }
     }
 
-    private String extractImport(String interceptorExt) throws BallerinaServiceGenException {
-        String id = "";
-
-        if (interceptorExt.contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-            String[] arr = interceptorExt.split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
-            String org = arr[0];
-            String module = OpenAPICodegenUtils.extractModuleName(interceptorExt);
-            String version = OpenAPICodegenUtils.buildModuleVersion(interceptorExt);
-            String fqn = org + OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR + module;
-            id = pickModuleIdentifier(fqn);
-
-            if (id == null) {
-                throw new BallerinaServiceGenException("Couldn't pick an unique identifier for module " + fqn);
-            }
-            if (version != null) {
-                addLibVersion(fqn, version);
-            }
-
-            String importStatement = fqn + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id;
-            addImport(importStatement);
-        }
-
-        return id;
-    }
-
     /**
      * Extracts the ballerina module names of interceptors provided in OpenAPI definition.
      * Import statements will also be assigned with an alias for easy reference. Final format
@@ -315,54 +260,57 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      */
     private void resolveInterceptors(Map<String, Object> exts) throws BallerinaServiceGenException {
         Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+        Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+
         if (reqExt != null) {
-            if (reqExt.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                String[] arr = reqExt.toString().split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
-                String reqImportId = extractImport(reqExt.toString());
-                this.requestInterceptor = reqImportId + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + arr[1];
-            } else {
-                this.requestInterceptor = reqExt.toString();
+            BallerinaInterceptor reqInterceptor = new BallerinaInterceptor(reqExt.toString());
+
+            // Add new library version and import statement if interceptor is coming from central
+            if (BallerinaInterceptor.Type.CENTRAL == reqInterceptor.getType()) {
+                // Set library version only if specific version is provided
+                if (reqInterceptor.getVersion() != null) {
+                    addLibVersion(reqInterceptor.getFqn(), reqInterceptor.getVersion());
+                }
+
+                addImport(reqInterceptor.getImportStatement());
             }
+            this.requestInterceptor = reqInterceptor.getInvokeStatement();
         }
 
-        Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
         if (resExt != null) {
-            if (resExt.toString().contains(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR)) {
-                String[] arr = resExt.toString().split(OpenAPIConstants.INTERCEPTOR_MODULE_SEPARATOR);
-                String resImportId = extractImport(resExt.toString());
-                this.responseInterceptor = resImportId + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + arr[1];
-            } else {
-                this.responseInterceptor = resExt.toString();
+            BallerinaInterceptor resInterceptor = new BallerinaInterceptor(resExt.toString());
+
+            if (BallerinaInterceptor.Type.CENTRAL == resInterceptor.getType()) {
+                if (resInterceptor.getVersion() != null) {
+                    addLibVersion(resInterceptor.getFqn(), resInterceptor.getVersion());
+                }
+
+                addImport(resInterceptor.getImportStatement());
             }
+            this.responseInterceptor = resInterceptor.getInvokeStatement();
         }
     }
 
     private void updateOperationInterceptors(BallerinaOperation operation) {
-        String reqModule = operation.getRequestInterceptorModule();
-        String reqVersion = operation.getRequestInterceptorModuleVersion();
-        String resModule = operation.getResponseInterceptorModule();
-        String resVersion = operation.getResponseInterceptorModuleVersion();
+        BallerinaInterceptor reqInterceptor = operation.getReqInterceptorContext();
+        BallerinaInterceptor resInterceptor = operation.getResInterceptorContext();
 
-        if (reqModule != null && operation.getRequestInterceptor() != null) {
-            if (reqVersion != null) {
-                addLibVersion(reqModule, reqVersion);
+        if (reqInterceptor != null) {
+            if (BallerinaInterceptor.Type.CENTRAL == reqInterceptor.getType()) {
+                if (reqInterceptor.getVersion() != null) {
+                    addLibVersion(reqInterceptor.getFqn(), reqInterceptor.getVersion());
+                }
+                addImport(reqInterceptor.getImportStatement());
             }
-            String id = pickModuleIdentifier(reqModule);
-            addImport(reqModule + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id);
-
-            String function = id + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + operation.getRequestInterceptor();
-            operation.setRequestInterceptor(function);
         }
 
-        if (resModule != null && operation.getResponseInterceptor() != null) {
-            if (resVersion != null) {
-                addLibVersion(resModule, resVersion);
+        if (resInterceptor != null) {
+            if (BallerinaInterceptor.Type.CENTRAL == resInterceptor.getType()) {
+                if (resInterceptor.getVersion() != null) {
+                    addLibVersion(resInterceptor.getFqn(), resInterceptor.getVersion());
+                }
+                addImport(resInterceptor.getImportStatement());
             }
-            String id = pickModuleIdentifier(resModule);
-            addImport(resModule + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id);
-
-            String function = id + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + operation.getResponseInterceptor();
-            operation.setRequestInterceptor(function);
         }
     }
 
