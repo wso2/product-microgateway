@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/stringutils;
 
 # Representation of the mutual ssl handler
 #
@@ -27,10 +28,7 @@ public type MutualSSLHandler object {
     # + req - The `Request` instance.
     # + return - Returns `true` if can be authenticated. Else, returns `false`.
     public function canProcess(http:Request req) returns @tainted boolean {
-        if (req.mutualSslHandshake["status"] == PASSED) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     # Authenticates the incoming request knowing that mutual ssl has happened at the trasnport layer.
@@ -39,10 +37,19 @@ public type MutualSSLHandler object {
     # + return - Returns `true` if authenticated successfully. Else, returns `false`
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean | http:AuthenticationError {
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        return doMTSLFilterRequest(req, invocationContext);
-    }
+        string|error mutualSSLVerifyClient = getMutualSSL();
+        if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
+                && req.mutualSslHandshake[STATUS] != PASSED ) {
+            return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
+        }
 
+        if (req.mutualSslHandshake[STATUS] == PASSED) {
+            printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake passed.");
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            return doMTSLFilterRequest(req, invocationContext);
+        }
+        return true;
+    }
 };
 
 

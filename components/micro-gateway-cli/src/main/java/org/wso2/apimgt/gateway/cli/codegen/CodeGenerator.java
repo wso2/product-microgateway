@@ -177,6 +177,10 @@ public class CodeGenerator {
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateTokenServices());
         genFiles.add(generateCommonEndpoints());
+        List<String> externalJars = CmdUtils.getExternalJarDependencies(projectName);
+        if (externalJars.size() > 0) {
+            genFiles.add(generateBallerinaTOMLDependencies(externalJars));
+        }
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
@@ -214,6 +218,19 @@ public class CodeGenerator {
     private GenSrcFile generateMainBal(List<BallerinaService> services) throws IOException {
         String srcFile = GeneratorConstants.MAIN_TEMPLATE_NAME + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(services, GeneratorConstants.MAIN_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Generate code for ballerina toml external dependencies
+     *
+     * @param jarNames List of jar names to be included as external platform dependencies in the ballerina.toml
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateBallerinaTOMLDependencies(List<String> jarNames) throws IOException {
+        String srcFile = GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
+        String mainContent = getContent(jarNames, GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 

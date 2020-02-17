@@ -35,12 +35,30 @@ import wso2/gateway;
     {{#equals epConfig.sandEndpoints.type "load_balance"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>lbResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
     {{#equals epConfig.prodEndpoints.type "failover"}} {{#epConfig.prodEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
     {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
+
+    {{#if apiRequestInterceptor}}
+    int {{operationId}}_api_request_interceptor_index = -1;
+    {{/if}}
+    {{#if apiResponseInterceptor}}
+    int {{operationId}}_api_response_interceptor_index = -1;
+    {{/if}}
+
+    {{#if requestInterceptor}}
+    int {{operationId}}_request_interceptor_index = -1;
+    {{/if}}
+    {{#if responseInterceptor}}
+    int {{operationId}}_response_interceptor_index = -1;
+    {{/if}}
+
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
 {{>kubernetes}}
 
 @http:ServiceConfig {
-    basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}}
+    basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}},
+    auth: {
+        authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
+    }
    {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
@@ -57,7 +75,11 @@ import wso2/gateway;
     apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
     authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
-    security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
+    security: {
+            "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
+            "mutualSSL": "{{api.mutualSSL}}",
+            "applicationSecurityOptional": {{applicationSecurityOptional}}
+        }
 }
 service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
 {{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
@@ -69,21 +91,45 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         auth:{
         {{#if isSecured}}
             {{#if scope}}
-                scopes: [{{{scope}}}] {{/if}}
+                scopes: [{{{scope}}}], {{/if}}
         {{else}}
-            enabled:false
+            enabled:false,
         {{/if}}
+            authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
         }
     }
     @gateway:Resource {
         authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
-        security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
+        security: {
+            "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
+            "applicationSecurityOptional": {{applicationSecurityOptional}} 
+            }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
-    {{#if apiRequestInterceptor}}{{apiRequestInterceptor}} (outboundEp, req);{{/if}}
-    {{#if requestInterceptor}}{{requestInterceptor}} (outboundEp, req);{{/if}}
+    {{#if apiRequestInterceptor}}
+    if({{operationId}}_api_request_interceptor_index == -1) {
+    {{^isJavaApiRequestInterceptor}}
+        {{apiRequestInterceptor}} (outboundEp, req);
+    {{/isJavaApiRequestInterceptor}}
+    } else {
+        if(!gateway:invokeRequestInterceptor({{operationId}}_api_request_interceptor_index, outboundEp, req)) {
+            return;
+        }
+    }
+    {{/if}}
+    {{#if requestInterceptor}}
+    if({{operationId}}_request_interceptor_index == -1) {
+    {{^isJavaRequestInterceptor}}
+        {{requestInterceptor}} (outboundEp, req);
+    {{/isJavaRequestInterceptor}}
+    } else {
+        if(!gateway:invokeRequestInterceptor({{operationId}}_request_interceptor_index, outboundEp, req)) {
+            return;
+        }
+    }
+    {{/if}}
     string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
@@ -181,8 +227,28 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
-            {{#if responseInterceptor}}{{responseInterceptor}} (outboundEp, clientResponse);{{/if}}
-            {{#if apiResponseInterceptor}}{{apiResponseInterceptor}} (outboundEp, clientResponse);{{/if}}
+            {{#if responseInterceptor}}
+                if({{operationId}}_response_interceptor_index == -1) {
+                {{^isJavaResponseInterceptor}}
+                    {{responseInterceptor}} (outboundEp, clientResponse);
+                {{/isJavaResponseInterceptor}}
+                } else {
+                    if(!gateway:invokeResponseInterceptor({{operationId}}_response_interceptor_index, outboundEp, clientResponse)) {
+                        return;
+                    }
+                }
+            {{/if}}
+            {{#if apiResponseInterceptor}}
+                if({{operationId}}_api_response_interceptor_index == -1) {
+                {{^isJavaApiResponseInterceptor}}
+                    {{apiResponseInterceptor}} (outboundEp, clientResponse);
+                {{/isJavaApiResponseInterceptor}}
+                } else {
+                    if(!gateway:invokeResponseInterceptor({{operationId}}_api_response_interceptor_index, outboundEp, clientResponse)) {
+                        return;
+                    }
+                }
+            {{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);
@@ -241,4 +307,36 @@ function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string default
     } else {
         return url;
     }
+}
+
+function initInterceptorIndexes{{cut qualifiedServiceName " "}}() {
+
+{{#paths}}{{#value}}{{#operations}}{{#value}}
+    {{#if apiRequestInterceptor}}
+        string {{operationId}}_api_request_interceptor_name = "{{apiRequestInterceptor}}";
+        if({{operationId}}_api_request_interceptor_name.startsWith("java:")) {
+            {{operationId}}_api_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_request_interceptor_name.substring(5, {{operationId}}_api_request_interceptor_name.length()));
+        }
+        {{/if}}
+        {{#if apiResponseInterceptor}}
+        string {{operationId}}_api_response_interceptor_name = "{{apiResponseInterceptor}}";
+        if({{operationId}}_api_response_interceptor_name.startsWith("java:")) {
+            {{operationId}}_api_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_response_interceptor_name.substring(5, {{operationId}}_api_response_interceptor_name.length()));
+        }
+        {{/if}}
+
+        {{#if requestInterceptor}}
+        string {{operationId}}_request_interceptor_name = "{{requestInterceptor}}";
+        if({{operationId}}_request_interceptor_name.startsWith("java:")) {
+            {{operationId}}_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_request_interceptor_name.substring(5, {{operationId}}_request_interceptor_name.length()));
+        }
+        {{/if}}
+        {{#if responseInterceptor}}
+        string {{operationId}}_response_interceptor_name = "{{responseInterceptor}}";
+        if({{operationId}}_response_interceptor_name.startsWith("java:")) {
+            {{operationId}}_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_response_interceptor_name.substring(5, {{operationId}}_response_interceptor_name.length()));
+        }
+        {{/if}}
+
+{{/value}}{{/operations}}{{/value}}{{/paths}}
 }

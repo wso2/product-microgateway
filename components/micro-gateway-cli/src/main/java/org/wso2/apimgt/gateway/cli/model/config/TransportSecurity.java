@@ -17,13 +17,18 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
+
 /**
  * Transport Security http, http2 and mutualSSL.
  */
 public class TransportSecurity {
     private boolean http = true;
     private boolean https = true;
-    private String mutualSSL = "optional";
+
+    @JsonProperty("mutualssl")
+    private String mutualSSL = OpenAPIConstants.OPTIONAL;
 
     public void setHttp(boolean http) {
         this.http = http;

@@ -33,6 +33,8 @@ public class ExtendedAPI extends APIDetailedDTO {
     private String mgwApiScope = null;
     //support apim application level security
     private ApplicationSecurity applicationSecurity = null;
+    //support apim transport level security
+    private String mutualSSL = null;
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;
@@ -73,4 +75,13 @@ public class ExtendedAPI extends APIDetailedDTO {
     public ApplicationSecurity getApplicationSecurity() {
         return applicationSecurity;
     }
+
+    public String getMutualSSL() {
+        return mutualSSL;
+    }
+
+    public void setMutualSSL(String mutualSSL) {
+        this.mutualSSL = mutualSSL;
+    }
+
 }

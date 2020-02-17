@@ -20,10 +20,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -60,12 +62,19 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String responseInterceptor;
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
+    private boolean isJavaRequestInterceptor;
+    private boolean isJavaResponseInterceptor;
+    private boolean isJavaApiRequestInterceptor;
+    private boolean isJavaApiResponseInterceptor;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<String> authProviders;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean applicationSecurityOptional;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -92,9 +101,14 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, api.getApplicationSecurity());
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+                api.getMutualSSL());
+        // if application security defined in operation level is not found, get API level application security
+        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
+        this.applicationSecurityOptional = appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -114,11 +128,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             //set resource level request interceptors
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
+            requestInterceptor.ifPresent(value -> {
+                this.requestInterceptor = value.toString();
+                if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
+                    this.isJavaRequestInterceptor = true;
+                }
+            });
             //set resource level response interceptors
-            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
+            Optional<Object> responseInterceptor = Optional
+                    .ofNullable(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+            responseInterceptor.ifPresent(value -> {
+                this.responseInterceptor = value.toString();
+                if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
+                    this.isJavaResponseInterceptor = true;
+                }
+            });
             //set dev-first resource level throttle policy
             Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.THROTTLING_TIER));
@@ -253,6 +277,14 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public String getApiRequestInterceptor() {
         return apiRequestInterceptor;
+    }
+
+    public void setJavaApiRequestInterceptor(boolean javaApiRequestInterceptor) {
+        isJavaApiRequestInterceptor = javaApiRequestInterceptor;
+    }
+
+    public void setJavaApiResponseInterceptor(boolean javaApiResponseInterceptor) {
+        isJavaApiResponseInterceptor = javaApiResponseInterceptor;
     }
 
     public void setApiRequestInterceptor(String requestInterceptor) {
