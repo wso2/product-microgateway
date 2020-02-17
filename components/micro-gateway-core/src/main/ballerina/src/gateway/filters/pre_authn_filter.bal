@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
@@ -78,9 +77,7 @@ returns boolean {
     invocationContext.attributes[REQUEST_METHOD] = request.method;
     invocationContext.attributes[REQUEST_RAWPATH] = request.rawPath;
 
-    boolean isCookie = false;
     string authHeader = "";
-    string? authCookie = "";
     string | error extractedToken = "";
     string authHeaderName = getAuthHeaderFromFilterContext(context);
     printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header name : " + authHeaderName);
@@ -91,15 +88,6 @@ returns boolean {
     boolean isAPIKeyAuth = false;
     if (request.hasHeader(authHeaderName)) {
         authHeader = request.getHeader(authHeaderName);
-    } else if (request.hasHeader(COOKIE_HEADER)) {
-        //Authentiction with HTTP cookies
-        isCookie = config:contains(COOKIE_HEADER);
-        if (isCookie) {
-            authCookie = getAuthCookieIfPresent(request);
-            if (authCookie is string) {
-                authHeader = authCookie;
-            }
-        }
     } else {
         //process apikey authentication
         if (authProvidersIds.indexOf(AUTH_SCHEME_API_KEY) != ()) {
@@ -133,12 +121,7 @@ returns boolean {
     // set api's mutual ssl client verify configuration
     setMutualSSL(context.getServiceName());
 
-    string providerId;
-    if (!isCookie) {
-        providerId = getAuthenticationProviderType(authHeader);
-    } else {
-        providerId = getAuthenticationProviderTypeWithCookie(authHeader);
-    }
+    string providerId = getAuthenticationProviderType(authHeader);
     printDebug(KEY_PRE_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
     boolean canHandleAuthentication = isAPIKeyAuth;
     foreach string provider in authProvidersIds {
@@ -182,15 +165,6 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
     }
 }
 
-
-function getAuthenticationProviderTypeWithCookie(string authHeader) returns (string) {
-    if (contains(authHeader, ".")) {
-        return AUTH_SCHEME_JWT;
-    } else {
-        return AUTH_SCHEME_OAUTH2;
-    }
-}
-
 function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) {
     if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, DEFAULT_REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE)) {
         request.removeHeader(authHeaderName);
@@ -202,24 +176,4 @@ function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) 
         request.removeHeader(TEMP_AUTH_HEADER);
         printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
-}
-
-function getAuthCookieIfPresent(http:Request request) returns string? {
-    //get required cookie as config value
-    string? authCookie = ();
-    if (request.hasHeader(COOKIE_HEADER)) {
-        string requiredCookie = config:getAsString(COOKIE_HEADER, "");
-        //extract cookies from the incoming request
-        string authHead = request.getHeader(COOKIE_HEADER);
-        string[] cookies = split(authHead.trim(), ";");
-        foreach var cookie in cookies {
-            string converted = replaceFirst(cookie, "=", "::");
-            string[] splitedStrings = split(converted.trim(), "::");
-            string sessionId = splitedStrings[1];
-            if (sessionId == requiredCookie) {
-                authCookie = sessionId;
-            }
-        }
-    }
-    return authCookie;
 }
