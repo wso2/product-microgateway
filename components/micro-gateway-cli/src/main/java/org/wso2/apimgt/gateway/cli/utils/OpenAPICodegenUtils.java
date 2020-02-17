@@ -250,7 +250,7 @@ public class OpenAPICodegenUtils {
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
-        setTransportSecurity(api, getTransportSecurityfromDef(openAPI));
+        setTransportSecurity(api, populateTransportSecurity(openAPI));
         //open API content should be set in json in order to validation filter to work.
         api.setApiDefinition(openAPIContent);
         return api;
@@ -285,7 +285,7 @@ public class OpenAPICodegenUtils {
      * @param openAPI API definition
      * @return TransportSecurity
      */
-    private static TransportSecurity getTransportSecurityfromDef(OpenAPI openAPI) {
+    private static TransportSecurity populateTransportSecurity(OpenAPI openAPI) {
         TransportSecurity transportSecurity = null;
         Map<String, Object> apiDefExtensions = openAPI.getExtensions();
         if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
@@ -306,11 +306,9 @@ public class OpenAPICodegenUtils {
     }
 
     private static void validateTransportSecurity(OpenAPI openAPI, TransportSecurity transportSecurity) {
-        if (!transportSecurity.getHttps() && !transportSecurity.getHttps()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Atleast one transport type(http, https) should be enabled.");
-            }
-            throw new CLIRuntimeException("Atleast one transport type(http, https) should be enabled for '"
+        if (!transportSecurity.getHttp() && !transportSecurity.getHttps()) {
+            logger.debug("At least one transport type(http, https) should be enabled.");
+            throw new CLIRuntimeException("At least one transport type(http, https) should be enabled for '"
                     + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion() + "'");
         }
         if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(transportSecurity.getMutualSSL())) {
@@ -767,19 +765,24 @@ public class OpenAPICodegenUtils {
         }
         api.setMgwApiSecurity(securitySchemas);
         api.setMgwApiScope(scopes);
-        ApplicationSecurity appSecurityfromDef = getApplicationSecurityfromDef(openAPI, api.getMutualSSL());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Getting Application security by the extension for API '" + openAPI.getInfo().getTitle()
+                    + "' version '" + openAPI.getInfo().getVersion() + "'");
+        }
+        ApplicationSecurity appSecurityfromDef =
+                populateApplicationSecurity(openAPI.getExtensions(), api.getMutualSSL());
         api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
     }
 
     /**
-     * Get application security from API Definition extension
+     * Get application security from API Definition extension.
      *
-     * @param openAPI API definition
-     * @return ApplicationSecurity
+     * @param apiDefExtensions          API definition extesnsions
+     * @return ApplicationSecurity/null if not present returns null
      */
-    private static ApplicationSecurity getApplicationSecurityfromDef(OpenAPI openAPI, String mutualSSL) {
+    public static ApplicationSecurity populateApplicationSecurity(Map<String, Object> apiDefExtensions,
+                                                                   String mutualSSL) {
         ApplicationSecurity appSecurity = null;
-        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
         if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
             if (logger.isDebugEnabled()) {
                 logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
@@ -789,28 +792,22 @@ public class OpenAPICodegenUtils {
                         .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
 
             } catch (Exception exception) {
-                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
-                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.APPLICATION_SECURITY +
+                throw new CLIRuntimeException("The API contains " + OpenAPIConstants.APPLICATION_SECURITY +
                         " extension but failed to match " + OpenAPIConstants.APPLICATION_SECURITY_TYPES +
                         " to the required format.");
             }
-            if (!validateAppSecurity(appSecurity, mutualSSL)) {
-                throw new CLIRuntimeException("Application security is mandatory for "
-                        + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion()
-                        + " but security types were not found");
+            if (!validateAppSecurityOptionality(appSecurity, mutualSSL)) {
+                throw new CLIRuntimeException("Application security is given as optional for but Mutual SSL is not " +
+                        "mandatory for the API");
             }
         }
         return appSecurity;
     }
 
-    private static boolean validateAppSecurity(ApplicationSecurity appSecurity, String mutualSSL) {
-        if (!appSecurity.isOptional()) {
-            return !appSecurity.getSecurityTypes().isEmpty();
-        }
-        if (!OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)) {
-            return false;
-        }
-        return true;
+    private static boolean validateAppSecurityOptionality(ApplicationSecurity appSecurity,
+                                                          String mutualSSL) {
+        // if application security is optional, mutual ssl must be mandatory
+        return !appSecurity.isOptional() || OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL);
     }
 
     /**
@@ -878,17 +875,6 @@ public class OpenAPICodegenUtils {
     }
 
     public static List<String> getMgwResourceSecurity(Operation operation, ApplicationSecurity appSecurity) {
-        Map<String, Object> operationExtensions = operation.getExtensions();
-        //override api level application security extension by operation level extension
-        if (operationExtensions != null && operationExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
-            try {
-                appSecurity = new ObjectMapper().convertValue(
-                        operationExtensions.get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
-            } catch (Exception exception) {
-                throw new CLIRuntimeException("Operation contains " + OpenAPIConstants.APPLICATION_SECURITY +
-                        " extension but failed to match to the required format.");
-            }
-        }
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
         return getAuthProviders(securitySchemas, appSecurity);
     }
@@ -1081,7 +1067,8 @@ public class OpenAPICodegenUtils {
 
     public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity) {
         List<String> authProviders = new ArrayList<>();
-        // Support api manager application level security
+        // Support api manager application level security.
+        // Give priority to extensions security types.
         if (appSecurity != null && !appSecurity.getSecurityTypes().isEmpty()) {
             for (String securityType : appSecurity.getSecurityTypes()) {
                 if (OpenAPIConstants.APPLICATION_LEVEL_SECURITY.containsKey(securityType)) {
@@ -1089,7 +1076,10 @@ public class OpenAPICodegenUtils {
                             OpenAPIConstants.APPLICATION_LEVEL_SECURITY.get(securityType), authProviders);
                 }
             }
-        } else if (schemas != null) {
+        }
+        // Note that if application security extension provided auth security types,
+        // then swagger defined security schemes will be ignored.
+        if (authProviders.isEmpty() && schemas != null) {
             String[] schemasArray = schemas.trim().split("\\s*,\\s*");
             for (String securityType : schemasArray) {
                 getAuthProvidersForSecurityType(securityType, authProviders);

@@ -76,15 +76,19 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         auth:{
         {{#if isSecured}}
             {{#if scope}}
-                scopes: [{{{scope}}}] {{/if}}
+                scopes: [{{{scope}}}], {{/if}}
         {{else}}
-            enabled:false
+            enabled:false,
         {{/if}}
+            authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
         }
     }
     @gateway:Resource {
         authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
-        security: {"apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}] }
+        security: {
+            "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
+            "applicationSecurityOptional": {{applicationSecurityOptional}} 
+            }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {

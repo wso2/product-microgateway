@@ -133,21 +133,21 @@ returns boolean {
     // set api's mutual ssl client verify configuration
     setMutualSSL(context.getServiceName());
 
-    string providerId = getAuthenticationProviderType(authHeader);
+    string providerId;
     if (!isCookie) {
         providerId = getAuthenticationProviderType(authHeader);
     } else {
         providerId = getAuthenticationProviderTypeWithCookie(authHeader);
     }
     printDebug(KEY_PRE_AUTHN_FILTER, "Provider Id for authentication handler : " + providerId);
-    boolean canHandleAuthentication = false;
+    boolean canHandleAuthentication = isAPIKeyAuth;
     foreach string provider in authProvidersIds {
         if (provider == providerId) {
             canHandleAuthentication = true;
         }
     }
 
-    boolean isOptional = isAppSecurityOptional(context.getServiceName());
+    boolean isOptional = isAppSecurityOptionalforResource(context.getServiceName(), context.getResourceName());
     if (isSecuredResource && !isOptional) {
         if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !isAPIKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
@@ -177,8 +177,6 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
         return AUTHN_SCHEME_BASIC;
     } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
-    } else if (authHeader == AUTH_SCHEME_API_KEY) {
-        return AUTH_SCHEME_API_KEY;
     } else {
         return AUTH_SCHEME_OAUTH2;
     }

@@ -24,6 +24,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -68,6 +69,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean applicationSecurityOptional;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasSandEpConfig = false;
@@ -92,9 +96,14 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, api.getApplicationSecurity());
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+                api.getMutualSSL());
+        // if application security defined in operation level is not found, get API level application security
+        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
+        this.applicationSecurityOptional = appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration

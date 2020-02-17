@@ -632,8 +632,16 @@ public function getMutualSSL() returns string | error {
     }
 }
 
-public function isAppSecurityOptional(string serviceName) returns boolean {
+public function isAppSecurityOptionalforResource(string serviceName, string resourceName) returns boolean {
     boolean appSecurityOptional = false;
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>>resourceConfig.security;
+        json appSecurityOptionalJson = securityMap[APP_SECURITY_OPTIONAL];
+        appSecurityOptional = <boolean> appSecurityOptionalJson;
+        return appSecurityOptional;
+    }
+
     json | error securityOptional= getSecurityForService(serviceName, APP_SECURITY_OPTIONAL);
     if (securityOptional is json) {
         appSecurityOptional = <boolean> securityOptional;

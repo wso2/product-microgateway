@@ -120,7 +120,7 @@ public function getAPIAuthHandlers(boolean appSecurityOptional) returns http:Inb
     if (appSecurityOptional) { 
         return [getAuthHandlers()];
     }
-    if (authHandlersMap.length() < 0) {
+    if (authHandlersMap.length() < 1) {
         printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
         initAuthHandlers();
     }
@@ -156,7 +156,7 @@ function initiateKeyManagerConfigurations() {
 
 public function getBasicAuthHandler() returns http:InboundAuthHandler[] {
     // Initializes the basic auth handler
-    if (authHandlersMap.length() < 0) {
+    if (authHandlersMap.length() < 1) {
         printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
         initAuthHandlers();
     }
