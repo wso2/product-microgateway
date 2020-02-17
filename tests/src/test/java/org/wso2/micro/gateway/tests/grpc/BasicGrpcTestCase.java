@@ -25,7 +25,7 @@ public class BasicGrpcTestCase extends BaseTestCase {
     }
 
     @Test(description = "Test Basic Grpc Passthrough")
-    public void testPerResourceRequestInterceptor() throws Exception {
+    public void testBasicGrpcPassthrough() throws Exception {
         String response = testGrpcService("localhost:9590", "sample-request");
         Assert.assertNotNull(response);
         Assert.assertEquals(response, "response received :sample-request");

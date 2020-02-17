@@ -24,12 +24,16 @@ public class GetConfig {
         Toml toml = new Toml();
         toml.read(configFile);
         Config config = toml.to(Config.class);
-        boolean enabled = config.getB7a().getObservability().getMetrics().isEnabled();
-        long jmxPort = config.getB7a().getObservability().getMetrics().getPrometheus().getJmxPort();
-        File txtConfigs = new File(fileWritePath);
-        try (PrintWriter writer = new PrintWriter(txtConfigs, "UTF-8")) {
-            writer.println(enabled);
-            writer.println(jmxPort);
+        boolean enabled = false;
+        long jmxPort;
+        if (config.getB7a() != null && config.getB7a().getObservability() != null) {
+            enabled = config.getB7a().getObservability().getMetrics().isEnabled();
+            jmxPort = config.getB7a().getObservability().getMetrics().getPrometheus().getJmxPort();
+            File txtConfigs = new File(fileWritePath);
+            try (PrintWriter writer = new PrintWriter(txtConfigs, "UTF-8")) {
+                writer.println(enabled);
+                writer.println(jmxPort);
+            }
         }
     }
 

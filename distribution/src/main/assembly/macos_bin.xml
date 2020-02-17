@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <id>Micro Gateway Toolkit</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/templates</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/templates</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/../components/micro-gateway-cli/src/main/resources/policies</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/policies</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/conf</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/target/lib/dependencies</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/dependencies</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
+        <!--create an empty temp folder-->
+        <fileSet>
+            <directory>${basedir}/resources/temp</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/temp</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/cli-conf</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/filters</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/filters</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/definitions</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/definitions</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/lib/gw-balo/</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/gateway-balo</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>
+                ${project.build.directory}/extracted-jre-macos
+            </directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
+        <!--create an empty logs folder-->
+        <fileSet>
+            <directory>${basedir}/resources/logs</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/logs</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- Copying the in-place update tools-->
+        <fileSet>
+            <directory>target/update/</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin/</outputDirectory>
+            <includes>
+                <include>update_darwin</include>
+            </includes>
+            <fileMode>744</fileMode>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>${basedir}/target/platform.zip</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/resources/bin/micro-gw</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/../README.md</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/LICENSE-TOOLKIT.txt</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}</outputDirectory>
+            <destName>LICENSE.txt</destName>
+        </file>
+        <file>
+            <source>${basedir}/../release-notes.html</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/resources/updates/product.txt</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/updates</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+    </files>
+
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/gateway/platform</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
+                <include>com.moandjiezana.toml:toml4j:jar</include>
+                <include>com.beust:jcommander:jar</include>
+                <include>org.ballerinax.docker:docker-extension:jar</include>
+                <include>org.ballerinax.kubernetes:kubernetes-extension:jar</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/gateway/cli</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.slf4j:slf4j-api</include>
+                <include>org.slf4j:slf4j-jdk14</include>
+                <include>org.apache.commons:commons-lang3</include>
+                <include>commons-pool.wso2:commons-pool</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>
