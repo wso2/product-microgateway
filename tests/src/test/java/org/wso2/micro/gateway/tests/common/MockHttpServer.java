@@ -51,7 +51,7 @@ public class MockHttpServer extends Thread {
     private HttpsServer httpServer;
     private String KMServerUrl;
     private int KMServerPort = -1;
-    private String DCRRestAPIBasePath = "/client-registration/v0.14";
+    private String DCRRestAPIBasePath = "/client-registration/v0.15";
     private String PubRestAPIBasePath = "/api/am/publisher/v1.0";
     private String AdminRestAPIBasePath = "/api/am/admin/v1.0";
     private String TMRestAPIBasePath = "/endpoints";

@@ -29,7 +29,7 @@ public type PreAuthnFilterWrapper object {
         return result;
     }
 
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+    public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
         boolean result = self.preAuthnFilter.filterResponse(response, context);
         return result;
     }

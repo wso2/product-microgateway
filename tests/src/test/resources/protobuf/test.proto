@@ -1,0 +1,15 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "org.wso2.micro.gateway.tests.grpc.gen";
+
+message TestRequest {
+    string testReqString = 1;
+}
+
+message TestResponse {
+    string testResString = 1;
+}
+
+service TestService {
+    rpc testCall(TestRequest) returns (TestResponse);
+}

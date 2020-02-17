@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -58,6 +59,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
+    private boolean isGrpc;
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -100,6 +102,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
+        this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
         this.authProviders = OpenAPICodegenUtils
                 .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
@@ -177,15 +180,23 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 //if it is the developer first approach
                 if (isDevFirst) {
                     //to add API level request interceptor
-                    Optional<Object> apiRequestInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-                    apiRequestInterceptor.ifPresent(value -> operation.getValue()
-                            .setApiRequestInterceptor(value.toString()));
+                    Optional<Object> apiRequestInterceptor = Optional
+                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+                    apiRequestInterceptor.ifPresent(value -> {
+                        operation.getValue().setApiRequestInterceptor(value.toString());
+                        if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
+                            operation.getValue().setJavaApiRequestInterceptor(true);
+                        }
+                    });
                     //to add API level response interceptor
-                    Optional<Object> apiResponseInterceptor = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-                    apiResponseInterceptor.ifPresent(value -> operation.getValue()
-                            .setApiResponseInterceptor(value.toString()));
+                    Optional<Object> apiResponseInterceptor = Optional
+                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+                    apiResponseInterceptor.ifPresent(value -> {
+                        operation.getValue().setApiResponseInterceptor(value.toString());
+                        if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
+                            operation.getValue().setJavaApiResponseInterceptor(true);
+                        }
+                    });
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));

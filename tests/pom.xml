@@ -112,8 +112,21 @@
             <artifactId>broker-launcher</artifactId>
             <version>0.970.5</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.26.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -181,6 +194,7 @@
                             <target>
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${project.version}/resources/grpc/*.exe" perm="+x" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x" />
                             </target>
