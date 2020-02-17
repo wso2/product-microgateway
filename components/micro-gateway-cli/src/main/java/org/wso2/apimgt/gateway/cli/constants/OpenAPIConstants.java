@@ -1,5 +1,7 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,10 +21,26 @@ public class OpenAPIConstants {
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
+    public static final String INTERCEPTOR_FUNC_SEPARATOR = ":";
+    public static final String INTERCEPTOR_PATH_SEPARATOR = "/";
+    public static final String INTERCEPTOR_JAVA_PREFIX = "java:";
+    public static final String MODULE_IMPORT_STATEMENT_CONSTANT = "as";
     public static final String API_OWNER = "x-wso2-owner";
     public static final String TRANSPORT_SECURITY = "x-wso2-transports";
     public static final String APPLICATION_SECURITY = "x-wso2-application-security";
     public static final String APPLICATION_SECURITY_TYPES = "security-types";
+    public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
+    public static final String TRANSPORT_HTTP = "http";
+    public static final String TRANSPORT_HTTPS = "https";
+    public static final String OPTIONAL = "optional";
+    public static final String MANDATORY = "mandatory";
+
+    public static final ImmutableList<String> MODULE_IDENTIFIER_LIST = ImmutableList.of("vienna", "canberra",
+            "berlin", "athens", "georgetown", "budapest", "jakarta", "rome", "dublin", "tokyo", "bucharest", "moscow",
+            "lisbon", "manila", "lima", "oslo", "amsterdam", "kathmandu", "bridgetown", "cairo", "argentina",
+            "austria", "belgium", "benin", "cameroon", "sofia", "chile", "chad", "cuba", "cyprus", "denmark",
+            "nicosia", "fiji", "greece", "hungary", "laos", "libya", "malawi", "mauritius", "panama", "rabat", "peru",
+            "romania", "rwanda", "kigali", "castries", "kingstown", "victoria", "slovenia", "bern");
 
     /**
      * API security types supported by mgw
@@ -33,7 +51,6 @@ public class OpenAPIConstants {
         jwt,
         apikey
     }
-    public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     //map x-wso2-api-security security types to mgw security types
     public static final Map<String, String> APPLICATION_LEVEL_SECURITY;
     static {
@@ -43,8 +60,4 @@ public class OpenAPIConstants {
         map.put("oauth2", APISecurity.oauth2.name());
         APPLICATION_LEVEL_SECURITY = Collections.unmodifiableMap(map);
     }
-    public static final String TRANSPORT_HTTP = "http";
-    public static final String TRANSPORT_HTTPS = "https";
-    public static final String OPTIONAL = "optional";
-    public static final String MANDATORY = "mandatory";
 }

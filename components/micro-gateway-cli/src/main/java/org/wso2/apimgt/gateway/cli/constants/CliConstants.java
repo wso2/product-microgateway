@@ -108,5 +108,4 @@ public class CliConstants {
     public static final String PROJECT_GRPC_DEFINITIONS_DIR = "grpc_definitions";
     public static final String RESOURCES_GRPC_DIR = "grpc";
     public static final String MICROGW_PROJECT_PLACEHOLDER = "\\$MGW-PROJECT_HOME";
-    public static final String INTERCEPTOR_JAVA_PREFIX = "java:";
 }
