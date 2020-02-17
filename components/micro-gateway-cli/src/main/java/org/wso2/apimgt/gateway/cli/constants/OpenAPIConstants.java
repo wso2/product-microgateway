@@ -1,6 +1,7 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 import com.google.common.collect.ImmutableList;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class OpenAPIConstants {
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
     public static final String INTERCEPTOR_FUNC_SEPARATOR = ":";
     public static final String INTERCEPTOR_PATH_SEPARATOR = "/";
+    public static final String INTERCEPTOR_JAVA_PREFIX = "java:";
     public static final String MODULE_IMPORT_STATEMENT_CONSTANT = "as";
     public static final String API_OWNER = "x-wso2-owner";
     public static final String TRANSPORT_SECURITY = "x-wso2-transports";

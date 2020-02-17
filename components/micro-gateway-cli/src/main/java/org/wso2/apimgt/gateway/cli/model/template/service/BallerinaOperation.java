@@ -20,7 +20,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -60,6 +59,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private MgwEndpointConfigDTO epConfig;
     private BallerinaInterceptor reqInterceptorContext;
     private BallerinaInterceptor resInterceptorContext;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaRequestInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaResponseInterceptor;
 
     /**
      * b7a function name of operation level request interceptor.
@@ -125,10 +130,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             if (reqExt != null) {
                 reqInterceptorContext = new BallerinaInterceptor(reqExt.toString());
                 requestInterceptor = reqInterceptorContext.getInvokeStatement();
+                isJavaRequestInterceptor = BallerinaInterceptor.Type.JAVA == reqInterceptorContext.getType();
             }
             if (resExt != null) {
                 resInterceptorContext = new BallerinaInterceptor(resExt.toString());
                 responseInterceptor = resInterceptorContext.getInvokeStatement();
+                isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
             }
 
             Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
@@ -269,13 +276,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setResponseInterceptor(String responseInterceptor) {
         this.responseInterceptor = responseInterceptor;
-    }
-
-    public void setSecuritySchemas(String schemas) {
-        //update the Resource auth providers property only if there is no security scheme provided during instantiation
-        if (this.authProviders.size() < 1) {
-            authProviders = OpenAPICodegenUtils.getAuthProviders(schemas);
-        }
     }
 
     public BallerinaInterceptor getReqInterceptorContext() {

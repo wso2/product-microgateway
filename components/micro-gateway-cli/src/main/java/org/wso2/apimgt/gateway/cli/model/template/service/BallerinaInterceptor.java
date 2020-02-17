@@ -78,6 +78,10 @@ public class BallerinaInterceptor {
             invokeStatement = id + OpenAPIConstants.INTERCEPTOR_FUNC_SEPARATOR + name;
             importStatement = fqn + ' ' + OpenAPIConstants.MODULE_IMPORT_STATEMENT_CONSTANT + ' ' + id;
             type = Type.CENTRAL;
+        } else if (extension.startsWith(OpenAPIConstants.INTERCEPTOR_JAVA_PREFIX)) {
+            name = extension;
+            invokeStatement = name;
+            type = Type.JAVA;
         } else {
             name = extension;
             invokeStatement = name;

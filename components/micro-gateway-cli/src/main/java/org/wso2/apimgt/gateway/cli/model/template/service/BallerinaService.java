@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -98,6 +97,12 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      * This should be a name of a b7a function.
      */
     private String responseInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaRequestInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaResponseInterceptor;
 
     /**
      * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
@@ -287,6 +292,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 addImport(reqInterceptor.getImportStatement());
             }
+            this.isJavaRequestInterceptor = BallerinaInterceptor.Type.JAVA == reqInterceptor.getType();
             this.requestInterceptor = reqInterceptor.getInvokeStatement();
         }
 
@@ -300,6 +306,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 addImport(resInterceptor.getImportStatement());
             }
+            isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptor.getType();
             this.responseInterceptor = resInterceptor.getInvokeStatement();
         }
     }
