@@ -74,6 +74,11 @@
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
 
         <!-- Copying the in-place update tools-->
         <fileSet>
@@ -114,6 +119,11 @@
         <file>
             <source>${basedir}/../release-notes.html</source>
             <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
         </file>
         <file>
             <source>${basedir}/resources/updates/product.txt</source>

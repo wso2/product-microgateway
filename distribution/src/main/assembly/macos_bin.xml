@@ -43,7 +43,7 @@
         </fileSet>
         <fileSet>
             <directory>${basedir}/resources/grpc/stdlib</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc/google/protobuf</outputDirectory>
             <fileMode>644</fileMode>
         </fileSet>
         <!--create an empty temp folder-->
@@ -77,7 +77,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
-
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
         <!--create an empty logs folder-->
         <fileSet>
             <directory>${basedir}/resources/logs</directory>
@@ -105,7 +109,7 @@
         </file>
         <file>
             <source>${basedir}/resources/grpc/wso2_options.proto</source>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc</outputDirectory>
             <fileMode>644</fileMode>
         </file>
         <file>
@@ -124,6 +128,11 @@
         <file>
             <source>${basedir}/../release-notes.html</source>
             <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
         </file>
         <file>
             <source>${basedir}/resources/updates/product.txt</source>

@@ -72,6 +72,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/lib/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
 
         <!--create an empty logs folder-->
         <fileSet>
@@ -118,6 +123,11 @@
         <file>
             <source>${basedir}/../release-notes.html</source>
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
         </file>
         <file>
             <source>${basedir}/resources/updates/product.txt</source>
