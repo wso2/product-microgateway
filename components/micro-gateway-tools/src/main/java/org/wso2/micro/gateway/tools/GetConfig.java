@@ -24,7 +24,10 @@ public class GetConfig {
         Toml toml = new Toml();
         toml.read(configFile);
         Config config = toml.to(Config.class);
-        boolean enabled = config.getB7a().getObservability().getMetrics().isEnabled();
+        boolean enabled = false;
+        if (config.getB7a().getObservability() != null) {
+            enabled = config.getB7a().getObservability().getMetrics().isEnabled();
+        }
         long jmxPort = config.getB7a().getObservability().getMetrics().getPrometheus().getJmxPort();
         File txtConfigs = new File(fileWritePath);
         try (PrintWriter writer = new PrintWriter(txtConfigs, "UTF-8")) {

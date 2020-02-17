@@ -181,7 +181,7 @@ java_cmd_tools () {
       -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
       $JAVA_OPTS \
       -classpath "$METRIC_CLASSPATH" \
-      org.wso2.micro.gateway.tools.Main $1 | tee -a $GW_HOME/logs/microgateway.log
+      org.wso2.micro.gateway.tools.Main $1 $2| tee -a $GW_HOME/logs/microgateway.log
 }
 
 java_cmd_gateway () {
