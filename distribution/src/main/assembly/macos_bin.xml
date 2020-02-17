@@ -91,6 +91,9 @@
         <fileSet>
             <directory>target/update/</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin/</outputDirectory>
+            <includes>
+                <include>update_darwin</include>
+            </includes>
             <fileMode>744</fileMode>
         </fileSet>
     </fileSets>
@@ -107,10 +110,6 @@
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw</source>
-            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin</outputDirectory>
-        </file>
-        <file>
-            <source>${basedir}/resources/bin/micro-gw.bat</source>
             <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin</outputDirectory>
         </file>
         <file>

@@ -86,6 +86,9 @@
         <fileSet>
             <directory>target/update/</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/bin/</outputDirectory>
+            <includes>
+                <include>update_windows.exe</include>
+            </includes>
             <fileMode>744</fileMode>
         </fileSet>
     </fileSets>
