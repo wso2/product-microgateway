@@ -179,7 +179,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x" />
@@ -209,7 +209,7 @@
             </activation>
             <properties>
                 <host.os>macos</host.os>
-                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-macos-${project.version}</toolkit.dir>
             </properties>
         </profile>
         <profile>
@@ -222,7 +222,7 @@
             </activation>
             <properties>
                 <host.os>linux</host.os>
-                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+                <toolkit.dir>${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-linux-${project.version}</toolkit.dir>
             </properties>
         </profile>
         <profile>
@@ -234,7 +234,7 @@
             </activation>
             <properties>
                 <host.os>windows</host.os>
-                <toolkit.dir>${basedir}\..\tests\target\micro-gwtmp\wso2am-micro-gw-toolkit-${project.version}</toolkit.dir>
+                <toolkit.dir>${basedir}\..\tests\target\micro-gwtmp\wso2am-micro-gw-toolkit-windows-${project.version}</toolkit.dir>
             </properties>
         </profile>
         <profile>

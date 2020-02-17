@@ -239,7 +239,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>micro-gateway-toolkit</id>
+                        <id>micro-gateway-toolkit-linux</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -249,9 +249,43 @@
                                 <filter>${basedir}/src/main/assembly/filter.properties</filter>
                             </filters>
                             <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                                <descriptor>src/main/assembly/linux_bin.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2am-micro-gw-toolkit-${project.version}</finalName>
+                            <finalName>wso2am-micro-gw-toolkit-linux-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-toolkit-macos</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/macos_bin.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-toolkit-macos-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>micro-gateway-toolkit-windows</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <descriptor>src/main/assembly/windows_bin.xml</descriptor>
+                            </descriptors>
+                            <finalName>wso2am-micro-gw-toolkit-windows-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>

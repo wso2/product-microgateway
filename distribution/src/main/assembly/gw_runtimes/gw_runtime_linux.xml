@@ -45,11 +45,11 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>
-                ${project.build.directory}/extracted-jre-linux
-            </directory>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/</outputDirectory>
-            <fileMode>0755</fileMode>
+        <directory>
+            ${project.build.directory}/extracted-jre-linux
+        </directory>
+        <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/</outputDirectory>
+        <fileMode>0755</fileMode>
         </fileSet>
     </fileSets>
 

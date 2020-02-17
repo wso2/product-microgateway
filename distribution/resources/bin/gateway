@@ -66,10 +66,35 @@ OS400*) os400=true;;
 Darwin*) darwin=true
 esac
 
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin; then
-  [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-fi
+function change_java_home_path {
+  # For Cygwin, ensure paths are in UNIX format before anything is touched
+  if $cygwin; then
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+  fi
+
+  # For Migwn, ensure paths are in UNIX format before anything is touched
+  if $mingw ; then
+    [ -n "$JAVA_HOME" ] && JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+  fi
+
+  if [ -z "$JAVACMD" ] ; then
+      if [ -n "$JAVA_HOME"  ] ; then
+          if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+              # IBM's JDK on AIX uses strange locations for the executables
+              JAVACMD="$JAVA_HOME/jre/sh/java"
+          else
+              JAVACMD="$JAVA_HOME/bin/java"
+          fi
+      else
+            JAVACMD=java
+      fi
+  fi
+  # For Cygwin, switch paths to Windows format before running java
+  if $cygwin; then
+      JAVACMD=`cygpath --absolute --windows "$JAVACMD"`
+  fi
+}
+
 
 # For OS400
 if $os400; then
@@ -84,38 +109,21 @@ if $os400; then
   export QIBM_MULTI_THREADED
 fi
 
-# For Migwn, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
-  [ -n "$JAVA_HOME" ] && JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-fi
+change_java_home_path
 
-if [ -z "$JAVACMD" ] ; then
-    if [ -n "$JAVA_HOME"  ] ; then
-        if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-            # IBM's JDK on AIX uses strange locations for the executables
-            JAVACMD="$JAVA_HOME/jre/sh/java"
-        else
-            JAVACMD="$JAVA_HOME/bin/java"
-        fi
-    else
-          JAVACMD=java
-    fi
+if [ ! -x "$JAVACMD" ] ; then
+  echo "Warning!!! Externally set JAVACMD is not an executable file. Hence JAVA_HOME is set to internal JRE"
+  JAVACMD=
+  JAVA_HOME=$JAVA_PATH
+  change_java_home_path
 fi
 
 JDK_18=`$JAVACMD -version 2>&1 | grep "1.8."`
 if [ "$JDK_18" = "" ]; then
-    echo "Error: Microgateway is supported only on Java 1.8"
-    exit 1
-fi
-
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
-    JAVACMD=`cygpath --absolute --windows "$JAVACMD"`
-fi
-
-if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA Package inside the microgateway runtime distribution is not working."
-  exit 1
+    echo "Warning!!! Microgateway is supported only on Java 1.8. Hence JAVA_HOME is set to internal JRE"
+    JAVACMD=
+    JAVA_HOME=$JAVA_PATH
+    change_java_home_path
 fi
 
 # As we use different directory to keep microgateway configuration for the docker image
