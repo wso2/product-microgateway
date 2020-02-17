@@ -658,7 +658,8 @@ public class OpenAPICodegenUtils {
             interceptorMap = responseInterceptorMap;
         }
         //if the interceptor map does not contain the interceptor, the interceptor is not available
-        if (!interceptorMap.containsKey(interceptorName)) {
+        if (!interceptorName.startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX) && !interceptorMap
+                .containsKey(interceptorName)) {
             String errorMsg = "The interceptor '" + interceptorName + "' mentioned in openAPI definition:'" +
                     openAPIFilePath + "' ";
             //if the interceptor is resource level
