@@ -20,7 +20,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -58,14 +57,23 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
     private MgwEndpointConfigDTO epConfig;
-    private String requestInterceptor;
-    private String responseInterceptor;
-    private String apiRequestInterceptor;
-    private String apiResponseInterceptor;
+    private BallerinaInterceptor reqInterceptorContext;
+    private BallerinaInterceptor resInterceptorContext;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isJavaRequestInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isJavaResponseInterceptor;
-    private boolean isJavaApiRequestInterceptor;
-    private boolean isJavaApiResponseInterceptor;
+
+    /**
+     * b7a function name of operation level request interceptor.
+     */
+    private String requestInterceptor;
+    /**
+     * b7a function name of operation level response interceptor.
+     */
+    private String responseInterceptor;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
@@ -113,43 +121,38 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
         setEpConfigDTO(operation);
-        Map<String, Object> extensions = operation.getExtensions();
-        if (extensions != null) {
-            Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
+        Map<String, Object> exts = operation.getExtensions();
+
+        if (exts != null) {
+            // set interceptor details
+            Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+            Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+            if (reqExt != null) {
+                reqInterceptorContext = new BallerinaInterceptor(reqExt.toString());
+                requestInterceptor = reqInterceptorContext.getInvokeStatement();
+                isJavaRequestInterceptor = BallerinaInterceptor.Type.JAVA == reqInterceptorContext.getType();
+            }
+            if (resExt != null) {
+                resInterceptorContext = new BallerinaInterceptor(resExt.toString());
+                responseInterceptor = resInterceptorContext.getInvokeStatement();
+                isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
+            }
+
+            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
+            Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
-            Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
+            Optional<Object> authType = Optional.ofNullable(exts.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
                     this.isSecured = false;
                 }
             });
-            //set resource level request interceptors
-            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            requestInterceptor.ifPresent(value -> {
-                this.requestInterceptor = value.toString();
-                if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
-                    this.isJavaRequestInterceptor = true;
-                }
-            });
-            //set resource level response interceptors
-            Optional<Object> responseInterceptor = Optional
-                    .ofNullable(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            responseInterceptor.ifPresent(value -> {
-                this.responseInterceptor = value.toString();
-                if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
-                    this.isJavaResponseInterceptor = true;
-                }
-            });
             //set dev-first resource level throttle policy
-            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.THROTTLING_TIER));
-            devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.DISABLE_SECURITY));
-            devFirstDisableSecurity.ifPresent(value -> {
+            Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
+            extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
+            extDisableSecurity.ifPresent(value -> {
                 try {
                     this.isSecured = !(Boolean) value;
                     this.isSecuredAssignedFromOperation = true;
@@ -275,36 +278,20 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.responseInterceptor = responseInterceptor;
     }
 
-    public String getApiRequestInterceptor() {
-        return apiRequestInterceptor;
+    public BallerinaInterceptor getReqInterceptorContext() {
+        return reqInterceptorContext;
     }
 
-    public void setJavaApiRequestInterceptor(boolean javaApiRequestInterceptor) {
-        isJavaApiRequestInterceptor = javaApiRequestInterceptor;
+    public void setReqInterceptorContext(BallerinaInterceptor reqInterceptorContext) {
+        this.reqInterceptorContext = reqInterceptorContext;
     }
 
-    public void setJavaApiResponseInterceptor(boolean javaApiResponseInterceptor) {
-        isJavaApiResponseInterceptor = javaApiResponseInterceptor;
+    public BallerinaInterceptor getResInterceptorContext() {
+        return resInterceptorContext;
     }
 
-    public void setApiRequestInterceptor(String requestInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
-            this.apiRequestInterceptor = requestInterceptor;
-        }
-    }
-
-    public String getApiResponseInterceptor() {
-        return apiResponseInterceptor;
-    }
-
-    public void setApiResponseInterceptor(String responseInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
-            this.apiResponseInterceptor = responseInterceptor;
-        }
+    public void setResInterceptorContext(BallerinaInterceptor resInterceptorContext) {
+        this.resInterceptorContext = resInterceptorContext;
     }
 
     public void setSecuritySchemas(List<String> authProviders) {

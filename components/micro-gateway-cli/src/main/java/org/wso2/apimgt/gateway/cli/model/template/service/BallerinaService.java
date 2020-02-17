@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -36,6 +35,8 @@ import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,11 @@ import java.util.UUID;
 
 /**
  * Wrapper for {@link OpenAPI}.
+ * <p>
+ *     Parsing {@link OpenAPI} object model from the mustache/handlebars templates
+ *     makes the template logic complex. These Ballerina... classes helps the process
+ *     by wrapping all required attributes into a easily parsable object model.
+ * </p>
  * <p>This class can be used to push additional context variables for handlebars</p>
  */
 public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService, OpenAPI> {
@@ -59,7 +65,10 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<Tag> tags = null;
     private Set<Map.Entry<String, BallerinaPath>> paths = null;
     private String basepath;
+    private ArrayList<String> importModules = new ArrayList<>();
+    private HashMap<String, String> libVersions = new HashMap<>();
     private boolean isGrpc;
+
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
@@ -79,6 +88,23 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ExtendedAPI api;
 
     /**
+     * API level request interceptor name.
+     * This should be a name of a b7a function.
+     */
+    private String requestInterceptor;
+    /**
+     * API level response interceptor name.
+     * This should be a name of a b7a function.
+     */
+    private String responseInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaRequestInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaResponseInterceptor;
+
+    /**
      * Build a {@link BallerinaService} object from a {@link OpenAPI} object.
      * All non iterable objects using handlebars library is converted into
      * supported iterable object types.
@@ -92,6 +118,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.tags = openAPI.getTags();
         this.containerConfig = CmdUtils.getContainerConfig();
         this.config = CmdUtils.getConfig();
+
         return this;
     }
 
@@ -111,6 +138,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.mutualSSL = api.getMutualSSL();
         this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
         setPaths(definition);
+        resolveInterceptors(definition.getExtensions());
 
         return buildContext(definition);
     }
@@ -150,14 +178,24 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         return tags;
     }
 
+    /**
+     * Returns the map which contains the interceptor module name with organization and the module version.
+     *
+     * @return  {@link HashMap} object
+     */
+    public HashMap<String, String> getLibVersions() {
+        return libVersions;
+    }
+
     public Set<Map.Entry<String, BallerinaPath>> getPaths() {
         return paths;
     }
 
     /**
      * Populate path models into iterable structure.
-     * This method will also add an operationId to each operation,
-     * if operationId not provided in openAPI definition
+     * Method is generally used populate any missing data in {@link BallerinaOperation} after
+     * building operation context. This happens when operation context requires
+     * additional data from its parents to populate its own context details.
      *
      * @param openAPI {@code OpenAPI} definition object with schema definition
      * @throws BallerinaServiceGenException when context building fails
@@ -171,38 +209,26 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         Paths pathList = openAPI.getPaths();
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
-            balPath.getOperations().forEach(operation -> {
-                // set the ballerina function name as {http_method}{UUID} ex : get2345sdfd4324dfds
-                String operationId = operation.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
-                operation.getValue().setOperationId(operationId);
+            balPath.getOperations().forEach(op -> {
+                BallerinaOperation operation = op.getValue();
+                // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
+                String operationId = op.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
+                operation.setOperationId(operationId);
+
+                // set import and function call statement for operation level interceptors
+                updateOperationInterceptors(operation);
+
                 //to set auth providers property corresponding to the security schema in API-level
-                operation.getValue().setSecuritySchemas(this.authProviders);
-                //if it is the developer first approach
+                operation.setSecuritySchemas(this.authProviders);
+
+                // if it is the developer first approach
                 if (isDevFirst) {
-                    //to add API level request interceptor
-                    Optional<Object> apiRequestInterceptor = Optional
-                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-                    apiRequestInterceptor.ifPresent(value -> {
-                        operation.getValue().setApiRequestInterceptor(value.toString());
-                        if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
-                            operation.getValue().setJavaApiRequestInterceptor(true);
-                        }
-                    });
-                    //to add API level response interceptor
-                    Optional<Object> apiResponseInterceptor = Optional
-                            .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-                    apiResponseInterceptor.ifPresent(value -> {
-                        operation.getValue().setApiResponseInterceptor(value.toString());
-                        if (value.toString().startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX)) {
-                            operation.getValue().setJavaApiResponseInterceptor(true);
-                        }
-                    });
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
                     //api level throttle policy is added only if resource level resource tier is not available
-                    if (operation.getValue().getResourceTier() == null) {
-                        apiThrottlePolicy.ifPresent(value -> operation.getValue().setResourceTier(value.toString()));
+                    if (operation.getResourceTier() == null) {
+                        apiThrottlePolicy.ifPresent(value -> operation.setResourceTier(value.toString()));
                     }
                     //to add API-level security disable
                     Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
@@ -212,17 +238,113 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                             //Since we are considering based on 'x-wso2-disable-security', secured value should be the
                             // negation
                             boolean secured = !(Boolean) value;
-                            operation.getValue().setSecured(secured);
+                            operation.setSecured(secured);
                         } catch (ClassCastException e) {
                             throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
                                     "' should be a boolean value. But provided '" + value.toString() + "'.");
                         }
                     });
                     //to set scope property of API
-                    operation.getValue().setScope(api.getMgwApiScope());
+                    operation.setScope(api.getMgwApiScope());
                 }
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
+        }
+    }
+
+    /**
+     * Add new import statement to the import statement list if it is already not there
+     * in the list.
+     *
+     * @param importStmt The name of the module which is stored in Ballerina Central
+     */
+    private void addImport(String importStmt) {
+        if (!this.importModules.contains(importStmt) && (importStmt != null)) {
+            this.importModules.add(importStmt);
+        }
+    }
+
+    /**
+     * Extracts the ballerina module names of interceptors provided in OpenAPI definition.
+     * Import statements will also be assigned with an alias for easy reference. Final format
+     * of a import statement will look like below.
+     * <p>
+     *     Ex:
+     *     {@code import foo/bar as colombo}
+     * </p>
+     *
+     * @param exts OpenAPI Extensions map
+     * @throws BallerinaServiceGenException when fails to generate module identifier
+     */
+    private void resolveInterceptors(Map<String, Object> exts) throws BallerinaServiceGenException {
+        Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+        Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+
+        if (reqExt != null) {
+            BallerinaInterceptor reqInterceptor = new BallerinaInterceptor(reqExt.toString());
+
+            // Add new library version and import statement if interceptor is coming from central
+            if (BallerinaInterceptor.Type.CENTRAL == reqInterceptor.getType()) {
+                // Set library version only if specific version is provided
+                if (reqInterceptor.getVersion() != null) {
+                    addLibVersion(reqInterceptor.getFqn(), reqInterceptor.getVersion());
+                }
+
+                addImport(reqInterceptor.getImportStatement());
+            }
+            this.isJavaRequestInterceptor = BallerinaInterceptor.Type.JAVA == reqInterceptor.getType();
+            this.requestInterceptor = reqInterceptor.getInvokeStatement();
+        }
+
+        if (resExt != null) {
+            BallerinaInterceptor resInterceptor = new BallerinaInterceptor(resExt.toString());
+
+            if (BallerinaInterceptor.Type.CENTRAL == resInterceptor.getType()) {
+                if (resInterceptor.getVersion() != null) {
+                    addLibVersion(resInterceptor.getFqn(), resInterceptor.getVersion());
+                }
+
+                addImport(resInterceptor.getImportStatement());
+            }
+            isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptor.getType();
+            this.responseInterceptor = resInterceptor.getInvokeStatement();
+        }
+    }
+
+    private void updateOperationInterceptors(BallerinaOperation operation) {
+        BallerinaInterceptor reqInterceptor = operation.getReqInterceptorContext();
+        BallerinaInterceptor resInterceptor = operation.getResInterceptorContext();
+
+        if (reqInterceptor != null) {
+            if (BallerinaInterceptor.Type.CENTRAL == reqInterceptor.getType()) {
+                if (reqInterceptor.getVersion() != null) {
+                    addLibVersion(reqInterceptor.getFqn(), reqInterceptor.getVersion());
+                }
+                addImport(reqInterceptor.getImportStatement());
+            }
+        }
+
+        if (resInterceptor != null) {
+            if (BallerinaInterceptor.Type.CENTRAL == resInterceptor.getType()) {
+                if (resInterceptor.getVersion() != null) {
+                    addLibVersion(resInterceptor.getFqn(), resInterceptor.getVersion());
+                }
+                addImport(resInterceptor.getImportStatement());
+            }
+        }
+    }
+
+    /**
+     * Add new item to map containing the ballerina library to version mapping.
+     * This map will be used to populate ballerina.toml file which will define
+     * specific b7a version for each ballerina module.
+     *
+     * @param libName    The interceptor module name with the organization
+     * @param libVersion The interceptor module version
+     */
+    private void addLibVersion(String libName, String libVersion) {
+        if ((!this.libVersions.containsKey(libName)) && (libVersion != null)) {
+            this.libVersions.put(libName, libVersion);
         }
     }
 

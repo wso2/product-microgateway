@@ -47,10 +47,15 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
+import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -353,14 +358,14 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
         Map<String, Object> extensions = openAPI.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
                 openAPI.getServers());
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(api.getId());
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
                 openAPI.getServers());
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
@@ -370,20 +375,20 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
+        api.setSpecificBasepath(extensions.get(OpenAPIConstants.BASEPATH).toString());
         //assigns x-wso2-owner value to API provider
-        if (openAPI.getExtensions().containsKey(OpenAPIConstants.API_OWNER)) {
-            api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
+        if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
+            api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
         }
         try {
-            if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
-                api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
+            if (extensions.get(OpenAPIConstants.CORS) != null) {
+                api.setCorsConfiguration(objectMapper.convertValue(extensions.get(OpenAPIConstants.CORS),
                         APICorsConfigurationDTO.class));
                 // explicitly set the cors enabled value to true if cors config found in the open API definition
                 api.getCorsConfiguration().setCorsConfigurationEnabled(true);
             }
             // set authorization header from the open API extension
-            Object authHeader = openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER);
+            Object authHeader = extensions.get(OpenAPIConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
                 api.setAuthorizationHeader(authHeader.toString());
             }
@@ -538,8 +543,9 @@ public class OpenAPICodegenUtils {
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }
-            findRequestInterceptors(balSrcCode, path.toString());
-            findResponseInterceptors(balSrcCode, path.toString());
+
+            findInterceptors(balSrcCode, path.toString(), true, requestInterceptorMap);
+            findInterceptors(balSrcCode, path.toString(), false, responseInterceptorMap);
         });
     }
 
@@ -632,26 +638,6 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Find and store the request interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findRequestInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, true, requestInterceptorMap);
-    }
-
-    /**
-     * Find and store the response interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findResponseInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, false, responseInterceptorMap);
-    }
-
-    /**
      * Validate the existence of the interceptor in ballerina source files inside interceptors directory.
      * Throws an runtime error if the interceptor is not found.
      * if the provided interceptor name is null, 'null' will be returned.
@@ -674,7 +660,7 @@ public class OpenAPICodegenUtils {
             interceptorMap = responseInterceptorMap;
         }
         //if the interceptor map does not contain the interceptor, the interceptor is not available
-        if (!interceptorName.startsWith(CliConstants.INTERCEPTOR_JAVA_PREFIX) && !interceptorMap
+        if (!interceptorName.startsWith(OpenAPIConstants.INTERCEPTOR_JAVA_PREFIX) && !interceptorMap
                 .containsKey(interceptorName)) {
             String errorMsg = "The interceptor '" + interceptorName + "' mentioned in openAPI definition:'" +
                     openAPIFilePath + "' ";
@@ -685,25 +671,6 @@ public class OpenAPICodegenUtils {
             errorMsg += "is not available in any function in the " + CliConstants.PROJECT_INTERCEPTORS_DIR +
                     " directory.";
             throw new CLIRuntimeException(errorMsg);
-        }
-    }
-
-    /**
-     * validate API level interceptors
-     *
-     * @param openAPI         {@link OpenAPI} object
-     * @param openAPIFilePath file path to openAPI definition
-     */
-    private static void validateAPIInterceptors(OpenAPI openAPI, String openAPIFilePath) {
-        if (openAPI.getExtensions() != null) {
-            Optional<Object> apiRequestInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            apiRequestInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), true, openAPIFilePath, null, null));
-            Optional<Object> apiResponseInterceptor = Optional
-                    .ofNullable(openAPI.getExtensions().get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            apiResponseInterceptor.ifPresent(
-                    value -> validateInterceptorAvailability(value.toString(), false, openAPIFilePath, null, null));
         }
     }
 
@@ -727,6 +694,37 @@ public class OpenAPICodegenUtils {
     }
 
     /**
+     * Write ballerina dependency libraries to Ballerina.toml.
+     * These dependencies will be pulled from ballerina central
+     * during the mgw project build.
+     *
+     * @param projectName       The project name
+     * @param definitionContext Currently built ballerina service context
+     */
+    public static void writeDependencies(String projectName, BallerinaService definitionContext) {
+        if (definitionContext.getLibVersions() != null) {
+            HashMap<String, String> moduleVersionMap = definitionContext.getLibVersions();
+            String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
+                    + CliConstants.BALLERINA_TOML_FILE;
+            File file = new File(ballerinaTomlFile);
+            for (HashMap.Entry<String, String> entry : moduleVersionMap.entrySet()) {
+                try {
+                    List<String> content = Files.readAllLines(Paths.get(ballerinaTomlFile));
+                    Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
+                    String dependency = "\r\"" + entry.getKey() + "\" = \"" + entry.getValue() + "\"";
+                    if (!content.toString().contains(entry.getKey())) {
+                        PrintWriter printWriter = new PrintWriter(fileWriter);
+                        printWriter.print(dependency);
+                        printWriter.close();
+                    }
+                } catch (IOException e) {
+                    logger.error("Error occurred while writing module dependency to Ballerina.toml file.");
+                }
+            }
+        }
+    }
+
+    /**
      * Validate Resource level extensions for Single Resource
      *
      * @param operation       {@link Operation} object
@@ -740,29 +738,37 @@ public class OpenAPICodegenUtils {
             return;
         }
         //todo: validate policy
-        validateSingleResourceInterceptors(operation, pathItem, operationName, openAPIFilePath);
+       validateInterceptors(operation.getExtensions(), pathItem, operationName, openAPIFilePath);
     }
 
     /**
-     * Validate Resource interceptors for Single Resource
+     * Validate API Level and Resource Level interceptors
      *
-     * @param operation       {@link Operation} object
+     * @param extensions      {@link Map} object to access api level and operation level extensions
      * @param pathItem        path name
      * @param operationName   operation name
      * @param openAPIFilePath file path to openAPI definition
      */
-    private static void validateSingleResourceInterceptors(Operation operation, String pathItem, String operationName,
-                                                           String openAPIFilePath) {
-        //validate request interceptor
-        Optional<Object> requestInterceptor = Optional.ofNullable(operation.getExtensions()
-                .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-        requestInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), true,
-                openAPIFilePath, pathItem, operationName));
-        //validate response interceptor
-        Optional<Object> responseInterceptor = Optional.ofNullable(operation.getExtensions()
-                .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-        responseInterceptor.ifPresent(value -> validateInterceptorAvailability(value.toString(), false,
-                openAPIFilePath, pathItem, operationName));
+    private static void validateInterceptors(Map<String, Object> extensions, String pathItem, String operationName,
+                                        String openAPIFilePath) {
+        if (extensions != null) {
+             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
+                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
+             requestInterceptor.ifPresent(value -> {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
+                     validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
+                             true, openAPIFilePath, pathItem, operationName);
+                 }
+             });
+             Optional<Object> responseInterceptor = Optional.ofNullable(extensions
+                     .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
+             responseInterceptor.ifPresent(value -> {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
+                     validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
+                             false, openAPIFilePath, pathItem, operationName);
+                 }
+             });
+        }
     }
 
     /**
@@ -956,7 +962,8 @@ public class OpenAPICodegenUtils {
         validateAPINameAndVersion(openAPI, openAPIFilePath);
         validateBasePath(openAPI, openAPIFilePath, openAPIVersion);
         validateEndpointAvailability(openAPI, openAPIFilePath, openAPIVersion);
-        validateAPIInterceptors(openAPI, openAPIFilePath);
+        // validates API level interceptors
+        validateInterceptors(openAPI.getExtensions(), null, null, openAPIFilePath);
         validateResourceExtensionsForSinglePath(openAPI, openAPIFilePath);
         setOauthSecuritySchemaList(openAPI);
         setSecuritySchemaList(openAPI);
