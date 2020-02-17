@@ -98,12 +98,14 @@ public function setAuthorizationFailureMessage(http:Response response, http:Filt
     string errorMesssage = INVALID_SCOPE_MESSAGE;
     int errorCode = INVALID_SCOPE;
     response.setContentType(APPLICATION_JSON);
-    json payload = {
-        fault: {
-            code: errorCode,
-            message: errorMesssage,
-            description: errorDescription
-        }
-    };
+    if (!isGrpcResponse(response, context)) {
+        json payload = {
+            fault: {
+                code: errorCode,
+                message: errorMesssage,
+                description: errorDescription
+            }
+        };
     response.setJsonPayload(payload);
+    }
 }

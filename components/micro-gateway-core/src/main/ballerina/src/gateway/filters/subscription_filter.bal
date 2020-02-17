@@ -31,6 +31,9 @@ public type SubscriptionFilter object {
             printDebug(KEY_SUBSCRIPTION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
+        if (isGrpcRequest(filterContext)) {
+            printDebug(KEY_SUBSCRIPTION_FILTER, "Skip the filter as the request is GRPC");
+        }
         int startingTime = getCurrentTimeForAnalytics();
         boolean result = doSubscriptionFilterRequest(caller, request, filterContext);
         setLatency(startingTime, filterContext, SECURITY_LATENCY_SUBS);

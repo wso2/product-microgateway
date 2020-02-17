@@ -171,7 +171,7 @@
 
 # Enable http2
 [http2]
-  enable = false
+  enable = true
 
 # HTTP client configuration
 [httpClients]

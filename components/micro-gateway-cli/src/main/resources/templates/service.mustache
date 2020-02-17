@@ -130,7 +130,11 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         }
     }
     {{/if}}
-    string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
+    {{#if isGrpc}}
+        string urlPostfix = <@untainted>req.rawPath;
+    {{else}}
+        string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
+    {{/if}}
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
         urlPostfix = "/" + urlPostfix;
