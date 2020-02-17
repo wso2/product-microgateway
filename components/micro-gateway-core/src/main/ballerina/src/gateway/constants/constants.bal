@@ -234,11 +234,14 @@ public const string KEY_STORE_PASSWORD = "keyStorePassword";
 public const string TOKEN_LISTENER_PORT = "tokenListenerPort";
 public const string FILTERS = "filters";
 
+public const string MTSL = "mutualSSL";
 public const string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
 public const string MTSL_CONF_PROTOCOL_NAME = "protocolName";
 public const string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
 public const string MTSL_CONF_CIPHERS = "ciphers";
 public const string MTSL_CONF_SSLVERIFYCLIENT = "sslVerifyClient";
+public const string MANDATORY = "mandatory";
+public const string APP_SECURITY_OPTIONAL = "applicationSecurityOptional";
 
 public const string AUTH_CONF_INSTANCE_ID = "authConfig";
 public const string AUTH_HEADER_NAME = "authorizationHeader";
@@ -360,7 +363,6 @@ const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 const string API_KEY_UTIL = "APIKeyUtil";
 const string JWT_UTIL = "JWTUtil";
-const string API_KEY_HANDLER = "APIKeyHandler";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 
@@ -377,7 +379,16 @@ const string KEY_TYPE = "keytype";
 
 public const string INTROSPECT_CONTEXT = "introspect";
 
+//grpc
 const string IS_GRPC = "isGrpc";
 const string GRPC_STATUS_HEADER = "grpc-status";
 const string GRPC_MESSAGE_HEADER = "grpc-message";
 const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";
+
+//auth handlers
+public const string MUTUAL_SSL_HANDLER = "mutualSSLHandler";
+public const string JWT_AUTH_HANDLER = "jwtAuthHandler";
+public const string API_KEY_HANDLER = "apiKeyHandler";
+public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
+public const string BASIC_AUTH_HANDLER = "basicAuthHandler";
+public const string COOKIE_BASED_HANDLER = "cookieBasedHandler";

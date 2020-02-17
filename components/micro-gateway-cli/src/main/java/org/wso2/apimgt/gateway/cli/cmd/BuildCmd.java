@@ -44,7 +44,6 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -140,6 +139,7 @@ public class BuildCmd implements LauncherCmd {
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
+            CmdUtils.updateBallerinaToml(projectName);
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
@@ -261,27 +261,8 @@ public class BuildCmd implements LauncherCmd {
         
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
-        updateProjectOrganizationName(projectName);
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
         CmdUtils.createDirectory(projectModuleDir, true);
     }
 
-    /**
-     * Updates the organization name created in the Ballerina.toml file with value "wso2".
-     *
-     * @param projectName Name of the micro gateway project.
-     * @throws IOException Error occurred while updating ballerina toml file.
-     */
-    private void updateProjectOrganizationName(String projectName) throws IOException {
-        String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
-                + CliConstants.BALLERINA_TOML_FILE;
-        String templateFile = CmdUtils.getMicroGWConfResourceLocation() + File.separator
-                + CliConstants.BALLERINA_TOML_FILE;
-        String fileContent = CmdUtils.readFileAsString(templateFile, false);
-
-        // Windows paths contains '\' separator which causes issues when included in ballerina.toml
-        String unixHomePath = CmdUtils.getCLIHome().replace('\\', '/');
-        fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, unixHomePath);
-        Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
-    }
 }

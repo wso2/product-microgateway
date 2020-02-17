@@ -143,8 +143,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault</includeArtifactIds>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor</includeArtifactIds>
                         </configuration>
                     </execution>
 
@@ -194,6 +194,18 @@
                                 <delete dir="${project.build.directory}/extracted-jre-macos" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/extracted-jre-windows" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/ballerina-jre-artifacts-zip" includeemptydirs="true" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>modify-toml</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <replaceregexp file="resources/conf/Ballerina.toml" match="mgw-interceptor-.*.jar" replace="mgw-interceptor-${project.version}.jar" byline="true" />
                             </target>
                         </configuration>
                     </execution>

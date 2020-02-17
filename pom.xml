@@ -163,6 +163,16 @@
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-mime</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-io</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-runtime</artifactId>
                 <version>${ballerina.platform.version}</version>
             </dependency>
@@ -251,6 +261,11 @@
             <dependency>
                 <groupId>org.wso2.am.microgw</groupId>
                 <artifactId>org.wso2.micro.gateway.cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.microgw</groupId>
+                <artifactId>mgw-interceptor</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

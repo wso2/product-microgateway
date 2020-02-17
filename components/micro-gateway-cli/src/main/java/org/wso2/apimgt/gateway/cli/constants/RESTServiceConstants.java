@@ -44,7 +44,7 @@ public class RESTServiceConstants {
                     + "%20status:PUBLISHED&expand=" + CliConstants.EXPAND_PLACEHOLDER;
     public static final String API_OPEN_API_GET_URI = "apis/" + CliConstants.API_ID_PLACEHOLDER + "/swagger";
 
-    public static final String CONFIG_REST_VERSION = "v0.14";
+    public static final String CONFIG_REST_VERSION = "v0.15";
     public static final String CONFIG_PUBLISHER_ENDPOINT = "{baseURL}/api/am/publisher/{restVersion}";
     public static final String CONFIG_ADMIN_ENDPOINT = "{baseURL}/api/am/admin/{restVersion}";
     public static final String CONFIG_REGISTRATION_ENDPOINT = "{baseURL}/client-registration/{dcrVersion}/register";

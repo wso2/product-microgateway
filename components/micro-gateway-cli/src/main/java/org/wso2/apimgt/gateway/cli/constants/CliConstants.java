@@ -61,6 +61,7 @@ public class CliConstants {
     public static final String GW_DIST_RESOURCES = "resources";
     public static final String GW_DIST_FILTERS = "filters";
     public static final String GW_DIST_DEFINITIONS = "definitions";
+    public static final String GW_DIST_EXTERNAL = "external";
     public static final String GW_DIST_POLICIES_FILE = PROJECT_POLICIES_FILE;
     public static final String GW_DIST_EXTENSION_FILTER = "extension_filter.bal";
     public static final String GW_DIST_TOKEN_REVOCATION_EXTENSION = "token_revocation_extension.bal";
@@ -106,4 +107,6 @@ public class CliConstants {
 
     public static final String PROJECT_GRPC_DEFINITIONS_DIR = "grpc_definitions";
     public static final String RESOURCES_GRPC_DIR = "grpc";
+    public static final String MICROGW_PROJECT_PLACEHOLDER = "\\$MGW-PROJECT_HOME";
+    public static final String INTERCEPTOR_JAVA_PREFIX = "java:";
 }

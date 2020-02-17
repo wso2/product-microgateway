@@ -92,7 +92,7 @@ listener http:Listener tokenListenerEndpoint = new (
 
 public function getFilters() returns http:RequestFilter[] {
     map<json> deployedPolicies = getDeployedPolicies();
-    map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
+   //map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
 
     // Grpc Filter
     gateway:GrpcFilter grpcFilter = new gateway:GrpcFilter();
