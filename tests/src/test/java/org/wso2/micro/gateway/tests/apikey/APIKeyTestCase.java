@@ -82,7 +82,8 @@ public class APIKeyTestCase extends BaseTestCase {
     private void invokeAPIKeyNoQueryTest() throws Exception {
 
         //test endpoint with token
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/store/inventory?api_key=") + apikey );
+        HttpResponse response =
+                HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/store/inventory?api_key=") + apikey );
 
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
@@ -91,7 +92,8 @@ public class APIKeyTestCase extends BaseTestCase {
     private void invokeAPIKeyQueryTest() throws Exception {
 
         //test endpoint with token
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1?api_key_query=") + apikey);
+        HttpResponse response =
+                HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1?api_key_query=") + apikey);
 
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }

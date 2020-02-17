@@ -18,6 +18,7 @@ import ballerina/config;
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/time;
+import ballerina/stringutils;
 
 boolean isAnalyticsEnabled = false;
 boolean isOldAnalyticsEnabled = false;
@@ -35,7 +36,13 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
-    }
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+            eventDto.apiCreator = <string>apiConfiguration.publisher;
+        } else {
+            //sets API creator if x-wso2-owner extension not specified.
+            eventDto.apiCreator = UNKNOWN_VALUE;
+    } 
+}
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
@@ -54,7 +61,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         .attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.userName = authContext.username;
-        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
@@ -62,10 +68,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
         APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfig is APIConfiguration) {
-            var api_Creator = apiConfig.publisher;
-            eventDto.apiCreator = api_Creator;
-        }
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
@@ -89,7 +91,13 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     if (apiConfig is APIConfiguration) {
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
-    }
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfig .publisher)) {
+            eventDto.apiCreator = <string>apiConfig.publisher;
+        } else {
+            //sets API creator if x-wso2-owner extension not specified.
+            eventDto.apiCreator = UNKNOWN_VALUE;
+        }
+    } 
     eventDto.apiName = getApiName(context);
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
     if (httpResourceConfig is http:HttpResourceConfig) {
@@ -107,7 +115,6 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.consumerKey = authContext.consumerKey;
-        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.userName = authContext.username;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
@@ -115,11 +122,6 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
-        APIConfiguration? apiConfigs = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfigs is APIConfiguration) {
-            var api_Creater = apiConfigs.publisher;
-            eventDto.apiCreator = api_Creater;
-        }
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;

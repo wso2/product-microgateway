@@ -26,9 +26,11 @@ target
 .classpath
 .settings
 .project
+.vscode
 *.i??
 .idea
 *.DS_Store
 *.iml
 *dependency-reduced-pom.xml
 *.lock
+*.factorypath

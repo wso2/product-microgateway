@@ -20,10 +20,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -75,6 +77,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean applicationSecurityOptional;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasSandEpConfig = false;
@@ -91,7 +96,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
         // OperationId with spaces with special characters will cause errors in ballerina code.
         // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
-        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", ""));
         this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();
@@ -99,8 +104,14 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity());
-        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation);
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+                api.getMutualSSL());
+        // if application security defined in operation level is not found, get API level application security
+        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
+                this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
+        this.applicationSecurityOptional = appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -130,7 +141,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
-
             //set dev-first resource level throttle policy
             Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
             extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
@@ -282,5 +292,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setResInterceptorContext(BallerinaInterceptor resInterceptorContext) {
         this.resInterceptorContext = resInterceptorContext;
+    }
+
+    public void setSecuritySchemas(List<String> authProviders) {
+        //update the Resource auth providers property only if there is no security scheme provided during instantiation
+        if (this.authProviders.isEmpty()) {
+            this.authProviders = authProviders;
+        }
     }
 }

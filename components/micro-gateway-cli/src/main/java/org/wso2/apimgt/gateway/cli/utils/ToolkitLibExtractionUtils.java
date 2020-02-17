@@ -40,12 +40,11 @@ public class ToolkitLibExtractionUtils {
     public static void extractPlatformAndRuntime() {
         try {
             String libPath = CmdUtils.getCLILibPath();
-            String birPath = CliConstants.CLI_GATEWAY + File.separator + CliConstants.CLI_BIR_CACHE;
             String breLibPath = CliConstants.CLI_BRE + File.separator + CliConstants.CLI_LIB;
             String platformExtractedPath =
                     CmdUtils.getCLILibPath() + File.separator + CliConstants.CLI_PLATFORM;
 
-            extractBallerinaDist(platformExtractedPath, libPath, birPath, breLibPath, true);
+            extractBallerinaDist(platformExtractedPath, libPath, breLibPath, true);
         } catch (IOException e) {
             String message = "Error while unzipping platform while project setup";
             LOGGER.error(message, e);
@@ -53,16 +52,12 @@ public class ToolkitLibExtractionUtils {
         }
     }
 
-    private static void extractBallerinaDist(String destination, String libPath, String birPath, String breLibPath,
+    private static void extractBallerinaDist(String destination, String libPath, String breLibPath,
                                              Boolean isAddToClasspath) throws IOException {
         if (!Files.exists(Paths.get(destination))) {
             OUT.println("Initializing Toolkit...");
             ZipUtils.unzip(destination + CliConstants.EXTENSION_ZIP, destination,
                     isAddToClasspath);
-
-            // Copy bir to the platform
-            CmdUtils.copyFolder(libPath + File.separator + birPath,
-                    destination + File.separator + CliConstants.CLI_BIR_CACHE);
 
             // Copy gateway jars to platform
             CmdUtils.copyFolder(libPath + File.separator + CliConstants.CLI_GATEWAY + File.separator

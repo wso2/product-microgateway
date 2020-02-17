@@ -17,7 +17,8 @@
 import ballerina/jwt;
 import ballerina/runtime;
 
-public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList, boolean validateAllowedAPIs) returns boolean {
+public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList,
+        boolean validateAllowedAPIs) returns boolean {
 
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     //invocation context
@@ -52,19 +53,19 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
     if (customClaims is map<json> && customClaims.hasKey("application")) {
         json? application = customClaims.get("application");
         if (application is map<json>) {
-            if (application.id != null) {
+            if (application.hasKey("id")) {
                 printDebug(JWT_UTIL, "set application ID to " + application.id.toString());
                 authenticationContext.applicationId = application.id.toString();
             }
-            if (application.name != null) {
+            if (application.hasKey("name")) {
                 printDebug(JWT_UTIL, "set application name to " + application.name.toString());
                 authenticationContext.applicationName = application.name.toString();
             }
-            if (application.tier != null) {
+            if (application.hasKey("tier")) {
                 printDebug(JWT_UTIL, "set application tier to " + application.tier.toString());
                 authenticationContext.applicationTier = application.tier.toString();
             }
-            if (application.owner != null) {
+            if (application.hasKey("owner")) {
                 printDebug(JWT_UTIL, "set application owner to " + application.owner.toString());
                 authenticationContext.subscriber = application.owner.toString();
             }
@@ -81,7 +82,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
             var subscription = subscribedAPIList[index];
             if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
                 authenticationContext.authenticated = true;
-                printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString() + " version:" + subscription.'version.toString());
+                printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString()
+                    + " version:" + subscription.'version.toString());
 
                 //set throttling attribs if present
                 if (subscription.subscriptionTier is json) {
@@ -97,7 +99,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
                     authenticationContext.apiPublisher = subscription.publisher.toString();
                 }
                 if (subscription.subscriberTenantDomain is json) {
-                    printDebug(JWT_UTIL, "set subscriberTenantDomain to " + subscription.subscriberTenantDomain.toString());
+                    printDebug(JWT_UTIL, "set subscriberTenantDomain to "
+                        + subscription.subscriberTenantDomain.toString());
                     authenticationContext.subscriberTenantDomain = subscription.subscriberTenantDomain.toString();
                 }
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;

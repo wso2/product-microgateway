@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "wso2_options.proto";
+
+option java_multiple_files = true;
+option java_package = "org.wso2.micro.gateway.tests.grpc";
+
+message TestRequest {
+    string testReqString = 1;
+}
+
+message TestResponse {
+    string testResString = 1;
+}
+
+service TestService {
+    rpc testCall(TestRequest) returns (TestResponse);
+
+	//production endpoints
+	option (wso2.production_endpoints) = {
+		url : "http://localhost:50051";
+	};
+
+	//service level security
+    option (wso2.security) = NONE;
+}

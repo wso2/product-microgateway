@@ -1,3 +1,7 @@
+# Note - This file indicates default configurations in the WSO2 Microgateway.  
+# Use this file to guide you on adding configurations to micro-gw.conf.
+# If you want to change a default value, copy the configuration to <MG_RUNTIME_HOME>/conf/micro-gw.conf and change there.
+
 # Transport listener Configurations
 [listenerConfig]
   # Microgateway exposed IP / Host
@@ -9,10 +13,10 @@
   # HTTP port for endpoints(/token, /authorize, /revoke/, userinfo) of Key Manager
   tokenListenerPort = 9096
   # Internal keystore
-  keyStorePath = "${ballerina.home}/bre/security/ballerinaKeystore.p12"
+  keyStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12"
   keyStorePassword = "ballerina"
   # Truststore
-  trustStorePath = "${ballerina.home}/bre/security/ballerinaTruststore.p12"
+  trustStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"
   trustStorePassword = "ballerina"
 
 # API Authorization security for the gateway and the backend
@@ -167,7 +171,7 @@
 
 # Enable http2
 [http2]
-  enable = false
+  enable = true
 
 # HTTP client configuration
 [httpClients]
@@ -187,6 +191,17 @@
 
 # Throttling configurations
 [throttlingConfig]
+  # Configurations related to node local throttling.
+  [throttlingConfig.nodeLocal]
+    # Core number of threads in the thread pool.
+    processThreadPoolCoreSize = 200
+    # Maximum number of threads in the thread pool.
+    processThreadPoolMaximumSize = 1000
+    # Keep alive time of the threads in seconds
+    processThreadPoolKeepAliveTime = 200
+    # Throttle data cleanup task frequency in seconds.
+    cleanUpFrequency = 3600
+
   # Connect with the central traffic manager
   enabledGlobalTMEventPublishing = false
   # The message broker context factory
@@ -227,25 +242,33 @@
       # The port which the Jaeger server is listening to
       port = 5775
 
-# API Key auth configs
+# API Key authentication configurations
 [apikey.tokenConfigs]
   issuer="https://localhost:9095/apikey"
   audience="http://org.wso2.apimgt/gateway"
   certificateAlias="ballerina"
+  # Validate Allowed/subscribed APIs
   validateAllowedAPIs=false
 
+# API Key Security Token Service(STS) configurations
 [apikey.issuer]
-  # API Key STS token configs
+  # API Key STS token configurations
   [apikey.issuer.tokenConfig]
     enabled=true
-    keyStorePath="${ballerina.home}/bre/security/ballerinaKeystore.p12"
+    keyStorePath="${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12"
     keyStorePassword="ballerina"
     issuer="https://localhost:9095/apikey"
     audience="http://org.wso2.apimgt/gateway"
     certificateAlias="ballerina"
+    # validity time in seconds for the API Key. -1 is to indicate unlimited time 
     validityTime=-1
   # API Key STS Allowed APIs
   [apikey.issuer.apis]
+    # provide the list of allowed APIs by the generated API Key
+    # [apikey.issuer.apis.<number>] integer number starting from 1
+      # name="API name given in the API Definition"
+      # versions="Allowed versions" or "*" to allow all versions
+    # Examples :
     # [apikey.issuer.apis.1]
       # name="Swagger Petstore New"
       # versions="1.0.0, v1, v2"

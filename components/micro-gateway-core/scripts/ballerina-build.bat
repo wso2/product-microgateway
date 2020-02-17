@@ -26,7 +26,5 @@ PUSHD %GATEWAY_PROJECT%
 CALL %BAL_EXEC% build -c --experimental gateway
 POPD
 
-xcopy /Y /I /E %GATEWAY_PROJECT%\target\caches\bir_cache %MAVEN_PROJECT_ROOT%\target\bir_cache
-xcopy /Y /I /E %GATEWAY_PROJECT%\target\caches\jar_cache %MAVEN_PROJECT_ROOT%\target\jar_cache
 xcopy /Y /I /E %GATEWAY_PROJECT%\target\balo %MAVEN_PROJECT_ROOT%\target\balo
 

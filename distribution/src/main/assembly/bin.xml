@@ -41,6 +41,11 @@
             <directory>${basedir}/target/lib/dependencies</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/dependencies</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/resources/grpc/stdlib</directory>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc/google/protobuf</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
         <!--create an empty temp folder-->
         <fileSet>
             <directory>${basedir}/resources/temp</directory>
@@ -62,16 +67,8 @@
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/definitions</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/lib/gw/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/bir-cache</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/lib/gw-balo/</directory>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway-balo</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/lib/jar/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
         </fileSet>
 
         <!--create an empty logs folder-->
@@ -95,6 +92,11 @@
         <file>
             <source>${basedir}/target/platform.zip</source>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/resources/grpc/wso2_options.proto</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <fileMode>644</fileMode>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw</source>
@@ -127,11 +129,11 @@
 
     <dependencySets>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/platform</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
-                <include>org.wso2.am.microgw:org.wso2.micro.gateway.core:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
                 <include>org.ballerinax.docker:docker-extension:jar</include>
@@ -139,12 +141,14 @@
             </includes>
         </dependencySet>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/lib/gateway/cli</outputDirectory>
             <scope>runtime</scope>
             <includes>
                 <include>org.slf4j:slf4j-api</include>
                 <include>org.slf4j:slf4j-jdk14</include>
                 <include>org.apache.commons:commons-lang3</include>
+                <include>commons-pool.wso2:commons-pool</include>
             </includes>
         </dependencySet>
     </dependencySets>

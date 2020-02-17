@@ -104,8 +104,7 @@
 //             printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, msg.reason());
 //         }
 //     } else {
-//         printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Error object obtained");
-//         printFullError(KEY_TOKEN_REVOCATION_ETCD_UTIL, response);
+//         printError(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Error object obtained", response);
 //     }
 //     return finalResponse;
 // }

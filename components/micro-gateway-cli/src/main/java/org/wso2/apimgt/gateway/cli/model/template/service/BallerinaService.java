@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -67,6 +68,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private String basepath;
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
+    private boolean isGrpc;
 
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
@@ -76,6 +78,12 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private String mutualSSL;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean applicationSecurityOptional;
 
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private ExtendedAPI api;
@@ -116,9 +124,14 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.qualifiedServiceName =
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
+        this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
-        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity());
-        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity());
+        this.authProviders = OpenAPICodegenUtils
+                .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
+                this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
+        this.mutualSSL = api.getMutualSSL();
+        this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
         setPaths(definition);
         resolveInterceptors(definition.getExtensions());
 
@@ -194,14 +207,14 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                String operationId = op.getKey() + "_" + UUID.randomUUID().toString().replaceAll("-", "_");
+                String operationId = op.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
                 operation.setOperationId(operationId);
 
                 // set import and function call statement for operation level interceptors
                 updateOperationInterceptors(operation);
 
-                // set auth providers property corresponding to the security schema in API-level
-                operation.setSecuritySchemas(this.api.getMgwApiSecurity());
+                //to set auth providers property corresponding to the security schema in API-level
+                operation.setSecuritySchemas(this.authProviders);
 
                 // if it is the developer first approach
                 if (isDevFirst) {

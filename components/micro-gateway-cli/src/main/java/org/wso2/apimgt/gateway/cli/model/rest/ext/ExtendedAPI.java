@@ -15,6 +15,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
 
@@ -30,6 +31,12 @@ public class ExtendedAPI extends APIDetailedDTO {
     private String mgwApiSecurity = null;
     //Scopes
     private String mgwApiScope = null;
+    //isGrpc
+    private boolean isGrpc = false;
+    //support apim application level security
+    private ApplicationSecurity applicationSecurity = null;
+    //support apim transport level security
+    private String mutualSSL = null;
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;
@@ -62,4 +69,29 @@ public class ExtendedAPI extends APIDetailedDTO {
     public String getMgwApiScope() {
         return mgwApiScope;
     }
+
+    public boolean isGrpc() {
+        return isGrpc;
+    }
+
+    public void setGrpc(boolean grpc) {
+        isGrpc = grpc;
+    }
+
+    public void setApplicationSecurity(ApplicationSecurity applicationSecurity) {
+        this.applicationSecurity = applicationSecurity;
+    }
+
+    public ApplicationSecurity getApplicationSecurity() {
+        return applicationSecurity;
+    }
+
+    public String getMutualSSL() {
+        return mutualSSL;
+    }
+
+    public void setMutualSSL(String mutualSSL) {
+        this.mutualSSL = mutualSSL;
+    }
+
 }

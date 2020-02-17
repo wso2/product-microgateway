@@ -80,7 +80,7 @@ public class CLIExecutor {
                     + System.getenv("JAVA_HOME")}, new File(homeDirectory));
             new ServerLogReader("errorStream", process.getErrorStream()).start();
             new ServerLogReader("inputStream", process.getInputStream()).start();
-            boolean isCompleted = process.waitFor(2, TimeUnit.MINUTES);
+            boolean isCompleted = process.waitFor(5, TimeUnit.MINUTES);
             if (!isCompleted) {
                 throw new RuntimeException(errorMessage);
             }
@@ -209,6 +209,11 @@ public class CLIExecutor {
                 desPath = new File(homeDirectory + File.separator + project + File.separator +
                         CliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
                         openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
+            } else if (openAPIFileName.endsWith(".proto")) {
+                desPath = new File(
+                        homeDirectory + File.separator + project + File.separator +
+                                CliConstants.PROJECT_GRPC_DEFINITIONS_DIR + File.separator + openAPIFileName
+                                .substring(openAPIFileName.lastIndexOf("/") + 1));
             } else {
                 desPath = new File(
                         homeDirectory + File.separator + project + File.separator +
