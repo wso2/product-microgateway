@@ -142,8 +142,8 @@ public class CodeGenerator {
             try {
                 Files.walk(Paths.get(openApiPath)).filter(path -> {
                     Path fileName = path.getFileName();
-                    return fileName != null && (fileName.toString().endsWith(CliConstants.JSON_EXTENSION) || fileName
-                            .toString().endsWith(CliConstants.YAML_EXTENSION));
+                    return fileName != null && (fileName.toString().endsWith(CliConstants.JSON_EXTENSION) ||
+                            fileName.toString().endsWith(CliConstants.YAML_EXTENSION));
                 }).forEach(path -> {
                     try {
                         OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
@@ -161,7 +161,7 @@ public class CodeGenerator {
 
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
-
+                        OpenAPICodegenUtils.writeDependencies(projectName, definitionContext);
                         serviceList.add(definitionContext);
                         openAPIServiceList.add(definitionContext);
                     } catch (BallerinaServiceGenException e) {

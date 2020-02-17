@@ -1,7 +1,8 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/time;
-import ballerina/runtime;
+import ballerina/runtime;{{#importModules}}
+import {{.}};{{/importModules}}
 {{#if containerConfig.hasKubernetes}}import ballerina/kubernetes;{{/if}}
 import wso2/gateway;
 {{#if endpointConfig.prodEndpoints.securityConfig}}
@@ -36,10 +37,10 @@ import wso2/gateway;
     {{#equals epConfig.prodEndpoints.type "failover"}} {{#epConfig.prodEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.prodEndpoints}} {{/equals}}
     {{#equals epConfig.sandEndpoints.type "failover"}} {{#epConfig.sandEndpoints}}{{>basicAuthHandler}}{{>failoverResourceEndpoint}}{{/epConfig.sandEndpoints}} {{/equals}}
 
-    {{#if apiRequestInterceptor}}
+    {{#if @root.requestInterceptor}}
     int {{operationId}}_api_request_interceptor_index = -1;
     {{/if}}
-    {{#if apiResponseInterceptor}}
+    {{#if @root.requestInterceptor}}
     int {{operationId}}_api_response_interceptor_index = -1;
     {{/if}}
 
@@ -108,37 +109,38 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
-    {{#if apiRequestInterceptor}}
-    if({{operationId}}_api_request_interceptor_index == -1) {
-    {{^isJavaApiRequestInterceptor}}
-        {{apiRequestInterceptor}} (outboundEp, req);
-    {{/isJavaApiRequestInterceptor}}
-    } else {
-        if(!gateway:invokeRequestInterceptor({{operationId}}_api_request_interceptor_index, outboundEp, req)) {
-            return;
+        {{~#if @root.requestInterceptor}}
+        {{#equals @root.requestInterceptor requestInterceptor}}
+        {{else}}
+        if({{operationId}}_api_request_interceptor_index == -1) {
+        {{^@root.isJavaRequestInterceptor}}
+            {{@root.requestInterceptor}}(outboundEp, req);
+        {{/@root.isJavaRequestInterceptor}}
+        } else {
+            if(!gateway:invokeRequestInterceptor({{operationId}}_api_request_interceptor_index, outboundEp, req)) {
+                return;
+            }
+        }{{/equals}}{{/if}}
+        {{#if requestInterceptor}}
+        if({{operationId}}_request_interceptor_index == -1) {
+        {{^isJavaRequestInterceptor}}
+            {{requestInterceptor}}(outboundEp, req);
+        {{/isJavaRequestInterceptor}}
+        } else {
+            if(!gateway:invokeRequestInterceptor({{operationId}}_request_interceptor_index, outboundEp, req)) {
+                return;
+            }
         }
-    }
-    {{/if}}
-    {{#if requestInterceptor}}
-    if({{operationId}}_request_interceptor_index == -1) {
-    {{^isJavaRequestInterceptor}}
-        {{requestInterceptor}} (outboundEp, req);
-    {{/isJavaRequestInterceptor}}
-    } else {
-        if(!gateway:invokeRequestInterceptor({{operationId}}_request_interceptor_index, outboundEp, req)) {
-            return;
-        }
-    }
-    {{/if}}
-    {{#if isGrpc}}
-        string urlPostfix = <@untainted>req.rawPath;
-    {{else}}
+        {{/if}}
+
+        {{#if isGrpc}}
+            string urlPostfix = <@untainted>req.rawPath;
+        {{else}}
         string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
-    {{/if}}
-    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
-        urlPostfix = "/" + urlPostfix;
-    }
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
+            urlPostfix = "/" + urlPostfix;
+        }
         http:Response|error clientResponse;
         http:Response r = new;
         clientResponse = r;
@@ -232,27 +234,27 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
         if(clientResponse is http:Response) {
             {{#if responseInterceptor}}
-                if({{operationId}}_response_interceptor_index == -1) {
-                {{^isJavaResponseInterceptor}}
-                    {{responseInterceptor}} (outboundEp, clientResponse);
-                {{/isJavaResponseInterceptor}}
-                } else {
-                    if(!gateway:invokeResponseInterceptor({{operationId}}_response_interceptor_index, outboundEp, clientResponse)) {
-                        return;
-                    }
+            if({{operationId}}_response_interceptor_index == -1) {
+            {{^isJavaResponseInterceptor}}
+                {{responseInterceptor}} (outboundEp, clientResponse);
+            {{/isJavaResponseInterceptor}}
+            } else {
+                if(!gateway:invokeResponseInterceptor({{operationId}}_response_interceptor_index, outboundEp, clientResponse)) {
+                    return;
                 }
-            {{/if}}
-            {{#if apiResponseInterceptor}}
-                if({{operationId}}_api_response_interceptor_index == -1) {
-                {{^isJavaApiResponseInterceptor}}
-                    {{apiResponseInterceptor}} (outboundEp, clientResponse);
-                {{/isJavaApiResponseInterceptor}}
-                } else {
-                    if(!gateway:invokeResponseInterceptor({{operationId}}_api_response_interceptor_index, outboundEp, clientResponse)) {
-                        return;
-                    }
+            }{{/if}}
+            {{~#if @root.responseInterceptor}}
+            {{#equals @root.responseInterceptor responseInterceptor}}
+            {{else}}
+            if({{operationId}}_api_response_interceptor_index == -1) {
+            {{^@root.isJavaResponseInterceptor}}
+                {{@root.responseInterceptor}} (outboundEp, clientResponse);
+            {{/@root.isJavaResponseInterceptor}}
+            } else {
+                if(!gateway:invokeResponseInterceptor({{operationId}}_api_response_interceptor_index, outboundEp, clientResponse)) {
+                    return;
                 }
-            {{/if}}
+            }{{/equals}}{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
                 log:printError("Error when sending response", err = outboundResult);
@@ -316,14 +318,14 @@ function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string default
 function initInterceptorIndexes{{cut qualifiedServiceName " "}}() {
 
 {{#paths}}{{#value}}{{#operations}}{{#value}}
-    {{#if apiRequestInterceptor}}
-        string {{operationId}}_api_request_interceptor_name = "{{apiRequestInterceptor}}";
+    {{#if @root.requestInterceptor}}
+        string {{operationId}}_api_request_interceptor_name = "{{@root.requestInterceptor}}";
         if({{operationId}}_api_request_interceptor_name.startsWith("java:")) {
             {{operationId}}_api_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_request_interceptor_name.substring(5, {{operationId}}_api_request_interceptor_name.length()));
         }
         {{/if}}
-        {{#if apiResponseInterceptor}}
-        string {{operationId}}_api_response_interceptor_name = "{{apiResponseInterceptor}}";
+        {{#if @root.responseInterceptor}}
+        string {{operationId}}_api_response_interceptor_name = "{{@root.responseInterceptor}}";
         if({{operationId}}_api_response_interceptor_name.startsWith("java:")) {
             {{operationId}}_api_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_response_interceptor_name.substring(5, {{operationId}}_api_response_interceptor_name.length()));
         }
