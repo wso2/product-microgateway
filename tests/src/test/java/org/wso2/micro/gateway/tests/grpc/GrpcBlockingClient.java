@@ -4,6 +4,9 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.micro.gateway.tests.grpc.gen.TestRequest;
+import org.wso2.micro.gateway.tests.grpc.gen.TestResponse;
+import org.wso2.micro.gateway.tests.grpc.gen.TestServiceGrpc;
 
 public class GrpcBlockingClient {
     private static final Logger log = LoggerFactory.getLogger(GrpcServer.class);

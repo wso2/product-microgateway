@@ -1,6 +1,9 @@
 package org.wso2.micro.gateway.tests.grpc;
 
 import io.grpc.stub.StreamObserver;
+import org.wso2.micro.gateway.tests.grpc.gen.TestRequest;
+import org.wso2.micro.gateway.tests.grpc.gen.TestResponse;
+import org.wso2.micro.gateway.tests.grpc.gen.TestServiceGrpc;
 
 public class TestServiceImpl extends TestServiceGrpc.TestServiceImplBase{
 
