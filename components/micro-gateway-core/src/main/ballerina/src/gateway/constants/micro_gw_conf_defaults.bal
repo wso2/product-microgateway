@@ -62,7 +62,7 @@ public const boolean DEFAULT_TASK_UPLOAD_FILES_ENABLED = true;
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
 
-public const boolean DEFAULT_HTTP2_ENABLED = false;
+public const boolean DEFAULT_HTTP2_ENABLED = true;
 
 public const string DEFAULT_PROTOCOL_NAME = "TLS";
 public const string DEFAULT_PROTOCOL_VERSIONS = "TLSv1.2,TLSv1.1";
