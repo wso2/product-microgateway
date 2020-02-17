@@ -1164,7 +1164,7 @@ public final class CmdUtils {
      */
     public static String getProtoDescriptorPath(String projectName, String protoFileName) {
         String fileName = protoFileName.substring(0, protoFileName.length() - 6);
-        return getGrpcDefinitionsDirPath(projectName) + File.separator + fileName + ".desc";
+        return getProjectTargetGenDirectoryPath(projectName) + File.separator + fileName + ".desc";
     }
 
     /**

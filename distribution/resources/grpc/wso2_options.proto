@@ -50,7 +50,6 @@ message Endpoint {
 
 enum EndpointType {
 	DEFAULT = 0;
-	FAILOVER = 1;
 }
 
 enum Security {
@@ -58,4 +57,5 @@ enum Security {
 	BASIC = 1;
 	OAUTH2 = 2;
 	JWT = 3;
+	APIKEY = 4;
 }

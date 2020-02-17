@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
-import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -171,6 +170,9 @@ public class ProtobufParser {
                         securityList.contains(ExtensionHolder.Security.JWT)) {
                     protoOpenAPI.addAPIOauth2SecurityRequirement();
                 }
+                if (securityList.contains(ExtensionHolder.Security.APIKEY)) {
+                    protoOpenAPI.addAPIKeySecurityRequirement();
+                }
             }
             //set API level throttling tier
             String throttlingTier = service.getOptions().getExtension(ExtensionHolder.throttlingTier);
@@ -223,11 +225,11 @@ public class ProtobufParser {
             }
             epList.addEndpoint(endpoint.getUrl());
         });
-        if (protoEps.getType() == ExtensionHolder.EndpointType.FAILOVER) {
-            epList.setType(EndpointType.failover);
-        }
         if (epList.getEndpoints() == null) {
             return null;
+        }
+        if (epList.getEndpoints().size() > 1) {
+            throw new CLIRuntimeException("Multiple endpoints are not supported .service :" + service + ".");
         }
         return epList;
     }

@@ -43,8 +43,10 @@ import java.util.UUID;
 public class ProtoOpenAPI {
     private static final String OAUTH2_SCHEME = "grpc-oauth2-scheme";
     private static final String BASIC_SCHEME = "grpc-basic-scheme";
+    private static final String APIKEY_SCHEME = "grpc-apikey-scheme";
     private boolean isBasicAuthEnabled = false;
     private boolean isOauth2Enabled = false;
+    private boolean isAPIKeyEnabled = false;
     private boolean isSecurityDisabled = false;
     private boolean endpointsAvailable = false;
     private OpenAPI openAPI;
@@ -82,7 +84,6 @@ public class ProtoOpenAPI {
         Operation operation = new Operation();
         operation.setOperationId(UUID.randomUUID().toString());
         addOauth2SecurityRequirement(operation, scopes);
-        addBasicAuthSecurityRequirement(operation);
         if (StringUtils.isNotEmpty(throttlingTier)) {
             operation.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
         }
@@ -146,7 +147,19 @@ public class ProtoOpenAPI {
         scheme.setType(SecurityScheme.Type.HTTP);
         scheme.setScheme("basic");
         openAPI.setComponents(new Components().addSecuritySchemes(BASIC_SCHEME, scheme));
-        isBasicAuthEnabled = false;
+        isBasicAuthEnabled = true;
+    }
+
+    /*
+     * Add APIKey security scheme to the openAPI object.
+     */
+    private void addAPIKeySecurityScheme() {
+        SecurityScheme scheme = new SecurityScheme();
+        scheme.setType(SecurityScheme.Type.APIKEY);
+        scheme.setName("apikey");
+        scheme.setIn(SecurityScheme.In.HEADER);
+        openAPI.setComponents(new Components().addSecuritySchemes(APIKEY_SCHEME, scheme));
+        isAPIKeyEnabled = true;
     }
 
     /**
@@ -197,6 +210,7 @@ public class ProtoOpenAPI {
         }
     }
 
+    //todo: operation level security is not considered. Hence remove the unnecessary code
     /**
      * Add Basic Auth security requirement to the operation/API.
      * If {@link Operation} object is null, security requirement is added to the API.
@@ -219,6 +233,29 @@ public class ProtoOpenAPI {
         }
     }
 
+    //todo: remove the redundant work as operation level security is not considered
+    /**
+     * Add APIKey security requirement to the operation/API.
+     * If {@link Operation} object is null, security requirement is added to the API.
+     *
+     * @param operation {@link Operation} object
+     */
+    private void addAPIKeySecurityRequirement(Operation operation) {
+        if (!isAPIKeyEnabled) {
+            return;
+        }
+        if (openAPI.getComponents().getSecuritySchemes().get(APIKEY_SCHEME) != null) {
+            SecurityRequirement apikeyReq = new SecurityRequirement();
+            apikeyReq.addList(APIKEY_SCHEME);
+
+            if (operation == null) {
+                openAPI.addSecurityItem(apikeyReq);
+            } else {
+                operation.addSecurityItem(apikeyReq);
+            }
+        }
+    }
+
     /**
      * Add Oauth2 security requirement to the API level.
      */
@@ -236,6 +273,14 @@ public class ProtoOpenAPI {
     }
 
     /**
+     * Add API-KEY security requirement to the API level
+     */
+    void addAPIKeySecurityRequirement() {
+        addAPIKeySecurityScheme();
+        addAPIKeySecurityRequirement(null);
+    }
+
+    /**
      * Disable API security.
      */
     void disableAPISecurity() {
@@ -245,7 +290,7 @@ public class ProtoOpenAPI {
 
     private void checkSecurityTypeIncompatibility(String protoPath) {
         //if security types are defined with disabled security option, throw an error to indicate incompatibility.
-        if ((isOauth2Enabled || isBasicAuthEnabled) && isSecurityDisabled) {
+        if ((isOauth2Enabled || isBasicAuthEnabled || isAPIKeyEnabled) && isSecurityDisabled) {
             throw new CLIRuntimeException("\"None\" security type is incompatible with other security types. " +
                     "protobuf file : \"" + protoPath + "\".");
         }
