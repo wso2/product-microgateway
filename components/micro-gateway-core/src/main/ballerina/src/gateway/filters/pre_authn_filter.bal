@@ -130,6 +130,9 @@ returns boolean {
             }
         }
     }
+    // set api's mutual ssl client verify configuration
+    setMutualSSL(context.getServiceName());
+
     string providerId;
     if (!isCookie) {
         providerId = getAuthenticationProviderType(authHeader);
@@ -144,7 +147,8 @@ returns boolean {
         }
     }
 
-    if (isSecuredResource) {
+    boolean isOptional = isAppSecurityOptionalforResource(context.getServiceName(), context.getResourceName());
+    if (isSecuredResource && !isOptional) {
         if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !isAPIKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
@@ -154,7 +158,7 @@ returns boolean {
         }
     }
 
-    if (!canHandleAuthentication) {
+    if (!canHandleAuthentication && !isOptional) {
         setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
         setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);
