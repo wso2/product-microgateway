@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
+import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -73,6 +74,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
+
 /**
  * Utility functions providing tasks related to MGW toolkit.
  */
@@ -244,6 +246,15 @@ public final class CmdUtils {
     }
 
     /**
+     * Get grpc directory location inside Resources Directory.
+     *
+     * @return protobuf directory location
+     */
+    public static String getResourcesGrpcDirLocation() {
+        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
+    }
+
+    /**
      * Get resources file directory path
      *
      * @return resources file directory path
@@ -411,6 +422,10 @@ public final class CmdUtils {
         createDirectory(interceptorsPath, false);
         createFile(interceptorsPath, CliConstants.KEEP_FILE, true);
 
+        String externalLibPath = projectDir + File.separator + CliConstants.CLI_LIB;
+        createDirectory(externalLibPath, false);
+        createFile(externalLibPath, CliConstants.KEEP_FILE, true);
+
         String extensionsPath = projectDir + File.separator + CliConstants.PROJECT_EXTENSIONS_DIR;
         createDirectory(extensionsPath, false);
 
@@ -422,6 +437,9 @@ public final class CmdUtils {
         if (!StringUtils.isEmpty(apiDefinition)) {
             setApiDefinition(projectName, apiDefinition, headers, values, insecure);
         }
+
+        String grpcDefinitionsPath = projectDir + File.separator + CliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
+        createDirectory(grpcDefinitionsPath, false);
 
         createFile(projectDir.getPath(), CliConstants.PROJECT_POLICIES_FILE, true);
         String policyResPath = getDefinitionsLocation() + File.separator + CliConstants.GW_DIST_POLICIES_FILE;
@@ -727,7 +745,18 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /grpc_service/client of a given project in the current working directory
+     * Returns path to the /grpc_definitions of a given project in the current directory.
+     *
+     * @param projectName project name
+     * @return path to the grpc_defintions of a given project in the current working directory
+     */
+    public static String getGrpcDefinitionsDirPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator +
+                CliConstants.PROJECT_GRPC_DEFINITIONS_DIR;
+    }
+
+    /**
+     * Returns path to the /grpc_service/client of a given project in the current working directory.
      *
      * @return path to the /grpc_service/client of a given project in the current working directory
      */
@@ -738,7 +767,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /grpc_service of a given project in the current working directory
+     * Returns path to the /grpc_service of a given project in the current working directory.
      *
      * @return path to the /grpc_service of a given project in the current working directory
      */
@@ -748,7 +777,7 @@ public final class CmdUtils {
     }
 
     /**
-     * This function recursively copy all the sub folder and files from source to destination file paths
+     * This function recursively copy all the sub folder and files from source to destination file paths.
      *
      * @param source      source location
      * @param destination destination location
@@ -1122,6 +1151,29 @@ public final class CmdUtils {
     }
 
     /**
+     * get the path of the protoc executable.
+     *
+     * @return the absolute path of the protoc executable
+     */
+    public static String getProtocDirPath() {
+        return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
+    }
+
+    //todo: change the file location
+
+    /**
+     * descriptor path of the grpc definition.
+     *
+     * @param projectName   project name
+     * @param protoFileName protobuf file name
+     * @return descriptor path
+     */
+    public static String getProtoDescriptorPath(String projectName, String protoFileName) {
+        String fileName = protoFileName.substring(0, protoFileName.length() - 6);
+        return getProjectTargetGenDirectoryPath(projectName) + File.separator + fileName + ".desc";
+    }
+
+    /**
      * To print the message if verbose flag is set
      *
      * @param msg Message
@@ -1173,5 +1225,42 @@ public final class CmdUtils {
     public static String getMicroGWConfResourceLocation() {
         return getCLIHome() + File.separator + CliConstants.GW_DIST_RESOURCES + File.separator
                 + CliConstants.GW_DIST_CONF;
+    }
+
+    public static List<String> getExternalJarDependencies(String projectName) {
+        List<String> jarNames = new ArrayList<>();
+        String externalJarFolder =
+                getProjectDirectoryPath(projectName) + File.separator + CliConstants.CLI_LIB;
+        File[] files = new File(externalJarFolder).listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(CliConstants.EXTENSION_JAR)) {
+                    jarNames.add(file.getName());
+                }
+            }
+        }
+        return jarNames;
+    }
+
+    public static void updateBallerinaToml(String projectName) throws IOException {
+        String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
+                + CliConstants.BALLERINA_TOML_FILE;
+        String templateFile =
+                CmdUtils.getMicroGWConfResourceLocation() + File.separator + CliConstants.BALLERINA_TOML_FILE;
+        String fileContent = CmdUtils.readFileAsString(templateFile, false);
+
+        // Windows paths contains '\' separator which causes issues when included in ballerina.toml
+        String unixHomePath = CmdUtils.getCLIHome().replace('\\', '/');
+        fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, unixHomePath);
+        String dependencyFileLocation = getProjectTargetModulePath(projectName) + File.separator
+                + GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
+        if (Files.exists(Paths.get(dependencyFileLocation))) {
+            String dependencyContent = CmdUtils.readFileAsString(dependencyFileLocation, false);
+            String unixProjectPath = getProjectDirectoryPath(projectName).replace('\\', '/');
+            dependencyContent = dependencyContent
+                    .replaceAll(CliConstants.MICROGW_PROJECT_PLACEHOLDER, unixProjectPath);
+            fileContent += dependencyContent;
+        }
+        Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -322,6 +322,8 @@ This token works with any API since by default the microgateway config uses the 
 | x-wso2-request-interceptor     | Custom ballerina functions can be written in order to do transformations before dispatching the request      | Not Required -> API/Resource level
 | x-wso2-response-interceptor    | Custom ballerina functions can be written in order to do transformations before dispatching the response     | Not Required -> API/Resource level
 | x-wso2-auth-header             | Specify the authorization header for the API in which either bearer or basic token is sent                   | Not Required -> API level only
+| x-wso2-transports              | Specify the transport security for the API(http, https and mutual ssl)                                       | Not Required -> API level only
+| x-wso2-application-security    | Specify application security (basic_auth, api_key, oauth2)                                                   | Not Required -> API/Resource level 
 
 
 ### Microgateway open API extension usages
@@ -668,7 +670,8 @@ Enter Password for admin:
 
 Enter APIM base URL [https://localhost:9443]:
 
-You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MGW-TK_HOME>/conf/toolkit-config.toml)
+You are using REST version - v1.0 and dynamic client registration version - v0.15 of API Manager. 
+(If you want to change this, go to <MGW-TK_HOME>/conf/toolkit-config.toml)
 Enter Trust store location: [lib/platform/bre/security/ballerinaTruststore.p12]
 
 Enter Trust store password: [ use default? ]

@@ -19,10 +19,12 @@ import ballerina/config;
 import ballerina/file;
 import ballerina/http;
 import ballerina/io;
+import ballerina/jwt;
 import ballerina/lang.'int;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
 import ballerina/log;
+import ballerina/oauth2;
 import ballerina/reflect;
 import ballerina/runtime;
 import ballerina/stringutils;
@@ -35,6 +37,8 @@ map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
+map<http:InboundAuthHandler> authHandlersMap = {};
+string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -271,14 +275,16 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     http:Response response = new;
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = {
-        fault: {
-            code: errorCode,
-            message: errorMesssage,
-            description: errorDescription
-        }
-    };
-    response.setJsonPayload(payload);
+    if (!isGrpcRequest(context)) {
+        json payload = {
+            fault: {
+                code: errorCode,
+                message: errorMesssage,
+                description: errorDescription
+            }
+        };
+        response.setJsonPayload(payload);
+    }
     var value = caller->respond(response);
     if (value is error) {
         log:printError("Error occurred while sending the error response", err = value);
@@ -294,14 +300,16 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
     int errorCode = <int>context.attributes[ERROR_CODE];
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-    json payload = {
-        fault: {
+    if (! context.attributes.hasKey(IS_GRPC)) {
+        json payload = {
+            fault: {
             code: errorCode,
             message: errorMessage,
             description: errorDescription
         }
     };
     response.setJsonPayload(payload);
+    }
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
@@ -313,7 +321,7 @@ public function getAuthorizationHeader(runtime:InvocationContext context) return
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+        authHeader = authHeaderFromConfig;
     }
     return authHeader;
 
@@ -328,16 +336,24 @@ public function getAuthHeaderFromFilterContext(http:FilterContext context) retur
         authHeader = annotatedHeadeName;
     }
     if (authHeader == "") {
-        authHeader = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+        authHeader = authHeaderFromConfig;
     }
     return authHeader;
 }
 
 public function getCurrentTime() returns int {
+
     time:Time currentTime = time:currentTime();
     int time = currentTime.time;
     return time;
 
+}
+
+public function getCurrentTimeForAnalytics() returns int {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+        return 0;
+    }
+    return getCurrentTime();
 }
 
 public function rotateFile(string filePath) returns string | error {
@@ -347,7 +363,7 @@ public function rotateFile(string filePath) returns string | error {
     string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
     var compressResult = compress(filePath, zipName);
     if (compressResult is error) {
-        printFullError(KEY_UTILS, compressResult);
+        printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
@@ -355,7 +371,7 @@ public function rotateFile(string filePath) returns string | error {
         if (deleteResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {
-            printFullError(KEY_UTILS, deleteResult);
+            printError(KEY_UTILS, "Failed to delete file", deleteResult);
         }
         return zipName;
     }
@@ -401,17 +417,20 @@ public function getMessageId() returns string {
 # Add a error log with provided key (class) and message ID.
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
-public function printError(string key, string message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
+# + errorMessage - The error message to be logged.
+public function printError(string key, string message, error? errorMessage = ()) {
+    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message), err = errorMessage);
 }
 
 # Add a debug log with provided key (class) and message ID.
 # + key - The name of the bal file from which the log is printed.
 # + message - The message to be logged.
 public function printDebug(string key, string message) {
-    log:printDebug(function() returns string {
-        return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
-    });
+    if(isDebugEnabled) {
+        log:printDebug(function() returns string {
+            return io:sprintf("[%s] [%s] %s", key, getMessageId(), message);
+        });
+    }
 }
 
 # Add a warn log with provided key (class) and message ID.
@@ -439,18 +458,14 @@ public function printInfo(string key, string message) {
     log:printInfo(io:sprintf("[%s] [%s] %s", key, getMessageId(), message));
 }
 
-# Add a full error log with provided key (class) and message ID.
-# + key - The name of the bal file from which the log is printed.
-# + message - The message to be logged.
-public function printFullError(string key, error message) {
-    log:printError(io:sprintf("[%s] [%s] %s", key, getMessageId(), message.reason()), err = message);
-}
-
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+            return;
+    }
     int ending = getCurrentTime();
     context.attributes[latencyType] = ending - starting;
     int latency = ending - starting;
-    printDebug(KEY_THROTTLE_FILTER, "Throttling latency: " + latency.toString() + "ms");
+    printDebug(KEY_THROTTLE_FILTER, latencyType + " latency: " + latency.toString() + "ms");
 }
 
 # Check MESSAGE_ID in context and set if it is not.
@@ -500,6 +515,9 @@ public function decodeValueToBase10(string value) returns string {
 # + request - http request object.
 # + context - http filter context object.
 public function setHostHeaderToFilterContext(http:Request request,@tainted http:FilterContext context) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+        return;
+    }
     if (context.attributes[HOSTNAME_PROPERTY] == ()) {
         printDebug(KEY_AUTHN_FILTER, "Setting hostname to filter context");
         if (request.hasHeader(HOST_HEADER_NAME)) {
@@ -526,7 +544,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
         // if resource is not secured, no need to check further
         if (!resourceSecured) {
-            log:printWarn("Resource is not secured. `enabled: false`.");
+            printDebug(KEY_UTILS, "Resource is not secured. `enabled: false`.");
             return false;
         }
     }
@@ -568,8 +586,18 @@ public function getAuthProviders(string serviceName, string resourceName) return
     return authProviders;
 }
 
+public function getSecurityForService(string serviceName, string security) returns json | error {
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        map<json> securityMap = <map<json>>apiConfig.security;
+        return securityMap[security];
+    }
+    printError(KEY_UTILS, "Error while reading the api configs");
+    return error("Error while reading the api configs");
+}
+
 public function getAPIKeysforResource(string serviceName, string resourceName) returns json[] {
-    printDebug(KEY_UTILS, "Service name provided to retrieve auth configuration  : " + serviceName);
+    printDebug(KEY_UTILS, "Service name provided to retrieve apikey configuration  : " + serviceName);
     json[] apiKeys = [];
     ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
     if (resourceConfig is ResourceConfiguration) {
@@ -580,13 +608,49 @@ public function getAPIKeysforResource(string serviceName, string resourceName) r
             return apiKeys;
         }
     }
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
-    if (apiConfig is APIConfiguration) {
-        map<json> securityMap = <map<json>>apiConfig.security;
-        json apiKeysJson = securityMap[AUTH_SCHEME_API_KEY];
-        apiKeys = <json[]>apiKeysJson;
+
+    json | error securityAPIKey = getSecurityForService(serviceName, AUTH_SCHEME_API_KEY);
+    if (securityAPIKey is json) {
+        apiKeys = <json[]> securityAPIKey;
     }
     return apiKeys;
+}
+
+public function setMutualSSL(string serviceName) {
+    string mutualSSL = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, DEFAULT_SSL_VERIFY_CLIENT);
+    json | error securityMutualSSL = getSecurityForService(serviceName, MTSL);
+    if (securityMutualSSL is json) {
+        mutualSSL = <string> securityMutualSSL;
+    }
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    invocationContext.attributes[MTSL] = mutualSSL;
+}
+
+public function getMutualSSL() returns string | error {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (invocationContext.attributes.hasKey(MTSL)) {
+        return <string>invocationContext.attributes[MTSL];
+    } else {
+        printError(KEY_UTILS, "MutualSSL is missing in authentication context");
+        return error("MutualSSL is missing in authentication context");
+    }
+}
+
+public function isAppSecurityOptionalforResource(string serviceName, string resourceName) returns boolean {
+    boolean appSecurityOptional = false;
+    ResourceConfiguration? resourceConfig = resourceConfigAnnotationMap[resourceName];
+    if (resourceConfig is ResourceConfiguration) {
+        map<json> securityMap = <map<json>>resourceConfig.security;
+        json appSecurityOptionalJson = securityMap[APP_SECURITY_OPTIONAL];
+        appSecurityOptional = <boolean> appSecurityOptionalJson;
+        return appSecurityOptional;
+    }
+
+    json | error securityOptional= getSecurityForService(serviceName, APP_SECURITY_OPTIONAL);
+    if (securityOptional is json) {
+        appSecurityOptional = <boolean> securityOptional;
+    }
+    return appSecurityOptional;
 }
 
 # Log and prepare `error` as a `Error`.
@@ -640,4 +704,148 @@ public function setFilterSkipToFilterContext(http:FilterContext context) {
 
 public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?> {
     return filterConfigAnnotationMap;
+}
+
+function isGrpcRequest(http:FilterContext context) returns boolean {
+    //if the key is there, the value is always set to true.
+    return context.attributes.hasKey(IS_GRPC);
+}
+
+public function initAuthHandlers() {
+    //Initializes jwt handler
+    jwt:JwtValidatorConfig jwtValidatorConfig = {
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
+        clockSkewInSeconds: 60,
+        trustStoreConfig: {
+            trustStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+            },
+            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
+        },
+        jwtCache: jwtCache
+    };
+    JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
+    JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+    } else {
+        jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+    }
+
+    //Initializes apikey handler
+    jwt:JwtValidatorConfig apiKeyValidatorConfig = {
+        issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
+        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
+        clockSkewInSeconds: 60,
+        trustStoreConfig: {
+            trustStore: {
+                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
+                "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina")
+            },
+            certificateAlias: getConfigValue(API_KEY_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_API_KEY_ALIAS)
+        },
+        jwtCache: jwtCache
+    };
+    APIKeyProvider apiKeyProvider = new (apiKeyValidatorConfig);
+    APIKeyHandler | APIKeyHandlerWrapper apiKeyHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        apiKeyHandler = new APIKeyHandlerWrapper(apiKeyProvider);
+    } else {
+        apiKeyHandler = new APIKeyHandler(apiKeyProvider);
+    }
+
+    // Initializes the key validation handler
+    http:ClientSecureSocket secureSocket = {
+        trustStore: {
+            path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+            password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+        },
+        verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    };
+
+    http:OutboundAuthConfig? auth = ();
+    // support backward compatibility in reading the basic auth credentials when connecting with KM.
+    string username = getConfigValue(KM_CONF_INSTANCE_ID, USERNAME, "");
+    string password = getConfigValue(KM_CONF_INSTANCE_ID, PASSWORD, "");
+    if (username.length() == 0 && password.length() == 0) {
+        username = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
+        password = getConfigValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
+    }
+    if (getConfigBooleanValue(KM_CONF_SECURITY_BASIC_INSTANCE_ID, ENABLED, true)) {
+        auth:OutboundBasicAuthProvider basicAuthOutboundProvider = new ({
+            username: username,
+            password: password
+        });
+        http:BasicAuthHandler basicAuthOutboundHandler = new (basicAuthOutboundProvider);
+        auth = {authHandler: basicAuthOutboundHandler};
+    } else if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {
+        oauth2:OutboundOAuth2Provider | error oauth2Provider = getOauth2OutboundProvider();
+        if (oauth2Provider is oauth2:OutboundOAuth2Provider) {
+            http:BearerAuthHandler bearerAuthOutboundHandler = new (oauth2Provider);
+            auth = {authHandler: bearerAuthOutboundHandler};
+        } else {
+            printError(KEY_UTILS, "Failed to get oauth2 outbound provider", oauth2Provider);
+        }
+    } else {
+        printWarn(KEY_UTILS, "Key validation service security confogurations not enabled.");
+    }
+    http:ClientConfiguration clientConfig = {
+        auth: auth,
+        cache: {enabled: false},
+        secureSocket: secureSocket
+    };
+    oauth2:IntrospectionServerConfig keyValidationConfig = {
+        url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
+        clientConfig: clientConfig
+    };
+    string introspectURL = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
+    string keymanagerContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, DEFAULT_KM_TOKEN_CONTEXT);
+    introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + keymanagerContext : introspectURL + PATH_SEPERATOR + keymanagerContext;
+    introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + INTROSPECT_CONTEXT : introspectURL + PATH_SEPERATOR + INTROSPECT_CONTEXT;
+    oauth2:IntrospectionServerConfig introspectionServerConfig = {
+        url: introspectURL,
+        oauth2Cache: introspectCache,
+        clientConfig: clientConfig
+    };
+    OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationConfig);
+    oauth2:InboundOAuth2Provider introspectionProvider = new (introspectionServerConfig);
+    KeyValidationHandler | KeyValidationHandlerWrapper keyValidationHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        keyValidationHandler = new KeyValidationHandlerWrapper(oauth2KeyValidationProvider, introspectionProvider);
+    } else {
+        keyValidationHandler = new KeyValidationHandler(oauth2KeyValidationProvider, introspectionProvider);
+    }
+
+
+    // Initializes the basic auth handler
+    auth:BasicAuthConfig basicAuthConfig = {tableName: CONFIG_USER_SECTION};
+    BasicAuthProvider | BasicAuthProviderWrapper configBasicAuthProvider;
+    if (isMetricsEnabled || isTracingEnabled) {
+        configBasicAuthProvider = new BasicAuthProviderWrapper(basicAuthConfig);
+    } else {
+        configBasicAuthProvider = new BasicAuthProvider(basicAuthConfig);
+    }
+    http:BasicAuthHandler basicAuthHandler = new (configBasicAuthProvider);
+
+    //Initializes the mutual ssl handler
+    MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
+    if (isMetricsEnabled || isTracingEnabled) {
+        mutualSSLHandler = new MutualSSLHandlerWrapper();
+    } else {
+        mutualSSLHandler = new MutualSSLHandler();
+    }
+
+    //Initializes the cookie based handler
+    // CookieAuthHandler cookieBasedHandler = new;
+
+    //set to the map
+    authHandlersMap[MUTUAL_SSL_HANDLER] = mutualSSLHandler;
+    authHandlersMap[JWT_AUTH_HANDLER] = jwtAuthHandler;
+    authHandlersMap[KEY_VALIDATION_HANDLER] = keyValidationHandler;
+    authHandlersMap[BASIC_AUTH_HANDLER] = basicAuthHandler;
+    // authHandlersMap[COOKIE_BASED_HANDLER] = cookieBasedHandler;
+    authHandlersMap[API_KEY_HANDLER] = apiKeyHandler;
 }

@@ -30,12 +30,12 @@ public type PreAuthnFilter object {
             return true;
         }
         //Setting UUID
-        int startingTime = getCurrentTime();
+        int startingTime = getCurrentTimeForAnalytics();
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
-        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return result;
     }
 
@@ -117,7 +117,8 @@ returns boolean {
                             setAPIKeyAuth(inName, name);
                             authHeader = AUTH_SCHEME_API_KEY;
                             break;
-                        } else if (stringutils:equalsIgnoreCase(QUERY, inName) && request.getQueryParamValue(name) is string) {
+                        } else if (stringutils:equalsIgnoreCase(QUERY, inName)
+                                && request.getQueryParamValue(name) is string) {
                             printDebug(KEY_PRE_AUTHN_FILTER, "Request has apikey query : " + name);
                             isAPIKeyAuth = true;
                             setAPIKeyAuth(inName, name);
@@ -129,6 +130,9 @@ returns boolean {
             }
         }
     }
+    // set api's mutual ssl client verify configuration
+    setMutualSSL(context.getServiceName());
+
     string providerId;
     if (!isCookie) {
         providerId = getAuthenticationProviderType(authHeader);
@@ -143,7 +147,8 @@ returns boolean {
         }
     }
 
-    if (isSecuredResource) {
+    boolean isOptional = isAppSecurityOptionalforResource(context.getServiceName(), context.getResourceName());
+    if (isSecuredResource && !isOptional) {
         if ((!request.hasHeader(authHeaderName) || request.getHeader(authHeaderName).length() == 0) && !isAPIKeyAuth) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
@@ -153,7 +158,7 @@ returns boolean {
         }
     }
 
-    if (!canHandleAuthentication) {
+    if (!canHandleAuthentication && !isOptional) {
         setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
         setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
         sendErrorResponse(caller, request, context);

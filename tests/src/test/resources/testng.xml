@@ -33,6 +33,8 @@
     </test>
     <test name="micro-gw-services" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2.micro.gateway.tests.grpc.BasicGrpcTestCase" />
+            <class name="org.wso2.micro.gateway.tests.apikey.APIKeyTestCase" />
             <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.AuthenticationFailureTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
@@ -57,11 +59,11 @@
             <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithBasicAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithOAuthTestCase"/>
 
-<!--            <class name="org.wso2.micro.gateway.tests.throttling.ThrottlingTestCase"/>-->
-<!--            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/>-->
+            <class name="org.wso2.micro.gateway.tests.throttling.ThrottlingTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/>
             <class name="org.wso2.micro.gateway.tests.extensions.OASAPIInvokeTestCase"/>
-<!--            <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>-->
-<!--            <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>-->
+            <!--            <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>-->
+            <!--            <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>-->
             <class name="org.wso2.micro.gateway.tests.interceptor.InterceptorTestCase"/>
         </classes>
     </test>

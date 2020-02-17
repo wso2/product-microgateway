@@ -40,6 +40,8 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
+import org.wso2.apimgt.gateway.cli.model.config.TransportSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -88,13 +90,6 @@ public class OpenAPICodegenUtils {
     private static List<String> oauthSecuritySchemaList = new ArrayList<>();
     private static List<String> basicSecuritySchemaList = new ArrayList<>();
     private static Map apiKeySecuritySchemaMap = new HashMap();
-
-    enum APISecurity {
-        basic,
-        oauth2,
-        jwt,
-        apikey
-    }
 
     /**
      * Generate JsonNode object for a given API definition.
@@ -151,6 +146,10 @@ public class OpenAPICodegenUtils {
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
+                //Sets title name similar to API name in swagger definition.
+                //Without this modification, two seperate rows will be added to APIM analytics dashboard tables.
+                //(For APIM and Microgateway API invokes)
+                swagger.getInfo().setTitle(api.getName());
                 if (isExpand) {
                     swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
@@ -158,6 +157,10 @@ public class OpenAPICodegenUtils {
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+                //Sets title similar to API name in open API definition
+                //Without this modification, two seperate rows will be added to analytics dashboard tables.
+                //(For APIM and Microgateway API invokes)
+                openAPI.getInfo().setTitle(api.getName());
                 if (isExpand) {
                     openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
@@ -226,6 +229,9 @@ public class OpenAPICodegenUtils {
         if (api.getAuthorizationHeader() != null) {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
         }
+        if (api.getProvider() != null) {
+            extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
+        }
 
         return extensionsMap;
     }
@@ -236,23 +242,99 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * generate ExtendedAPI object from openAPI definition
+     * generate ExtendedAPI object from openAPI definition.
      *
-     * @param openAPI {@link OpenAPI} object
-     * @return Extended API object
+     * @param openAPI {@link OpenAPI} object with all required properties
+     * @return {@link ExtendedAPI} object
      */
-    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent, Path openAPIPath)
-            throws IOException {
+    public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent) throws IOException {
+        ExtendedAPI api = generateAPIFromOpenAPI(openAPI);
+        //open API content should be set in json in order to validation filter to work.
+        api.setApiDefinition(openAPIContent);
+        return api;
+    }
 
+    /**
+     * Generate {@link ExtendedAPI} object from generated OpenAPI from protobuf file. This is used for the ballerina
+     * service generation.
+     *
+     * @param openAPI {@link OpenAPI} object with all required properties
+     * @return {@link ExtendedAPI} object for protobuf
+     */
+    public static ExtendedAPI generateGrpcAPIFromOpenAPI(OpenAPI openAPI) {
+        ExtendedAPI api = generateAPIFromOpenAPI(openAPI);
+        api.setGrpc(true);
+        return api;
+    }
+
+    private static ExtendedAPI generateAPIFromOpenAPI(OpenAPI openAPI) {
         String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
         ExtendedAPI api = new ExtendedAPI();
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
-        api.setTransport(Arrays.asList("http", "https"));
-        //open API content should be set in json in order to validation filter to work.
-        api.setApiDefinition(openAPIContent);
+        setTransportSecurity(api, populateTransportSecurity(openAPI));
         return api;
+    }
+
+    /**
+     * Set mutual SSL and http, https transport security to API.
+     *
+     * @param api Extended API object
+     * @param transportSecurity Transport security
+     */
+    private static void setTransportSecurity(ExtendedAPI api, TransportSecurity transportSecurity) {
+        List<String> transports = new ArrayList<>();
+        if (transportSecurity != null) {
+            if (transportSecurity.getHttp()) {
+                transports.add(OpenAPIConstants.TRANSPORT_HTTP);
+            }
+            if (transportSecurity.getHttps()) {
+                transports.add(OpenAPIConstants.TRANSPORT_HTTPS);
+            }
+        }
+        if (transports.isEmpty()) {
+            transports = Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS);
+        }
+        api.setTransport(transports);
+        api.setMutualSSL(transportSecurity != null ? transportSecurity.getMutualSSL() : OpenAPIConstants.OPTIONAL);
+    }
+
+    /**
+     * Get transport security from API Definition extension
+     *
+     * @param openAPI API definition
+     * @return TransportSecurity
+     */
+    private static TransportSecurity populateTransportSecurity(OpenAPI openAPI) {
+        TransportSecurity transportSecurity = null;
+        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
+        if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
+            }
+            try {
+                transportSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                        .get(OpenAPIConstants.TRANSPORT_SECURITY), TransportSecurity.class);
+            } catch (Exception exception) {
+                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.TRANSPORT_SECURITY +
+                        " extension but failed to match to the required format.");
+            }
+            validateTransportSecurity(openAPI, transportSecurity);
+        }
+        return transportSecurity;
+    }
+
+    private static void validateTransportSecurity(OpenAPI openAPI, TransportSecurity transportSecurity) {
+        if (!transportSecurity.getHttp() && !transportSecurity.getHttps()) {
+            logger.debug("At least one transport type(http, https) should be enabled.");
+            throw new CLIRuntimeException("At least one transport type(http, https) should be enabled for '"
+                    + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion() + "'");
+        }
+        if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(transportSecurity.getMutualSSL())) {
+            transportSecurity.setHttps(true);
+        }
     }
 
     public static void setAdditionalConfig(ExtendedAPI api) {
@@ -276,14 +358,14 @@ public class OpenAPICodegenUtils {
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
         Map<String, Object> extensions = openAPI.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
                 openAPI.getServers());
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(api.getId());
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? openAPI.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
+                extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
                 openAPI.getServers());
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
@@ -293,16 +375,20 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
+        api.setSpecificBasepath(extensions.get(OpenAPIConstants.BASEPATH).toString());
+        //assigns x-wso2-owner value to API provider
+        if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
+            api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
+        }
         try {
-            if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
-                api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
+            if (extensions.get(OpenAPIConstants.CORS) != null) {
+                api.setCorsConfiguration(objectMapper.convertValue(extensions.get(OpenAPIConstants.CORS),
                         APICorsConfigurationDTO.class));
                 // explicitly set the cors enabled value to true if cors config found in the open API definition
                 api.getCorsConfiguration().setCorsConfigurationEnabled(true);
             }
             // set authorization header from the open API extension
-            Object authHeader = openAPI.getExtensions().get(OpenAPIConstants.AUTHORIZATION_HEADER);
+            Object authHeader = extensions.get(OpenAPIConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
                 api.setAuthorizationHeader(authHeader.toString());
             }
@@ -457,8 +543,9 @@ public class OpenAPICodegenUtils {
             } catch (IOException e) {
                 logger.error("Error occurred while reading interceptors", e);
             }
-            findRequestInterceptors(balSrcCode, path.toString());
-            findResponseInterceptors(balSrcCode, path.toString());
+
+            findInterceptors(balSrcCode, path.toString(), true, requestInterceptorMap);
+            findInterceptors(balSrcCode, path.toString(), false, responseInterceptorMap);
         });
     }
 
@@ -551,26 +638,6 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Find and store the request interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findRequestInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, true, requestInterceptorMap);
-    }
-
-    /**
-     * Find and store the response interceptors included in a ballerina source code.
-     *
-     * @param balSrcCode          the ballerina source code
-     * @param interceptorFilePath the file path of the ballerina source code
-     */
-    private static void findResponseInterceptors(String balSrcCode, String interceptorFilePath) {
-        findInterceptors(balSrcCode, interceptorFilePath, false, responseInterceptorMap);
-    }
-
-    /**
      * Validate the existence of the interceptor in ballerina source files inside interceptors directory.
      * Throws an runtime error if the interceptor is not found.
      * if the provided interceptor name is null, 'null' will be returned.
@@ -593,7 +660,8 @@ public class OpenAPICodegenUtils {
             interceptorMap = responseInterceptorMap;
         }
         //if the interceptor map does not contain the interceptor, the interceptor is not available
-        if (!interceptorMap.containsKey(interceptorName)) {
+        if (!interceptorName.startsWith(OpenAPIConstants.INTERCEPTOR_JAVA_PREFIX) && !interceptorMap
+                .containsKey(interceptorName)) {
             String errorMsg = "The interceptor '" + interceptorName + "' mentioned in openAPI definition:'" +
                     openAPIFilePath + "' ";
             //if the interceptor is resource level
@@ -626,15 +694,16 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Writes the dependencies in Ballerina.toml file for the interceptors which are being referred from
-     * the Ballerina Central
+     * Write ballerina dependency libraries to Ballerina.toml.
+     * These dependencies will be pulled from ballerina central
+     * during the mgw project build.
      *
      * @param projectName       The project name
      * @param definitionContext Currently built ballerina service context
      */
-    public static void writeDependency (String projectName, BallerinaService definitionContext) {
-        if (definitionContext.getModuleVersionMap() != null) {
-            HashMap<String, String> moduleVersionMap = definitionContext.getModuleVersionMap();
+    public static void writeDependencies(String projectName, BallerinaService definitionContext) {
+        if (definitionContext.getLibVersions() != null) {
+            HashMap<String, String> moduleVersionMap = definitionContext.getLibVersions();
             String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
                     + CliConstants.BALLERINA_TOML_FILE;
             File file = new File(ballerinaTomlFile);
@@ -686,7 +755,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
              requestInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.REQUEST_INTERCEPTOR).toString(),
                              true, openAPIFilePath, pathItem, operationName);
                  }
@@ -694,7 +763,7 @@ public class OpenAPICodegenUtils {
              Optional<Object> responseInterceptor = Optional.ofNullable(extensions
                      .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
              responseInterceptor.ifPresent(value -> {
-                 if (!value.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
+                 if (!value.toString().contains(OpenAPIConstants.INTERCEPTOR_PATH_SEPARATOR)) {
                      validateInterceptorAvailability(extensions.get(OpenAPIConstants.RESPONSE_INTERCEPTOR).toString(),
                              false, openAPIFilePath, pathItem, operationName);
                  }
@@ -715,10 +784,53 @@ public class OpenAPICodegenUtils {
         String scopes = securitySchemasAndScopes[1];
         //if securitySchemas String is null, set to oauth2
         if (StringUtils.isEmpty(securitySchemas)) {
-            securitySchemas = APISecurity.oauth2.name();
+            securitySchemas = OpenAPIConstants.APISecurity.oauth2.name();
         }
         api.setMgwApiSecurity(securitySchemas);
         api.setMgwApiScope(scopes);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Getting Application security by the extension for API '" + openAPI.getInfo().getTitle()
+                    + "' version '" + openAPI.getInfo().getVersion() + "'");
+        }
+        ApplicationSecurity appSecurityfromDef =
+                populateApplicationSecurity(openAPI.getExtensions(), api.getMutualSSL());
+        api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
+    }
+
+    /**
+     * Get application security from API Definition extension.
+     *
+     * @param apiDefExtensions          API definition extesnsions
+     * @return ApplicationSecurity/null if not present returns null
+     */
+    public static ApplicationSecurity populateApplicationSecurity(Map<String, Object> apiDefExtensions,
+                                                                   String mutualSSL) {
+        ApplicationSecurity appSecurity = null;
+        if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
+            }
+            try {
+                appSecurity = new ObjectMapper().convertValue(apiDefExtensions
+                        .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
+
+            } catch (Exception exception) {
+                throw new CLIRuntimeException("The API contains " + OpenAPIConstants.APPLICATION_SECURITY +
+                        " extension but failed to match " + OpenAPIConstants.APPLICATION_SECURITY_TYPES +
+                        " to the required format.");
+            }
+            if (!validateAppSecurityOptionality(appSecurity, mutualSSL)) {
+                throw new CLIRuntimeException("Application security is given as optional for but Mutual SSL is not " +
+                        "mandatory for the API");
+            }
+        }
+        return appSecurity;
+    }
+
+    private static boolean validateAppSecurityOptionality(ApplicationSecurity appSecurity,
+                                                          String mutualSSL) {
+        // if application security is optional, mutual ssl must be mandatory
+        return !appSecurity.isOptional() || OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL);
     }
 
     /**
@@ -740,8 +852,8 @@ public class OpenAPICodegenUtils {
             securityRequirementList.forEach(value -> value.forEach((k, v) -> {
                 //check if the key's type is oauth2
                 if (oauthSecuritySchemaList.contains(k)) {
-                    if (!securitySchemaList.contains(APISecurity.oauth2.name())) {
-                        securitySchemaList.add(APISecurity.oauth2.name());
+                    if (!securitySchemaList.contains(OpenAPIConstants.APISecurity.oauth2.name())) {
+                        securitySchemaList.add(OpenAPIConstants.APISecurity.oauth2.name());
                     }
                     //if oauth2, add all the available scopes
                     v.forEach(scope -> {
@@ -751,11 +863,11 @@ public class OpenAPICodegenUtils {
                     });
                     //if the key's type is basic
                 } else if (basicSecuritySchemaList.contains(k) &&
-                        !securitySchemaList.contains(APISecurity.basic.name())) {
-                    securitySchemaList.add(APISecurity.basic.name());
+                        !securitySchemaList.contains(OpenAPIConstants.APISecurity.basic.name())) {
+                    securitySchemaList.add(OpenAPIConstants.APISecurity.basic.name());
                 }  else if (apiKeySecuritySchemaMap.containsKey(k) &&
-                        !securitySchemaList.contains(APISecurity.apikey.name())) {
-                    securitySchemaList.add(APISecurity.apikey.name());
+                        !securitySchemaList.contains(OpenAPIConstants.APISecurity.apikey.name())) {
+                    securitySchemaList.add(OpenAPIConstants.APISecurity.apikey.name());
                 }
 
             }));
@@ -785,9 +897,9 @@ public class OpenAPICodegenUtils {
         return new String[]{securitySchemas, scopes};
     }
 
-    public static List<String> getMgwResourceSecurity(Operation operation) {
+    public static List<String> getMgwResourceSecurity(Operation operation, ApplicationSecurity appSecurity) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
-        return getAuthProviders(securitySchemas);
+        return getAuthProviders(securitySchemas, appSecurity);
     }
 
     /**
@@ -806,7 +918,8 @@ public class OpenAPICodegenUtils {
      * @param securityRequirementList {@link List<SecurityRequirement>} object
      * @return list of API Keys
      */
-    public static List<APIKey> generateAPIKeysFromSecurity(List<SecurityRequirement> securityRequirementList) {
+    public static List<APIKey> generateAPIKeysFromSecurity(List<SecurityRequirement> securityRequirementList,
+                                                           boolean isAPIKeyEnabled) {
         List<APIKey> apiKeys = new ArrayList<>();
         if (securityRequirementList != null) {
             securityRequirementList.forEach(value -> value.forEach((k, v) -> {
@@ -815,6 +928,10 @@ public class OpenAPICodegenUtils {
                     apiKeys.add((APIKey) apiKeySecuritySchemaMap.get(k));
                 }
             }));
+        }
+        if (isAPIKeyEnabled && apiKeys.isEmpty()) {
+            apiKeys.add(new APIKey(SecurityScheme.In.HEADER, OpenAPIConstants.DEFAULT_API_KEY_HEADER_QUERY));
+            apiKeys.add(new APIKey(SecurityScheme.In.QUERY, OpenAPIConstants.DEFAULT_API_KEY_HEADER_QUERY));
         }
         return apiKeys;
     }
@@ -890,9 +1007,7 @@ public class OpenAPICodegenUtils {
                     val.getScheme().toLowerCase(Locale.getDefault()).equals("basic")) {
                 basicSecuritySchemaList.add(key);
             } else if (val.getType() == SecurityScheme.Type.APIKEY) {
-                APIKey apiKey = new APIKey();
-                apiKey.setIn(val.getIn());
-                apiKey.setName(val.getName());
+                APIKey apiKey = new APIKey(val.getIn(), val.getName());
                 apiKeySecuritySchemaMap.put(key, apiKey);
             }
         });
@@ -974,60 +1089,48 @@ public class OpenAPICodegenUtils {
         return false;
     }
 
-    /**
-     * Extracts the module name from the interceptor statement
-     *
-     * @param interceptorStatement the interceptor statement
-     * @return                     the module name
-     */
-    public static String  buildModuleStatement (String interceptorStatement) {
-        String moduleName = null;
-        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
-        if (splitArray.length == 2) {
-          // set module name when the version is not specified in the swagger definition
-          moduleName = splitArray[1].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
-        }
-        if (splitArray.length == 3) {
-          moduleName = splitArray[1];
-        }
-        return moduleName;
-    }
-
-    /**
-     * Extracts the module version from the interceptor statement
-     *
-     * @param interceptorStatement the interceptor statement
-     * @return                     the module version
-     */
-    public static String buildModuleVersion (String interceptorStatement) {
-        String moduleVersion = null;
-        String[] splitArray = interceptorStatement.split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR);
-        if (splitArray.length == 3) {
-            moduleVersion = splitArray[2].split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[0];
-        }
-        return moduleVersion;
-    }
-
-    public static List<String> getAuthProviders(String schemas) {
+    public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity) {
         List<String> authProviders = new ArrayList<>();
-        boolean basic = false;
-        boolean oauth2 = false;
-        if (schemas != null) {
-            String[] schemasArray = schemas.trim().split("\\s*,\\s*");
-            for (String s : schemasArray) {
-                if (s.equalsIgnoreCase(APISecurity.basic.name())) {
-                    authProviders.add(APISecurity.basic.name());
-                } else if (s.equalsIgnoreCase(APISecurity.apikey.name())) {
-                    authProviders.add(APISecurity.apikey.name());
-                } else if (s.equalsIgnoreCase(APISecurity.oauth2.name())) {
-                    authProviders.add(APISecurity.oauth2.name());
-                    authProviders.add(APISecurity.jwt.name());
+        // Support api manager application level security.
+        // Give priority to extensions security types.
+        if (appSecurity != null && !appSecurity.getSecurityTypes().isEmpty()) {
+            for (String securityType : appSecurity.getSecurityTypes()) {
+                if (OpenAPIConstants.APPLICATION_LEVEL_SECURITY.containsKey(securityType)) {
+                    getAuthProvidersForSecurityType(
+                            OpenAPIConstants.APPLICATION_LEVEL_SECURITY.get(securityType), authProviders);
                 }
             }
         }
-        if (authProviders.size() < 1) {
-            authProviders.add(APISecurity.oauth2.name());
-            authProviders.add(APISecurity.jwt.name());
+        // Note that if application security extension provided auth security types,
+        // then swagger defined security schemes will be ignored.
+        if (authProviders.isEmpty() && schemas != null) {
+            String[] schemasArray = schemas.trim().split("\\s*,\\s*");
+            for (String securityType : schemasArray) {
+                getAuthProvidersForSecurityType(securityType, authProviders);
+            }
+        }
+
+        if (authProviders.isEmpty()) {
+            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
+            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+        }
+        return authProviders;
+    }
+
+    private static List<String> getAuthProvidersForSecurityType(String securityType, List<String> authProviders) {
+        if (securityType.equalsIgnoreCase(OpenAPIConstants.APISecurity.basic.name())) {
+            if (!authProviders.contains(OpenAPIConstants.APISecurity.basic.name())) {
+                authProviders.add(OpenAPIConstants.APISecurity.basic.name());
+            }
+        } else if (securityType.equalsIgnoreCase(OpenAPIConstants.APISecurity.apikey.name())) {
+            if (!authProviders.contains(OpenAPIConstants.APISecurity.apikey.name())) {
+                authProviders.add(OpenAPIConstants.APISecurity.apikey.name());
+            }
+        } else if (securityType.equalsIgnoreCase(OpenAPIConstants.APISecurity.oauth2.name())) {
+            if (!authProviders.contains(OpenAPIConstants.APISecurity.oauth2.name())) {
+                authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
+                authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+            }
         }
         return authProviders;
     }

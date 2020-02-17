@@ -104,14 +104,16 @@ public function generateAPIKey(http:Request req) returns string | error {
 
 public function getExpiryTime(http:Request req) returns @tainted (int) {
     var payload = req.getJsonPayload();
-    int expiryTime = getConfigIntValue(API_KEY_ISSUER_TOKEN_CONFIG, API_KEY_VALIDITY_TIME, DEFAULT_API_KEY_VALIDITY_TIME);
+    int expiryTime =
+        getConfigIntValue(API_KEY_ISSUER_TOKEN_CONFIG, API_KEY_VALIDITY_TIME, DEFAULT_API_KEY_VALIDITY_TIME);
     printDebug(API_KEY_UTIL, "Validity Period in config: " + expiryTime.toString());
 
     if (payload is json) {
         map<json> payloadMap = <map<json>>payload;
         if (payloadMap.hasKey(API_KEY_VALIDITY_TIME)) {
             var expiryTimefromPayload = ints:fromString(payloadMap[API_KEY_VALIDITY_TIME].toString());
-            if (expiryTimefromPayload is int && expiryTimefromPayload > 0 && (expiryTime < 0 || expiryTime > expiryTimefromPayload)) {
+            if (expiryTimefromPayload is int && expiryTimefromPayload > 0
+                    && (expiryTime < 0 || expiryTime > expiryTimefromPayload)) {
                 expiryTime = expiryTimefromPayload;
             }
         }

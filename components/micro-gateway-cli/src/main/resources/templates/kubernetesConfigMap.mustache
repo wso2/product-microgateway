@@ -1,7 +1,7 @@
 {{#if containerConfig.kubernetes.kubernetesConfigMap.enable}}
 {{#containerConfig.kubernetes.kubernetesConfigMap}}@kubernetes:ConfigMap {
 {{#ballerinaConf}}
-    ballerinaConf: "{{ballerinaConf}}"{{#if configMaps}},{{/if}}{{/ballerinaConf}}{{#if configMaps}}
+    conf: "{{ballerinaConf}}"{{#if configMaps}},{{/if}}{{/ballerinaConf}}{{#if configMaps}}
     configMaps: [ {{#configMaps}}
         { {{#name}}
             name:"{{name}}",{{/name}}{{#readOnly}}

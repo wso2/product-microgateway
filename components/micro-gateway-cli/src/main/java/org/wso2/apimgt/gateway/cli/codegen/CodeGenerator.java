@@ -35,6 +35,7 @@ import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
+import org.wso2.apimgt.gateway.cli.protobuf.ProtobufParser;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -125,11 +126,12 @@ public class CodeGenerator {
         String projectSrcPath = CmdUtils.getProjectTargetModulePath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
+        List<BallerinaService> openAPIServiceList = new ArrayList<>();
         List<String> openAPIDirectoryLocations = new ArrayList<>();
         String projectAPIDefGenLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
         openAPIDirectoryLocations.add(CmdUtils.getProjectDirectoryPath(projectName) + File.separator
                 + CliConstants.PROJECT_API_DEFINITIONS_DIR);
-
+        String grpcDirLocation = CmdUtils.getGrpcDefinitionsDirPath(projectName);
         if (Files.exists(Paths.get(projectAPIDefGenLocation))) {
             openAPIDirectoryLocations.add(projectAPIDefGenLocation);
         }
@@ -140,8 +142,8 @@ public class CodeGenerator {
             try {
                 Files.walk(Paths.get(openApiPath)).filter(path -> {
                     Path fileName = path.getFileName();
-                    return fileName != null && (fileName.toString().endsWith(CliConstants.JSON_EXTENSION) || fileName
-                            .toString().endsWith(CliConstants.YAML_EXTENSION));
+                    return fileName != null && (fileName.toString().endsWith(CliConstants.JSON_EXTENSION) ||
+                            fileName.toString().endsWith(CliConstants.YAML_EXTENSION));
                 }).forEach(path -> {
                     try {
                         OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
@@ -153,14 +155,15 @@ public class CodeGenerator {
                         }
                         String openAPIVersion = OpenAPICodegenUtils.findSwaggerVersion(openAPIContentAsJson, false);
                         OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString(), openAPIVersion);
-                        ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson, path);
+                        ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
 
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
-                        OpenAPICodegenUtils.writeDependency(projectName, definitionContext);
+                        OpenAPICodegenUtils.writeDependencies(projectName, definitionContext);
                         serviceList.add(definitionContext);
+                        openAPIServiceList.add(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
                     } catch (IOException e) {
@@ -172,11 +175,37 @@ public class CodeGenerator {
                 throw new CLIInternalException("File write operations failed during ballerina code generation", e);
             }
         });
+        //to process protobuf files
+        Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
+            Path filename = path.getFileName();
+            return filename != null && (filename.toString().endsWith(".proto"));
+        }).forEach(path -> {
+            String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
+            try {
+                OpenAPI openAPI = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
+                if (openAPI != null) {
+                    String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                    BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent, path, true);
+                    genFiles.add(generateService(definitionContext));
+                    serviceList.add(definitionContext);
+                }
+            } catch (IOException e) {
+                throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
+                        "ballerina code", e);
+            } catch (BallerinaServiceGenException e) {
+                throw new CLIInternalException("File write operations failed during the ballerina code "
+                        + "generation for the protobuf files", e);
+            }
+        });
 
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateTokenServices());
         genFiles.add(generateCommonEndpoints());
+        List<String> externalJars = CmdUtils.getExternalJarDependencies(projectName);
+        if (externalJars.size() > 0) {
+            genFiles.add(generateBallerinaTOMLDependencies(externalJars));
+        }
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
         CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
@@ -187,6 +216,21 @@ public class CodeGenerator {
         CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION,
                 projectSrcPath + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION);
+    }
+
+    private BallerinaService generateDefinitionContext(OpenAPI openAPI, String openAPIContent, Path path,
+                                                       boolean isGrpc) throws IOException,
+            BallerinaServiceGenException {
+        ExtendedAPI api;
+        if (isGrpc) {
+            api = OpenAPICodegenUtils.generateGrpcAPIFromOpenAPI(openAPI);
+        } else {
+            api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIContent);
+        }
+        BallerinaService definitionContext;
+        OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
+        definitionContext = new BallerinaService().buildContext(openAPI, api);
+        return definitionContext;
     }
 
     /**
@@ -214,6 +258,19 @@ public class CodeGenerator {
     private GenSrcFile generateMainBal(List<BallerinaService> services) throws IOException {
         String srcFile = GeneratorConstants.MAIN_TEMPLATE_NAME + GeneratorConstants.BALLERINA_EXTENSION;
         String mainContent = getContent(services, GeneratorConstants.MAIN_TEMPLATE_NAME);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Generate code for ballerina toml external dependencies
+     *
+     * @param jarNames List of jar names to be included as external platform dependencies in the ballerina.toml
+     * @return generated source files as a list of {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateBallerinaTOMLDependencies(List<String> jarNames) throws IOException {
+        String srcFile = GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
+        String mainContent = getContent(jarNames, GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 

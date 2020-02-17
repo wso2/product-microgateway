@@ -39,13 +39,13 @@ public type APIKeyHandler object {
             [string, string][inName, name] = <[string, string]> apiKey;
             if (stringutils:equalsIgnoreCase(HEADER, inName)) {
                 if (req.hasHeader(name)) {
-                    printDebug(API_KEY_HANDLER, "Request will handle through API Key handler");
+                    printDebug(KEY_AUTHN_FILTER, "Request will handle through API Key handler");
                     return true;
                 }
             } else if (stringutils:equalsIgnoreCase(QUERY, inName)) {
                 string? apikeyQuery = req.getQueryParamValue(name);
                 if (apikeyQuery is string) {
-                    printDebug(API_KEY_HANDLER, "Request will handle through API Key handler");
+                    printDebug(KEY_AUTHN_FILTER, "Request will handle through API Key handler");
                     return true;
                 }
             }
@@ -73,7 +73,7 @@ public type APIKeyHandler object {
                 }
             }
         }
-        printDebug(API_KEY_HANDLER, "credentials: " + credentials);
+        printDebug(KEY_AUTHN_FILTER, "credentials: " + credentials);
         var authenticationResult = self.apiKeyProvider.authenticate(<@untainted>credentials);
         if (authenticationResult is boolean) {
             return authenticationResult;

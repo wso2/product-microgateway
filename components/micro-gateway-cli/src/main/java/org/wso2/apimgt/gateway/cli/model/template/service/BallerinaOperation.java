@@ -24,6 +24,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -56,20 +57,32 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     //to identify if the isSecured flag is set from the operation
     private boolean isSecuredAssignedFromOperation = false;
     private MgwEndpointConfigDTO epConfig;
+    private BallerinaInterceptor reqInterceptorContext;
+    private BallerinaInterceptor resInterceptorContext;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaRequestInterceptor;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isJavaResponseInterceptor;
+
+    /**
+     * b7a function name of operation level request interceptor.
+     */
     private String requestInterceptor;
+    /**
+     * b7a function name of operation level response interceptor.
+     */
     private String responseInterceptor;
-    private String requestInterceptorModuleVersion;
-    private String responseInterceptorModuleVersion;
-    private String apiRequestInterceptor;
-    private String apiResponseInterceptor;
-    private String requestInterceptorModule;
-    private String responseInterceptorModule;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<String> authProviders;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean applicationSecurityOptional;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -88,7 +101,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
         // OperationId with spaces with special characters will cause errors in ballerina code.
         // Replacing it with uuid so that we can identify there was a ' ' when doing bal -> swagger
-        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", "_"));
+        operation.setOperationId(UUID.randomUUID().toString().replaceAll("-", ""));
         this.operationId = operation.getOperationId();
         this.tags = operation.getTags();
         this.summary = operation.getSummary();
@@ -96,72 +109,50 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity());
-        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation);
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+                api.getMutualSSL());
+        // if application security defined in operation level is not found, get API level application security
+        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
+        this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
+        this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
+                this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
+        this.applicationSecurityOptional = appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
         setEpConfigDTO(operation);
-        Map<String, Object> extensions = operation.getExtensions();
-        if (extensions != null) {
-            Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
+        Map<String, Object> exts = operation.getExtensions();
+
+        if (exts != null) {
+            // set interceptor details
+            Object reqExt = exts.get(OpenAPIConstants.REQUEST_INTERCEPTOR);
+            Object resExt = exts.get(OpenAPIConstants.RESPONSE_INTERCEPTOR);
+            if (reqExt != null) {
+                reqInterceptorContext = new BallerinaInterceptor(reqExt.toString());
+                requestInterceptor = reqInterceptorContext.getInvokeStatement();
+                isJavaRequestInterceptor = BallerinaInterceptor.Type.JAVA == reqInterceptorContext.getType();
+            }
+            if (resExt != null) {
+                resInterceptorContext = new BallerinaInterceptor(resExt.toString());
+                responseInterceptor = resInterceptorContext.getInvokeStatement();
+                isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
+            }
+
+            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
             resourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> scopes = Optional.ofNullable(extensions.get(X_SCOPE));
+            Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
-            Optional<Object> authType = Optional.ofNullable(extensions.get(X_AUTH_TYPE));
+            Optional<Object> authType = Optional.ofNullable(exts.get(X_AUTH_TYPE));
             authType.ifPresent(value -> {
                 if (AUTH_TYPE_NONE.equals(value)) {
                     this.isSecured = false;
                 }
             });
-
-            /*
-            Set resource level request interceptors and set the ballerina module to be imported if specified.
-            */
-            Optional<Object> requestInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
-            if (requestInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
-                requestInterceptor.ifPresent(value -> {
-                    // set the organization name with the module name
-                    this.requestInterceptorModule = value.toString().
-                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
-                    this.requestInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
-                    this.requestInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
-                });
-            } else {
-                requestInterceptor.ifPresent(value -> this.requestInterceptor = value.toString());
-            }
-
-            /*
-            Set resource level response interceptors and set the ballerina module to be imported if specified.
-            */
-            Optional<Object> responseInterceptor = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.RESPONSE_INTERCEPTOR));
-            if (responseInterceptor.toString().contains(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)) {
-                responseInterceptor.ifPresent(value -> {
-                    // set the organization name with the module name
-                    this.responseInterceptorModule = value.toString().
-                            split(OpenAPIConstants.MODULE_STATEMENT_SEPARATOR)[0]
-                            + OpenAPIConstants.MODULE_STATEMENT_SEPARATOR
-                            + OpenAPICodegenUtils.buildModuleStatement(value.toString());
-                    this.responseInterceptor = value.toString().
-                            split(OpenAPIConstants.INTERCEPTOR_STATEMENT_SEPARATOR)[1];
-                    this.responseInterceptorModuleVersion = OpenAPICodegenUtils.buildModuleVersion(value.toString());
-                });
-            } else {
-                responseInterceptor.ifPresent(value -> this.responseInterceptor = value.toString());
-            }
-
             //set dev-first resource level throttle policy
-            Optional<Object> devFirstResourceTier = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.THROTTLING_TIER));
-            devFirstResourceTier.ifPresent(value -> this.resourceTier = value.toString());
-            Optional<Object> devFirstDisableSecurity = Optional.ofNullable(extensions
-                    .get(OpenAPIConstants.DISABLE_SECURITY));
-            devFirstDisableSecurity.ifPresent(value -> {
+            Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
+            extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
+            extDisableSecurity.ifPresent(value -> {
                 try {
                     this.isSecured = !(Boolean) value;
                     this.isSecuredAssignedFromOperation = true;
@@ -179,80 +170,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         }
 
         return this;
-    }
-
-    /**
-     * Returns the module version relevant to operation level request interceptors
-     *
-     * @return  The request interceptor module version
-     */
-    public String getRequestInterceptorModuleVersion() {
-        return requestInterceptorModuleVersion;
-    }
-
-    /**
-     * Set the module version for the operation level request interceptors
-     *
-     * @param requestInterceptorModuleVersion The version of the request interceptor module
-     */
-    public void setRequestInterceptorModuleVersion(String requestInterceptorModuleVersion) {
-        this.requestInterceptorModuleVersion = requestInterceptorModuleVersion;
-    }
-
-    /**
-     * Returns the module version relevant to operation level response interceptors
-     *
-     * @return  The response interceptor module version
-     */
-    public String getResponseInterceptorModuleVersion() {
-        return responseInterceptorModuleVersion;
-    }
-
-    /**
-     * Set the module version for the operation level response interceptors
-     *
-     * @param responseInterceptorModuleVersion The version of the response interceptor module
-     */
-    public void setResponseInterceptorModuleVersion(String responseInterceptorModuleVersion) {
-        this.responseInterceptorModuleVersion = responseInterceptorModuleVersion;
-    }
-
-    /**
-     * Get the module located in the Ballerina Central, where the operation level request interceptors can be found
-     *
-     * @return     The module which contains the operation level request interceptors
-     */
-    public String getRequestInterceptorModule() {
-        return requestInterceptorModule;
-    }
-
-    /**
-     * Set the module located in the Ballerina Central, where the operation level request interceptor can be found
-     *
-     * @param requestInterceptorModule   Ballerina Central Module where the operation level request interceptor
-     *                                   can be found
-     */
-    public void setRequestInterceptorModule(String requestInterceptorModule) {
-        this.requestInterceptorModule = requestInterceptorModule;
-    }
-
-    /**
-     * Get the module located in the Ballerina Central, where the operation level response interceptor can be found
-     *
-     * @return     The module which contains the operation level response interceptors
-     */
-    public String getResponseInterceptorModule() {
-       return responseInterceptorModule;
-    }
-
-    /**
-     * Set the module located in the Ballerina Central, where the operation level response interceptors can be found
-     *
-     * @param responseInterceptorModule   Ballerina Central Module where the operation level response interceptor
-     *                                    can be found
-     */
-    public void setResponseInterceptorModule(String responseInterceptorModule) {
-        this.responseInterceptorModule = responseInterceptorModule;
     }
 
     @Override
@@ -361,34 +278,26 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.responseInterceptor = responseInterceptor;
     }
 
-    public String getApiRequestInterceptor() {
-        return apiRequestInterceptor;
+    public BallerinaInterceptor getReqInterceptorContext() {
+        return reqInterceptorContext;
     }
 
-    public void setApiRequestInterceptor(String requestInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.requestInterceptor == null || !this.requestInterceptor.equals(requestInterceptor)) {
-            this.apiRequestInterceptor = requestInterceptor;
-        }
+    public void setReqInterceptorContext(BallerinaInterceptor reqInterceptorContext) {
+        this.reqInterceptorContext = reqInterceptorContext;
     }
 
-    public String getApiResponseInterceptor() {
-        return apiResponseInterceptor;
+    public BallerinaInterceptor getResInterceptorContext() {
+        return resInterceptorContext;
     }
 
-    public void setApiResponseInterceptor(String responseInterceptor) {
-        //if user specify the same interceptor function in both api level and resource level ignore
-        // api level interceptor
-        if (this.responseInterceptor == null || !this.responseInterceptor.equals(responseInterceptor)) {
-            this.apiResponseInterceptor = responseInterceptor;
-        }
+    public void setResInterceptorContext(BallerinaInterceptor resInterceptorContext) {
+        this.resInterceptorContext = resInterceptorContext;
     }
 
-    public void setSecuritySchemas(String schemas) {
+    public void setSecuritySchemas(List<String> authProviders) {
         //update the Resource auth providers property only if there is no security scheme provided during instantiation
-        if (this.authProviders.size() < 1) {
-            authProviders = OpenAPICodegenUtils.getAuthProviders(schemas);
+        if (this.authProviders.isEmpty()) {
+            this.authProviders = authProviders;
         }
     }
 }

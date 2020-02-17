@@ -1,14 +1,21 @@
 import wso2/gateway;
 
 public function main() {
+    int totalResourceLength = 0;
     {{#each this}}
     string[] {{cut qualifiedServiceName " "}}_service = [{{#paths}}{{#value}}{{#operations}}{{#value}} "{{operationId}}"{{#unless @last}},{{/unless}}
                                 {{/value}}{{/operations}}{{/value}}{{#unless @last}},{{/unless}}{{/paths}}];
+    totalResourceLength = totalResourceLength +  {{cut qualifiedServiceName " "}}_service.length();
     gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
-    {{/each}}
 
+    {{/each}}
+    gateway:initiateInterceptorArray(totalResourceLength);
+    {{#each this}}
+    initInterceptorIndexes{{cut qualifiedServiceName " "}}();
+    {{/each}}
     addTokenServicesFilterAnnotation();
     initThrottlePolicies();
+    gateway:initThrottleDataPublisher();
     gateway:startObservabilityListener();
 
     {{>jwtRevocation}}

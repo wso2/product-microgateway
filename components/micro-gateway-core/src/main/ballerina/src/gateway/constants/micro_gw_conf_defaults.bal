@@ -18,9 +18,9 @@
 public const string DEFAULT_CONF_HOST = "0.0.0.0";
 public const int DEFAULT_HTTP_PORT = 9090;
 public const int DEFAULT_HTTPS_PORT = 9095;
-public const string DEFAULT_KEY_STORE_PATH = "${ballerina.home}/bre/security/ballerinaKeystore.p12";
+public const string DEFAULT_KEY_STORE_PATH = "${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12";
 public const string DEFAULT_KEY_STORE_PASSWORD = "ballerina";
-public const string DEFAULT_TRUST_STORE_PATH = "${ballerina.home}/bre/security/ballerinaTruststore.p12";
+public const string DEFAULT_TRUST_STORE_PATH = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12";
 public const string DEFAULT_TRUST_STORE_PASSWORD = "ballerina";
 public const int DEFAULT_TOKEN_LISTENER_PORT = 9096;
 
@@ -62,7 +62,7 @@ public const boolean DEFAULT_TASK_UPLOAD_FILES_ENABLED = true;
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
 
-public const boolean DEFAULT_HTTP2_ENABLED = false;
+public const boolean DEFAULT_HTTP2_ENABLED = true;
 
 public const string DEFAULT_PROTOCOL_NAME = "TLS";
 public const string DEFAULT_PROTOCOL_VERSIONS = "TLSv1.2,TLSv1.1";
@@ -81,6 +81,12 @@ public const string DEFAULT_SSL_VERIFY_CLIENT = "optional";
 
 public const boolean DEFAULT_REQUEST_VALIDATION_ENABLED = false;
 public const boolean DEFAULT_RESPONSE_VALIDATION_ENABLED = false;
+
+// Local throttling related constants
+public const int DEFAULT_PROCESS_THREAD_POOL_CORE_SIZE = 200;
+public const int DEFAULT_PROCESS_THREAD_POOL_MAXIMUM_SIZE = 1000;
+public const int DEFAULT_PROCESS_THREAD_POOL_KEEP_ALIVE_TIME = 200;
+public const int DEFAULT_THROTTLE_CLEANUP_FREQUENCY = 3600000;
 
 public const boolean DEFAULT_GLOBAL_TM_EVENT_PUBLISH_ENABLED = false;
 public const string DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
