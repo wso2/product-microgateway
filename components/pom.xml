@@ -28,6 +28,7 @@
     <name>Micro Gateway Components</name>
 
     <modules>
+        <module>micro-gateway-interceptor</module>
         <module>micro-gateway-core</module>
         <module>micro-gateway-cli</module>
         <module>micro-gateway-tools</module>

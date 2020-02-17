@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.interceptors;
+package org.wso2.micro.gateway.interceptor;
 
 /**
  * Defines the interface for writing the gateway interceptors.

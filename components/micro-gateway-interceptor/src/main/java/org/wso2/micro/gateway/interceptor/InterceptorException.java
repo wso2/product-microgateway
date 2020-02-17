@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.interceptors;
+package org.wso2.micro.gateway.interceptor;
 
 /**
  * Exception type definition for calling Request/Response and other interceptor related methods.

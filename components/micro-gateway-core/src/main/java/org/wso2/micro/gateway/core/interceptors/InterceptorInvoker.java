@@ -19,6 +19,10 @@ package org.wso2.micro.gateway.core.interceptors;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.micro.gateway.interceptor.Caller;
+import org.wso2.micro.gateway.interceptor.Interceptor;
+import org.wso2.micro.gateway.interceptor.Request;
+import org.wso2.micro.gateway.interceptor.Response;
 
 /**
  * Class to dynamically invoke the interceptors defined.

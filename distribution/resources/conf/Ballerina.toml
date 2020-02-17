@@ -23,4 +23,9 @@ target = "java8"
         version = "1.1.1"
         groupId = "org.wso2.securevault"
 
+        [[platform.libraries]]
+        module = "interceptor"
+        path = "${MGW-TK_HOME}/lib/dependencies/mgw-interceptor-3.1.0-m3-SNAPSHOT.jar"
+
+
 

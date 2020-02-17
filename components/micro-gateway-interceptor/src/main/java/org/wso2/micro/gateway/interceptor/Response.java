@@ -14,21 +14,14 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.interceptors;
+package org.wso2.micro.gateway.interceptor;
 
 import org.ballerinalang.jvm.values.ArrayValue;
-import org.ballerinalang.jvm.values.ArrayValueImpl;
-import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.mime.nativeimpl.EntityHeaders;
-import org.ballerinalang.mime.nativeimpl.MimeDataSourceBuilder;
-import org.ballerinalang.mime.nativeimpl.MimeEntityBody;
-import org.ballerinalang.mime.util.MimeConstants;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.http.ValueCreatorUtils;
 import org.ballerinalang.net.http.nativeimpl.ExternResponse;
-import org.ballerinalang.stdlib.io.channels.base.Channel;
-import org.ballerinalang.stdlib.io.utils.IOConstants;
 
 /**
  * Representation of ballerina http:Response object. Provide methods to do CRUD operations on the response object
@@ -162,86 +155,86 @@ public class Response {
         return hasHeader(Constants.CONTENT_TYPE_HEADER) ? getHeader(Constants.CONTENT_TYPE_HEADER) : "";
     }
 
-    /**
-     * Extracts `text` payload from the response. If the content type is not text, an exception will be thrown.
-     *
-     * @return The `text` payload of the request.
-     * @throws InterceptorException If error while getting text payload.
-     */
-    public String getTextPayload() throws InterceptorException {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-        Object textPayload = MimeDataSourceBuilder.getText(entity);
-        if (textPayload instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting text payload from the response",
-                    ((ErrorValue) textPayload).getCause());
-        }
-        return textPayload.toString();
-    }
-
-    /**
-     * Gets the response payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
-     * `Request.getBodyParts()`.
-     *
-     * @return {@link Channel} A byte channel from which the message payload can be read.
-     * @throws InterceptorException If error while getting byte channel of the request.
-     */
-    public Channel getByteChannel() throws InterceptorException {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-        Object byteChannel = MimeEntityBody.getByteChannel(entity);
-        if (byteChannel instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting byte channel from the response",
-                    ((ErrorValue) byteChannel).getCause());
-        }
-        ObjectValue byteChannelObject = (ObjectValue) byteChannel;
-        return ((Channel) byteChannelObject.getNativeData(IOConstants.BYTE_CHANNEL_NAME));
-    }
-
-    /**
-     * Gets the response payload as a `byte[]`.
-     *
-     * @return The byte[] representation of the message payload
-     * @throws InterceptorException If error while getting byte array of the request.
-     */
-    public byte[] getBinaryPayload() throws InterceptorException {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-        Object binaryPayload = MimeDataSourceBuilder.getByteArray(entity);
-        if (binaryPayload instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting byte array from the request",
-                    ((ErrorValue) binaryPayload).getCause());
-        }
-        ArrayValue byteArray = (ArrayValue) binaryPayload;
-        return byteArray.getBytes();
-    }
-
-    /**
-     * Sets a string text content as the payload.
-     *
-     * @param textPayload The text payload.
-     */
-    public void setTextPayload(String textPayload) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        MimeEntityBody.setText(entity, textPayload, MimeConstants.TEXT_PLAIN);
-    }
-
-    /**
-     * Sets a byte[]  content as the payload.
-     *
-     * @param binaryPayload The byte[] payload.
-     */
-    public void setBinaryPayload(byte[] binaryPayload) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        MimeEntityBody.setByteArray(entity, new ArrayValueImpl(binaryPayload), MimeConstants.OCTET_STREAM);
-    }
-
-    /**
-     * Sets a json string as the payload.
-     *
-     * @param jsonPayload The json payload.
-     */
-    public void setJsonPayload(String jsonPayload) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        MimeEntityBody.setJson(entity, jsonPayload, MimeConstants.APPLICATION_JSON);
-    }
+//    /**
+//     * Extracts `text` payload from the response. If the content type is not text, an exception will be thrown.
+//     *
+//     * @return The `text` payload of the request.
+//     * @throws InterceptorException If error while getting text payload.
+//     */
+//    public String getTextPayload() throws InterceptorException {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
+//        Object textPayload = MimeDataSourceBuilder.getText(entity);
+//        if (textPayload instanceof ErrorValue) {
+//            throw new InterceptorException("Error while getting text payload from the response",
+//                    ((ErrorValue) textPayload).getCause());
+//        }
+//        return textPayload.toString();
+//    }
+//
+//    /**
+//     * Gets the response payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
+//     * `Request.getBodyParts()`.
+//     *
+//     * @return {@link Channel} A byte channel from which the message payload can be read.
+//     * @throws InterceptorException If error while getting byte channel of the request.
+//     */
+//    public Channel getByteChannel() throws InterceptorException {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
+//        Object byteChannel = MimeEntityBody.getByteChannel(entity);
+//        if (byteChannel instanceof ErrorValue) {
+//            throw new InterceptorException("Error while getting byte channel from the response",
+//                    ((ErrorValue) byteChannel).getCause());
+//        }
+//        ObjectValue byteChannelObject = (ObjectValue) byteChannel;
+//        return ((Channel) byteChannelObject.getNativeData(IOConstants.BYTE_CHANNEL_NAME));
+//    }
+//
+//    /**
+//     * Gets the response payload as a `byte[]`.
+//     *
+//     * @return The byte[] representation of the message payload
+//     * @throws InterceptorException If error while getting byte array of the request.
+//     */
+//    public byte[] getBinaryPayload() throws InterceptorException {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
+//        Object binaryPayload = MimeDataSourceBuilder.getByteArray(entity);
+//        if (binaryPayload instanceof ErrorValue) {
+//            throw new InterceptorException("Error while getting byte array from the request",
+//                    ((ErrorValue) binaryPayload).getCause());
+//        }
+//        ArrayValue byteArray = (ArrayValue) binaryPayload;
+//        return byteArray.getBytes();
+//    }
+//
+//    /**
+//     * Sets a string text content as the payload.
+//     *
+//     * @param textPayload The text payload.
+//     */
+//    public void setTextPayload(String textPayload) {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
+//        MimeEntityBody.setText(entity, textPayload, MimeConstants.TEXT_PLAIN);
+//    }
+//
+//    /**
+//     * Sets a byte[]  content as the payload.
+//     *
+//     * @param binaryPayload The byte[] payload.
+//     */
+//    public void setBinaryPayload(byte[] binaryPayload) {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
+//        MimeEntityBody.setByteArray(entity, new ArrayValueImpl(binaryPayload), MimeConstants.OCTET_STREAM);
+//    }
+//
+//    /**
+//     * Sets a json string as the payload.
+//     *
+//     * @param jsonPayload The json payload.
+//     */
+//    public void setJsonPayload(String jsonPayload) {
+//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
+//        MimeEntityBody.setJson(entity, jsonPayload, MimeConstants.APPLICATION_JSON);
+//    }
 
     protected ObjectValue getResponseObjectValue() {
         return responseObj;

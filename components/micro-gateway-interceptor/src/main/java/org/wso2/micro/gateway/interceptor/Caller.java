@@ -14,17 +14,22 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.interceptors;
+package org.wso2.micro.gateway.interceptor;
 
+import org.ballerinalang.jvm.values.ObjectValue;
+import org.ballerinalang.net.http.nativeimpl.connection.Respond;
 
 /**
- * Class to hold the constants related to interceptor util methods.
- *
+ * Representation of ballerina http:Caller object.
  */
-public class Constants {
-    public static final String LEADING_HEADER = "leading";
-    public static final String EXPECT_HEADER = "expect";
-    public static final String HUNDRED_CONTINUE = "100-continue";
-    public static final String CONTENT_TYPE_HEADER = "content-type";
+public class Caller {
+    private ObjectValue callerObj;
 
+    public Caller(ObjectValue callerObj) {
+        this.callerObj = callerObj;
+    }
+
+    public void respond(Response response) throws InterceptorException {
+        Respond.nativeRespond(callerObj, response.getResponseObjectValue());
+    }
 }

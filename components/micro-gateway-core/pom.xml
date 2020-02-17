@@ -61,6 +61,10 @@
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>mgw-interceptor</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>
