@@ -179,6 +179,8 @@ if [ "$JDK_18" = "" ]; then
     change_java_home_path
 fi
 
+export JAVA_HOME=$JAVA_HOME
+
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
     [ -n "$BALLERINA_HOME" ] && BALLERINA_HOME=`cygpath --unix "$BALLERINA_HOME"`

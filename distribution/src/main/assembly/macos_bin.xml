@@ -131,7 +131,7 @@
         </file>
         <file>
             <source>${basedir}/resources/grpc/wso2_options.proto</source>
-            <outputDirectory>wso2am-micro-gw-toolkit-${project.version}/resources/grpc</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/resources/grpc</outputDirectory>
             <fileMode>644</fileMode>
         </file>
         <file>
