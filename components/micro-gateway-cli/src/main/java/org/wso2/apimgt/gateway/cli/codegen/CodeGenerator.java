@@ -201,6 +201,7 @@ public class CodeGenerator {
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateTokenServices());
+        genFiles.add(generateHealthCheckService());
         genFiles.add(generateCommonEndpoints());
         List<String> externalJars = CmdUtils.getExternalJarDependencies(projectName);
         if (externalJars.size() > 0) {
@@ -309,6 +310,18 @@ public class CodeGenerator {
     private GenSrcFile generateTokenServices() throws IOException {
         String srcFile = GeneratorConstants.TOKEN_SERVICES + GeneratorConstants.BALLERINA_EXTENSION;
         String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.TOKEN_SERVICES);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
+    }
+
+    /**
+     * Generate health check  services. For ex: /health
+     *
+     * @return generated source file  {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateHealthCheckService() throws IOException {
+        String srcFile = GeneratorConstants.HEALTH_CHECK + GeneratorConstants.BALLERINA_EXTENSION;
+        String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.HEALTH_CHECK);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 

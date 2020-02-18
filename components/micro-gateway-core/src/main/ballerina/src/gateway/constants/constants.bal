@@ -365,6 +365,7 @@ const string API_KEY_UTIL = "APIKeyUtil";
 const string JWT_UTIL = "JWTUtil";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
+public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
