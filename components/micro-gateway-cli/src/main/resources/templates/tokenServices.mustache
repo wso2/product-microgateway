@@ -237,4 +237,5 @@ public function addTokenServicesFilterAnnotation() {
     filterConfigAnnotationMap["apiKeyService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(apiKeyService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["revokeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(revokeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["userInfoService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(userInfoService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    filterConfigAnnotationMap["healthCheckService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(healthCheckService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
 }
