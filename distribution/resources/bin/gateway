@@ -250,7 +250,7 @@ if [ ! "$CMD" = "stop" ]; then
 fi
 
 OBSERVABILITY_FLAG="false"
-CONFIG_FILE="$GW_HOME/conf/micro-gw.conf"
+CONFIG_FILE="$MGW_CONF_DIR/micro-gw.conf"
 CONFIG_OUT_FILE="$GW_HOME/.config"
 
 if [[ $b7a_observability_metrics_enabled == "true" ]]; then
@@ -277,8 +277,6 @@ if [ ! "$CMD" = "stop" ]; then
           jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
           export JAVA_OPTS="$JAVA_OPTS -javaagent:$GW_HOME/lib/gateway/jmx_prometheus_javaagent-0.12.0.jar=$jmx_port:$GW_HOME/conf/Prometheus/config.yml"
       fi
-  else
-      echo "Error while reading Observability configurations from the file"
   fi
   if [ -a "$CONFIG_OUT_FILE" ];then
       rm $CONFIG_OUT_FILE
