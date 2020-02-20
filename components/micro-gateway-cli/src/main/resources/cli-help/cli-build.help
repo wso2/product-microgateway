@@ -14,6 +14,10 @@ OPTIONS
        <Optional>
        Deployment configuration file for docker/kubernetes environments
 
+    --docker
+        <Optional>
+        Prompt to give docker image and docker base image for docker configurations
+
     --docker-image
         <Optional>
         Provide docker image name and tag.
