@@ -216,7 +216,7 @@ public class BuildCmd implements LauncherCmd {
     }
 
     private void createDockerImageFromCLI(String projectName, ContainerConfig containerConfig) {
-        if (isDocker) {
+        if (isDocker || !StringUtils.isEmpty(dockerImage) || !StringUtils.isEmpty(dockerBaseImage)) {
             PrintStream outStream = System.out;
             if (StringUtils.isEmpty(dockerImage)) {
                 dockerImage = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ["
