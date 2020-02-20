@@ -33,7 +33,6 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        printDebug(KEY_ANALYTICS_FILTER, "FilterResponse method invoked.");
         if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
             boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {

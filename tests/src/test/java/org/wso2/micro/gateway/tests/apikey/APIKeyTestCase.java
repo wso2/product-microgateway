@@ -36,7 +36,7 @@ import java.util.Base64;
 
 public class APIKeyTestCase extends BaseTestCase {
     private String apikey;
-    private String jwtTokenProd;
+    private String apiKeywithoutAllowedAPIs;
 
     @BeforeClass
     public void start() throws Exception {
@@ -45,7 +45,14 @@ public class APIKeyTestCase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        apiKeywithoutAllowedAPIs =
+                "eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJqd3QiLCAia2lkIjoiYmFsbGVyaW5hIn0.eyJzdWIiOiJhZG1pbiIsICJpc3M" +
+                "iOiJodHRwczovL2xvY2FsaG9zdDo5MDk1L2FwaWtleSIsICJpYXQiOjE1ODIwMTczNTMsICJqdGkiOiI5NGFkNTk3NC1lZDI0L" +
+                "TRjYmQtOWZlNi1iMGNmMjU5MTQ5ZDEiLCAiYXVkIjoiaHR0cDovL29yZy53c28yLmFwaW1ndC9nYXRld2F5IiwgImtleXR5cGU" +
+                "iOiJQUk9EVUNUSU9OIiwgImFsbG93ZWRBUElzIjpbXX0.BaV6hsJUxoVEoZv2DpEg7PaE4z4q4RQ8lMLDLFDROcN5H7V4moTlk" +
+                "Gb9tl0p3fZLPq4TGfddi53qiApQsgHG9hdd8XqrlAC47fq2ZHR-VAnWju3N-irqA6q75vfaz3g0X2A2t5e8zzcCt5YkA5ySCjI" +
+                "FLHLR3Dxv3XBgpG7n9A8TwVywD64AZAhtnC-wgbX0uuTUSpK7BCPm-s34bChb4asrAKkDYUqzFmZTQDmL6t5lJ7QAhm3UrwuI2" +
+                "wCAEZb6hu2YCZsrOLsX76t-2Evkx4Na-3sWIfb_2v5Arbd7PhjS6t0m5wpxCJGChDuP7dLZOXhjZGykg02uUxSt07ys1A";
         super.init("api-key-project", new String[]{"common_api.yaml"}, null,"confs/api-key.conf");
     }
 
@@ -102,7 +109,7 @@ public class APIKeyTestCase extends BaseTestCase {
     private void validateAPIsAPIKeyTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put("api_key", jwtTokenProd);
+        headers.put("api_key", apiKeywithoutAllowedAPIs);
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
 
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
