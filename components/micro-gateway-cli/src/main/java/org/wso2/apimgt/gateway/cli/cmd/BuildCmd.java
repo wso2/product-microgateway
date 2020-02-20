@@ -73,10 +73,6 @@ public class BuildCmd implements LauncherCmd {
     private String javaDebugPort;
 
     @SuppressWarnings("unused")
-    @Parameter(names = "--docker")
-    private boolean isDocker;
-
-    @SuppressWarnings("unused")
     @Parameter(names = "--docker-image")
     private String dockerImage;
 
@@ -216,7 +212,7 @@ public class BuildCmd implements LauncherCmd {
     }
 
     private void createDockerImageFromCLI(String projectName, ContainerConfig containerConfig) {
-        if (isDocker) {
+        if (!StringUtils.isEmpty(dockerImage) || !StringUtils.isEmpty(dockerBaseImage)) {
             PrintStream outStream = System.out;
             if (StringUtils.isEmpty(dockerImage)) {
                 dockerImage = CmdUtils.promptForTextInput(outStream, "Enter docker image name: ["
