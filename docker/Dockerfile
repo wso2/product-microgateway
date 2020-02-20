@@ -29,10 +29,11 @@ ARG USER_HOME=/home/${USER}
 
 # build arguments for WSO2 product installation
 ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
-ARG MGW_SERVER_VERSION=3.1.0-m3-SNAPSHOT
+ARG MGW_SERVER_VERSION=3.1.0-alpha
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
 ARG INTERNAL_JRE=jdk8u202-b08-jre
+ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v3.1.0-alpha/wso2am-micro-gw-linux-3.1.0-alpha.zip
 
 # build argument for MOTD
 ARG MOTD='printf "\n\
@@ -54,12 +55,12 @@ ENV DEBCONF_NOWARNINGS yes
 
 RUN \
     apt-get update \
-        && apt-get install -y unzip libxml2-utils netcat-openbsd
+        && apt-get install -y unzip libxml2-utils netcat-openbsd wget
 
-COPY  runtime/ /root/
 # Create folders, unzip distribution
 RUN \
-    unzip /root/${MGW_SERVER}.zip -d /home/${USER}/ >/dev/null 2>&1 \
+    wget --no-check-certificate -O /root/${MGW_SERVER}.zip "${MGW_SERVER_DIST_URL}" \
+    && unzip /root/${MGW_SERVER}.zip -d /home/${USER}/ >/dev/null 2>&1 \
     && mkdir -p /home/${USER}/conf \
     && mv /home/${USER}/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
     && mv ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
