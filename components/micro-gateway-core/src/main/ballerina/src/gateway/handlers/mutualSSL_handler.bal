@@ -40,6 +40,7 @@ public type MutualSSLHandler object {
         string|error mutualSSLVerifyClient = getMutualSSL();
         if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
                 && req.mutualSslHandshake[STATUS] != PASSED ) {
+            setErrorMessageToInvocationContext(MUTUAL_SSL_FAILED);
             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
         }
 
