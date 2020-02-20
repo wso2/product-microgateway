@@ -34,33 +34,27 @@ public type OAuthzFilter object {
             printDebug(KEY_AUTHZ_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        string checkAuthentication = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_SSLVERIFYCLIENT, DEFAULT_SSL_VERIFY_CLIENT);
-        if (checkAuthentication != "require") {
-            //Setting UUID
-            int startingTime = getCurrentTime();
-            checkOrSetMessageID(context);
-            printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
-            runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
-            boolean result = true;
-            if (authContext is runtime:AuthenticationContext) {
-                string? authScheme = authContext?.scheme;
-                // scope validation is done in authn filter for oauth2, hence we only need to
-                //validate scopes if auth scheme is jwt.
-                if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
-                    //Start a new child span for the span.
-                    int | error | () balSpan = startSpan(BALLERINA_AUTHZ_FILTER);
-                    result = self.authzFilter.filterRequest(caller, request, context);
-                    //finishing span
-                    finishSpan(BALLERINA_AUTHZ_FILTER, balSpan);
-                }
+        //Setting UUID
+        int startingTime = getCurrentTime();
+        printDebug(KEY_AUTHZ_FILTER, "Processing request via Authorization filter.");
+        runtime:AuthenticationContext? authContext = runtime:getInvocationContext()?.authenticationContext;
+        boolean result = true;
+        if (authContext is runtime:AuthenticationContext) {
+            string? authScheme = authContext?.scheme;
+            // scope validation is done in authn filter for oauth2, hence we only need to
+            //validate scopes if auth scheme is jwt.
+            if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
+                //Start a new child span for the span.
+                int | error | () balSpan = startSpan(BALLERINA_AUTHZ_FILTER);
+                result = self.authzFilter.filterRequest(caller, request, context);
+                //finishing span
+                finishSpan(BALLERINA_AUTHZ_FILTER, balSpan);
             }
-            printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());
-            setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
-            return result;
-        } else {
-            // Skip this filter is mutualSSL is enabled.
-            return true;
         }
+        printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());
+        setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
+        return result;
+
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
