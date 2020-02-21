@@ -146,7 +146,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
     basePath:"/apikey",
     auth: {
         enabled: true,
-        authHandlers: gateway:getBasicAuthHandler()
+        authHandlers: gateway:getAuthHandlers([gateway:AUTHN_SCHEME_BASIC])
     } {{#corsConfiguration.corsConfigurationEnabled}},
     cors: {
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
@@ -164,7 +164,7 @@ service apiKeyService on apiSecureListener {
         path: "/*",
         auth: {
             enabled: true,
-            authHandlers: gateway:getBasicAuthHandler()
+            authHandlers: gateway:getAuthHandlers([gateway:AUTHN_SCHEME_BASIC])
         }
     }
     resource function apiKeyResource(http:Caller caller, http:Request req) {

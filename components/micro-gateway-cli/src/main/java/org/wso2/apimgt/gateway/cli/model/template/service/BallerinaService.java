@@ -79,7 +79,10 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private List<APIKey> apiKeys;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
-    private String mutualSSL;
+    private String mutualSSLClientVerification;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private boolean isMutualSSL = false;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean applicationSecurityOptional;
@@ -135,7 +138,10 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
-        this.mutualSSL = api.getMutualSSL();
+        if (api.getMutualSSL() != null) {
+            this.isMutualSSL = true;
+            this.mutualSSLClientVerification = api.getMutualSSL();
+        }
         this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
         setPaths(definition);
         resolveInterceptors(definition.getExtensions());

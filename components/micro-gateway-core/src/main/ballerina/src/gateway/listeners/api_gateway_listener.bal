@@ -107,26 +107,45 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     isConfigInitiated = true;
 }
 
-public function getAuthHandlers() returns http:InboundAuthHandler[] {
+public function getAuthHandlers(string[] appSecurity = [], boolean appSecurityOptional = false, boolean isMutualSSL = false) returns http:InboundAuthHandler[][] {
     if (authHandlersMap.length() < 1) {
         printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
         initAuthHandlers();
     }
-    return [authHandlersMap.get(MUTUAL_SSL_HANDLER), authHandlersMap.get(JWT_AUTH_HANDLER), authHandlersMap.get(KEY_VALIDATION_HANDLER),
-        authHandlersMap.get(BASIC_AUTH_HANDLER), authHandlersMap.get(API_KEY_HANDLER)];
+    if (appSecurityOptional) { 
+        if (isMutualSSL) {
+            // add mutual ssl to the auth handlers
+            appSecurity.push(AUTH_SCHEME_MUTUAL_SSL);
+        }
+        return [getHandlers(appSecurity)];
+    }
+    // if application security is mandatory, one of application handlers must pass. If mutual ssl enabled. it also should pass.
+    // e.g. [mutualssl] && [jwt or basic or ...]
+    if (isMutualSSL) {
+        return [getHandlers([AUTH_SCHEME_MUTUAL_SSL]), getHandlers(appSecurity)];
+    }
+    return [getHandlers(appSecurity)];
 }
 
-public function getAPIAuthHandlers(boolean appSecurityOptional) returns http:InboundAuthHandler[][] {
-    if (appSecurityOptional) { 
-        return [getAuthHandlers()];
+public function getHandlers(string[] appSecurity) returns http:InboundAuthHandler[] {
+    http:InboundAuthHandler[] handlers = [];
+    //enforce handler order mutualssl, opaque, basic, apikey, jwts
+    if (appSecurity.indexOf(AUTH_SCHEME_MUTUAL_SSL) != ()) {
+        handlers.push(authHandlersMap.get(MUTUAL_SSL_HANDLER));
     }
-    if (authHandlersMap.length() < 1) {
-        printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
-        initAuthHandlers();
+    if (appSecurity.indexOf(AUTH_SCHEME_OAUTH2) != ()) {
+        handlers.push(authHandlersMap.get(KEY_VALIDATION_HANDLER));
     }
-
-    return [[authHandlersMap.get(MUTUAL_SSL_HANDLER)], [authHandlersMap.get(JWT_AUTH_HANDLER), authHandlersMap.get(KEY_VALIDATION_HANDLER),
-        authHandlersMap.get(BASIC_AUTH_HANDLER), authHandlersMap.get(API_KEY_HANDLER)]];
+    if (appSecurity.indexOf(AUTHN_SCHEME_BASIC) != ()) {
+        handlers.push(authHandlersMap.get(BASIC_AUTH_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_API_KEY) != ()) {
+        handlers.push(authHandlersMap.get(API_KEY_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_JWT) != ()) {
+        appendMultipleJWTIssuers(handlers);
+    }
+    return handlers;
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {

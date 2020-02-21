@@ -18,6 +18,7 @@ public const string AUTHN_SCHEME_BASIC = "basic";
 public const string AUTH_SCHEME_JWT = "jwt";
 public const string AUTH_SCHEME_OAUTH2 = "oauth2";
 public const string AUTH_SCHEME_API_KEY = "apikey";
+public const string AUTH_SCHEME_MUTUAL_SSL = "mutualssl";
 public const string AUTH_PROVIDER_CONFIG = "config";
 public const string HEADER = "header";
 public const string QUERY = "query";

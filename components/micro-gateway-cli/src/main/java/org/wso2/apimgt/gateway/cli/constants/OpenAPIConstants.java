@@ -32,7 +32,6 @@ public class OpenAPIConstants {
     public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     public static final String TRANSPORT_HTTP = "http";
     public static final String TRANSPORT_HTTPS = "https";
-    public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
 
     public static final ImmutableList<String> MODULE_IDENTIFIER_LIST = ImmutableList.of("vienna", "canberra",

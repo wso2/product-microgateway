@@ -77,8 +77,16 @@
       clientId = ""
       clientSecret = ""
 
-# JWT token authorization configurations
-[jwtTokenConfig]
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[jwtTokenConfig]]
+  issuer = "https://localhost:9443/oauth2/token"
+  audience = "http://org.wso2.apimgt/gateway"
+  certificateAlias = "wso2apim"
+  # Validate subscribed APIs
+  validateSubscription = false
+# Issuer 2
+[[jwtTokenConfig]]
   issuer = "https://localhost:9443/oauth2/token"
   audience = "http://org.wso2.apimgt/gateway"
   certificateAlias = "wso2apim"
