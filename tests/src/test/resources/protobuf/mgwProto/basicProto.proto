@@ -3,7 +3,7 @@ syntax = "proto3";
 import "wso2_options.proto";
 
 option java_multiple_files = true;
-option java_package = "org.wso2.micro.gateway.tests.grpc";
+option java_package = "org.wso2.micro.gateway.tests.grpc.gen";
 
 message TestRequest {
     string testReqString = 1;
@@ -23,4 +23,34 @@ service TestService {
 
 	//service level security
     option (wso2.security) = NONE;
+}
+
+service JwtAuthTestService {
+    rpc testCall(TestRequest) returns (TestResponse);
+
+    rpc testCallWithScopes(TestRequest) returns (TestResponse){
+        option (wso2.scopes) = "scope_1";
+    };
+
+	//production endpoints
+	option (wso2.production_endpoints) = {
+		url : "http://localhost:50051";
+	};
+
+	//service level security
+    option (wso2.security) = OAUTH2;
+}
+
+service ThrottlingTestService {
+    rpc testCallServiceThrottling(TestRequest) returns (TestResponse);
+
+    rpc testCallMethodThrottling(TestRequest) returns (TestResponse) {
+        option (wso2.method_throttling_tier) = "3PerMin";
+    };
+
+    option (wso2.throttling_tier) = "8PerMin";
+
+    option (wso2.production_endpoints) = {
+        url : "http://localhost:50051";
+    };
 }
