@@ -16,12 +16,13 @@
 
 package org.wso2.micro.gateway.interceptor;
 
-import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.mime.nativeimpl.EntityHeaders;
+import org.ballerinalang.jvm.values.api.BXML;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.http.ValueCreatorUtils;
 import org.ballerinalang.net.http.nativeimpl.ExternResponse;
+import org.ballerinalang.stdlib.io.channels.base.Channel;
+import org.json.JSONObject;
 
 /**
  * Representation of ballerina http:Response object. Provide methods to do CRUD operations on the response object
@@ -29,6 +30,7 @@ import org.ballerinalang.net.http.nativeimpl.ExternResponse;
  */
 public class Response {
     private ObjectValue responseObj;
+    private Entity entity;
 
     public Response(ObjectValue responseObj) {
         this.responseObj = responseObj;
@@ -40,14 +42,38 @@ public class Response {
     }
 
     /**
+     * Get the http status code of the response. For ex: 200.
+     *
+     * @return Returns http status code as a long value.
+     */
+    public long getResponseCode() {
+        return responseObj.getIntValue(Constants.STATUS_CODE);
+    }
+
+    /**
+     * Set the http status code for the response. For ex: 200.
+     * @param statusCode The status code to be set for the http response.
+     */
+    public void setResponseCode(long statusCode) {
+        responseObj.set(Constants.STATUS_CODE, statusCode);
+    }
+
+    /**
+     * Get the ultimate request URI that was made to receive the response when redirect is on
+     * @return the requested URI
+     */
+    public String getResolvedRequestedURI() {
+        return responseObj.getStringValue(Constants.RESOLVED_REQUESTED_URI);
+    }
+
+    /**
      * Checks whether the requested header key exists in the header map.
      *
      * @param headerName The header name.
      * @return Returns true if the specified header key exists
      */
     public boolean hasHeader(String headerName) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        return EntityHeaders.hasHeader(entity, headerName, Constants.LEADING_HEADER);
+        return getEntityWithoutBody().hasHeader(headerName);
     }
 
     /**
@@ -58,11 +84,7 @@ public class Response {
      * @return The first header value for the specified header name. Null is returned if header does not present.
      */
     public String getHeader(String headerName) {
-        if (hasHeader(headerName)) {
-            ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-            return EntityHeaders.getHeader(entity, headerName, Constants.LEADING_HEADER);
-        }
-        return null;
+        return getEntityWithoutBody().getHeader(headerName);
     }
 
     /**
@@ -72,9 +94,7 @@ public class Response {
      * @param headerValue The header value.
      */
     public void addHeader(String headerName, String headerValue) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false); // check getEntityIfAvailable can be used.
-        EntityHeaders.addHeader(entity, headerName, headerValue, Constants.LEADING_HEADER);
-
+        getEntityWithoutBody().addHeader(headerName, headerValue);
     }
 
     /**
@@ -84,15 +104,7 @@ public class Response {
      * @return The header values the specified header key maps to. Null is returned if header does not present.
      */
     public String[] getHeaders(String headerName) {
-        if (hasHeader(headerName)) {
-            ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-            ArrayValue headerArray = EntityHeaders.getHeaders(entity, headerName, Constants.LEADING_HEADER);
-            String[] stringArray;
-            if ((stringArray = headerArray.getStringArray()) != null) {
-                return stringArray;
-            }
-        }
-        return null;
+        return getEntityWithoutBody().getHeaders(headerName);
     }
 
     /**
@@ -103,8 +115,7 @@ public class Response {
      * @param headerValue The header value.
      */
     public void setHeader(String headerName, String headerValue) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        EntityHeaders.setHeader(entity, headerName, headerValue, Constants.LEADING_HEADER);
+        getEntityWithoutBody().setHeader(headerName, headerValue);
     }
 
     /**
@@ -113,16 +124,14 @@ public class Response {
      * @param headerName The header name.
      */
     public void removeHeader(String headerName) {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        EntityHeaders.removeHeader(entity, headerName, Constants.LEADING_HEADER);
+        getEntityWithoutBody().removeHeader(headerName);
     }
 
     /**
      * Removes all the headers from the response.
      */
     public void removeAllHeaders() {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        EntityHeaders.removeAllHeaders(entity, Constants.LEADING_HEADER);
+        getEntityWithoutBody().removeAllHeaders();
     }
 
     /**
@@ -131,9 +140,7 @@ public class Response {
      * @return An array of all the header names.
      */
     public String[] getHeaderNames() {
-        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-        ArrayValue headerNames = EntityHeaders.getHeaderNames(entity, Constants.LEADING_HEADER);
-        return headerNames.getStringArray();
+        return getEntityWithoutBody().getHeaderNames();
     }
 
     /**
@@ -155,88 +162,145 @@ public class Response {
         return hasHeader(Constants.CONTENT_TYPE_HEADER) ? getHeader(Constants.CONTENT_TYPE_HEADER) : "";
     }
 
-//    /**
-//     * Extracts `text` payload from the response. If the content type is not text, an exception will be thrown.
-//     *
-//     * @return The `text` payload of the request.
-//     * @throws InterceptorException If error while getting text payload.
-//     */
-//    public String getTextPayload() throws InterceptorException {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-//        Object textPayload = MimeDataSourceBuilder.getText(entity);
-//        if (textPayload instanceof ErrorValue) {
-//            throw new InterceptorException("Error while getting text payload from the response",
-//                    ((ErrorValue) textPayload).getCause());
-//        }
-//        return textPayload.toString();
-//    }
-//
-//    /**
-//     * Gets the response payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
-//     * `Request.getBodyParts()`.
-//     *
-//     * @return {@link Channel} A byte channel from which the message payload can be read.
-//     * @throws InterceptorException If error while getting byte channel of the request.
-//     */
-//    public Channel getByteChannel() throws InterceptorException {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-//        Object byteChannel = MimeEntityBody.getByteChannel(entity);
-//        if (byteChannel instanceof ErrorValue) {
-//            throw new InterceptorException("Error while getting byte channel from the response",
-//                    ((ErrorValue) byteChannel).getCause());
-//        }
-//        ObjectValue byteChannelObject = (ObjectValue) byteChannel;
-//        return ((Channel) byteChannelObject.getNativeData(IOConstants.BYTE_CHANNEL_NAME));
-//    }
-//
-//    /**
-//     * Gets the response payload as a `byte[]`.
-//     *
-//     * @return The byte[] representation of the message payload
-//     * @throws InterceptorException If error while getting byte array of the request.
-//     */
-//    public byte[] getBinaryPayload() throws InterceptorException {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, true);
-//        Object binaryPayload = MimeDataSourceBuilder.getByteArray(entity);
-//        if (binaryPayload instanceof ErrorValue) {
-//            throw new InterceptorException("Error while getting byte array from the request",
-//                    ((ErrorValue) binaryPayload).getCause());
-//        }
-//        ArrayValue byteArray = (ArrayValue) binaryPayload;
-//        return byteArray.getBytes();
-//    }
-//
-//    /**
-//     * Sets a string text content as the payload.
-//     *
-//     * @param textPayload The text payload.
-//     */
-//    public void setTextPayload(String textPayload) {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-//        MimeEntityBody.setText(entity, textPayload, MimeConstants.TEXT_PLAIN);
-//    }
-//
-//    /**
-//     * Sets a byte[]  content as the payload.
-//     *
-//     * @param binaryPayload The byte[] payload.
-//     */
-//    public void setBinaryPayload(byte[] binaryPayload) {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-//        MimeEntityBody.setByteArray(entity, new ArrayValueImpl(binaryPayload), MimeConstants.OCTET_STREAM);
-//    }
-//
-//    /**
-//     * Sets a json string as the payload.
-//     *
-//     * @param jsonPayload The json payload.
-//     */
-//    public void setJsonPayload(String jsonPayload) {
-//        ObjectValue entity = HttpUtil.getEntity(responseObj, false, false);
-//        MimeEntityBody.setJson(entity, jsonPayload, MimeConstants.APPLICATION_JSON);
-//    }
+    /**
+     * Extracts `json` payload from the response. If the content type is not JSON, an exception will be thrown.
+     *
+     * @return The `json` {@link JSONObject} payload of the request. Null if json body is not found in the response.
+     * @throws InterceptorException If error while getting json payload.
+     */
+    public JSONObject getJsonPayload() throws InterceptorException {
+        return getEntity().getJson();
+    }
+
+    /**
+     * Extracts `xml` payload from the response. If the content type is not XML, an exception will be thrown.
+     *
+     * @return {@link BXML} The `xml` payload of the response.
+     * @throws InterceptorException If error while getting xml payload.
+     */
+    public BXML getXmlPayload() throws InterceptorException {
+        return getEntity().getXml();
+    }
+
+    /**
+     * Extracts `text` payload from the response. If the content type is not text, an exception will be thrown.
+     *
+     * @return The `text` payload of the response.
+     * @throws InterceptorException If error while getting text payload.
+     */
+    public String getTextPayload() throws InterceptorException {
+        return getEntity().getText();
+    }
+
+    /**
+     * Gets the response payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
+     * `Request.getBodyParts()`.
+     *
+     * @return {@link Channel} A byte channel from which the
+     * message payload can be read.
+     * @throws InterceptorException If error while getting byte channel of the request.
+     */
+    public Channel getByteChannel() throws InterceptorException {
+        return getEntity().getByteChannel();
+    }
+
+    /**
+     * Gets the response payload as a `byte[]`.
+     *
+     * @return The byte[] representation of the message payload
+     * @throws InterceptorException If error while getting byte array of the request.
+     */
+    public byte[] getBinaryPayload() throws InterceptorException {
+        return getEntity().getByteArray();
+    }
+
+    /**
+     * Extracts body parts from the response. If the content type is not a composite media type, an exception
+     * is thrown.
+     *
+     * @return Returns the body parts as an array of entities.
+     * @throws InterceptorException if there were any errors constructing the body parts from the reponse.
+     */
+    public Entity[] getBodyParts() throws InterceptorException {
+        return getEntity().getBodyParts();
+    }
+
+    /**
+     * Sets a string text content as the payload.
+     *
+     * @param textPayload The text payload.
+     */
+    public void setTextPayload(String textPayload) {
+        getEntity().setText(textPayload);
+        setEntity(entity);
+    }
+
+    /**
+     * Sets a byte[]  content as the payload.
+     *
+     * @param binaryPayload The byte[] payload.
+     */
+    public void setBinaryPayload(byte[] binaryPayload) {
+        getEntity().setBinary(binaryPayload);
+        setEntity(entity);
+    }
+
+    /**
+     * Sets a json as the payload.
+     *
+     * @param jsonPayload {@link JSONObject} The json payload.
+     */
+    public void setJsonPayload(JSONObject jsonPayload) {
+        getEntity().setJson(jsonPayload);
+        setEntity(entity);
+    }
+
+    /**
+     * Sets a xml as the payload.
+     *
+     * @param xmlPayload The xml {@link BXML} payload.
+     */
+    public void setXmlPayload(BXML xmlPayload) {
+        getEntity().setXml(xmlPayload);
+        setEntity(entity);
+    }
+
+    /**
+     * Set multiparts as the payload.
+     *
+     * @param bodyParts   The entities which make up the message body
+     * @param contentType The content type of the top level message. Set this to override the default
+     *                    `content-type` header value which is 'multipart/form-data'
+     */
+    public void setBodyParts(Entity[] bodyParts, String contentType) {
+        getEntityWithoutBody().setBodyParts(bodyParts, contentType);
+        setEntity(entity);
+    }
+
+    /**
+     * Returns the java native object of the ballerina level http:Response object.
+     *
+     * @return Native ballerina object {@link ObjectValue} representing the response.
+     */
+    public ObjectValue getNativeRequestObject() {
+        return responseObj;
+    }
+
+    public void setEntity(Entity entity) {
+        ExternResponse.setEntity(responseObj, entity.getEntityObj());
+    }
 
     protected ObjectValue getResponseObjectValue() {
         return responseObj;
+    }
+
+    private Entity getEntityWithoutBody() {
+        entity = new Entity(HttpUtil.getEntity(responseObj, false, false));
+        return entity;
+    }
+
+    private Entity getEntity() {
+        entity = new Entity(HttpUtil.getEntity(responseObj, false, true));
+        return entity;
     }
 }

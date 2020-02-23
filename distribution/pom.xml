@@ -143,8 +143,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor</includeArtifactIds>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.json</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json</includeArtifactIds>
                         </configuration>
                     </execution>
 
