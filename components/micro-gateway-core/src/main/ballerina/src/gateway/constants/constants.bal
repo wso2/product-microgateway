@@ -381,7 +381,7 @@ const string KEY_TYPE = "keytype";
 public const string INTROSPECT_CONTEXT = "introspect";
 
 //grpc
-const string IS_GRPC = "isGrpc";
+public const string IS_GRPC = "isGrpc";
 const string GRPC_STATUS_HEADER = "grpc-status";
 const string GRPC_MESSAGE_HEADER = "grpc-message";
 const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";

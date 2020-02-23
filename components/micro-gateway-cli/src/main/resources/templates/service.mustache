@@ -277,12 +277,17 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }
             invocationContext.attributes["error_response_code"] = errorCode;
             invocationContext.attributes["error_response"] = errorDescription;
-            json payload = {fault : {
-                code : errorCode,
-                message : "Runtime Error",
-                description : errorDescription
-            }};
-            res.setPayload(payload);
+            if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
+                json payload = {fault : {
+                                code : errorCode,
+                                message : "Runtime Error",
+                                description : errorDescription
+                            }};
+
+                            res.setPayload(payload);
+            } else {
+                gateway:attachGrpcErrorHeaders (res, errorDescription);
+            }
             log:printError("Error in client response", err = clientResponse);
             var outboundResult = outboundEp->respond(res);
             if (outboundResult is error) {

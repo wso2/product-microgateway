@@ -18,13 +18,12 @@ import ballerina/http;
 import ballerina/mime;
 import ballerina/runtime;
 
+//todo: verify https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+map<string> httpGrpcStatusCodeMap = { "401" : "16", "403" : "7", "404" : "12", "429" : "8", "500" : "2" };
+map<string> httpGrpcErrorMsgMap = { "404" : "Unimplemeted", "500" : "Internal server error" };
+
 // GRPC filter
 public type GrpcFilter object {
-    //todo: verify https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
-    map<string> httpGrpcStatusCodeMap = { "401" : "16", "403" : "7", "404" : "12", "429" : "8", "500" : "2" };
-    map<string> httpGrpcErrorMsgMap = { "401" : "Unauthenticated", "403" : "Unauthorized", "404" : "Service not found",
-        "429" : "Too many function calls", "500" : "Internal server error" };
-
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context)
             returns boolean {
         if ( request.getContentType() == GRPC_CONTENT_TYPE_HEADER) {
@@ -35,7 +34,7 @@ public type GrpcFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        if (!isGrpcResponse(response, context)) {
+        if (!needGrpcResponseFiltering(response, context)) {
            return true;
         }
         printDebug(KEY_GRPC_FILTER, "Grpc filter is applied for response" + context.attributes[MESSAGE_ID].toString());
@@ -43,34 +42,24 @@ public type GrpcFilter object {
         if (statusCode == "200") {
            return true;
         }
-        string grpcStatus = self.httpGrpcStatusCodeMap[statusCode] ?: "";
-        string grpcErrorMessage = self.httpGrpcErrorMsgMap[statusCode] ?: "";
-        
-        if(statusCode == "") {
-           response.setHeader(GRPC_STATUS_HEADER, "2");
-           response.setHeader(GRPC_MESSAGE_HEADER, "Response is not recognized by the gateway.");
-            printDebug(KEY_GRPC_FILTER, "Response is not recognized by the gateway.");
-           return true;
+        //if the grpc status and error message is set, it is not required to further process
+        if (response.hasHeader(GRPC_STATUS_HEADER, mime:TRAILING) &&
+                response.hasHeader(GRPC_MESSAGE_HEADER, mime:TRAILING)) {
+            return true;
         }
-        response.setHeader(GRPC_STATUS_HEADER, grpcStatus, mime:TRAILING);
-        response.setHeader(GRPC_MESSAGE_HEADER, grpcErrorMessage, mime:TRAILING);
-        printDebug(KEY_GRPC_FILTER, "grpc status is " + grpcStatus + " and grpc Message is " + grpcErrorMessage);
-        response.setContentType(GRPC_CONTENT_TYPE_HEADER);
-
+        attachGenericGrpcErrorMsg (response);
         return true;
     }
 };
 
 function addGrpcToFilterContext(http:FilterContext context) {
-    //todo: decide to use the invocationContext alone
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     context.attributes[IS_GRPC] = true;
     invocationContext.attributes[IS_GRPC] = true;
     printDebug(KEY_GRPC_FILTER, "\"isGrpc\" key is added to the request " + context.attributes[MESSAGE_ID].toString());
 }
 
-//todo: change the method name
-function isGrpcResponse(http:Response response, http:FilterContext context) returns boolean {
+function needGrpcResponseFiltering(http:Response response, http:FilterContext context) returns boolean {
     //todo: check if needs to check the content type as well.
     //if backend sends the grpc error message, it is not required to be modified from the gateway
     if(response.hasHeader(GRPC_STATUS_HEADER)) {
@@ -84,4 +73,29 @@ function isGrpcResponse(http:Response response, http:FilterContext context) retu
         return isGrpcAttr;
     }
     return false;
+}
+
+public function attachGrpcErrorHeaders(http:Response response, string errorMsg) {
+    string statusCode = response.statusCode.toString();
+    string grpcStatus = httpGrpcStatusCodeMap[statusCode] ?: "";
+    string grpcErrorMessage = errorMsg;
+    if (grpcStatus == ""){
+        response.setHeader(GRPC_STATUS_HEADER, "2");
+        response.setHeader(GRPC_MESSAGE_HEADER, "Response is not recognized by the gateway.");
+        return;
+    }
+    response.setHeader(GRPC_STATUS_HEADER, grpcStatus, mime:TRAILING);
+    response.setHeader(GRPC_MESSAGE_HEADER, grpcErrorMessage, mime:TRAILING);
+    response.setContentType(GRPC_CONTENT_TYPE_HEADER);
+    printDebug(KEY_GRPC_FILTER, "grpc status is " + grpcStatus + " and grpc Message is " + grpcErrorMessage);
+
+}
+
+function attachGenericGrpcErrorMsg(http:Response response) {
+    if (response.hasHeader(GRPC_MESSAGE_HEADER)) {
+        return;
+    }
+    string statusCode = response.statusCode.toString();
+    string grpcErrorMessage = httpGrpcErrorMsgMap[statusCode] ?: "";
+    attachGrpcErrorHeaders(response, grpcErrorMessage);
 }
