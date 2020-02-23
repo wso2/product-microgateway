@@ -92,7 +92,6 @@ listener http:Listener tokenListenerEndpoint = new (
 
 public function getFilters() returns http:RequestFilter[] {
     map<json> deployedPolicies = getDeployedPolicies();
-   //map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
     map<string> apis = gateway:getOpenAPIs();
 
     // Grpc Filter
@@ -132,26 +131,7 @@ public function getFilters() returns http:RequestFilter[] {
     // Extension filter
     ExtensionFilter extensionFilter = new;
 
-    return [grpcFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, analyticsFilter,
-        extensionFilter];
+    return [grpcFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter,
+            analyticsFilter, extensionFilter];
 }
 
-public function getOpenAPIMapFromFile() returns @tainted map<json>{
-    map<json> openAPIMap = {};
-    string filePath = "./openAPIJsonConstants.json";
-    io:ReadableByteChannel|error rbc = io:openReadableFile(filePath);
-    if(rbc is io:ReadableByteChannel) {
-        io:ReadableCharacterChannel rch = new(rbc, "UTF8");
-        var result = rch.readJson();
-        if(result is map<json>) {
-            openAPIMap = result;
-        }
-        var closeResult = rch.close();
-        if (closeResult is error) {
-            log:printError("Error occurred while closing character stream", err = closeResult);
-        }
-    } else {
-        log:printError("Error occurred while reading the open API json file", err = rbc);
-    }
-    return openAPIMap;
-}

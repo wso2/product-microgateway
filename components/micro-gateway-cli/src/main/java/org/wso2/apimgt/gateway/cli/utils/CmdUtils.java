@@ -341,7 +341,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Url validator, Allow any url with https and http.
+     * Url validation, Allow any url with https and http.
      * Allow any url without fully qualified domain.
      *
      * @param url Url as string
