@@ -16,6 +16,7 @@
 
 package org.wso2.micro.gateway.interceptor;
 
+import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.net.http.nativeimpl.connection.Respond;
 
@@ -31,5 +32,34 @@ public class Caller {
 
     public void respond(Response response) throws InterceptorException {
         Respond.nativeRespond(callerObj, response.getResponseObjectValue());
+    }
+
+    /**
+     * Returns the java native object of the ballerina level http:Caller object.
+     *
+     * @return Native ballerina object {@link ObjectValue} representing the caller.
+     */
+    public ObjectValue getNativeRequestObject() {
+        return callerObj;
+    }
+
+    /**
+     * Get the local address from the caller object.
+     *
+     * @return local address as a string in the format host:port
+     */
+    public String getLocalAddress() {
+        MapValue obj = (MapValue) callerObj.get(Constants.LOCAL_ADDRESS);
+        return obj.getStringValue(Constants.HOST) + ":" + obj.getIntValue(Constants.PORT);
+    }
+
+    /**
+     * Get the remote address from the caller object.
+     *
+     * @return remote address as a string in the format host:port
+     */
+    public String getRemoteAddress() {
+        MapValue obj = (MapValue) callerObj.get(Constants.REMOTE_ADDRESS);
+        return obj.getStringValue(Constants.HOST) + ":" + obj.getIntValue(Constants.PORT);
     }
 }
