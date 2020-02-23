@@ -135,9 +135,15 @@ public class BuildCmd implements LauncherCmd {
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             policyGenerator.generate(genPoliciesPath, projectName);
 
+            // Created resources directory
+            String resourcesPath =
+                    CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
+
+            CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
+
             // Copy static source files
-            CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
-                    CmdUtils.getProjectTargetInterceptorsPath(projectName));
+            //CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
+                    CmdUtils.getProjectTargetInterceptorsPath(projectName);
             new CodeGenerator().generate(projectName, true);
             CmdUtils.updateBallerinaToml(projectName);
         } catch (IOException e) {

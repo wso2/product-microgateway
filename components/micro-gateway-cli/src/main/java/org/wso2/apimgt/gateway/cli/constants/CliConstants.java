@@ -38,6 +38,7 @@ public class CliConstants {
     public static final String PROJECT_GEN_DIR = "gen";
     public static final String GEN_SRC_DIR = "src";
     public static final String GEN_POLICIES_DIR = "policies";
+    public static final String RESOURCES_DIR = "resources";
     public static final String MAIN_CONFIG_FILE_NAME = "toolkit-config.toml";
     public static final String DEPLOYMENT_CONFIG_FILE_NAME = "deployment-config.toml";
     public static final String TEMP_DIR_NAME = "temp";

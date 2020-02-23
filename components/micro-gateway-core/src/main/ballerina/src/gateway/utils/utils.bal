@@ -39,6 +39,8 @@ map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
 map<http:InboundAuthHandler> authHandlersMap = {};
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+map<string> openAPIs = {};
+
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -396,6 +398,19 @@ public function mask(string text) returns string {
     } else {
         return "xxxx";
     }
+}
+
+# mask all letters with given text except last 4 charactors.
+# + apis - The string to be masked.
+public function setOpenAPIs(map<string> apis) {
+   openAPIs = apis;
+}
+
+# Returns map of open APIs.
+#
+# + return - openAPIS
+public function getOpenAPIs() returns map<string> {
+    return openAPIs;
 }
 
 # Returns the current message ID (uuid).

@@ -68,6 +68,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
     private boolean isGrpc;
+    private String projectName;
 
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
@@ -130,6 +131,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
+        this.projectName = api.getProjectName();
         this.setBasepath(api.getSpecificBasepath());
         this.authProviders = OpenAPICodegenUtils
                 .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
@@ -410,5 +412,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     public void setIsDevFirst(boolean value) {
         isDevFirst = value;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 }

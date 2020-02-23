@@ -93,6 +93,7 @@ listener http:Listener tokenListenerEndpoint = new (
 public function getFilters() returns http:RequestFilter[] {
     map<json> deployedPolicies = getDeployedPolicies();
    //map<json> openAPIs = <@untainted>getOpenAPIMapFromFile();
+    map<string> apis = gateway:getOpenAPIs();
 
     // Grpc Filter
     gateway:GrpcFilter grpcFilter = new gateway:GrpcFilter();
@@ -105,7 +106,7 @@ public function getFilters() returns http:RequestFilter[] {
     // Subscription validation filter
     gateway:SubscriptionFilter | gateway:SubscriptionFilterWrapper subscriptionFilter;
     //Validation filter
-    //gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
+    gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
     // Authorization filter
     gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
 
@@ -117,13 +118,13 @@ public function getFilters() returns http:RequestFilter[] {
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
         subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
-        //validationFilter = new gateway:ValidationFilterWrapper(openAPIs);
+        validationFilter = new gateway:ValidationFilterWrapper(openAPIs);
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
         subscriptionFilter =  new gateway:SubscriptionFilter();
-        //validationFilter = new gateway:ValidationFilter(openAPIs);
+        validationFilter = new gateway:ValidationFilter(openAPIs);
     }
 
     authorizationFilter = gateway:getDefaultAuthorizationFilter();

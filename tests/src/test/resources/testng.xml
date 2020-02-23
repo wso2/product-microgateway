@@ -64,7 +64,7 @@
             <class name="org.wso2.micro.gateway.tests.extensions.OASAPIInvokeTestCase"/>
             <!--            <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>-->
             <!--            <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>-->
-            <class name="org.wso2.micro.gateway.tests.interceptor.InterceptorTestCase"/>
+<!--            <class name="org.wso2.micro.gateway.tests.interceptor.InterceptorTestCase"/>-->
         </classes>
     </test>
 </suite>

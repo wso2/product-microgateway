@@ -156,6 +156,7 @@ public class CodeGenerator {
                         String openAPIVersion = OpenAPICodegenUtils.findSwaggerVersion(openAPIContentAsJson, false);
                         OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString(), openAPIVersion);
                         ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson);
+                        api.setProjectName(projectName);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
 
