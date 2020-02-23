@@ -28,13 +28,16 @@ public type JwtAuthProvider object {
 
     public jwt:JwtValidatorConfig jwtValidatorConfig;
     public jwt:InboundJwtAuthProvider inboundJwtAuthProvider;
+    public boolean subscriptionValEnabled;
 
     # Provides authentication based on the provided JWT token.
     #
     # + jwtValidatorConfig - JWT validator configurations
-    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig) {
+    # + subscriptionValEnabled - Validate subscription
+    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled) {
         self.jwtValidatorConfig = jwtValidatorConfig;
         self.inboundJwtAuthProvider = new (jwtValidatorConfig);
+        self.subscriptionValEnabled = subscriptionValEnabled;
     }
 
 
@@ -89,22 +92,51 @@ public type JwtAuthProvider object {
                                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                                 return false;
                             }
-                            return true;
                         } else {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
-                            return handleVar;
                         }
-
-                    } else {
-                        printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
-                        return handleVar;
+                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled);
+                    } 
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
+                    if (payload is jwt:JwtPayload) {
+                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled);
                     }
-                }
+                } 
             }
-            return handleVar;
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            return prepareError("Failed to process jwt token in jwt auth provider.");
         } else {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             return prepareError("Failed to authenticate with jwt auth provider.", handleVar);
         }
     }
 };
+
+public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled) 
+        returns @tainted (boolean | auth:Error) {
+    boolean subscriptionValidated = false;
+    json subscribedAPIList = [];
+    map<json>? customClaims = payload?.customClaims;
+    //get allowed apis
+    if (customClaims is map<json> && customClaims.hasKey(SUBSCRIBED_APIS)) {
+        printDebug(KEY_JWT_AUTH_PROVIDER, "subscribedAPIs claim found in the jwt.");
+        subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
+    }
+    if (subscribedAPIList is json[]) {
+        if (subscriptionValEnabled && subscribedAPIList.length() < 1) {
+            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+            return prepareError("SubscribedAPI list is empty.");
+        }
+        subscriptionValidated = handleSubscribedAPIs(jwtToken, payload, subscribedAPIList, subscriptionValEnabled);
+        if (subscriptionValidated || !subscriptionValEnabled) {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
+            return true;
+        } else { 
+            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+            return prepareError("Subscriptions validation fails.");
+        }
+    }
+    setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+    return prepareError("Failed to decode the JWT.");
+}

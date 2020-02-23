@@ -169,7 +169,7 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
             }
         }
     }
-    printError(KEY_SUBSCRIPTION_FILTER, "Failed to validate API.");
+    printError(API_KEY_UTIL, "Failed to validate API.");
     return false;
 }
 

@@ -225,6 +225,13 @@ function getDefaultStringValue(anydata val, string defaultVal) returns string {
     return defaultVal;
 }
 
+function getDefaultBooleanValue(anydata val, boolean defaultVal) returns boolean {
+    if (val is boolean) {
+        return <boolean>val;
+    }
+    return defaultVal;
+}
+
 public function setErrorMessageToFilterContext(http:FilterContext context, int errorCode) {
     int status;
     if (errorCode == API_AUTH_GENERAL_ERROR) {
@@ -857,7 +864,8 @@ function readMultipleJWTIssuers() {
                 },
                 jwtCache: jwtCache
             };
-            JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
+            JwtAuthProvider jwtAuthProvider 
+                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION], DEFAULT_VALIDATE_SUBSCRIPTION));
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -884,7 +892,8 @@ function readMultipleJWTIssuers() {
             },
             jwtCache: jwtCache
         };
-        JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
+        JwtAuthProvider jwtAuthProvider 
+            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, DEFAULT_VALIDATE_SUBSCRIPTION));
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);

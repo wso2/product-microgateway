@@ -345,7 +345,6 @@ const string KEY_GW_LISTNER = "APIGatewayListener";
 const string KEY_PRE_AUTHN_FILTER = "PreAuthnFilter";
 const string KEY_AUTHN_FILTER = "AuthnFilter";
 const string KEY_AUTHZ_FILTER = "AuthzFilter";
-const string KEY_SUBSCRIPTION_FILTER = "SubscriptionFilter";
 const string KEY_THROTTLE_FILTER = "ThrottleFilter";
 const string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
 const string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
