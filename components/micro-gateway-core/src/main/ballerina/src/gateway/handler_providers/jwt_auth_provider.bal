@@ -60,6 +60,7 @@ public type JwtAuthProvider object {
             if (authContext is runtime:AuthenticationContext) {
                 string? jwtToken = authContext?.authToken;
                 if (jwtToken is string) {
+                    boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
                     var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
@@ -95,12 +96,12 @@ public type JwtAuthProvider object {
                         } else {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
                         }
-                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled);
+                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
                     } 
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
                     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
                     if (payload is jwt:JwtPayload) {
-                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled);
+                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
                     }
                 }
             }
@@ -112,7 +113,7 @@ public type JwtAuthProvider object {
     }
 };
 
-public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled) 
+public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled, boolean isGRPC) 
         returns @tainted (boolean | auth:Error) {
     boolean subscriptionValidated = false;
     json subscribedAPIList = [];
@@ -128,12 +129,12 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
             return prepareError("SubscribedAPI list is empty.");
         }
         subscriptionValidated = handleSubscribedAPIs(jwtToken, payload, subscribedAPIList, subscriptionValEnabled);
-        if (subscriptionValidated || !subscriptionValEnabled) {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
+        if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validation passed.");
             return true;
         } else { 
             setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
-            return prepareError("Subscriptions validation fails.");
+            return prepareError("Subscriptions validation failed.");
         }
     }
     setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
