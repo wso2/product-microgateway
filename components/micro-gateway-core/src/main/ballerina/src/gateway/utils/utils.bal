@@ -37,7 +37,8 @@ map<TierConfiguration?> resourceTierAnnotationMap = {};
 map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
-map<http:InboundAuthHandler> authHandlersMap = {};
+map<http:InboundAuthHandler> authHandlersMap = {}; //all handlers except for jwt handlers
+http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
@@ -215,6 +216,20 @@ public function getConfigFloatValue(string instanceId, string property, float de
 
 public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
+}
+
+function getDefaultStringValue(anydata val, string defaultVal) returns string {
+    if (val is string) {
+        return <string>val;
+    }
+    return defaultVal;
+}
+
+function getDefaultBooleanValue(anydata val, boolean defaultVal) returns boolean {
+    if (val is boolean) {
+        return <boolean>val;
+    }
+    return defaultVal;
 }
 
 public function setErrorMessageToFilterContext(http:FilterContext context, int errorCode) {
@@ -712,28 +727,8 @@ function isGrpcRequest(http:FilterContext context) returns boolean {
 }
 
 public function initAuthHandlers() {
-    //Initializes jwt handler
-    jwt:JwtValidatorConfig jwtValidatorConfig = {
-        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
-        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
-        clockSkewInSeconds: 60,
-        trustStoreConfig: {
-            trustStore: {
-                path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
-                password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
-            },
-            certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
-        },
-        jwtCache: jwtCache
-    };
-    JwtAuthProvider jwtAuthProvider = new (jwtValidatorConfig);
-    JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
-    if (isMetricsEnabled || isTracingEnabled) {
-        jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
-    } else {
-        jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
-    }
-
+    //Initializes jwt handlers
+    readMultipleJWTIssuers();
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
@@ -843,9 +838,99 @@ public function initAuthHandlers() {
 
     //set to the map
     authHandlersMap[MUTUAL_SSL_HANDLER] = mutualSSLHandler;
-    authHandlersMap[JWT_AUTH_HANDLER] = jwtAuthHandler;
     authHandlersMap[KEY_VALIDATION_HANDLER] = keyValidationHandler;
     authHandlersMap[BASIC_AUTH_HANDLER] = basicAuthHandler;
     // authHandlersMap[COOKIE_BASED_HANDLER] = cookieBasedHandler;
     authHandlersMap[API_KEY_HANDLER] = apiKeyHandler;
+}
+
+function readMultipleJWTIssuers() {
+    map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
+    if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
+        printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
+        string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
+        string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+        foreach map<anydata> jwtIssuer in jwtIssuers {
+            jwt:JwtValidatorConfig jwtValidatorConfig = {
+                issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
+                audience: getDefaultStringValue(jwtIssuer[AUDIENCE], DEFAULT_AUDIENCE),
+                clockSkewInSeconds: 60,
+                trustStoreConfig: {
+                    trustStore: {
+                        path: trustStorePath,
+                        password: trustStorePassword
+                    },
+                    certificateAlias: getDefaultStringValue(jwtIssuer[CERTIFICATE_ALIAS], DEFAULT_CERTIFICATE_ALIAS)
+                },
+                jwtCache: jwtCache
+            };
+            JwtAuthProvider jwtAuthProvider 
+                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION], DEFAULT_VALIDATE_SUBSCRIPTION));
+            JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
+            if (isMetricsEnabled || isTracingEnabled) {
+                jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+            } else {
+                jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+            }
+            jwtHandlers.push(jwtAuthHandler);
+        }
+    }
+
+    if (jwtHandlers.length() < 1) {
+        //Support old config model
+        printDebug(KEY_UTILS, "Find old jwt configurations or set default JWT configurations.");
+        jwt:JwtValidatorConfig jwtValidatorConfig = {
+            issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
+            audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
+            clockSkewInSeconds: 60,
+            trustStoreConfig: {
+                trustStore: {
+                    path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
+                    password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
+                },
+                certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
+            },
+            jwtCache: jwtCache
+        };
+        JwtAuthProvider jwtAuthProvider 
+            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, DEFAULT_VALIDATE_SUBSCRIPTION));
+        JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
+        if (isMetricsEnabled || isTracingEnabled) {
+            jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+        } else {
+            jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+        }
+        jwtHandlers.push(jwtAuthHandler);
+    }
+}
+
+function appendMultipleJWTIssuers(http:InboundAuthHandler[] handlers) {
+    foreach http:InboundAuthHandler jwtHandler in jwtHandlers {
+        handlers.push(jwtHandler);
+    }
+}
+
+# Get application security handlers.
+#
+# + appSecurity - appsecurity array
+# + return - auth handlers
+public function getHandlers(string[] appSecurity) returns http:InboundAuthHandler[] {
+    http:InboundAuthHandler[] handlers = [];
+    //enforce handler order mutualssl, jwts, opaque, basic, apikey
+    if (appSecurity.indexOf(AUTH_SCHEME_MUTUAL_SSL) != ()) {
+        handlers.push(authHandlersMap.get(MUTUAL_SSL_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_JWT) != ()) {
+        appendMultipleJWTIssuers(handlers);
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_OAUTH2) != ()) {
+        handlers.push(authHandlersMap.get(KEY_VALIDATION_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTHN_SCHEME_BASIC) != ()) {
+        handlers.push(authHandlersMap.get(BASIC_AUTH_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_API_KEY) != ()) {
+        handlers.push(authHandlersMap.get(API_KEY_HANDLER));
+    }
+    return handlers;
 }

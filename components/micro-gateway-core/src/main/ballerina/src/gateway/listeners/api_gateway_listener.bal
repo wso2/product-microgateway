@@ -83,7 +83,7 @@ public type APIGatewayListener object {
 
 function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
     http:ListenerAuth auth = {
-         authHandlers: getAuthHandlers(),
+         authHandlers: getAuthHandlers(), //set empty array
          mandateSecureSocket: false,
          position: 2
     };
@@ -107,26 +107,25 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     isConfigInitiated = true;
 }
 
-public function getAuthHandlers() returns http:InboundAuthHandler[] {
+public function getAuthHandlers(string[] appSecurity = [], boolean appSecurityOptional = false, 
+        boolean isMutualSSL = false) returns http:InboundAuthHandler[][] {
     if (authHandlersMap.length() < 1) {
         printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
         initAuthHandlers();
     }
-    return [authHandlersMap.get(MUTUAL_SSL_HANDLER), authHandlersMap.get(JWT_AUTH_HANDLER), authHandlersMap.get(KEY_VALIDATION_HANDLER),
-        authHandlersMap.get(BASIC_AUTH_HANDLER), authHandlersMap.get(API_KEY_HANDLER)];
-}
-
-public function getAPIAuthHandlers(boolean appSecurityOptional) returns http:InboundAuthHandler[][] {
     if (appSecurityOptional) { 
-        return [getAuthHandlers()];
+        if (isMutualSSL) {
+            // add mutual ssl to the auth handlers
+            appSecurity.push(AUTH_SCHEME_MUTUAL_SSL);
+        }
+        return [getHandlers(appSecurity)];
     }
-    if (authHandlersMap.length() < 1) {
-        printDebug(KEY_GW_LISTNER, "Initializing auth handlers");
-        initAuthHandlers();
+    // if application security is mandatory, one of application handlers must pass. If mutual ssl enabled. it also should pass.
+    // e.g. [mutualssl] && [jwt or basic or ...]
+    if (isMutualSSL) {
+        return [getHandlers([AUTH_SCHEME_MUTUAL_SSL]), getHandlers(appSecurity)];
     }
-
-    return [[authHandlersMap.get(MUTUAL_SSL_HANDLER)], [authHandlersMap.get(JWT_AUTH_HANDLER), authHandlersMap.get(KEY_VALIDATION_HANDLER),
-        authHandlersMap.get(BASIC_AUTH_HANDLER), authHandlersMap.get(API_KEY_HANDLER)]];
+    return [getHandlers(appSecurity)];
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {
