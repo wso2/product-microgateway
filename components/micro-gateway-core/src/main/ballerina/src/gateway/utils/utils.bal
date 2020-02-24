@@ -877,8 +877,8 @@ function readMultipleJWTIssuers() {
     }
 
     if (jwtHandlers.length() < 1) {
-        //Initializes jwt handler
-        printDebug(KEY_UTILS, "Find old jwt configurations");
+        //Support old config model
+        printDebug(KEY_UTILS, "Find old jwt configurations or set default JWT configurations.");
         jwt:JwtValidatorConfig jwtValidatorConfig = {
             issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
             audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
@@ -908,4 +908,29 @@ function appendMultipleJWTIssuers(http:InboundAuthHandler[] handlers) {
     foreach http:InboundAuthHandler jwtHandler in jwtHandlers {
         handlers.push(jwtHandler);
     }
+}
+
+# Get application security handlers.
+#
+# + appSecurity - appsecurity array
+# + return - auth handlers
+public function getHandlers(string[] appSecurity) returns http:InboundAuthHandler[] {
+    http:InboundAuthHandler[] handlers = [];
+    //enforce handler order mutualssl, jwts, opaque, basic, apikey
+    if (appSecurity.indexOf(AUTH_SCHEME_MUTUAL_SSL) != ()) {
+        handlers.push(authHandlersMap.get(MUTUAL_SSL_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_JWT) != ()) {
+        appendMultipleJWTIssuers(handlers);
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_OAUTH2) != ()) {
+        handlers.push(authHandlersMap.get(KEY_VALIDATION_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTHN_SCHEME_BASIC) != ()) {
+        handlers.push(authHandlersMap.get(BASIC_AUTH_HANDLER));
+    }
+    if (appSecurity.indexOf(AUTH_SCHEME_API_KEY) != ()) {
+        handlers.push(authHandlersMap.get(API_KEY_HANDLER));
+    }
+    return handlers;
 }

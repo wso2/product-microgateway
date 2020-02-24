@@ -102,10 +102,9 @@ public type JwtAuthProvider object {
                     if (payload is jwt:JwtPayload) {
                         return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled);
                     }
-                } 
+                }
             }
-            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-            return prepareError("Failed to process jwt token in jwt auth provider.");
+            return handleVar;
         } else {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             return prepareError("Failed to authenticate with jwt auth provider.", handleVar);

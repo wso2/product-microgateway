@@ -77,12 +77,12 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<APIKey> apiKeys;
-
-    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
-    private String mutualSSLClientVerification;
-
+    //check whether mutual ssl is enabled
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isMutualSSL = false;
+    //if mutual ssl is enabled, verifying client is mandatory or optional
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private String mutualSSLClientVerification;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean applicationSecurityOptional;

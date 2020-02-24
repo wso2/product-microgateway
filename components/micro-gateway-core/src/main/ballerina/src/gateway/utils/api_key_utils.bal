@@ -184,7 +184,6 @@ public function getAPIKeyAuth() returns [string, string] | error {
     if (invocationContext.attributes.hasKey("apiKeyIn") && invocationContext.attributes.hasKey("apiKeyName")) {
         return [<string>invocationContext.attributes["apiKeyIn"], <string>invocationContext.attributes["apiKeyName"]];
     } else {
-        printDebug(API_KEY_UTIL, "API key is missing in invocation context");
         return error("API key is missing in invocation context");
     }
 }

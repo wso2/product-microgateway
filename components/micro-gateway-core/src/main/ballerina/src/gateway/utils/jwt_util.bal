@@ -17,6 +17,13 @@
 import ballerina/jwt;
 import ballerina/runtime;
 
+# Handle additional claims in JWT token and set them to invocation context.
+# Then return check subscription is validated or not.
+#
+# + apiKeyToken - jwt token
+# + payload - payload of jwt token
+# + subscribedAPIList - subscribedAPIList array
+# + return - subscribed APIs validated or not
 public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList,
         boolean validateAllowedAPIs) returns boolean {
 
@@ -25,6 +32,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
     AuthenticationContext authenticationContext = {};
     authenticationContext.apiKey = apiKeyToken;
     authenticationContext.callerToken = apiKeyToken;
+    // if validateAllowedAPIs is false, then set authenticated to true.
+    // Then if validateAllowedAPIs is true only set authenticated true after validating APIs.
     authenticationContext.authenticated = !validateAllowedAPIs;
 
     string? username = payload?.sub;
@@ -49,7 +58,7 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
         authenticationContext.consumerKey = consumerKey.toString();
     }
 
-    //set application attribs if present in token
+    //set application attributes if present in token
     if (customClaims is map<json> && customClaims.hasKey("application")) {
         json? application = customClaims.get("application");
         if (application is map<json>) {
@@ -81,6 +90,7 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
         while (index < l) {
             var subscription = subscribedAPIList[index];
             if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+                // Successfully validated the API. Then set authenticated to true.
                 authenticationContext.authenticated = true;
                 printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString()
                     + " version:" + subscription.'version.toString());
