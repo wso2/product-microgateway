@@ -83,7 +83,7 @@ public type APIGatewayListener object {
 
 function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
     http:ListenerAuth auth = {
-         authHandlers: getAuthHandlers(),
+         authHandlers: getAuthHandlers(), //set empty array
          mandateSecureSocket: false,
          position: 2
     };

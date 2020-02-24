@@ -23,6 +23,7 @@ import ballerina/runtime;
 # + apiKeyToken - jwt token
 # + payload - payload of jwt token
 # + subscribedAPIList - subscribedAPIList array
+# + validateAllowedAPIs - validate allowed APIs boolean value
 # + return - subscribed APIs validated or not
 public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload, json[] subscribedAPIList,
         boolean validateAllowedAPIs) returns boolean {

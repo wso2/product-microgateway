@@ -73,7 +73,7 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
     //Initiate handlers without listener annotation to make sure that, the handlers get initialized
     //after the gateway cache objects are initialized.
     http:ListenerAuth auth = {
-         authHandlers: getAuthHandlers(),
+         authHandlers: getAuthHandlers(), //set empty array
          position: 2
     };
     config.auth = auth;

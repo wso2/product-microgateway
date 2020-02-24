@@ -23,6 +23,7 @@ import ballerina/runtime;
 #
 # + jwtValidatorConfig - JWT validator configurations
 # + inboundJwtAuthProvider - Reference to b7a inbound auth provider
+# + subscriptionValEnabled - Validate subscription
 public type JwtAuthProvider object {
     *auth:InboundAuthProvider;
 
