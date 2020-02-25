@@ -82,7 +82,6 @@ public type KeyValidationHandler object {
                 if (principal is runtime:Principal) {
                     authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                 }
-                checkAndRemoveAuthHeaders(req, authHeaderName);
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                 invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                 return authenticationResult;
@@ -102,7 +101,6 @@ public type KeyValidationHandler object {
                         string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
                         req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
                     }
-                    checkAndRemoveAuthHeaders(req, authHeaderName);
                 }
                 return authenticationResult;
             } else {
