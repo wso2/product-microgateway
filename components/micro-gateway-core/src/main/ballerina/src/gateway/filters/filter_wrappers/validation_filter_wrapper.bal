@@ -20,8 +20,8 @@
 
      ValidationFilter validationFilter;
 
-     public function __init(map<string> openAPIs) {
-         self.validationFilter = new ValidationFilter(openAPIs);
+     public function __init() {
+         self.validationFilter = new ValidationFilter();
      }
 
      public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
@@ -34,13 +34,13 @@
          return result;
      }
 
-//     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-//         //Start a new root span attaching to the system span.
-//         int | error | () spanIdRes = startSpan(VALIDATION_FILTER_RESPONSE);
-//         boolean result = self.validationFilter.filterResponse(response, context);
-//         //Finish span.
-//         finishSpan(VALIDATION_FILTER_RESPONSE, spanIdRes);
-//         return result;
-//     }
+     public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
+         //Start a new root span attaching to the system span.
+         int | error | () spanIdRes = startSpan(VALIDATION_FILTER_RESPONSE);
+         boolean result = self.validationFilter.filterResponse(response, context);
+         //Finish span.
+         finishSpan(VALIDATION_FILTER_RESPONSE, spanIdRes);
+         return result;
+     }
 
  };

@@ -21,6 +21,8 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.cmd.CommandUtil;
 import org.slf4j.Logger;
@@ -41,6 +43,8 @@ import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -140,6 +144,38 @@ public class BuildCmd implements LauncherCmd {
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
 
             CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
+            String fileContent = null;
+            String val = null;
+            FileInputStream fileInputStream;
+            File dir = new File(resourcesPath);
+            File[] directoryListing = dir.listFiles();
+            if (directoryListing != null) {
+                for (File child : directoryListing) {
+                      String ch = child.toString();
+                     if (ch.endsWith("yaml")) {
+                         try {
+                             fileInputStream = new FileInputStream(child);
+                             byte[] crunchifyValue = new byte[(int) child.length()];
+                             fileInputStream.read(crunchifyValue);
+                             fileInputStream.close();
+
+                             fileContent = new String(crunchifyValue, "UTF-8");
+                         } catch (IOException e) {
+                             // TODO Auto-generated catch block
+
+                         }
+
+
+                       val = convertYamlToJson(fileContent);
+                     }
+                     FileWriter writer;
+                     writer = new FileWriter(resourcesPath  + "/" + Math.random() + ".json");
+                     writer.write(val);
+                     writer.close();
+                     child.delete();
+
+                }
+            }
 
             // Copy static source files
             //CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
@@ -150,6 +186,14 @@ public class BuildCmd implements LauncherCmd {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
         }
+    }
+
+    private String convertYamlToJson(String yaml) throws IOException {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Object obj = yamlReader.readValue(yaml, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
     }
 
     private boolean isOpenAPIsAvailable(String fileLocation) {

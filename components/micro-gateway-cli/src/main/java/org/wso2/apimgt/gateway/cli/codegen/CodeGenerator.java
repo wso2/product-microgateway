@@ -59,6 +59,7 @@ import java.util.List;
 public class CodeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
     private static PrintStream outStream = System.out;
+    public static String projectName;
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -135,6 +136,7 @@ public class CodeGenerator {
         if (Files.exists(Paths.get(projectAPIDefGenLocation))) {
             openAPIDirectoryLocations.add(projectAPIDefGenLocation);
         }
+        CodeGenerator.projectName = projectName;
 
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
@@ -156,7 +158,6 @@ public class CodeGenerator {
                         String openAPIVersion = OpenAPICodegenUtils.findSwaggerVersion(openAPIContentAsJson, false);
                         OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString(), openAPIVersion);
                         ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson);
-                        api.setProjectName(projectName);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
 

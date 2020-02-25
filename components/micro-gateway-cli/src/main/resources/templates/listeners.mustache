@@ -1,8 +1,6 @@
 import wso2/gateway;
 import ballerina/http;
 import ballerina/config;
-import ballerina/io;
-import ballerina/log;
 
 {{#if containerConfig.hasDocker}}import ballerina/docker;{{/if}}
 {{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerina/kubernetes;{{/if}}
@@ -92,7 +90,6 @@ listener http:Listener tokenListenerEndpoint = new (
 
 public function getFilters() returns http:RequestFilter[] {
     map<json> deployedPolicies = getDeployedPolicies();
-    map<string> apis = gateway:getOpenAPIs();
 
     // Grpc Filter
     gateway:GrpcFilter grpcFilter = new gateway:GrpcFilter();
@@ -117,13 +114,13 @@ public function getFilters() returns http:RequestFilter[] {
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
         subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
-        validationFilter = new gateway:ValidationFilterWrapper(openAPIs);
+        validationFilter = new gateway:ValidationFilterWrapper();
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
         subscriptionFilter =  new gateway:SubscriptionFilter();
-        validationFilter = new gateway:ValidationFilter(openAPIs);
+        validationFilter = new gateway:ValidationFilter();
     }
 
     authorizationFilter = gateway:getDefaultAuthorizationFilter();

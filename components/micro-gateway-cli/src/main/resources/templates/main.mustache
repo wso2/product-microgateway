@@ -2,19 +2,16 @@ import wso2/gateway;
 
 public function main() {
     int totalResourceLength = 0;
-    {{#each this}}
     boolean isRequestValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
     gateway:REQUEST_VALIDATION_ENABLED, gateway:DEFAULT_REQUEST_VALIDATION_ENABLED);
     boolean isResponseValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
     gateway:RESPONSE_VALIDATION_ENABLED, gateway:DEFAULT_RESPONSE_VALIDATION_ENABLED);
-
+    {{#each this}}
     if (isRequestValidationEnabled || isResponseValidationEnabled) {
-    map<string>|error  openAPIs =  gateway:extractJAR("{{projectName}}", "{{cut qualifiedServiceName " "}}");
-    if (openAPIs is map<string>) {
-        gateway:setOpenAPIs(openAPIs);
-
+    error? err = gateway:extractJAR("{{projectName}}", "{{cut qualifiedServiceName " "}}");
+    if (err is error) {
+        gateway:printError(gateway:MAIN, "Error when retrieving the resources artifacts", err);
     }
-
     }
     string[] {{cut qualifiedServiceName " "}}_service = [{{#paths}}{{#value}}{{#operations}}{{#value}} "{{operationId}}"{{#unless @last}},{{/unless}}
                                 {{/value}}{{/operations}}{{/value}}{{#unless @last}},{{/unless}}{{/paths}}];
