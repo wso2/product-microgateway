@@ -305,12 +305,12 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {
             fault: {
-            code: errorCode,
-            message: errorMessage,
-            description: errorDescription
-        }
-    };
-    response.setJsonPayload(payload);
+                code: errorCode,
+                message: errorMessage,
+                description: errorDescription
+            }
+        };
+        response.setJsonPayload(payload);
     } else {
         attachGrpcErrorHeaders (response, errorMessage);
     }
