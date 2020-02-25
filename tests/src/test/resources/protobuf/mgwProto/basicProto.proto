@@ -29,7 +29,7 @@ service JwtAuthTestService {
     rpc testCall(TestRequest) returns (TestResponse);
 
     rpc testCallWithScopes(TestRequest) returns (TestResponse){
-        option (wso2.scopes) = "scope_1";
+        option (wso2.method_scopes) = "scope_1";
     };
 
 	//production endpoints
@@ -38,7 +38,7 @@ service JwtAuthTestService {
 	};
 
 	//service level security
-    option (wso2.security) = OAUTH2;
+    option (wso2.security) = JWT;
 }
 
 service ThrottlingTestService {
@@ -53,4 +53,7 @@ service ThrottlingTestService {
     option (wso2.production_endpoints) = {
         url : "http://localhost:50051";
     };
+
+    //service level security
+    option (wso2.security) = JWT;
 }
