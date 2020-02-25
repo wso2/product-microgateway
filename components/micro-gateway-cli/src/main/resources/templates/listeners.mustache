@@ -99,8 +99,6 @@ public function getFilters() returns http:RequestFilter[] {
     gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
     // Analytic filter
     gateway:AnalyticsRequestFilter analyticsFilter;
-    // Subscription validation filter
-    gateway:SubscriptionFilter | gateway:SubscriptionFilterWrapper subscriptionFilter;
     //Validation filter
     gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
     // Authorization filter
@@ -127,7 +125,7 @@ public function getFilters() returns http:RequestFilter[] {
 
     // Extension filter
     ExtensionFilter extensionFilter = new;
-
+    
     return [grpcFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter,
             analyticsFilter, extensionFilter];
 }
