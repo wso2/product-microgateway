@@ -424,7 +424,7 @@ public class Validate {
                         return extractReference(nodeNext.toString());
                     }
                 } catch (IOException e) {
-                    // throw new APIManagementException("Error occurred while converting bytes from json node");
+                    logger.error("Error occurred while converting bytes from json node");
                 }
             } else {
                 return value;
