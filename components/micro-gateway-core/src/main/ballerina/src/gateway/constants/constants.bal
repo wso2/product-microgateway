@@ -394,3 +394,8 @@ public const string API_KEY_HANDLER = "apiKeyHandler";
 public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
 public const string BASIC_AUTH_HANDLER = "basicAuthHandler";
 public const string COOKIE_BASED_HANDLER = "cookieBasedHandler";
+
+//validation
+public const string VALIDATION_STATUS = "validated";
+public const string REQ_METHOD = "requestMethod";
+public const string REQUEST_PATH = "requestPath";

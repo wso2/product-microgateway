@@ -142,44 +142,13 @@ public class BuildCmd implements LauncherCmd {
             // Created resources directory
             String resourcesPath =
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
-
             CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
-            String fileContent = null;
-            String val = null;
-            FileInputStream fileInputStream;
-            File dir = new File(resourcesPath);
-            File[] directoryListing = dir.listFiles();
-            if (directoryListing != null) {
-                for (File child : directoryListing) {
-                      String ch = child.toString();
-                     if (ch.endsWith("yaml")) {
-                         try {
-                             fileInputStream = new FileInputStream(child);
-                             byte[] crunchifyValue = new byte[(int) child.length()];
-                             fileInputStream.read(crunchifyValue);
-                             fileInputStream.close();
-
-                             fileContent = new String(crunchifyValue, "UTF-8");
-                         } catch (IOException e) {
-                             // TODO Auto-generated catch block
-
-                         }
-
-
-                       val = convertYamlToJson(fileContent);
-                     }
-                     FileWriter writer;
-                     writer = new FileWriter(resourcesPath  + "/" + Math.random() + ".json");
-                     writer.write(val);
-                     writer.close();
-                     child.delete();
-
-                }
-            }
+            // If resources folder contains .yaml file, replace the .yaml with .json file
+            replaceYAMLFilesToJson(resourcesPath);
 
             // Copy static source files
             //CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
-                    CmdUtils.getProjectTargetInterceptorsPath(projectName);
+            CmdUtils.getProjectTargetInterceptorsPath(projectName);
             new CodeGenerator().generate(projectName, true);
             CmdUtils.updateBallerinaToml(projectName);
         } catch (IOException e) {
@@ -194,6 +163,32 @@ public class BuildCmd implements LauncherCmd {
 
         ObjectMapper jsonWriter = new ObjectMapper();
         return jsonWriter.writeValueAsString(obj);
+    }
+
+    private void replaceYAMLFilesToJson(String resPath) throws IOException {
+        String fileContent;
+        String val = null;
+        FileInputStream fileInputStream;
+        File dir = new File(resPath);
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                String ch = child.toString();
+                if (ch.endsWith("yaml")) {
+                   fileInputStream = new FileInputStream(child);
+                   byte[] value = new byte[(int) child.length()];
+                   fileInputStream.read(value);
+                   fileInputStream.close();
+                   fileContent = new String(value, "UTF-8");
+                   val = convertYamlToJson(fileContent);
+                }
+                FileWriter writer;
+                writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                writer.write(val);
+                writer.close();
+                child.delete();
+            }
+        }
     }
 
     private boolean isOpenAPIsAvailable(String fileLocation) {
@@ -308,7 +303,7 @@ public class BuildCmd implements LauncherCmd {
 
         String targetGenDir = targetDirPath + File.separator + CliConstants.PROJECT_GEN_DIR;
         CmdUtils.createDirectory(targetGenDir, true);
-        
+
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);

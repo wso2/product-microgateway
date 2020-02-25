@@ -111,13 +111,11 @@ public function getFilters() returns http:RequestFilter[] {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
-        subscriptionFilter =  new gateway:SubscriptionFilterWrapper();
         validationFilter = new gateway:ValidationFilterWrapper();
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
-        subscriptionFilter =  new gateway:SubscriptionFilter();
         validationFilter = new gateway:ValidationFilter();
     }
 
@@ -125,8 +123,8 @@ public function getFilters() returns http:RequestFilter[] {
 
     // Extension filter
     ExtensionFilter extensionFilter = new;
-    
-    return [grpcFilter, preAuthnFilter, authorizationFilter, subscriptionFilter, throttleFilter, validationFilter,
+
+    return [grpcFilter, preAuthnFilter, authorizationFilter, throttleFilter, validationFilter,
             analyticsFilter, extensionFilter];
 }
 

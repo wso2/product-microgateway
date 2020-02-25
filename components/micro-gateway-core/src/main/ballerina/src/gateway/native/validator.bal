@@ -25,12 +25,11 @@ import ballerinax/java;
 # +return - status of the validation
 public function requestValidate(string reqPath, string requestMethod,  string payload, string serviceName)
                                                                               returns handle | error {
- handle requestPath = java:fromString(reqPath);
- handle reqMethod = java:fromString(requestMethod);
- handle requestPayload = java:fromString(payload);
- handle servName = java:fromString(serviceName);
-
- return jRequestValidate(requestPath, reqMethod, requestPayload, servName);
+     handle requestPath = java:fromString(reqPath);
+     handle reqMethod = java:fromString(requestMethod);
+     handle requestPayload = java:fromString(payload);
+     handle servName = java:fromString(serviceName);
+     return jRequestValidate(requestPath, reqMethod, requestPayload, servName);
 }
 
 # Validate response payload.
@@ -41,15 +40,14 @@ public function requestValidate(string reqPath, string requestMethod,  string pa
 # + response - Service Name
 # + serviceNme - Service Name
 # + return - Extracted resources map
-public function responseValidate(string reqPath, string requestMethod, string responseCode, string response, string serviceNme)
-                                                                              returns handle | error {
- handle requestPath = java:fromString(reqPath);
- handle reqMethod = java:fromString(requestMethod);
- handle resCode = java:fromString(responseCode);
- handle responsePayload = java:fromString(response);
- handle servName = java:fromString(serviceNme);
-
- return jResponseValidate(requestPath, reqMethod, resCode, responsePayload, servName);
+public function responseValidate(string reqPath, string requestMethod, string responseCode, string response,
+                                                                           string serviceNme) returns handle | error {
+     handle requestPath = java:fromString(reqPath);
+     handle reqMethod = java:fromString(requestMethod);
+     handle resCode = java:fromString(responseCode);
+     handle responsePayload = java:fromString(response);
+     handle servName = java:fromString(serviceNme);
+     return jResponseValidate(requestPath, reqMethod, resCode, responsePayload, servName);
 }
 
 # Extract Resource artifcats.
@@ -58,9 +56,9 @@ public function responseValidate(string reqPath, string requestMethod, string re
 # + serviceName - Service Name
 # + return - Extracted resources map
 public function extractJAR(string projectName, string serviceName) returns error? {
-   handle prjtName = java:fromString(projectName);
-   handle servName = java:fromString(serviceName);
-   return extract(prjtName, servName);
+     handle prjtName = java:fromString(projectName);
+     handle servName = java:fromString(serviceName);
+     return extract(prjtName, servName);
 }
 
 function extract(handle Name, handle serv) returns error?  = @java:Method {
@@ -70,13 +68,13 @@ function extract(handle Name, handle serv) returns error?  = @java:Method {
 } external;
 
 function jRequestValidate(handle resourcePath, handle reqMethod, handle requestPayload, handle serviceName)
-                        returns handle | error = @java:Method {
+                                                                            returns handle | error = @java:Method {
      name: "validateRequest",
      class: "org.wso2.micro.gateway.core.validation.Validate"
 } external;
 
 function jResponseValidate(handle resourcePath, handle reqMethod, handle resCode, handle res, handle serName)
                         returns handle | error = @java:Method {
- name: "validateResponse",
- class: "org.wso2.micro.gateway.core.validation.Validate"
+     name: "validateResponse",
+     class: "org.wso2.micro.gateway.core.validation.Validate"
 } external;

@@ -47,61 +47,58 @@ public class Validate {
     private static final Log logger = LogFactory.getLog(Validate.class);
     private static JsonNode rootNode;
     private static String swaggerObject;
-    private static Map<String, String>  swaggers = new HashMap<>();
+    private static Map<String, String> swaggers = new HashMap<>();
 
     /**
      * Validate request message.
      *
-     * @param requestPath  API request resource path
-     * @param reqMethod    API request method
-     * @param payload      Request payload
+     * @param requestPath API request resource path
+     * @param reqMethod   API request method
+     * @param payload     Request payload
      * @return Status of the validation
      */
-    public static String validateRequest(String requestPath, String reqMethod, String payload, String serviceName) {
-        String swagger =  swaggers.get(serviceName);
+    public static String validateRequest(String requestPath, String reqMethod, String payload, String serviceName)
+            throws IOException {
+        String swagger = swaggers.get(serviceName);
         String schema = extractSchemaFromRequest(requestPath, reqMethod, swagger);
         return validateContent(schema, payload);
     }
 
     /***
-     *
-     * @param resourcePath
-     * @param reqmethod
-     * @param responseCode
-     * @param response
-     * @return
+     * Validate response message.
+     * @param resourcePath request resource path
+     * @param reqMethod request method
+     * @param responseCode response message code
+     * @param response response payload
+     * @return Status of the validation result
      */
-    public static String validateResponse(String resourcePath, String reqmethod, String responseCode, String response,
+    public static String validateResponse(String resourcePath, String reqMethod, String responseCode, String response,
                                           String serviceName) {
-        String swagger =  swaggers.get(serviceName);
-        String responseSchema = extractResponse(resourcePath, reqmethod, responseCode, swagger);
+        String swagger = swaggers.get(serviceName);
+        String responseSchema = extractResponse(resourcePath, reqMethod, responseCode, swagger);
         return validateContent(responseSchema, response);
-
     }
 
+    /***
+     * Extract resource artifacts from the jar file
+     * @param projectName project name.
+     * @param serviceName ballerina service name
+     * @throws IOException
+     */
     public static void extractResources(String projectName, String serviceName) throws IOException {
         String swaggerContent;
-        InputStream in = Validate.class.getResourceAsStream("/resources/wso2/" + projectName);
+        InputStream in = Validate.class.getResourceAsStream("/resources/wso2/" + projectName + "/");
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         while ((swaggerContent = reader.readLine()) != null && !swaggerContent.isEmpty()) {
             swaggers.put(serviceName, swaggerContent);
         }
     }
 
-    /**
-     * Extract the relevant schema from the request.
-     *
-     * @return String Schema
-     */
-    private static String extractSchemaFromRequest(String resourcePath, String requestMethod,
-                                                   String swagger) {
+    private static String extractSchemaFromRequest(String resourcePath, String requestMethod, String swagger)
+            throws IOException {
         String schema;
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            rootNode = objectMapper.readTree(swagger.getBytes());
-        } catch (IOException e) {
-
-        }
+        rootNode = objectMapper.readTree(swagger.getBytes());
         swaggerObject = swagger;
         String value = JsonPath.read(swagger, Constants.JSON_PATH +
                 Constants.OPEN_API).toString();
@@ -317,7 +314,7 @@ public class Validate {
      *
      * @param payloadObject Request/response payload
      * @param schemaString  Schema which uses to validate request/response messages
-     * @return
+     * @return Returns "validated" or everit error logs
      */
     private static String validateContent(String payloadObject, String schemaString) {
         logger.debug("Validating JSON content against the schema");

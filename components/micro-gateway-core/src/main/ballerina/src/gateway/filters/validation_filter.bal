@@ -18,24 +18,37 @@
  import ballerina/stringutils;
 
  int errorItem = 0;
- string requestPath = "";
- string requestMethod = "";
 
  boolean enableRequestValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, REQUEST_VALIDATION_ENABLED,
  DEFAULT_REQUEST_VALIDATION_ENABLED);
  boolean enableResponseValidation = getConfigBooleanValue(VALIDATION_CONFIG_INSTANCE_ID, RESPONSE_VALIDATION_ENABLED,
  DEFAULT_RESPONSE_VALIDATION_ENABLED);
 
+// Validation filter
  public type ValidationFilter object {
 
   public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
-                                                                                    returns boolean {
+                                                                                          returns boolean {
+    if (filterContext.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>filterContext.attributes[SKIP_ALL_FILTERS]) {
+        printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+        return true;
+    }
+    if (!enableRequestValidation) {
+        return true;
+    }
     printDebug(KEY_VALIDATION_FILTER, "The request validation filter");
     boolean result = doValidationFilterRequest(caller, request, filterContext);
     return result;
   }
 
   public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
+     if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
+         printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+         return true;
+     }
+     if (!enableResponseValidation) {
+         return true;
+     }
      printDebug(KEY_VALIDATION_FILTER, "The response validation filter");
      boolean result = doValidationFilterResponse(response, context);
      return result;
@@ -51,15 +64,16 @@
     json result = {};
     json|error bodyModels = {};
     json|error paths = {};
+    string requestPath = "";
+    string requestMethod = "";
 
-    if (enableRequestValidation) {
         printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled.");
         APIConfiguration? apiConfig = apiConfigAnnotationMap[filterContext.getServiceName()];
         string serviceName = filterContext.getServiceName();
-       //getting the payload of the request
-        var payload = request.getJsonPayload();
+        printDebug(KEY_VALIDATION_FILTER, "Relevent Service name : " + serviceName);
        //getting the method of the request
         requestMethod = request.method.toLowerAscii();
+        filterContext.attributes[REQ_METHOD] = requestMethod;
        //getting the resource Name
         string resourceName = filterContext.getResourceName();
         //getting the payload of the request
@@ -69,12 +83,11 @@
         http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
         if (httpResourceConfig is http:HttpResourceConfig) {
             requestPath = httpResourceConfig.path;
-            filterContext.attributes["requestPath"] = requestPath;
-            filterContext.attributes["requestMethod"] = requestMethod;
+            filterContext.attributes[REQUEST_PATH] = requestPath;
             printDebug(KEY_VALIDATION_FILTER, "The Request resource Path : " + requestPath);
         }
         var valResult = requestValidate(requestPath, requestMethod, payloadVal, serviceName);
-        if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), "validated")) {
+        if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
             return true;
         } else {
             http:Response res = new;
@@ -82,39 +95,33 @@
             res.setPayload(valResult.toString());
             return false;
         }
-     }
-     return false;
-  }
+ }
 
- function doValidationFilterResponse(@tainted http:Response response, http:FilterContext context)
-                                                                                                 returns boolean {
-       if (enableResponseValidation) {
-           printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
-           string resPath = "";
-           string reqMethod = "";
-           string responseCode = response.statusCode.toString();
-           any path = context.attributes["requestPath"];
-           if (path is string) {
-               resPath = path;
-           }
-           any method = context.attributes["requestMethod"];
-           if (method is string) {
-               reqMethod = method;
-           }
-           string resPayload = response.getJsonPayload().toString();
-           string servName = context.getServiceName();
-           var valResult = responseValidate(resPath, requestMethod, responseCode, resPayload, servName);
+ function doValidationFilterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
+     string resPath = "";
+     string requestMethod = "";
+     string reqMethod = "";
 
-           if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), "validated")) {
-               return true;
-            } else {
-                http:Response res = new;
-                res.statusCode = 500;
-                res.setPayload(valResult.toString());
-                return false;
-
-                }
-       }
-
-  return false;
-  }
+         printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
+         string responseCode = response.statusCode.toString();
+         any path = context.attributes[REQUEST_PATH];
+         if (path is string) {
+             resPath = path;
+         }
+         any method = context.attributes[REQ_METHOD];
+         if (method is string) {
+            reqMethod = method;
+         }
+         string resPayload = response.getJsonPayload().toString();
+         string servName = context.getServiceName();
+         printDebug(KEY_VALIDATION_FILTER, "The Response payload : " + resPayload);
+         var valResult = responseValidate(resPath, requestMethod, responseCode, resPayload, servName);
+         if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
+             return true;
+         } else {
+             http:Response res = new;
+             res.statusCode = 500;
+             res.setPayload(valResult.toString());
+             return false;
+         }
+ }
