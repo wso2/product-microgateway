@@ -112,7 +112,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Discover the openAPI version of the given API definition
+     * Discover the openAPI version of the given API definition.
      *
      * @param apiDefinition API definition (as a file path or String content)
      * @param isFilePath    If the given api Definition is a file path
@@ -172,7 +172,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format
+     * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format.
      * v2/YAML -> v2/JSON
      * v3/YAML -> v3/JSON
      *
@@ -301,7 +301,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Get transport security from API Definition extension
+     * Get transport security from API Definition extension.
      *
      * @param openAPI API definition
      * @return TransportSecurity
@@ -953,7 +953,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * validate the openAPI definition
+     * validate the openAPI definition.
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openAPIFilePath file path to openAPI definition
@@ -971,11 +971,11 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the security schemas of type "oauth2"
+     * store the security schemas of type "oauth2".
      *
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+    public static void setOauthSecuritySchemaList(OpenAPI openAPI) {
         //Since the security schema list needs to instantiated per each API
         oauthSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
@@ -995,7 +995,7 @@ public class OpenAPICodegenUtils {
      *
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setSecuritySchemaList(OpenAPI openAPI) {
+    public static void setSecuritySchemaList(OpenAPI openAPI) {
         //Since the security schema list needs to instantiated per each API
         basicSecuritySchemaList = new ArrayList<>();
         apiKeySecuritySchemaMap = new HashMap();
@@ -1014,11 +1014,11 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the endpoint extensions which are used as references
+     * store the endpoint extensions which are used as references.
      *
      * @param extensions {@link Map<String,Object>} object
      */
-    private static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
+    public static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
         if (extensions != null && extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
             try {
                 TypeReference<List<Map<Object, Object>>> typeRef1 = new TypeReference<List<Map<Object, Object>>>() {
