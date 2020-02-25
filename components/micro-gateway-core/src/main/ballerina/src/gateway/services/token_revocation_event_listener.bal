@@ -70,11 +70,11 @@ public function startTokenRevocationSubscriberService() returns @tainted jms:Mes
     jms:MessageConsumer subscriberEndpoint = check session->createDurableSubscriber(dest, "sub-2");
     var attachResult = subscriberEndpoint.__attach(jmsTokenRevocation);
     if (attachResult is error) {
-        printDebug(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.");
+        printDebug(KEY_TOKEN_REVOCATION_JMS, "Message consumer hasn't been attached to the service.");
     }
     var startResult = subscriberEndpoint.__start();
     if (startResult is error) {
-        printDebug(KEY_THROTTLE_UTIL, "Starting the task is failed.");
+        printDebug(KEY_TOKEN_REVOCATION_JMS, "Starting the task is failed.");
     }
     return subscriberEndpoint;
 }

@@ -43,7 +43,7 @@ public const string DEFAULT_KM_CONF_SECURITY_OAUTH2 = "";
 public const string DEFAULT_JWT_ISSUER = "https://localhost:9443/oauth2/token";
 public const boolean DEFAULT_VALIDATE_SUBSCRIPTION = false;
 public const string DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
-public const string DEFAULT_CERTIFICATE_ALIAS = "wso2apim";
+public const string DEFAULT_CERTIFICATE_ALIAS = "wso2apim310";
 public const string DEFAULT_JWT_HEADER_NAME = "X-JWT-Assertion";
 
 public const boolean DEFAULT_CACHING_ENABLED = true;

@@ -159,7 +159,7 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
         }
         if (subscribedAPIList is json[]) {
             if (validateAllowedAPIs && subscribedAPIList.length() < 1) {
-                printError(API_KEY_UTIL, "SubscribedAPI list is empty");
+                printDebug(API_KEY_UTIL, "SubscribedAPI list is empty");
                 return false;
             }
             validated = handleSubscribedAPIs(apiKeyToken, payload, subscribedAPIList, validateAllowedAPIs);

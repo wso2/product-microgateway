@@ -102,7 +102,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {
         config.httpVersion = "2.0";
-        log:printDebug("httpVersion = " + config.httpVersion);
+        printDebug(KEY_GW_LISTNER, "httpVersion = " + config.httpVersion);
     }
     isConfigInitiated = true;
 }
