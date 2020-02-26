@@ -690,11 +690,7 @@ public function prepareError(string message, error? err = ()) returns auth:Error
 # + err - The `error` instance.
 # + return - Returns the prepared `AuthenticationError` instance.
 function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    if(isDebugEnabled) {
-        log:printDebug(function () returns string {
-            return message;
-        });
-    }
+    printDebug(KEY_UTILS, message);
     if (err is error) {
         http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
         return preparedError;
