@@ -147,10 +147,6 @@ returns boolean {
         sendErrorResponse(caller, request, context);
         return false;
     }
-    // if auth providers are there, use those to authenticate
-
-    //TODO: Move this to post authentication handler
-    //checkAndRemoveAuthHeaders(request, authHeaderName);
     return true;
 }
 
@@ -162,18 +158,5 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
-    }
-}
-
-function checkAndRemoveAuthHeaders(http:Request request, string authHeaderName) {
-    if (getConfigBooleanValue(AUTH_CONF_INSTANCE_ID, REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE, DEFAULT_REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE)) {
-        request.removeHeader(authHeaderName);
-        printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + authHeaderName + " from the request");
-    }
-    if (request.hasHeader(TEMP_AUTH_HEADER)) {
-        request.setHeader(AUTH_HEADER, request.getHeader(TEMP_AUTH_HEADER));
-        printDebug(KEY_PRE_AUTHN_FILTER, "Setting the backed up auth header value to the header: " + AUTH_HEADER);
-        request.removeHeader(TEMP_AUTH_HEADER);
-        printDebug(KEY_PRE_AUTHN_FILTER, "Removed header : " + TEMP_AUTH_HEADER + " from the request");
     }
 }

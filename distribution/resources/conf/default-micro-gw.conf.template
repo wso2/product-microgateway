@@ -21,9 +21,9 @@
 
 # API Authorization security for the gateway and the backend
 [authConfig]
-  # Global Authorization header expected by the gateway. Can be overridden at API level using the extension
+  # Authorization header expected by the Microgateway. Can be overridden at API level using the extension
   authorizationHeader = "Authorization"
-  # Send authorization header to the backend
+  # Remove authorization header from the backend request
   removeAuthHeaderFromOutMessage = true
 
 # API JWT Authorization security for backend
