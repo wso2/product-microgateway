@@ -52,6 +52,8 @@ public type OAuthzFilter object {
             }
         }
         printDebug(KEY_AUTHZ_FILTER, "Returned with value: " + result.toString());
+        string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
+        checkAndRemoveAuthHeaders(request, authHeader);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHZ);
         return result;
 
