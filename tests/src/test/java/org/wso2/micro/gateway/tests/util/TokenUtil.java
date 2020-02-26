@@ -23,7 +23,7 @@ public class TokenUtil {
         jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
         jwtTokenInfo.put("sub", "admin");
         jwtTokenInfo.put("application", new JSONObject(applicationDTO));
-        jwtTokenInfo.put("iss", "https://localhost:8244/token");
+        jwtTokenInfo.put("iss", "https://localhost:9443/oauth2/token");
         jwtTokenInfo.put("keytype", keyType);
         jwtTokenInfo.put("iat", System.currentTimeMillis());
         jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);

@@ -58,7 +58,7 @@ import wso2/gateway;
 @http:ServiceConfig {
     basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}},
     auth: {
-        authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
+        authHandlers: gateway:getAuthHandlers([{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}], {{applicationSecurityOptional}}, {{isMutualSSL}})
     }
    {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
@@ -78,7 +78,7 @@ import wso2/gateway;
     authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
     security: {
             "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
-            "mutualSSL": "{{api.mutualSSL}}",
+            "mutualSSL": "{{mutualSSLClientVerification}}",
             "applicationSecurityOptional": {{applicationSecurityOptional}}
         }
 }
@@ -96,7 +96,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{else}}
             enabled:false,
         {{/if}}
-            authHandlers: gateway:getAPIAuthHandlers({{applicationSecurityOptional}})
+            authHandlers: gateway:getAuthHandlers([{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}], {{applicationSecurityOptional}}, {{isMutualSSL}})
         }
     }
     @gateway:Resource {

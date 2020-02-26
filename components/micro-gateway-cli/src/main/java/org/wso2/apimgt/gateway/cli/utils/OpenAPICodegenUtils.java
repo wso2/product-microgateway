@@ -297,7 +297,9 @@ public class OpenAPICodegenUtils {
             transports = Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS);
         }
         api.setTransport(transports);
-        api.setMutualSSL(transportSecurity != null ? transportSecurity.getMutualSSL() : OpenAPIConstants.OPTIONAL);
+        if (transportSecurity != null && transportSecurity.getMutualSSL() != null) {
+            api.setMutualSSL(transportSecurity.getMutualSSL());
+        }
     }
 
     /**
@@ -820,7 +822,7 @@ public class OpenAPICodegenUtils {
                         " to the required format.");
             }
             if (!validateAppSecurityOptionality(appSecurity, mutualSSL)) {
-                throw new CLIRuntimeException("Application security is given as optional for but Mutual SSL is not " +
+                throw new CLIRuntimeException("Application security is given as optional but Mutual SSL is not " +
                         "mandatory for the API");
             }
         }
@@ -1109,8 +1111,8 @@ public class OpenAPICodegenUtils {
                 getAuthProvidersForSecurityType(securityType, authProviders);
             }
         }
-
-        if (authProviders.isEmpty()) {
+        //add oauth2 and jwt if security is empty. But if application security is optional not to add defaults.
+        if ((appSecurity == null || !appSecurity.isOptional()) && authProviders.isEmpty()) {
             authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
             authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
         }
