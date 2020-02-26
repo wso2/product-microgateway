@@ -66,12 +66,12 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
 
-    log:printDebug("ThrottleMessage is sent to traffic manager");
+    printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage is sent to traffic manager");
 
     var response = throttleEndpoint->post("/throttleEventReceiver", clientRequest);
 
     if (response is http:Response) {
-        log:printDebug("\nStatus Code: " + response.statusCode.toString());
+        printDebug(KEY_THROTTLE_UTIL, "\nStatus Code: " + response.statusCode.toString());
     } else {
         log:printError(response.reason(), err = response);
     }

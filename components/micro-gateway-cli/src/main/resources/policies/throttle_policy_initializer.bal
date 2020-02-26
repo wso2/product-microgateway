@@ -1,4 +1,3 @@
-import ballerina/log;
 import ballerina/runtime;
 import wso2/gateway;
 
@@ -10,7 +9,7 @@ function initThrottlePolicies() {
     if (!globalThrottlingEnabled) {
         while (true) {
             if (gateway:isStreamsInitialized == true) {
-                log:printDebug("Throttle streams initialized.");
+                gateway:printDebug(gateway:KEY_THROTTLE_UTIL, "Throttle streams initialized.");
             break;
         }
     }
@@ -29,7 +28,7 @@ function initThrottlePolicies() {
 
     future<()> initSubscriptionUnauthenticatedPolicyFtr = start initSubscriptionUnauthenticatedPolicy();
 
-    log:printDebug("Throttle policies initialized.");
+    gateway:printDebug(gateway:KEY_THROTTLE_UTIL, "Throttle policies initialized.");
     }
 }
 

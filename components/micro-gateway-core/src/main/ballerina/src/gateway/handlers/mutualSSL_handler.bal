@@ -40,28 +40,27 @@ public type MutualSSLHandler object {
         string|error mutualSSLVerifyClient = getMutualSSL();
         if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
                 && req.mutualSslHandshake[STATUS] != PASSED ) {
-            setErrorMessageToInvocationContext(MUTUAL_SSL_FAILED);
+            // provided more generic error code to avoid security issues.
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS); 
             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
         }
 
         if (req.mutualSslHandshake[STATUS] == PASSED) {
             printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake passed.");
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-            return doMTSLFilterRequest(req, invocationContext);
+            doMTSLFilterRequest(req, invocationContext); 
         }
         return true;
     }
 };
 
 
-function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) returns boolean | http:AuthenticationError {
+function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    boolean | http:AuthenticationError isAuthenticated = true;
     AuthenticationContext authenticationContext = {};
-    boolean isSecured = true;
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
 
-    context.attributes[IS_SECURED] = isSecured;
+    context.attributes[IS_SECURED] = true;
     int startingTime = getCurrentTimeForAnalytics();
     context.attributes[REQUEST_TIME] = startingTime;
     context.attributes[FILTER_FAILED] = false;
@@ -70,6 +69,4 @@ function doMTSLFilterRequest(http:Request request, runtime:InvocationContext con
     authenticationContext.username = USER_NAME_UNKNOWN;
     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-
-    return isAuthenticated;
 }
