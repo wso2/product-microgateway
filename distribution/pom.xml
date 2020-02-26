@@ -91,6 +91,18 @@
                 <version>${download.plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>download-ballerina</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>download-wum-tool</id>
                         <phase>prepare-package</phase>
                         <goals>
@@ -126,32 +138,12 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeArtifactIds>
-                                ballerina-jre-artifacts
-                            </includeArtifactIds>
+                            <includeArtifactIds>ballerina-jre-artifacts</includeArtifactIds>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                             <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-jbal-tools</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.ballerinalang</groupId>
-                                    <artifactId>jballerina-tools</artifactId>
-                                    <version>${ballerina.platform.version}</version>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
                     </execution>
                     <execution>

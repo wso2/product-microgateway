@@ -45,9 +45,7 @@
             </excludes>
         </fileSet>
         <fileSet>
-        <directory>
-            ${project.build.directory}/extracted-jre-linux
-        </directory>
+        <directory>${project.build.directory}/extracted-jre-linux</directory>
         <outputDirectory>wso2am-micro-gw-linux-${project.version}/lib/</outputDirectory>
         <fileMode>0755</fileMode>
         </fileSet>
@@ -64,7 +62,7 @@
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
         </file>
         <file>
-            <source>${project.build.directory}/ballerina/jballerina-tools-${ballerina.platform.version}/bre/security/ballerinaKeystore.p12</source>
+            <source>${project.build.directory}/ballerina/jballerina-${ballerina.platform.version}/bre/security/ballerinaKeystore.p12</source>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}/runtime/bre/security</outputDirectory>
         </file>
         <file>
