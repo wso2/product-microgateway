@@ -99,11 +99,6 @@ public const string INVALID_ENTITY_MESSAGE = "Unprocessable entity";
 public const int INVALID_RESPONSE = 900916;
 public const string INVALID_RESPONSE_MESSAGE = "Unprocessable entity";
 
-public const int MUTUAL_SSL_FAILED = 900918;
-public const string MUTUAL_SSL_FAILED_MESSAGE = "SSL handshake failure";
-public const string MUTUAL_SSL_FAILED_DESCRIPTION =
-"Make sure you correctly configured Mutual SSL";
-
 public function getAuthenticationFailureMessage(int errorCode) returns string {
     string errorMessage;
     if (errorCode == API_AUTH_ACCESS_TOKEN_EXPIRED) {
@@ -142,8 +137,6 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = INVALID_RESPONSE_MESSAGE;
     } else if (errorCode == API_AUTH_PROVIDER_INVALID) {
         errorMessage = API_AUTH_PROVIDER_INVALID_MESSAGE;
-    } else if (errorCode == MUTUAL_SSL_FAILED) {
-        errorMessage = MUTUAL_SSL_FAILED_MESSAGE;
     } else {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
     }
@@ -173,8 +166,6 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_NO_COOKIE_PROVIDED_STRING_DESCRIPTION;
     } else if (API_AUTH_PROVIDER_INVALID == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_PROVIDER_INVALID_DESCRIPTION;
-    } else if (MUTUAL_SSL_FAILED == errorCode) {
-        errorDescription += DESCRIPTION_SEPARATOR + MUTUAL_SSL_FAILED_DESCRIPTION;
     } else {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_GENERAL_ERROR_MESSAGE;
     }
