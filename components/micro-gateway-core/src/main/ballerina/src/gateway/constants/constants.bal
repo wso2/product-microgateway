@@ -25,7 +25,6 @@ public const string QUERY = "query";
 public const string API_KEY_IN = "in";
 public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
-public const string TEMP_AUTH_HEADER = "WSO2-Authorization";
 public const string AUTH_SCHEME_BASIC = "Basic";
 public const string AUTH_SCHEME_BEARER = "Bearer";
 public const string ANN_PACKAGE = "ballerina/http";
