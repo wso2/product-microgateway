@@ -334,23 +334,6 @@
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>micro-gateway-runtime</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime.xml</descriptor>
-                            </descriptors>
-                            <finalName>wso2am-micro-gw-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>

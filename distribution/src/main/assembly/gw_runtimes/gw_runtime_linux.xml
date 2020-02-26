@@ -80,17 +80,6 @@
             <source>${basedir}/../release-notes.html</source>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}</outputDirectory>
         </file>
-        <file>
-            <source>${basedir}/resources/updates/product.txt</source>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/updates</outputDirectory>
-            <filtered>true</filtered>
-            <fileMode>644</fileMode>
-        </file>
-        <file>
-            <source>${basedir}/target/update/update_linux</source>
-            <outputDirectory>wso2am-micro-gw-linux-${project.version}/bin</outputDirectory>
-            <fileMode>744</fileMode>
-        </file>
     </files>
     <dependencySets>
         <dependencySet>
