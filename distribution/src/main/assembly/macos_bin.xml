@@ -90,16 +90,6 @@
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
-
-        <!-- Copying the in-place update tools-->
-        <fileSet>
-            <directory>target/update/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin/</outputDirectory>
-            <includes>
-                <include>update_darwin</include>
-            </includes>
-            <fileMode>744</fileMode>
-        </fileSet>
     </fileSets>
 
     <files>
@@ -139,6 +129,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/target/update/update_darwin</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin</outputDirectory>
+            <fileMode>744</fileMode>
         </file>
     </files>
 
