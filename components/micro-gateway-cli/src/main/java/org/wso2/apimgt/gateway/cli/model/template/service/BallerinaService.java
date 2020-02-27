@@ -26,6 +26,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -134,15 +135,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
-        this.authProviders = OpenAPICodegenUtils
-                .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
+        ApplicationSecurity appSecurity = api.getApplicationSecurity();
+        // if auth providers are not given in API level, and app security is not optional, add default auth providers
+        boolean addDefaultAuth = appSecurity == null || !appSecurity.isOptional();
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(), appSecurity, addDefaultAuth);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         if (api.getMutualSSL() != null) {
             this.isMutualSSL = true;
             this.mutualSSLClientVerification = api.getMutualSSL();
         }
-        this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
+        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
         setPaths(definition);
         resolveInterceptors(definition.getExtensions());
 
@@ -223,9 +226,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 // set import and function call statement for operation level interceptors
                 updateOperationInterceptors(operation);
-
-                //to set auth providers property corresponding to the security schema in API-level
-                operation.setSecuritySchemas(this.authProviders);
 
                 // if it is the developer first approach
                 if (isDevFirst) {

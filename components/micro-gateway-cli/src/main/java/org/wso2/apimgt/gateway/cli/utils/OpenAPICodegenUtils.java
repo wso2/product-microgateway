@@ -901,7 +901,9 @@ public class OpenAPICodegenUtils {
 
     public static List<String> getMgwResourceSecurity(Operation operation, ApplicationSecurity appSecurity) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
-        return getAuthProviders(securitySchemas, appSecurity);
+        // Don't add default auth at resource level, because,
+        // we will apply api level security if resource level security is not given
+        return getAuthProviders(securitySchemas, appSecurity, false);
     }
 
     /**
@@ -1091,7 +1093,15 @@ public class OpenAPICodegenUtils {
         return false;
     }
 
-    public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity) {
+    /**
+     * Get auth providers for given schema
+     * @param schemas oas definition schemas
+     * @param appSecurity security defined by the extension
+     * @param addDefaultAuth if it is operation/api security level auth providers
+     * @return list of auth providers
+     */
+    public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity,
+                                                boolean addDefaultAuth) {
         List<String> authProviders = new ArrayList<>();
         // Support api manager application level security.
         // Give priority to extensions security types.
@@ -1111,8 +1121,8 @@ public class OpenAPICodegenUtils {
                 getAuthProvidersForSecurityType(securityType, authProviders);
             }
         }
-        //add oauth2 and jwt if security is empty. But if application security is optional not to add defaults.
-        if ((appSecurity == null || !appSecurity.isOptional()) && authProviders.isEmpty()) {
+        // add oauth2 and jwt if security is empty. But if security is optional not to add defaults.
+        if (addDefaultAuth && authProviders.isEmpty()) {
             authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
             authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
         }

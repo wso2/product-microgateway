@@ -111,12 +111,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         //to provide resource level security in dev-first approach
         ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
                 api.getMutualSSL());
-        // if application security defined in operation level is not found, get API level application security
-        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
         this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
-        this.applicationSecurityOptional = appSecurity.isOptional();
+        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -292,12 +290,5 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public void setResInterceptorContext(BallerinaInterceptor resInterceptorContext) {
         this.resInterceptorContext = resInterceptorContext;
-    }
-
-    public void setSecuritySchemas(List<String> authProviders) {
-        //update the Resource auth providers property only if there is no security scheme provided during instantiation
-        if (this.authProviders.isEmpty()) {
-            this.authProviders = authProviders;
-        }
     }
 }
