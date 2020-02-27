@@ -285,7 +285,7 @@ public function setErrorMessageToInvocationContext(int errorCode) {
 # + context - filter context object.
 public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
-    string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
+    string errorMessage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
     http:Response response = new;
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
@@ -294,11 +294,13 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
         json payload = {
             fault: {
                 code: errorCode,
-                message: errorMesssage,
+                message: errorMessage,
                 description: errorDescription
             }
         };
         response.setJsonPayload(payload);
+    } else {
+        attachGrpcErrorHeaders (response, errorMessage);
     }
     var value = caller->respond(response);
     if (value is error) {
@@ -318,12 +320,14 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {
             fault: {
-            code: errorCode,
-            message: errorMessage,
-            description: errorDescription
-        }
-    };
-    response.setJsonPayload(payload);
+                code: errorCode,
+                message: errorMessage,
+                description: errorDescription
+            }
+        };
+        response.setJsonPayload(payload);
+    } else {
+        attachGrpcErrorHeaders (response, errorMessage);
     }
 }
 

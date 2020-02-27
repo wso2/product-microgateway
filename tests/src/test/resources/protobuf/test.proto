@@ -13,3 +13,15 @@ message TestResponse {
 service TestService {
     rpc testCall(TestRequest) returns (TestResponse);
 }
+
+service JwtAuthTestService {
+    rpc testCall(TestRequest) returns (TestResponse);
+
+    rpc testCallWithScopes(TestRequest) returns (TestResponse);
+}
+
+service ThrottlingTestService {
+    rpc testCallServiceThrottling(TestRequest) returns (TestResponse);
+
+    rpc testCallMethodThrottling(TestRequest) returns (TestResponse);
+}
