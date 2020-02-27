@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
@@ -94,7 +95,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             Arrays.asList("HEAD", "OPTIONS", "PATCH", "DELETE", "POST", "PUT", "GET");
 
     @Override
-    public BallerinaOperation buildContext(Operation operation, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaOperation buildContext(Operation operation, ExtendedAPI api) throws BallerinaServiceGenException,
+            CLICompileTimeException {
         if (operation == null) {
             return getDefaultValue();
         }
@@ -173,7 +175,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     }
 
     @Override
-    public BallerinaOperation buildContext(Operation operation) throws BallerinaServiceGenException {
+    public BallerinaOperation buildContext(Operation operation) throws BallerinaServiceGenException,
+            CLICompileTimeException {
         return buildContext(operation, null);
     }
 
@@ -251,7 +254,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         return epConfig;
     }
 
-    private void setEpConfigDTO(Operation operation) {
+    private void setEpConfigDTO(Operation operation) throws CLICompileTimeException {
         this.epConfig = OpenAPICodegenUtils.getResourceEpConfigForCodegen(operation);
 
         if (epConfig.getProdEndpointList() != null) {

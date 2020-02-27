@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.servers.Server;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.util.AbstractMap;
@@ -41,7 +42,8 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
     }
 
     @Override
-    public BallerinaPath buildContext(PathItem item, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaPath buildContext(PathItem item, ExtendedAPI api) throws BallerinaServiceGenException,
+            CLICompileTimeException {
         Map.Entry<String, BallerinaOperation> entry;
         BallerinaOperation operation;
 
@@ -49,43 +51,78 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
         // Therefore we have to manually check if each http verb exists
         if (item.getGet() != null) {
             setServersToOperationLevel(item.getGet(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getGet(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getGet(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under GET resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("get", operation);
             operations.add(entry);
         }
         if (item.getPut() != null) {
             setServersToOperationLevel(item.getPut(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getPut(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getPut(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under PUT resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("put", operation);
             operations.add(entry);
         }
         if (item.getPost() != null) {
             setServersToOperationLevel(item.getPost(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getPost(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getPost(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under POST resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("post", operation);
             operations.add(entry);
         }
         if (item.getDelete() != null) {
             setServersToOperationLevel(item.getDelete(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getDelete(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getDelete(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under DELETE resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("delete", operation);
             operations.add(entry);
         }
         if (item.getOptions() != null) {
             setServersToOperationLevel(item.getOptions(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getOptions(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getOptions(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under OPTIONS resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("options", operation);
             operations.add(entry);
         }
         if (item.getHead() != null) {
             setServersToOperationLevel(item.getHead(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getHead(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getHead(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under HEAD resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("head", operation);
             operations.add(entry);
         }
         if (item.getPatch() != null) {
             setServersToOperationLevel(item.getPatch(), item.getServers());
-            operation = new BallerinaOperation().buildContext(item.getPatch(), api);
+            try {
+                operation = new BallerinaOperation().buildContext(item.getPatch(), api);
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("Error while parsing the information under HEAD resource.\n\t-"
+                        + e.getErrorMessage());
+            }
             entry = new AbstractMap.SimpleEntry<>("patch", operation);
             operations.add(entry);
         }
@@ -94,7 +131,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
     }
 
     @Override
-    public BallerinaPath buildContext(PathItem item) throws BallerinaServiceGenException {
+    public BallerinaPath buildContext(PathItem item) throws BallerinaServiceGenException, CLICompileTimeException {
         return buildContext(item, null);
     }
 

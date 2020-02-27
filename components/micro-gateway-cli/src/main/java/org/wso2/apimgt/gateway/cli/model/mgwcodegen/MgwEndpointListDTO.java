@@ -7,7 +7,6 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 
 import java.util.List;
 
-
 /**
  * List of {@link MgwEndpointDTO} definitions with other endpoint
  * related details such as endpoint security.

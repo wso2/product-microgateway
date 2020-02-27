@@ -20,6 +20,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointDTO;
@@ -31,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 /**
@@ -40,13 +42,14 @@ public final class RouteUtils {
     private static final ObjectMapper OBJECT_MAPPER_JSON = new ObjectMapper();
 
     /**
-     * To parse the Endpoint Configuration received from API Manager to RouteEndpointConfig Object
+     * To parse the Endpoint Configuration received from API Manager to RouteEndpointConfig Object.
      *
      * @param epConfigJson Endpoint Configuration Json received from Publisher API
      * @param epSecurity   Endpoint Security details received from Publisher API
      * @return RouteEndpointConfig object
      */
-    public static RouteEndpointConfig parseEndpointConfig(String epConfigJson, APIEndpointSecurityDTO epSecurity) {
+    public static RouteEndpointConfig parseEndpointConfig(String epConfigJson, APIEndpointSecurityDTO epSecurity)
+            throws MalformedURLException, CLICompileTimeException {
         RouteEndpointConfig endpointConfig = new RouteEndpointConfig();
         EndpointListRouteDTO prodEndpointConfig = new EndpointListRouteDTO();
         EndpointListRouteDTO sandEndpointConfig = new EndpointListRouteDTO();
@@ -132,6 +135,18 @@ public final class RouteUtils {
             if (sandEndpointNode != null) {
                 sandEndpointConfig.addEndpoint(sandEndpointNode.get(RESTServiceConstants.URL).asText());
             }
+        }
+        try {
+            prodEndpointConfig.validateEndpoints();
+        } catch (CLICompileTimeException e) {
+            throw new CLICompileTimeException("The provided production endpoint is invalid.\n\t-" +
+                    e.getErrorMessage());
+        }
+        try {
+            sandEndpointConfig.validateEndpoints();
+        } catch (CLICompileTimeException e) {
+            throw new CLICompileTimeException("The provided production endpoint is invalid.\n\t-" +
+                    e.getErrorMessage());
         }
 
         if (prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size() > 0) {

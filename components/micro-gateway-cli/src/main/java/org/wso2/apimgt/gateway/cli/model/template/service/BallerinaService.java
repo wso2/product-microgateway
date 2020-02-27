@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
@@ -217,7 +218,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.paths = new LinkedHashSet<>();
         Paths pathList = openAPI.getPaths();
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
-            BallerinaPath balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
+            BallerinaPath balPath = null;
+            try {
+                balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
+            } catch (CLICompileTimeException e) {
+                throw new CLIRuntimeException("Error while parsing information under path:" + path.getKey() +
+                        "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getErrorMessage());
+            }
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
