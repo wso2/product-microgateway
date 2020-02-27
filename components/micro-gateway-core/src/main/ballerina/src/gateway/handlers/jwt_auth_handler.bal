@@ -16,6 +16,7 @@
 
 import ballerina/auth;
 import ballerina/http;
+import ballerina/jwt;
 import ballerina/runtime;
 
 # Representation of the jwt self validating handler
@@ -62,9 +63,22 @@ public type JWTAuthHandler object {
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
+            setBackendJwtHeader(credential, req);
             return authenticationResult;
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }
 };
+
+public function setBackendJwtHeader(string credential, http:Request req) {
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+    if (payload is jwt:JwtPayload) {
+        map<json>? customClaims = payload?.customClaims;
+        // validate backend jwt claim and set it to jwt header
+        if (customClaims is map<json> && customClaims.hasKey(BACKEND_JWT)) {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Set backend jwt header.");
+            req.setHeader(jwtheaderName, customClaims.get(BACKEND_JWT).toString());
+        }
+    }
+}

@@ -376,6 +376,7 @@ const string SUBSCRIBED_APIS = "subscribedAPIs";
 const string ALLOWED_APIS = "allowedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
+const string BACKEND_JWT = "backendJwt";
 
 public const string INTROSPECT_CONTEXT = "introspect";
 
