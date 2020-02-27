@@ -901,9 +901,7 @@ public class OpenAPICodegenUtils {
 
     public static List<String> getMgwResourceSecurity(Operation operation, ApplicationSecurity appSecurity) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
-        // Don't add default auth at resource level, because,
-        // we will apply api level security if resource level security is not given
-        return getAuthProviders(securitySchemas, appSecurity, false);
+        return getAuthProviders(securitySchemas, appSecurity);
     }
 
     /**
@@ -1097,11 +1095,9 @@ public class OpenAPICodegenUtils {
      * Get auth providers for given schema
      * @param schemas oas definition schemas
      * @param appSecurity security defined by the extension
-     * @param addDefaultAuth if it is operation/api security level auth providers
      * @return list of auth providers
      */
-    public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity,
-                                                boolean addDefaultAuth) {
+    public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity) {
         List<String> authProviders = new ArrayList<>();
         // Support api manager application level security.
         // Give priority to extensions security types.
@@ -1121,15 +1117,10 @@ public class OpenAPICodegenUtils {
                 getAuthProvidersForSecurityType(securityType, authProviders);
             }
         }
-        // add oauth2 and jwt if security is empty. But if security is optional not to add defaults.
-        if (addDefaultAuth && authProviders.isEmpty()) {
-            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
-            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
-        }
         return authProviders;
     }
 
-    private static List<String> getAuthProvidersForSecurityType(String securityType, List<String> authProviders) {
+    private static void getAuthProvidersForSecurityType(String securityType, List<String> authProviders) {
         if (securityType.equalsIgnoreCase(OpenAPIConstants.APISecurity.basic.name())) {
             if (!authProviders.contains(OpenAPIConstants.APISecurity.basic.name())) {
                 authProviders.add(OpenAPIConstants.APISecurity.basic.name());
@@ -1144,6 +1135,16 @@ public class OpenAPICodegenUtils {
                 authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
             }
         }
-        return authProviders;
+    }
+
+     public static void addDefaultAuthProviders(List<String> authProviders, ApplicationSecurity appSecurity) {
+        // add oauth2 and jwt if security is empty. But if security is optional not to add defaults.
+        // if auth providers are not given in API level, and resource level app security is not optional,
+        // add default auth providers
+        boolean addDefaultAuth = appSecurity == null || !appSecurity.isOptional();
+        if (addDefaultAuth && authProviders.isEmpty()) {
+            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
+            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+        }
     }
 }

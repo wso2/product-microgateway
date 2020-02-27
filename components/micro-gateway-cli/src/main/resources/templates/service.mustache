@@ -90,16 +90,13 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         methods:["{{upper key}}"],
         path:"{{../../key}}",
         auth:{
-        {{#unless authProviders.isEmpty}}
-            authHandlers: gateway:getAuthHandlers([{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}], {{applicationSecurityOptional}}, {{isMutualSSL}}),
-        {{/unless}}
         {{#if isSecured}}
             {{#if scope}}
                 scopes: [{{{scope}}}], {{/if}}
-            enabled:true
         {{else}}
-            enabled:false
+            enabled:false,
         {{/if}}
+            authHandlers: gateway:getAuthHandlers([{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}], {{applicationSecurityOptional}}, {{isMutualSSL}})
         }
     }
     @gateway:Resource {

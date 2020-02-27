@@ -136,9 +136,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
         ApplicationSecurity appSecurity = api.getApplicationSecurity();
-        // if auth providers are not given in API level, and app security is not optional, add default auth providers
-        boolean addDefaultAuth = appSecurity == null || !appSecurity.isOptional();
-        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(), appSecurity, addDefaultAuth);
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(), appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         if (api.getMutualSSL() != null) {
@@ -226,6 +224,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 // set import and function call statement for operation level interceptors
                 updateOperationInterceptors(operation);
+
+                //to set auth providers property corresponding to the security schema in API-level
+                operation.setSecuritySchemas(this.authProviders);
+                //set default auth providers for api level
+                OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
 
                 // if it is the developer first approach
                 if (isDevFirst) {
