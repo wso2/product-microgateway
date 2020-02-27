@@ -70,7 +70,6 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     printDebug(KEY_UTILS, "Resource Name : " + resourceName);
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
-    io:println(httpServiceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
         apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
         apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
