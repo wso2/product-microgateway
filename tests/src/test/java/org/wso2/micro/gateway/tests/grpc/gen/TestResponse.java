@@ -9,7 +9,7 @@ package org.wso2.micro.gateway.tests.grpc.gen;
 public  final class TestResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:TestResponse)
-        TestResponseOrBuilder {
+    TestResponseOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use TestResponse.newBuilder() to construct.
   private TestResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
@@ -76,15 +76,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return Test.internal_static_TestResponse_descriptor;
+    return org.wso2.micro.gateway.tests.grpc.gen.Test.internal_static_TestResponse_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return Test.internal_static_TestResponse_fieldAccessorTable
+    return org.wso2.micro.gateway.tests.grpc.gen.Test.internal_static_TestResponse_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            TestResponse.class, TestResponse.Builder.class);
+            org.wso2.micro.gateway.tests.grpc.gen.TestResponse.class, org.wso2.micro.gateway.tests.grpc.gen.TestResponse.Builder.class);
   }
 
   public static final int TESTRESSTRING_FIELD_NUMBER = 1;
@@ -162,10 +162,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof TestResponse)) {
+    if (!(obj instanceof org.wso2.micro.gateway.tests.grpc.gen.TestResponse)) {
       return super.equals(obj);
     }
-    TestResponse other = (TestResponse) obj;
+    org.wso2.micro.gateway.tests.grpc.gen.TestResponse other = (org.wso2.micro.gateway.tests.grpc.gen.TestResponse) obj;
 
     if (!getTestResString()
         .equals(other.getTestResString())) return false;
@@ -187,69 +187,69 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static TestResponse parseFrom(byte[] data)
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static TestResponse parseFrom(java.io.InputStream input)
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static TestResponse parseDelimitedFrom(java.io.InputStream input)
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static TestResponse parseDelimitedFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static TestResponse parseFrom(
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -262,7 +262,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(TestResponse prototype) {
+  public static Builder newBuilder(org.wso2.micro.gateway.tests.grpc.gen.TestResponse prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -283,18 +283,18 @@ private static final long serialVersionUID = 0L;
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:TestResponse)
-          TestResponseOrBuilder {
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponseOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return Test.internal_static_TestResponse_descriptor;
+      return org.wso2.micro.gateway.tests.grpc.gen.Test.internal_static_TestResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return Test.internal_static_TestResponse_fieldAccessorTable
+      return org.wso2.micro.gateway.tests.grpc.gen.Test.internal_static_TestResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TestResponse.class, TestResponse.Builder.class);
+              org.wso2.micro.gateway.tests.grpc.gen.TestResponse.class, org.wso2.micro.gateway.tests.grpc.gen.TestResponse.Builder.class);
     }
 
     // Construct using org.wso2.micro.gateway.tests.grpc.gen.TestResponse.newBuilder()
@@ -323,17 +323,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return Test.internal_static_TestResponse_descriptor;
+      return org.wso2.micro.gateway.tests.grpc.gen.Test.internal_static_TestResponse_descriptor;
     }
 
     @java.lang.Override
-    public TestResponse getDefaultInstanceForType() {
-      return TestResponse.getDefaultInstance();
+    public org.wso2.micro.gateway.tests.grpc.gen.TestResponse getDefaultInstanceForType() {
+      return org.wso2.micro.gateway.tests.grpc.gen.TestResponse.getDefaultInstance();
     }
 
     @java.lang.Override
-    public TestResponse build() {
-      TestResponse result = buildPartial();
+    public org.wso2.micro.gateway.tests.grpc.gen.TestResponse build() {
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -341,8 +341,8 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public TestResponse buildPartial() {
-      TestResponse result = new TestResponse(this);
+    public org.wso2.micro.gateway.tests.grpc.gen.TestResponse buildPartial() {
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse result = new org.wso2.micro.gateway.tests.grpc.gen.TestResponse(this);
       result.testResString_ = testResString_;
       onBuilt();
       return result;
@@ -382,16 +382,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof TestResponse) {
-        return mergeFrom((TestResponse)other);
+      if (other instanceof org.wso2.micro.gateway.tests.grpc.gen.TestResponse) {
+        return mergeFrom((org.wso2.micro.gateway.tests.grpc.gen.TestResponse)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(TestResponse other) {
-      if (other == TestResponse.getDefaultInstance()) return this;
+    public Builder mergeFrom(org.wso2.micro.gateway.tests.grpc.gen.TestResponse other) {
+      if (other == org.wso2.micro.gateway.tests.grpc.gen.TestResponse.getDefaultInstance()) return this;
       if (!other.getTestResString().isEmpty()) {
         testResString_ = other.testResString_;
         onChanged();
@@ -411,11 +411,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      TestResponse parsedMessage = null;
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (TestResponse) e.getUnfinishedMessage();
+        parsedMessage = (org.wso2.micro.gateway.tests.grpc.gen.TestResponse) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -517,12 +517,12 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:TestResponse)
-  private static final TestResponse DEFAULT_INSTANCE;
+  private static final org.wso2.micro.gateway.tests.grpc.gen.TestResponse DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new TestResponse();
+    DEFAULT_INSTANCE = new org.wso2.micro.gateway.tests.grpc.gen.TestResponse();
   }
 
-  public static TestResponse getDefaultInstance() {
+  public static org.wso2.micro.gateway.tests.grpc.gen.TestResponse getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
@@ -547,7 +547,7 @@ private static final long serialVersionUID = 0L;
   }
 
   @java.lang.Override
-  public TestResponse getDefaultInstanceForType() {
+  public org.wso2.micro.gateway.tests.grpc.gen.TestResponse getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

@@ -69,6 +69,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
     private boolean isGrpc;
+    //to identify if there is any endpoint with backend security (to insert "import ballerina/auth")
+    private boolean hasEpSecurity = false;
 
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
@@ -144,6 +146,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             this.mutualSSLClientVerification = api.getMutualSSL();
         }
         this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
+        setHasEpSecurity(endpointConfig);
         setPaths(definition);
         resolveInterceptors(definition.getExtensions());
 
@@ -221,6 +224,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                 String operationId = op.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
                 operation.setOperationId(operationId);
+
+                //set hasEpSecurity to identify if there are operations with backend security config
+                setHasEpSecurity(operation.getEpConfigDTO());
 
                 // set import and function call statement for operation level interceptors
                 updateOperationInterceptors(operation);
@@ -419,5 +425,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     public void setIsDevFirst(boolean value) {
         isDevFirst = value;
+    }
+
+    public void setHasEpSecurity(MgwEndpointConfigDTO endpointConfig) {
+        if (hasEpSecurity || endpointConfig == null) {
+            return;
+        }
+        if ((endpointConfig.getProdEndpointList() != null &&
+                endpointConfig.getProdEndpointList().getSecurityConfig() != null) ||
+                (endpointConfig.getSandboxEndpointList() != null &&
+                        endpointConfig.getSandboxEndpointList().getSecurityConfig() != null)) {
+            hasEpSecurity = true;
+        }
     }
 }

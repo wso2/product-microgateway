@@ -25,6 +25,11 @@ rm -rf ${GATEWAY_PROJECT}/target
 
 cd ${GATEWAY_PROJECT}
 ${BAL_EXEC} build -c --experimental gateway
+#Exit if the build process fails
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+  exit $exit_code
+fi
 cd -
 
 cp -r ${GATEWAY_PROJECT}/target/balo ${MAVEN_PROJECT_ROOT}/target

@@ -5,10 +5,8 @@ import ballerina/runtime;{{#importModules}}
 import {{.}};{{/importModules}}
 {{#if containerConfig.hasKubernetes}}import ballerina/kubernetes;{{/if}}
 import wso2/gateway;
-{{#if endpointConfig.prodEndpoints.securityConfig}}
-    {{#equals endpointConfig.prodEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
-{{else if endpointConfig.sandEndpoints.securityConfig}}
-    {{#equals endpointConfig.sandEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
+{{#if hasEpSecurity}}
+    import ballerina/auth;
 {{/if}}
 {{#equals endpointConfig.prodEndpoints.type "http"}}
     {{#endpointConfig.prodEndpoints}}{{>basicAuthHandler}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
@@ -277,12 +275,17 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }
             invocationContext.attributes["error_response_code"] = errorCode;
             invocationContext.attributes["error_response"] = errorDescription;
-            json payload = {fault : {
-                code : errorCode,
-                message : "Runtime Error",
-                description : errorDescription
-            }};
-            res.setPayload(payload);
+            if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
+                json payload = {fault : {
+                                code : errorCode,
+                                message : "Runtime Error",
+                                description : errorDescription
+                            }};
+
+                            res.setPayload(payload);
+            } else {
+                gateway:attachGrpcErrorHeaders (res, errorDescription);
+            }
             log:printError("Error in client response", err = clientResponse);
             var outboundResult = outboundEp->respond(res);
             if (outboundResult is error) {

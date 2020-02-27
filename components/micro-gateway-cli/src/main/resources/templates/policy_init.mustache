@@ -7,14 +7,14 @@ function initThrottlePolicies() {
     //TODO: Enable once the jms module with ballerina
     boolean globalThrottlingEnabled = gateway:initiateThrottlingJmsListener();
 
-     if(!globalThrottlingEnabled){
-         while (true) {
-             if(gateway:getIsStreamsInitialized()) {
-                            gateway:printDebug(gateway:KEY_THROTTLE_UTIL, "Throttle streams initialized.");
-                            break;
-             }
-         }
-     }
+    if(!globalThrottlingEnabled){
+        while (true) {
+            if(gateway:getIsStreamsInitialized()) {
+                gateway:printDebug(gateway:KEY_THROTTLE_UTIL, "Throttle streams initialized.");
+                break;
+            }
+        }
+    }
 }
 
 function getDeployedPolicies() returns map<json> {

@@ -20,11 +20,11 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.27.0)",
     comments = "Source: test.proto")
-public final class TestServiceGrpc {
+public final class JwtAuthTestServiceGrpc {
 
-  private TestServiceGrpc() {}
+  private JwtAuthTestServiceGrpc() {}
 
-  public static final String SERVICE_NAME = "TestService";
+  public static final String SERVICE_NAME = "JwtAuthTestService";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
@@ -38,10 +38,10 @@ public final class TestServiceGrpc {
   public static io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
       org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallMethod() {
     io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallMethod;
-    if ((getTestCallMethod = TestServiceGrpc.getTestCallMethod) == null) {
-      synchronized (TestServiceGrpc.class) {
-        if ((getTestCallMethod = TestServiceGrpc.getTestCallMethod) == null) {
-          TestServiceGrpc.getTestCallMethod = getTestCallMethod =
+    if ((getTestCallMethod = JwtAuthTestServiceGrpc.getTestCallMethod) == null) {
+      synchronized (JwtAuthTestServiceGrpc.class) {
+        if ((getTestCallMethod = JwtAuthTestServiceGrpc.getTestCallMethod) == null) {
+          JwtAuthTestServiceGrpc.getTestCallMethod = getTestCallMethod =
               io.grpc.MethodDescriptor.<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "testCall"))
@@ -50,7 +50,7 @@ public final class TestServiceGrpc {
                   org.wso2.micro.gateway.tests.grpc.gen.TestRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.wso2.micro.gateway.tests.grpc.gen.TestResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new TestServiceMethodDescriptorSupplier("testCall"))
+              .setSchemaDescriptor(new JwtAuthTestServiceMethodDescriptorSupplier("testCall"))
               .build();
         }
       }
@@ -58,59 +58,97 @@ public final class TestServiceGrpc {
     return getTestCallMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallWithScopesMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "testCallWithScopes",
+      requestType = org.wso2.micro.gateway.tests.grpc.gen.TestRequest.class,
+      responseType = org.wso2.micro.gateway.tests.grpc.gen.TestResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallWithScopesMethod() {
+    io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallWithScopesMethod;
+    if ((getTestCallWithScopesMethod = JwtAuthTestServiceGrpc.getTestCallWithScopesMethod) == null) {
+      synchronized (JwtAuthTestServiceGrpc.class) {
+        if ((getTestCallWithScopesMethod = JwtAuthTestServiceGrpc.getTestCallWithScopesMethod) == null) {
+          JwtAuthTestServiceGrpc.getTestCallWithScopesMethod = getTestCallWithScopesMethod =
+              io.grpc.MethodDescriptor.<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "testCallWithScopes"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.wso2.micro.gateway.tests.grpc.gen.TestRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.wso2.micro.gateway.tests.grpc.gen.TestResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new JwtAuthTestServiceMethodDescriptorSupplier("testCallWithScopes"))
+              .build();
+        }
+      }
+    }
+    return getTestCallWithScopesMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
-  public static TestServiceStub newStub(io.grpc.Channel channel) {
-    io.grpc.stub.AbstractStub.StubFactory<TestServiceStub> factory =
-      new io.grpc.stub.AbstractStub.StubFactory<TestServiceStub>() {
+  public static JwtAuthTestServiceStub newStub(io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceStub>() {
         @java.lang.Override
-        public TestServiceStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-          return new TestServiceStub(channel, callOptions);
+        public JwtAuthTestServiceStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new JwtAuthTestServiceStub(channel, callOptions);
         }
       };
-    return TestServiceStub.newStub(factory, channel);
+    return JwtAuthTestServiceStub.newStub(factory, channel);
   }
 
   /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
-  public static TestServiceBlockingStub newBlockingStub(
+  public static JwtAuthTestServiceBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    io.grpc.stub.AbstractStub.StubFactory<TestServiceBlockingStub> factory =
-      new io.grpc.stub.AbstractStub.StubFactory<TestServiceBlockingStub>() {
+    io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceBlockingStub>() {
         @java.lang.Override
-        public TestServiceBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-          return new TestServiceBlockingStub(channel, callOptions);
+        public JwtAuthTestServiceBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new JwtAuthTestServiceBlockingStub(channel, callOptions);
         }
       };
-    return TestServiceBlockingStub.newStub(factory, channel);
+    return JwtAuthTestServiceBlockingStub.newStub(factory, channel);
   }
 
   /**
    * Creates a new ListenableFuture-style stub that supports unary calls on the service
    */
-  public static TestServiceFutureStub newFutureStub(
+  public static JwtAuthTestServiceFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    io.grpc.stub.AbstractStub.StubFactory<TestServiceFutureStub> factory =
-      new io.grpc.stub.AbstractStub.StubFactory<TestServiceFutureStub>() {
+    io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<JwtAuthTestServiceFutureStub>() {
         @java.lang.Override
-        public TestServiceFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-          return new TestServiceFutureStub(channel, callOptions);
+        public JwtAuthTestServiceFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new JwtAuthTestServiceFutureStub(channel, callOptions);
         }
       };
-    return TestServiceFutureStub.newStub(factory, channel);
+    return JwtAuthTestServiceFutureStub.newStub(factory, channel);
   }
 
   /**
    */
-  public static abstract class TestServiceImplBase implements io.grpc.BindableService {
+  public static abstract class JwtAuthTestServiceImplBase implements io.grpc.BindableService {
 
     /**
      */
     public void testCall(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request,
         io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getTestCallMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void testCallWithScopes(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getTestCallWithScopesMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -122,22 +160,29 @@ public final class TestServiceGrpc {
                 org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
                 org.wso2.micro.gateway.tests.grpc.gen.TestResponse>(
                   this, METHODID_TEST_CALL)))
+          .addMethod(
+            getTestCallWithScopesMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+                org.wso2.micro.gateway.tests.grpc.gen.TestResponse>(
+                  this, METHODID_TEST_CALL_WITH_SCOPES)))
           .build();
     }
   }
 
   /**
    */
-  public static final class TestServiceStub extends io.grpc.stub.AbstractAsyncStub<TestServiceStub> {
-    private TestServiceStub(
+  public static final class JwtAuthTestServiceStub extends io.grpc.stub.AbstractAsyncStub<JwtAuthTestServiceStub> {
+    private JwtAuthTestServiceStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected TestServiceStub build(
+    protected JwtAuthTestServiceStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-      return new TestServiceStub(channel, callOptions);
+      return new JwtAuthTestServiceStub(channel, callOptions);
     }
 
     /**
@@ -147,20 +192,28 @@ public final class TestServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getTestCallMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void testCallWithScopes(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getTestCallWithScopesMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
    */
-  public static final class TestServiceBlockingStub extends io.grpc.stub.AbstractBlockingStub<TestServiceBlockingStub> {
-    private TestServiceBlockingStub(
+  public static final class JwtAuthTestServiceBlockingStub extends io.grpc.stub.AbstractBlockingStub<JwtAuthTestServiceBlockingStub> {
+    private JwtAuthTestServiceBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected TestServiceBlockingStub build(
+    protected JwtAuthTestServiceBlockingStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-      return new TestServiceBlockingStub(channel, callOptions);
+      return new JwtAuthTestServiceBlockingStub(channel, callOptions);
     }
 
     /**
@@ -169,20 +222,27 @@ public final class TestServiceGrpc {
       return blockingUnaryCall(
           getChannel(), getTestCallMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public org.wso2.micro.gateway.tests.grpc.gen.TestResponse testCallWithScopes(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getTestCallWithScopesMethod(), getCallOptions(), request);
+    }
   }
 
   /**
    */
-  public static final class TestServiceFutureStub extends io.grpc.stub.AbstractFutureStub<TestServiceFutureStub> {
-    private TestServiceFutureStub(
+  public static final class JwtAuthTestServiceFutureStub extends io.grpc.stub.AbstractFutureStub<JwtAuthTestServiceFutureStub> {
+    private JwtAuthTestServiceFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected TestServiceFutureStub build(
+    protected JwtAuthTestServiceFutureStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-      return new TestServiceFutureStub(channel, callOptions);
+      return new JwtAuthTestServiceFutureStub(channel, callOptions);
     }
 
     /**
@@ -192,19 +252,28 @@ public final class TestServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getTestCallMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> testCallWithScopes(
+        org.wso2.micro.gateway.tests.grpc.gen.TestRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getTestCallWithScopesMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_TEST_CALL = 0;
+  private static final int METHODID_TEST_CALL_WITH_SCOPES = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final TestServiceImplBase serviceImpl;
+    private final JwtAuthTestServiceImplBase serviceImpl;
     private final int methodId;
 
-    MethodHandlers(TestServiceImplBase serviceImpl, int methodId) {
+    MethodHandlers(JwtAuthTestServiceImplBase serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -215,6 +284,10 @@ public final class TestServiceGrpc {
       switch (methodId) {
         case METHODID_TEST_CALL:
           serviceImpl.testCall((org.wso2.micro.gateway.tests.grpc.gen.TestRequest) request,
+              (io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse>) responseObserver);
+          break;
+        case METHODID_TEST_CALL_WITH_SCOPES:
+          serviceImpl.testCallWithScopes((org.wso2.micro.gateway.tests.grpc.gen.TestRequest) request,
               (io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse>) responseObserver);
           break;
         default:
@@ -233,9 +306,9 @@ public final class TestServiceGrpc {
     }
   }
 
-  private static abstract class TestServiceBaseDescriptorSupplier
+  private static abstract class JwtAuthTestServiceBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
-    TestServiceBaseDescriptorSupplier() {}
+    JwtAuthTestServiceBaseDescriptorSupplier() {}
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
@@ -244,21 +317,21 @@ public final class TestServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
-      return getFileDescriptor().findServiceByName("TestService");
+      return getFileDescriptor().findServiceByName("JwtAuthTestService");
     }
   }
 
-  private static final class TestServiceFileDescriptorSupplier
-      extends TestServiceBaseDescriptorSupplier {
-    TestServiceFileDescriptorSupplier() {}
+  private static final class JwtAuthTestServiceFileDescriptorSupplier
+      extends JwtAuthTestServiceBaseDescriptorSupplier {
+    JwtAuthTestServiceFileDescriptorSupplier() {}
   }
 
-  private static final class TestServiceMethodDescriptorSupplier
-      extends TestServiceBaseDescriptorSupplier
+  private static final class JwtAuthTestServiceMethodDescriptorSupplier
+      extends JwtAuthTestServiceBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
     private final String methodName;
 
-    TestServiceMethodDescriptorSupplier(String methodName) {
+    JwtAuthTestServiceMethodDescriptorSupplier(String methodName) {
       this.methodName = methodName;
     }
 
@@ -273,12 +346,13 @@ public final class TestServiceGrpc {
   public static io.grpc.ServiceDescriptor getServiceDescriptor() {
     io.grpc.ServiceDescriptor result = serviceDescriptor;
     if (result == null) {
-      synchronized (TestServiceGrpc.class) {
+      synchronized (JwtAuthTestServiceGrpc.class) {
         result = serviceDescriptor;
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
-              .setSchemaDescriptor(new TestServiceFileDescriptorSupplier())
+              .setSchemaDescriptor(new JwtAuthTestServiceFileDescriptorSupplier())
               .addMethod(getTestCallMethod())
+              .addMethod(getTestCallWithScopesMethod())
               .build();
         }
       }

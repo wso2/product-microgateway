@@ -291,11 +291,11 @@ public class ProtoOpenAPI {
         isSecurityDisabled = true;
     }
 
-    private void checkSecurityTypeIncompatibility(String protoPath) {
+    private void checkSecurityTypeIncompatibility(String service) {
         //if security types are defined with disabled security option, throw an error to indicate incompatibility.
         if ((isOauth2Enabled || isBasicAuthEnabled || isAPIKeyEnabled) && isSecurityDisabled) {
             throw new CLIRuntimeException("\"None\" security type is incompatible with other security types. " +
-                    "protobuf file : \"" + protoPath + "\".");
+                    "service : \"" + service + "\".");
         }
     }
 
@@ -311,22 +311,22 @@ public class ProtoOpenAPI {
         openAPI.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
     }
 
-    private void checkEndpointAvailability(String protoPath) {
+    private void checkEndpointAvailability(String service) {
         //if no endpoints are available, throw an error.
         if (!endpointsAvailable) {
-            throw new CLIRuntimeException("No endpoints provided in the protobuf file : \"" + protoPath + "\".");
+            throw new CLIRuntimeException("No endpoints provided in the service : \"" + service + "\".");
         }
     }
 
     /**
      * Return the validated openAPI object.
      *
-     * @param protoPath proto File Path
+     * @param service gRPC service name
      * @return {@link OpenAPI} object
      */
-    OpenAPI getOpenAPI(String protoPath) {
-        checkEndpointAvailability(protoPath);
-        checkSecurityTypeIncompatibility(protoPath);
+    OpenAPI getOpenAPI(String service) {
+        checkEndpointAvailability(service);
+        checkSecurityTypeIncompatibility(service);
         logger.debug("Corresponding openAPI is successfully generated. \n" + openAPI.toString());
         return openAPI;
     }

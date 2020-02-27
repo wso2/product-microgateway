@@ -1,9 +1,14 @@
 http:Response res = new;
 res.statusCode = 403;
-json payload = {
-    ERROR_CODE: "900901",
-    ERROR_MESSAGE: "Sandbox key offered to the API with no sandbox endpoint"
-};
+string errorMessage = "Sandbox key offered to the API with no sandbox endpoint";
+if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
+    json payload = {
+        ERROR_CODE: "900901",
+        ERROR_MESSAGE: errorMessage
+    };
+    res.setPayload(payload);
+} else {
+    gateway:attachGrpcErrorHeaders (res, errorMessage);
+}
 invocationContext.attributes["error_code"] = "900901";
-res.setPayload(payload);
 clientResponse = res;
