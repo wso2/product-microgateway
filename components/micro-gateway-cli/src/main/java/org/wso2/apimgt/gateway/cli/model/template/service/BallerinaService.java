@@ -148,6 +148,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
         setHasEpSecurity(endpointConfig);
         setPaths(definition);
+        //set default auth providers for api level
+        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
         resolveInterceptors(definition.getExtensions());
 
         return buildContext(definition);
@@ -233,8 +235,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
                 //to set auth providers property corresponding to the security schema in API-level
                 operation.setSecuritySchemas(this.authProviders);
-                //set default auth providers for api level
-                OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
 
                 // if it is the developer first approach
                 if (isDevFirst) {
