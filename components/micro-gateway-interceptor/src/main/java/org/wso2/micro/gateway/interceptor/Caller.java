@@ -18,10 +18,10 @@ package org.wso2.micro.gateway.interceptor;
 
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.net.http.nativeimpl.connection.Respond;
 
 /**
- * Representation of ballerina http:Caller object.
+ * Representation of ballerina http:Caller object. This caller object can be used extract the dat about the client
+ * and also to respond to a client with a http response.
  */
 public class Caller {
     private ObjectValue callerObj;
@@ -30,8 +30,17 @@ public class Caller {
         this.callerObj = callerObj;
     }
 
-    public void respond(Response response) throws InterceptorException {
-        Respond.nativeRespond(callerObj, response.getResponseObjectValue());
+    /**
+     * Method use to send the response to the client. If used from either request or response interceptor
+     * set the return value as false. Then this will stop sending multiple responses to the client.
+     * If used in request interceptor then set the return value of method
+     * {@link Interceptor#interceptRequest(Caller, Request)} as false.
+     * If used in response interceptor then set the return value of method
+     * {@link Interceptor#interceptResponse(Caller, Response)} as false
+     */
+    public void respond(Response response) {
+        Utils.addDataToContextAttributes(Constants.RESPOND_DONE, true);
+        Utils.addDataToContextAttributes(Constants.RESPONSE_OBJECT, response.getResponseObjectValue());
     }
 
     /**

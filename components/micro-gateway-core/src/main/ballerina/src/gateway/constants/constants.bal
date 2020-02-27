@@ -398,3 +398,7 @@ public const string API_KEY_HANDLER = "apiKeyHandler";
 public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
 public const string BASIC_AUTH_HANDLER = "basicAuthHandler";
 public const string COOKIE_BASED_HANDLER = "cookieBasedHandler";
+
+// java interceptor related constants
+public const string RESPOND_DONE = "respond_done";
+public const string RESPONSE_OBJECT = "response_object";

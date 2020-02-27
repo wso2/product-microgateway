@@ -26,6 +26,9 @@ import org.ballerinalang.net.http.nativeimpl.ExternRequest;
 import org.ballerinalang.stdlib.io.channels.base.Channel;
 import org.json.JSONObject;
 
+import java.nio.channels.ByteChannel;
+import java.util.Map;
+
 /**
  * Representation of ballerina http:Request object. Provide methods to do CRUD operations on the request object
  * when writing gateway interceptors.
@@ -88,7 +91,11 @@ public class Request {
      *
      * @return {@link BMap} Ballerina map value object containing query parameters.
      */
-    public BMap<String, Object> getQueryParams() {
+    public Map<String, String> getQueryParams() {
+        return InterceptorUtils.convertBMapToMap(getNativeQueryParams());
+    }
+
+    private BMap<String, Object> getNativeQueryParams() {
         return ExternRequest.getQueryParams(requestObj);
     }
 
@@ -100,7 +107,7 @@ public class Request {
      * present, then the first value is returned. Null is returned if no key is found.
      */
     public String getQueryParamValue(String key) {
-        BMap mapValue = getQueryParams();
+        BMap mapValue = getNativeQueryParams();
         BArray arrayValue = ((MapValue) mapValue).getArrayValue(key);
         if (arrayValue != null) {
             return arrayValue.get(0).toString();
@@ -116,7 +123,7 @@ public class Request {
      * Null is returned if no key is found.
      */
     public String[] getQueryParamValues(String key) {
-        BMap mapValue = getQueryParams();
+        BMap mapValue = getNativeQueryParams();
         BArray arrayValue = ((MapValue) mapValue).getArrayValue(key);
         if (arrayValue != null) {
             return arrayValue.getStringArray();
@@ -130,8 +137,9 @@ public class Request {
      * @param path Path to the location of matrix parameters.
      * @return A map value object {@link MapValue} of matrix parameters which can be found for the given path.
      */
-    public BMap<String, Object> getMatrixParams(String path) {
-        return ExternRequest.getMatrixParams(requestObj, path);
+    public Map<String, String> getMatrixParams(String path) {
+
+        return InterceptorUtils.convertBMapToMap(ExternRequest.getMatrixParams(requestObj, path));
     }
 
     /**
@@ -274,10 +282,10 @@ public class Request {
      * Gets the request payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
      * `Request.getBodyParts()`.
      *
-     * @return {@link Channel} A byte channel from which the message payload can be read.
+     * @return {@link ByteChannel} A byte channel from which the message payload can be read.
      * @throws InterceptorException If error while getting byte channel of the request.
      */
-    public Channel getByteChannel() throws InterceptorException {
+    public ByteChannel getByteChannel() throws InterceptorException {
         return getEntity().getByteChannel();
     }
 
@@ -354,17 +362,17 @@ public class Request {
         setEntity(entity);
     }
 
-    //    /**
-    //     * Sets a `ByteChannel`  as the payload.
-    //     *
-    //     * @param channel - A `ByteChannel` {@link IOChannel} through which the message payload can be read
-    //     * @param contentType The content type of the top level message. Set this to override the default
-    //     *                    `content-type` header value which is 'application/octet-stream'
-    //     */
-    //    public void setByteChannel(IOChannel channel, String contentType) {
-    //        getEntityWithoutBody().setByteChannel(channel, contentType);
-    //        ExternRequest.setEntity(requestObj, entity.getEntityObj());
-    //    }
+    /**
+     * Set byte channel as the payload.
+     *
+     * @param byteChannel {@link Channel} Channel object which contains the payload data.
+     * @param contentType The content type of the top level message. Set this to override the default
+     *                    `content-type` header value which is 'application/octet-stream'
+     */
+    public void setByteChannel(Channel byteChannel, String contentType) {
+        getEntityWithoutBody().setByteChannel(byteChannel, contentType);
+        setEntity(entity);
+    }
 
     /**
      * Returns the java native object of the ballerina level http:Request object.
@@ -379,12 +387,12 @@ public class Request {
         ExternRequest.setEntity(requestObj, entity.getEntityObj());
     }
 
-    private Entity getEntityWithoutBody() {
+    public Entity getEntityWithoutBody() {
         entity = new Entity(HttpUtil.getEntity(requestObj, true, false));
         return entity;
     }
 
-    private Entity getEntity() {
+    public Entity getEntity() {
         entity = new Entity(HttpUtil.getEntity(requestObj, true, true));
         return entity;
     }

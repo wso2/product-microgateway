@@ -24,6 +24,8 @@ import org.ballerinalang.net.http.nativeimpl.ExternResponse;
 import org.ballerinalang.stdlib.io.channels.base.Channel;
 import org.json.JSONObject;
 
+import java.nio.channels.ByteChannel;
+
 /**
  * Representation of ballerina http:Response object. Provide methods to do CRUD operations on the response object
  * when writing gateway interceptors.
@@ -196,11 +198,11 @@ public class Response {
      * Gets the response payload as a `ByteChannel` except in the case of multiparts. To retrieve multiparts, use
      * `Request.getBodyParts()`.
      *
-     * @return {@link Channel} A byte channel from which the
+     * @return {@link ByteChannel} A byte channel from which the
      * message payload can be read.
      * @throws InterceptorException If error while getting byte channel of the request.
      */
-    public Channel getByteChannel() throws InterceptorException {
+    public ByteChannel getByteChannel() throws InterceptorException {
         return getEntity().getByteChannel();
     }
 
@@ -278,6 +280,18 @@ public class Response {
     }
 
     /**
+     * Set byte channel as the payload.
+     *
+     * @param byteChannel {@link Channel} Channel object which contains the payload data.
+     * @param contentType The content type of the top level message. Set this to override the default
+     *                    `content-type` header value which is 'application/octet-stream'
+     */
+    public void setByteChannel(Channel byteChannel, String contentType) {
+        getEntityWithoutBody().setByteChannel(byteChannel, contentType);
+        setEntity(entity);
+    }
+
+    /**
      * Returns the java native object of the ballerina level http:Response object.
      *
      * @return Native ballerina object {@link ObjectValue} representing the response.
@@ -294,12 +308,12 @@ public class Response {
         return responseObj;
     }
 
-    private Entity getEntityWithoutBody() {
+    public Entity getEntityWithoutBody() {
         entity = new Entity(HttpUtil.getEntity(responseObj, false, false));
         return entity;
     }
 
-    private Entity getEntity() {
+    public Entity getEntity() {
         entity = new Entity(HttpUtil.getEntity(responseObj, false, true));
         return entity;
     }
