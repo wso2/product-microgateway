@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
 
@@ -39,7 +40,6 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
 
     string? username = payload?.sub;
     if (username is string) {
-        printDebug(JWT_UTIL, "set username : " + username);
         authenticationContext.username = username;
     }
 
@@ -47,42 +47,36 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
     //set keytype
     if (customClaims is map<json> && customClaims.hasKey(KEY_TYPE)) {
         json keyType = customClaims.get(KEY_TYPE);
-        printDebug(JWT_UTIL, "set keytype as " + keyType.toString());
         authenticationContext.keyType = keyType.toString();
-        invocationContext.attributes[KEY_TYPE_ATTR] = keyType;
     }
+    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
 
     //set consumer key
-    if (customClaims is map<json> && customClaims.hasKey("consumerKey")) {
-        json consumerKey = customClaims.get("consumerKey");
-        printDebug(JWT_UTIL, "set consumer key as " + consumerKey.toString());
+    if (customClaims is map<json> && customClaims.hasKey(CONSUMER_KEY)) {
+        json consumerKey = customClaims.get(CONSUMER_KEY);
         authenticationContext.consumerKey = consumerKey.toString();
     }
 
     //set application attributes if present in token
-    if (customClaims is map<json> && customClaims.hasKey("application")) {
-        json? application = customClaims.get("application");
+    if (customClaims is map<json> && customClaims.hasKey(APPLICATION)) {
+        json? application = customClaims.get(APPLICATION);
         if (application is map<json>) {
             if (application.hasKey("id")) {
-                printDebug(JWT_UTIL, "set application ID to " + application.id.toString());
                 authenticationContext.applicationId = application.id.toString();
             }
             if (application.hasKey("name")) {
-                printDebug(JWT_UTIL, "set application name to " + application.name.toString());
                 authenticationContext.applicationName = application.name.toString();
             }
             if (application.hasKey("tier")) {
-                printDebug(JWT_UTIL, "set application tier to " + application.tier.toString());
                 authenticationContext.applicationTier = application.tier.toString();
             }
             if (application.hasKey("owner")) {
-                printDebug(JWT_UTIL, "set application owner to " + application.owner.toString());
                 authenticationContext.subscriber = application.owner.toString();
             }
         }
     }
     //validate allowed apis
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes["SERVICE_NAME"]];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
     if (apiConfig is APIConfiguration) {
         string apiName = apiConfig.name;
         string apiVersion = apiConfig.apiVersion;
@@ -93,32 +87,47 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
             if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
                 // Successfully validated the API. Then set authenticated to true.
                 authenticationContext.authenticated = true;
-                printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString()
-                    + " version:" + subscription.'version.toString());
+                if (isDebugEnabled) { 
+                    printDebug(JWT_UTIL, "Found a matching allowed api with name:" + subscription.name.toString()
+                        + " version:" + subscription.'version.toString());
+                }
 
                 //set throttling attribs if present
                 if (subscription.subscriptionTier is json) {
-                    printDebug(JWT_UTIL, "set application tier to " + subscription.subscriptionTier.toString());
                     authenticationContext.tier = subscription.subscriptionTier.toString();
-                }
-                if (subscription.subscriptionTier is json) {
-                    printDebug(JWT_UTIL, "set apiTier to " + subscription.subscriptionTier.toString());
-                    authenticationContext.apiTier = subscription.subscriptionTier.toString();
+                    authenticationContext.apiTier = subscription.subscriptionTier.toString(); //Todo set correct api tier
                 }
                 if (subscription.publisher is json) {
-                    printDebug(JWT_UTIL, "set apiPublisher to " + subscription.publisher.toString());
                     authenticationContext.apiPublisher = subscription.publisher.toString();
                 }
                 if (subscription.subscriberTenantDomain is json) {
-                    printDebug(JWT_UTIL, "set subscriberTenantDomain to "
-                        + subscription.subscriberTenantDomain.toString());
                     authenticationContext.subscriberTenantDomain = subscription.subscriberTenantDomain.toString();
+                }
+                if (isDebugEnabled) { 
+                    printDebug(JWT_UTIL, "Set username : " + authenticationContext.username + ", keytype : " 
+                    + authenticationContext.keyType + ", consumer key : " + authenticationContext.consumerKey 
+                    + ", application ID : " + authenticationContext.applicationId + ", application name : " 
+                    + authenticationContext.applicationName + ", application tier : " + authenticationContext.applicationTier 
+                    + ", application owner : " + authenticationContext.subscriber + ", application tier : " 
+                    + authenticationContext.tier + ", apiTier : " + authenticationContext.apiTier 
+                    + ", apiPublisher : " + authenticationContext.apiPublisher + ", subscriberTenantDomain : " 
+                    + authenticationContext.subscriberTenantDomain);
                 }
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                 return true;
             }
             index += 1;
         }
+    }
+    if (isDebugEnabled) { 
+        printDebug(JWT_UTIL, "Set username : " + authenticationContext.username + ", keytype : " 
+        + authenticationContext.keyType + ", consumer key : " + authenticationContext.consumerKey 
+        + ", application ID : " + authenticationContext.applicationId + ", application name : " 
+        + authenticationContext.applicationName + ", application tier : " + authenticationContext.applicationTier 
+        + ", application owner : " + authenticationContext.subscriber + ", application tier : " 
+        + authenticationContext.tier + ", apiTier : " + authenticationContext.apiTier 
+        + ", apiPublisher : " + authenticationContext.apiPublisher + ", subscriberTenantDomain : " 
+        + authenticationContext.subscriberTenantDomain);
     }
     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
     return false;

@@ -5,10 +5,8 @@ import ballerina/runtime;{{#importModules}}
 import {{.}};{{/importModules}}
 {{#if containerConfig.hasKubernetes}}import ballerina/kubernetes;{{/if}}
 import wso2/gateway;
-{{#if endpointConfig.prodEndpoints.securityConfig}}
-    {{#equals endpointConfig.prodEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
-{{else if endpointConfig.sandEndpoints.securityConfig}}
-    {{#equals endpointConfig.sandEndpoints.securityConfig.type "basic"}} import ballerina/auth;{{/equals}}
+{{#if hasEpSecurity}}
+    import ballerina/auth;
 {{/if}}
 {{#equals endpointConfig.prodEndpoints.type "http"}}
     {{#endpointConfig.prodEndpoints}}{{>basicAuthHandler}}{{>httpEndpoint}}{{/endpointConfig.prodEndpoints}}
