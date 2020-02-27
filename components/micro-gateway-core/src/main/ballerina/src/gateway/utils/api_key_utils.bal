@@ -159,7 +159,7 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
         }
         if (subscribedAPIList is json[]) {
             if (validateAllowedAPIs && subscribedAPIList.length() < 1) {
-                printError(API_KEY_UTIL, "SubscribedAPI list is empty");
+                printDebug(API_KEY_UTIL, "SubscribedAPI list is empty");
                 return false;
             }
             validated = handleSubscribedAPIs(apiKeyToken, payload, subscribedAPIList, validateAllowedAPIs);
@@ -169,7 +169,7 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
             }
         }
     }
-    printError(KEY_SUBSCRIPTION_FILTER, "Failed to validate API.");
+    printError(API_KEY_UTIL, "Failed to validate API.");
     return false;
 }
 
@@ -184,7 +184,6 @@ public function getAPIKeyAuth() returns [string, string] | error {
     if (invocationContext.attributes.hasKey("apiKeyIn") && invocationContext.attributes.hasKey("apiKeyName")) {
         return [<string>invocationContext.attributes["apiKeyIn"], <string>invocationContext.attributes["apiKeyName"]];
     } else {
-        printDebug(API_KEY_UTIL, "API key is missing in invocation context");
         return error("API key is missing in invocation context");
     }
 }
