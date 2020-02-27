@@ -16,6 +16,7 @@
 
 package org.wso2.micro.gateway.core.interceptors;
 
+import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +52,16 @@ public class InterceptorInvoker {
     }
 
     public static boolean invokeRequestInterceptor(int arrayIndex, ObjectValue caller, ObjectValue request) {
-        return interceptorArray[arrayIndex].interceptRequest(new Caller(caller), new Request(request));
+        boolean returnedValue = interceptorArray[arrayIndex]
+                .interceptRequest(new Caller(caller), new Request(request));
+        Scheduler.getStrand().setReturnValues(returnedValue);
+        return returnedValue;
     }
 
     public static boolean invokeResponseInterceptor(int arrayIndex, ObjectValue caller, ObjectValue response) {
-        return interceptorArray[arrayIndex].interceptResponse(new Caller(caller), new Response(response));
+        boolean returnedValue = interceptorArray[arrayIndex]
+                .interceptResponse(new Caller(caller), new Response(response));
+        Scheduler.getStrand().setReturnValues(returnedValue);
+        return returnedValue;
     }
 }

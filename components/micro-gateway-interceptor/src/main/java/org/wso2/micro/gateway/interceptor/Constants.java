@@ -39,6 +39,9 @@ public class Constants {
     public static final String REMOTE_ADDRESS = "remoteAddress";
     public static final String HOST = "host";
     public static final String PORT = "port";
+    public static final String RESPOND_DONE = "respond_done";
+    public static final String RESPONSE_OBJECT = "response_object";
+    public static final String READABLE_BYTE_CHANNEL = "ReadableByteChannel";
 
 
 }

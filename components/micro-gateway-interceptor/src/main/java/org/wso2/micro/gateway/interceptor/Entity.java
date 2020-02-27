@@ -15,33 +15,46 @@
  */
 package org.wso2.micro.gateway.interceptor;
 
+import org.ballerinalang.jvm.BallerinaValues;
+import org.ballerinalang.jvm.JSONParser;
+import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.values.ArrayValue;
-import org.ballerinalang.jvm.values.ArrayValueImpl;
 import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.XMLValue;
+import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.jvm.values.api.BXML;
+import org.ballerinalang.mime.nativeimpl.AbstractGetPayloadHandler;
 import org.ballerinalang.mime.nativeimpl.EntityHeaders;
-import org.ballerinalang.mime.nativeimpl.MimeDataSourceBuilder;
 import org.ballerinalang.mime.nativeimpl.MimeEntityBody;
 import org.ballerinalang.mime.util.MimeConstants;
 import org.ballerinalang.mime.util.MimeUtil;
 import org.ballerinalang.stdlib.io.channels.base.Channel;
-import org.ballerinalang.stdlib.io.channels.base.IOChannel;
 import org.ballerinalang.stdlib.io.utils.IOConstants;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.channels.ByteChannel;
 
 /**
  * Represents the headers and body of a message. This can be used to represent both the entity of a top level message
  * and an entity(body part) inside of a multipart entity.
  */
 public class Entity {
+
+    private static final Logger log = LoggerFactory.getLogger("ballerina");
     private ObjectValue entityObj;
 
     public Entity(ObjectValue entity) {
         this.entityObj = entity;
+    }
+
+    public Entity() {
+        this.entityObj = BallerinaValues
+                .createObjectValue(MimeConstants.PROTOCOL_MIME_PKG_ID, MimeConstants.ENTITY, new Object());
     }
 
     /**
@@ -149,11 +162,7 @@ public class Entity {
      * @throws InterceptorException If error while getting json payload.
      */
     public JSONObject getJson() throws InterceptorException {
-        Object jsonBody = MimeDataSourceBuilder.getJson(entityObj);
-        if (jsonBody instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting JSON payload from the entity",
-                    ((ErrorValue) jsonBody).getCause());
-        }
+        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.JSON);
         if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
             String jsonPayload = MimeUtil
                     .getMessageAsString(entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE));
@@ -169,15 +178,11 @@ public class Entity {
      * @throws InterceptorException If error while getting xml payload.
      */
     public BXML getXml() throws InterceptorException {
-        Object xmlBody = MimeDataSourceBuilder.getXml(entityObj);
-        if (xmlBody instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting XML payload from the entity",
-                    ((ErrorValue) xmlBody).getCause());
-        }
+        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.XML);
         if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
             return (BXML) entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE);
         }
-        return (BXML) xmlBody;
+        return null;
     }
 
     /**
@@ -187,28 +192,28 @@ public class Entity {
      * @throws InterceptorException If error while getting text payload.
      */
     public String getText() throws InterceptorException {
-        Object textPayload = MimeDataSourceBuilder.getText(entityObj);
-        if (textPayload instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting text payload from the entity",
-                    ((ErrorValue) textPayload).getCause());
+        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.TEXT);
+        if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
+            return  entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE).toString();
         }
-        return textPayload.toString();
+        return null;
     }
 
     /**
      * Given an entity, gets the entity body as a byte channel
      *
-     * @return {@link IOChannel} A byte channel from which the message payload can be read.
+     * @return {@link ByteChannel} A byte channel from which the message payload can be read.
      * @throws InterceptorException If error while getting byte channel of the entity.
      */
-    public Channel getByteChannel() throws InterceptorException {
+    public ByteChannel getByteChannel() throws InterceptorException {
         Object byteChannel = MimeEntityBody.getByteChannel(entityObj);
         if (byteChannel instanceof ErrorValue) {
             throw new InterceptorException("Error while getting byte channel from the entity",
                     ((ErrorValue) byteChannel).getCause());
         }
         ObjectValue byteChannelObject = (ObjectValue) byteChannel;
-        return ((Channel) byteChannelObject.getNativeData(IOConstants.BYTE_CHANNEL_NAME));
+        Channel channel = ((Channel) byteChannelObject.getNativeData(IOConstants.BYTE_CHANNEL_NAME));
+        return channel.getByteChannel();
     }
 
     /**
@@ -218,13 +223,11 @@ public class Entity {
      * @throws InterceptorException If error while getting byte array of the entity.
      */
     public byte[] getByteArray() throws InterceptorException {
-        Object binaryPayload = MimeDataSourceBuilder.getByteArray(entityObj);
-        if (binaryPayload instanceof ErrorValue) {
-            throw new InterceptorException("Error while getting byte array from the request",
-                    ((ErrorValue) binaryPayload).getCause());
+        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.BLOB);
+        if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
+            return (byte[]) entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE);
         }
-        ArrayValue byteArray = (ArrayValue) binaryPayload;
-        return byteArray.getBytes();
+        return null;
     }
 
     /**
@@ -253,7 +256,7 @@ public class Entity {
      * @param jsonPayload {@link JSONObject} The json payload.
      */
     public void setJson(JSONObject jsonPayload) {
-        MimeEntityBody.setJson(entityObj, jsonPayload.toString(), MimeConstants.APPLICATION_JSON);
+        MimeEntityBody.setJson(entityObj, JSONParser.parse(jsonPayload.toString()), MimeConstants.APPLICATION_JSON);
     }
 
     /**
@@ -275,12 +278,13 @@ public class Entity {
     }
 
     /**
-     * Sets a byte[] content ato the entity.
+     * Sets a byte[] content to the entity.
      *
      * @param binaryPayload The byte[] payload.
      */
     public void setBinary(byte[] binaryPayload) {
-        MimeEntityBody.setByteArray(entityObj, new ArrayValueImpl(binaryPayload), MimeConstants.OCTET_STREAM);
+        MimeEntityBody.setByteArray(entityObj, (ArrayValue) BValueCreator.createArrayValue(binaryPayload),
+                MimeConstants.OCTET_STREAM);
     }
 
     /**
@@ -298,23 +302,27 @@ public class Entity {
         for (int index = 0; index < bodyParts.length; index++) {
             entityObjects[index] = bodyParts[index].getEntityObj();
         }
-        MimeEntityBody.setBodyParts(entityObj, new ArrayValueImpl(entityObjects, new BArrayType(BTypes.typeAny)),
-                contentType);
+        ArrayValue arrValues = (ArrayValue) BValueCreator
+                .createArrayValue(entityObjects, new BArrayType(BTypes.typeAny));
+        MimeEntityBody.setBodyParts(entityObj, arrValues, contentType);
     }
 
-    //    /**
-    //     * Sets a `ByteChannel`  to the entity.
-    //     *
-    //     * @param channel - A `ByteChannel` {@link IOChannel} through which the message payload can be read
-    //     * @param contentType The content type of the top level message. Set this to override the default
-    //     *                    `content-type` header value which is 'application/octet-stream'
-    //     */
-    //    public void setByteChannel(IOChannel channel, String contentType) {
-    //        if (contentType == null) {
-    //            contentType = Constants.OCTET_STREAM;
-    //        }
-    //        MimeEntityBody.setByteChannel(entityObj, (ObjectValue) channel, contentType);
-    //    }
+    /**
+     * Sets a `ByteChannel`  to the entity.
+     *
+     * @param channel - A `ByteChannel` {@link Channel} through which the message payload can be read
+     * @param contentType The content type of the top level message. Set this to override the default
+     *                    `content-type` header value which is 'application/octet-stream'
+     */
+    public void setByteChannel(Channel channel, String contentType) {
+        if (contentType == null) {
+            contentType = Constants.OCTET_STREAM;
+        }
+        ObjectValue channelObj = BallerinaValues
+                .createObjectValue(IOConstants.IO_PACKAGE_ID, Constants.READABLE_BYTE_CHANNEL);
+        channelObj.addNativeData(IOConstants.BYTE_CHANNEL_NAME, channel);
+        MimeEntityBody.setByteChannel(entityObj, channelObj, contentType);
+    }
 
     /**
      * Returns the java native object of the ballerina level mime:Entity object.
@@ -324,6 +332,25 @@ public class Entity {
     public ObjectValue getEntityObj() {
         return entityObj;
     }
+
+    private void constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType type)
+            throws InterceptorException {
+        MGWBlockingCallBack callback = new MGWBlockingCallBack(Scheduler.getStrand());
+        try {
+            AbstractGetPayloadHandler.constructNonBlockingDataSource(callback, entityObj, type);
+            callback.sync();
+        } catch (Exception e) {
+            // we need to catch all the exceptions including runtime thrown from ballerina side in order to avoid the
+            // call back syncing process.
+            String msg = "Error while getting the payload with type : " + type.toString();
+            log.error(msg, e);
+            callback.notifyFailure();
+            throw new InterceptorException(msg, e);
+        }
+
+    }
+
+
 
 }
 

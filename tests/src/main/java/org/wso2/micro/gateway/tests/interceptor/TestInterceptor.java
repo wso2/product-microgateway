@@ -1,6 +1,5 @@
 package org.wso2.micro.gateway.tests.interceptor;
 
-import org.ballerinalang.stdlib.io.channels.base.Channel;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.channels.ByteChannel;
+import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -35,7 +36,7 @@ public class TestInterceptor implements Interceptor {
         appendResponseString(request.getRequestPath());
         appendResponseString(request.getRequestHttpMethod());
         appendResponseString(request.getRequestHttpVersion());
-        appendResponseString(request.getQueryParams().stringValue());
+        appendResponseString(request.getQueryParams().toString());
         appendResponseString(request.getQueryParamValue("test"));
         if ("application/json".equals(contentType)) {
             try {
@@ -73,11 +74,8 @@ public class TestInterceptor implements Interceptor {
         responseObject.put("age", "22");
         responseObject.put("city", "chicago");
         response1.setJsonPayload(responseObject);
-        try {
-            caller.respond(response1);
-        } catch (InterceptorException e) {
-            log.error("Error while responding from the response interceptor", e);
-        }
+        caller.respond(response1);
+        caller.respond(response1);
         return false;
     }
 
@@ -92,8 +90,8 @@ public class TestInterceptor implements Interceptor {
 
     public String getByteChannel(Request request) {
         try {
-            Channel io = request.getByteChannel();
-            InputStream in = io.getInputStream();
+            ByteChannel byteChannel = request.getByteChannel();
+            InputStream in = Channels.newInputStream(byteChannel);
             StringBuilder textBuilder = new StringBuilder();
             try (Reader reader = new BufferedReader(
                     new InputStreamReader(in, Charset.forName(StandardCharsets.UTF_8.name())))) {
@@ -112,11 +110,7 @@ public class TestInterceptor implements Interceptor {
     public void respondFromRequest(Caller caller) {
         Response response = new Response();
         response.setTextPayload(responseString);
-        try {
-            caller.respond(response);
-        } catch (InterceptorException e) {
-            log.error("Error while responding from the request interceptor", e);
-        }
+        caller.respond(response);
     }
 
     public  void appendResponseString(String response) {
