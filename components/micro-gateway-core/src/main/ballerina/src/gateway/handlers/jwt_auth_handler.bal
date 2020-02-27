@@ -78,7 +78,6 @@ public function setBackendJwtHeader(string credential, http:Request req) {
         // validate backend jwt claim and set it to jwt header
         if (customClaims is map<json> && customClaims.hasKey(BACKEND_JWT)) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "Set backend jwt header.");
-            string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
             req.setHeader(jwtheaderName, customClaims.get(BACKEND_JWT).toString());
         }
     }
