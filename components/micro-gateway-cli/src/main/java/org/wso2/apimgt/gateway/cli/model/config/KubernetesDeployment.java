@@ -40,7 +40,7 @@ public class KubernetesDeployment {
     private String image;
     private String env;
     private String buildImage;
-    private String cmd = "CMD gateway ${APP} --b7a.config.file=conf/micro-gw.conf";
+    private String cmd = "CMD gateway ${APP}";
     private CopyFileConfig copyFiles;
     private String dockerHost;
     private String dockerCertPath;
