@@ -192,7 +192,7 @@ java_cmd_gateway () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME}/runtime \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$CONFIG_FILE 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 }
 
 java_cmd_gateway_background () {
@@ -205,7 +205,7 @@ java_cmd_gateway_background () {
     $JAVA_OPTS \
     -Dmgw-runtime.home=${GW_HOME} \
     -Dballerina.home=${GW_HOME}/runtime \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$MGW_CONF_DIR/micro-gw.conf 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$CONFIG_FILE 2>&1 | tee -a $GW_HOME/logs/microgateway.log
 EOF
 }
 
@@ -251,6 +251,12 @@ fi
 
 OBSERVABILITY_FLAG="false"
 CONFIG_FILE="$MGW_CONF_DIR/micro-gw.conf"
+K8S_MOUNT_PATH="/home/ballerina/conf/ballerina.conf"
+# if externally config map mounted conf found then use that as the config file location. This happens when used with k8s
+if [ -f "$K8S_MOUNT_PATH" ]
+then
+	CONFIG_FILE="$K8S_MOUNT_PATH"
+fi
 CONFIG_OUT_FILE="$GW_HOME/.config"
 
 if [[ $b7a_observability_metrics_enabled == "true" ]]; then
