@@ -36,8 +36,8 @@
 
                                 http:Response res = new;
                                 res.statusCode = 500;
+                                string errorDescription = "Error while connecting to re initialized backend";
                                 if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
-                                    string errorDescription = "Error while connecting to re initialized backend";
                                     json payload = {
                                         "fault": {
                                             "code": "101503",
