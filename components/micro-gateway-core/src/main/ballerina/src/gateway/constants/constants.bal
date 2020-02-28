@@ -127,6 +127,11 @@ public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
 
+//throttle policy prefixes
+public const string RESOURCE_LEVEL_PREFIX = "res_";
+public const string APP_LEVEL_PREFIX = "app_";
+public const string SUB_LEVEL_PREFIX = "sub_";
+
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
 public const string UPLOADING_URL = "uploadingUrl";
