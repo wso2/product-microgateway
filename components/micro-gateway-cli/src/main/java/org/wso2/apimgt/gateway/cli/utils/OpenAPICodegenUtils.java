@@ -369,9 +369,9 @@ public class OpenAPICodegenUtils {
         }
         EndpointListRouteDTO sandEndpointListDTO = null;
         try {
+            //Servers object is set to null as the servers object is considered as a production endpoint
             sandEndpointListDTO = extractEndpointFromOpenAPI(
-                    extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
-                    openAPI.getServers());
+                    extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null, null);
         } catch (CLICompileTimeException e) {
             throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
                     openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
@@ -428,8 +428,7 @@ public class OpenAPICodegenUtils {
             prodEndpointListDTO.validateEndpoints();
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
-                operation.getServers());
+                extensions != null ? operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null, null);
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(operation.getOperationId());
             sandEndpointListDTO.validateEndpoints();
