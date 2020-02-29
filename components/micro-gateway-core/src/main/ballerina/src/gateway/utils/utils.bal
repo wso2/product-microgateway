@@ -157,6 +157,9 @@ public function getClientIp(http:Request request, http:Caller caller) returns (s
         }
     } else {
         clientIp = caller.remoteAddress.host;
+        if (clientIp == "") {
+            clientIp = caller.localAddress.host;
+        }
     }
     return clientIp;
 }
