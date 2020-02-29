@@ -191,6 +191,20 @@ public class CLIExecutor {
         }
     }
 
+    private void copyInterceptorJarToProjectLib(String project) throws MicroGWTestException {
+        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_INTERCEPTOR_JAR);
+        File jarFile = new File(jarLocation);
+        File desPath = new File(
+                homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator
+                        + "mgw-interceptor.jar");
+        try {
+            FileUtils.copyFile(jarFile, desPath);
+        } catch (IOException e) {
+            throw new MicroGWTestException("Error while copying the file from " + jarLocation + " to " + desPath + ".",
+                    e);
+        }
+    }
+
     /**
      * Copy the openAPI definitions' relative paths (compared to resources directory) to project directory.
      *
@@ -201,30 +215,28 @@ public class CLIExecutor {
     private void copyOpenAPIDefinitionsToProject(String project, String[] openAPIFileNames)
             throws MicroGWTestException {
         for (String openAPIFileName : openAPIFileNames) {
-            File swaggerSrcPath = new File(
-                    getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" +
-                            openAPIFileName).getPath());
-            File desPath;
-            if (openAPIFileName.contains(".bal")) {
-                desPath = new File(homeDirectory + File.separator + project + File.separator +
-                        CliConstants.PROJECT_INTERCEPTORS_DIR + File.separator +
-                        openAPIFileName.substring(openAPIFileName.lastIndexOf("/") + 1));
-            } else if (openAPIFileName.endsWith(".proto")) {
-                desPath = new File(
-                        homeDirectory + File.separator + project + File.separator +
-                                CliConstants.PROJECT_GRPC_DEFINITIONS_DIR + File.separator + openAPIFileName
-                                .substring(openAPIFileName.lastIndexOf("/") + 1));
+            if(!openAPIFileName.contains(".jar")) {
+                File swaggerSrcPath = new File(
+                        getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" + openAPIFileName).getPath());
+                File desPath;
+                if (openAPIFileName.contains(".bal")) {
+                    desPath = new File(homeDirectory + File.separator + project + File.separator + CliConstants.PROJECT_INTERCEPTORS_DIR + File.separator + openAPIFileName
+                            .substring(openAPIFileName.lastIndexOf("/") + 1));
+                } else if (openAPIFileName.endsWith(".proto")) {
+                    desPath = new File(homeDirectory + File.separator + project + File.separator + CliConstants.PROJECT_GRPC_DEFINITIONS_DIR + File.separator + openAPIFileName
+                            .substring(openAPIFileName.lastIndexOf("/") + 1));
+                } else {
+                    desPath = new File(homeDirectory + File.separator + project + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
+                            .substring(openAPIFileName.lastIndexOf("/") + 1));
+                }
+                try {
+                    FileUtils.copyFile(swaggerSrcPath, desPath);
+                } catch (IOException e) {
+                    throw new MicroGWTestException(
+                            "Error while copying the file from " + swaggerSrcPath + " to " + desPath + ".", e);
+                }
             } else {
-                desPath = new File(
-                        homeDirectory + File.separator + project + File.separator +
-                                CliConstants.PROJECT_API_DEFINITIONS_DIR + File.separator + openAPIFileName
-                                .substring(openAPIFileName.lastIndexOf("/") + 1));
-            }
-            try {
-                FileUtils.copyFile(swaggerSrcPath, desPath);
-            } catch (IOException e) {
-                throw new MicroGWTestException("Error while copying the file from " + swaggerSrcPath +
-                        " to " + desPath + ".", e);
+                copyInterceptorJarToProjectLib(project);
             }
         }
     }
