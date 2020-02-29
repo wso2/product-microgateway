@@ -302,6 +302,7 @@ public class OpenAPICodegenUtils {
         }
     }
 
+
     /**
      * Get transport security from API Definition extension.
      *

@@ -39,6 +39,8 @@ public class ResponseConstants {
             + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
     public static final String PER_RESOURCE_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900802," +
             " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
+    public static final String PER_API_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900800," +
+            " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
     public static final String NONEXISTING_THROTTLEPOLICY_RESPONSE = "{\"fault\":{\"code\":900809, " +
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
@@ -50,4 +52,13 @@ public class ResponseConstants {
             "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
     public static final String PAYLOAD = "payload";
+
+    public static final String JSON_RESPONSE = ":application/json:Accept:Cache-Control:Connection:Content-Length"
+            + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
+            + "{test2=value2, test=value1}:value1:{\"hello\":\"world\"}";
+    public static final String XML_RESPONSE = ":text/xml:Accept:Cache-Control:Connection:Content-Length"
+            + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
+            + "{test2=value2, test=value1}:value1:<test><msg>hello</msg></test>";
+
+    public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
 }

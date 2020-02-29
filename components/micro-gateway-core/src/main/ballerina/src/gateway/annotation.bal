@@ -27,6 +27,7 @@ public type APIConfiguration record {
     string publisher;
     string authorizationHeader?;
     json security;
+    string apiTier;
     string[] authProviders = [];
 };
 

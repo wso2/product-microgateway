@@ -34,6 +34,7 @@ public class DataProcessAgent implements Runnable {
     private String appTierTimeUnit;
     private long apiTierCount;
     private long apiTierUnitTime;
+    private String apiTierTimeUnit;
     private long subscriptionTierCount;
     private long subscriptionTierUnitTime;
     private String subscriptionTierTimeUnit;
@@ -58,8 +59,9 @@ public class DataProcessAgent implements Runnable {
         this.appTierUnitTime = throttleData.getIntValue("appTierUnitTime");
         this.appTierTimeUnit = throttleData.getStringValue("appTierTimeUnit");
         this.apiKey = throttleData.getStringValue("apiKey");
-        //this.apiTierCount = apiTierCount;
-        //this.apiTierUnitTime = apiTierUnitTime;
+        this.apiTierCount = throttleData.getIntValue("apiTierCount");
+        this.apiTierUnitTime = throttleData.getIntValue("apiTierUnitTime");
+        this.apiTierTimeUnit = throttleData.getStringValue("apiTierTimeUnit");
         this.subscriptionKey = throttleData.getStringValue("subscriptionKey");
         this.subscriptionTierCount = throttleData.getIntValue("subscriptionTierCount");
         this.subscriptionTierUnitTime = throttleData.getIntValue("subscriptionTierUnitTime");
@@ -74,9 +76,9 @@ public class DataProcessAgent implements Runnable {
 
     public void run() {
         throttleCounter.updateCounters(apiKey, appKey, stopOnQuota, subscriptionKey, appTierCount, appTierUnitTime,
-                appTierTimeUnit, apiTierCount, apiTierUnitTime, subscriptionTierCount, subscriptionTierUnitTime,
-                subscriptionTierTimeUnit, resourceKey, resourceTierCount, resourceTierUnitTime, resourceTierTimeUnit,
-                timestamp);
+                appTierTimeUnit, apiTierCount, apiTierUnitTime, apiTierTimeUnit, subscriptionTierCount,
+                subscriptionTierUnitTime, subscriptionTierTimeUnit, resourceKey, resourceTierCount,
+                resourceTierUnitTime, resourceTierTimeUnit, timestamp);
     }
 
     private ThrottleCounter getDataPublisher() {
