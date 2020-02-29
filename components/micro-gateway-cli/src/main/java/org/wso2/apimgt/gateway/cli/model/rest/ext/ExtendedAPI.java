@@ -33,8 +33,7 @@ public class ExtendedAPI extends APIDetailedDTO {
     private String mgwApiScope = null;
     //isGrpc
     private boolean isGrpc = false;
-    //projectName
-    private  String projectName = null;
+
     //support apim application level security
     private ApplicationSecurity applicationSecurity = null;
     //support apim transport level security
@@ -94,14 +93,6 @@ public class ExtendedAPI extends APIDetailedDTO {
 
     public void setMutualSSL(String mutualSSL) {
         this.mutualSSL = mutualSSL;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getProjectName() {
-        return projectName;
     }
 
 }
