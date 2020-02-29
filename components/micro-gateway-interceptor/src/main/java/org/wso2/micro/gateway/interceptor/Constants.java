@@ -43,5 +43,4 @@ public class Constants {
     public static final String RESPONSE_OBJECT = "response_object";
     public static final String READABLE_BYTE_CHANNEL = "ReadableByteChannel";
 
-
 }

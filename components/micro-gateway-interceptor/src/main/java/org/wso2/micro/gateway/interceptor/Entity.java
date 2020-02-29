@@ -347,10 +347,6 @@ public class Entity {
             callback.notifyFailure();
             throw new InterceptorException(msg, e);
         }
-
     }
 
-
-
 }
-
