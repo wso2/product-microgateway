@@ -147,18 +147,18 @@ public function removeThrottleData(string key) {
 }
 
 //check whether the throttle policy is available if in built throttling is used
-public function isPolicyExist(map<json> deployedPolicies, string policyName) returns boolean {
+public function isPolicyExist(map<json> deployedPolicies, string policyName, string prefix) returns boolean {
     if (!enabledGlobalTMEventPublishing) {
-        return deployedPolicies.hasKey(policyName);
+        return deployedPolicies.hasKey(prefix + policyName);
     }
     return true;
 }
 
-public function getPolicyDetails(map<json> deployedPolicies, string policyName) returns (map<json>) {
+public function getPolicyDetails(map<json> deployedPolicies, string policyName, string prefix) returns (map<json>) {
     if (stringutils:equalsIgnoreCase(policyName, UNLIMITED_TIER) || policyName.length() == 0) {
         return { count : -1, unitTime :-1, timeUnit : "min", stopOnQuota : true };
     }
-    return <map<json>>deployedPolicies.get(policyName);
+    return <map<json>>deployedPolicies.get(prefix + policyName);
 }
 
 public function getRequestStream() returns stream<RequestStreamDTO> {

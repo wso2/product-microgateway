@@ -71,7 +71,7 @@ deployedPolicies) returns boolean {
         string? resourceLevelPolicyName = getResourceLevelPolicy(context);
         if (resourceLevelPolicyName is string) {
             printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy : " + resourceLevelPolicyName);
-            if (resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
+            if (resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName, RESOURCE_LEVEL_PREFIX)) {
                 printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
                 + "' does not exist.");
                 setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
@@ -94,7 +94,7 @@ deployedPolicies) returns boolean {
             printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
         }
 
-        if (keyValidationResult.tier != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, keyValidationResult.tier)) {
+        if (keyValidationResult.tier != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, keyValidationResult.tier, SUB_LEVEL_PREFIX)) {
             printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyValidationResult.tier
             + "' does not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
@@ -125,7 +125,7 @@ deployedPolicies) returns boolean {
         printDebug(KEY_THROTTLE_FILTER, "Checking application level throttle policy '"
         + keyValidationResult.applicationTier + "' exist.");
         if (keyValidationResult.applicationTier != UNLIMITED_TIER &&
-        !isPolicyExist(deployedPolicies, keyValidationResult.applicationTier)) {
+        !isPolicyExist(deployedPolicies, keyValidationResult.applicationTier, APP_LEVEL_PREFIX)) {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttle policy '"
             + keyValidationResult.applicationTier + "' does not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
@@ -154,7 +154,7 @@ deployedPolicies) returns boolean {
 
         printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
         + "' exist.");
-        if (!isPolicyExist(deployedPolicies, UNAUTHENTICATED_TIER)) {
+        if (!isPolicyExist(deployedPolicies, UNAUTHENTICATED_TIER, SUB_LEVEL_PREFIX)) {
             printDebug(KEY_THROTTLE_FILTER, "Unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
             + "' is not exist.");
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
@@ -234,7 +234,7 @@ function isSubscriptionLevelThrottled(http:FilterContext context, Authentication
     }
     printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle key : " + subscriptionLevelThrottleKey);
     if (!enabledGlobalTMEventPublishing) {
-        boolean stopOnQuota = <boolean>deployedPolicies.get(keyValidationDto.tier).stopOnQuota;
+        boolean stopOnQuota = <boolean>deployedPolicies.get(SUB_LEVEL_PREFIX + keyValidationDto.tier).stopOnQuota;
         boolean isThrottled = isSubLevelThrottled(subscriptionLevelThrottleKey);
         return [isThrottled, stopOnQuota];
     }
@@ -341,16 +341,16 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
 function generateLocalThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto, map<json> deployedPolicies)
     returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDTO = setCommonThrottleData(req, context, keyValidationDto, deployedPolicies);
-    map<json> appPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.applicationTier);
+    map<json> appPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.applicationTier, APP_LEVEL_PREFIX);
     requestStreamDTO.appTierCount = <int>appPolicyDetails.count;
     requestStreamDTO.appTierUnitTime = <int>appPolicyDetails.unitTime;
     requestStreamDTO.appTierTimeUnit = appPolicyDetails.timeUnit.toString();
-    map<json> subPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.tier);
+    map<json> subPolicyDetails = getPolicyDetails(deployedPolicies, keyValidationDto.tier, SUB_LEVEL_PREFIX);
     requestStreamDTO.subscriptionTierCount = <int>subPolicyDetails.count;
     requestStreamDTO.subscriptionTierUnitTime = <int>subPolicyDetails.unitTime;
     requestStreamDTO.subscriptionTierTimeUnit = subPolicyDetails.timeUnit.toString();
     requestStreamDTO.stopOnQuota = <boolean>subPolicyDetails.stopOnQuota;
-    map<json> resourcePolicyDetails = getPolicyDetails(deployedPolicies, requestStreamDTO.resourceTier);
+    map<json> resourcePolicyDetails = getPolicyDetails(deployedPolicies, requestStreamDTO.resourceTier, RESOURCE_LEVEL_PREFIX);
     requestStreamDTO.resourceTierCount = <int>resourcePolicyDetails.count;
     requestStreamDTO.resourceTierUnitTime = <int>resourcePolicyDetails.unitTime;
     requestStreamDTO.resourceTierTimeUnit = resourcePolicyDetails.timeUnit.toString();

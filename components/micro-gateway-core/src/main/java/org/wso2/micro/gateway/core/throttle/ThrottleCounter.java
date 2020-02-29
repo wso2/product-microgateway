@@ -49,7 +49,7 @@ public class ThrottleCounter {
     private void updateMapCounters(Map<String, ThrottleData> counterMap, String throttleKey, boolean stopOnQuota,
             long limit, long unitTime, String timeUnit, long timestamp, ThrottleData.ThrottleType throttleType) {
         ThrottleData existingThrottleData = counterMap.computeIfPresent(throttleKey, (key, throttleData) -> {
-            if (limit > 0 && throttleData.getCount().incrementAndGet() > limit) {
+            if (limit > 0 && throttleData.getCount().incrementAndGet() >= limit) {
                 throttleData.setThrottled(true);
             } else {
                 throttleData.setThrottled(false);
@@ -58,6 +58,7 @@ public class ThrottleCounter {
                 throttleData.getCount().set(1);
                 long startTime = timestamp - (timestamp % getTimeInMilliSeconds(1, timeUnit));
                 throttleData.setWindowStartTime(startTime);
+                throttleData.setThrottled(false);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Throttle count for the key '" + throttleKey + "' is " + throttleData.getCount());
