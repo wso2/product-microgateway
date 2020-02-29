@@ -27,7 +27,7 @@ public class ThrottleData {
      * Enum to hold throttle types supported by gateway.
      */
     public enum ThrottleType {
-        APP, SUBSCRIPTION, RESOURCE
+        APP, SUBSCRIPTION, RESOURCE, API
     }
 
     private long windowStartTime = 0;
@@ -104,6 +104,10 @@ public class ThrottleData {
             switch (getThrottleType()) {
                 case APP: {
                     ThrottleCounter.removeFromApplicationCounterMap(this.throttleKey);
+                    break;
+                }
+                case API: {
+                    ThrottleCounter.removeFromApiCounterMap(this.throttleKey);
                     break;
                 }
                 case RESOURCE: {

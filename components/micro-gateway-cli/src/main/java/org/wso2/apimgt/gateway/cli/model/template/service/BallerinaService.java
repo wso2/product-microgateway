@@ -241,10 +241,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     //to add API-level throttling policy
                     Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.THROTTLING_TIER));
-                    //api level throttle policy is added only if resource level resource tier is not available
-                    if (operation.getResourceTier() == null) {
-                        apiThrottlePolicy.ifPresent(value -> operation.setResourceTier(value.toString()));
-                    }
+                    apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
                     //to add API-level security disable
                     Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
                             .get(OpenAPIConstants.DISABLE_SECURITY));

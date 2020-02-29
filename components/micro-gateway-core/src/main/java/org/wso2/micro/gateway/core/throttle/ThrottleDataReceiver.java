@@ -69,7 +69,6 @@ public class ThrottleDataReceiver {
      * This method used to pass throttle data and let it run within separate thread.
      */
     public static void processNonThrottledEvent(MapValue throttleEvent) {
-        //check for a dto
         try {
             DataProcessAgent agent = new DataProcessAgent();
             agent.setDataReference(throttleEvent);
@@ -89,6 +88,10 @@ public class ThrottleDataReceiver {
 
     public static boolean isSubcriptionLevelThrottled(String subscriptionKey) {
         return ThrottleCounter.isSubscriptionLevelThrottled(subscriptionKey);
+    }
+
+    public static boolean isApiLevelThrottled(String apiKey) {
+        return ThrottleCounter.isApiLevelThrottled(apiKey);
     }
 
     public static ThrottleDataCleanUpTask getThrottleDataCleanUpTask() {
