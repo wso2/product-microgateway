@@ -95,25 +95,20 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${download.plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>unpack</id>
-                        <phase>validate</phase>
+                        <id>download-ballerina</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>unpack</goal>
+                            <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.ballerinalang</groupId>
-                                    <artifactId>jballerina-tools</artifactId>
-                                    <version>${ballerina.platform.version}</version>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/extracted-distribution/</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/extracted-distribution/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -132,7 +127,7 @@
                             <executable>${project.basedir}/scripts/ballerina-build.${script.extension}</executable>
                             <arguments>
                                 <argument>
-                                    ${project.build.directory}/extracted-distribution/jballerina-tools-${ballerina.platform.version}
+                                    ${project.build.directory}/extracted-distribution/jballerina-${ballerina.platform.version}
                                 </argument>
                                 <argument>
                                     ${project.basedir}
