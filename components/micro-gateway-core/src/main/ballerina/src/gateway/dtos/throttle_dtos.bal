@@ -75,6 +75,9 @@ public type RequestStreamDTO record {
     int appTierCount = -1;
     int appTierUnitTime = -1;
     string appTierTimeUnit = "";
+    int apiTierCount = -1;
+    int apiTierUnitTime = -1;
+    string apiTierTimeUnit = "";
     int subscriptionTierCount = -1;
     int subscriptionTierUnitTime = -1;
     string subscriptionTierTimeUnit = "";

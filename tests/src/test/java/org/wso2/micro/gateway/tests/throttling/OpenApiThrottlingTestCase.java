@@ -58,23 +58,6 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         super.init(project, new String[]{"common_api.yaml"});
     }
 
-    @Test(description = "Test per API throttling")
-    public void testPerAPIThrottling() throws Exception {
-        response = invokeAndAssert(jwtTokenProd,
-                getServiceURLHttp("/petstore/v1/pet/findByStatus?status=available"));
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_THROTTLING_RESPONSE);
-        Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
-    }
-
-    @Test(description = "Test per resource throttling")
-    public void testPerResourceThrottling() throws Exception {
-        response = invokeAndAssert(jwtTokenProd, getServiceURLHttp(perResourceUrl));
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_THROTTLING_RESPONSE);
-        Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
-    }
-
     @Test(description = "Test throttling with non existing policy")
     public void testThrottlingWithNonExistingPolicy() throws Exception {
         response = invokeAndAssert(jwtTokenProd,
@@ -82,6 +65,23 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.NONEXISTING_THROTTLEPOLICY_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 500, "Internal server error occured");
+    }
+
+    @Test(description = "Test per resource throttling", dependsOnMethods = {"testThrottlingWithNonExistingPolicy"})
+    public void testPerResourceThrottling() throws Exception {
+        response = invokeAndAssert(jwtTokenProd, getServiceURLHttp(perResourceUrl));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_THROTTLING_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
+    }
+
+    @Test(description = "Test per API throttling", dependsOnMethods = {"testPerResourceThrottling"})
+    public void testPerAPIThrottling() throws Exception {
+        response = invokeAndAssert(jwtTokenProd,
+                getServiceURLHttp("/petstore/v1/pet/findByStatus?status=available"));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.PER_API_THROTTLING_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
     }
 
     private HttpResponse invokeAndAssert(String token, String url) throws Exception {

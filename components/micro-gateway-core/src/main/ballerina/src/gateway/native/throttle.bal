@@ -39,6 +39,11 @@ public function isAppLevelThrottled(string appKey) returns boolean {
     return jIsAppLevelThrottled(key);
 }
 
+public function isApiThrottled(string appKey) returns boolean {
+    handle key = java:fromString(appKey);
+    return jIsApiLevelThrottled(key);
+}
+
 public function isSubLevelThrottled(string subscriptionKey) returns boolean {
     handle key = java:fromString(subscriptionKey);
     return jIsSubscriptionLevelThrottled(key);
@@ -59,6 +64,10 @@ public function jIsAppLevelThrottled(handle appKey) returns boolean = @java:Meth
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
 } external;
 
+public function jIsApiLevelThrottled(handle apiKey) returns boolean = @java:Method  {
+    name: "isApiLevelThrottled",
+    class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
+} external;
 
 public function jInitThrottleDataPublisher(int processThreadPoolCoreSize, int processThreadPoolMaximumSize,
     int processThreadPoolKeepAliveTime, int cleanUpFrequency) = @java:Method {

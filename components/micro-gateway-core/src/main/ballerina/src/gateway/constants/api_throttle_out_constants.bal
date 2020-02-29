@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
+public const int API_THROTTLE_OUT_ERROR_CODE = 900800;
 public const int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
 public const int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
 public const int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
