@@ -83,24 +83,25 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
             printError(KEY_THROTTLE_UTIL, "Error while creating the jms session.", session);
             return session;
         } else {
-        jms:Destination dest = check session->createTopic("throttleData");
-        jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-1");
-        if (subscriberEndpoint is error) {
-            printError(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.", subscriberEndpoint);
-        } else {
-            var attachResult = subscriberEndpoint.__attach(messageServ);
-            if (attachResult is error) {
-                printError(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.", attachResult);
-                return attachResult;
+            jms:Destination dest = check session->createTopic("throttleData");
+            jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-1");
+            if (subscriberEndpoint is error) {
+                printError(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.", subscriberEndpoint);
+            } else {
+                var attachResult = subscriberEndpoint.__attach(messageServ);
+                if (attachResult is error) {
+                    printError(KEY_THROTTLE_UTIL, "Message consumer hasn't been attached to the service.", attachResult);
+                    return attachResult;
+                }
+                var startResult = subscriberEndpoint.__start();
+                if (startResult is error) {
+                    printError(KEY_THROTTLE_UTIL, "Starting the task is failed.", startResult);
+                    return startResult;
+                }
+                printDebug(KEY_THROTTLE_UTIL, "Successfully created jms connection");
             }
-            var startResult = subscriberEndpoint.__start();
-            if (startResult is error) {
-                printError(KEY_THROTTLE_UTIL, "Starting the task is failed.", startResult);
-                return startResult;
-            }
-            printDebug(KEY_THROTTLE_UTIL, "Successfully created jms connection");
-        }
-        return subscriberEndpoint;
+
+            return subscriberEndpoint;
         }
     }
 }
