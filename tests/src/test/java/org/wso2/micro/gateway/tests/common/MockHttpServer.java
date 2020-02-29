@@ -19,16 +19,6 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationPolicy;
 import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.xml.sax.SAXException;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManagerFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,6 +31,16 @@ import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Mock http server for key-manager and APIM rest api endpoints
@@ -51,9 +51,9 @@ public class MockHttpServer extends Thread {
     private HttpsServer httpServer;
     private String KMServerUrl;
     private int KMServerPort = -1;
-    private String DCRRestAPIBasePath = "/client-registration/v0.15";
-    private String PubRestAPIBasePath = "/api/am/publisher/v1.0";
-    private String AdminRestAPIBasePath = "/api/am/admin/v1.0";
+    private String DCRRestAPIBasePath = "/client-registration/v0.16";
+    private String PubRestAPIBasePath = "/api/am/publisher/v1.1";
+    private String AdminRestAPIBasePath = "/api/am/admin/v1.1";
     private String TMRestAPIBasePath = "/endpoints";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
