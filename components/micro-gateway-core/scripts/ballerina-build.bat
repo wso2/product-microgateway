@@ -24,6 +24,8 @@ RMDIR /S /Q %GATEWAY_PROJECT%\target
 
 PUSHD %GATEWAY_PROJECT%
 CALL %BAL_EXEC% build -c --experimental gateway
+REM Exit if the build process is failed
+if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
 POPD
 
 xcopy /Y /I /E %GATEWAY_PROJECT%\target\balo %MAVEN_PROJECT_ROOT%\target\balo

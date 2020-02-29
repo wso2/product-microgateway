@@ -1,11 +1,18 @@
 package org.wso2.micro.gateway.tests.grpc.gen;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
+import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
+import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
+import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
 import static io.grpc.stub.ClientCalls.asyncUnaryCall;
 import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
 import static io.grpc.stub.ClientCalls.blockingUnaryCall;
 import static io.grpc.stub.ClientCalls.futureUnaryCall;
+import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnaryCall;
+import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
@@ -20,29 +27,29 @@ public final class TestServiceGrpc {
   public static final String SERVICE_NAME = "TestService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<TestRequest,
-          TestResponse> getTestCallMethod;
+  private static volatile io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "testCall",
-      requestType = TestRequest.class,
-      responseType = TestResponse.class,
+      requestType = org.wso2.micro.gateway.tests.grpc.gen.TestRequest.class,
+      responseType = org.wso2.micro.gateway.tests.grpc.gen.TestResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<TestRequest,
-          TestResponse> getTestCallMethod() {
-    io.grpc.MethodDescriptor<TestRequest, TestResponse> getTestCallMethod;
+  public static io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+      org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallMethod() {
+    io.grpc.MethodDescriptor<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse> getTestCallMethod;
     if ((getTestCallMethod = TestServiceGrpc.getTestCallMethod) == null) {
       synchronized (TestServiceGrpc.class) {
         if ((getTestCallMethod = TestServiceGrpc.getTestCallMethod) == null) {
           TestServiceGrpc.getTestCallMethod = getTestCallMethod =
-              io.grpc.MethodDescriptor.<TestRequest, TestResponse>newBuilder()
+              io.grpc.MethodDescriptor.<org.wso2.micro.gateway.tests.grpc.gen.TestRequest, org.wso2.micro.gateway.tests.grpc.gen.TestResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "testCall"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  TestRequest.getDefaultInstance()))
+                  org.wso2.micro.gateway.tests.grpc.gen.TestRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  TestResponse.getDefaultInstance()))
+                  org.wso2.micro.gateway.tests.grpc.gen.TestResponse.getDefaultInstance()))
               .setSchemaDescriptor(new TestServiceMethodDescriptorSupplier("testCall"))
               .build();
         }
@@ -101,8 +108,8 @@ public final class TestServiceGrpc {
 
     /**
      */
-    public void testCall(TestRequest request,
-                         io.grpc.stub.StreamObserver<TestResponse> responseObserver) {
+    public void testCall(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getTestCallMethod(), responseObserver);
     }
 
@@ -112,8 +119,8 @@ public final class TestServiceGrpc {
             getTestCallMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                      TestRequest,
-                      TestResponse>(
+                org.wso2.micro.gateway.tests.grpc.gen.TestRequest,
+                org.wso2.micro.gateway.tests.grpc.gen.TestResponse>(
                   this, METHODID_TEST_CALL)))
           .build();
     }
@@ -135,8 +142,8 @@ public final class TestServiceGrpc {
 
     /**
      */
-    public void testCall(TestRequest request,
-                         io.grpc.stub.StreamObserver<TestResponse> responseObserver) {
+    public void testCall(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request,
+        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getTestCallMethod(), getCallOptions()), request, responseObserver);
     }
@@ -158,7 +165,7 @@ public final class TestServiceGrpc {
 
     /**
      */
-    public TestResponse testCall(TestRequest request) {
+    public org.wso2.micro.gateway.tests.grpc.gen.TestResponse testCall(org.wso2.micro.gateway.tests.grpc.gen.TestRequest request) {
       return blockingUnaryCall(
           getChannel(), getTestCallMethod(), getCallOptions(), request);
     }
@@ -180,8 +187,8 @@ public final class TestServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<TestResponse> testCall(
-        TestRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<org.wso2.micro.gateway.tests.grpc.gen.TestResponse> testCall(
+        org.wso2.micro.gateway.tests.grpc.gen.TestRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getTestCallMethod(), getCallOptions()), request);
     }
@@ -207,8 +214,8 @@ public final class TestServiceGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_TEST_CALL:
-          serviceImpl.testCall((TestRequest) request,
-              (io.grpc.stub.StreamObserver<TestResponse>) responseObserver);
+          serviceImpl.testCall((org.wso2.micro.gateway.tests.grpc.gen.TestRequest) request,
+              (io.grpc.stub.StreamObserver<org.wso2.micro.gateway.tests.grpc.gen.TestResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -232,7 +239,7 @@ public final class TestServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return Test.getDescriptor();
+      return org.wso2.micro.gateway.tests.grpc.gen.Test.getDescriptor();
     }
 
     @java.lang.Override

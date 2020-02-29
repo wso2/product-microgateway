@@ -98,7 +98,6 @@ public type KeyValidationHandler object {
                             && authenticationContext?.callerToken != "") {
                         printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
                         callerToken);
-                        string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
                         req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
                     }
                 }

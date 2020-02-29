@@ -103,7 +103,7 @@
  }
 
  function doValidationFilterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
-     
+
      string resPath = "";
      string requestMethod = "";
      string reqMethod = "";

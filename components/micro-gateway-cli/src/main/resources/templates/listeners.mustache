@@ -3,7 +3,10 @@ import ballerina/http;
 import ballerina/config;
 
 {{#if containerConfig.hasDocker}}import ballerina/docker;{{/if}}
-{{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerina/kubernetes;{{/if}}
+{{#if containerConfig.kubernetes.kubernetesService.enable}}import ballerina/kubernetes;
+{{else if containerConfig.kubernetes.kubernetesServiceHttps.enable}}import ballerina/kubernetes;
+{{else if containerConfig.kubernetes.kubernetesServiceHttp.enable}}import ballerina/kubernetes;{{/if}}
+
 
 //Throttle tier data initiation
 

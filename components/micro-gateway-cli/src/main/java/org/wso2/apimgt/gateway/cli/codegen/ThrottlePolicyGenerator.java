@@ -26,6 +26,7 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.SubscriptionThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ThrottlePolicyListMapper;
@@ -41,7 +42,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Helper for generating ballerina based throttle policies.
@@ -92,6 +96,7 @@ public class ThrottlePolicyGenerator {
         if (applicationPolicies == null && subscriptionPolicies == null && resourcePolicies == null) {
             return;
         }
+        checkDuplicatePolicyNames(applicationPolicies, subscriptionPolicies, resourcePolicies);
 
         List<GenSrcFile> genFiles = new ArrayList<>();
         GenSrcFile initGenFile = generateInitBal(applicationPolicies, subscriptionPolicies, resourcePolicies);
@@ -294,5 +299,35 @@ public class ThrottlePolicyGenerator {
                 .build();
 
         return template.apply(context);
+    }
+
+    private void checkDuplicatePolicyNames(List<ThrottlePolicyMapper> applicationPolicies,
+            List<ThrottlePolicyMapper> subscriptionPolicies, List<ThrottlePolicyMapper> resourcePolicies) {
+        if (applicationPolicies != null) {
+            List<String> appPolicyNames = applicationPolicies.stream().map(ThrottlePolicyMapper::getName)
+                    .collect(Collectors.toList());
+            Set<String> appPolicySet = new HashSet<>(appPolicyNames);
+            if (appPolicySet.size() < applicationPolicies.size()) {
+                throw new CLIRuntimeException(
+                        "Application policies contains duplicate names in the policies.yaml file");
+            }
+        }
+        if (subscriptionPolicies != null) {
+            List<String> subPolicyNames = subscriptionPolicies.stream().map(ThrottlePolicyMapper::getName)
+                    .collect(Collectors.toList());
+            Set<String> subPolicySet = new HashSet<>(subPolicyNames);
+            if (subPolicySet.size() < subscriptionPolicies.size()) {
+                throw new CLIRuntimeException(
+                        "Subscription policies contains duplicate names in the policies.yaml file");
+            }
+        }
+        if (resourcePolicies != null) {
+            List<String> resPolicyNames = resourcePolicies.stream().map(ThrottlePolicyMapper::getName)
+                    .collect(Collectors.toList());
+            Set<String> resPolicySet = new HashSet<>(resPolicyNames);
+            if (resPolicySet.size() < resourcePolicies.size()) {
+                throw new CLIRuntimeException("Resource policies contains duplicate names in the policies.yaml file");
+            }
+        }
     }
 }

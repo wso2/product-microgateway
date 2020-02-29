@@ -127,6 +127,11 @@ public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
 
+//throttle policy prefixes
+public const string RESOURCE_LEVEL_PREFIX = "res_";
+public const string APP_LEVEL_PREFIX = "app_";
+public const string SUB_LEVEL_PREFIX = "sub_";
+
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
 public const string UPLOADING_URL = "uploadingUrl";
@@ -349,7 +354,7 @@ const string KEY_ANALYTICS_FILTER = "AnalyticsFilter";
 const string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
 const string KEY_VALIDATION_FILTER = "ValidationFilter";
 const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
-const string KEY_THROTTLE_UTIL = "ThrottleUtil";
+public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
 const string KEY_GW_CACHE = "GatewayCache";
 const string KEY_UTILS = "Utils";
 const string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
@@ -377,11 +382,12 @@ const string SUBSCRIBED_APIS = "subscribedAPIs";
 const string ALLOWED_APIS = "allowedAPIs";
 const string CONSUMER_KEY = "consumerKey";
 const string KEY_TYPE = "keytype";
+const string BACKEND_JWT = "backendJwt";
 
 public const string INTROSPECT_CONTEXT = "introspect";
 
 //grpc
-const string IS_GRPC = "isGrpc";
+public const string IS_GRPC = "isGrpc";
 const string GRPC_STATUS_HEADER = "grpc-status";
 const string GRPC_MESSAGE_HEADER = "grpc-message";
 const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";
@@ -398,3 +404,8 @@ public const string COOKIE_BASED_HANDLER = "cookieBasedHandler";
 public const string VALIDATION_STATUS = "validated";
 public const string REQ_METHOD = "requestMethod";
 public const string REQUEST_PATH = "requestPath";
+
+// java interceptor related constants
+public const string RESPOND_DONE = "respond_done";
+public const string RESPONSE_OBJECT = "response_object";
+

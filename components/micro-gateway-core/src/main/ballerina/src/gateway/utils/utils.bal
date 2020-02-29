@@ -39,9 +39,10 @@ map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
 map<http:InboundAuthHandler> authHandlersMap = {}; //all handlers except for jwt handlers
 http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
-string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
-map<string> openAPIs = {};
 
+// values read from configuration
+string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
+string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -72,7 +73,6 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     printDebug(KEY_UTILS, "Resource Name : " + resourceName);
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
-    io:println(httpServiceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
         apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
         apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
@@ -287,7 +287,7 @@ public function setErrorMessageToInvocationContext(int errorCode) {
 # + context - filter context object.
 public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
-    string errorMesssage = <string>context.attributes[ERROR_MESSAGE];
+    string errorMessage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
     http:Response response = new;
     response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
@@ -296,11 +296,13 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
         json payload = {
             fault: {
                 code: errorCode,
-                message: errorMesssage,
+                message: errorMessage,
                 description: errorDescription
             }
         };
         response.setJsonPayload(payload);
+    } else {
+        attachGrpcErrorHeaders (response, errorMessage);
     }
     var value = caller->respond(response);
     if (value is error) {
@@ -320,12 +322,14 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {
             fault: {
-            code: errorCode,
-            message: errorMessage,
-            description: errorDescription
-        }
-    };
-    response.setJsonPayload(payload);
+                code: errorCode,
+                message: errorMessage,
+                description: errorDescription
+            }
+        };
+        response.setJsonPayload(payload);
+    } else {
+        attachGrpcErrorHeaders (response, errorMessage);
     }
 }
 
@@ -421,19 +425,6 @@ public function mask(string text) returns string {
     } else {
         return "xxxx";
     }
-}
-
-# mask all letters with given text except last 4 charactors.
-# + apis - The string to be masked.
-public function setOpenAPIs(map<string> apis) {
-   openAPIs = apis;
-}
-
-# Returns map of open APIs.
-#
-# + return - openAPIS
-public function getOpenAPIs() returns map<string> {
-    return openAPIs;
 }
 
 # Returns the current message ID (uuid).
@@ -713,9 +704,7 @@ public function prepareError(string message, error? err = ()) returns auth:Error
 # + err - The `error` instance.
 # + return - Returns the prepared `AuthenticationError` instance.
 function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    log:printDebug(function () returns string {
-        return message;
-    });
+    printDebug(KEY_UTILS, message);
     if (err is error) {
         http:AuthenticationError preparedError = error(http:AUTHN_FAILED, message = message, cause = err);
         return preparedError;

@@ -30,7 +30,7 @@ target = "java8"
                  path = "../../../target/lib/dependencies/guava-27.1-jre.jar"
 
     [[platform.libraries]]
-                     path = "../../../target/lib/dependencies/json-20160810.jar"
+                     path = "../../../target/lib/dependencies/json-20190722.jar"
 
     [[platform.libraries]]
                      path = "../../../target/lib/dependencies/asm-1.0.2.jar"

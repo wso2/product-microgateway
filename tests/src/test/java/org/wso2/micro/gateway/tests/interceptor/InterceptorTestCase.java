@@ -27,11 +27,10 @@ import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.ResponseConstants;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
-import org.wso2.micro.gateway.tests.util.HttpResponse;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +38,7 @@ import java.util.Map;
  * This test class is used to test per API/Resource interceptors.
  */
 public class InterceptorTestCase extends BaseTestCase {
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
@@ -55,7 +54,7 @@ public class InterceptorTestCase extends BaseTestCase {
         //generate apis with CLI and start the micro gateway server
         super.init(project, new String[]{"interceptor/interceptor.yaml", "interceptor/validateRequest.bal",
                 "interceptor/interceptPerAPIRequest.bal", "interceptor/interceptPerAPIResponse.bal",
-                "interceptor/validateResponse.bal", "interceptor/PerAPIInterceptor.yaml"});
+                "interceptor/validateResponse.bal", "interceptor/PerAPIInterceptor.yaml", "mgw-interceptor.jar"});
     }
 
     @Test(description = "Test per API throttling")
@@ -129,4 +128,5 @@ public class InterceptorTestCase extends BaseTestCase {
         //Stop all the mock servers
         super.finalize();
     }
+
 }

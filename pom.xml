@@ -330,6 +330,11 @@
                 <version>${ballerina.platform.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-runtime-api</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.moandjiezana.toml</groupId>
                 <artifactId>toml4j</artifactId>
                 <version>${toml.parser.version}</version>
@@ -396,10 +401,13 @@
                 <version>${everit.version}</version>
                 <scope>compile</scope>
             </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-
     <build>
         <plugins>
             <plugin>
@@ -522,7 +530,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.1.2</ballerina.platform.version>
+        <ballerina.platform.version>1.1.4</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -597,6 +605,7 @@
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <jackson-data-bind.version>2.9.10.1</jackson-data-bind.version>
         <jackson-core.version>2.9.9</jackson-core.version>
+        <org.json.version>20190722</org.json.version>
     </properties>
 
 </project>

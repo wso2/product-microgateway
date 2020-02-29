@@ -26,6 +26,7 @@ import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -68,6 +69,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
     private boolean isGrpc;
+    //to identify if there is any endpoint with backend security (to insert "import ballerina/auth")
+    private boolean hasEpSecurity = false;
 
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
@@ -134,16 +137,19 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
-        this.authProviders = OpenAPICodegenUtils
-                .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
+        ApplicationSecurity appSecurity = api.getApplicationSecurity();
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(), appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         if (api.getMutualSSL() != null) {
             this.isMutualSSL = true;
             this.mutualSSLClientVerification = api.getMutualSSL();
         }
-        this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
+        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
+        setHasEpSecurity(endpointConfig);
         setPaths(definition);
+        //set default auth providers for api level
+        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
         resolveInterceptors(definition.getExtensions());
 
         return buildContext(definition);
@@ -220,6 +226,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
                 String operationId = op.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
                 operation.setOperationId(operationId);
+
+                //set hasEpSecurity to identify if there are operations with backend security config
+                setHasEpSecurity(operation.getEpConfigDTO());
 
                 // set import and function call statement for operation level interceptors
                 updateOperationInterceptors(operation);
@@ -418,4 +427,15 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         isDevFirst = value;
     }
 
+    public void setHasEpSecurity(MgwEndpointConfigDTO endpointConfig) {
+        if (hasEpSecurity || endpointConfig == null) {
+            return;
+        }
+        if ((endpointConfig.getProdEndpointList() != null &&
+                endpointConfig.getProdEndpointList().getSecurityConfig() != null) ||
+                (endpointConfig.getSandboxEndpointList() != null &&
+                        endpointConfig.getSandboxEndpointList().getSecurityConfig() != null)) {
+            hasEpSecurity = true;
+        }
+    }
 }
