@@ -57,7 +57,7 @@ service jmsTokenRevocation = service {
 # + return - jms:TopicSubscriber for token Revocation
 public function startTokenRevocationSubscriberService() returns @tainted jms:MessageConsumer | error {
     // Initialize a JMS connection  with the provider.
-    jms:Connection connection = check jms:createConnection({
+    jms:Connection | error connection = trap jms:createConnection({
         initialContextFactory: jmsConnectioninitialContextFactoryTokenRevocation,
         providerUrl: jmsConnectionProviderUrlTokenRevocation,
         username: jmsConnectionUsernameTokenRevocation,
@@ -65,18 +65,36 @@ public function startTokenRevocationSubscriberService() returns @tainted jms:Mes
 
     });
 
-    jms:Session session = check connection->createSession({acknowledgementMode: "AUTO_ACKNOWLEDGE"});
-    jms:Destination dest = check session->createTopic(tokenRevocationJMSTopic);
-    jms:MessageConsumer subscriberEndpoint = check session->createDurableSubscriber(dest, "sub-2");
-    var attachResult = subscriberEndpoint.__attach(jmsTokenRevocation);
-    if (attachResult is error) {
-        printDebug(KEY_TOKEN_REVOCATION_JMS, "Message consumer hasn't been attached to the service.");
+    if (connection is error) {
+        printError(KEY_TOKEN_REVOCATION_JMS, "Error while creating the jms connection.", connection);
+        return connection;
+    } else {
+        jms:Session | error session = trap connection->createSession({acknowledgementMode: "AUTO_ACKNOWLEDGE"});
+        if (session is error) {
+            printError(KEY_TOKEN_REVOCATION_JMS, "Error while creating the jms session.", session);
+            return session;
+        } else {
+            jms:Destination dest = check session->createTopic(tokenRevocationJMSTopic);
+            jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-2");
+            if (subscriberEndpoint is error) {
+                printError(KEY_TOKEN_REVOCATION_JMS, "Error while creating the jms subscriber.", subscriberEndpoint);
+            } else {
+                var attachResult = subscriberEndpoint.__attach(jmsTokenRevocation);
+                if (attachResult is error) {
+                    printError(KEY_TOKEN_REVOCATION_JMS, "Message consumer hasn't been attached to the service.", attachResult);
+                    return attachResult;
+                }
+                var startResult = subscriberEndpoint.__start();
+                if (startResult is error) {
+                    printError(KEY_TOKEN_REVOCATION_JMS, "Starting the task is failed.", startResult);
+                    return startResult;
+                }
+                printDebug(KEY_TOKEN_REVOCATION_JMS, "Successfully created jms connection");
+            }
+
+            return subscriberEndpoint;
+        }
     }
-    var startResult = subscriberEndpoint.__start();
-    if (startResult is error) {
-        printDebug(KEY_TOKEN_REVOCATION_JMS, "Starting the task is failed.");
-    }
-    return subscriberEndpoint;
 }
 
 # `initiateTokenRevocationJmsListener` function initialize jmslistener subscriber service if `enabledTokenRevocation`
@@ -92,7 +110,7 @@ public function initiateTokenRevocationJmsListener() returns boolean {
             printInfo(KEY_TOKEN_REVOCATION_JMS, "subscriber service for token revocation is started");
             return true;
         } else {
-            printError(KEY_TOKEN_REVOCATION_JMS, "Error while starting subscriber service for token revocation");
+            printError(KEY_TOKEN_REVOCATION_JMS, "Error while starting subscriber service for token revocation", topicTokenRevocationSubscriber);
             return false;
         }
     }
