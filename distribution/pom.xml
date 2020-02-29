@@ -66,16 +66,6 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.tools</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.ballerinax.docker</groupId>
-            <artifactId>docker-extension</artifactId>
-            <version>${ballerina.platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinax.kubernetes</groupId>
-            <artifactId>kubernetes-extension</artifactId>
-            <version>${ballerina.platform.version}</version>
-        </dependency>
         <!--required for the message broker-->
         <dependency>
             <groupId>org.wso2.securevault</groupId>
