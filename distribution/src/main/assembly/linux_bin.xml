@@ -137,8 +137,6 @@
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
-                <include>org.ballerinax.docker:docker-extension:jar</include>
-                <include>org.ballerinax.kubernetes:kubernetes-extension:jar</include>
             </includes>
         </dependencySet>
         <dependencySet>
