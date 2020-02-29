@@ -18,6 +18,7 @@
 package org.wso2.micro.gateway.tests.validation;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,122 +33,52 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.context.ServerInstance;
 import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
 import java.io.File;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class ValidationTestCase extends BaseTestCase {
-    private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd, prodEndpoint, sandEndpoint;
+    private String apikey;
+
 
     @BeforeClass
     public void start() throws Exception {
-        String label = "apimTestLabel";
-        String project = "apimTestProject";
-        //get mock APIM Instance
-        MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        API api = new API();
-        api.setName("PizzaShackAPI");
-        api.setContext("/pizzashack");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo"));
-        api.setSandEndpoint(getMockServiceURLHttp("/echo/invalidResponse"));
-        prodEndpoint = api.getProdEndpoint();
-        sandEndpoint = api.getSandEndpoint();
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-        //Register API with label
-        pub.addApi(label, api);
-
-        //Define application info
         ApplicationDTO application = new ApplicationDTO();
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        //Register a production token with key validation info
-        KeyValidationInfo info = new KeyValidationInfo();
-        info.setApi(api);
-        info.setApplication(application);
-        info.setAuthorized(true);
-        info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
-        info.setSubscriptionTier("Unlimited");
+        super.init("api-key-project", new String[]{"common_api.yaml"}, null, "confs/validation.conf");
+        String originalInput = "generalUser1:password";
+        String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
 
-        //Register a production token with key validation info
-        prodToken = pub.getAndRegisterAccessToken(info);
-
-        //Register a sandbox token with key validation info
-        KeyValidationInfo infoSand = new KeyValidationInfo();
-        infoSand.setApi(api);
-        infoSand.setApplication(application);
-        infoSand.setAuthorized(true);
-        infoSand.setKeyType(TestConstant.KEY_TYPE_SANDBOX);
-        infoSand.setSubscriptionTier("Unlimited");
-        sandToken = pub.getAndRegisterAccessToken(infoSand);
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 360000);
-        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 360000);
-        //generate apis with CLI and start the micro gateway server
-        String configPath = "confs/validation.conf";
-        String[] openAPIFiles = new String[] { "validation/PizzaShackAPI_swagger.json" };
-        super.init(project, openAPIFiles, null, configPath);
-    }
-
-    @Test(description = "Test valid request and valid response with a JWT token")
-    public void testValidRequestAndValidResponseWithJWT() throws Exception {
-        //test valid request and valid response with a JWT token
-        invokeValidRequestAndValidResponse(jwtTokenProd, MockHttpServer.ECHO_ENDPOINT_RESPONSE, 200);
-    }
-
-    @Test(description = "Test invalid request with a JWT token")
-    public void testInvalidRequestWithJWT() throws Exception {
-        //test invalid request with a JWT token
-        invokeInvalidRequest(jwtTokenProd, MockHttpServer.ECHO_ENDPOINT_RESPONSE_FOR_INVALID_REQUEST, 422);
-    }
-
-    @Test(description = "Test invalid response with a JWT token")
-    public void testInvalidResponseWithJWT() throws Exception {
-        //test invalid response with a JWT token
-        invokeInvalidResponse(jwtTokenSand, MockHttpServer.ERROR_MESSAGE_FOR_INVALID_RESPONSE, 500);
-    }
-
-    private void invokeValidRequestAndValidResponse(String token, String responseData, int responseCode) throws
-            Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.ACCEPT.toString(), "application/json");
-        headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.ECHO_ENDPOINT_RESPONSE,
-                        headers);
+        //get token from token endpoint
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + basicAuthToken);
+        HttpResponse response = HttpClientRequest
+                .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_PORT + "/apikey", headers);
+
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        apikey = response.getData();
     }
 
-    private void invokeInvalidRequest(String token, String responseData, int responseCode) throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.ACCEPT.toString(), "application/json");
-        headers.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doPost(getServiceURLHttp("/pizzashack/1.0.0/order"), MockHttpServer.INVALID_POSTBODY,
-                        headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
-    }
 
-    private void invokeInvalidResponse(String token, String responseData, int responseCode) throws Exception {
+    @Test(description = "Test to check the apikey auth working")
+    private void testAPIResponse() throws Exception {
+
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.ACCEPT.toString(), "application/json");
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+        //test endpoint with token
+        headers.put("api_key", apikey);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
+
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @AfterClass

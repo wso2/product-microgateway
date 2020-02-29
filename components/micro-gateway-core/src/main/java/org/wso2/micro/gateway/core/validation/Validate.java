@@ -35,10 +35,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import static org.wso2.micro.gateway.core.Constants.VALIDATED_STATUS;
 
 /**
  * This class is for validating request/response payload against schema.
@@ -60,8 +66,11 @@ public class Validate {
     public static String validateRequest(String requestPath, String reqMethod, String payload, String serviceName)
             throws IOException {
         String swagger = swaggers.get(serviceName);
+        if ("get".equals(reqMethod) || "GET".equals(reqMethod)) {
+            return VALIDATED_STATUS;
+        }
         String schema = extractSchemaFromRequest(requestPath, reqMethod, swagger);
-        return validateContent(schema, payload);
+        return validateContent(payload, schema);
     }
 
     /***
@@ -86,11 +95,25 @@ public class Validate {
      * @throws IOException
      */
     public static void extractResources(String projectName, String serviceName) throws IOException {
-        String swaggerContent;
-        InputStream in = Validate.class.getResourceAsStream("/resources/wso2/" + projectName + "/");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        while ((swaggerContent = reader.readLine()) != null && !swaggerContent.isEmpty()) {
-            swaggers.put(serviceName, swaggerContent);
+        String path = "resources/wso2/" + projectName + "/";
+        CodeSource src = Validate.class.getProtectionDomain().getCodeSource();
+        if (src != null) {
+            URL jar = src.getLocation();
+            ZipInputStream zip = new ZipInputStream(jar.openStream());
+            while (true) {
+                ZipEntry e = zip.getNextEntry();
+                if (e == null) {
+                    break;
+                }
+                String name = e.getName();
+                String swaggerContent;
+                if (name.startsWith(path)) {
+                    InputStream in = Validate.class.getResourceAsStream("/" + name);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    swaggerContent = reader.readLine();
+                    swaggers.put(serviceName, swaggerContent);
+                }
+            }
         }
     }
 

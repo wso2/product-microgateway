@@ -48,6 +48,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -147,8 +148,8 @@ public class BuildCmd implements LauncherCmd {
             replaceYAMLFilesToJson(resourcesPath);
 
             // Copy static source files
-            //CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
-            CmdUtils.getProjectTargetInterceptorsPath(projectName);
+            CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
+                    CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
             CmdUtils.updateBallerinaToml(projectName);
         } catch (IOException e) {
@@ -168,25 +169,34 @@ public class BuildCmd implements LauncherCmd {
     private void replaceYAMLFilesToJson(String resPath) throws IOException {
         String fileContent;
         String val = null;
-        FileInputStream fileInputStream;
+        FileInputStream fileInputStream = null;
+        FileWriter writer = null;
         File dir = new File(resPath);
         File[] directoryListing = dir.listFiles();
         if (directoryListing != null) {
-            for (File child : directoryListing) {
-                String ch = child.toString();
-                if (ch.endsWith("yaml")) {
-                   fileInputStream = new FileInputStream(child);
-                   byte[] value = new byte[(int) child.length()];
-                   fileInputStream.read(value);
-                   fileInputStream.close();
-                   fileContent = new String(value, "UTF-8");
-                   val = convertYamlToJson(fileContent);
+            try {
+                for (File child : directoryListing) {
+                    String ch = child.toString();
+                    if (ch.endsWith("yaml")) {
+                        fileInputStream = new FileInputStream(child);
+                        byte[] value = new byte[(int) child.length()];
+                        fileInputStream.read(value);
+                        fileInputStream.close();
+                        fileContent = new String(value, StandardCharsets.UTF_8);
+                        val = convertYamlToJson(fileContent);
+                    }
+                    writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                    writer.write(val);
+                    writer.close();
+                    child.delete();
                 }
-                FileWriter writer;
-                writer = new FileWriter(resPath + "/" + Math.random() + ".json");
-                writer.write(val);
-                writer.close();
-                child.delete();
+            } finally {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
             }
         }
     }

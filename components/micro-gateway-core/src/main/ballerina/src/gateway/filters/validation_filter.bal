@@ -77,8 +77,12 @@
        //getting the resource Name
         string resourceName = filterContext.getResourceName();
         //getting the payload of the request
-        string payloadVal = request.getJsonPayload().toString();
+        string payloadVal = "";
 
+        var reqPayload  = request.getJsonPayload();
+        if (reqPayload is map<json>) {
+            payloadVal = reqPayload.toJsonString();
+        }
         //getting request path
         http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
         if (httpResourceConfig is http:HttpResourceConfig) {
@@ -93,11 +97,13 @@
             http:Response res = new;
             res.statusCode = 400;
             res.setPayload(valResult.toString());
+            var rcal = caller->respond(res);
             return false;
         }
  }
 
  function doValidationFilterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
+     
      string resPath = "";
      string requestMethod = "";
      string reqMethod = "";
@@ -119,9 +125,8 @@
          if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
              return true;
          } else {
-             http:Response res = new;
-             res.statusCode = 500;
-             res.setPayload(valResult.toString());
+             response.statusCode = 500;
+             response.setPayload(valResult.toString());
              return false;
          }
  }

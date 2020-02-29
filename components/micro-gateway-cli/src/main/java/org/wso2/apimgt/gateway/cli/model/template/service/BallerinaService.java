@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -69,7 +68,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private ArrayList<String> importModules = new ArrayList<>();
     private HashMap<String, String> libVersions = new HashMap<>();
     private boolean isGrpc;
-    private String projectName;
 
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
@@ -135,7 +133,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
-        this.projectName = CodeGenerator.projectName;
         this.setBasepath(api.getSpecificBasepath());
         this.authProviders = OpenAPICodegenUtils
                 .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
@@ -421,11 +418,4 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         isDevFirst = value;
     }
 
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
 }

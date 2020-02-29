@@ -24,7 +24,7 @@ import ballerinax/java;
 # + serviceName - serviceName
 # +return - status of the validation
 public function requestValidate(string reqPath, string requestMethod,  string payload, string serviceName)
-                                                                              returns handle | error {
+    returns handle | error {
      handle requestPath = java:fromString(reqPath);
      handle reqMethod = java:fromString(requestMethod);
      handle requestPayload = java:fromString(payload);

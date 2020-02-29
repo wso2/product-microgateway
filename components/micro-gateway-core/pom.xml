@@ -73,7 +73,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.core.version}</version>
+            <version>${jackson-data-bind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -91,9 +96,9 @@
             <version>${com.google.guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
+            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>${jayway.jsonpath.version}</version>
+            <version>${com.jayway.jsonpath.version}</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -101,7 +106,7 @@
             <version>${org.json.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.everit.json</groupId>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
             <artifactId>org.everit.json.schema</artifactId>
             <version>${everit.version}</version>
             <scope>provided</scope>
@@ -171,8 +176,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.everit.json</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
