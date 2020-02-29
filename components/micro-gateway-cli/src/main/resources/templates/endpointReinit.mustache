@@ -36,15 +36,21 @@
 
                                 http:Response res = new;
                                 res.statusCode = 500;
-                                json payload = {
-                                    "fault": {
-                                        "code": "101503",
-                                        "message": "Runtime Error",
-                                        "description": "Error while connecting to re initialized backend"
-                                    }
-                                };
+                                string errorDescription = "Error while connecting to re initialized backend";
+                                if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
+                                    json payload = {
+                                        "fault": {
+                                            "code": "101503",
+                                            "message": "Runtime Error",
+                                            "description": errorDescription
+                                        }
+                                    };
+                                    res.setPayload(payload);
+                                } else {
+                                      gateway:attachGrpcErrorHeaders (res, errorDescription);
+                                }
                                 invocationContext.attributes["error_code"] = "101503";
-                                res.setPayload(payload);
+
                                 clientResponse = res;
                                 log:printError("URL defined at etcd for key " + gateway:getConfigValue("", failedEtcdKeyConfigValue, "") + " is invalid");
                             }

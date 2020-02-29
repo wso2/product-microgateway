@@ -57,6 +57,9 @@ public class GeneratorConstants {
     public static final String INIT_FUNC_SUFFIX = "Policy";
     public static final String THROTTLE_POLICY_INITIALIZER = "throttle_policy_initializer";
     public static final String UTF_8 = "UTF-8";
+    public static final String RESOURCE_LEVEL_PREFIX = "res_";
+    public static final String APP_LEVEL_PREFIX = "app_";
+    public static final String SUB_LEVEL_PREFIX = "sub_";
 
     /**
      * Enum defining the available types of throttle policies.

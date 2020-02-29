@@ -86,26 +86,12 @@
                 <exclude>*/**</exclude>
             </excludes>
         </fileSet>
-
-        <!-- Copying the in-place update tools-->
-        <fileSet>
-            <directory>target/update/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/bin/</outputDirectory>
-            <includes>
-                <include>update_windows.exe</include>
-            </includes>
-            <fileMode>744</fileMode>
-        </fileSet>
     </fileSets>
 
     <files>
         <file>
             <source>${basedir}/target/platform.zip</source>
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/lib</outputDirectory>
-        </file>
-        <file>
-            <source>${basedir}/resources/bin/micro-gw</source>
-            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/bin</outputDirectory>
         </file>
         <file>
             <source>${basedir}/resources/bin/micro-gw.bat</source>
@@ -134,6 +120,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/target/update/update_windows.exe</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/bin</outputDirectory>
+            <fileMode>744</fileMode>
         </file>
     </files>
 

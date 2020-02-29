@@ -139,13 +139,13 @@ returns boolean {
             sendErrorResponse(caller, request, context);
             return false;
         }
-    }
-
-    if (!canHandleAuthentication && !isOptional) {
-        setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
-        setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
-        sendErrorResponse(caller, request, context);
-        return false;
+        if (!canHandleAuthentication) {
+            printDebug(KEY_PRE_AUTHN_FILTER, "Request does not have a valid authentication scheme");
+            setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
+            setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
     }
     return true;
 }

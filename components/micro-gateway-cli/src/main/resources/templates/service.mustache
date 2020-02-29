@@ -107,26 +107,39 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         {{~#if @root.requestInterceptor}}
         {{#equals @root.requestInterceptor requestInterceptor}}
         {{else}}
         if({{operationId}}_api_request_interceptor_index == -1) {
         {{^@root.isJavaRequestInterceptor}}
             {{@root.requestInterceptor}}(outboundEp, req);
+            if(invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
+                return;
+            }
         {{/@root.isJavaRequestInterceptor}}
         } else {
             if(!gateway:invokeRequestInterceptor({{operationId}}_api_request_interceptor_index, outboundEp, req)) {
-                return;
+                if(respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
+                    // return only if  interceptor returned false and respond is called from interceptor.
+                    return;
+                }
             }
         }{{/equals}}{{/if}}
         {{#if requestInterceptor}}
         if({{operationId}}_request_interceptor_index == -1) {
         {{^isJavaRequestInterceptor}}
             {{requestInterceptor}}(outboundEp, req);
+            if(invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
+                return;
+            }
         {{/isJavaRequestInterceptor}}
         } else {
             if(!gateway:invokeRequestInterceptor({{operationId}}_request_interceptor_index, outboundEp, req)) {
-                return;
+                if(respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
+                    // return only if  interceptor returned false and respond is called from interceptor.
+                    return;
+                }
             }
         }
         {{/if}}
@@ -136,7 +149,6 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         {{else}}
         string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
         {{/if}}
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
             urlPostfix = "/" + urlPostfix;
         }
@@ -236,10 +248,16 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             if({{operationId}}_response_interceptor_index == -1) {
             {{^isJavaResponseInterceptor}}
                 {{responseInterceptor}} (outboundEp, clientResponse);
+                if(invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
+                    return;
+                }
             {{/isJavaResponseInterceptor}}
             } else {
                 if(!gateway:invokeResponseInterceptor({{operationId}}_response_interceptor_index, outboundEp, clientResponse)) {
-                    return;
+                    if(respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
+                        // return only if interceptor returned false and respond is called from interceptor.
+                        return;
+                    }
                 }
             }{{/if}}
             {{~#if @root.responseInterceptor}}
@@ -248,10 +266,16 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             if({{operationId}}_api_response_interceptor_index == -1) {
             {{^@root.isJavaResponseInterceptor}}
                 {{@root.responseInterceptor}} (outboundEp, clientResponse);
+                if(invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
+                    return;
+                }
             {{/@root.isJavaResponseInterceptor}}
             } else {
                 if(!gateway:invokeResponseInterceptor({{operationId}}_api_response_interceptor_index, outboundEp, clientResponse)) {
-                    return;
+                    if(respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
+                        // return only if interceptor returned false and respond is called from interceptor.
+                        return;
+                    }
                 }
             }{{/equals}}{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
@@ -275,12 +299,17 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }
             invocationContext.attributes["error_response_code"] = errorCode;
             invocationContext.attributes["error_response"] = errorDescription;
-            json payload = {fault : {
-                code : errorCode,
-                message : "Runtime Error",
-                description : errorDescription
-            }};
-            res.setPayload(payload);
+            if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
+                json payload = {fault : {
+                                code : errorCode,
+                                message : "Runtime Error",
+                                description : errorDescription
+                            }};
+
+                            res.setPayload(payload);
+            } else {
+                gateway:attachGrpcErrorHeaders (res, errorDescription);
+            }
             log:printError("Error in client response", err = clientResponse);
             var outboundResult = outboundEp->respond(res);
             if (outboundResult is error) {
@@ -312,6 +341,21 @@ function getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}(string default
     } else {
         return url;
     }
+}
+
+function respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(runtime:InvocationContext invocationContext, http:Caller outboundEp) returns boolean {
+    boolean tryRespond = false;
+    if(invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && invocationContext.attributes.hasKey(gateway:RESPONSE_OBJECT)) {
+        if(<boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
+            http:Response clientResponse = <http:Response>invocationContext.attributes[gateway:RESPONSE_OBJECT];
+            var outboundResult = outboundEp->respond(clientResponse);
+            if (outboundResult is error) {
+                log:printError("Error when sending response from the interceptor", err = outboundResult);
+            }
+            tryRespond = true;
+        }
+    }
+    return tryRespond;
 }
 
 function initInterceptorIndexes{{cut qualifiedServiceName " "}}() {

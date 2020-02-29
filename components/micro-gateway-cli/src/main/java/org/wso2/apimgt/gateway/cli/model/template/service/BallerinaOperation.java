@@ -60,6 +60,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private MgwEndpointConfigDTO epConfig;
     private BallerinaInterceptor reqInterceptorContext;
     private BallerinaInterceptor resInterceptorContext;
+    private ApplicationSecurity appSecurity;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isJavaRequestInterceptor;
@@ -111,14 +112,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+        appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
                 api.getMutualSSL());
-        // if application security defined in operation level is not found, get API level application security
-        appSecurity = appSecurity == null ? api.getApplicationSecurity() : appSecurity;
         this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
-        this.applicationSecurityOptional = appSecurity.isOptional();
+        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -297,10 +296,12 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.resInterceptorContext = resInterceptorContext;
     }
 
-    public void setSecuritySchemas(List<String> authProviders) {
+    void setSecuritySchemas(List<String> authProviders) {
         //update the Resource auth providers property only if there is no security scheme provided during instantiation
         if (this.authProviders.isEmpty()) {
             this.authProviders = authProviders;
         }
+        //set default auth providers after updating with api level auth providers
+        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, this.appSecurity);
     }
 }

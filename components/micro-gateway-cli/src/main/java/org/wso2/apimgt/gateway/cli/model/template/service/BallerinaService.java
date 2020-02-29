@@ -27,6 +27,7 @@ import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
+import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -137,17 +138,19 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
         this.setBasepath(api.getSpecificBasepath());
-        this.authProviders = OpenAPICodegenUtils
-                .getAuthProviders(api.getMgwApiSecurity(), api.getApplicationSecurity());
+        ApplicationSecurity appSecurity = api.getApplicationSecurity();
+        this.authProviders = OpenAPICodegenUtils.getAuthProviders(api.getMgwApiSecurity(), appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(definition.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
         if (api.getMutualSSL() != null) {
             this.isMutualSSL = true;
             this.mutualSSLClientVerification = api.getMutualSSL();
         }
-        this.applicationSecurityOptional = api.getApplicationSecurity().isOptional();
+        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
         setHasEpSecurity(endpointConfig);
         setPaths(definition);
+        //set default auth providers for api level
+        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
         resolveInterceptors(definition.getExtensions());
 
         return buildContext(definition);

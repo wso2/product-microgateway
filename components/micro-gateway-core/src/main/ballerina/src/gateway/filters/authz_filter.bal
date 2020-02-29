@@ -91,17 +91,19 @@ public function doAuthzFilterResponse(http:Response response, http:FilterContext
 
 public function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
     string errorDescription = INVALID_SCOPE_MESSAGE;
-    string errorMesssage = INVALID_SCOPE_MESSAGE;
+    string errorMessage = INVALID_SCOPE_MESSAGE;
     int errorCode = INVALID_SCOPE;
     response.setContentType(APPLICATION_JSON);
-    if (!isGrpcResponse(response, context)) {
+    if (!needGrpcResponseFiltering(response, context)) {
         json payload = {
             fault: {
                 code: errorCode,
-                message: errorMesssage,
+                message: errorMessage,
                 description: errorDescription
             }
         };
     response.setJsonPayload(payload);
+    } else {
+        attachGrpcErrorHeaders (response, errorMessage);
     }
 }

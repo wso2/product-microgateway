@@ -100,6 +100,9 @@ public class CodeGenerator {
                         }
                         String openAPIVersion = OpenAPICodegenUtils.findSwaggerVersion(openAPIContentAsJson, false);
                         OpenAPICodegenUtils.validateOpenAPIDefinition(openAPI, path.toString(), openAPIVersion);
+                        OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
+                        OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
+                        OpenAPICodegenUtils.setOpenAPIDefinitionEndpointReferenceExtensions(openAPI.getExtensions());
                         ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
@@ -127,12 +130,17 @@ public class CodeGenerator {
         }).forEach(path -> {
             String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
             try {
-                OpenAPI openAPI = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
-                if (openAPI != null) {
-                    String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-                    BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent, path, true);
-                    genFiles.add(generateService(definitionContext));
-                    serviceList.add(definitionContext);
+                ArrayList<OpenAPI> openAPIs = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
+                if (openAPIs.size() > 0) {
+                    for (OpenAPI openAPI : openAPIs) {
+                        String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                        OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
+                        OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
+                        BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
+                                path, true);
+                        genFiles.add(generateService(definitionContext));
+                        serviceList.add(definitionContext);
+                    }
                 }
             } catch (IOException e) {
                 throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
@@ -195,7 +203,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate code for Main ballerina file
+     * Generate code for Main ballerina file.
      *
      * @param services list of model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}
@@ -208,7 +216,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate code for ballerina toml external dependencies
+     * Generate code for ballerina toml external dependencies.
      *
      * @param jarNames List of jar names to be included as external platform dependencies in the ballerina.toml
      * @return generated source files as a list of {@link GenSrcFile}

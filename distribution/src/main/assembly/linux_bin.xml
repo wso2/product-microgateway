@@ -79,16 +79,6 @@
             <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/resources/grpc/google/protobuf</outputDirectory>
             <fileMode>644</fileMode>
         </fileSet>
-
-        <!-- Copying the in-place update tools-->
-        <fileSet>
-            <directory>target/update/</directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/bin/</outputDirectory>
-            <includes>
-                <include>update_linux</include>
-            </includes>
-            <fileMode>744</fileMode>
-        </fileSet>
         <fileSet>
             <directory>
                 ${project.build.directory}/extracted-jre-linux
@@ -130,6 +120,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/target/update/update_linux</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-linux-${project.version}/bin</outputDirectory>
+            <fileMode>744</fileMode>
         </file>
     </files>
 

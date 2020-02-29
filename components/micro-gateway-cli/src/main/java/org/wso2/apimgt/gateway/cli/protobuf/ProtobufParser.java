@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -134,17 +135,19 @@ public class ProtobufParser {
      * Generate OpenAPI object for the {@link DescriptorProtos.FieldDescriptorProto}.
      *
      * @param descriptor file descriptor of the protobuf
-     * @return {@link OpenAPI} object
+     * @return {@link OpenAPI} arraylist of openAPIs
      */
-    private static OpenAPI generateOpenAPIFromProto(DescriptorProtos.FileDescriptorProto descriptor, String protoPath) {
+    private static ArrayList<OpenAPI> generateOpenAPIFromProto(DescriptorProtos.FileDescriptorProto descriptor,
+                                                               String protoPath) {
         if (descriptor == null) {
             throw new CLIInternalException("descriptor is not available");
         }
         if (descriptor.getServiceCount() == 0) {
             return null;
         }
-        ProtoOpenAPI protoOpenAPI = new ProtoOpenAPI();
+        ArrayList<OpenAPI> openAPIS = new ArrayList<>();
         descriptor.getServiceList().forEach(service -> {
+            ProtoOpenAPI protoOpenAPI = new ProtoOpenAPI();
             if (StringUtils.isEmpty(descriptor.getPackage())) {
                 protoOpenAPI.addOpenAPIInfo(service.getName());
             } else {
@@ -192,8 +195,9 @@ public class ProtobufParser {
                 }
                 protoOpenAPI.addOpenAPIPath(method.getName(), methodScopes, methodThrottlingTier);
             });
+            openAPIS.add(protoOpenAPI.getOpenAPI(service.getName()));
         });
-        return protoOpenAPI.getOpenAPI(protoPath);
+        return openAPIS;
     }
 
     /**
@@ -201,9 +205,9 @@ public class ProtobufParser {
      *
      * @param protoPath      protobuf file path
      * @param descriptorPath descriptor file path
-     * @return {@link OpenAPI} object
+     * @return {@link OpenAPI} list of OpenAPIs
      */
-    public OpenAPI generateOpenAPI(String protoPath, String descriptorPath) {
+    public ArrayList<OpenAPI> generateOpenAPI(String protoPath, String descriptorPath) {
         DescriptorProtos.FileDescriptorProto descriptor =
                 generateRootFileDescriptor(protoPath, descriptorPath);
         return generateOpenAPIFromProto(descriptor, protoPath);

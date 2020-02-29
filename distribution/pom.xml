@@ -86,6 +86,37 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${download.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>download-ballerina</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-wum-tool</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://product-dist.wso2.com/downloads/in-place/release/update.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -107,32 +138,12 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeArtifactIds>
-                                ballerina-jre-artifacts
-                            </includeArtifactIds>
+                            <includeArtifactIds>ballerina-jre-artifacts</includeArtifactIds>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                             <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-jbal-tools</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.ballerinalang</groupId>
-                                    <artifactId>jballerina-tools</artifactId>
-                                    <version>${ballerina.platform.version}</version>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
                     </execution>
                     <execution>
@@ -143,8 +154,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor</includeArtifactIds>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.json</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json</includeArtifactIds>
                         </configuration>
                     </execution>
 
@@ -154,20 +165,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>add-in-place-tool</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- download file -->
-                                <get src="https://product-dist.wso2.com/downloads/in-place/release/update.zip" dest="${project.build.directory}/update.zip" verbose="false" usetimestamp="true" />
-                                <unzip src="${project.build.directory}/update.zip" dest="${project.build.directory}" />
-                            </target>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>extract-jre</id>
                         <phase>generate-resources</phase>
@@ -331,23 +328,6 @@
                                 <descriptor>src/main/assembly/gw_runtimes/gw_runtime_windows.xml</descriptor>
                             </descriptors>
                             <finalName>wso2am-micro-gw-windows-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>micro-gateway-runtime</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>${basedir}/src/main/assembly/filter.properties</filter>
-                            </filters>
-                            <descriptors>
-                                <descriptor>src/main/assembly/gw_runtimes/gw_runtime.xml</descriptor>
-                            </descriptors>
-                            <finalName>wso2am-micro-gw-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>

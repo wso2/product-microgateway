@@ -16,7 +16,6 @@
 
 import ballerina/config;
 import ballerina/http;
-import ballerina/io;
 import ballerina/task;
 
 map<string> etcdUrls = {};
@@ -47,11 +46,11 @@ public function initiateEtcdTimerTask() {
 
     var searchResult = timer.attach(etcdService);
     if (searchResult is error) {
-        printError(KEY_ETCD_UTIL, searchResult.toString());
+        printError(KEY_ETCD_UTIL, "Attaching the etcd timer task has failed", searchResult);
     }
     var startResult = timer.start();
     if (startResult is error) {
-        printError(KEY_ETCD_UTIL, "Starting the etcd service task is failed.");
+        printError(KEY_ETCD_UTIL, "Starting the etcd service task is failed.", startResult);
     }
     if (trigTime is string) {
         printInfo(KEY_ETCD_UTIL, "Etcd periodic timer task started with a periodic time of " + trigTime + "ms");
@@ -124,7 +123,7 @@ public function etcdSetup(string key, string etcdConfigKey, string defaultUrl, s
             etcdKey = defaultEtcdKey;
         }
         if (etcdKey == "") {
-            printInfo(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
+            printWarn(KEY_ETCD_UTIL, "Etcd Key not provided for: " + key);
             endpointUrl = config:getAsString(key, defaultUrl);
         } else {
             printDebug(KEY_ETCD_UTIL, "Etcd Key provided for: " + key);
@@ -235,7 +234,6 @@ public function etcdAuthenticate() {
     var response = etcdEndpoint->post(etcdAuthBasePath + "/authenticate", req);
     if (response is http:Response) {
         printDebug(KEY_ETCD_UTIL, "Http Response object obtained");
-        io:println(response.getTextPayload());
         json | error msg = response.getJsonPayload();
         if (msg is json) {
             map<json> | error payload = map<json>.constructFrom(msg);
@@ -246,7 +244,7 @@ public function etcdAuthenticate() {
                     if (token is string) {
                         etcdToken = <@untainted>token;
                         etcdConnectionEstablished = true;
-                        printInfo(KEY_ETCD_UTIL, "Etcd Authentication Successful");
+                        printDebug(KEY_ETCD_UTIL, "Etcd Authentication Successful");
                     } else {
                         etcdConnectionEstablished = false;
                         printError(KEY_ETCD_UTIL, token.reason());
@@ -270,21 +268,21 @@ public function etcdAuthenticate() {
                         }
                     } else {
                         etcdConnectionEstablished = false;
-                        printError(KEY_ETCD_UTIL, authenticationError.reason());
+                        printError(KEY_ETCD_UTIL, "Error while authentication with etcd server", authenticationError);
                     }
                 }
             } else {
                 etcdConnectionEstablished = false;
-                printError(KEY_ETCD_UTIL, payload.toString());
+                printError(KEY_ETCD_UTIL, "ETCD Authentication response payload error", payload);
             }
         } else {
             etcdConnectionEstablished = false;
-            printError(KEY_ETCD_UTIL, msg.reason());
+            printError(KEY_ETCD_UTIL, "Error returned while connecting with etcd authentication endpoint", msg);
         }
     } else {
         printDebug(KEY_ETCD_UTIL, "Error object obtained");
         etcdConnectionEstablished = false;
-        printError(KEY_ETCD_UTIL, response.reason());
+        printError(KEY_ETCD_UTIL, "ETCD authentication response failure", response);
     }
 }
 

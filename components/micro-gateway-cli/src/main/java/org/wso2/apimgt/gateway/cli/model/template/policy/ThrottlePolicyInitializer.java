@@ -72,18 +72,22 @@ public class ThrottlePolicyInitializer {
                                                         GeneratorConstants.PolicyType type) {
         for (ThrottlePolicyMapper policyDTO : policies) {
             String escapedPolicyName = CodegenUtils.trim(policyDTO.getName());
+            String policyName = policyDTO.getName();
             switch (type) {
                 case RESOURCE:
                     policyInitNames.add(GeneratorConstants.RESOURCE_INIT_FUNC_PREFIX + escapedPolicyName
                             + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    policyDTO.setName(GeneratorConstants.RESOURCE_LEVEL_PREFIX + policyName);
                     break;
                 case APPLICATION:
                     policyInitNames.add(GeneratorConstants.APPLICATION_INIT_FUNC_PREFIX + escapedPolicyName
                             + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    policyDTO.setName(GeneratorConstants.APP_LEVEL_PREFIX + policyName);
                     break;
                 case SUBSCRIPTION:
                     policyInitNames.add(GeneratorConstants.SUBSCRIPTION_INIT_FUNC_PREFIX + escapedPolicyName
                             + GeneratorConstants.INIT_FUNC_SUFFIX);
+                    policyDTO.setName(GeneratorConstants.SUB_LEVEL_PREFIX + policyName);
                     break;
             }
             policyNames.add(escapedPolicyName);

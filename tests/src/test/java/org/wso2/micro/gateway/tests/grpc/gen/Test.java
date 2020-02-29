@@ -36,8 +36,15 @@ public final class Test {
       "\n\ntest.proto\"$\n\013TestRequest\022\025\n\rtestReqSt" +
       "ring\030\001 \001(\t\"%\n\014TestResponse\022\025\n\rtestResStr" +
       "ing\030\001 \001(\t26\n\013TestService\022\'\n\010testCall\022\014.T" +
-      "estRequest\032\r.TestResponseB%\n!org.wso2.mi" +
-      "cro.gateway.tests.grpcP\001b\006proto3"
+      "estRequest\032\r.TestResponse2p\n\022JwtAuthTest" +
+      "Service\022\'\n\010testCall\022\014.TestRequest\032\r.Test" +
+      "Response\0221\n\022testCallWithScopes\022\014.TestReq" +
+      "uest\032\r.TestResponse2\212\001\n\025ThrottlingTestSe" +
+      "rvice\0228\n\031testCallServiceThrottling\022\014.Tes" +
+      "tRequest\032\r.TestResponse\0227\n\030testCallMetho" +
+      "dThrottling\022\014.TestRequest\032\r.TestResponse" +
+      "B)\n%org.wso2.micro.gateway.tests.grpc.ge" +
+      "nP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

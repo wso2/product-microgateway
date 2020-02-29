@@ -114,7 +114,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Discover the openAPI version of the given API definition
+     * Discover the openAPI version of the given API definition.
      *
      * @param apiDefinition API definition (as a file path or String content)
      * @param isFilePath    If the given api Definition is a file path
@@ -183,7 +183,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format
+     * Convert the v2 or v3 open API definition in yaml or json format into json format of the respective format.
      * v2/YAML -> v2/JSON
      * v3/YAML -> v3/JSON
      *
@@ -986,7 +986,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * validate the openAPI definition
+     * validate the openAPI definition.
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openAPIFilePath file path to openAPI definition
@@ -1004,11 +1004,11 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the security schemas of type "oauth2"
+     * store the security schemas of type "oauth2".
      *
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setOauthSecuritySchemaList(OpenAPI openAPI) {
+    public static void setOauthSecuritySchemaList(OpenAPI openAPI) {
         //Since the security schema list needs to instantiated per each API
         oauthSecuritySchemaList = new ArrayList<>();
         if (openAPI.getComponents() == null || openAPI.getComponents().getSecuritySchemes() == null) {
@@ -1028,7 +1028,7 @@ public class OpenAPICodegenUtils {
      *
      * @param openAPI {@link OpenAPI} object
      */
-    private static void setSecuritySchemaList(OpenAPI openAPI) {
+    public static void setSecuritySchemaList(OpenAPI openAPI) {
         //Since the security schema list needs to instantiated per each API
         basicSecuritySchemaList = new ArrayList<>();
         apiKeySecuritySchemaMap = new HashMap();
@@ -1047,11 +1047,11 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the endpoint extensions which are used as references
+     * store the endpoint extensions which are used as references.
      *
      * @param extensions {@link Map<String,Object>} object
      */
-    private static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
+    public static void setOpenAPIDefinitionEndpointReferenceExtensions(Map<String, Object> extensions) {
         if (extensions != null && extensions.get(OpenAPIConstants.ENDPOINTS) != null) {
             try {
                 TypeReference<List<Map<Object, Object>>> typeRef1 = new TypeReference<List<Map<Object, Object>>>() {
@@ -1122,6 +1122,12 @@ public class OpenAPICodegenUtils {
         return false;
     }
 
+    /**
+     * Get auth providers for given schema
+     * @param schemas oas definition schemas
+     * @param appSecurity security defined by the extension
+     * @return list of auth providers
+     */
     public static List<String> getAuthProviders(String schemas, ApplicationSecurity appSecurity) {
         List<String> authProviders = new ArrayList<>();
         // Support api manager application level security.
@@ -1142,15 +1148,10 @@ public class OpenAPICodegenUtils {
                 getAuthProvidersForSecurityType(securityType, authProviders);
             }
         }
-        //add oauth2 and jwt if security is empty. But if application security is optional not to add defaults.
-        if ((appSecurity == null || !appSecurity.isOptional()) && authProviders.isEmpty()) {
-            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
-            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
-        }
         return authProviders;
     }
 
-    private static List<String> getAuthProvidersForSecurityType(String securityType, List<String> authProviders) {
+    private static void getAuthProvidersForSecurityType(String securityType, List<String> authProviders) {
         if (securityType.equalsIgnoreCase(OpenAPIConstants.APISecurity.basic.name())) {
             if (!authProviders.contains(OpenAPIConstants.APISecurity.basic.name())) {
                 authProviders.add(OpenAPIConstants.APISecurity.basic.name());
@@ -1165,6 +1166,16 @@ public class OpenAPICodegenUtils {
                 authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
             }
         }
-        return authProviders;
+    }
+
+     public static void addDefaultAuthProviders(List<String> authProviders, ApplicationSecurity appSecurity) {
+        // add oauth2 and jwt if security is empty. But if security is optional not to add defaults.
+        // if auth providers are not given in API level, and resource level app security is not optional,
+        // add default auth providers
+        boolean addDefaultAuth = appSecurity == null || !appSecurity.isOptional();
+        if (addDefaultAuth && authProviders.isEmpty()) {
+            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
+            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+        }
     }
 }
