@@ -69,17 +69,17 @@ public class ValidationTestCase extends BaseTestCase {
         apikey = response.getData();
     }
 
-//
-//    @Test(description = "Test to check the apikey auth working")
-//    private void testAPIResponse() throws Exception {
-//
-//        Map<String, String> headers = new HashMap<>();
-//        //test endpoint with token
-//        headers.put("api_key", apikey);
-//        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
-//
-//        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-//    }
+
+    @Test(description = "Test to check response validation", enabled = false)
+    private void testAPIResponse() throws Exception {
+
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put("api_key", apikey);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
+
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
 
     @AfterClass
     public void stop() throws Exception {
