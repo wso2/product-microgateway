@@ -59,7 +59,7 @@ public class TestInterceptor implements Interceptor {
         }
 
         respondFromRequest(caller);
-        return true;
+        return false;
     }
 
     @Override
@@ -74,7 +74,6 @@ public class TestInterceptor implements Interceptor {
         responseObject.put("age", "22");
         responseObject.put("city", "chicago");
         response1.setJsonPayload(responseObject);
-        caller.respond(response1);
         caller.respond(response1);
         return false;
     }
