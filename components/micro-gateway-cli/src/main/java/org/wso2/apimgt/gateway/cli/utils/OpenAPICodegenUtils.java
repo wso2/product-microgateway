@@ -150,7 +150,7 @@ public class OpenAPICodegenUtils {
                         api.getVersion() + "\" are invalid.");
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
-                        api.getVersion() + "\" are invalid.\n\t-" + e.getTerminalMsg());
+                        api.getVersion() + "\" are invalid.\n\t-" + e.getTerminalMsg(), e);
             }
         }
 
@@ -362,7 +362,7 @@ public class OpenAPICodegenUtils {
         } catch (CLICompileTimeException e) {
             throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
                     openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
-                    e.getTerminalMsg());
+                    e.getTerminalMsg(), e);
         }
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
@@ -376,7 +376,7 @@ public class OpenAPICodegenUtils {
         } catch (CLICompileTimeException e) {
             throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
                     openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
-                    e.getTerminalMsg());
+                    e.getTerminalMsg(), e);
         }
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());

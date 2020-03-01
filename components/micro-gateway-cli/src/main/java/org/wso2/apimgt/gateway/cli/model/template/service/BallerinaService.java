@@ -226,7 +226,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("Error while parsing information under path:" + path.getKey() +
-                        "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getTerminalMsg());
+                        "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getTerminalMsg(), e);
             }
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();

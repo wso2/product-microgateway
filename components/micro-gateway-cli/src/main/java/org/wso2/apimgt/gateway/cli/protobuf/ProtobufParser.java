@@ -229,7 +229,7 @@ public class ProtobufParser {
         } catch (CLICompileTimeException e) {
             //todo: etcd setup needs to be tested for the protobuf scenario
             throw new CLIRuntimeException("The provided endpoint string for the gRPC \"" + service +
-                    "\" is invalid.\n\t-" + e.getTerminalMsg());
+                    "\" is invalid.\n\t-" + e.getTerminalMsg(), e);
         }
         if (epList.getEndpoints() == null) {
             return null;
