@@ -89,7 +89,7 @@ public const int DEFAULT_PROCESS_THREAD_POOL_KEEP_ALIVE_TIME = 200;
 public const int DEFAULT_THROTTLE_CLEANUP_FREQUENCY = 3600000;
 
 public const boolean DEFAULT_GLOBAL_TM_EVENT_PUBLISH_ENABLED = false;
-public const string DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+public const string DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY = "wso2mbInitialContextFactory";
 public const string DEFAULT_JMS_CONNECTION_PROVIDER_URL = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'";
 public const string DEFAULT_JMS_CONNECTION_USERNAME = "";
 public const string DEFAULT_JMS_CONNECTION_PASSWORD = "";

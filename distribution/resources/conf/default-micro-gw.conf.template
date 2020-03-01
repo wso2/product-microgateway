@@ -101,7 +101,7 @@
     # The JMS Message Broker that identify messages related to revoked tokens
     jmsConnectionTopic = "tokenRevocation"
     # The message broker context factory
-    jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+    jmsConnectioninitialContextFactory = "wso2mbInitialContextFactory"
     # The message broker connection URL
     jmsConnectionProviderUrl= "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
     # The username used to establish  the message broker connection
@@ -212,7 +212,7 @@
   # Connect with the central traffic manager
   enabledGlobalTMEventPublishing = false
   # The message broker context factory
-  jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+  jmsConnectioninitialContextFactory = "wso2mbInitialContextFactory"
   # The message broker connection URL
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
   # The username used to establish  the message broker connection

@@ -29,6 +29,7 @@ import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 import org.wso2.micro.gateway.tests.util.TokenUtil;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,7 @@ public class BasicGrpcTestCase extends BaseTestCase {
     private GrpcServer grpcServer;
     private String jwtTokenProd;
     private String jwtTokenProdWithValidScopes;
+    private String basicAuthToken;
 
     @BeforeClass
     public void start() throws Exception {
@@ -53,6 +55,8 @@ public class BasicGrpcTestCase extends BaseTestCase {
         jwtTokenProdWithValidScopes = TokenUtil
                 .getJwtWithCustomClaims(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600,
                         claimMap);
+        String originalInput = "generalUser1:password";
+        basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
         //generate apis with CLI and start the micro gateway server
         super.init(project, new String[]{"../protobuf/mgwProto/basicProto.proto"});
 
@@ -60,7 +64,7 @@ public class BasicGrpcTestCase extends BaseTestCase {
         grpcServer.start();
     }
 
-    @Test(description = "Test Basic Grpc Passthrough with transport security")
+    @Test(description = "Test BasicAuth Grpc Passthrough with transport security")
     public void testBasicGrpcPassthrough() throws Exception {
         String response = testGrpcService("localhost:9595", "sample-request");
         Assert.assertNotNull(response);
@@ -68,8 +72,17 @@ public class BasicGrpcTestCase extends BaseTestCase {
     }
 
     @Test(description = "Test Grpc Test cases with JWT token : success")
-    public void testGrpcWithJwtSuccessScenarion() throws Exception {
+    public void testGrpcWithJwtSuccessScenario() throws Exception {
         String token = "Bearer " + jwtTokenProd;
+        String response = testGrpcServiceWithJwt("localhost:9590", "sample-request", token);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response, "response received :sample-request");
+    }
+
+    @Test(description = "Test Grpc Test cases with JWT token : success")
+    public void testGrpcWithBasicSuccessScenario() throws Exception {
+        String token = "Basic " + basicAuthToken;
+        //todo: rename the method to more generic one since this is used to do the basic Authentication
         String response = testGrpcServiceWithJwt("localhost:9590", "sample-request", token);
         Assert.assertNotNull(response);
         Assert.assertEquals(response, "response received :sample-request");

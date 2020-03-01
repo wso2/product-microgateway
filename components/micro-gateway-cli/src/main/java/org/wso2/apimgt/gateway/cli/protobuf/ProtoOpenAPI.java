@@ -56,6 +56,7 @@ public class ProtoOpenAPI {
 
     ProtoOpenAPI() {
         openAPI = new OpenAPI();
+        openAPI.setComponents(new Components());
     }
 
     /**
@@ -89,6 +90,14 @@ public class ProtoOpenAPI {
         addOauth2SecurityRequirement(operation, scopes);
         if (StringUtils.isNotEmpty(throttlingTier)) {
             operation.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
+        }
+        //needs to add the basic Auth Requirement to the operation level because if scopes are mentioned,
+        // there would be oauth2 security requirement in method level.
+        if (isBasicAuthEnabled) {
+            addBasicAuthSecurityRequirement(operation);
+        }
+        if (isAPIKeyEnabled) {
+            addAPIKeySecurityRequirement(operation);
         }
         //For each path, the only available http method is "post" according to the grpc mapping.
         pathItem.setPost(operation);
@@ -138,7 +147,7 @@ public class ProtoOpenAPI {
         scheme = new SecurityScheme();
         scheme.setType(SecurityScheme.Type.OAUTH2);
         scheme.setFlows(new OAuthFlows().implicit(flowObj));
-        openAPI.setComponents(new Components().addSecuritySchemes(OAUTH2_SCHEME, scheme));
+        openAPI.getComponents().addSecuritySchemes(OAUTH2_SCHEME, scheme);
         isOauth2Enabled = true;
     }
 
@@ -149,7 +158,7 @@ public class ProtoOpenAPI {
         SecurityScheme scheme = new SecurityScheme();
         scheme.setType(SecurityScheme.Type.HTTP);
         scheme.setScheme("basic");
-        openAPI.setComponents(new Components().addSecuritySchemes(BASIC_SCHEME, scheme));
+        openAPI.getComponents().addSecuritySchemes(BASIC_SCHEME, scheme);
         isBasicAuthEnabled = true;
     }
 
@@ -159,9 +168,9 @@ public class ProtoOpenAPI {
     private void addAPIKeySecurityScheme() {
         SecurityScheme scheme = new SecurityScheme();
         scheme.setType(SecurityScheme.Type.APIKEY);
-        scheme.setName("apikey");
+        scheme.setName("api_key");
         scheme.setIn(SecurityScheme.In.HEADER);
-        openAPI.setComponents(new Components().addSecuritySchemes(APIKEY_SCHEME, scheme));
+        openAPI.getComponents().addSecuritySchemes(APIKEY_SCHEME, scheme);
         isAPIKeyEnabled = true;
     }
 
