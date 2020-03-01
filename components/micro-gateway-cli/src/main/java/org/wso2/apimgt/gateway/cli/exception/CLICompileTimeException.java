@@ -22,7 +22,9 @@ package org.wso2.apimgt.gateway.cli.exception;
  * This can be used when the provided extensions does not adhere to the rules.
  */
 public class CLICompileTimeException extends Exception {
-    private String errorMessage;
+    private String terminalMsg;
+    private static final int DEFAULT_EXIT_CODE = 1;
+    private int exitCode;
 
     /**
      * Creates a CLICompileTimeException using error message.
@@ -30,11 +32,38 @@ public class CLICompileTimeException extends Exception {
      * @param message error message
      */
     public CLICompileTimeException(String message) {
-        super(message, new RuntimeException());
-        this.errorMessage = message;
+        this(message, message, DEFAULT_EXIT_CODE);
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public CLICompileTimeException(String message, Throwable e) {
+        this(message, message, DEFAULT_EXIT_CODE, e);
+    }
+
+    public CLICompileTimeException(String message, int exitCode) {
+        this(message, message, exitCode);
+    }
+
+    public CLICompileTimeException(String terminalMsg, String internalMsg, int exitCode) {
+        super(internalMsg);
+        this.exitCode = exitCode;
+        this.terminalMsg = terminalMsg;
+    }
+
+    public CLICompileTimeException(String terminalMsg, String internalMsg, int exitCode, Throwable e) {
+        super(internalMsg, e);
+        this.exitCode = exitCode;
+        this.terminalMsg = terminalMsg;
+    }
+
+    public String getTerminalMsg() {
+        return terminalMsg;
+    }
+
+    public int getExitCode() {
+        return exitCode;
+    }
+
+    public void setExitCode(int exitCode) {
+        this.exitCode = exitCode;
     }
 }

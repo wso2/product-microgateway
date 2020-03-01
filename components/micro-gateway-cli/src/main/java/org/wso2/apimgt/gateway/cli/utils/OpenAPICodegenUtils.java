@@ -150,7 +150,7 @@ public class OpenAPICodegenUtils {
                         api.getVersion() + "\" are invalid.");
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
-                        api.getVersion() + "\" are invalid.\n\t-" + e.getErrorMessage());
+                        api.getVersion() + "\" are invalid.\n\t-" + e.getTerminalMsg());
             }
         }
 
@@ -361,7 +361,7 @@ public class OpenAPICodegenUtils {
         } catch (CLICompileTimeException e) {
             throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
                     openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
-                    e.getErrorMessage());
+                    e.getTerminalMsg());
         }
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
@@ -375,7 +375,7 @@ public class OpenAPICodegenUtils {
         } catch (CLICompileTimeException e) {
             throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
                     openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
-                    e.getErrorMessage());
+                    e.getTerminalMsg());
         }
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
@@ -454,14 +454,14 @@ public class OpenAPICodegenUtils {
                                 endpointListRouteDTO.validateEndpoints();
                             } catch (CLICompileTimeException e) {
                                 throw new CLICompileTimeException("The provided endpoint using the reference " +
-                                        referencePath + " is invalid.\n\t-" + e.getErrorMessage());
+                                        referencePath + " is invalid.\n\t-" + e.getTerminalMsg(), e);
                             }
                             return endpointListRouteDTO;
                         } catch (IllegalArgumentException e) {
                             throw new CLICompileTimeException("Error while parsing the referenced endpoint object "
                                     + endpointExtensionObjectValue + ". The endpoint \"" + referencePath
                                     + "\" defined under " + OpenAPIConstants.ENDPOINTS + " is incompatible : "
-                                    + value.get(referencePath).toString());
+                                    + value.get(referencePath).toString(), e);
                         }
                     }
                 }
@@ -476,14 +476,14 @@ public class OpenAPICodegenUtils {
                     throw new CLICompileTimeException("Error while parsing the endpoint object. The "
                             + OpenAPIConstants.PRODUCTION_ENDPOINTS + " or "
                             + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
-                            + endpointExtensionObjectValue);
+                            + endpointExtensionObjectValue, e);
                 }
                 try {
                     endpointListRouteDTO.validateEndpoints();
                 } catch (CLICompileTimeException e) {
                     throw new CLICompileTimeException("The provided endpoint using the extension " +
                             OpenAPIConstants.PRODUCTION_ENDPOINTS + " or " + OpenAPIConstants.SANDBOX_ENDPOINTS +
-                            " is invalid.\n\t-" + e.getErrorMessage());
+                            " is invalid.\n\t-" + e.getTerminalMsg(), e);
                 }
             }
         } else if (servers != null) {
@@ -496,7 +496,7 @@ public class OpenAPICodegenUtils {
                 endpointListRouteDTO.validateEndpoints();
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("The provided endpoint using the \"servers\" object " +
-                        "is invalid.\n\t-" + e.getErrorMessage());
+                        "is invalid.\n\t-" + e.getTerminalMsg(), e);
             }
         }
         return endpointListRouteDTO;

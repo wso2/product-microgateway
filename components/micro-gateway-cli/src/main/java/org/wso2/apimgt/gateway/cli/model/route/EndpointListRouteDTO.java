@@ -103,7 +103,7 @@ public class EndpointListRouteDTO {
             try {
                 new URL(endpointUrl);
             } catch (MalformedURLException e) {
-                throw new CLICompileTimeException("Malformed Url is provided :" + endpointUrl);
+                throw new CLICompileTimeException("Malformed Url is provided :" + endpointUrl, e);
             }
         }
     }

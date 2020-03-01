@@ -140,13 +140,13 @@ public final class RouteUtils {
             prodEndpointConfig.validateEndpoints();
         } catch (CLICompileTimeException e) {
             throw new CLICompileTimeException("The provided production endpoint is invalid.\n\t-" +
-                    e.getErrorMessage());
+                    e.getTerminalMsg(), e);
         }
         try {
             sandEndpointConfig.validateEndpoints();
         } catch (CLICompileTimeException e) {
             throw new CLICompileTimeException("The provided production endpoint is invalid.\n\t-" +
-                    e.getErrorMessage());
+                    e.getTerminalMsg(), e);
         }
 
         if (prodEndpointConfig.getEndpoints() != null && prodEndpointConfig.getEndpoints().size() > 0) {

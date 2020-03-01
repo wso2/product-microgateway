@@ -52,7 +52,7 @@ public class MgwEndpointDTO {
     }
 
     /**
-     * sets endpointUrl and isEtcdEnabled.
+     * Sets endpointUrl and isEtcdEnabled.
      * endpointUrl could be in the format of either 'etcd_key, default url' or 'url'.
      * Validation in here is moved to {@link EndpointListRouteDTO} to provide proper error message.
      *

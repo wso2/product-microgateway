@@ -55,7 +55,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getGet(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under GET resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("get", operation);
             operations.add(entry);
@@ -66,7 +66,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getPut(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under PUT resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("put", operation);
             operations.add(entry);
@@ -77,7 +77,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getPost(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under POST resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("post", operation);
             operations.add(entry);
@@ -88,7 +88,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getDelete(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under DELETE resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("delete", operation);
             operations.add(entry);
@@ -99,7 +99,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getOptions(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under OPTIONS resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("options", operation);
             operations.add(entry);
@@ -110,7 +110,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getHead(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under HEAD resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("head", operation);
             operations.add(entry);
@@ -121,7 +121,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
                 operation = new BallerinaOperation().buildContext(item.getPatch(), api);
             } catch (CLICompileTimeException e) {
                 throw new CLICompileTimeException("Error while parsing the information under HEAD resource.\n\t-"
-                        + e.getErrorMessage());
+                        + e.getTerminalMsg(), e);
             }
             entry = new AbstractMap.SimpleEntry<>("patch", operation);
             operations.add(entry);
