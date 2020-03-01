@@ -184,11 +184,11 @@ public class BuildCmd implements LauncherCmd {
                         fileInputStream.close();
                         fileContent = new String(value, StandardCharsets.UTF_8);
                         val = convertYamlToJson(fileContent);
+                        writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                        writer.write(val);
+                        writer.close();
+                        child.delete();
                     }
-                    writer = new FileWriter(resPath + "/" + Math.random() + ".json");
-                    writer.write(val);
-                    writer.close();
-                    child.delete();
                 }
             } finally {
                 if (fileInputStream != null) {
