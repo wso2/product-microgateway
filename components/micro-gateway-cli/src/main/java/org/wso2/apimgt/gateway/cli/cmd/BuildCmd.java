@@ -144,6 +144,7 @@ public class BuildCmd implements LauncherCmd {
             String resourcesPath =
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
             CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
+            CmdUtils.copyFolder(CmdUtils.getProjectGenAPIDefinitionPath(projectName), resourcesPath);
             // If resources folder contains .yaml file, replace the .yaml with .json file
             replaceYAMLFilesToJson(resourcesPath);
 
@@ -184,11 +185,11 @@ public class BuildCmd implements LauncherCmd {
                         fileInputStream.close();
                         fileContent = new String(value, StandardCharsets.UTF_8);
                         val = convertYamlToJson(fileContent);
+                        writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                        writer.write(val);
+                        writer.close();
+                        child.delete();
                     }
-                    writer = new FileWriter(resPath + "/" + Math.random() + ".json");
-                    writer.write(val);
-                    writer.close();
-                    child.delete();
                 }
             } finally {
                 if (fileInputStream != null) {
