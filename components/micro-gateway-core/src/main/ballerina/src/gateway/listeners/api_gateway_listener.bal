@@ -116,6 +116,7 @@ public function getAuthHandlers(string[] appSecurity = [], boolean appSecurityOp
     if (appSecurityOptional) { 
         if (isMutualSSL) {
             // add mutual ssl to the auth handlers
+            printDebug(KEY_GW_LISTNER, "Add mutual SSL handler as OR combination with the auth handlers");
             appSecurity.push(AUTH_SCHEME_MUTUAL_SSL);
         }
         return [getHandlers(appSecurity)];
@@ -123,6 +124,7 @@ public function getAuthHandlers(string[] appSecurity = [], boolean appSecurityOp
     // if application security is mandatory, one of application handlers must pass. If mutual ssl enabled. it also should pass.
     // e.g. [mutualssl] && [jwt or basic or ...]
     if (isMutualSSL) {
+        printDebug(KEY_GW_LISTNER, "Add mutual SSL handler as AND combination with other auth handlers");
         return [getHandlers([AUTH_SCHEME_MUTUAL_SSL]), getHandlers(appSecurity)];
     }
     return [getHandlers(appSecurity)];
