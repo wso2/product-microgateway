@@ -9,7 +9,7 @@ import ballerina/config;
 
 
 //Throttle tier data initiation
-
+// todo: can remove this since this is not used
 {{#if config.mutualSSL.certificateDetails}}
     json ClientCerts ={{{config.mutualSSL.certificateDetails}}};
 {{else}}

@@ -122,7 +122,6 @@
 
 # token cache configurations
 [caching]
-  enabled=true
   # Expiry time of the cache in seconds
   tokenCacheExpiryTime = 900000
   # The size of the cache in MB

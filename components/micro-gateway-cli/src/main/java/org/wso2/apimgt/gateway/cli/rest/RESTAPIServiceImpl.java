@@ -419,7 +419,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         if (selectedCertificates != null) {
             MutualSSL clientDetails = new MutualSSL();
             clientDetails.setClientCertificates(selectedCertificates);
-            config.setMutualSSL(clientDetails);
+            config.setMutualSSL(clientDetails); // todo: check usage of this.
         }
         return selectedCertificates;
     }

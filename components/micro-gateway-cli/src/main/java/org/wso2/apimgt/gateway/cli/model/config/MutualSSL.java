@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * Mutual SSL data holder for Client -> GW connection.
  */
+//todo: check the intended usage of this
 public class MutualSSL {
 
     private List<ClientCertMetadataDTO> clientCertificates;
