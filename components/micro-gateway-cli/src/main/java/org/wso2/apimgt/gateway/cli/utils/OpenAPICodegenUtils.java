@@ -32,7 +32,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
@@ -822,10 +821,6 @@ public class OpenAPICodegenUtils {
         String[] securitySchemasAndScopes = generateMgwSecuritySchemasAndScopes(openAPI.getSecurity());
         String securitySchemas = securitySchemasAndScopes[0];
         String scopes = securitySchemasAndScopes[1];
-        //if securitySchemas String is null, set to oauth2
-        if (StringUtils.isEmpty(securitySchemas)) {
-            securitySchemas = OpenAPIConstants.APISecurity.oauth2.name();
-        }
         api.setMgwApiSecurity(securitySchemas);
         api.setMgwApiScope(scopes);
         if (logger.isDebugEnabled()) {
@@ -870,7 +865,8 @@ public class OpenAPICodegenUtils {
     private static boolean validateAppSecurityOptionality(ApplicationSecurity appSecurity,
                                                           String mutualSSL) {
         // if application security is optional, mutual ssl must be mandatory
-        return !appSecurity.isOptional() || OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL);
+        return !((appSecurity.isOptional() != null && appSecurity.isOptional()) &&
+                !OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL));
     }
 
     /**
@@ -1175,14 +1171,8 @@ public class OpenAPICodegenUtils {
         }
     }
 
-     public static void addDefaultAuthProviders(List<String> authProviders, ApplicationSecurity appSecurity) {
-        // add oauth2 and jwt if security is empty. But if security is optional not to add defaults.
-        // if auth providers are not given in API level, and resource level app security is not optional,
-        // add default auth providers
-        boolean addDefaultAuth = appSecurity == null || !appSecurity.isOptional();
-        if (addDefaultAuth && authProviders.isEmpty()) {
-            authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
-            authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
-        }
+     public static void addDefaultAuthProviders(List<String> authProviders) {
+        authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
+        authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
     }
 }

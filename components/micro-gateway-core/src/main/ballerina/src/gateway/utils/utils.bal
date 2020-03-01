@@ -944,6 +944,9 @@ function appendMultipleJWTIssuers(http:InboundAuthHandler[] handlers) {
 # + return - auth handlers
 public function getHandlers(string[] appSecurity) returns http:InboundAuthHandler[] {
     http:InboundAuthHandler[] handlers = [];
+    if (isDebugEnabled) {
+        printDebug(KEY_UTILS, "Adding auth handlers : " + appSecurity.toString());
+    }
     //enforce handler order mutualssl, jwts, opaque, basic, apikey
     if (appSecurity.indexOf(AUTH_SCHEME_MUTUAL_SSL) != ()) {
         handlers.push(authHandlersMap.get(MUTUAL_SSL_HANDLER));
