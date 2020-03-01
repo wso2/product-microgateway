@@ -42,7 +42,6 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
-import org.wso2.apimgt.gateway.cli.model.config.TransportSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -285,71 +284,78 @@ public class OpenAPICodegenUtils {
         api.setId(apiId);
         api.setName(openAPI.getInfo().getTitle());
         api.setVersion(openAPI.getInfo().getVersion());
-        setTransportSecurity(api, populateTransportSecurity(openAPI));
+        populateTransportSecurity(api, openAPI);
         return api;
     }
 
     /**
-     * Set mutual SSL and http, https transport security to API.
+     * Get http, https and mutualSSL from API Definition x-wso2-transport and x-wso2-mutual-ssl extensions.
      *
-     * @param api Extended API object
-     * @param transportSecurity Transport security
+     * @param api       Extended api
+     * @param openAPI   API definition
      */
-    private static void setTransportSecurity(ExtendedAPI api, TransportSecurity transportSecurity) {
+    private static void populateTransportSecurity(ExtendedAPI api, OpenAPI openAPI) throws CLIRuntimeException {
         List<String> transports = new ArrayList<>();
-        if (transportSecurity != null) {
-            if (transportSecurity.getHttp()) {
-                transports.add(OpenAPIConstants.TRANSPORT_HTTP);
+        String mutualSSL = null;
+        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
+        if (apiDefExtensions.containsKey(OpenAPIConstants.MUTUAL_SSL)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.MUTUAL_SSL + " extension found in the API Definition");
             }
-            if (transportSecurity.getHttps()) {
-                transports.add(OpenAPIConstants.TRANSPORT_HTTPS);
+            mutualSSL = validateMutualSSL(apiDefExtensions.get(OpenAPIConstants.MUTUAL_SSL), openAPI);
+            api.setMutualSSL(mutualSSL);
+        }
+        if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
             }
+            transports = validateTransports(apiDefExtensions.get(OpenAPIConstants.TRANSPORT_SECURITY), mutualSSL,
+                    openAPI);
         }
         if (transports.isEmpty()) {
             transports = Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS);
         }
         api.setTransport(transports);
-        if (transportSecurity != null && transportSecurity.getMutualSSL() != null) {
-            api.setMutualSSL(transportSecurity.getMutualSSL());
-        }
     }
 
-
-    /**
-     * Get transport security from API Definition extension.
-     *
-     * @param openAPI API definition
-     * @return TransportSecurity
-     */
-    private static TransportSecurity populateTransportSecurity(OpenAPI openAPI) {
-        TransportSecurity transportSecurity = null;
-        Map<String, Object> apiDefExtensions = openAPI.getExtensions();
-        if (apiDefExtensions.containsKey(OpenAPIConstants.TRANSPORT_SECURITY)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(OpenAPIConstants.TRANSPORT_SECURITY + " extension found in the API Definition");
-            }
-            try {
-                transportSecurity = new ObjectMapper().convertValue(apiDefExtensions
-                        .get(OpenAPIConstants.TRANSPORT_SECURITY), TransportSecurity.class);
-            } catch (Exception exception) {
-                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
-                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.TRANSPORT_SECURITY +
-                        " extension but failed to match to the required format.");
-            }
-            validateTransportSecurity(openAPI, transportSecurity);
+    private static List<String> validateTransports(Object transportExtension, String mutualSSL, OpenAPI openAPI)
+            throws CLIRuntimeException {
+        List<String> transports;
+        try {
+            transports = (List<String>) transportExtension;
+        } catch (ClassCastException exception) {
+            throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                    openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.TRANSPORT_SECURITY +
+                    " extension but failed to match to the required format.");
         }
-        return transportSecurity;
+        for (String transport : transports) {
+            if (!(OpenAPIConstants.TRANSPORT_HTTP.equalsIgnoreCase(transport) ||
+                    OpenAPIConstants.TRANSPORT_HTTPS.equalsIgnoreCase(transport))) {
+                throw new CLIRuntimeException("only http and https are allowed as transports");
+            }
+        }
+        if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)
+                && !transports.contains(OpenAPIConstants.TRANSPORT_HTTPS)) {
+            // add https if mutualssl is mandatory
+            transports.add(OpenAPIConstants.TRANSPORT_HTTPS);
+        }
+        return transports;
     }
 
-    private static void validateTransportSecurity(OpenAPI openAPI, TransportSecurity transportSecurity) {
-        if (!transportSecurity.getHttp() && !transportSecurity.getHttps()) {
-            logger.debug("At least one transport type(http, https) should be enabled.");
-            throw new CLIRuntimeException("At least one transport type(http, https) should be enabled for '"
-                    + openAPI.getInfo().getTitle() + "' version '" + openAPI.getInfo().getVersion() + "'");
+    private static String validateMutualSSL(Object mutualSSLExtension, OpenAPI openAPI) throws CLIRuntimeException {
+        String mutualSSL;
+        try {
+            mutualSSL = (String) mutualSSLExtension;
+        } catch (ClassCastException exception) {
+            throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                    openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.MUTUAL_SSL +
+                    " extension but failed to match to the required format.");
         }
-        if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(transportSecurity.getMutualSSL())) {
-            transportSecurity.setHttps(true);
+        if (!(OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)
+                || OpenAPIConstants.OPTIONAL.equalsIgnoreCase(mutualSSL))) {
+                throw new CLIRuntimeException("only optional and mandatory are allowed for mutual SSL");
         }
+        return mutualSSL;
     }
 
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
