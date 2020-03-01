@@ -21,6 +21,8 @@ package org.wso2.apimgt.gateway.cli.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.packerina.cmd.CommandUtil;
 import org.slf4j.Logger;
@@ -41,9 +43,12 @@ import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -135,6 +140,13 @@ public class BuildCmd implements LauncherCmd {
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             policyGenerator.generate(genPoliciesPath, projectName);
 
+            // Created resources directory
+            String resourcesPath =
+                    CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
+            CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
+            // If resources folder contains .yaml file, replace the .yaml with .json file
+            replaceYAMLFilesToJson(resourcesPath);
+
             // Copy static source files
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
@@ -143,6 +155,49 @@ public class BuildCmd implements LauncherCmd {
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
+        }
+    }
+
+    private String convertYamlToJson(String yaml) throws IOException {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Object obj = yamlReader.readValue(yaml, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
+    }
+
+    private void replaceYAMLFilesToJson(String resPath) throws IOException {
+        String fileContent;
+        String val = null;
+        FileInputStream fileInputStream = null;
+        FileWriter writer = null;
+        File dir = new File(resPath);
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            try {
+                for (File child : directoryListing) {
+                    String ch = child.toString();
+                    if (ch.endsWith("yaml")) {
+                        fileInputStream = new FileInputStream(child);
+                        byte[] value = new byte[(int) child.length()];
+                        fileInputStream.read(value);
+                        fileInputStream.close();
+                        fileContent = new String(value, StandardCharsets.UTF_8);
+                        val = convertYamlToJson(fileContent);
+                    }
+                    writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                    writer.write(val);
+                    writer.close();
+                    child.delete();
+                }
+            } finally {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
+            }
         }
     }
 
@@ -258,7 +313,7 @@ public class BuildCmd implements LauncherCmd {
 
         String targetGenDir = targetDirPath + File.separator + CliConstants.PROJECT_GEN_DIR;
         CmdUtils.createDirectory(targetGenDir, true);
-        
+
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);

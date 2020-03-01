@@ -33,6 +33,7 @@ public class ExtendedAPI extends APIDetailedDTO {
     private String mgwApiScope = null;
     //isGrpc
     private boolean isGrpc = false;
+
     //support apim application level security
     private ApplicationSecurity applicationSecurity = null;
     //support apim transport level security

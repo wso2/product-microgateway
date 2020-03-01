@@ -341,7 +341,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Url validator, Allow any url with https and http.
+     * Url validation, Allow any url with https and http.
      * Allow any url without fully qualified domain.
      *
      * @param url Url as string
@@ -733,7 +733,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /gen/api-definition of a given project in the current working directory
+     * Returns path to the /gen/api-definition of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /gen/api-definition of a given project in the current working directory
@@ -742,6 +742,16 @@ public final class CmdUtils {
         return getProjectDirectoryPath(projectName) + File.separator +
                 CliConstants.PROJECT_GEN_DIR + File.separator +
                 CliConstants.PROJECT_API_DEFINITIONS_DIR;
+    }
+
+    /**
+     * Returns path to the /api-definition of a given project the current working directory.
+     * @param projectName name of the project
+     * @return path to the /api-definition of the given project in the current working directory
+     */
+    public static String getAPIDefinitionPath(String projectName) {
+        return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
+
     }
 
     /**

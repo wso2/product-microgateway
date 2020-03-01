@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.tests.interceptor;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -120,6 +121,12 @@ public class InterceptorTestCase extends BaseTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(key, ResponseConstants.PER_APIRESPONSE_HEADER);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
+
+    @AfterClass
+    public void stop() throws Exception {
+        //Stop all the mock servers
+        super.finalize();
     }
 
 }

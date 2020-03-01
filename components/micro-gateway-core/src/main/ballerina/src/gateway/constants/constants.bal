@@ -370,6 +370,7 @@ const string JWT_UTIL = "JWTUtil";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
+public const string MAIN = "Main function";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
@@ -399,6 +400,12 @@ public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
 public const string BASIC_AUTH_HANDLER = "basicAuthHandler";
 public const string COOKIE_BASED_HANDLER = "cookieBasedHandler";
 
+//validation
+public const string VALIDATION_STATUS = "validated";
+public const string REQ_METHOD = "requestMethod";
+public const string REQUEST_PATH = "requestPath";
+
 // java interceptor related constants
 public const string RESPOND_DONE = "respond_done";
 public const string RESPONSE_OBJECT = "response_object";
+

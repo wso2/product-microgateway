@@ -42,4 +42,32 @@ public class Constants {
     public static final String ERROR_MESSAGE = "message";
 
     public static final String FILE_NOT_FOUND_ERROR = "{wso2/gateway}FileNotFoundError";
+
+    public static final String SCHEMA_REFERENCE = "$ref";
+    public static final String PATHS = "$..paths..";
+    public static final String BODY_CONTENT = "..requestBody.content.application/json.schema";
+    public static final String JSON_PATH = "$.";
+    public static final String ITEMS = "items";
+    public static final String OPEN_API = ".openapi";
+    public static final char JSONPATH_SEPARATE = '.';
+    public static final String PARAM_SCHEMA = ".parameters..schema";
+    public static final String REQUEST_BODY = "..requestBody";
+    public static final String JSON_RESPONSES = ".responses.";
+    public static final String DEFAULT = "default";
+    public static final String CONTENT = ".content";
+    public static final String JSON_CONTENT = ".application/json.schema.$ref";
+    public static final String SCHEMA = ".schema";
+    public static final String EMPTY_ARRAY = "[]";
+    public static final String INTERNAL_ERROR_CODE = "500";
+    public static final String DEFINITIONS = "definitions";
+    public static final String COMPONENT_SCHEMA = "components/schemas";
+    public static final char HASH = '#';
+    public static final String EMPTY = "";
+    public static final String BACKWARD_SLASH = "\"";
+    public static final char FORWARD_SLASH = '/';
+    public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
+    public static final String REQUESTBODIES = "requestBodies";
+    public static final String JSONPATH_SCHEMAS = "$..components.schemas.";
+    public static final String JSON_SCHEMA = ".content.application/json.schema";
+    public static final String VALIDATED_STATUS = "validated";
 }

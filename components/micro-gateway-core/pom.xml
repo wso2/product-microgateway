@@ -65,6 +65,58 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-interceptor</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-data-bind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${commons-logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${com.google.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${com.jayway.jsonpath.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${org.json.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <version>${everit.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -151,6 +203,24 @@
                             <descriptors>
                                 <descriptor>${basedir}/assembly/balo.xml</descriptor>
                             </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
