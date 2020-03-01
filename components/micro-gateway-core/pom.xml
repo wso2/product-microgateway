@@ -163,18 +163,6 @@
                             <outputDirectory>${project.build.directory}/extracted-distribution/</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -215,6 +203,24 @@
                             <descriptors>
                                 <descriptor>${basedir}/assembly/balo.xml</descriptor>
                             </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
