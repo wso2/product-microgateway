@@ -25,6 +25,7 @@ service TestService {
     option (wso2.security) = NONE;
 }
 
+//todo: provide a generic service name since Basic Auth is added.
 service JwtAuthTestService {
     rpc testCall(TestRequest) returns (TestResponse);
 
@@ -39,6 +40,7 @@ service JwtAuthTestService {
 
 	//service level security
     option (wso2.security) = JWT;
+    option (wso2.security) = BASIC;
 }
 
 service ThrottlingTestService {
