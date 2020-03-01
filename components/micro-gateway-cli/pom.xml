@@ -20,7 +20,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.1.0-beta-SNAPSHOT</version>
+        <version>3.1.0-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
