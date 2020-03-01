@@ -71,7 +71,8 @@ import wso2/gateway;
 @gateway:API {
     publisher:"{{api.provider}}",
     name:"{{api.name}}",
-    apiVersion: "{{api.version}}" {{#if api.authorizationHeader}},
+    apiVersion: "{{api.version}}",
+    apiTier : "{{api.apiLevelPolicy}}" {{#if api.authorizationHeader}},
     authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
     authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
     security: {

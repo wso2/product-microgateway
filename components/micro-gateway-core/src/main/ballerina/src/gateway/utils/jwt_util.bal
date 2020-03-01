@@ -95,7 +95,6 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
                 //set throttling attribs if present
                 if (subscription.subscriptionTier is json) {
                     authenticationContext.tier = subscription.subscriptionTier.toString();
-                    authenticationContext.apiTier = subscription.subscriptionTier.toString(); //Todo set correct api tier
                 }
                 if (subscription.publisher is json) {
                     authenticationContext.apiPublisher = subscription.publisher.toString();

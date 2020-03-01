@@ -39,6 +39,8 @@ public class ResponseConstants {
             + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
     public static final String PER_RESOURCE_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900802," +
             " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
+    public static final String PER_API_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900800," +
+            " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
     public static final String NONEXISTING_THROTTLEPOLICY_RESPONSE = "{\"fault\":{\"code\":900809, " +
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +

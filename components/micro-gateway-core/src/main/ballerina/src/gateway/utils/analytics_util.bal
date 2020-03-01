@@ -33,16 +33,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     ThrottleAnalyticsEventDTO eventDto = {};
 
-    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
-    if (apiConfiguration is APIConfiguration) {
-        eventDto.apiVersion = apiConfiguration.apiVersion;
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            eventDto.apiCreator = <string>apiConfiguration.publisher;
-        } else {
-            //sets API creator if x-wso2-owner extension not specified.
-            eventDto.apiCreator = UNKNOWN_VALUE;
-    } 
-}
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
@@ -64,6 +54,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
+        eventDto.apiCreator = authContext.apiPublisher;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
@@ -71,6 +62,18 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
+    }
+
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
+    if (apiConfiguration is APIConfiguration) {
+        eventDto.apiVersion = apiConfiguration.apiVersion;
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)
+                && stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+            eventDto.apiCreator = <string>apiConfiguration.publisher;
+        } else if (stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+            //sets API creator if x-wso2-owner extension not specified.
+            eventDto.apiCreator = UNKNOWN_VALUE;
+        }
     }
 
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
@@ -87,17 +90,6 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     map<json> metaInfo = {};
 
     eventDto.apiContext = getContext(context);
-    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
-    if (apiConfig is APIConfiguration) {
-        var api_Version = apiConfig.apiVersion;
-        eventDto.apiVersion = api_Version;
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfig .publisher)) {
-            eventDto.apiCreator = <string>apiConfig.publisher;
-        } else {
-            //sets API creator if x-wso2-owner extension not specified.
-            eventDto.apiCreator = UNKNOWN_VALUE;
-        }
-    } 
     eventDto.apiName = getApiName(context);
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
     if (httpResourceConfig is http:HttpResourceConfig) {
@@ -119,6 +111,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.userTenantDomain = authContext.subscriberTenantDomain;
+        eventDto.apiCreator = authContext.apiPublisher;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
@@ -127,7 +120,20 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
-    metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
+
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
+    if (apiConfig is APIConfiguration) {
+        var api_Version = apiConfig.apiVersion;
+        eventDto.apiVersion = api_Version;
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfig.publisher)
+                && stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+            eventDto.apiCreator = <string>apiConfig.publisher;
+        } else if (stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+            //sets API creator if x-wso2-owner extension not specified.
+            eventDto.apiCreator = UNKNOWN_VALUE;
+        }
+    }
+metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
     return eventDto;
 }
