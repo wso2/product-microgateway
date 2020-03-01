@@ -184,3 +184,18 @@ public function getResourceTier(string resourceName) returns string {
     }
     return UNLIMITED_TIER;
 }
+
+public function getAPITier(string serviceName, string tierFromKeyValidation) returns string {
+    string apiTier = "";
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        apiTier = apiConfig.apiTier;
+    }
+    if(apiTier == "") {
+        apiTier = tierFromKeyValidation;
+    }
+    if(apiTier.length() == 0) {
+        return UNLIMITED_TIER;
+    }
+    return apiTier;
+}

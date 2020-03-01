@@ -44,6 +44,7 @@ public type OAuthzFilter object {
             // scope validation is done in authn filter for oauth2, hence we only need to
             //validate scopes if auth scheme is jwt.
             if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
+                printDebug(KEY_AUTHZ_FILTER, "Auth scheme was resolved as : " + authScheme);
                 //Start a new child span for the span.
                 int | error | () balSpan = startSpan(BALLERINA_AUTHZ_FILTER);
                 result = self.authzFilter.filterRequest(caller, request, context);

@@ -29,21 +29,24 @@ import java.util.concurrent.TimeUnit;
 public class ThrottleCounter {
     private static final Logger log = LoggerFactory.getLogger(ThrottleCounter.class);
 
+    private static final Map<String, ThrottleData> apiLevelCounter = new ConcurrentHashMap<>();
     private static final Map<String, ThrottleData> resourceLevelCounter = new ConcurrentHashMap<>();
     private static final Map<String, ThrottleData> applicationLevelCounter = new ConcurrentHashMap<>();
     private static final Map<String, ThrottleData> subscriptionLevelCounter = new ConcurrentHashMap<>();
 
     public void updateCounters(String apiKey, String appKey, boolean stopOnQuota, String subscriptionKey,
             long appTierCount, long appTierUnitTime, String appTierTimeUnit, long apiTierCount, long apiTierUnitTime,
-            long subscriptionTierCount, long subscriptionTierUnitTime, String subcriptionTierTimeUnit,
-            String resourceKey, long resourceTierCount, long resourceTierUnitTime, String resourceTierTimeUnit,
-            long timestamp) {
+            String apiTierTimeUnit, long subscriptionTierCount, long subscriptionTierUnitTime,
+            String subscriptionTierTimeUnit, String resourceKey, long resourceTierCount, long resourceTierUnitTime,
+            String resourceTierTimeUnit, long timestamp) {
+        updateMapCounters(apiLevelCounter, apiKey, stopOnQuota, apiTierCount, apiTierUnitTime, apiTierTimeUnit,
+                timestamp, ThrottleData.ThrottleType.API);
         updateMapCounters(resourceLevelCounter, resourceKey, stopOnQuota, resourceTierCount, resourceTierUnitTime,
                 resourceTierTimeUnit, timestamp, ThrottleData.ThrottleType.RESOURCE);
         updateMapCounters(applicationLevelCounter, appKey, stopOnQuota, appTierCount, appTierUnitTime, appTierTimeUnit,
                 timestamp, ThrottleData.ThrottleType.APP);
         updateMapCounters(subscriptionLevelCounter, subscriptionKey, stopOnQuota, subscriptionTierCount,
-                subscriptionTierUnitTime, subcriptionTierTimeUnit, timestamp, ThrottleData.ThrottleType.SUBSCRIPTION);
+                subscriptionTierUnitTime, subscriptionTierTimeUnit, timestamp, ThrottleData.ThrottleType.SUBSCRIPTION);
     }
 
     private void updateMapCounters(Map<String, ThrottleData> counterMap, String throttleKey, boolean stopOnQuota,
@@ -103,12 +106,20 @@ public class ThrottleCounter {
         return isRequestThrottled(subscriptionLevelCounter, subscriptionKey);
     }
 
+    static boolean isApiLevelThrottled(String apiKey) {
+        return isRequestThrottled(apiLevelCounter, apiKey);
+    }
+
     static void removeFromResourceCounterMap(String key) {
         resourceLevelCounter.remove(key);
     }
 
     static void removeFromApplicationCounterMap(String key) {
         applicationLevelCounter.remove(key);
+    }
+
+    static void removeFromApiCounterMap(String key) {
+        apiLevelCounter.remove(key);
     }
 
     static void removeFromSubscriptionCounterMap(String key) {

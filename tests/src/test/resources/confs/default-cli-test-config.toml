@@ -2,9 +2,9 @@
 httpRequestTimeout = 1000000
 
 [token]
-publisherEndpoint = "https://localhost:9443/api/am/publisher/v1.0"
-adminEndpoint = "https://localhost:9443/api/am/admin/v1.0"
-registrationEndpoint = "https://localhost:9443/client-registration/v0.15/register"
+publisherEndpoint = "https://localhost:9443/api/am/publisher/v1.1"
+adminEndpoint = "https://localhost:9443/api/am/admin/v1.1"
+registrationEndpoint = "https://localhost:9443/client-registration/v0.16/register"
 tokenEndpoint = "https://localhost:9443/oauth2/token"
 username = "admin"
 clientId = ""

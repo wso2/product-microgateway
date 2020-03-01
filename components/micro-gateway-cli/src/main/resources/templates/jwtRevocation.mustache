@@ -5,8 +5,8 @@ map<string> receivedRevokedTokenMap = gateway:getRevokedTokenMap();
         gateway:PERSISTENT_USE_DEFAULT, gateway:DEFAULT_PERSISTENT_USE_DEFAULT);
 
     //TODO: Re enable this code once the compile errors are fixed
-    //if (useDefault){
-    //    future<()> initETCDRetriveal = start gateway:etcdRevokedTokenRetrieverTask();
-    //} else {
-    //    initiatePersistentRevokedTokenRetrieval(receivedRevokedTokenMap);
-    //}
+    if (useDefault){
+        future<()> initETCDRetriveal = start gateway:etcdRevokedTokenRetrieverTask();
+    } else {
+        initiatePersistentRevokedTokenRetrieval(receivedRevokedTokenMap);
+    }

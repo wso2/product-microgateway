@@ -30,7 +30,6 @@ import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
@@ -60,60 +59,6 @@ public class CodeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
     private static PrintStream outStream = System.out;
     public static String projectName;
-
-    /**
-     * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
-     * Generated source will be written to a ballerina package at {@code outPath}
-     * <p>Method can be used for generating Ballerina mock services and clients</p>
-     *
-     * @throws IOException                  when file operations fail
-     * @throws BallerinaServiceGenException when code generator fails
-     */
-    public void generate(String projectName, List<ExtendedAPI> apis, boolean overwrite)
-            throws IOException, BallerinaServiceGenException {
-
-        String projectSrcPath = CmdUtils.getProjectGenSrcDirectoryPath((projectName));
-        BallerinaService definitionContext;
-
-        List<GenSrcFile> genFiles = new ArrayList<>();
-        List<BallerinaService> serviceList = new ArrayList<>();
-        for (ExtendedAPI api : apis) {
-            outStream.println("ID for API " + api.getName() + " : " + api.getId());
-            String apiHashId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-            OpenAPI openApi = new OpenAPIV3Parser().read(CmdUtils
-                    .getProjectGenSwaggerPath(projectName, apiHashId));
-            OpenAPICodegenUtils.setAdditionalConfig(api);
-            BallerinaService ballerinaService = new BallerinaService();
-            ballerinaService.setIsDevFirst(false);
-            definitionContext = ballerinaService.buildContext(openApi, api);
-            // we need to generate the bal service for default versioned apis as well
-            if (api.getIsDefaultVersion()) {
-                definitionContext.setQualifiedServiceName(CodegenUtils.trim(api.getName()));
-                genFiles.add(generateService(definitionContext));
-                // without building the definitionContext again we use the same context to build default version as
-                // well. Hence setting the default version as false to generate the api with base path having version.
-                api.setIsDefaultVersion(false);
-                OpenAPICodegenUtils.setAdditionalConfig(api);
-                definitionContext.setQualifiedServiceName(CodegenUtils.trim(api.getName() + "_" + api.getVersion()));
-            }
-            serviceList.add(definitionContext);
-            genFiles.add(generateService(definitionContext));
-            genFiles.add(generateSwagger(definitionContext));
-
-        }
-        genFiles.add(generateMainBal(serviceList));
-        genFiles.add(generateCommonEndpoints());
-        CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
-
-        CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
-
-        CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
-    }
-
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.

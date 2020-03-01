@@ -67,8 +67,9 @@ public function populateAnnotationMaps(string serviceName, service s, string[] r
 # + return - api key validation request dto.
 public function getKeyValidationRequestObject(runtime:InvocationContext context, string accessToken) returns APIRequestMetaDataDto {
     APIRequestMetaDataDto apiKeyValidationRequest = {};
-    string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    string resourceName = runtime:getInvocationContext().attributes[http:RESOURCE_NAME].toString();
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string serviceName = invocationContext.attributes[http:SERVICE_NAME].toString();
+    string resourceName = invocationContext.attributes[http:RESOURCE_NAME].toString();
     printDebug(KEY_UTILS, "Service Name : " + serviceName);
     printDebug(KEY_UTILS, "Resource Name : " + resourceName);
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
@@ -76,6 +77,18 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     if (httpResourceConfig is http:HttpResourceConfig) {
         apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
         apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
+        http:ResourceAuth? resourceLevelAuthAnn = httpResourceConfig?.auth;
+        // we are explicitly setting the scopes to principal, because scope validation happens at key validation
+        //service. Doing scope validation again in ballerina authz filter causes authorization failure.
+        //So we trust the scope validation done by key validation service and forcefully make the ballerina
+        //authz scope validation successful.
+        if (resourceLevelAuthAnn is http:ResourceAuth) {
+            var resourceScopes = resourceLevelAuthAnn?.scopes;
+            if (resourceScopes is string[]) {
+                runtime:Principal principal = {username: accessToken, scopes: resourceScopes};
+                invocationContext.principal = principal;
+            }
+        }
     }
     string apiContext = <string>httpServiceConfig.basePath;
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
@@ -157,6 +170,9 @@ public function getClientIp(http:Request request, http:Caller caller) returns (s
         }
     } else {
         clientIp = caller.remoteAddress.host;
+        if (clientIp == "") {
+            clientIp = caller.localAddress.host;
+        }
     }
     return clientIp;
 }
