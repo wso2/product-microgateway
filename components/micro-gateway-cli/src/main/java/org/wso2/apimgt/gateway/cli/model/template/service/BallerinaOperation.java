@@ -60,7 +60,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private MgwEndpointConfigDTO epConfig;
     private BallerinaInterceptor reqInterceptorContext;
     private BallerinaInterceptor resInterceptorContext;
-    private ApplicationSecurity appSecurity;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isJavaRequestInterceptor;
@@ -112,12 +111,19 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(operation.getExtensions(),
                 api.getMutualSSL());
         this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
-        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
+        ApplicationSecurity apiAppSecurity = api.getApplicationSecurity();
+        if (appSecurity != null && appSecurity.isOptional() != null) {
+            // if app security is made optional at resource
+            this.applicationSecurityOptional = appSecurity.isOptional();
+        } else if (apiAppSecurity != null && apiAppSecurity.isOptional() != null) {
+            // if app security made optional at API level
+            this.applicationSecurityOptional = apiAppSecurity.isOptional();
+        }
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
@@ -299,9 +305,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     void setSecuritySchemas(List<String> authProviders) {
         //update the Resource auth providers property only if there is no security scheme provided during instantiation
         if (this.authProviders.isEmpty()) {
-            this.authProviders = authProviders;
+            this.authProviders = new ArrayList<>(authProviders);
         }
         //set default auth providers after updating with api level auth providers
-        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, this.appSecurity);
+        if (!this.applicationSecurityOptional && this.authProviders.isEmpty()) {
+            OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders);
+        }
     }
 }

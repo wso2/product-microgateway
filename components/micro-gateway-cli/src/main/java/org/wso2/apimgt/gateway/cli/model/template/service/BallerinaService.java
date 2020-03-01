@@ -146,11 +146,15 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             this.isMutualSSL = true;
             this.mutualSSLClientVerification = api.getMutualSSL();
         }
-        this.applicationSecurityOptional = appSecurity != null && appSecurity.isOptional();
+        if (appSecurity != null && appSecurity.isOptional() != null) {
+            this.applicationSecurityOptional = appSecurity.isOptional();
+        }
         setHasEpSecurity(endpointConfig);
         setPaths(definition);
         //set default auth providers for api level
-        OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
+        if (!this.applicationSecurityOptional && this.authProviders.isEmpty()) {
+            OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders);
+        }
         resolveInterceptors(definition.getExtensions());
         setResponseCache(definition.getExtensions());
         return buildContext(definition);

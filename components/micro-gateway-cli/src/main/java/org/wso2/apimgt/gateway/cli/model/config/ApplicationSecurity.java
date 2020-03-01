@@ -29,8 +29,8 @@ public class ApplicationSecurity {
 
     @JsonProperty("security-types")
     private List<String> securityTypes = new ArrayList<>();
-
-    private boolean optional = false;
+    // default set to null to make it as undefined
+    private Boolean optional = null;
 
     public void setSecurityTypes(List<String> securityTypes) {
         this.securityTypes = securityTypes;
@@ -44,7 +44,11 @@ public class ApplicationSecurity {
         this.optional = optional;
     }
 
-    public boolean isOptional() {
+    /**
+     * Return if application security is optional(true), mandatory(false) or undefined(null)
+     * @return Boolean isOptional
+     */
+    public Boolean isOptional() {
         return this.optional;
     }
 }
