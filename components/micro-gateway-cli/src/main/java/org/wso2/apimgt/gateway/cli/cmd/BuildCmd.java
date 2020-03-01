@@ -144,6 +144,7 @@ public class BuildCmd implements LauncherCmd {
             String resourcesPath =
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
             CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
+            CmdUtils.copyFolder(CmdUtils.getProjectGenAPIDefinitionPath(projectName), resourcesPath);
             // If resources folder contains .yaml file, replace the .yaml with .json file
             replaceYAMLFilesToJson(resourcesPath);
 

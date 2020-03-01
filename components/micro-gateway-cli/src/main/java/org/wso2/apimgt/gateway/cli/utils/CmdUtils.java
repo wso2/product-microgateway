@@ -834,7 +834,10 @@ public final class CmdUtils {
      * @param destinationFolder destination location
      * @throws IOException error while copying folder to destination
      */
-    private static void copyFolder(File sourceFolder, File destinationFolder) throws IOException {
+    private static boolean copyFolder(File sourceFolder, File destinationFolder) throws IOException {
+        if (sourceFolder == null || destinationFolder == null || !sourceFolder.exists()) {
+            return false;
+        }
         //Check if sourceFolder is a directory or file
         //If sourceFolder is file; then copy the file directly to new location
         if (sourceFolder.isDirectory()) {
@@ -872,6 +875,8 @@ public final class CmdUtils {
                 logger.debug("Setting write permission failed for {}", destinationFolder.getAbsolutePath());
             }
         }
+
+        return true;
     }
 
     /**
