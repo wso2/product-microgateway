@@ -97,7 +97,7 @@ where you executed the command.
  
 5. Next, Lets build the project and create a microgateway docker image.
 ```
-micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.0-alpha
+micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.0-beta
 ```
 
 Once the build is successful microgateway docker image will be created with name "petstore:v1"
@@ -121,7 +121,7 @@ TOKEN=$(curl -X get "https://localhost:9095/apikey" -H "Authorization:Basic YWRt
 
 8. We can now invoke the API running on the microgateway using cURL as below.
 ```
-curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/xml" -H "api_key:$TOKEN" -k
+curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/json" -H "api_key:$TOKEN" -k
 ```
 
 
