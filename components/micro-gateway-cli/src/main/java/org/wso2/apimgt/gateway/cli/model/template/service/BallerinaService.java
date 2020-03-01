@@ -152,7 +152,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         //set default auth providers for api level
         OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders, api.getApplicationSecurity());
         resolveInterceptors(definition.getExtensions());
-
+        setResponseCache(definition.getExtensions());
         return buildContext(definition);
     }
 
@@ -440,6 +440,27 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 (endpointConfig.getSandboxEndpointList() != null &&
                         endpointConfig.getSandboxEndpointList().getSecurityConfig() != null)) {
             hasEpSecurity = true;
+        }
+    }
+
+    public void setResponseCache(Map<String, Object> exts) {
+        if (exts != null) {
+            Object responseCacheObject = exts.get(OpenAPIConstants.RESPONSE_CACHE);
+            if (responseCacheObject != null) {
+                // This logic is written to maintain backward compatibility with APIM 2.x.
+                // We can not use mapping object dto.
+                Map cacheObjectMap = (Map) responseCacheObject;
+                boolean enabled = (boolean) cacheObjectMap.get(OpenAPIConstants.ENABLED);
+                if (enabled) {
+                    api.setResponseCaching(OpenAPIConstants.CACHE_ENABLED);
+                    if (cacheObjectMap.containsKey(OpenAPIConstants.CACHE_TIMEOUT)) {
+                        int cacheTimeout = (int) cacheObjectMap.get(OpenAPIConstants.CACHE_TIMEOUT);
+                        api.setCacheTimeout(cacheTimeout * 1000); //set the value in milli seconds.
+                    }
+                } else {
+                    api.setResponseCaching(OpenAPIConstants.DISABLED);
+                }
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ public class OpenAPIConstants {
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
+    public static final String RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String INTERCEPTOR_FUNC_SEPARATOR = ":";
     public static final String INTERCEPTOR_PATH_SEPARATOR = "/";
     public static final String INTERCEPTOR_JAVA_PREFIX = "java:";
@@ -33,6 +34,10 @@ public class OpenAPIConstants {
     public static final String TRANSPORT_HTTP = "http";
     public static final String TRANSPORT_HTTPS = "https";
     public static final String MANDATORY = "mandatory";
+    public static final String ENABLED = "enabled";
+    public static final String DISABLED = "Disabled";
+    public static final String CACHE_TIMEOUT = "cacheTimeoutInSeconds";
+    public static final String CACHE_ENABLED = "Enabled";
 
     public static final ImmutableList<String> MODULE_IDENTIFIER_LIST = ImmutableList.of("vienna", "canberra",
             "berlin", "athens", "georgetown", "budapest", "jakarta", "rome", "dublin", "tokyo", "bucharest", "moscow",

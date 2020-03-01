@@ -68,7 +68,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     
     private String apiDefinition = null;
     private String wsdlUri = null;
-    private String responseCaching = null;
+    private String responseCaching = "Disabled";
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean isDefaultVersion = null;
