@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
@@ -56,6 +57,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -140,7 +142,16 @@ public class OpenAPICodegenUtils {
         String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
         RouteEndpointConfig mgwEndpointConfigDTO = null;
         if (isExpand) {
-            mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+            try {
+                mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
+            } catch (MalformedURLException e) {
+                //Providing API Name and version would be enough since this path is executed only if APIM 2.6.0 is used
+                throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
+                        api.getVersion() + "\" are invalid.");
+            } catch (CLICompileTimeException e) {
+                throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
+                        api.getVersion() + "\" are invalid.\n\t-" + e.getTerminalMsg(), e);
+            }
         }
 
         switch (swaggerVersion) {
@@ -236,7 +247,8 @@ public class OpenAPICodegenUtils {
         return extensionsMap;
     }
 
-    private static RouteEndpointConfig getEndpointObjectFromAPI(ExtendedAPI api) {
+    private static RouteEndpointConfig getEndpointObjectFromAPI(ExtendedAPI api)
+            throws MalformedURLException, CLICompileTimeException {
         return RouteUtils.parseEndpointConfig(api.getEndpointConfig(), api.getEndpointSecurity());
 
     }
@@ -340,36 +352,32 @@ public class OpenAPICodegenUtils {
         }
     }
 
-    public static void setAdditionalConfig(ExtendedAPI api) {
-        RouteEndpointConfig endpointConfig = RouteUtils.parseEndpointConfig(api.getEndpointConfig(),
-                api.getEndpointSecurity());
-        if (endpointConfig.getProdEndpointList() != null) {
-            endpointConfig.getProdEndpointList().setName(api.getId());
-        }
-        if (endpointConfig.getSandboxEndpointList() != null) {
-            endpointConfig.getSandboxEndpointList().setName(api.getId());
-        }
-        api.setEndpointConfigRepresentation(RouteUtils.convertToMgwServiceMap(endpointConfig.getProdEndpointList(),
-                endpointConfig.getSandboxEndpointList()));
-        if (api.getIsDefaultVersion()) {
-            api.setSpecificBasepath(api.getContext());
-        } else {
-            api.setSpecificBasepath(api.getContext() + "/" + api.getVersion());
-        }
-    }
-
     public static void setAdditionalConfigsDevFirst(ExtendedAPI api, OpenAPI openAPI, String openAPIFilePath) {
         Map<String, Object> extensions = openAPI.getExtensions();
-        EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? extensions.get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
-                openAPI.getServers());
+        EndpointListRouteDTO prodEndpointListDTO = null;
+        try {
+            prodEndpointListDTO = extractEndpointFromOpenAPI(
+                    extensions != null ? extensions.get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
+                    openAPI.getServers());
+        } catch (CLICompileTimeException e) {
+            throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
+                    openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
+                    e.getTerminalMsg(), e);
+        }
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(api.getId());
         }
-        EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
-                openAPI.getServers());
+        EndpointListRouteDTO sandEndpointListDTO = null;
+        try {
+            //Servers object is set to null as the servers object is considered as a production endpoint
+            sandEndpointListDTO = extractEndpointFromOpenAPI(
+                    extensions != null ? extensions.get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null, null);
+        } catch (CLICompileTimeException e) {
+            throw new CLIRuntimeException("Error while parsing the openAPI defintion for the API \"" +
+                    openAPI.getInfo().getTitle() + " : " + openAPI.getInfo().getVersion() + "\".\n\t-" +
+                    e.getTerminalMsg(), e);
+        }
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(api.getId());
         }
@@ -403,12 +411,13 @@ public class OpenAPICodegenUtils {
 
     /**
      * get resource Endpoint configuration in the format of {@link MgwEndpointConfigDTO} to match the mustache
-     * template
+     * template.
      *
      * @param operation {@link Operation} object
      * @return {@link MgwEndpointConfigDTO} object
      */
-    public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation) {
+    public static MgwEndpointConfigDTO getResourceEpConfigForCodegen(Operation operation)
+            throws CLICompileTimeException {
         Map<String, Object> extensions = operation.getExtensions();
         EndpointListRouteDTO prodEndpointListDTO = extractEndpointFromOpenAPI(
                 extensions != null ? operation.getExtensions().get(OpenAPIConstants.PRODUCTION_ENDPOINTS) : null,
@@ -416,18 +425,21 @@ public class OpenAPICodegenUtils {
         // if endpoint name is empty set operation id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
             prodEndpointListDTO.setName(operation.getOperationId());
+            //Validate the endpointList and throw the exception as it is.
+            prodEndpointListDTO.validateEndpoints();
         }
         EndpointListRouteDTO sandEndpointListDTO = extractEndpointFromOpenAPI(
-                extensions != null ? operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null,
-                operation.getServers());
+                extensions != null ? operation.getExtensions().get(OpenAPIConstants.SANDBOX_ENDPOINTS) : null, null);
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
             sandEndpointListDTO.setName(operation.getOperationId());
+            sandEndpointListDTO.validateEndpoints();
         }
+
         return RouteUtils.convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
     }
 
     private static EndpointListRouteDTO extractEndpointFromOpenAPI(Object endpointExtensionObject,
-            List<Server> servers) {
+            List<Server> servers) throws CLICompileTimeException {
         EndpointListRouteDTO endpointListRouteDTO = null;
         if (endpointExtensionObject != null) {
             String endpointExtensionObjectValue = endpointExtensionObject.toString();
@@ -439,16 +451,22 @@ public class OpenAPICodegenUtils {
                             endpointListRouteDTO = objectMapper
                                     .convertValue(value.get(referencePath), EndpointListRouteDTO.class);
                             endpointListRouteDTO.setName(referencePath);
+                            try {
+                                endpointListRouteDTO.validateEndpoints();
+                            } catch (CLICompileTimeException e) {
+                                throw new CLICompileTimeException("The provided endpoint using the reference " +
+                                        referencePath + " is invalid.\n\t-" + e.getTerminalMsg(), e);
+                            }
                             return endpointListRouteDTO;
                         } catch (IllegalArgumentException e) {
-                            throw new CLIRuntimeException("Error while parsing the referenced endpoint object "
+                            throw new CLICompileTimeException("Error while parsing the referenced endpoint object "
                                     + endpointExtensionObjectValue + ". The endpoint \"" + referencePath
                                     + "\" defined under " + OpenAPIConstants.ENDPOINTS + " is incompatible : "
-                                    + value.get(referencePath).toString());
+                                    + value.get(referencePath).toString(), e);
                         }
                     }
                 }
-                throw new CLIRuntimeException("The referenced endpoint value : \"" + endpointExtensionObjectValue
+                throw new CLICompileTimeException("The referenced endpoint value : \"" + endpointExtensionObjectValue
                         + "\" is not defined under the open API extension " + OpenAPIConstants.ENDPOINTS);
 
             } else {
@@ -456,10 +474,17 @@ public class OpenAPICodegenUtils {
                     endpointListRouteDTO = objectMapper
                             .convertValue(endpointExtensionObject, EndpointListRouteDTO.class);
                 } catch (IllegalArgumentException e) {
-                    throw new CLIRuntimeException("Error while parsing the endpoint object. The "
+                    throw new CLICompileTimeException("Error while parsing the endpoint object. The "
                             + OpenAPIConstants.PRODUCTION_ENDPOINTS + " or "
                             + OpenAPIConstants.SANDBOX_ENDPOINTS + " format is incompatible : "
-                            + endpointExtensionObjectValue);
+                            + endpointExtensionObjectValue, e);
+                }
+                try {
+                    endpointListRouteDTO.validateEndpoints();
+                } catch (CLICompileTimeException e) {
+                    throw new CLICompileTimeException("The provided endpoint using the extension " +
+                            OpenAPIConstants.PRODUCTION_ENDPOINTS + " or " + OpenAPIConstants.SANDBOX_ENDPOINTS +
+                            " is invalid.\n\t-" + e.getTerminalMsg(), e);
                 }
             }
         } else if (servers != null) {
@@ -468,12 +493,18 @@ public class OpenAPICodegenUtils {
                 //server url templating can have urls similar to 'https://{customerId}.saas-app.com:{port}/v2'
                 endpointListRouteDTO.addEndpoint(replaceOpenAPIServerTemplate(server));
             }
+            try {
+                endpointListRouteDTO.validateEndpoints();
+            } catch (CLICompileTimeException e) {
+                throw new CLICompileTimeException("The provided endpoint using the \"servers\" object " +
+                        "is invalid.\n\t-" + e.getTerminalMsg(), e);
+            }
         }
         return endpointListRouteDTO;
     }
 
     /**
-     * Validate basePath to avoid having the same basePath for two or more APIs
+     * Validate basePath to avoid having the same basePath for two or more APIs.
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openApiFilePath OpenAPI definition file

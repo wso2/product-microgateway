@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
@@ -33,8 +34,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -224,16 +223,14 @@ public class ProtobufParser {
     private static EndpointListRouteDTO generateEpList(ExtensionHolder.Endpoints protoEps, String service) {
         EndpointListRouteDTO epList = new EndpointListRouteDTO();
 
-        protoEps.getUrlList().forEach(endpointUrl -> {
-            try {
-                new URL(endpointUrl);
-            }  catch (MalformedURLException e) {
-                //todo: decide if the service name or the proto file is more important
-                throw new CLIRuntimeException("The provided endpoint for the service \"" + service +
-                        "\" is invalid : \"" + endpointUrl + "\"");
-            }
-            epList.addEndpoint(endpointUrl);
-        });
+        protoEps.getUrlList().forEach(epList::addEndpoint);
+        try {
+            epList.validateEndpoints();
+        } catch (CLICompileTimeException e) {
+            //todo: etcd setup needs to be tested for the protobuf scenario
+            throw new CLIRuntimeException("The provided endpoint string for the gRPC \"" + service +
+                    "\" is invalid.\n\t-" + e.getTerminalMsg(), e);
+        }
         if (epList.getEndpoints() == null) {
             return null;
         }

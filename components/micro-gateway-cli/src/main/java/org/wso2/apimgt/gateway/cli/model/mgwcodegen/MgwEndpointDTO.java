@@ -16,10 +16,7 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 /**
  * DTO built by parsing endpoint details in OpenAPI definition.
@@ -55,8 +52,9 @@ public class MgwEndpointDTO {
     }
 
     /**
-     * sets endpointUrl and isEtcdEnabled
+     * Sets endpointUrl and isEtcdEnabled.
      * endpointUrl could be in the format of either 'etcd_key, default url' or 'url'.
+     * Validation in here is moved to {@link EndpointListRouteDTO} to provide proper error message.
      *
      * @param endpointUrl endpoint string
      */
@@ -64,28 +62,15 @@ public class MgwEndpointDTO {
         if (endpointUrl.trim().matches("etcd\\s*\\(.*,.*\\)")) {
             String temp = endpointUrl.substring(endpointUrl.indexOf("(") + 1, endpointUrl.indexOf(")"));
             String[] entries = temp.split(",");
-            if (entries.length != 2) {
-                throw new CLIRuntimeException("'etcd' key containing string should be provided as 'etcd " +
-                        "(etcd_key, default_url)'.");
-            }
             isEtcdEnabled = true;
             etcdKey = entries[0];
             this.endpointUrl = entries[1];
         } else {
             this.endpointUrl = endpointUrl;
         }
-        validateURL(this.endpointUrl);
     }
 
     public boolean isEtcdEnabled() {
         return isEtcdEnabled;
-    }
-
-    private void validateURL(String urlString) {
-        try {
-            new URL(urlString);
-        } catch (MalformedURLException e) {
-            throw new CLIRuntimeException("Malformed URL is provided: '" + urlString + "'.");
-        }
     }
 }
