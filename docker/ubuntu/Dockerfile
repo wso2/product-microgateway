@@ -30,11 +30,11 @@ ARG USER_HOME=/home/${USER}
 
 # build arguments for WSO2 product installation
 ARG MGW_SERVER_NAME=wso2am-micro-gw
-ARG MGW_SERVER_VERSION=3.0.2
+ARG MGW_SERVER_VERSION=3.1.0-beta
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
 ARG MGW_SERVER_HOME=${USER_HOME}/${MGW_SERVER}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
-ARG MGW_SERVER_DIST_URL=https://bintray.com/wso2/binaryGA/download_file?file_path=${MGW_SERVER}.zip
+ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
 
 # build argument for MOTD
 ARG MOTD='printf "\n\
