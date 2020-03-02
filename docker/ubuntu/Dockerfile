@@ -29,12 +29,11 @@ ARG USER_GROUP_ID=802
 ARG USER_HOME=/home/${USER}
 
 # build arguments for WSO2 product installation
-ARG MGW_SERVER_NAME=wso2am-micro-gw
+ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
 ARG MGW_SERVER_VERSION=3.1.0-beta
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
-ARG MGW_SERVER_HOME=${USER_HOME}/${MGW_SERVER}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
-ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
+ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
 
 # build argument for MOTD
 ARG MOTD='printf "\n\
@@ -60,28 +59,33 @@ RUN \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
-# add the WSO2 product distribution to user's home directory
+# Prepare image with users, groups, packages and other configs.
 RUN \
     wget --no-check-certificate -O ${MGW_SERVER}.zip "${MGW_SERVER_DIST_URL}" \
     && unzip -d ${USER_HOME} ${MGW_SERVER}.zip \
-    && mkdir -p /home/ballerina/${MGW_SERVER}/runtime \
     && mkdir -p /home/ballerina/conf \
-    && unzip -d ${MGW_SERVER_HOME}/runtime ${MGW_SERVER_HOME}/runtime.zip  \
-    && rm -rf ${MGW_SERVER_HOME}/runtime.zip \
-    && cp ${MGW_SERVER_HOME}/lib/gateway/*.jar ${MGW_SERVER_HOME}/runtime/bre/lib/ \
-    && mv /home/ballerina/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
+    && mv /home/${USER}/${MGW_SERVER} ${MGW_RUNTIME_HOME} \
+    && mv ${MGW_RUNTIME_HOME}/conf/micro-gw.conf ${USER_HOME}/conf/micro-gw.conf \
     && chown ${USER}:${USER_GROUP} -R ${MGW_RUNTIME_HOME}  \
-    && rm -rf ${MGW_SERVER}.zip
+    && rm -rf ${MGW_SERVER}.zip \
+    && rm "/root/.wget-hsts"
+
 
 ENV BALLERINA_HOME ${MGW_RUNTIME_HOME}/runtime
-ENV PATH $BALLERINA_HOME/bin:$PATH
-ENV GWHOME ${MGW_RUNTIME_HOME}
+ENV GW_HOME ${MGW_RUNTIME_HOME}
+ENV PATH $GW_HOME/bin:$PATH
+ENV MGW_CONF_DIR=${USER_HOME}/conf
+ENV JAVA_OPTS="${JAVA_OPTS}"
 
-WORKDIR /home/ballerina
+WORKDIR ${USER_HOME}
 
-USER ballerina
+USER ${USER}
+
+RUN \
+    touch ${USER_HOME}/gc.log \
+    && touch ${USER_HOME}/heapdump.hprof
 
 # expose ports
-EXPOSE 9090 9095 9096
+EXPOSE 9090 9095
 
-CMD ballerina run --config ${GWHOME}/conf/micro-gw.conf /home/exec/${project}.balx 2>&1  | tee -a ${GWHOME}/logs/microgateway.log
+CMD gateway /home/exec/${project}.jar
