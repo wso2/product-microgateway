@@ -8,7 +8,7 @@ This section defines the step-by-step instructions to build an [Ubuntu](https://
 
 ## How to build an image
 
-##### 1. Navigatew to ubuntu or alpine folder based on the preference.
+##### 1. Navigate to ubuntu or alpine folder based on the preference.
 ##### 2. Build the Docker image using the following command.
 
 ```docker build --no-cache=true -t wso2/wso2micro-gw:3.1.0 .```
