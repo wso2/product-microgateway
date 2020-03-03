@@ -84,6 +84,15 @@ public class OpenApiThrottlingTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 500, "Internal server error occured");
     }
 
+    @Test(description = "Test resource level throttling for unsecured resource")
+    public void testUnsecuredResourceThrottling() throws Exception {
+        response = invokeAndAssert(null,
+                getServiceURLHttp("/petstore/v1/user/login?username=test?password=test"));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.PER_RESOURCE_THROTTLING_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 429, "Too Many Requests");
+    }
+
     private HttpResponse invokeAndAssert(String token, String url) throws Exception {
         Map<String, String> headers = new HashMap<>();
         org.wso2.micro.gateway.tests.util.HttpResponse response = null;

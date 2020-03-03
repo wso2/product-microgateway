@@ -61,7 +61,7 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
     context.attributes[IS_THROTTLE_OUT] = false;
-
+    string? resourceLevelPolicyName = getResourceLevelPolicy(context);
     AuthenticationContext keyvalidationResult = {};
     if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         if (isRequestBlocked(caller, request, context)) {
@@ -73,33 +73,11 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
         keyvalidationResult = <AuthenticationContext>context.attributes[
         AUTHENTICATION_CONTEXT];
-        printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.
-                tier + "' exist.");
-        string? resourceLevelPolicyName = getResourceLevelPolicy(context);
-        if(resourceLevelPolicyName is string) {
-            if(resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
-                printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
-                        + "' does not exist.");
-                setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
-                    INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
-                    INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-                sendErrorResponse(caller, request, context);
-                return false;
-            }
-        }
-        printDebug(KEY_THROTTLE_FILTER, "Checking resource level throttling-out.");
-        if (isResourceLevelThrottled(context, keyvalidationResult, resourceLevelPolicyName)) {
-            printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
-            context.attributes[IS_THROTTLE_OUT] = true;
-            context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
-            setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
-                THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+        if(!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies)) {
             return false;
-        } else {
-            printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
         }
-
+        printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttle policy '" + keyvalidationResult.
+                        tier + "' exist.");
         if (keyvalidationResult.tier != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, keyvalidationResult.tier)) {
             printDebug(KEY_THROTTLE_FILTER, "Subscription level throttle policy '" + keyvalidationResult.tier
                     + "' does not exist.");
@@ -158,6 +136,9 @@ function doThrottleFilterRequest(http:Caller caller, http:Request request, http:
         // setting keytype to invocationContext
         runtime:getInvocationContext().attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
 
+        if(!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies)) {
+            return false;
+        }
         printDebug(KEY_THROTTLE_FILTER, "Checking unauthenticated throttle policy '" + UNAUTHENTICATED_TIER
                 + "' exist.");
         if (!isPolicyExist(deployedPolicies, UNAUTHENTICATED_TIER)) {
@@ -252,7 +233,7 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 }
 
 
-function isResourceLevelThrottled(http:FilterContext context,AuthenticationContext keyValidationDto, string? policy) returns (boolean) {
+function isResourceLevelThrottled(http:FilterContext context, string? policy) returns (boolean) {
     if (policy is string) {
         if (policy == UNLIMITED_TIER) {
             return false;
@@ -348,4 +329,32 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     json properties = {};
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
+}
+
+function checkResourceLevelThrottled(http:Caller caller, http:Request request, http:FilterContext context,
+        string? resourceLevelPolicyName, map<boolean> deployedPolicies) returns boolean {
+    if(resourceLevelPolicyName is string) {
+        if(resourceLevelPolicyName.length() > 0 && resourceLevelPolicyName != UNLIMITED_TIER && !isPolicyExist(deployedPolicies, resourceLevelPolicyName)) {
+            printDebug(KEY_THROTTLE_FILTER, "Resource level throttle policy '" + resourceLevelPolicyName
+                    + "' does not exist.");
+            setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
+                INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
+                INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+    }
+    printDebug(KEY_THROTTLE_FILTER, "Checking resource level throttling-out.");
+    if (isResourceLevelThrottled(context, resourceLevelPolicyName)) {
+        printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
+        context.attributes[IS_THROTTLE_OUT] = true;
+        context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
+        setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
+            THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+        sendErrorResponse(caller, request, context);
+        return false;
+    } else {
+        printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
+    }
+    return true;
 }
