@@ -36,12 +36,12 @@ ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
 ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
 
 # build argument for MOTD
-ARG MOTD='printf "\n\
+ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
  This Docker container comprises of a WSO2 product, running with its latest GA release \n\
  which is under the Apache License, Version 2.0. \n\
- Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"'
+ Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 # create the non-root user and group and set MOTD login message
 RUN \
