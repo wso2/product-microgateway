@@ -760,7 +760,6 @@ public function initAuthHandlers() {
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
-        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
         clockSkewInSeconds: 60,
         trustStoreConfig: {
             trustStore: {

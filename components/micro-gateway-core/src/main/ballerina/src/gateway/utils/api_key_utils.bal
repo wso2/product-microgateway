@@ -19,9 +19,9 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/lang.'int as ints;
 import ballerina/runtime;
-import ballerina/stringutils;
 import ballerina/system;
 import ballerina/time;
+import ballerina/config;
 
 # Provide self generated jwt as api key.
 # + req - http request
@@ -54,7 +54,6 @@ public function generateAPIKey(http:Request req) returns string | error {
         jwtPayload.sub = username;
         jwtPayload.iss = getConfigValue(API_KEY_ISSUER_TOKEN_CONFIG, ISSUER, DEFAULT_API_KEY_ISSUER);
         jwtPayload.jti = system:uuid();
-        jwtPayload.aud = getConfigValue(API_KEY_ISSUER_TOKEN_CONFIG, AUDIENCE, DEFAULT_AUDIENCE);
         int currentTime = time:currentTime().time / 1000;        //current time in seconds
         int expiryTime = getExpiryTime(req);
 
@@ -68,28 +67,8 @@ public function generateAPIKey(http:Request req) returns string | error {
         json keyType = PRODUCTION_KEY_TYPE;
         customClaims[KEY_TYPE] = keyType;
 
-        json[] apis = [];
-        int counter = 1;
-        while (true) {
-            map<any> apiMap = getConfigMapValue(API_KEY_ISSUER_APIS + "." + counter.toString());
-            counter = counter + 1;
-            if (apiMap.keys().length() > 0) {
-                string name = <string>apiMap.get("name");
-                if (!apiMap.hasKey("versions") || stringutils:equalsIgnoreCase("*", <string>apiMap.get("versions"))) {
-                    json api = {name: name, 'version: "*"};
-                    apis.push(api);
-                } else {
-                    string allowedVersionsfromConfig = <string>apiMap.get("versions");
-                    string[] allowedVersionList = split(allowedVersionsfromConfig, ",");
-                    foreach string v in allowedVersionList {
-                        json api = {name: name, 'version: v.trim()};
-                        apis.push(api);
-                    }
-                }
-            } else {
-                break;
-            }
-        }
+        json[] apis = getAPIsforAPIKey();
+
         printDebug(API_KEY_UTIL, apis.toJsonString());
         customClaims[ALLOWED_APIS] = apis;
         jwtPayload.customClaims = customClaims;
@@ -186,4 +165,28 @@ public function getAPIKeyAuth() returns [string, string] | error {
     } else {
         return error("API key is missing in invocation context");
     }
+}
+
+public function getAPIsforAPIKey() returns json[] {
+    json[] apis = [];
+    map<anydata>[] | error apiList = map<anydata>[].constructFrom(config:getAsArray(API_KEY_ISSUER_API));
+    if (apiList is map<anydata>[] && apiList.length() > 0) {
+        foreach map<anydata> apiData in apiList {
+            anydata apiName = apiData[NAME];
+            anydata apiVersions = apiData[VERSIONS];
+            if (apiName is string) {
+                if (!(apiVersions is string) || "*" == apiVersions) {
+                    json api = {name: apiName, 'version: "*"};
+                    apis.push(api);
+                } else {
+                    string[] allowedVersionList = split(apiVersions, ",");
+                    foreach string v in allowedVersionList {
+                        json api = {name: apiName, 'version: v.trim()};
+                        apis.push(api);
+                    }
+                }  
+            }
+        }
+    }
+    return apis;
 }

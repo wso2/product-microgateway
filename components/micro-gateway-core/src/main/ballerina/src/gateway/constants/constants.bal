@@ -222,6 +222,8 @@ public const string TOKEN_URL = "tokenUrl";
 public const string REFRESH_TOKEN = "refreshToken";
 public const string ACCESS_TOKEN = "accessToken";
 public const string CREDENTIAL_BEARER = "credentialBearer";
+public const string NAME = "name";
+public const string VERSIONS = "versions";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
@@ -265,7 +267,7 @@ public const string API_KEY_ISSUER_ENABLED = "enabled";
 public const string API_KEY_VALIDATE_ALLOWED_APIS = "validateAllowedAPIs";
 public const string API_KEY_ISSUER_TOKEN_CONFIG = "apikey.issuer.tokenConfig";
 public const string API_KEY_VALIDITY_TIME = "validityTime";
-public const string API_KEY_ISSUER_APIS = "apikey.issuer.apis";
+public const string API_KEY_ISSUER_API = "apikey.issuer.api";
 
 public const string CACHING_ID = "caching";
 public const string TOKEN_CACHE_ENABLED = "enabled";
