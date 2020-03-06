@@ -6,19 +6,19 @@ version= "3.1.0"
 target = "java8"
 
     [[platform.libraries]]
-    path = "../../../target/org.wso2.micro.gateway.core-3.1.0-beta-SNAPSHOT.jar"
+    path = "../../../target/org.wso2.micro.gateway.core-3.1.0-beta2-SNAPSHOT.jar"
 
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/org.everit.json.schema-1.5.0.wso2.v1.jar"
 
     [[platform.libraries]]
-        path = "../../../target/lib/dependencies/jackson-databind-2.9.10.1.jar"
+        path = "../../../target/lib/dependencies/jackson-databind-2.9.10.jar"
 
     [[platform.libraries]]
         path = "../../../target/lib/dependencies/jackson-core-2.9.9.jar"
 
     [[platform.libraries]]
-        path = "../../../target/lib/dependencies/jackson-annotations-2.9.10.jar"
+        path = "../../../target/lib/dependencies/jackson-annotations-2.9.9.jar"
 
     [[platform.libraries]]
         path = "../../../target/lib/dependencies/json-smart-2.3.jar"
@@ -27,10 +27,10 @@ target = "java8"
         path = "../../../target/lib/dependencies/json-path-2.4.0.wso2v2.jar"
 
     [[platform.libraries]]
-                 path = "../../../target/lib/dependencies/guava-27.1-jre.jar"
+                 path = "../../../target/lib/dependencies/guava-27.0-jre.jar"
 
     [[platform.libraries]]
-                     path = "../../../target/lib/dependencies/json-20190722.jar"
+                     path = "../../../target/lib/dependencies/json-20140107.jar"
 
     [[platform.libraries]]
                      path = "../../../target/lib/dependencies/asm-1.0.2.jar"

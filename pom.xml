@@ -297,7 +297,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${jackson.dataformat.version}</version>
+                <version>${jackson-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -402,9 +402,14 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
+                <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
+                <version>${json.orbit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${fasterxml.jackson.databind.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -583,11 +588,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jackson.core.version>2.8.6</jackson.core.version>
-        <jackson.annotation.version>2.8.0</jackson.annotation.version>
+        <jackson.annotation.version>2.9.9</jackson.annotation.version>
         <jackson.dataformat.version>2.8.8</jackson.dataformat.version>
         <kraal.version>0.0.16</kraal.version>
         <kotlin.stdlib.version>1.3.31</kotlin.stdlib.version>
-        <asm.version>7.1</asm.version>
+<!--        <asm.version>7.1</asm.version>-->
         <prometheus.jmx.agent.version>0.12.0</prometheus.jmx.agent.version>
         <jms-module.version>0.6.3</jms-module.version>
         <jmx.api.version>2.0.1</jmx.api.version>
@@ -596,16 +601,16 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
         <jayway.jsonpath.version>2.4.0</jayway.jsonpath.version>
-        <com.google.guava.version>27.1-jre</com.google.guava.version>
+        <com.google.guava.version>27.0-jre</com.google.guava.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
-        <org.json.version>20160810</org.json.version>
+        <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <com.jayway.jsonpath.version>2.4.0.wso2v2</com.jayway.jsonpath.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
-        <jackson-data-bind.version>2.9.10.1</jackson-data-bind.version>
         <jackson-core.version>2.9.9</jackson-core.version>
-        <org.json.version>20190722</org.json.version>
+        <everit.version>1.5.0.wso2.v1</everit.version>
+        <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
     </properties>
 
 </project>

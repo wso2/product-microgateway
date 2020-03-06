@@ -97,6 +97,7 @@ public class Validate {
     public static void extractResources(String projectName, String serviceName) throws IOException {
         String path = "resources/wso2/" + projectName + "/";
         CodeSource src = Validate.class.getProtectionDomain().getCodeSource();
+        StringBuffer stringBuffer;
         if (src != null) {
             URL jar = src.getLocation();
             ZipInputStream zip = new ZipInputStream(jar.openStream());
@@ -106,12 +107,18 @@ public class Validate {
                     break;
                 }
                 String name = e.getName();
-                String swaggerContent;
+                // String swaggerContent;
                 if (name.startsWith(path)) {
                     InputStream in = Validate.class.getResourceAsStream("/" + name);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    swaggerContent = reader.readLine();
-                    swaggers.put(serviceName, swaggerContent);
+                    stringBuffer = new StringBuffer();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+
+                        stringBuffer.append(line).append("\n");
+                    }
+                    swaggers.put(serviceName, stringBuffer.toString());
                 }
             }
         }

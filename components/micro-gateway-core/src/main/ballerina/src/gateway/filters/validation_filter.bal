@@ -80,7 +80,9 @@
         string payloadVal = "";
 
         var reqPayload  = request.getJsonPayload();
+        printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled---------." + reqPayload.toString());
         if (reqPayload is map<json>) {
+             printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled---1223------.");
             payloadVal = reqPayload.toJsonString();
         }
         //getting request path
