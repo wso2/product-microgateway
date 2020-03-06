@@ -252,7 +252,6 @@
 # API Key authentication configurations
 [apikey.tokenConfigs]
   issuer="https://localhost:9095/apikey"
-  audience="http://org.wso2.apimgt/gateway"
   certificateAlias="ballerina"
   # Validate Allowed/subscribed APIs
   validateAllowedAPIs=false
@@ -265,7 +264,6 @@
     keyStorePath="${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12"
     keyStorePassword="ballerina"
     issuer="https://localhost:9095/apikey"
-    audience="http://org.wso2.apimgt/gateway"
     certificateAlias="ballerina"
     # validity time in seconds for the API Key. -1 is to indicate unlimited time 
     validityTime=-1

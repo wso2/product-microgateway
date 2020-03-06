@@ -54,7 +54,6 @@ public function generateAPIKey(http:Request req) returns string | error {
         jwtPayload.sub = username;
         jwtPayload.iss = getConfigValue(API_KEY_ISSUER_TOKEN_CONFIG, ISSUER, DEFAULT_API_KEY_ISSUER);
         jwtPayload.jti = system:uuid();
-        jwtPayload.aud = getConfigValue(API_KEY_ISSUER_TOKEN_CONFIG, AUDIENCE, DEFAULT_AUDIENCE);
         int currentTime = time:currentTime().time / 1000;        //current time in seconds
         int expiryTime = getExpiryTime(req);
 
