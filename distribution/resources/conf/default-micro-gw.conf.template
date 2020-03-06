@@ -270,15 +270,16 @@
     # validity time in seconds for the API Key. -1 is to indicate unlimited time 
     validityTime=-1
   # API Key STS Allowed APIs
-  [apikey.issuer.apis]
     # provide the list of allowed APIs by the generated API Key
-    # [apikey.issuer.apis.<number>] integer number starting from 1
+    # [[apikey.issuer.api]] 
       # name="API name given in the API Definition"
       # versions="Allowed versions" or "*" to allow all versions
     # Examples :
-    # [apikey.issuer.apis.1]
-      # name="Swagger Petstore New"
-      # versions="1.0.0, v1, v2"
-    # [apikey.issuer.apis.2]
-      # name="MyAPI"
-      # versions="*"
+    # API 1
+    [[apikey.issuer.api]]
+      name="Swagger Petstore New"
+      versions="1.0.0, v1, v2"
+    # API 2
+    [[apikey.issuer.api]]
+      name="MyAPI"
+      versions="*"
