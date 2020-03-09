@@ -25,7 +25,6 @@ import io.netty.handler.codec.http2.HttpConversionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -38,13 +37,11 @@ import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HTTP2Client.Http2ClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTP_PORT;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
 
@@ -52,12 +49,12 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
     private static final Log log = LogFactory.getLog(HTTP2RequestsWithHTTP2BackEndTestCase.class);
     protected MockHttp2Server mockHttp2Server;
     protected Http2ClientRequest http2ClientRequest;
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
 
     @BeforeClass
-    private void setup() throws Exception {
-        String label = "apimTestLabel";
-        String project = "apimTestProject";
+    public void setup() throws Exception {
+        String label = "http2TestLabel";
+        String project = "http2TestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -66,6 +63,15 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
         api.setEndpoint("https://localhost:8443");
         api.setVersion("1.0.0");
         api.setProvider("admin");
+        //Register API with label
+        pub.addApi(label, api);
+
+        API api2 = new API();
+        api2.setName("PizzaShackAPINew");
+        api2.setContext("/pizzashack1");
+        api2.setEndpoint(getMockServiceURLHttp("/echo"));
+        api2.setVersion("2.0.0");
+        api2.setProvider("admin");
         //Register API with label
         pub.addApi(label, api);
 
@@ -132,9 +138,9 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
         log.info("Response: " + response.getResponseMessage() + " , " + response.getResponseCode());
     }
 
-    @AfterClass
-    public void stop() throws Exception {
-        //Stop all the mock servers
-        super.finalize();
-    }
+//    @AfterClass
+//    public void stop() throws Exception {
+//        //Stop all the mock servers
+//        super.finalize();
+//    }
 }

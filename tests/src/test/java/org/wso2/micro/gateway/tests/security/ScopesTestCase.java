@@ -21,7 +21,6 @@ package org.wso2.micro.gateway.tests.security;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -39,7 +38,7 @@ import java.util.Map;
  */
 public class ScopesTestCase extends BaseTestCase {
 
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
     private String jwtTokenProdWithScopes;
     private String jwtTokenProdWithSingleScope;
     private String jwtTokenProdWithMultipleScope;
@@ -69,7 +68,7 @@ public class ScopesTestCase extends BaseTestCase {
                 .getJwtWithCustomClaims(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600,
                         claimMap);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[] { "common_api.yaml" });
+        super.init(project, new String[] { "common_api.yaml", "security/disable_security.yaml" });
     }
 
     @Test(description = "Test Invoking the resource which is protected by scopes without providing the scopes")
@@ -145,9 +144,4 @@ public class ScopesTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
-    @AfterClass
-    public void stop() throws Exception {
-        //Stop all the mock servers
-        super.finalize();
-    }
 }

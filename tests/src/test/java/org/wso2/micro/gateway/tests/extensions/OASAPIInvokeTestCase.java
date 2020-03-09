@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.tests.extensions;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -33,12 +32,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OASAPIInvokeTestCase extends BaseTestCase {
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
 
-        String project = "apimTestProject";
+        String project = "OpenApiThrottlingProject";
         API api = new API();
         api.setName("PetStoreAPI");
         api.setContext("petstore/v1");
@@ -68,12 +67,4 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         Assert.assertEquals(response.getData(), ResponseConstants.petByIdResponse);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
-
-    @AfterClass
-    public void stop() throws Exception {
-        //Stop all the mock servers
-        mockHttpServer.stopIt();
-        super.finalize();
-    }
-
 }

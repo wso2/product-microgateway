@@ -19,17 +19,12 @@
 package org.wso2.micro.gateway.tests.throttling;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.ResponseConstants;
-import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
+import org.wso2.micro.gateway.tests.extensions.OASAPIInvokeTestCase;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
-import org.wso2.micro.gateway.tests.util.TestConstant;
-import org.wso2.micro.gateway.tests.util.TokenUtil;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 
 import java.util.HashMap;
@@ -38,25 +33,9 @@ import java.util.Map;
 /**
  * This test class is used to test per API/Resource throttling policies.
  */
-public class OpenApiThrottlingTestCase extends BaseTestCase {
-    private String jwtTokenProd;
+public class OpenApiThrottlingTestCase extends OASAPIInvokeTestCase {
     private HttpResponse response;
     private String perResourceUrl = "petstore/v1/pet/1";
-
-    @BeforeClass
-    public void start() throws Exception {
-        String project = "OpenApiThrottlingProject";
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(),
-                TestConstant.KEY_TYPE_PRODUCTION, 3600);
-        //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"common_api.yaml"});
-    }
 
     @Test(description = "Test throttling with non existing policy")
     public void testThrottlingWithNonExistingPolicy() throws Exception {

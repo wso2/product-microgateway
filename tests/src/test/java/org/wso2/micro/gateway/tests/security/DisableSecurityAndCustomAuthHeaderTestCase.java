@@ -18,42 +18,19 @@
 
 package org.wso2.micro.gateway.tests.security;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
-import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.BaseTestCase;
 import org.wso2.micro.gateway.tests.common.ResponseConstants;
-import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
-import org.wso2.micro.gateway.tests.util.TestConstant;
-import org.wso2.micro.gateway.tests.util.TokenUtil;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * This test class is used to test disable security at API/resource level and usage of custom authentication header
  */
-public class DisableSecurityAndCustomAuthHeaderTestCase extends BaseTestCase {
-    private String jwtTokenProd;
-
-    @BeforeClass
-    public void start() throws Exception {
-
-        String project = "disableSecurityProject";
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
-        super.init(project, new String[]{"common_api.yaml", "security/disable_security.yaml"});
-    }
+public class DisableSecurityAndCustomAuthHeaderTestCase extends ScopesTestCase {
 
     @Test(description = "Test Invoking un secured resource which is specified at API level without token")
     public void testDisableSecurityAPILevel() throws Exception {
