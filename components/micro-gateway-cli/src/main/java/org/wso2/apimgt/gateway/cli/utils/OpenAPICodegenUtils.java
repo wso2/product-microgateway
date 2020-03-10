@@ -508,7 +508,7 @@ public class OpenAPICodegenUtils {
         //iterate through function string array which only contains true positives and update the interceptor map
         functionStringArray.forEach(f -> {
             //function name
-            String functionName = f.split(" ")[1];
+            String functionName = (f.replace("(", " ")).split(" ")[1];
             //if the function is declared more than one time, throws an runtime exception as it causes ballerina
             // compilation error
             if (interceptorMap.containsKey(functionName)) {
