@@ -103,8 +103,10 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
-    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
+
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.consumerKey = authContext.consumerKey;
         eventDto.userName = authContext.username;
