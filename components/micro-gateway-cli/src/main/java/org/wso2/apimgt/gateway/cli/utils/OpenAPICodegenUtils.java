@@ -391,7 +391,7 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(extensions.get(OpenAPIConstants.BASEPATH).toString());
+        api.setSpecificBasepath(resolveBasePathFromContextTemplate(extensions, openAPI.getInfo().getVersion()));
         //assigns x-wso2-owner value to API provider
         if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
             api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
@@ -1174,5 +1174,23 @@ public class OpenAPICodegenUtils {
      public static void addDefaultAuthProviders(List<String> authProviders) {
         authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
         authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+    }
+
+    private static String resolveBasePathFromContextTemplate(Map<String, Object> extensions, String version) {
+        String basePath = extensions.get(OpenAPIConstants.BASEPATH).toString();
+        if (extensions.containsKey(OpenAPIConstants.CONTEXT_TEMPLATE)) {
+            String contextTemplate = extensions.get(OpenAPIConstants.CONTEXT_TEMPLATE).toString();
+            if (!contextTemplate.contains(OpenAPIConstants.VERSION_PLACEHOLDER) && contextTemplate
+                    .contains(OpenAPIConstants.BASE_PATH_PLACEHOLDER)) {
+                throw new CLIRuntimeException(OpenAPIConstants.CONTEXT_TEMPLATE + " extension : " + contextTemplate
+                        + " present in the open API is in wrong format. It should be in formats "
+                        + "/*{context}*/{version}/* or /*{version}*/{context}/*");
+            }
+            String context;
+            context = contextTemplate.replace(OpenAPIConstants.VERSION_PLACEHOLDER, version);
+            context = context.replace(OpenAPIConstants.BASE_PATH_PLACEHOLDER, basePath);
+            return context;
+        }
+        return basePath;
     }
 }

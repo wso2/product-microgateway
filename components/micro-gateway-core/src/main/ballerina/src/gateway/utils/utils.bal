@@ -97,13 +97,6 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
         apiVersion = <string>apiConfig.apiVersion;
     }
     apiKeyValidationRequest.apiVersion = apiVersion;
-    if (!contains(apiContext, apiVersion)) {
-        if (hasSuffix(apiContext, PATH_SEPERATOR)) {
-            apiContext = apiContext + apiVersion;
-        } else {
-            apiContext = apiContext + PATH_SEPERATOR + apiVersion;
-        }
-    }
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
@@ -760,7 +753,6 @@ public function initAuthHandlers() {
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
-        audience: getConfigValue(API_KEY_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
         clockSkewInSeconds: 60,
         trustStoreConfig: {
             trustStore: {

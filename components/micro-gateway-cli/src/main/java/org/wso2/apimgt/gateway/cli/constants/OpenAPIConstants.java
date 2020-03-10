@@ -30,6 +30,7 @@ public class OpenAPIConstants {
     public static final String TRANSPORT_SECURITY = "x-wso2-transports";
     public static final String MUTUAL_SSL = "x-wso2-mutual-ssl";
     public static final String APPLICATION_SECURITY = "x-wso2-application-security";
+    public static final String CONTEXT_TEMPLATE = "x-wso2-context-template";
     public static final String APPLICATION_SECURITY_TYPES = "security-types";
     public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     public static final String TRANSPORT_HTTP = "http";
@@ -40,6 +41,8 @@ public class OpenAPIConstants {
     public static final String DISABLED = "Disabled";
     public static final String CACHE_TIMEOUT = "cacheTimeoutInSeconds";
     public static final String CACHE_ENABLED = "Enabled";
+    public static final String VERSION_PLACEHOLDER = "{version}";
+    public static final String BASE_PATH_PLACEHOLDER = "{basePath}";
 
     public static final ImmutableList<String> MODULE_IDENTIFIER_LIST = ImmutableList.of("vienna", "canberra",
             "berlin", "athens", "georgetown", "budapest", "jakarta", "rome", "dublin", "tokyo", "bucharest", "moscow",
