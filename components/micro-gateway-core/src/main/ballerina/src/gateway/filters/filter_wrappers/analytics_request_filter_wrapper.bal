@@ -40,7 +40,7 @@ public type AnalyticsRequestFilterWrapper object {
         //starting a Gauge metric
         map<string> | () gaugeTags = getGaugeTagInvocationContext(ANALYTIC_GAUGE_TAGS);
         if (gaugeTags is ()) {
-            gaugeTags = gaugeTagDetailsResponse(context, FILTER_ANALYTICS);
+            gaugeTags = gaugeTagDetailsFromContext(context, FILTER_ANALYTICS);
         }
         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
         observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION, {"Category": FILTER_ANALYTICS});

@@ -67,7 +67,7 @@ public function gaugeTagDetails(http:Request request, http:FilterContext context
     return gaugeTags;
 }
 
-public function gaugeTagDetailsResponse(http:FilterContext context, string category) returns map<string> | () {
+public function gaugeTagDetailsFromContext(http:FilterContext context, string category) returns map<string> | () {
     if (isMetricsEnabled == false) {
         return ();
     }
