@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.tests.security;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -35,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class APIInvokeWithOAuthTestCase extends BaseTestCase {
-    private String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
+    protected String prodToken, sandToken, jwtTokenProd, jwtTokenSand, expiringJwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
@@ -158,9 +157,4 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
 //        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
 //    }
 
-    @AfterClass
-    public void stop() throws Exception {
-        //Stop all the mock servers
-        super.finalize();
-    }
 }

@@ -21,7 +21,6 @@ package org.wso2.micro.gateway.tests.security;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -32,7 +31,6 @@ import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +42,7 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
     private String invalidSubscriptionToken, invalidScopeToken;
 
     @BeforeClass
-    private void setup() throws Exception {
+    public void setup() throws Exception {
         String label = "apimTestLabel";
         String project = "apimTestProject";
         //get mock APIM Instance
@@ -72,7 +70,8 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         info1.setStringResponse(response1);
         invalidScopeToken = pub.getAndRegisterAccessToken(info1);
 
-        super.init(label, project);
+        String configPath = "confs/mutualSSL-test.conf";
+        super.init(label, project, configPath);
     }
 
     @Test(description = "Test without auth header")
@@ -117,10 +116,5 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         Assert.assertTrue(response.getData().contains("Resource forbidden"));
     }
 
-    @AfterClass
-    public void stop() throws Exception {
-        //Stop all the mock servers
-        super.finalize();
-    }
 }
 
