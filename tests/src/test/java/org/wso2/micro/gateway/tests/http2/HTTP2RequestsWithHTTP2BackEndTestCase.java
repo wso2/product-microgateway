@@ -137,10 +137,4 @@ public class HTTP2RequestsWithHTTP2BackEndTestCase extends BaseTestCase {
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         log.info("Response: " + response.getResponseMessage() + " , " + response.getResponseCode());
     }
-
-//    @AfterClass
-//    public void stop() throws Exception {
-//        //Stop all the mock servers
-//        super.finalize();
-//    }
 }
