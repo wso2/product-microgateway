@@ -167,6 +167,7 @@ if [ -e "$GW_HOME/bin/gateway.pid" ]; then
   PID=`cat "$GW_HOME"/bin/gateway.pid`
 fi
 
+
 #To run the Java classes required for the identification of observability
 java_cmd_tools () {
   METRIC_CLASSPATH=""
@@ -240,6 +241,14 @@ do
 done
 
 for last; do true; done
+
+if [ "$CMD" = "version" ]; then
+  if [ -e "$GW_HOME/version.txt" ]; then
+    VERSION=`cat "$GW_HOME"/version.txt`
+    echo "${VERSION}"
+    exit 0
+  fi
+fi
 
 if [ ! "$CMD" = "stop" ]; then
   if [[ "$CMD" == "" ]]; then
