@@ -59,10 +59,13 @@ public const string VALIDATION_FILTER_RESPONSE = "Validation_Filter_Response";
 public const string FILTER_AUTHENTICATION = "Authentiation";
 public const string FILTER_ANALYTICS = "Analytics";
 public const string FILTER_THROTTLING = "Throttling";
+public const string FILTER_VALIDATION = "Validation";
 public const string PER_REQ_DURATION = "Per_Request_Duration";
 public const string REQ_FLTER_DURATION = "Request_Filter_Duration";
 public const string REQ_DURATION_TOTAL = "Request_Duration_Total";
 public const string FILTER_TOTAL_DURATION = "Filter_Total_Duration";
 public const string ANALYTIC_GAUGE_TAGS = "ANALYTIC_GAUGE_TAGS";
+public const string VALIDATION_GAUGE_TAGS = "VALIDATION_GAUGE_TAGS";
 public const string ANALYTIC_REQUEST_TIME = "ANALYTIC_REQUEST_TIME";
+public const string VALIDATION_REQUEST_TIME = "VALIDATION_REQUEST_TIME";
 
