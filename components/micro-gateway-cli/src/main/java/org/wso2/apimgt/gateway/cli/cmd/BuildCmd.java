@@ -318,6 +318,10 @@ public class BuildCmd implements LauncherCmd {
         String targetGenDir = targetDirPath + File.separator + CliConstants.PROJECT_GEN_DIR;
         CmdUtils.createDirectory(targetGenDir, true);
 
+        CmdUtils.createDirectory(CmdUtils.getProjectTargetGenGrpcSrcDirectory(projectName), true);
+        CmdUtils.createDirectory(CmdUtils.getProjectTargetGenGrpcSrcOpenAPIsDirectory(projectName), true);
+        CmdUtils.createDirectory(CmdUtils.getProjectTargetGenGrpcSrcDescDirectory(projectName), true);
+
         //Initializing the ballerina project.
         CommandUtil.initProject(Paths.get(targetGenDir));
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
