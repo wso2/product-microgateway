@@ -29,7 +29,7 @@ target = "java8"
 
         [[platform.libraries]]
         module = "interceptor"
-        path = "${MGW-TK_HOME}/lib/dependencies/json-20140107.jar"
+        path = "${MGW-TK_HOME}/lib/dependencies/json-20190722.jar"
 
 
 

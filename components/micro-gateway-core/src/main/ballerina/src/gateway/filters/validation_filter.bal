@@ -96,9 +96,14 @@
         if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
             return true;
         } else {
+             json newPayload = { fault: {
+                                    code: 400,
+                                    message: "Bad Request",
+                                    description: valResult.toString()
+                                } };
             http:Response res = new;
             res.statusCode = 400;
-            res.setPayload(valResult.toString());
+            res.setJsonPayload(newPayload);
             var rcal = caller->respond(res);
             return false;
         }
@@ -109,6 +114,7 @@
      string resPath = "";
      string requestMethod = "";
      string reqMethod = "";
+     string resPayload = "";
 
          printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
          string responseCode = response.statusCode.toString();
@@ -120,15 +126,28 @@
          if (method is string) {
             reqMethod = method;
          }
-         string resPayload = response.getJsonPayload().toString();
+         var payload = response.getJsonPayload();
+         if (payload is map<json>)  {
+              resPayload = payload.toJsonString();
+         }
          string servName = context.getServiceName();
-         printDebug(KEY_VALIDATION_FILTER, "The Response payload : " + resPayload);
-         var valResult = responseValidate(resPath, requestMethod, responseCode, resPayload, servName);
+         printDebug(KEY_VALIDATION_FILTER, "RequestPath.--" + resPath.toString());
+         printDebug(KEY_VALIDATION_FILTER, "RequestMethod--" + reqMethod.toString());
+         printDebug(KEY_VALIDATION_FILTER, "Reesponse code--" + responseCode.toString());
+         printDebug(KEY_VALIDATION_FILTER, "Response payload--" +  resPayload.toString());
+         printDebug(KEY_VALIDATION_FILTER, "servName----" +  servName);
+         var valResult = responseValidate(resPath, reqMethod, responseCode, resPayload, servName);
+         printDebug(KEY_VALIDATION_FILTER, "valrResult-----------" + valResult.toString());
          if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
              return true;
          } else {
+             json newPayload = { fault: {
+                                                 code: 500,
+                                                 message: "Bad Response",
+                                                 description: valResult.toString()
+                                             } };
              response.statusCode = 500;
-             response.setPayload(valResult.toString());
-             return false;
+             response.setJsonPayload(newPayload);
+             return true;
          }
  }

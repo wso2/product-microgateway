@@ -71,8 +71,6 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
     @AfterClass
     public void stop() throws Exception {
-        //Stop all the mock servers
-        mockHttpServer.stopIt();
         super.finalize();
     }
 

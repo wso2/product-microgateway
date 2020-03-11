@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static org.wso2.micro.gateway.core.Constants.EMPTY_ARRAY;
 import static org.wso2.micro.gateway.core.Constants.VALIDATED_STATUS;
 
 /**
@@ -70,7 +71,12 @@ public class Validate {
             return VALIDATED_STATUS;
         }
         String schema = extractSchemaFromRequest(requestPath, reqMethod, swagger);
-        return validateContent(payload, schema);
+        if (schema != null && !EMPTY_ARRAY.equals(schema) &&
+                payload != null && !EMPTY_ARRAY.equals(payload)) {
+            return validateContent(payload, schema);
+        } else {
+            return VALIDATED_STATUS;
+        }
     }
 
     /***
@@ -85,7 +91,12 @@ public class Validate {
                                           String serviceName) {
         String swagger = swaggers.get(serviceName);
         String responseSchema = extractResponse(resourcePath, reqMethod, responseCode, swagger);
-        return validateContent(responseSchema, response);
+        if (responseSchema != null && !EMPTY_ARRAY.equals(responseSchema) &&
+                response != null && !EMPTY_ARRAY.equals(response) && !response.isEmpty()) {
+            return validateContent(response, responseSchema);
+        } else {
+            return VALIDATED_STATUS;
+        }
     }
 
     /***
@@ -132,13 +143,13 @@ public class Validate {
         swaggerObject = swagger;
         String value = JsonPath.read(swagger, Constants.JSON_PATH +
                 Constants.OPEN_API).toString();
-        if (value != null && !value.equals(Constants.EMPTY_ARRAY)) {
+        if (value != null && !value.equals(EMPTY_ARRAY)) {
             //refer schema
             StringBuilder jsonPath = new StringBuilder();
             jsonPath.append(Constants.PATHS)
                     .append(resourcePath).append(Constants.BODY_CONTENT);
             schema = JsonPath.read(swagger, jsonPath.toString()).toString();
-            if (schema == null | Constants.EMPTY_ARRAY.equals(schema)) {
+            if (schema == null | EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
                 StringBuilder requestBodyPath = new StringBuilder();
                 requestBodyPath.append(Constants.PATHS).append(resourcePath).
@@ -342,15 +353,16 @@ public class Validate {
     /**
      * Validate the Request/response content.
      *
-     * @param payloadObject Request/response payload
+     * @param payload Request/response payload
      * @param schemaString  Schema which uses to validate request/response messages
      * @return Returns "validated" or everit error logs
      */
-    private static String validateContent(String payloadObject, String schemaString) {
+    private static String validateContent(String payload, String schemaString) {
         logger.debug("Validating JSON content against the schema");
         StringBuilder finalMessage = new StringBuilder();
         List<String> errorMessages;
         JSONObject jsonSchema = new JSONObject(schemaString);
+        JSONObject payloadObject = new JSONObject(payload);
         Schema schema = SchemaLoader.load(jsonSchema);
         if (schema == null) {
             return null;
@@ -387,7 +399,12 @@ public class Validate {
                 append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
                 append(Constants.JSON_RESPONSES).append(responseCode);
         resource = JsonPath.read(swagger, responseSchemaPath.toString());
-
+        swaggerObject = swagger;
+        try {
+            rootNode = mapper.readTree(swagger.getBytes());
+        } catch (IOException e) {
+            logger.error("Error occurred while reading the swagger.", e);
+        }
         if (resource != null) {
             responseSchemaPath.append(Constants.CONTENT);
             content = JsonPath.read(swagger, responseSchemaPath.toString());
@@ -397,7 +414,7 @@ public class Validate {
             schemaCon = JsonPath.read(swagger, responseSchemaPath.toString());
         }
         if (schemaCon != null) {
-            if (!schemaCon.toString().equals(Constants.EMPTY_ARRAY)) {
+            if (!schemaCon.toString().equals(EMPTY_ARRAY)) {
                 return extractReference(schemaCon.toString());
             } else {
                 StringBuilder pathBuilder = new StringBuilder();
@@ -437,12 +454,12 @@ public class Validate {
                 (Constants.SCHEMA);
         resource = JsonPath.read(swagger, resPath.toString());
         JsonNode json = mapper.convertValue(resource, JsonNode.class);
-        if (json.get(0) != null && !Constants.EMPTY_ARRAY.equals(json.get(0))) {
+        if (json.get(0) != null && !EMPTY_ARRAY.equals(json.get(0))) {
             value = json.get(0).toString();
         } else {
             value = json.toString();
         }
-        if (value != null && !Constants.EMPTY_ARRAY.equals(value)) {
+        if (value != null && !EMPTY_ARRAY.equals(value)) {
             if (value.contains(Constants.SCHEMA_REFERENCE)) {
                 byte[] bytes = value.getBytes();
                 try {
@@ -466,7 +483,7 @@ public class Validate {
                     append(Constants.JSON_RESPONSES).append(Constants.DEFAULT);
             resourceSchema = JsonPath.read(swagger, responseDefaultPath.toString());
             JsonNode jnode = mapper.convertValue(resourceSchema, JsonNode.class);
-            if (jnode.get(0) != null && !Constants.EMPTY_ARRAY.equals(jnode)) {
+            if (jnode.get(0) != null && !EMPTY_ARRAY.equals(jnode)) {
                 value = jnode.get(0).toString();
             } else {
                 value = jnode.toString();

@@ -25,16 +25,15 @@ public class ResponseConstants {
     public static final String responseBodyV1 = "{\"id\":222222222, \"category\":{ \"id\":1, \"name\":\"Test\" }," +
             " \"name\":\"doggie\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
             "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
-    public static final String petByIdResponse = "{\"id\": 9199424981609281000," + "  \"category\": {"
-            + "    \"id\": 0," + "    \"name\": \"string\"" + "  }," + "  \"name\": \"doggie\","
-            + "  \"photoUrls\": [" + "    \"string\"" + "  ]," + "  \"tags\": [" + "    {"
-            + "      \"id\": 0," + "      \"name\": \"string\"" + "    }" + "  ],"
-            + "  \"status\": \"available\"" + "}";
-    public static final String petByIdResponseV1 = "{\"id\": 33333333333333," + "  \"category\": {"
-            + "    \"id\": 0," + "    \"name\": \"string\"" + "  }," + "  \"name\": \"doggieNew\","
-            + "  \"photoUrls\": [" + "    \"string\"" + "  ]," + "  \"tags\": [" + "    {"
-            + "      \"id\": 0," + "      \"name\": \"string\"" + "    }" + "  ],"
-            + "  \"status\": \"available\"" + "}";
+    public static final String petByIdResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
+            "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
+            " \"status\":\"hello\"}";
+    public static final String petByIdResponseV1 = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
+            "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}], " +
+            "\"status\":\"hello\"}";
+    public static final String getPetResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}," +
+            " \"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
+            " \"status\":\"hello\"}";
     public static final String storeInventoryResponse = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
             + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
     public static final String PER_RESOURCE_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900802," +
@@ -59,6 +58,10 @@ public class ResponseConstants {
     public static final String XML_RESPONSE = ":text/xml:Accept:Cache-Control:Connection:Content-Length"
             + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
             + "{test2=value2, test=value1}:value1:<test><msg>hello</msg></test>";
+    public static final String VALIDATION_RESPONSE = "{\"fault\":{\"code\":400, \"message\":\"Bad Request\", " +
+            "\"description\":\"#: required key [name] not found, #: required key [photoUrls] not found, \"}}";
+    public static final String  INVALID_RESPONSE = "{\"fault\":{\"code\":500, \"message\":\"Bad Response\", " +
+            "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
 }

@@ -112,7 +112,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.json.wso2</groupId>
+            <groupId>org.json</groupId>
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
@@ -222,8 +222,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
