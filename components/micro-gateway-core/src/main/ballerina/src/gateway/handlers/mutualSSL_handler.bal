@@ -40,13 +40,16 @@ public type MutualSSLHandler object {
         string|error mutualSSLVerifyClient = getMutualSSL();
         if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
                 && req.mutualSslHandshake[STATUS] != PASSED ) {
+            if (req.mutualSslHandshake[STATUS] == FAILED) {
+                printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: FAILED");
+            }
             // provided more generic error code to avoid security issues.
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS); 
             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
         }
 
         if (req.mutualSslHandshake[STATUS] == PASSED) {
-            printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake passed.");
+            printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
             doMTSLFilterRequest(req, invocationContext); 
         }
