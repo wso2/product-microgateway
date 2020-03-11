@@ -130,11 +130,6 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
-        <file>
-            <source>${basedir}/target/update/update_darwin</source>
-            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/bin</outputDirectory>
-            <fileMode>744</fileMode>
-        </file>
     </files>
 
     <dependencySets>
