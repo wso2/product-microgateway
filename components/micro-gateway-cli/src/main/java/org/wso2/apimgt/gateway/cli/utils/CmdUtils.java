@@ -637,7 +637,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /target/gen of a given project in the current working directory
+     * Returns path to the /target/gen of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /target/gen of a given project in the current working directory
@@ -645,6 +645,37 @@ public final class CmdUtils {
     public static String getProjectTargetGenDirectoryPath(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator + CliConstants.PROJECT_TARGET_DIR
                 + File.separator + CliConstants.PROJECT_GEN_DIR;
+    }
+
+    /**
+     * Returns path to the /target/gen/gRPCSrc of a given project in the current working directory.
+     *
+     * @param projectName name of the project
+     * @return path to the /target/gen/gRPCSrc of a given project in the current working directory
+     */
+    public static String getProjectTargetGenGrpcSrcDirectory(String projectName) {
+        return getProjectTargetGenDirectoryPath(projectName) + File.separator + CliConstants.GEN_GRPC_SRC_DIR;
+    }
+
+    /**
+     * Returns path to the /target/gen/gRPCSrc/OpenAPIs of a given project in the current working directory.
+     *
+     * @param projectName name of the project
+     * @return path to the /target/gen/gRPCSrc/OpenAPIs of a given project in the current working directory
+     */
+    public static String getProjectTargetGenGrpcSrcOpenAPIsDirectory(String projectName) {
+        return getProjectTargetGenGrpcSrcDirectory(projectName) + File.separator +
+                CliConstants.GEN_GRPC_SRC_OPENAPI_DIR;
+    }
+
+    /**
+     * Returns path to the /target/gen/gRPCSrc/desc of a given project in the current working directory.
+     *
+     * @param projectName name of the project
+     * @return path to the /target/gen/gRPCSrc/desc of a given project in the current working directory
+     */
+    public static String getProjectTargetGenGrpcSrcDescDirectory(String projectName) {
+        return getProjectTargetGenGrpcSrcDirectory(projectName) + File.separator + CliConstants.GEN_GRPC_SRC_DESC_DIR;
     }
 
     /**
@@ -1174,8 +1205,6 @@ public final class CmdUtils {
         return getResourceFolderLocation() + File.separator + CliConstants.RESOURCES_GRPC_DIR;
     }
 
-    //todo: change the file location
-
     /**
      * descriptor path of the grpc definition.
      *
@@ -1185,7 +1214,7 @@ public final class CmdUtils {
      */
     public static String getProtoDescriptorPath(String projectName, String protoFileName) {
         String fileName = protoFileName.substring(0, protoFileName.length() - 6);
-        return getProjectTargetGenDirectoryPath(projectName) + File.separator + fileName + ".desc";
+        return getProjectTargetGenGrpcSrcDescDirectory(projectName) + File.separator + fileName + ".desc";
     }
 
     /**
