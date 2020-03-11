@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.template.BallerinaToml;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
@@ -83,6 +84,8 @@ public class CodeGenerator {
             openAPIDirectoryLocations.add(projectAPIDefGenLocation);
         }
         CodeGenerator.projectName = projectName;
+        BallerinaToml ballerinaToml = new BallerinaToml();
+        ballerinaToml.setToolkitHome(CmdUtils.getCLIHome());
 
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
@@ -112,9 +115,9 @@ public class CodeGenerator {
 
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
-                        OpenAPICodegenUtils.writeDependencies(projectName, definitionContext);
                         serviceList.add(definitionContext);
                         openAPIServiceList.add(definitionContext);
+                        ballerinaToml.addDependencies(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
                     } catch (IOException e) {
@@ -126,7 +129,8 @@ public class CodeGenerator {
                 throw new CLIInternalException("File write operations failed during ballerina code generation", e);
             }
         });
-        //to process protobuf files
+
+        // to process protobuf files
         if (Paths.get(grpcDirLocation).toFile().exists()) {
             Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
                 Path filename = path.getFileName();
@@ -145,6 +149,7 @@ public class CodeGenerator {
                                     path, true);
                             genFiles.add(generateService(definitionContext));
                             serviceList.add(definitionContext);
+                            ballerinaToml.addDependencies(definitionContext);
                         }
                     }
                 } catch (IOException e) {
@@ -162,11 +167,15 @@ public class CodeGenerator {
         genFiles.add(generateTokenServices());
         genFiles.add(generateHealthCheckService());
         genFiles.add(generateCommonEndpoints());
-        List<String> externalJars = CmdUtils.getExternalJarDependencies(projectName);
-        if (externalJars.size() > 0) {
-            genFiles.add(generateBallerinaTOMLDependencies(externalJars));
-        }
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
+
+        // generate Ballerina.toml file
+        ballerinaToml.addLibs(projectName);
+        GenSrcFile toml = generateBallerinaTOML(ballerinaToml);
+        String tomlPath = CmdUtils.getProjectTargetGenDirectoryPath(projectName)
+                + File.separator + CliConstants.BALLERINA_TOML_FILE;
+        CodegenUtils.writeFile(Paths.get(tomlPath), toml.getContent());
+
         CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
                         + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
                 projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
@@ -222,15 +231,15 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate code for ballerina toml external dependencies.
+     * Generate code for ballerina toml.
      *
-     * @param jarNames List of jar names to be included as external platform dependencies in the ballerina.toml
-     * @return generated source files as a list of {@link GenSrcFile}
+     * @param toml Mustache data holder for Ballerina.toml file
+     * @return generated source file as a {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private GenSrcFile generateBallerinaTOMLDependencies(List<String> jarNames) throws IOException {
+    private GenSrcFile generateBallerinaTOML(BallerinaToml toml) throws IOException {
         String srcFile = GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
-        String mainContent = getContent(jarNames, GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME);
+        String mainContent = getContent(toml, GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 

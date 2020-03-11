@@ -152,7 +152,6 @@ public class BuildCmd implements LauncherCmd {
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
-            CmdUtils.updateBallerinaToml(projectName);
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
