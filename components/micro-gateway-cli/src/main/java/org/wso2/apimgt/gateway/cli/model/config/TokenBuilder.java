@@ -77,6 +77,11 @@ public class TokenBuilder {
         return this;
     }
 
+    public TokenBuilder setDCRVersion(String restVersion) {
+        this.token.setDcrVersion(restVersion);
+        return this;
+    }
+
     public TokenBuilder setBaseURL(String baseURL) {
         this.token.setBaseURL(baseURL);
         return this;

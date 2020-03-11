@@ -384,6 +384,7 @@ public class ImportCmd implements LauncherCmd {
         configTokenValues.setRegistrationEndpoint(registrationEndpoint);
         configTokenValues.setTokenEndpoint(tokenEndpoint);
         configTokenValues.setRestVersion(restVersion);
+        configTokenValues.setDCRVersion(dcrVersion);
         configTokenValues.setBaseURL(token.getBaseURL());
 
         isEndPointsNeeded = StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
@@ -436,17 +437,18 @@ public class ImportCmd implements LauncherCmd {
             configTokenValues.setBaseURL(baseURL);
         }
 
-        // set rest version
+        // set rest and dcr version
         if (isRestVersionNeeded) {
 
             if (StringUtils.isEmpty(restVersion)) {
                 restVersion = RESTServiceConstants.CONFIG_REST_VERSION;
             }
             if (StringUtils.isEmpty(dcrVersion)) {
-                dcrVersion = RESTServiceConstants.CONFIG_REST_VERSION;
+                dcrVersion = RESTServiceConstants.CONFIG_DCR_VERSION;
             }
             informRestVersionToUser(restVersion, dcrVersion);
             configTokenValues.setRestVersion(restVersion);
+            configTokenValues.setDCRVersion(dcrVersion);
         }
 
         if (isBaseURLNeeded || isRestVersionNeeded) {
