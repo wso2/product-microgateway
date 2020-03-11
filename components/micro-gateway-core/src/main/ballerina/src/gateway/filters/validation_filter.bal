@@ -80,9 +80,7 @@
         string payloadVal = "";
 
         var reqPayload  = request.getJsonPayload();
-        printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled---------." + reqPayload.toString());
         if (reqPayload is map<json>) {
-             printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled---1223------.");
             payloadVal = reqPayload.toJsonString();
         }
         //getting request path
@@ -131,21 +129,15 @@
               resPayload = payload.toJsonString();
          }
          string servName = context.getServiceName();
-         printDebug(KEY_VALIDATION_FILTER, "RequestPath.--" + resPath.toString());
-         printDebug(KEY_VALIDATION_FILTER, "RequestMethod--" + reqMethod.toString());
-         printDebug(KEY_VALIDATION_FILTER, "Reesponse code--" + responseCode.toString());
-         printDebug(KEY_VALIDATION_FILTER, "Response payload--" +  resPayload.toString());
-         printDebug(KEY_VALIDATION_FILTER, "servName----" +  servName);
          var valResult = responseValidate(resPath, reqMethod, responseCode, resPayload, servName);
-         printDebug(KEY_VALIDATION_FILTER, "valrResult-----------" + valResult.toString());
          if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
              return true;
          } else {
              json newPayload = { fault: {
-                                                 code: 500,
-                                                 message: "Bad Response",
-                                                 description: valResult.toString()
-                                             } };
+                                        code: 500,
+                                        message: "Bad Response",
+                                        description: valResult.toString()
+                               } };
              response.statusCode = 500;
              response.setJsonPayload(newPayload);
              return true;

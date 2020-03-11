@@ -48,7 +48,6 @@ public class ValidationTestCase extends BaseTestCase {
         super.init("validation-project", new String[]{"validation/validation_api.yaml"}, null,
                 "confs/validation.conf");
         apikey = getAPIKey();
-
     }
 
    private String getAPIKey() throws Exception {

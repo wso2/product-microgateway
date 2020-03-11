@@ -261,6 +261,5 @@ public class HttpClientRequest {
         httpResponse.setResponseMessage(conn.getResponseMessage());
         return httpResponse;
     }
-
 }
 

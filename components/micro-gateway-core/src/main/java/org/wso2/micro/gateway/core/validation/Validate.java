@@ -118,13 +118,11 @@ public class Validate {
                     break;
                 }
                 String name = e.getName();
-                // String swaggerContent;
                 if (name.startsWith(path)) {
                     InputStream in = Validate.class.getResourceAsStream("/" + name);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     stringBuffer = new StringBuffer();
                     String line;
-
                     while ((line = reader.readLine()) != null) {
 
                         stringBuffer.append(line).append("\n");
@@ -353,8 +351,8 @@ public class Validate {
     /**
      * Validate the Request/response content.
      *
-     * @param payload Request/response payload
-     * @param schemaString  Schema which uses to validate request/response messages
+     * @param payload      Request/response payload
+     * @param schemaString Schema which uses to validate request/response messages
      * @return Returns "validated" or everit error logs
      */
     private static String validateContent(String payload, String schemaString) {
