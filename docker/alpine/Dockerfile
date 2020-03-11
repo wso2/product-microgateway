@@ -32,7 +32,7 @@ ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
 ARG MGW_SERVER_VERSION=3.1.0-beta
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
-ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
+ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
 
 # build argument for MOTD
 ARG MOTD='printf "\n\
