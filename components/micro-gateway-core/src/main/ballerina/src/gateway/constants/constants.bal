@@ -239,6 +239,11 @@ public const string LISTENER_CONF_HTTPS_PORT = "httpsPort";
 public const string KEY_STORE_PATH = "keyStorePath";
 public const string KEY_STORE_PASSWORD = "keyStorePassword";
 public const string TOKEN_LISTENER_PORT = "tokenListenerPort";
+public const string KEEP_ALIVE = "keepAlive";
+public const string MAX_PIPELINED_REQUESTS = "maxPipelinedRequests";
+public const string MAX_URI_LENGTH = "maxUriLength";
+public const string MAX_HEADER_SIZE = "maxHeaderSize";
+public const string MAX_ENTITY_BODY_SIZE = "maxEntityBodySize";
 public const string FILTERS = "filters";
 
 public const string MTSL = "mutualSSL";
