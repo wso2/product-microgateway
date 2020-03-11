@@ -212,6 +212,9 @@ public class BuildCmd implements LauncherCmd {
 
     private boolean isProtosAvailable(String fileLocation) {
         File file = new File(fileLocation);
+        if (!file.exists()) {
+            return false;
+        }
         FilenameFilter protoFilter = (f, name) -> (name.endsWith(".proto"));
         String[] fileNames = file.list(protoFilter);
         if (fileNames != null && fileNames.length > 0) {

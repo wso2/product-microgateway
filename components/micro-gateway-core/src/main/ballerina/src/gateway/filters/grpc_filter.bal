@@ -86,11 +86,7 @@ public function attachGrpcErrorHeaders(http:Response response, string errorMsg) 
     }
     response.setHeader(GRPC_STATUS_HEADER, grpcStatus, mime:TRAILING);
     response.setHeader(GRPC_MESSAGE_HEADER, grpcErrorMessage, mime:TRAILING);
-    //todo: temp workaround, fix this after ballerina patch release
-    //todo: check the implementation with different gRPC clients other than ballerina and java
-    //this fixes the problem as the first 5 bytes are reserved in gRPC. Therefore gRPC client doesnot identify that
-    //there is a payload attached.
-    response.setTextPayload("xxxx");
+    response.setTextPayload("");
     response.setContentType(GRPC_CONTENT_TYPE_HEADER);
     printDebug(KEY_GRPC_FILTER, "grpc status is " + grpcStatus + " and grpc Message is " + grpcErrorMessage);
 
