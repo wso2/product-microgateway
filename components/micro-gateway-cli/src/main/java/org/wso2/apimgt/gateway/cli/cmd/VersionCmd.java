@@ -60,7 +60,7 @@ public class VersionCmd implements LauncherCmd {
     /**
      * Get micro-gw version from version.txt file.
      *
-     * @param filePath  path of version.tst file
+     * @param filePath  path of version.txt file
      */
     public static String getversion(String filePath) {
         try {
