@@ -92,18 +92,6 @@
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>download-wum-tool</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://product-dist.wso2.com/downloads/in-place/release/update.zip</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>

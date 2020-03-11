@@ -23,6 +23,11 @@ public const string DEFAULT_KEY_STORE_PASSWORD = "ballerina";
 public const string DEFAULT_TRUST_STORE_PATH = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12";
 public const string DEFAULT_TRUST_STORE_PASSWORD = "ballerina";
 public const int DEFAULT_TOKEN_LISTENER_PORT = 9096;
+public const string DEFAULT_KEEP_ALIVE = "AUTO";
+public const int DEFAULT_MAX_PIPELINED_REQUESTS = 10;
+public const int DEFAULT_MAX_URI_LENGTH = 4096;
+public const int DEFAULT_MAX_HEADER_SIZE = 8192;
+public const int DEFAULT_MAX_ENTITY_BODY_SIZE = -1;
 
 public const string DEFAULT_AUTH_HEADER_NAME = "Authorization";
 public const boolean DEFAULT_REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE = true;

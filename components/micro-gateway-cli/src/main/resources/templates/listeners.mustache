@@ -17,6 +17,7 @@ import ballerina/config;
 {{/if}}
 
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
+                                                                   {{>http1Settings}}
                                                                            {{>mutualSSL}}
                                                                            filters:getFilters()
                                                                        };
@@ -27,6 +28,7 @@ http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
 listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureServiceEndpointConfiguration);
 
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
+                                                            {{>http1Settings}}
                                                                      filters:getFilters()
                                                                  };
 

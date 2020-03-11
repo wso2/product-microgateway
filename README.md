@@ -651,7 +651,7 @@ Enter Password for admin:
 
 Enter APIM base URL [https://localhost:9443]:
 
-You are using REST version - v1.0 and dynamic client registration version - v0.15 of API Manager. 
+You are using REST version - v1.1 and dynamic client registration version - v0.16 of API Manager. 
 (If you want to change this, go to <MGW-TK_HOME>/conf/toolkit-config.toml)
 Enter Trust store location: [lib/platform/bre/security/ballerinaTruststore.p12]
 
