@@ -57,9 +57,14 @@ public class VersionCmd implements LauncherCmd {
         // Nothing to implement
     }
 
-    public static String getversion(String fileName) {
+    /**
+     * Get micro-gw version from version.txt file.
+     *
+     * @param filePath  path of version.tst file
+     */
+    public static String getversion(String filePath) {
         try {
-            toolkitVersion = new String(Files.readAllBytes(Paths.get(fileName)));
+            toolkitVersion = new String(Files.readAllBytes(Paths.get(filePath)));
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while finding the version.txt file : ", e);
         }
