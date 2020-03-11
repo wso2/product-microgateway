@@ -21,18 +21,9 @@ package org.wso2.micro.gateway.tests.security;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.model.API;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,33 +33,17 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Properties;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Testing the pizza_shack api rest for mutualSSL feature
  */
-public class MutualSSLTestCase extends BaseTestCase {
+public class MutualSSLTestCase extends AuthenticationFailureTestCase {
 
     private static final Log log = LogFactory.getLog(MutualSSLTestCase.class);
-
-    @BeforeClass
-    private void setup() throws Exception {
-        String label = "apimTestLabel";
-        String project = "apimTestProject";
-        //get mock APIM Instance
-        MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        API api = new API();
-        api.setName("PizzaShackAPI");
-        api.setContext("/pizzashack");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setSandEndpoint(getMockServiceURLHttp("/echo/sand"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-        //Register API with label
-        pub.addApi(label, api);
-
-        String configPath = "confs/mutualSSL-test.conf";
-        super.init(label, project, configPath);
-    }
 
     @Test(description = "mutual SSL is properly established with ballerina keystore and trust store")
     public void mutualSSLEstablished() throws Exception {

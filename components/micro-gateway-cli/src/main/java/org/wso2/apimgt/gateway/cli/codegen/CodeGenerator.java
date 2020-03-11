@@ -126,32 +126,34 @@ public class CodeGenerator {
             }
         });
         //to process protobuf files
-        Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
-            Path filename = path.getFileName();
-            return filename != null && (filename.toString().endsWith(".proto"));
-        }).forEach(path -> {
-            String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
-            try {
-                ArrayList<OpenAPI> openAPIs = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
-                if (openAPIs.size() > 0) {
-                    for (OpenAPI openAPI : openAPIs) {
-                        String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-                        OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
-                        OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
-                        BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
-                                path, true);
-                        genFiles.add(generateService(definitionContext));
-                        serviceList.add(definitionContext);
+        if (Paths.get(grpcDirLocation).toFile().exists()) {
+            Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
+                Path filename = path.getFileName();
+                return filename != null && (filename.toString().endsWith(".proto"));
+            }).forEach(path -> {
+                String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
+                try {
+                    ArrayList<OpenAPI> openAPIs = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
+                    if (openAPIs.size() > 0) {
+                        for (OpenAPI openAPI : openAPIs) {
+                            String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                            OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
+                            OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
+                            BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
+                                    path, true);
+                            genFiles.add(generateService(definitionContext));
+                            serviceList.add(definitionContext);
+                        }
                     }
+                } catch (IOException e) {
+                    throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
+                            "ballerina code", e);
+                } catch (BallerinaServiceGenException e) {
+                    throw new CLIInternalException("File write operations failed during the ballerina code "
+                            + "generation for the protobuf files", e);
                 }
-            } catch (IOException e) {
-                throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
-                        "ballerina code", e);
-            } catch (BallerinaServiceGenException e) {
-                throw new CLIInternalException("File write operations failed during the ballerina code "
-                        + "generation for the protobuf files", e);
-            }
-        });
+            });
+        }
 
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));

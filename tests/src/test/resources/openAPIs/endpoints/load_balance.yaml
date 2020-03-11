@@ -28,7 +28,7 @@ tags:
   externalDocs:
     description: Find out more about our store
     url: http://swagger.io
-x-wso2-basePath: /petstore/v2
+x-wso2-basePath: /petstore/v4
 x-wso2-production-endpoints:
   urls:
     - https://localhost:2380/v1
