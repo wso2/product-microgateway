@@ -273,3 +273,14 @@ function getCredentialBearer() returns http:CredentialBearer {
     }
     return http:NO_BEARER;
 }
+
+public function getKeepAliveValue() returns http:KeepAlive {
+    string keepAlive = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEEP_ALIVE, DEFAULT_KEEP_ALIVE);
+    if (stringutils:equalsIgnoreCase("AUTO", keepAlive)) {
+        return http:KEEPALIVE_AUTO;
+    } else if(stringutils:equalsIgnoreCase("ALWAYS", keepAlive)) {
+        return http:KEEPALIVE_ALWAYS;
+    } else {
+        return http:KEEPALIVE_NEVER;
+    }
+}

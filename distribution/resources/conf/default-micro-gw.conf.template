@@ -18,6 +18,21 @@
   # Truststore
   trustStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"
   trustStorePassword = "ballerina"
+  # http1 Settings
+  # Can be set to either `AUTO`, which respects the `connection` header, or `ALWAYS`,
+  # which always keeps the connection alive, or `NEVER`, which always closes the connection
+  keepAlive = "AUTO"
+  # Defines the maximum number of requests that can be processed at a given time on a single connection.
+  # By default 10 requests can be pipelined on a single connection and user can change this limit appropriately.
+  maxPipelinedRequests = 10
+  # Maximum allowed length for a URI. Exceeding this limit will result in a `414 - URI Too Long` response.
+  maxUriLength = 4096
+  # Maximum allowed size for headers. Exceeding this limit will result in a `413 - Payload Too Large` response.
+  maxHeaderSize = 8192
+  # Maximum allowed size for the entity body. By default it is set to -1 which means there is no
+  # restriction `maxEntityBodySize`, On the Exceeding this limit will result in a`413 - Payload Too Large` response.
+  maxEntityBodySize = -1
+
 
 # API Authorization security for the gateway and the backend
 [authConfig]
