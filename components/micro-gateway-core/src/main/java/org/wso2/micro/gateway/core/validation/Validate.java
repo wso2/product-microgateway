@@ -124,7 +124,6 @@ public class Validate {
                     stringBuffer = new StringBuffer();
                     String line;
                     while ((line = reader.readLine()) != null) {
-
                         stringBuffer.append(line).append("\n");
                     }
                     swaggers.put(serviceName, stringBuffer.toString());

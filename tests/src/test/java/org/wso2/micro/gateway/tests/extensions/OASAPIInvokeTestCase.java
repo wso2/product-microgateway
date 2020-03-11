@@ -68,9 +68,4 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         Assert.assertEquals(response.getData(), ResponseConstants.petByIdResponse);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
-
-    @AfterClass
-    public void stop() throws Exception {
-        super.finalize();
-    }
 }
