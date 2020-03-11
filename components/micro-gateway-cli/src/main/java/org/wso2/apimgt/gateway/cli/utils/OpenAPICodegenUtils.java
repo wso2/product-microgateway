@@ -831,8 +831,8 @@ public class OpenAPICodegenUtils {
             logger.debug("Getting Application security by the extension for API '" + openAPI.getInfo().getTitle()
                     + "' version '" + openAPI.getInfo().getVersion() + "'");
         }
-        ApplicationSecurity appSecurityfromDef = populateApplicationSecurity(openAPI.getInfo().getTitle(),
-                openAPI.getInfo().getVersion(), openAPI.getExtensions(), api.getMutualSSL());
+        ApplicationSecurity appSecurityfromDef = populateApplicationSecurity(api.getName(), api.getVersion(),
+                openAPI.getExtensions(), api.getMutualSSL());
         api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
     }
 
