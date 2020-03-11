@@ -84,6 +84,7 @@ public class Main {
             BuildCmd buildCmd = new BuildCmd();
             ResetCmd resetCmd = new ResetCmd();
             ImportCmd importCmd = new ImportCmd();
+            VersionCmd versionCmd = new VersionCmd();
 
             JCommander cmdParser = JCommander.newBuilder()
                     .addCommand(CliCommands.HELP, helpCmd)
@@ -91,6 +92,7 @@ public class Main {
                     .addCommand(CliCommands.BUILD, buildCmd)
                     .addCommand(CliCommands.RESET, resetCmd)
                     .addCommand(CliCommands.IMPORT, importCmd)
+                    .addCommand(CliCommands.VERSION, versionCmd)
                     .build();
             cmdParser.setProgramName(CliConstants.MICRO_GW);
 
@@ -99,6 +101,7 @@ public class Main {
             buildCmd.setParentCmdParser(cmdParser);
             resetCmd.setParentCmdParser(cmdParser);
             importCmd.setParentCmdParser(cmdParser);
+            versionCmd.setParentCmdParser(cmdParser);
 
             cmdParser.parse(args);
             Map<String, JCommander> commanderMap;
