@@ -21,61 +21,15 @@ package org.wso2.micro.gateway.tests.http2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
-import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.model.API;
-import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
 import org.wso2.micro.gateway.tests.util.HTTP2Client.Http2ClientRequest;
-import org.wso2.micro.gateway.tests.util.TestConstant;
-
-import java.io.File;
-
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTPS_PORT;
 import static org.wso2.micro.gateway.tests.util.TestConstant.GATEWAY_LISTENER_HTTP_PORT;
 
-public class HTTP2RequestsWithHTTP1BackEndTestCase extends BaseTestCase {
+public class HTTP2RequestsWithHTTP1BackEndTestCase extends HTTP2RequestsWithHTTP2BackEndTestCase {
 
     private static final Log log = LogFactory.getLog(HTTP2RequestsWithHTTP2BackEndTestCase.class);
     protected Http2ClientRequest http2ClientRequest;
-    private String jwtTokenProd;
-
-    @BeforeClass
-    private void setup() throws Exception {
-        String label = "apimTestLabel";
-        String project = "apimTestProject";
-        //get mock APIM Instance
-        MockAPIPublisher pub = MockAPIPublisher.getInstance();
-        API api = new API();
-        api.setName("PizzaShackAPI");
-        api.setContext("/pizzashack");
-        api.setEndpoint(getMockServiceURLHttp("/echo"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-        //Register API with label
-        pub.addApi(label, api);
-
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        //Register a production token with key validation info
-        KeyValidationInfo info = new KeyValidationInfo();
-        info.setApi(api);
-        info.setApplication(application);
-        info.setAuthorized(true);
-        info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
-        info.setSubscriptionTier("Unlimited");
-
-        String configPath = "confs/http2-test.conf";
-        super.init(label, project, configPath);
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
-    }
 
     @Test(description = "Test API invocation with an HTTP/2.0 request via insecure connection sending to HTTP/1.1 BE")
     public void testHTTP2RequestsViaInsecureConnectionWithHTTP1BE() throws Exception {

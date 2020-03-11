@@ -15,6 +15,7 @@
  // under the License.
 
  import ballerina/http;
+ import ballerina/observe;
 
  public type ValidationFilterWrapper object {
 
@@ -28,7 +29,12 @@
                          returns boolean {
          //Start a new root span attaching to the system span.
          int | error | () spanIdReq = startSpan(VALIDATION_FILTER_REQUEST);
+         map<string> | () gaugeTags = gaugeTagDetails(request, filterContext, FILTER_VALIDATION);
+         setGaugeTagInvocationContext(VALIDATION_GAUGE_TAGS, gaugeTags);
+         int startingTime = getCurrentTime();
          boolean result = self.validationFilter.filterRequest(caller, request, filterContext);
+         float | () latency = setGaugeDuration(startingTime);
+         setLatencyInvocationContext(VALIDATION_REQUEST_TIME, latency);
          //Finish span.
          finishSpan(VALIDATION_FILTER_REQUEST, spanIdReq);
          return result;
@@ -37,7 +43,21 @@
      public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
          //Start a new root span attaching to the system span.
          int | error | () spanIdRes = startSpan(VALIDATION_FILTER_RESPONSE);
+         //starting a Gauge metric
+         map<string> | () gaugeTags = getGaugeTagInvocationContext(VALIDATION_GAUGE_TAGS);
+         if (gaugeTags is ()) {
+            gaugeTags = gaugeTagDetailsFromContext(context, FILTER_VALIDATION);
+         }
+         observe:Gauge | () localGauge = initializeGauge(PER_REQ_DURATION, REQ_FLTER_DURATION, gaugeTags);
+         observe:Gauge | () localGaugeTotal = initializeGauge(REQ_DURATION_TOTAL, FILTER_TOTAL_DURATION,
+                {"Category": FILTER_VALIDATION});
+         int startingTime = getCurrentTime();
          boolean result = self.validationFilter.filterResponse(response, context);
+         float | () latency = setGaugeDuration(startingTime);
+         float | () reqLatency = getLatencyInvocationContext(VALIDATION_REQUEST_TIME);
+         float | () totalLatency = calculateLatency(reqLatency, latency);
+         updateGauge(localGauge, totalLatency);
+         updateGauge(localGaugeTotal, totalLatency);
          //Finish span.
          finishSpan(VALIDATION_FILTER_RESPONSE, spanIdRes);
          return result;

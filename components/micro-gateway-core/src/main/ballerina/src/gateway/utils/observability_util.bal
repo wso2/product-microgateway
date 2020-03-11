@@ -67,6 +67,16 @@ public function gaugeTagDetails(http:Request request, http:FilterContext context
     return gaugeTags;
 }
 
+public function gaugeTagDetailsFromContext(http:FilterContext context, string category) returns map<string> | () {
+    if (isMetricsEnabled == false) {
+        return ();
+    }
+    string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
+    string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
+    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": context.getServiceName()};
+    return gaugeTags;
+}
+
 public function gaugeTagDetails_authn(http:Request request, string category) returns map<string> | () {
     if (isMetricsEnabled == false) {
         return ();
@@ -100,8 +110,11 @@ public function getGaugeTagInvocationContext(string attribute) returns map<strin
     if (isMetricsEnabled == false) {
         return ();
     }
-
-    return (<map<string>>runtime:getInvocationContext().attributes[attribute]);
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (invocationContext.attributes.hasKey(attribute)) {
+        return (<map<string>>invocationContext.attributes[attribute]);
+    }
+    return ();
 }
 
 public function setLatencyInvocationContext(string attribute, float | () latency) {
@@ -115,15 +128,17 @@ public function getLatencyInvocationContext(string attribute) returns float | ()
     if (isMetricsEnabled == false) {
         return ();
     }
-
-    return (<float>runtime:getInvocationContext().attributes[ANALYTIC_REQUEST_TIME]);
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (invocationContext.attributes.hasKey(attribute)) {
+        return (<float>runtime:getInvocationContext().attributes[attribute]);
+    }
+    return 0;
 }
 
 public function calculateLatency(float | () reqLatency, float | () latency) returns float | () {
     if (isMetricsEnabled == false) {
         return ();
     }
-
     return (<float>reqLatency + <float>latency);
 }
 

@@ -21,6 +21,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.slf4j.Logger;
@@ -126,32 +127,35 @@ public class CodeGenerator {
             }
         });
         //to process protobuf files
-        Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
-            Path filename = path.getFileName();
-            return filename != null && (filename.toString().endsWith(".proto"));
-        }).forEach(path -> {
-            String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
-            try {
-                ArrayList<OpenAPI> openAPIs = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
-                if (openAPIs.size() > 0) {
-                    for (OpenAPI openAPI : openAPIs) {
-                        String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-                        OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
-                        OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
-                        BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
-                                path, true);
-                        genFiles.add(generateService(definitionContext));
-                        serviceList.add(definitionContext);
+        if (Paths.get(grpcDirLocation).toFile().exists()) {
+            Files.walk(Paths.get(grpcDirLocation)).filter(path -> {
+                Path filename = path.getFileName();
+                return filename != null && (filename.toString().endsWith(".proto"));
+            }).forEach(path -> {
+                String descriptorPath = CmdUtils.getProtoDescriptorPath(projectName, path.getFileName().toString());
+                try {
+                    ArrayList<OpenAPI> openAPIs = new ProtobufParser().generateOpenAPI(path.toString(), descriptorPath);
+                    if (openAPIs.size() > 0) {
+                        for (OpenAPI openAPI : openAPIs) {
+                            String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                            OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
+                            OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
+                            createProtoOpenAPIFile(projectName, openAPI);
+                            BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
+                                    path, true);
+                            genFiles.add(generateService(definitionContext));
+                            serviceList.add(definitionContext);
+                        }
                     }
+                } catch (IOException e) {
+                    throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
+                            "ballerina code", e);
+                } catch (BallerinaServiceGenException e) {
+                    throw new CLIInternalException("File write operations failed during the ballerina code "
+                            + "generation for the protobuf files", e);
                 }
-            } catch (IOException e) {
-                throw new CLIRuntimeException("Protobuf file cannot be parsed to " +
-                        "ballerina code", e);
-            } catch (BallerinaServiceGenException e) {
-                throw new CLIInternalException("File write operations failed during the ballerina code "
-                        + "generation for the protobuf files", e);
-            }
-        });
+            });
+        }
 
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
@@ -362,5 +366,25 @@ public class CodeGenerator {
         String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Save the openAPI definition created from the services included in the .proto files.
+     *
+     * @param projectName projectName
+     * @param openAPI {@link OpenAPI} object corresponding to the gRPC service
+     */
+    private void createProtoOpenAPIFile(String projectName, OpenAPI openAPI) {
+        String protoOpenAPIDirPath =  CmdUtils.getProjectTargetGenGrpcSrcOpenAPIsDirectory(projectName);
+        String fileName = openAPI.getInfo().getTitle() + "_" +
+                openAPI.getInfo().getVersion().replace(".", "_") + CliConstants.YAML_EXTENSION;
+        String protoOpenAPIFilePath =  protoOpenAPIDirPath + File.separator + fileName;
+        try {
+            CmdUtils.createFile(protoOpenAPIDirPath, fileName, true);
+            CmdUtils.writeContent(Yaml.pretty(openAPI), new File(protoOpenAPIFilePath));
+        } catch (IOException e) {
+            throw new CLIInternalException("Error while writing openAPI files to the directory: " +
+                    protoOpenAPIDirPath + ".");
+        }
     }
 }

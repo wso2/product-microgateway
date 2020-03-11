@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OASAPIInvokeTestCase extends BaseTestCase {
-    private String jwtTokenProd;
+    protected String jwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
 
-        String project = "apimTestProject";
+        String project = "OpenApiThrottlingProject";
         API api = new API();
         api.setName("PetStoreAPI");
         api.setContext("petstore/v1");
@@ -73,5 +73,4 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
     public void stop() throws Exception {
         super.finalize();
     }
-
 }

@@ -151,11 +151,11 @@ REM Start the gateway using internal ballerina distribution as the runtime
 
         REM TODO: Possible solution for this complexity can be Add-Content Cmdlet. Do some RnD on it.
         IF !PSVersion! LEQ 3 (
-            CALL POWERSHELL "%JAVA_HOME%\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | out-file -encoding Unicode -filepath '%GW_HOME%\logs\microgateway.log' -Append"
+            CALL POWERSHELL "%JAVA_HOME%\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | out-file -encoding Unicode -filepath '%GW_HOME%\logs\microgateway.log' -Append"
             EXIT /B %ERRORLEVEL%
         ) ELSE (
             REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
             EXIT /B %ERRORLEVEL%
         )
     )

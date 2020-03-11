@@ -330,7 +330,9 @@ public class OpenAPICodegenUtils {
         for (String transport : transports) {
             if (!(OpenAPIConstants.TRANSPORT_HTTP.equalsIgnoreCase(transport) ||
                     OpenAPIConstants.TRANSPORT_HTTPS.equalsIgnoreCase(transport))) {
-                throw new CLIRuntimeException("only http and https are allowed as transports");
+                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.TRANSPORT_SECURITY +
+                        " extension but only http and https are allowed as transports");
             }
         }
         if (OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)
@@ -352,7 +354,9 @@ public class OpenAPICodegenUtils {
         }
         if (!(OpenAPIConstants.MANDATORY.equalsIgnoreCase(mutualSSL)
                 || OpenAPIConstants.OPTIONAL.equalsIgnoreCase(mutualSSL))) {
-                throw new CLIRuntimeException("only optional and mandatory are allowed for mutual SSL");
+                throw new CLIRuntimeException("The API '" + openAPI.getInfo().getTitle() + "' version '" +
+                        openAPI.getInfo().getVersion() + "' contains " + OpenAPIConstants.MUTUAL_SSL +
+                        " but only optional and mandatory are allowed for mutual SSL");
         }
         return mutualSSL;
     }
@@ -391,7 +395,7 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(extensions.get(OpenAPIConstants.BASEPATH).toString());
+        api.setSpecificBasepath(resolveBasePathFromContextTemplate(extensions, openAPI.getInfo().getVersion()));
         //assigns x-wso2-owner value to API provider
         if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
             api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
@@ -635,7 +639,7 @@ public class OpenAPICodegenUtils {
         //iterate through function string array which only contains true positives and update the interceptor map
         functionStringArray.forEach(f -> {
             //function name
-            String functionName = f.split(" ")[1];
+            String functionName = (f.replace("(", " ")).split(" ")[1];
             //if the function is declared more than one time, throws an runtime exception as it causes ballerina
             // compilation error
             if (interceptorMap.containsKey(functionName)) {
@@ -827,8 +831,8 @@ public class OpenAPICodegenUtils {
             logger.debug("Getting Application security by the extension for API '" + openAPI.getInfo().getTitle()
                     + "' version '" + openAPI.getInfo().getVersion() + "'");
         }
-        ApplicationSecurity appSecurityfromDef =
-                populateApplicationSecurity(openAPI.getExtensions(), api.getMutualSSL());
+        ApplicationSecurity appSecurityfromDef = populateApplicationSecurity(api.getName(), api.getVersion(),
+                openAPI.getExtensions(), api.getMutualSSL());
         api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
     }
 
@@ -838,25 +842,27 @@ public class OpenAPICodegenUtils {
      * @param apiDefExtensions          API definition extesnsions
      * @return ApplicationSecurity/null if not present returns null
      */
-    public static ApplicationSecurity populateApplicationSecurity(Map<String, Object> apiDefExtensions,
-                                                                   String mutualSSL) {
+    public static ApplicationSecurity populateApplicationSecurity(String apiName, String version,
+                                                                  Map<String, Object> apiDefExtensions,
+                                                                  String mutualSSL) {
         ApplicationSecurity appSecurity = null;
         if (apiDefExtensions != null && apiDefExtensions.containsKey(OpenAPIConstants.APPLICATION_SECURITY)) {
             if (logger.isDebugEnabled()) {
-                logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API");
+                logger.debug(OpenAPIConstants.APPLICATION_SECURITY + " extension found in the API '" + apiName
+                        + "' version '" + version + "'");
             }
             try {
                 appSecurity = new ObjectMapper().convertValue(apiDefExtensions
                         .get(OpenAPIConstants.APPLICATION_SECURITY), ApplicationSecurity.class);
 
             } catch (Exception exception) {
-                throw new CLIRuntimeException("The API contains " + OpenAPIConstants.APPLICATION_SECURITY +
-                        " extension but failed to match " + OpenAPIConstants.APPLICATION_SECURITY_TYPES +
-                        " to the required format.");
+                throw new CLIRuntimeException("The API '" + apiName + "' version '" + version + "' contains "
+                        + OpenAPIConstants.APPLICATION_SECURITY + " extension but failed to match "
+                        + OpenAPIConstants.APPLICATION_SECURITY_TYPES + " to the required format.");
             }
             if (!validateAppSecurityOptionality(appSecurity, mutualSSL)) {
                 throw new CLIRuntimeException("Application security is given as optional but Mutual SSL is not " +
-                        "mandatory for the API");
+                        "mandatory for the API '" + apiName + "' version '" + version + "'");
             }
         }
         return appSecurity;
@@ -1174,5 +1180,23 @@ public class OpenAPICodegenUtils {
      public static void addDefaultAuthProviders(List<String> authProviders) {
         authProviders.add(OpenAPIConstants.APISecurity.oauth2.name());
         authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
+    }
+
+    private static String resolveBasePathFromContextTemplate(Map<String, Object> extensions, String version) {
+        String basePath = extensions.get(OpenAPIConstants.BASEPATH).toString();
+        if (extensions.containsKey(OpenAPIConstants.CONTEXT_TEMPLATE)) {
+            String contextTemplate = extensions.get(OpenAPIConstants.CONTEXT_TEMPLATE).toString();
+            if (!contextTemplate.contains(OpenAPIConstants.VERSION_PLACEHOLDER) && contextTemplate
+                    .contains(OpenAPIConstants.BASE_PATH_PLACEHOLDER)) {
+                throw new CLIRuntimeException(OpenAPIConstants.CONTEXT_TEMPLATE + " extension : " + contextTemplate
+                        + " present in the open API is in wrong format. It should be in formats "
+                        + "/*{context}*/{version}/* or /*{version}*/{context}/*");
+            }
+            String context;
+            context = contextTemplate.replace(OpenAPIConstants.VERSION_PLACEHOLDER, version);
+            context = context.replace(OpenAPIConstants.BASE_PATH_PLACEHOLDER, basePath);
+            return context;
+        }
+        return basePath;
     }
 }
