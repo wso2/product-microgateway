@@ -18,8 +18,8 @@
   # Truststore
   trustStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"
   trustStorePassword = "ballerina"
-  #http1 Settings
-  #Can be set to either `AUTO`, which respects the `connection` header, or `ALWAYS`,
+  # http1 Settings
+  # Can be set to either `AUTO`, which respects the `connection` header, or `ALWAYS`,
   # which always keeps the connection alive, or `NEVER`, which always closes the connection
   keepAlive = "AUTO"
   # Defines the maximum number of requests that can be processed at a given time on a single connection.
