@@ -65,6 +65,7 @@ public class CLIExecutor {
                 "--truststore-pass", "ballerina"};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
+        runVersionCmd(mgwCommand);
         runBuildCmd(mgwCommand, project);
     }
 
@@ -183,6 +184,13 @@ public class CLIExecutor {
         return new String[]{"bash", mgwCommand, mainCommand, project};
     }
 
+    private String[] generateBasicCmdArgsBasedOnOS(String mgwCommand, String mainCommand) {
+        if (Utils.getOSName().toLowerCase().contains("windows")) {
+            return new String[]{"cmd.exe", "/c", mgwCommand.trim() + ".bat", mainCommand};
+        }
+        return new String[]{"bash", mgwCommand, mainCommand};
+    }
+
     /**
      * Build the project.
      *
@@ -194,6 +202,18 @@ public class CLIExecutor {
         String[] buildCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "build", project);
         String buildErrorMsg = "Error occurred when building the project.";
         runProcess(buildCmdArray, homeDirectory, buildErrorMsg);
+    }
+
+    /**
+     * find the version.
+     *
+     * @param mgwCommand the path of microgateway executable
+     * @throws MicroGWTestException
+     */
+    private void runVersionCmd(String mgwCommand) throws MicroGWTestException {
+        String[] versionCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "version");
+        String buildErrorMsg = "Error occurred when finding the version.";
+        runProcess(versionCmdArray, homeDirectory, buildErrorMsg);
     }
 
     /**

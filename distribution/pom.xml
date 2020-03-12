@@ -224,6 +224,18 @@
                             </target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>modify-version</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <replaceregexp file="resources/version.txt" match="version" replace="${project.version}" byline="true" />
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

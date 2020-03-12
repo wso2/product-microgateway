@@ -90,6 +90,7 @@ public class CliConstants {
     public static final String MICRO_GW_CONF_FILE = "micro-gw.conf";
     public static final String KEEP_FILE = ".keep";
     public static final String BALLERINA_TOML_FILE = "Ballerina.toml";
+    public static final String VERSION_FILE = "version.txt";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
