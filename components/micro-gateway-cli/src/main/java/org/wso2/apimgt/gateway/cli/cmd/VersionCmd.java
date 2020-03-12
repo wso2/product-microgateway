@@ -65,7 +65,7 @@ public class VersionCmd implements LauncherCmd {
         try {
             toolkitVersion = new String(Files.readAllBytes(Paths.get(filePath)));
         } catch (IOException e) {
-            throw new CLIInternalException("Error occurred while finding the version.txt file : ", e);
+            throw new CLIInternalException("Error occurred while finding the version.txt file", e);
         }
         return toolkitVersion;
     }
