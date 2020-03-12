@@ -77,8 +77,6 @@
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/resources/grpc/google/protobuf</outputDirectory>
             <fileMode>644</fileMode>
         </fileSet>
-
-
         <!--create an empty logs folder-->
         <fileSet>
             <directory>${basedir}/resources/logs</directory>

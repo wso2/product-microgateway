@@ -167,7 +167,6 @@ if [ -e "$GW_HOME/bin/gateway.pid" ]; then
   PID=`cat "$GW_HOME"/bin/gateway.pid`
 fi
 
-
 #To run the Java classes required for the identification of observability
 java_cmd_tools () {
   METRIC_CLASSPATH=""
