@@ -104,7 +104,8 @@ paths:
         "404":
           description: Pet not found
       security:
-        - api_key: []
+        - petstore_auth: []
+        - petstore_basic: []
 components:
   schemas:
     Category:
@@ -175,6 +176,17 @@ components:
             "$ref": "#/components/schemas/Pet"
       description: Pet object that needs to be added to the store
       required: true
-
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore.swagger.io/oauth/authorize
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    petstore_basic:
+      type: http
+      scheme: basic
 
 
