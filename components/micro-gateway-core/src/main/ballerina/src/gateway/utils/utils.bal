@@ -837,13 +837,15 @@ public function initAuthHandlers() {
 
     // Initializes the basic auth handler
     auth:BasicAuthConfig basicAuthConfig = {tableName: CONFIG_USER_SECTION};
-    BasicAuthProvider | BasicAuthProviderWrapper configBasicAuthProvider;
+    BasicAuthProvider configBasicAuthProvider;
+    configBasicAuthProvider = new (basicAuthConfig);
+    BasicAuthHandler | BasicAuthHandlerWrapper basicAuthHandler;
     if (isMetricsEnabled || isTracingEnabled) {
-        configBasicAuthProvider = new BasicAuthProviderWrapper(basicAuthConfig);
+        basicAuthHandler = new BasicAuthHandlerWrapper(configBasicAuthProvider);
     } else {
-        configBasicAuthProvider = new BasicAuthProvider(basicAuthConfig);
+        basicAuthHandler = new BasicAuthHandler(configBasicAuthProvider);
     }
-    http:BasicAuthHandler basicAuthHandler = new (configBasicAuthProvider);
+
 
     //Initializes the mutual ssl handler
     MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
