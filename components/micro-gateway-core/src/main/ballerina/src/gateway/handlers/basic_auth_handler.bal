@@ -43,8 +43,9 @@ public type BasicAuthHandler object {
             authHeader = "authorization";
         }
         if (req.hasHeader(authHeader)) {
-            string headerValue = req.getHeader(authHeader);
-            if (headerValue.startsWith(auth:AUTH_SCHEME_BASIC)) {
+            string headerValue = req.getHeader(authHeader).toLowerAscii();
+            string authScheme = (auth:AUTH_SCHEME_BASIC).toLowerAscii();
+            if (headerValue.startsWith(authScheme)) {
                 printDebug(KEY_AUTHN_FILTER, "Request will be authenticated via basicAuth handler");
                 return true;
             }
