@@ -20,23 +20,26 @@ package org.wso2.micro.gateway.tests.apikey;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.http.HttpStatus;
-import org.json.*;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.model.*;
-import org.wso2.micro.gateway.tests.util.*;
+import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
+import org.wso2.micro.gateway.tests.util.HttpClientRequest;
+import org.wso2.micro.gateway.tests.util.HttpResponse;
+import org.wso2.micro.gateway.tests.util.TestConstant;
+import org.wso2.micro.gateway.tests.util.TokenUtil;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Base64;
 
 public class APIKeyTestCase extends BaseTestCase {
     private String apikey;
     private String apiKeywithoutAllowedAPIs;
+    private String jwtTokenProd;
 
     @BeforeClass
     public void start() throws Exception {
@@ -44,6 +47,7 @@ public class APIKeyTestCase extends BaseTestCase {
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
+        jwtTokenProd = TokenUtil.getBasicJWT(application, new JSONObject(), TestConstant.KEY_TYPE_PRODUCTION, 3600);
 
         apiKeywithoutAllowedAPIs =
                 "eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJqd3QiLCAia2lkIjoiYmFsbGVyaW5hIn0.eyJzdWIiOiJhZG1pbiIsICJpc3M" +
@@ -113,6 +117,31 @@ public class APIKeyTestCase extends BaseTestCase {
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
 
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the apikey is working if the same resource has enabled oauth2 and added "
+            + "scopes as well", dependsOnMethods = "APIKeyIssueTest")
+    private void invokeAPIKeyWithOauth2ScopeProtectedResource() throws Exception {
+
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put("api_key", apikey);
+        HttpResponse response = HttpClientRequest.doPost(getServiceURLHttp("petstore/v1/pet/"), "", headers);
+
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the scope protected method using a bearer token without the scope is failing "
+            + "even its passes when api key is used(tested in invokeAPIKeyWithOauth2ScopeProtectedResource method)",
+            dependsOnMethods = "invokeAPIKeyWithOauth2ScopeProtectedResource")
+    private void invokeOauth2ScopeProtectedResource() throws Exception {
+
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpClientRequest.doPost(getServiceURLHttp("petstore/v1/pet/"), "", headers);
+
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
     @AfterClass
