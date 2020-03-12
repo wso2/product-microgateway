@@ -72,12 +72,12 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-data-bind.version}</version>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
+            <artifactId>jackson-annotations</artifactId>
             <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
@@ -101,21 +101,24 @@
             <version>${com.jayway.jsonpath.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${org.json.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.org.everit.json</groupId>
             <artifactId>org.everit.json.schema</artifactId>
-            <version>${everit.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.json</groupId>
                     <artifactId>json</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -219,8 +222,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json,com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava,org.json</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema,jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava,json</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

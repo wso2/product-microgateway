@@ -21,6 +21,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.slf4j.Logger;
@@ -139,6 +140,7 @@ public class CodeGenerator {
                             String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                             OpenAPICodegenUtils.setOauthSecuritySchemaList(openAPI);
                             OpenAPICodegenUtils.setSecuritySchemaList(openAPI);
+                            createProtoOpenAPIFile(projectName, openAPI);
                             BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
                                     path, true);
                             genFiles.add(generateService(definitionContext));
@@ -364,5 +366,25 @@ public class CodeGenerator {
         String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
         String mainContent = getContent(context, GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
+    }
+
+    /**
+     * Save the openAPI definition created from the services included in the .proto files.
+     *
+     * @param projectName projectName
+     * @param openAPI {@link OpenAPI} object corresponding to the gRPC service
+     */
+    private void createProtoOpenAPIFile(String projectName, OpenAPI openAPI) {
+        String protoOpenAPIDirPath =  CmdUtils.getProjectTargetGenGrpcSrcOpenAPIsDirectory(projectName);
+        String fileName = openAPI.getInfo().getTitle() + "_" +
+                openAPI.getInfo().getVersion().replace(".", "_") + CliConstants.YAML_EXTENSION;
+        String protoOpenAPIFilePath =  protoOpenAPIDirPath + File.separator + fileName;
+        try {
+            CmdUtils.createFile(protoOpenAPIDirPath, fileName, true);
+            CmdUtils.writeContent(Yaml.pretty(openAPI), new File(protoOpenAPIFilePath));
+        } catch (IOException e) {
+            throw new CLIInternalException("Error while writing openAPI files to the directory: " +
+                    protoOpenAPIDirPath + ".");
+        }
     }
 }

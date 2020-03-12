@@ -24,19 +24,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
-import org.wso2.micro.gateway.tests.common.CLIExecutor;
-import org.wso2.micro.gateway.tests.common.KeyValidationInfo;
-import org.wso2.micro.gateway.tests.common.MockAPIPublisher;
-import org.wso2.micro.gateway.tests.common.MockHttpServer;
-import org.wso2.micro.gateway.tests.common.model.API;
+import org.wso2.micro.gateway.tests.common.ResponseConstants;
 import org.wso2.micro.gateway.tests.common.model.ApplicationDTO;
-import org.wso2.micro.gateway.tests.context.ServerInstance;
-import org.wso2.micro.gateway.tests.context.Utils;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.HttpResponse;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
-import java.io.File;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +38,6 @@ import java.util.Map;
 public class ValidationTestCase extends BaseTestCase {
     private String apikey;
 
-
     @BeforeClass
     public void start() throws Exception {
         ApplicationDTO application = new ApplicationDTO();
@@ -53,7 +45,13 @@ public class ValidationTestCase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        super.init("api-key-project", new String[]{"common_api.yaml"}, null, "confs/validation.conf");
+        super.init("validation-project", new String[]{"validation/validation_api.yaml"}, null,
+                "confs/validation.conf");
+        apikey = getAPIKey();
+    }
+
+   private String getAPIKey() throws Exception {
+
         String originalInput = "generalUser1:password";
         String basicAuthToken = Base64.getEncoder().encodeToString(originalInput.getBytes());
 
@@ -62,23 +60,31 @@ public class ValidationTestCase extends BaseTestCase {
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + basicAuthToken);
         HttpResponse response = HttpClientRequest
                 .doGet("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_PORT + "/apikey", headers);
+        return response.getData();
+    }
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    @Test(description = "Test invalid request body for the Post request")
+    private void testInvalidRequest() throws Exception {
 
-        apikey = response.getData();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("api_key", apikey);
+        headers.put("Content-Type", "application/json");
+        HttpResponse response =
+                HttpClientRequest.doPost(getServiceURLHttp("petstore/v1/pet"), "{ \"id\": 0}",
+                        headers);
+        Assert.assertEquals(response.getData(), ResponseConstants.VALIDATION_RESPONSE, "Response code mismatched");
     }
 
 
-    @Test(description = "Test to check response validation", enabled = false)
-    private void testAPIResponse() throws Exception {
+    @Test(description = "Test invalid response body for the Get request")
+    private void testInvalidResponse() throws Exception {
 
         Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
         headers.put("api_key", apikey);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
-
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        headers.put("accept", "application/json");
+        HttpResponse response =
+                HttpClientRequest.doGet(getServiceURLHttp("petstore/v1/pet/2"), headers);
+        Assert.assertEquals(response.getData(), ResponseConstants.INVALID_RESPONSE, "Response code mismatched");
     }
 
     @AfterClass

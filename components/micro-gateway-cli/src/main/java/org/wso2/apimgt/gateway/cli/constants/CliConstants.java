@@ -35,8 +35,13 @@ public class CliConstants {
     public static final String PROJECT_SERVICES_DIR = "services";
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
     public static final String PROJECT_TARGET_DIR = "target";
+    public static final String CLI_DEPENDENCIES = "dependencies";
+    public static final String CLI_VALIDATION_DEPENDENCIES = "validation";
     public static final String PROJECT_GEN_DIR = "gen";
     public static final String GEN_SRC_DIR = "src";
+    public static final String GEN_GRPC_SRC_DIR = "gRPCSrc";
+    public static final String GEN_GRPC_SRC_OPENAPI_DIR = "openAPIs";
+    public static final String GEN_GRPC_SRC_DESC_DIR = "desc";
     public static final String GEN_POLICIES_DIR = "policies";
     public static final String RESOURCES_DIR = "resources";
     public static final String MAIN_CONFIG_FILE_NAME = "toolkit-config.toml";
@@ -85,6 +90,7 @@ public class CliConstants {
     public static final String MICRO_GW_CONF_FILE = "micro-gw.conf";
     public static final String KEEP_FILE = ".keep";
     public static final String BALLERINA_TOML_FILE = "Ballerina.toml";
+    public static final String VERSION_FILE = "version.txt";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");

@@ -28,4 +28,5 @@ public class CliCommands {
     public static final String RESET = "reset";
     public static final String INIT = "init";
     public static final String IMPORT = "import";
+    public static final String VERSION = "version";
 }
