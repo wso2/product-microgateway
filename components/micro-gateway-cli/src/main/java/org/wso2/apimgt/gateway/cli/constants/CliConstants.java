@@ -35,6 +35,8 @@ public class CliConstants {
     public static final String PROJECT_SERVICES_DIR = "services";
     public static final String PROJECT_POLICIES_FILE = "policies.yaml";
     public static final String PROJECT_TARGET_DIR = "target";
+    public static final String CLI_DEPENDENCIES = "dependencies";
+    public static final String CLI_VALIDATION_DEPENDENCIES = "validation";
     public static final String PROJECT_GEN_DIR = "gen";
     public static final String GEN_SRC_DIR = "src";
     public static final String GEN_GRPC_SRC_DIR = "gRPCSrc";

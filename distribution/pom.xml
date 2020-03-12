@@ -72,6 +72,35 @@
             <artifactId>org.wso2.securevault</artifactId>
             <version>${org.wso2.securevault.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${com.jayway.jsonpath.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${com.google.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -136,7 +165,18 @@
                             <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json</includeArtifactIds>
                         </configuration>
                     </execution>
-
+                    <execution>
+                        <id>copy-validation-jars</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib/dependencies/validation</outputDirectory>
+                            <includeGroupIds>com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava</includeGroupIds>
+                            <includeArtifactIds>jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava</includeArtifactIds>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
