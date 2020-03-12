@@ -63,8 +63,8 @@ public class CLIExecutor {
                 "--truststore-pass", "ballerina"};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
-        runBuildCmd(mgwCommand, project);
         runVersionCmd(mgwCommand);
+        runBuildCmd(mgwCommand, project);
     }
 
     /**

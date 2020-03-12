@@ -37,8 +37,6 @@ import java.nio.file.Paths;
 @Parameters(commandNames = "version", commandDescription = "find the micro-gw toolkit version")
 public class VersionCmd implements LauncherCmd {
     private static PrintStream outStream = System.err;
-    private static String toolkitVersion;
-
 
     @Override
     public void execute() {
@@ -63,12 +61,12 @@ public class VersionCmd implements LauncherCmd {
      * @param filePath  path of version.txt file
      */
     public static String getversion(String filePath) {
+        String toolkitVersion;
         try {
             toolkitVersion = new String(Files.readAllBytes(Paths.get(filePath)));
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while finding the version.txt file : ", e);
         }
         return toolkitVersion;
-
     }
 }
