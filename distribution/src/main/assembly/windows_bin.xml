@@ -77,7 +77,6 @@
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/resources/grpc/google/protobuf</outputDirectory>
             <fileMode>644</fileMode>
         </fileSet>
-
         <!--create an empty logs folder-->
         <fileSet>
             <directory>${basedir}/resources/logs</directory>
@@ -120,6 +119,11 @@
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>${basedir}/resources/version.txt</source>
+            <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/resources</outputDirectory>
+            <destName>version.txt</destName>
         </file>
     </files>
 
