@@ -45,8 +45,9 @@ public type KeyValidationHandler object {
     public function canProcess(http:Request req) returns @tainted boolean {
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
         if (req.hasHeader(authHeader)) {
-            string headerValue = req.getHeader(authHeader);
-            if (hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
+            string headerValue = req.getHeader(authHeader).toLowerAscii();
+            string schemeBearer = auth:AUTH_SCHEME_BEARER.toLowerAscii();
+            if (hasPrefix(headerValue, schemeBearer)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential, "\\.");
                 if (splitContent.length() < 3) {

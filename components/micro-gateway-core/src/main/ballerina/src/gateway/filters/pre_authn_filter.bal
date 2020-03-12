@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
+import ballerina/auth;
 
 // Pre Authentication filter
 
@@ -152,9 +153,11 @@ returns boolean {
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
     printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
-    if (contains(authHeader, AUTH_SCHEME_BASIC)) {
-        return AUTHN_SCHEME_BASIC;
-    } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
+    string authHdr = authHeader.toLowerAscii();
+    string schemeBasic = auth:AUTH_SCHEME_BASIC.toLowerAscii();
+    if (contains(authHdr, schemeBasic)) {
+        return auth:AUTH_SCHEME_BASIC;
+    } else if (contains(authHdr, schemeBasic) && contains(authHdr, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
