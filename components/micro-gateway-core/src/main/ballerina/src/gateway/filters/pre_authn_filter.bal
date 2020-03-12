@@ -155,9 +155,10 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
     printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
     string authHdr = authHeader.toLowerAscii();
     string schemeBasic = auth:AUTH_SCHEME_BASIC.toLowerAscii();
+    string schemeBearer = auth:AUTH_SCHEME_BEARER.toLowerAscii();
     if (contains(authHdr, schemeBasic)) {
         return auth:AUTH_SCHEME_BASIC;
-    } else if (contains(authHdr, schemeBasic) && contains(authHdr, ".")) {
+    } else if (contains(authHdr, schemeBearer) && contains(authHdr, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
