@@ -16,6 +16,7 @@
 
  import ballerina/http;
  import ballerina/stringutils;
+ import ballerina/log;
 
  int errorItem = 0;
 
@@ -95,14 +96,17 @@
             return true;
         } else {
              json newPayload = { fault: {
-                                    code: 400,
+                                    code: http:STATUS_BAD_REQUEST,
                                     message: "Bad Request",
                                     description: valResult.toString()
                                 } };
             http:Response res = new;
-            res.statusCode = 400;
+            res.statusCode = http:STATUS_BAD_REQUEST;
             res.setJsonPayload(newPayload);
             var rcal = caller->respond(res);
+            if (rcal is error) {
+                log:printError("Error occurred while sending the error response", err = rcal);
+            }
             return false;
         }
  }
@@ -134,11 +138,11 @@
              return true;
          } else {
              json newPayload = { fault: {
-                                        code: 500,
+                                        code: http:STATUS_INTERNAL_SERVER_ERROR,
                                         message: "Bad Response",
                                         description: valResult.toString()
                                } };
-             response.statusCode = 500;
+             response.statusCode = http:STATUS_INTERNAL_SERVER_ERROR;
              response.setJsonPayload(newPayload);
              return true;
          }
