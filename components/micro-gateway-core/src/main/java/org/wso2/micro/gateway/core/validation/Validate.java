@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.wso2.micro.gateway.core.Constants.VALIDATED_STATUS;
 
 /**
  * This class is for validating request/response payload against schema.
@@ -67,10 +66,14 @@ public class Validate {
             throws IOException {
         String swagger = swaggers.get(serviceName);
         if ("get".equals(reqMethod) || "GET".equals(reqMethod)) {
-            return VALIDATED_STATUS;
+            return Constants.VALIDATED_STATUS;
         }
         String schema = extractSchemaFromRequest(requestPath, reqMethod, swagger);
-        return validateContent(payload, schema);
+        if (schema != null && !Constants.EMPTY_ARRAY.equals(schema)) {
+            return validateContent(payload, schema);
+        } else  {
+            return Constants.VALIDATED_STATUS;
+        }
     }
 
     /***
@@ -85,7 +88,11 @@ public class Validate {
                                           String serviceName) {
         String swagger = swaggers.get(serviceName);
         String responseSchema = extractResponse(resourcePath, reqMethod, responseCode, swagger);
-        return validateContent(responseSchema, response);
+        if (responseSchema != null && !Constants.EMPTY_ARRAY.equals(responseSchema)) {
+            return validateContent(response, responseSchema);
+        } else {
+            return Constants.VALIDATED_STATUS;
+        }
     }
 
     /***
@@ -97,6 +104,7 @@ public class Validate {
     public static void extractResources(String projectName, String serviceName) throws IOException {
         String path = "resources/wso2/" + projectName + "/";
         CodeSource src = Validate.class.getProtectionDomain().getCodeSource();
+        StringBuffer stringBuffer;
         if (src != null) {
             URL jar = src.getLocation();
             ZipInputStream zip = new ZipInputStream(jar.openStream());
@@ -106,12 +114,15 @@ public class Validate {
                     break;
                 }
                 String name = e.getName();
-                String swaggerContent;
                 if (name.startsWith(path)) {
                     InputStream in = Validate.class.getResourceAsStream("/" + name);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    swaggerContent = reader.readLine();
-                    swaggers.put(serviceName, swaggerContent);
+                    stringBuffer = new StringBuffer();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuffer.append(line).append("\n");
+                    }
+                    swaggers.put(serviceName, stringBuffer.toString());
                 }
             }
         }
@@ -131,7 +142,7 @@ public class Validate {
             jsonPath.append(Constants.PATHS)
                     .append(resourcePath).append(Constants.BODY_CONTENT);
             schema = JsonPath.read(swagger, jsonPath.toString()).toString();
-            if (schema == null | Constants.EMPTY_ARRAY.equals(schema)) {
+            if (schema == null || Constants.EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
                 StringBuilder requestBodyPath = new StringBuilder();
                 requestBodyPath.append(Constants.PATHS).append(resourcePath).
@@ -335,15 +346,16 @@ public class Validate {
     /**
      * Validate the Request/response content.
      *
-     * @param payloadObject Request/response payload
-     * @param schemaString  Schema which uses to validate request/response messages
+     * @param payload      Request/response payload
+     * @param schemaString Schema which uses to validate request/response messages
      * @return Returns "validated" or everit error logs
      */
-    private static String validateContent(String payloadObject, String schemaString) {
+    private static String validateContent(String payload, String schemaString) {
         logger.debug("Validating JSON content against the schema");
         StringBuilder finalMessage = new StringBuilder();
         List<String> errorMessages;
         JSONObject jsonSchema = new JSONObject(schemaString);
+        JSONObject payloadObject = new JSONObject(payload);
         Schema schema = SchemaLoader.load(jsonSchema);
         if (schema == null) {
             return null;
@@ -380,7 +392,12 @@ public class Validate {
                 append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
                 append(Constants.JSON_RESPONSES).append(responseCode);
         resource = JsonPath.read(swagger, responseSchemaPath.toString());
-
+        swaggerObject = swagger;
+        try {
+            rootNode = mapper.readTree(swagger.getBytes());
+        } catch (IOException e) {
+            logger.error("Error occurred while reading the swagger.", e);
+        }
         if (resource != null) {
             responseSchemaPath.append(Constants.CONTENT);
             content = JsonPath.read(swagger, responseSchemaPath.toString());

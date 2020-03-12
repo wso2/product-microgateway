@@ -39,8 +39,6 @@ public class Constants {
 
     public static final String GATEWAY_VERSION = "MGW_VERSION";
 
-    public static final String ERROR_MESSAGE = "message";
-
     public static final String FILE_NOT_FOUND_ERROR = "{wso2/gateway}FileNotFoundError";
 
     public static final String SCHEMA_REFERENCE = "$ref";
@@ -58,7 +56,6 @@ public class Constants {
     public static final String JSON_CONTENT = ".application/json.schema.$ref";
     public static final String SCHEMA = ".schema";
     public static final String EMPTY_ARRAY = "[]";
-    public static final String INTERNAL_ERROR_CODE = "500";
     public static final String DEFINITIONS = "definitions";
     public static final String COMPONENT_SCHEMA = "components/schemas";
     public static final char HASH = '#';

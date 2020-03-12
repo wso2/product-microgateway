@@ -16,6 +16,7 @@
 
  import ballerina/http;
  import ballerina/stringutils;
+ import ballerina/log;
 
  int errorItem = 0;
 
@@ -94,10 +95,18 @@
         if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
             return true;
         } else {
+             json newPayload = { fault: {
+                                    code: http:STATUS_BAD_REQUEST,
+                                    message: "Bad Request",
+                                    description: valResult.toString()
+                                } };
             http:Response res = new;
-            res.statusCode = 400;
-            res.setPayload(valResult.toString());
+            res.statusCode = http:STATUS_BAD_REQUEST;
+            res.setJsonPayload(newPayload);
             var rcal = caller->respond(res);
+            if (rcal is error) {
+                log:printError("Error occurred while sending the error response", err = rcal);
+            }
             return false;
         }
  }
@@ -107,6 +116,7 @@
      string resPath = "";
      string requestMethod = "";
      string reqMethod = "";
+     string resPayload = "";
 
          printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
          string responseCode = response.statusCode.toString();
@@ -118,15 +128,22 @@
          if (method is string) {
             reqMethod = method;
          }
-         string resPayload = response.getJsonPayload().toString();
+         var payload = response.getJsonPayload();
+         if (payload is map<json>)  {
+              resPayload = payload.toJsonString();
+         }
          string servName = context.getServiceName();
-         printDebug(KEY_VALIDATION_FILTER, "The Response payload : " + resPayload);
-         var valResult = responseValidate(resPath, requestMethod, responseCode, resPayload, servName);
+         var valResult = responseValidate(resPath, reqMethod, responseCode, resPayload, servName);
          if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
              return true;
          } else {
-             response.statusCode = 500;
-             response.setPayload(valResult.toString());
-             return false;
+             json newPayload = { fault: {
+                                        code: http:STATUS_INTERNAL_SERVER_ERROR,
+                                        message: "Bad Response",
+                                        description: valResult.toString()
+                               } };
+             response.statusCode = http:STATUS_INTERNAL_SERVER_ERROR;
+             response.setJsonPayload(newPayload);
+             return true;
          }
  }

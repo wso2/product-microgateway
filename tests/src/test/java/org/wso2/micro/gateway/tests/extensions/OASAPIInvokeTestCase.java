@@ -19,6 +19,7 @@ package org.wso2.micro.gateway.tests.extensions;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
