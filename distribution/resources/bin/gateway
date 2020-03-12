@@ -241,6 +241,14 @@ done
 
 for last; do true; done
 
+if [ "$CMD" = "version" ]; then
+  if [ -e "$GW_HOME/version.txt" ]; then
+    VERSION=`cat "$GW_HOME"/version.txt`
+    echo "${VERSION}"
+    exit 0
+  fi
+fi
+
 if [ ! "$CMD" = "stop" ]; then
   if [[ "$CMD" == "" ]]; then
     if [[ ! -f "$1" ]]; then

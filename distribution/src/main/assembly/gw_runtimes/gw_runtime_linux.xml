@@ -78,6 +78,11 @@
             <source>${basedir}/../release-notes.html</source>
             <outputDirectory>wso2am-micro-gw-linux-${project.version}</outputDirectory>
         </file>
+        <file>
+            <source>${basedir}/resources/version.txt</source>
+            <outputDirectory>wso2am-micro-gw-linux-${project.version}</outputDirectory>
+            <destName>version.txt</destName>
+        </file>
     </files>
     <dependencySets>
         <dependencySet>

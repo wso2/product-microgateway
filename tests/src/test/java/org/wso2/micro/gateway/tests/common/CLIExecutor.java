@@ -31,8 +31,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Execute APIM CLI functions.
@@ -63,6 +65,7 @@ public class CLIExecutor {
                 "--truststore-pass", "ballerina"};
         runImportCmd(mgwCommand, project, importCmdArray);
         copyCustomizedPolicyFileFromResources(project);
+        runVersionCmd(mgwCommand);
         runBuildCmd(mgwCommand, project);
     }
 
@@ -76,7 +79,7 @@ public class CLIExecutor {
      */
     private void runProcess(String[] cmdArray, String homeDirectory, String errorMessage) throws MicroGWTestException {
         try {
-            Process process = Runtime.getRuntime().exec(cmdArray, new String[] {"MICROGW_HOME=" + cliHome, "JAVA_HOME="
+            Process process = Runtime.getRuntime().exec(cmdArray, new String[]{"MICROGW_HOME=" + cliHome, "JAVA_HOME="
                     + System.getenv("JAVA_HOME")}, new File(homeDirectory));
             new ServerLogReader("errorStream", process.getErrorStream()).start();
             new ServerLogReader("inputStream", process.getInputStream()).start();
@@ -101,14 +104,34 @@ public class CLIExecutor {
      * @throws MicroGWTestException
      */
     public void generateFromDefinition(String project, String[] openAPIFileNames)
-            throws MicroGWTestException {
+            throws MicroGWTestException, IOException {
 
         createBackgroundEnv();
         String mgwCommand = this.cliHome + File.separator + CliConstants.CLI_BIN + File.separator + "micro-gw";
         runInitCmd(mgwCommand, project);
+        String sourcePath = this.cliHome + File.separator + CliConstants.CLI_LIB + File.separator +
+                CliConstants.CLI_DEPENDENCIES +
+                File.separator + CliConstants.CLI_VALIDATION_DEPENDENCIES;
+        String des = homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator;
+        copyValidationArtifactsToProject(sourcePath, des);
         copyOpenAPIDefinitionsToProject(project, openAPIFileNames);
         copyCustomizedPolicyFileFromResources(project);
         runBuildCmd(mgwCommand, project);
+    }
+
+    private void copyValidationArtifactsToProject(String sourcePath, String desPath) throws IOException {
+        Files.walk(Paths.get(sourcePath)).filter(path -> {
+            Path fileName = path.getFileName();
+            return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_JAR);
+        }).forEach(path -> {
+            File sourceFile = new File(path.toString());
+            File destination = new File(desPath + path.getFileName().toString());
+            try {
+                FileUtils.copyFile(sourceFile, destination);
+            } catch (IOException e) {
+                log.error("Error while copying the file from" + sourcePath + " to " + desPath + ".", e);
+            }
+        });
     }
 
     private void createBackgroundEnv() throws MicroGWTestException {
@@ -161,6 +184,13 @@ public class CLIExecutor {
         return new String[]{"bash", mgwCommand, mainCommand, project};
     }
 
+    private String[] generateBasicCmdArgsBasedOnOS(String mgwCommand, String mainCommand) {
+        if (Utils.getOSName().toLowerCase().contains("windows")) {
+            return new String[]{"cmd.exe", "/c", mgwCommand.trim() + ".bat", mainCommand};
+        }
+        return new String[]{"bash", mgwCommand, mainCommand};
+    }
+
     /**
      * Build the project.
      *
@@ -172,6 +202,18 @@ public class CLIExecutor {
         String[] buildCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "build", project);
         String buildErrorMsg = "Error occurred when building the project.";
         runProcess(buildCmdArray, homeDirectory, buildErrorMsg);
+    }
+
+    /**
+     * find the version.
+     *
+     * @param mgwCommand the path of microgateway executable
+     * @throws MicroGWTestException
+     */
+    private void runVersionCmd(String mgwCommand) throws MicroGWTestException {
+        String[] versionCmdArray = generateBasicCmdArgsBasedOnOS(mgwCommand, "version");
+        String buildErrorMsg = "Error occurred when finding the version.";
+        runProcess(versionCmdArray, homeDirectory, buildErrorMsg);
     }
 
     /**
@@ -215,7 +257,7 @@ public class CLIExecutor {
     private void copyOpenAPIDefinitionsToProject(String project, String[] openAPIFileNames)
             throws MicroGWTestException {
         for (String openAPIFileName : openAPIFileNames) {
-            if(!openAPIFileName.contains(".jar")) {
+            if (!openAPIFileName.contains(".jar")) {
                 File swaggerSrcPath = new File(
                         getClass().getClassLoader().getResource(Constants.OPEN_APIS + "/" + openAPIFileName).getPath());
                 File desPath;

@@ -98,7 +98,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/pet/", exchange -> {
 
-                byte[] response = ResponseConstants.petByIdResponse.getBytes();
+                byte[] response = ResponseConstants.getPetResponse.getBytes();
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -142,9 +142,18 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            httpServer.createContext(base + "/pet/2", exchange -> {
+
+                byte[] response = ResponseConstants.getPetResponse.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.createContext(base + "/pet/", exchange -> {
 
-                byte[] response = ResponseConstants.petByIdResponseV1.getBytes();
+                byte[] response = ResponseConstants.getPetResponse.getBytes();
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
