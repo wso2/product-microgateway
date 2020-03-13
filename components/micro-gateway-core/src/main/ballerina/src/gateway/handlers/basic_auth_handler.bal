@@ -40,7 +40,7 @@ public type BasicAuthHandler object {
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString().trim();
         //if '/apikey' resource is called, the handler is hit without the preAuthnFilter.
         if (stringutils:equalsIgnoreCase("", authHeader)) {
-            authHeader = "authorization";
+            authHeader = DEFAULT_AUTH_HEADER_NAME;
         }
         if (req.hasHeader(authHeader)) {
             string headerValue = req.getHeader(authHeader).toLowerAscii();
@@ -62,7 +62,7 @@ public type BasicAuthHandler object {
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString().trim();
         //if '/apikey' resource is called, the handler is hit without the preAuthnFilter.
         if (stringutils:equalsIgnoreCase("", authHeader)) {
-            authHeader = "authorization";
+            authHeader = DEFAULT_AUTH_HEADER_NAME;
         }
         string headerValue = req.getHeader(authHeader);
         string credential = headerValue.substring(5, headerValue.length()).trim();
