@@ -51,6 +51,7 @@ paths:
       security:
         - petstore_auth:
             - write:petsNew
+        - api_key: []
     put:
       tags:
         - pet

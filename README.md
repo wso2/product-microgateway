@@ -138,7 +138,7 @@ Then this run time will expose all the APIs which were included in the particula
 The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API definition as well 
 as importing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
 
-![Alt text](architecture.png?raw=true "Title")
+![Alt text](Architecture.png?raw=true "Title")
 
 ###### Dev Phase
 
