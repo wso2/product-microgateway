@@ -6,26 +6,6 @@
 
 The WSO2 API Microgateway is a Cloud Native API Gateway which can be used to expose one or many microservices as APIs.
 
-Here is a short summary of the features it hosts.
-
-1. Exposing one or more microservices as APIs using the Open API Specification.
-1. Authentication and Authorization of API requests based on OAuth2.0 (opaque tokens and JWTs), Basic Auth and Mutual TLS.
-1. Rate Limiting of API requests based on numerous policies.
-1. Business Insights through API Analytics.
-1. Service discovery features.
-1. Request and Response transformations.
-1. Load balancing, failover and circuit breaking capabilities of API requests.
-1. Seamless integration with Docker and Kubernetes.
-1. Integration with WSO2 API Manager to support design first APIs, API Analytics and shared rate limiting. 
-1. Grouping APIs by labels. 
-
-It also has the following characteristics that makes it a perfect fit for microservice architectures
-
-1. Less than 1s startup time, allowing for faster scaling.
-1. Built on a stateless architecture, allowing for infinite scaling.
-1. Has an immutable runtime, making it heavily robust.
-1. Easy integration with CI/CD processes and tools.
-1. Runs in isolation with no dependencies to other components
 
 #### Table of Contents
 
@@ -59,7 +39,7 @@ It also has the following characteristics that makes it a perfect fit for micros
    * [Import APIs from WSO2 API Manager](#import-apis-from-wso2-api-manager)
 
 
-#### Why WSO2 API Microgateway
+## Why WSO2 API Microgateway
 Microservices have become the norm for modern application architecture. Workloads of modern applications are spread 
 across many groups of microservices, cloud services and legacy services. The characteristics and behaviors of such 
 heterogeneous services have a massive diversity. Such as authentication mechanisms, message formats, high availability 
@@ -70,9 +50,7 @@ consumers, internal consumers and partners. It applies the common quality of ser
 security, rate limiting and analytics and also offers a wide range of features which helps organizations to deploy APIs 
 microservice architectures efficiently.
 
-#### Microgateway quick start
-Please note that this guide is for MGW 3.1.0, which is still not available as a GA release. If you are using the 
-last released GA version then refer the [QSG of 3.0.x](https://github.com/wso2/product-microgateway/tree/3.0.x#microgateway-quick-start).
+## Microgateway quick start
 
 Let's host our first API on a Microgateway. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway
 
@@ -97,7 +75,7 @@ where you executed the command.
  
 5. Next, Lets build the project and create a microgateway docker image.
 ```
-micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.0-beta
+micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.0
 ```
 
 Once the build is successful microgateway docker image will be created with name "petstore:v1"
@@ -126,13 +104,26 @@ curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/json" -H "
 
 
 #### Features
-- **Authentication** : Supports mutual TLS, Oauth2(opaque tokens and JWT) and basic authentication
-- **Rate limiting** : Throttle the request to the APIs based on the request count for a give time period
-- **Transformations** : Manipulate API request and response using interceptor functions
-- **Analytics** : Publish data to streams
-- **Service Discovery** : Resolve endpoints using third party distributed key value stores like etcd
-- **Cloud native** : A lightweight gateway that can be run on any platform(bare metal, docker and k8s)
-- **Scalable** : Distributed nature allows to scale horizontally.
+Here is a short summary of the features it hosts.
+
+1. Exposing one or more microservices as APIs using the Open API Specification.
+1. Authentication and Authorization of API requests based on OAuth2.0 (opaque tokens and JWTs), Basic Auth and Mutual TLS.
+1. Rate Limiting of API requests based on numerous policies.
+1. Business Insights through API Analytics.
+1. Service discovery features.
+1. Request and Response transformations.
+1. Load balancing, failover and circuit breaking capabilities of API requests.
+1. Seamless integration with Docker and Kubernetes.
+1. Integration with WSO2 API Manager to support design first APIs, API Analytics and shared rate limiting. 
+1. Grouping APIs by labels. 
+
+It also has the following characteristics that makes it a perfect fit for microservice architectures
+
+1. Less than 1s startup time, allowing for faster scaling.
+1. Built on a stateless architecture, allowing for infinite scaling.
+1. Has an immutable runtime, making it heavily robust.
+1. Easy integration with CI/CD processes and tools.
+1. Runs in isolation with no dependencies to other components
 
 #### Microgateway Components
 - **Toolkit** : The toolkit is used to initiate microgateway projects. Once the project is initialized API developer can
@@ -144,9 +135,10 @@ Then this run time will expose all the APIs which were included in the particula
 
 #### Architecture
 
-The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API definition.
+The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API definition as well 
+as importing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
 
-![Alt text](architecture-new.png?raw=true "Title")
+![Alt text](Architecture.png?raw=true "Title")
 
 ###### Dev Phase
 

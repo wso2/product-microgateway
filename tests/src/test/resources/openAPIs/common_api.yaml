@@ -13,7 +13,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 x-wso2-basePath: /petstore/v1
-x-wso2-throttling-tier: 8PerMin
+x-wso2-throttling-tier: 15PerMin
 x-wso2-production-endpoints:
   urls:
     - https://localhost:2380/v2
@@ -51,6 +51,9 @@ paths:
       security:
         - petstore_auth:
             - write:petsNew
+        #the scopes mentioned under petstore_auth is applied for the basicAuth case as well. (due to ballerina impl)
+        - petstore_basic: []
+        - api_key: []
     put:
       tags:
         - pet
@@ -224,6 +227,7 @@ paths:
         - petstore_auth:
             - write:pets
             - read:pets
+        - petstore_basic: []
     delete:
       tags:
         - pet
@@ -252,6 +256,8 @@ paths:
         - petstore_auth:
             - write:pets
             - read:pets
+          #the scopes mentioned under petstore_auth is applied for the basicAuth case as well. (due to ballerina impl)
+        - petstore_basic: []
   "/pet/{petId}/uploadImage":
     post:
       tags:
@@ -605,6 +611,9 @@ components:
       type: apiKey
       name: api_key_query
       in: query
+    petstore_basic:
+      type: http
+      scheme: basic
   schemas:
     Order:
       type: object
