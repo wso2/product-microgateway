@@ -144,7 +144,7 @@ fi
 
 JAVA_PATH=$MICROGW_HOME/lib/jdk8u202-b08-jre
 if [ -d "$JAVA_HOME" ]; then
-  echo "JAVA_HOME is externally set: $JAVA_HOME"
+  echo "JAVA_HOME: $JAVA_HOME"
 else
   JAVA_HOME=$JAVA_PATH
 fi
