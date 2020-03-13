@@ -53,6 +53,7 @@ paths:
             - write:petsNew
         #the scopes mentioned under petstore_auth is applied for the basicAuth case as well. (due to ballerina impl)
         - petstore_basic: []
+        - api_key: []
     put:
       tags:
         - pet
