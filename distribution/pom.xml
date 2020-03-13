@@ -232,7 +232,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp file="resources/version.txt" match="version" replace="${project.version}" byline="true" />
+                                <replaceregexp file="resources/version.txt" match=".*" replace="${project.version}" byline="true" />
                             </target>
                         </configuration>
                     </execution>
