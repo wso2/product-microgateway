@@ -88,6 +88,8 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
 
         //test endpoint
         invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        invokeWithSimpleBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
 
         try {
             Thread.sleep(2000);
@@ -102,6 +104,17 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/basic-menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), responseData);
+        Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
+    }
+
+    private void invokeWithSimpleBasic(String token, String responseData, int responseCode) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "basic " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/basic-menu"), headers);
         Assert.assertNotNull(response);
