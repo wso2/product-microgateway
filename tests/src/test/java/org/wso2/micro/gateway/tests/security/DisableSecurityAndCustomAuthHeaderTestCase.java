@@ -66,10 +66,37 @@ public class DisableSecurityAndCustomAuthHeaderTestCase extends ScopesTestCase {
 
     }
 
-    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using auth header 'Authorization'")
-    public void testEnableSecurityOverriddenResourceLevelWithWrongAuthHeader() throws Exception {
+    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using auth header " +
+            "'Authorization' : JWT")
+    public void testEnableSecurityOverriddenResourceLevelWithWrongAuthHeaderJWT() throws Exception {
+        String authHeaderValue = "Bearer " + jwtTokenProd;
+        testEnableSecurityOverriddenResourceLevelWithWrongAuthHeader(authHeaderValue);
+    }
+
+    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using auth header " +
+            "'Authorization' : BasicAuth")
+    public void testEnableSecurityOverriddenResourceLevelWithWrongAuthHeaderBasic() throws Exception {
+        String authHeaderValue = "Basic " + basicAuthToken;
+        testEnableSecurityOverriddenResourceLevelWithWrongAuthHeader(authHeaderValue);
+    }
+
+    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using correct header " +
+            ": JWT")
+    public void testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeaderJWT() throws Exception {
+        String authHeaderValue = "Bearer " + jwtTokenProd;
+        testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeader(authHeaderValue);
+    }
+
+    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using correct header " +
+            ": BasicAuth")
+    public void testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeaderBasic() throws Exception {
+        String authHeaderValue = "Basic " + basicAuthToken;
+        testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeader(authHeaderValue);
+    }
+
+    private void testEnableSecurityOverriddenResourceLevelWithWrongAuthHeader(String authHeaderValue) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + jwtTokenProd);
+        headers.put("Authorization", authHeaderValue);
         //test endpoint with token
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("petstore/v2/pet/1"), headers);
@@ -77,20 +104,17 @@ public class DisableSecurityAndCustomAuthHeaderTestCase extends ScopesTestCase {
         Assert.assertTrue(response.getData().contains("900902"),
                 "Response should contain code 900902 which is for missing auth header");
         Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
-
     }
 
-    @Test(description = "Test Invoking the resource which is secured with auth header 'auth' using correct header")
-    public void testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeader() throws Exception {
+    private void testEnableSecurityOverriddenResourceLevelWithCorrectAuthHeader(String authHeaderValue) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("auth", "Bearer " + jwtTokenProd);
+        headers.put("auth", authHeaderValue);
         //test endpoint with token
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("petstore/v2/pet/1"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.petByIdResponse);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
-
     }
 
     @AfterClass
