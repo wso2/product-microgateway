@@ -59,7 +59,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
     private void invoke(String token, String responseData, int responseCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "bearer " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
                 .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
         Assert.assertNotNull(response);

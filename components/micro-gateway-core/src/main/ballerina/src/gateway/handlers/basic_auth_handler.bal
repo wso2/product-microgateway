@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/auth;
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
@@ -44,8 +43,7 @@ public type BasicAuthHandler object {
         }
         if (req.hasHeader(authHeader)) {
             string headerValue = req.getHeader(authHeader).toLowerAscii();
-            string authScheme = (auth:AUTH_SCHEME_BASIC).toLowerAscii();
-            if (headerValue.startsWith(authScheme)) {
+            if (headerValue.startsWith(AUTH_SCHEME_BASIC_LOWERCASE)) {
                 printDebug(KEY_AUTHN_FILTER, "Request will be authenticated via basicAuth handler");
                 return true;
             }
