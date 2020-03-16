@@ -152,9 +152,10 @@ returns boolean {
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
     printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
-    if (contains(authHeader, AUTH_SCHEME_BASIC)) {
+    string authHdr = authHeader.toLowerAscii();
+    if (contains(authHdr, AUTH_SCHEME_BASIC_LOWERCASE)) {
         return AUTHN_SCHEME_BASIC;
-    } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
+    } else if (contains(authHdr, AUTH_SCHEME_BEARER_LOWERCASE) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
