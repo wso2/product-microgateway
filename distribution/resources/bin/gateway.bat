@@ -38,10 +38,9 @@ SET CONF_OUT_FILE=%GW_HOME%\.config
 SET IS_METRICS_ENABLED=F
 SET EXEC_FILE=
 SET BAL_ARGS=
-
 REM If java_home is set and version is 1.8 in the running environment,
 REM pick that as the java_home for MGW. If not set internal jre home
-IF EXIST %JAVA_HOME% (
+IF EXIST "%JAVA_HOME%" (
     SET JAVA_CMD="%JAVA_HOME%\bin\java.exe"
     SET JAVA_VERSION=
     FOR /F "tokens=* USEBACKQ" %%F IN (`%JAVA_CMD% -fullversion 2^>^&1`) DO (
@@ -60,6 +59,14 @@ REM ----------------------------------------------------------------------------
 REM -----------------------------------------------------------------------------
 REM --- START OF MAIN PROGRAM LOGIC ---
 REM -----------------------------------------------------------------------------
+
+REM Check for verssion command
+IF "%~1"=="version" (
+    IF EXIST %GW_HOME%\version.txt (
+        type %GW_HOME%\version.txt
+        EXIT/B 0
+    )
+)
 
 CALL :checkJava
 IF %ERRORLEVEL% NEQ 0 GOTO END
@@ -87,7 +94,6 @@ IF EXIST %CONF_OUT_FILE% (
         )
     )
 )
-
 :enableAgent
     IF "%IS_METRICS_ENABLED%"=="T" (
         FOR /F "skip=1 delims=" %%i IN (%CONF_OUT_FILE%) DO (
@@ -98,7 +104,7 @@ IF EXIST %CONF_OUT_FILE% (
             SET JAVA_OPTS="-javaagent:%GW_HOME%\lib\gateway\jmx_prometheus_javaagent-0.12.0.jar=%jmxPort%:%GW_HOME%\conf\Prometheus\config.yml"
     )
 
-    DEL /Q /F %CONF_OUT_FILE%
+IF EXIST %CONF_OUT_FILE% DEL /Q /F %CONF_OUT_FILE%
 
 :continueInit
     REM Change the windows style `\` path separator to unix style `/path/to/file` for log file path
