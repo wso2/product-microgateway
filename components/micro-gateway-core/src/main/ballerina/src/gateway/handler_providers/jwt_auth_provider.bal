@@ -17,7 +17,8 @@
 import ballerina/auth;
 import ballerina/jwt;
 import ballerina/runtime;
-
+import ballerina/stringutils;
+import ballerina/config;
 
 # Represents inbound JWT auth provider.
 #
@@ -53,7 +54,6 @@ public type JwtAuthProvider object {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return handleVar;
             }
-
             boolean isBlacklisted = false;
             string? jti = "";
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -61,6 +61,10 @@ public type JwtAuthProvider object {
             if (authContext is runtime:AuthenticationContext) {
                 string? jwtToken = authContext?.authToken;
                 if (jwtToken is string) {
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
+                    if(payload is jwt:JwtPayload ){
+                        doMappingContext(invocationContext,payload);
+                    }
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
@@ -98,9 +102,8 @@ public type JwtAuthProvider object {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
                         }
                         return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
-                    } 
+                    }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
-                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
                     if (payload is jwt:JwtPayload) {
                         return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
                     }
@@ -140,4 +143,52 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
     }
     setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
     return prepareError("Failed to decode the JWT.");
+}
+
+public function doMappingContext(runtime:InvocationContext invocationContext,jwt:JwtPayload payload) {
+    string payloadissuer=payload["iss"].toString();
+    map<any>? customClaims = invocationContext["principal"]["claims"];
+    map<any>? invocationvalue = invocationContext;
+    map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
+    if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0 && customClaims is map<any>) {
+        foreach map<anydata> jwtIssuer in jwtIssuers {
+           string issuer=getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER);
+           if (issuer==payloadissuer) {
+                string className=getDefaultStringValue(jwtIssuer[ISSUER_CLASSNAME], DEFAULT_ISSUER_CLASSNAME);
+                map<anydata> claims = <map<anydata>>jwtIssuer["claims"];
+                if (claims.length() > 0) {
+                    string[] keys = claims.keys();
+                    foreach string key in keys {
+                        string claimvalue = claims[key].toString();
+                        if (customClaims is map<anydata>) {
+                            if (customClaims.hasKey(claimvalue) ) {
+                                customClaims[key] = customClaims[claimvalue];
+                                if (key == "scope" && !jwtIssuer.hasKey("className") ) {
+                                    putScopeValue(customClaims["scope"],invocationContext);
+                                }
+                                anydata removedElement = customClaims.remove(claimvalue);
+                            }
+                         }
+                    }
+                }
+                if (jwtIssuer.hasKey("className")) {
+                    var class = loadMappingClass(className);
+                    map<any>? customClaimsEdited = transformJWT(customClaims);
+                    if (customClaimsEdited is map<any>) {
+                        invocationContext["principal"]["claims"]= customClaimsEdited;
+                    }
+                    putScopeValue(invocationContext["principal"]["claims"]["scope"],invocationContext);
+                }
+           }
+        }
+     }
+}
+
+public function putScopeValue(any scope,runtime:InvocationContext invocationContext){
+    if (scope is string && scope != "") {
+        string[]? scopes =  stringutils:split(scope.toString(), " ");
+        if (scopes is string[]) {
+            invocationContext["principal"]["scopes"] = scopes;
+        }
+    }
 }
