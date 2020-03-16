@@ -101,7 +101,6 @@ goto :end
         :continueBuild
             call :passToJar
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
-			ECHO [DONE]
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%BALLERINA_HOME%\bin\;%PATH%
