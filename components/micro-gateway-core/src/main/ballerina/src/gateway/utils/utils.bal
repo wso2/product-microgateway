@@ -390,28 +390,35 @@ public function getCurrentTimeForAnalytics() returns int {
 public function rotateFile(string filePath) returns string | error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
+    int filePathLength = filePath.length();
+    //to remove additional .tmp extension
+    string eventFilePath = filePath.substring(0, filePathLength - 4) ;
     int rotatingTimeStamp = getCurrentTime();
+    var renameFileResult = file:rename(filePath, eventFilePath);
+    if (renameFileResult is error) {
+        printError(KEY_UTILS, "Failed to rename file", renameFileResult);
+    }
     string fileNameWithoutExtension = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." +
         uuid;
     string tempZipName = fileNameWithoutExtension + TMP_EXTENSION;
     string zipName = fileNameWithoutExtension + ZIP_EXTENSION;
     //until the compression happens, the file will have .tmp extension. After the compression is completed
     //successfully, the file will be renamed with .zip extension. Only the files with .zip extension will be uploaded.
-    var compressResult = compress(filePath, tempZipName);
+    var compressResult = compress(eventFilePath, tempZipName);
     if (compressResult is error) {
         printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
-        var renameResult = file:rename(tempZipName, zipName);
-        var deleteResult = file:remove(filePath);
-        if (renameResult is error) {
-            printError(KEY_UTILS, "Failed to rename file", renameResult);
+        var renameZipResult = file:rename(tempZipName, zipName);
+        var deleteFileResult = file:remove(eventFilePath);
+        if (renameZipResult is error) {
+            printError(KEY_UTILS, "Failed to rename file", renameZipResult);
         }
-        if (deleteResult is ()) {
+        if (deleteFileResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {
-            printError(KEY_UTILS, "Failed to delete file", deleteResult);
+            printError(KEY_UTILS, "Failed to delete file", deleteFileResult);
         }
         return zipName;
     }
