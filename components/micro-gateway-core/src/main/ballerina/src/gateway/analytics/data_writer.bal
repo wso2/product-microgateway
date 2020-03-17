@@ -65,7 +65,7 @@ public function getEventData(EventDTO dto) returns string {
 function writeEventToFile(EventDTO eventDTO) {
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     // errors from 'openWritableFile' will be 'panicked'
-    var writableChannel = <io:WritableByteChannel>io:openWritableFile(fileLocation + API_USAGE_FILE, true);
+    var writableChannel = <io:WritableByteChannel>io:openWritableFile(fileLocation + TEMP_API_USAGE_FILE, true);
     io:WritableCharacterChannel charChannel = new (writableChannel, "UTF-8");
     var result = charChannel.write(getEventData(eventDTO), 0);
     if (result is io:GenericError) {
