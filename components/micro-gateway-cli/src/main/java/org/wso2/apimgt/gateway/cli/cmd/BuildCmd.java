@@ -129,7 +129,7 @@ public class BuildCmd implements LauncherCmd {
             }
             String toolkitConfigPath = CmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
-            outStream.print("Generating sources...\n");
+            outStream.print("Generating sources...");
 
             // Create policies directory
             String genPoliciesPath =
@@ -153,6 +153,7 @@ public class BuildCmd implements LauncherCmd {
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
             CmdUtils.updateBallerinaToml(projectName);
+            outStream.print(CmdUtils.format("[DONE]\n"));
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
