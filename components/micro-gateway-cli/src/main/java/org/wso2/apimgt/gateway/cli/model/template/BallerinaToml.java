@@ -18,12 +18,16 @@
 
 package org.wso2.apimgt.gateway.cli.model.template;
 
+import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Mustache data holder for Ballerina.toml file.
@@ -32,10 +36,25 @@ public class BallerinaToml {
     private List<String> dependencies;
     private List<BallerinaLibrary> libs;
     private String toolkitHome;
+    private String mgwVersion;
 
     public BallerinaToml() {
         dependencies = new ArrayList<>();
         libs = new ArrayList<>();
+        init();
+    }
+
+    private void init() {
+        Properties pom = new Properties();
+        String pomPath = "/META-INF/maven/org.wso2.am.microgw/org.wso2.micro.gateway.cli/pom.properties";
+        try (InputStream is = getClass().getResourceAsStream(pomPath)) {
+            if (is != null) {
+                pom.load(is);
+                this.mgwVersion = pom.getProperty("version");
+            }
+        } catch (IOException e) {
+            throw new CLIInternalException("Failed to initialize target ballerina project");
+        }
     }
 
     /**
@@ -97,5 +116,13 @@ public class BallerinaToml {
             // Windows paths contain '\' separator which causes issues when included in ballerina.toml
             this.toolkitHome = toolkitHome.replace('\\', '/');
         }
+    }
+
+    public String getMgwVersion() {
+        return mgwVersion;
+    }
+
+    public void setMgwVersion(String mgwVersion) {
+        this.mgwVersion = mgwVersion;
     }
 }
