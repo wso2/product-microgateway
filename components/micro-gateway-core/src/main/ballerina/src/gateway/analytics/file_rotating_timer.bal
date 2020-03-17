@@ -23,7 +23,7 @@ function sendFileRotatingEvent() returns error? {
     int cnt = 0;
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + filepath:getPathSeparator();
     printDebug(KEY_ROTATE_TASK, "Rotate file location : " + fileLocation);
-    string path = fileLocation + API_USAGE_FILE;
+    string path = fileLocation + TEMP_API_USAGE_FILE;
     if (file:exists(path)) {
         var result = rotateFile(path);
         if (result is string) {
