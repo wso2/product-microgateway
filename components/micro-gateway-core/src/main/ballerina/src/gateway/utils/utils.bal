@@ -391,14 +391,23 @@ public function rotateFile(string filePath) returns string | error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
-    var compressResult = compress(filePath, zipName);
+    string fileNameWithoutExtension = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." +
+        uuid;
+    string tempZipName = fileNameWithoutExtension + TMP_EXTENSION;
+    string zipName = fileNameWithoutExtension + ZIP_EXTENSION;
+    //until the compression happens, the file will have .tmp extension. After the compression is completed
+    //successfully, the file will be renamed with .zip extension. Only the files with .zip extension will be uploaded.
+    var compressResult = compress(filePath, tempZipName);
     if (compressResult is error) {
         printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
+        var renameResult = file:rename(tempZipName, zipName);
         var deleteResult = file:remove(filePath);
+        if (renameResult is error) {
+            printError(KEY_UTILS, "Failed to rename file", renameResult);
+        }
         if (deleteResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {

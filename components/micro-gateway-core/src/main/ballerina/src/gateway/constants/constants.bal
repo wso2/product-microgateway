@@ -134,6 +134,7 @@ public const string SUB_LEVEL_PREFIX = "sub_";
 
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
+public const string TMP_EXTENSION = ".tmp";
 public const string UPLOADING_URL = "uploadingUrl";
 public const string API_USAGE_FILE = "api-usage-data.dat";
 public const string TIME_INTERVAL = "timeInterval";
