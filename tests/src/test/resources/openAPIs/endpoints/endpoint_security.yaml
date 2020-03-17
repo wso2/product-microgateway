@@ -13,7 +13,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 x-wso2-basePath: /petstore/v5
-x-wso2-throttling-tier: 8PerMin
+x-wso2-throttling-tier: 15PerMin
 x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint2"
 security:
   - petstore_auth: []

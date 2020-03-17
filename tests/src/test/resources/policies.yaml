@@ -15,8 +15,8 @@ resourcePolicies:
      count: 3
      unitTime: 1
      timeUnit: min
-  - 8PerMin:
-     count: 8
+  - 15PerMin:
+     count: 15
      unitTime: 1
      timeUnit: min
 applicationPolicies:

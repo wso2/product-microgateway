@@ -25,6 +25,7 @@ public const string PRE_AUTHN_FILTER_REQUEST = "Pre_Authen_Filter_Request";
 public const string BASICAUTH_PROVIDER = "BasicAuth_Provider";
 public const string HASHING_MECHANISM = "Hashing_Mechanism";
 public const string BALLERINA_INBOUND_BASICAUTH = "Ballerina_Inbound_BasicAuth";
+public const string BASIC_AUTH_HANDLER_PROCESS = "Basic_Auth_Handler_Process";
 
 public const string JWT_AUTHENHANDLER_PROCESS = "Jwt_AuthenHandler_Process";
 public const string JWT_PROVIDER_AUTHENTICATE = "JWT_Provider_Authenticate";
