@@ -24,9 +24,6 @@ package org.wso2.apimgt.gateway.cli.model.template;
 public class BallerinaLibrary {
     private String module;
     private String path;
-    private String artifactId;
-    private String version;
-    private String groupId;
 
     public String getModule() {
         return module;
@@ -42,29 +39,5 @@ public class BallerinaLibrary {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public String getArtifactId() {
-        return artifactId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
     }
 }
