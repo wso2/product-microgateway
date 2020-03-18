@@ -91,7 +91,6 @@ public class ProtocCommandBuilder {
         String protocExePath = protocExeFile.getAbsolutePath(); // if file already exists will do nothing
         if (!protocExeFile.exists()) {
             logger.info("Downloading protoc executor file - " + protocFilename);
-            OUT.println("Downloading protoc compiler: " + protocFilename);
             String protocDownloadurl = PROTOC_PLUGIN_EXE_URL_SUFFIX + protocVersion + "/protoc-" + protocVersion
                     + "-" + OSDetector.getDetectedClassifier() + PROTOC_PLUGIN_EXE_PREFIX;
             File tempDownloadFile = new File(protocDirPath,
@@ -106,7 +105,6 @@ public class ProtocCommandBuilder {
                 throw e;
             }
             logger.debug("Download process is successfully completed. Executor file path - " + protocExeFile.getPath());
-            OUT.println("Download completed.");
         } else {
             grantPermission(protocExeFile);
             logger.info("Continue with existing protoc executor file at " + protocExeFile.getPath());
@@ -122,9 +120,17 @@ public class ProtocCommandBuilder {
     public static void downloadFile(URL url, File file) {
         try (InputStream in = url.openStream(); FileOutputStream fos = new FileOutputStream(file)) {
             int length;
-            byte[] buffer = new byte[1024]; // buffer for portion of data from
+            byte[] buffer = new byte[1024]; // buffer for portion of data
+            int count = 0;
             while ((length = in.read(buffer)) > -1) {
                 fos.write(buffer, 0, length);
+
+                // just to make it look we are doing something when file is downloading
+                count++;
+                if (count == 1000) {
+                    OUT.print('.');
+                    count = 0;
+                }
             }
         } catch (IOException e) {
             String msg = "Error while downloading the file: " + file.getName() + ". " + e.getMessage();

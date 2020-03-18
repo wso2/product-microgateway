@@ -129,7 +129,7 @@ public class BuildCmd implements LauncherCmd {
             }
             String toolkitConfigPath = CmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
-            outStream.print("Generating sources...\n");
+            outStream.print("Generating sources...");
 
             // Create policies directory
             String genPoliciesPath =

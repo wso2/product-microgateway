@@ -23,6 +23,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
@@ -1282,5 +1283,20 @@ public final class CmdUtils {
             }
         }
         return jars;
+    }
+
+    /**
+     * Formats a message based on the type of OS. On windows there will not
+     * be any formatting since Windows CMD may not output ASCII formatting.
+     * On other OSs message will be printed in bold.
+     *
+     * @param message message to be printed in the console
+     */
+    public static String format(String message) {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return message;
+        } else {
+            return "\033[0;1m" + message + "\033[0m";
+        }
     }
 }

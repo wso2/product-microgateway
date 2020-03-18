@@ -42,7 +42,7 @@ import java.util.UUID;
  */
 public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOperation, Operation> {
 
-    public static final String X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String X_THROTTLING_TIER = OpenAPIConstants.APIM_THROTTLING_TIER;
     public static final String X_SCOPE = "x-scope";
     public static final String X_AUTH_TYPE = "x-auth-type";
     public static final String AUTH_TYPE_NONE = "None";
