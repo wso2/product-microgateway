@@ -84,6 +84,7 @@ public const string USER_NAME_UNKNOWN = "Unknown";
 public const string UNKNOWN_VALUE = "__unknown__";
 public const string STATUS = "status";
 public const string PASSED = "passed";
+public const string FAILED = "failed";
 
 public const string FILTER_FAILED = "filter_failed";
 public const string SKIP_ALL_FILTERS = "skip_filters";

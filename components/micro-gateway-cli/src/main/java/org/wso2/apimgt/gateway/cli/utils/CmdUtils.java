@@ -33,7 +33,6 @@ import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
-import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -1273,40 +1272,17 @@ public final class CmdUtils {
     }
 
     public static List<String> getExternalJarDependencies(String projectName) {
-        List<String> jarNames = new ArrayList<>();
-        String externalJarFolder =
-                getProjectDirectoryPath(projectName) + File.separator + CliConstants.CLI_LIB;
-        File[] files = new File(externalJarFolder).listFiles();
-        if (files != null) {
-            for (File file : files) {
+        List<String> jars = new ArrayList<>();
+        String extJarDir = getProjectDirectoryPath(projectName) + File.separator + CliConstants.CLI_LIB;
+        File[] jarFiles = new File(extJarDir).listFiles();
+        if (jarFiles != null) {
+            for (File file : jarFiles) {
                 if (file.getName().endsWith(CliConstants.EXTENSION_JAR)) {
-                    jarNames.add(file.getName());
+                    jars.add(file.getAbsolutePath());
                 }
             }
         }
-        return jarNames;
-    }
-
-    public static void updateBallerinaToml(String projectName) throws IOException {
-        String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
-                + CliConstants.BALLERINA_TOML_FILE;
-        String templateFile =
-                CmdUtils.getMicroGWConfResourceLocation() + File.separator + CliConstants.BALLERINA_TOML_FILE;
-        String fileContent = CmdUtils.readFileAsString(templateFile, false);
-
-        // Windows paths contains '\' separator which causes issues when included in ballerina.toml
-        String unixHomePath = CmdUtils.getCLIHome().replace('\\', '/');
-        fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, unixHomePath);
-        String dependencyFileLocation = getProjectTargetModulePath(projectName) + File.separator
-                + GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
-        if (Files.exists(Paths.get(dependencyFileLocation))) {
-            String dependencyContent = CmdUtils.readFileAsString(dependencyFileLocation, false);
-            String unixProjectPath = getProjectDirectoryPath(projectName).replace('\\', '/');
-            dependencyContent = dependencyContent
-                    .replaceAll(CliConstants.MICROGW_PROJECT_PLACEHOLDER, unixProjectPath);
-            fileContent += dependencyContent;
-        }
-        Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
+        return jars;
     }
 
     /**

@@ -46,15 +46,10 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -734,37 +729,6 @@ public class OpenAPICodegenUtils {
             validateSingleResourceExtensions(entry.getValue().getOptions(), entry.getKey(), "options", openAPIFilePath);
             validateSingleResourceExtensions(entry.getValue().getTrace(), entry.getKey(), "trace", openAPIFilePath);
         });
-    }
-
-    /**
-     * Write ballerina dependency libraries to Ballerina.toml.
-     * These dependencies will be pulled from ballerina central
-     * during the mgw project build.
-     *
-     * @param projectName       The project name
-     * @param definitionContext Currently built ballerina service context
-     */
-    public static void writeDependencies(String projectName, BallerinaService definitionContext) {
-        if (definitionContext.getLibVersions() != null) {
-            HashMap<String, String> moduleVersionMap = definitionContext.getLibVersions();
-            String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
-                    + CliConstants.BALLERINA_TOML_FILE;
-            File file = new File(ballerinaTomlFile);
-            for (HashMap.Entry<String, String> entry : moduleVersionMap.entrySet()) {
-                try {
-                    List<String> content = Files.readAllLines(Paths.get(ballerinaTomlFile));
-                    Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
-                    String dependency = "\r\"" + entry.getKey() + "\" = \"" + entry.getValue() + "\"";
-                    if (!content.toString().contains(entry.getKey())) {
-                        PrintWriter printWriter = new PrintWriter(fileWriter);
-                        printWriter.print(dependency);
-                        printWriter.close();
-                    }
-                } catch (IOException e) {
-                    logger.error("Error occurred while writing module dependency to Ballerina.toml file.");
-                }
-            }
-        }
     }
 
     /**
