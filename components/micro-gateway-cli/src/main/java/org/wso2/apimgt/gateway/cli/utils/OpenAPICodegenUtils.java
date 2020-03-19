@@ -1163,4 +1163,8 @@ public class OpenAPICodegenUtils {
         }
         return basePath;
     }
+
+    public static void printMessageToConsole(String msg) {
+        outStream.println(msg);
+    }
 }

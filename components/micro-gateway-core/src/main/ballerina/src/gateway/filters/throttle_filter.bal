@@ -253,6 +253,9 @@ function isAPILevelThrottled(http:FilterContext context, string? apiVersion) ret
     if (apiVersion is string) {
         apiThrottleKey += ":" + apiVersion;
     }
+    if (enabledGlobalTMEventPublishing) {
+        apiThrottleKey += "_default";
+    }
     if (!enabledGlobalTMEventPublishing) {
         return isApiThrottled(apiThrottleKey);
     }
@@ -375,7 +378,7 @@ function generateGlobalThrottleEvent(http:Request req, http:FilterContext contex
     requestStreamDTO.appId = keyValidationDto.applicationId;
     setThrottleKeysWithVersion(requestStreamDTO, context);
     json properties = {};
-    requestStreamDTO.properties = properties.toString();
+    requestStreamDTO.properties = properties.toJsonString();
     return requestStreamDTO;
 }
 
@@ -385,10 +388,17 @@ function setCommonThrottleData(http:Request req, http:FilterContext context, Aut
     requestStreamDTO.appTier = keyValidationDto.applicationTier;
     requestStreamDTO.apiTier = getAPITier(context.getServiceName(), keyValidationDto.apiTier);
     requestStreamDTO.subscriptionTier = keyValidationDto.tier;
-    string resourceKey = context.getResourceName();
-    requestStreamDTO.resourceKey = resourceKey;
-    requestStreamDTO.resourceTier = getResourceTier(resourceKey);
     requestStreamDTO.apiKey = getContext(context);
+
+    if (requestStreamDTO.apiTier != UNLIMITED_TIER && requestStreamDTO.apiTier != "") {
+        requestStreamDTO.resourceTier = requestStreamDTO.apiTier;
+        requestStreamDTO.resourceKey = requestStreamDTO.apiKey;
+    } else {
+        string resourceKey = context.getResourceName();
+        requestStreamDTO.resourceTier = getResourceTier(resourceKey);
+        requestStreamDTO.resourceKey = resourceKey;
+    }
+
     requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context);
     return requestStreamDTO;

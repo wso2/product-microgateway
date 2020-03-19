@@ -149,6 +149,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         if (appSecurity != null && appSecurity.isOptional() != null) {
             this.applicationSecurityOptional = appSecurity.isOptional();
         }
+        addAPILevelPolicy(definition);
         setHasEpSecurity(endpointConfig);
         setPaths(definition);
         //set default auth providers for api level
@@ -248,15 +249,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.setSecuritySchemas(this.authProviders);
 
                 // if it is the developer first approach
-
-                //to add API-level throttling policy
-                Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
-                        .get(OpenAPIConstants.THROTTLING_TIER));
-                if (!apiThrottlePolicy.isPresent()) {
-                    apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.APIM_THROTTLING_TIER));
-                }
-                apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
                 //to add API-level security disable
                 Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
                         .get(OpenAPIConstants.DISABLE_SECURITY));
@@ -289,6 +281,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         if (!this.importModules.contains(importStmt) && (importStmt != null)) {
             this.importModules.add(importStmt);
         }
+    }
+
+    private void addAPILevelPolicy(OpenAPI openAPI) {
+        // if it is the developer first approach to add API-level throttling policy
+        Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                .get(OpenAPIConstants.THROTTLING_TIER));
+        if (!apiThrottlePolicy.isPresent()) {
+            apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                    .get(OpenAPIConstants.APIM_THROTTLING_TIER));
+        }
+        apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
     }
 
     /**

@@ -145,8 +145,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
             }
 
-            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
-            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
+
             Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
             Optional<Object> authType = Optional.ofNullable(exts.get(X_AUTH_TYPE));
@@ -155,9 +154,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
+            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
+            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
             //set dev-first resource level throttle policy
-            Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
-            extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            if (this.resourceTier == null) {
+                Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
+                extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            }
+            if (api.getApiLevelPolicy() != null && this.resourceTier != null) {
+                //if api level policy exists then we are neglecting the resource level policies
+                String message = "[WARN] : Resource level policy: " + this.resourceTier
+                        + " will be neglected due to the presence of API level policy: " + api.getApiLevelPolicy()
+                        + " for the API : " + api.getName();
+                OpenAPICodegenUtils.printMessageToConsole(message);
+                this.resourceTier = null;
+            }
             Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
             extDisableSecurity.ifPresent(value -> {
                 try {
