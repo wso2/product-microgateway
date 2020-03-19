@@ -95,7 +95,7 @@ public class BuildCmd implements LauncherCmd {
     private String dockerBaseImage;
 
     public void execute() {
-        runCallhome();
+        invokeCallhome();
 
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
@@ -338,7 +338,7 @@ public class BuildCmd implements LauncherCmd {
      * Invoke call home.
      *
      */
-    private void runCallhome() {
+    private void invokeCallhome() {
         String productHome = CmdUtils.getCLIHome();
         String trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
         String trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
