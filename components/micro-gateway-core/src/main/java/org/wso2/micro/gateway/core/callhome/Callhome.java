@@ -18,7 +18,6 @@ package org.wso2.micro.gateway.core.callhome;
 
 import org.wso2.callhome.CallHomeExecutor;
 import org.wso2.callhome.utils.CallHomeInfo;
-import org.wso2.callhome.utils.MessageFormatter;
 import org.wso2.callhome.utils.Util;
 import org.wso2.micro.gateway.core.Constants;
 

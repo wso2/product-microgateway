@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerinax/java;
-import ballerina/log;
 
 # Invoke callhome.
 #

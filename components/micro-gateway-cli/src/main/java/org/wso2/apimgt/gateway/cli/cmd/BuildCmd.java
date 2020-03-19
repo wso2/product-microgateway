@@ -345,9 +345,15 @@ public class BuildCmd implements LauncherCmd {
 
         CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
         CallHomeExecutor.execute(callhomeinfo);
-        String callHomeResponse = CallHomeExecutor.getMessage();
-        String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
-        outStream.println(formattedMessage);
+
+        Thread callHomeThread = new Thread(() -> {
+            String callHomeResponse = CallHomeExecutor.getMessage();
+            String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+            outStream.println(formattedMessage);
+        });
+        callHomeThread.setName("callHomeThread");
+        callHomeThread.start();
+
     }
 
 
