@@ -99,9 +99,9 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher) 
-            && stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) {
+            && stringutils:equalsIgnoreCase("", requestResponseExecutionDTO.apiCreator)) {
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
-        } else if (stringutils:equalsIgnoreCase("", <string>requestResponseExecutionDTO.apiCreator)) { 
+        } else if (stringutils:equalsIgnoreCase("", requestResponseExecutionDTO.apiCreator)) {
             requestResponseExecutionDTO.apiCreator = UNKNOWN_VALUE;
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
@@ -164,9 +164,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     requestResponseExecutionDTO.applicationOwner = <string>context.attributes[APPLICATION_OWNER_PROPERTY];
     requestResponseExecutionDTO.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
     requestResponseExecutionDTO.apiTier = <string>context.attributes[API_TIER_PROPERTY];
-
     requestResponseExecutionDTO.throttledOut = <boolean>context.attributes[CONTINUE_ON_TROTTLE_PROPERTY];
-
     requestResponseExecutionDTO.userAgent = <string>context.attributes[USER_AGENT_PROPERTY];
     requestResponseExecutionDTO.userIp = <string>context.attributes[USER_IP_PROPERTY];
     requestResponseExecutionDTO.requestTimestamp = <int>context.attributes[REQUEST_TIME_PROPERTY];

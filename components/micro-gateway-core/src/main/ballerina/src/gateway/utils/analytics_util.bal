@@ -68,9 +68,9 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
         if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)
-                && stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+                && stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
             eventDto.apiCreator = <string>apiConfiguration.publisher;
-        } else if (stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+        } else if (stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
             //sets API creator if x-wso2-owner extension not specified.
             eventDto.apiCreator = UNKNOWN_VALUE;
         }
@@ -128,9 +128,9 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
         if (!stringutils:equalsIgnoreCase("", <string>apiConfig.publisher)
-                && stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+                && stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
             eventDto.apiCreator = <string>apiConfig.publisher;
-        } else if (stringutils:equalsIgnoreCase("", <string>eventDto.apiCreator)) {
+        } else if (stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
             //sets API creator if x-wso2-owner extension not specified.
             eventDto.apiCreator = UNKNOWN_VALUE;
         }
