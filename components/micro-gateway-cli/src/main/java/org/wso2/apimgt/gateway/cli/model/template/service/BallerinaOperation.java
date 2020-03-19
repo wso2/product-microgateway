@@ -28,6 +28,7 @@ import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.ArrayList;
@@ -165,8 +166,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 //if api level policy exists then we are neglecting the resource level policies
                 String message = "[WARN] : Resource level policy: " + this.resourceTier
                         + " will be neglected due to the presence of API level policy: " + api.getApiLevelPolicy()
-                        + " for the API : " + api.getName();
-                OpenAPICodegenUtils.printMessageToConsole(message);
+                        + " for the API : " + api.getName() + "\n";
+                CmdUtils.appendMessagesToConsole(message);
                 this.resourceTier = null;
             }
             Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
