@@ -42,7 +42,6 @@ import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 import org.wso2.callhome.CallHomeExecutor;
-import org.wso2.callhome.core.DataHolder;
 import org.wso2.callhome.utils.CallHomeInfo;
 import org.wso2.callhome.utils.MessageFormatter;
 import org.wso2.callhome.utils.Util;
@@ -58,10 +57,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -352,7 +347,7 @@ public class BuildCmd implements LauncherCmd {
         CallHomeExecutor.execute(callhomeinfo);
         String callHomeResponse = CallHomeExecutor.getMessage();
         String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
-        outStream.print(formattedMessage);
+        outStream.println(formattedMessage);
     }
 
 
