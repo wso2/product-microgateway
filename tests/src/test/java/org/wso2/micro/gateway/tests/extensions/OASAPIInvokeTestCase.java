@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.tests.extensions;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.micro.gateway.tests.common.BaseTestCase;
@@ -54,7 +53,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
         //generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"common_api.yaml"});
+        super.init(project, new String[]{"common_api.yaml", "throttling/throttle.yaml"});
     }
 
     @Test(description = "Test API invocation with a JWT token")
@@ -63,7 +62,7 @@ public class OASAPIInvokeTestCase extends BaseTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("petstore/v1/pet/1"), headers);
+                .doGet(getServiceURLHttp("petstore/v2/pet/1"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.petByIdResponse);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");

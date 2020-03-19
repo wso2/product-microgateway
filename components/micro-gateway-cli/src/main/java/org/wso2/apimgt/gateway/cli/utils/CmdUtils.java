@@ -88,6 +88,7 @@ public final class CmdUtils {
     private static final String openAPISpec2 = "2";
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
+    private static String consoleMessages = "";
 
     private CmdUtils() {
 
@@ -1299,4 +1300,15 @@ public final class CmdUtils {
             return "\033[0;1m" + message + "\033[0m";
         }
     }
+
+    public static void appendMessagesToConsole(String msg) {
+        consoleMessages += msg;
+    }
+
+    public static void printMessagesToConsole() {
+        if (!"".equals(consoleMessages)) {
+            OUT.println(consoleMessages);
+        }
+    }
+
 }
