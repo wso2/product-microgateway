@@ -15,11 +15,27 @@
 // under the License.
 
 import ballerinax/java;
+import ballerina/log;
 
 # Invoke callhome.
 #
-public function invokeCallHome() = @java:Method  {
+# + trustStoreLocation - truststore location
+# + trustStorePassword - truststore password
+public function runCallHome(handle trustStoreLocation, handle trustStorePassword ) = @java:Method  {
     name: "runCallHome",
     class: "org.wso2.micro.gateway.core.callhome.Callhome"
 } external;
 
+public function invokeCallHome() {
+    handle trustStoreLocationUnresolve = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH));
+    handle trustStoreLocation = getTrustStoreLocation(trustStoreLocationUnresolve);
+    string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+
+    runCallHome(trustStoreLocation,java:fromString(trustStorePassword));
+}
+
+
+public function getTrustStoreLocation(handle pathsubstring) returns handle = @java:Method  {
+    name: "getTrustStoreLocation",
+    class: "org.wso2.micro.gateway.core.callhome.Callhome"
+} external;

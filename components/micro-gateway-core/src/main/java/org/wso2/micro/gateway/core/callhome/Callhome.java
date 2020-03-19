@@ -18,32 +18,30 @@ package org.wso2.micro.gateway.core.callhome;
 
 import org.wso2.callhome.CallHomeExecutor;
 import org.wso2.callhome.utils.CallHomeInfo;
+import org.wso2.callhome.utils.MessageFormatter;
 import org.wso2.callhome.utils.Util;
 import org.wso2.micro.gateway.core.Constants;
 
-import java.io.File;
 /**
- * Invoke call home
+ * Invoke call home.
  *
  *
  */
 public class Callhome {
 
     /**
-     * run call home
+     * run call home.
      *
      */
-    public static void runCallHome() {
+    public static void runCallHome(String trustStoreLocation, String trustStorePassword) {
         String productHome = getRuntimeHome();
-        String trustStoreLocation = getTrustStoreLocation();
-        String trustStorePassword = Constants.TRUST_STORE_PASSWORD;
 
         CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
         CallHomeExecutor.execute(callhomeinfo);
     }
 
     /**
-     * Get runtime home location
+     * Get runtime home location.
      *
      * @return runtime home location
      */
@@ -52,11 +50,14 @@ public class Callhome {
     }
 
     /**
-     * Get truststore location
+     * Get truststore location.
      *
      * @return truststore location
      */
-    private static String getTrustStoreLocation() {
-        return getRuntimeHome() + File.separator + Constants.TRUST_STORE_LOCATION;
+    public static String getTrustStoreLocation(String fullpath) {
+        String homePathConst = "\\$\\{mgw-runtime.home}";
+        String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
+        String correctPath = fullpath.replaceAll(homePathConst, homePath);
+        return correctPath;
     }
 }
