@@ -148,6 +148,8 @@
                 <include>org.slf4j:slf4j-jdk14</include>
                 <include>org.apache.commons:commons-lang3</include>
                 <include>commons-pool.wso2:commons-pool</include>
+                <include>org.wso2.carbon.callhome:core</include>
+                <include>org.wso2.carbon.callhome:core</include>
             </includes>
         </dependencySet>
     </dependencySets>

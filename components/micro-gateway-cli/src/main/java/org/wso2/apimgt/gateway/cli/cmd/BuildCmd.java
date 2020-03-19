@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
@@ -40,6 +41,11 @@ import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
+import org.wso2.callhome.CallHomeExecutor;
+import org.wso2.callhome.core.DataHolder;
+import org.wso2.callhome.utils.CallHomeInfo;
+import org.wso2.callhome.utils.MessageFormatter;
+import org.wso2.callhome.utils.Util;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,6 +58,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -90,6 +100,8 @@ public class BuildCmd implements LauncherCmd {
     private String dockerBaseImage;
 
     public void execute() {
+        runCallhome();
+
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
             outStream.println(commandUsageInfo);
@@ -326,5 +338,23 @@ public class BuildCmd implements LauncherCmd {
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
         CmdUtils.createDirectory(projectModuleDir, true);
     }
+
+    /**
+     * Invoke call home.
+     *
+     */
+    private void runCallhome() {
+        String productHome = CmdUtils.getCLIHome();
+        String trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
+        String trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+
+        CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
+        CallHomeExecutor.execute(callhomeinfo);
+        String callHomeResponse = CallHomeExecutor.getMessage();
+        String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+        outStream.print(formattedMessage);
+    }
+
+
 
 }
