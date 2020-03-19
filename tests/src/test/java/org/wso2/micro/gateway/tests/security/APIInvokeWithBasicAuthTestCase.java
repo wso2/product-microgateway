@@ -60,6 +60,14 @@ public class APIInvokeWithBasicAuthTestCase extends APIInvokeWithOAuthTestCase {
         //test endpoint
         invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
         invokeWithLowercaseBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        // user stored with sha256 password in the default-test-config.conf
+        String sha256HashedUser = "user1:password";
+        basicAuthToken = Base64.getEncoder().encodeToString(sha256HashedUser.getBytes());
+        invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
+        // user stored with sha512 password in the default-test-config.conf
+        String sha512HashedUser = "user2:password1";
+        basicAuthToken = Base64.getEncoder().encodeToString(sha512HashedUser.getBytes());
+        invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
     }
 
     @Test(description = "Test API invocation with Basic Auth")
