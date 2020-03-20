@@ -57,6 +57,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -94,6 +96,7 @@ public class BuildCmd implements LauncherCmd {
     @Parameter(names = "--docker-base-image")
     private String dockerBaseImage;
 
+    private CountDownLatch latch = new CountDownLatch(1);
     public void execute() {
 
         if (helpFlag) {
@@ -102,6 +105,7 @@ public class BuildCmd implements LauncherCmd {
             return;
         }
 
+        runCallHomeSeparateThread();
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(CmdUtils.getProjectDirectoryPath(projectName));
         try {
@@ -159,8 +163,9 @@ public class BuildCmd implements LauncherCmd {
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
             outStream.print(CmdUtils.format("[DONE]\n"));
-            runCallHomeSeperateThread();
-        } catch (IOException e) {
+            //wait until call home thread finishes the task.
+            latch.await(10, TimeUnit.SECONDS);
+        } catch (IOException | InterruptedException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
         }
@@ -364,10 +369,12 @@ public class BuildCmd implements LauncherCmd {
 
             String callHomeResponse = CallHomeExecutor.getMessage();
             String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
-            outStream.println(formattedMessage);
+            CmdUtils.setCallHomeMessage(formattedMessage);
+            latch.countDown();
         } catch (Exception e) {
             // All the exceptions during call home should be caught in order to continue the toolkit build process.
             logger.error("Error while initialising call home functionality", e);
+            latch.countDown();
         }
     }
 
@@ -396,7 +403,7 @@ public class BuildCmd implements LauncherCmd {
      * This method will do the call home functionality in a separate thread.
      *
      */
-    private void runCallHomeSeperateThread() {
+    private void runCallHomeSeparateThread() {
         Thread callHomeThread = new Thread(() -> {
             invokeCallHome();
         });
