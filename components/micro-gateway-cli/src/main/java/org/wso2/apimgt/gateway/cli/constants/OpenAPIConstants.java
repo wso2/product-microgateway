@@ -31,7 +31,6 @@ public class OpenAPIConstants {
     public static final String TRANSPORT_SECURITY = "x-wso2-transports";
     public static final String MUTUAL_SSL = "x-wso2-mutual-ssl";
     public static final String APPLICATION_SECURITY = "x-wso2-application-security";
-    public static final String CONTEXT_TEMPLATE = "x-wso2-context-template";
     public static final String APPLICATION_SECURITY_TYPES = "security-types";
     public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     public static final String TRANSPORT_HTTP = "http";

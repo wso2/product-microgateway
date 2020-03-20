@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  description: "This is a sample server Petstore server.  You can find out more about
+    Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
+    #swagger](http://swagger.io/irc/).  For this sample, you can use the api key
+    `special-key` to test the authorization filters."
+  version: 2.0.0
+  title: PetStoreAPI
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+x-wso2-basePath: /petstore/v2
+x-wso2-production-endpoints:
+  urls:
+    - https://localhost:2380/v2
+security:
+  - petstore_auth: []
+x-wso2-sandbox-endpoints:
+  urls:
+    - https://localhost:2380/v2
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+  - name: store
+    description: Access to Petstore orders
+  - name: user
+    description: Operations about user
+    externalDocs:
+      description: Find out more about our store
+      url: http://swagger.io
+paths:
+  "/store/order/{orderId}":
+    get:
+      tags:
+        - store
+      summary: Find purchase order by ID
+      description: For valid response try integer IDs with value >= 1 and <= 10. Other
+        values will generated exceptions
+      operationId: getOrderById
+      x-wso2-throttling-tier: NonExistingPolicy
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of pet that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Order"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Order not found
+  "/pet/{petId}":
+    get:
+      tags:
+        - pet
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      x-wso2-throttling-tier: 3PerMin
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Pet"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+      security:
+        - api_key: []
+          api_key_query: []
+        - petstore_auth: []

@@ -35,12 +35,12 @@ import java.util.Map;
  */
 public class OpenApiThrottlingTestCase extends OASAPIInvokeTestCase {
     private HttpResponse response;
-    private String perResourceUrl = "petstore/v1/pet/1";
+    private String perResourceUrl = "petstore/v2/pet/2";
 
     @Test(description = "Test throttling with non existing policy")
     public void testThrottlingWithNonExistingPolicy() throws Exception {
         response = invokeAndAssert(jwtTokenProd,
-                getServiceURLHttp("/petstore/v1/store/order/1"));
+                getServiceURLHttp("/petstore/v2/store/order/1"));
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.NONEXISTING_THROTTLEPOLICY_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 500, "Internal server error occured");

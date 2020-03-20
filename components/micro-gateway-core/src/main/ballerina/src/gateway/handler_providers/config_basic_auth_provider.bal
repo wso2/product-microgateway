@@ -19,6 +19,7 @@ import ballerina/crypto;
 import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as strings;
 import ballerina/runtime;
+import ballerina/config;
 
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
@@ -88,7 +89,12 @@ public type BasicAuthProvider object {
         //Starting a new span
         int | error | () spanHash = startSpan(HASHING_MECHANISM);
         //Hashing mechanism
-        string hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
+        string passwordFromConfig = readPassword(userName);
+        string hashedPass = password;
+        // this is to support backward compatibility with 3.0.x where only sha1 was supported for hashing.
+        if(passwordFromConfig != "" && !passwordFromConfig.startsWith(SHA_PREFIX)) {
+            hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
+        }
         printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
         string credentials = userName + ":" + hashedPass;
         string hashedRequest;
@@ -139,3 +145,13 @@ public type BasicAuthProvider object {
     }
 
 };
+
+# Reads the password hash for a user.
+#
+# + username - Username
+# + return - Password hash read from userstore, or nil if not found
+function readPassword(string username) returns string {
+    // first read the user id from user->id mapping
+    // read the hashed password from the user-store file, using the user id
+    return config:getAsString(CONFIG_USER_SECTION + "." + username + "." + PASSWORD, "");
+}
