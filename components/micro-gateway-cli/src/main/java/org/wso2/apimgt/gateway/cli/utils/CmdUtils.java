@@ -89,6 +89,7 @@ public final class CmdUtils {
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
     private static String consoleMessages = "";
+    private static String callHomeMessage = "";
 
     private CmdUtils() {
 
@@ -1308,6 +1309,16 @@ public final class CmdUtils {
     public static void printMessagesToConsole() {
         if (!"".equals(consoleMessages)) {
             OUT.println(consoleMessages);
+        }
+    }
+
+    public static void setCallHomeMessage(String message) {
+        callHomeMessage = message;
+    }
+
+    public static void printCallHomeMessage() {
+        if (!"".equals(callHomeMessage)) {
+            OUT.println(callHomeMessage);
         }
     }
 

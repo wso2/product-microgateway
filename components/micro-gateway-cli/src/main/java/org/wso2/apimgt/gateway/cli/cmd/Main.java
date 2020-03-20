@@ -49,6 +49,8 @@ public class Main {
             invokedCmd = getInvokedCmd(args);
             invokedCmd.ifPresent(LauncherCmd::execute);
             CmdUtils.printMessagesToConsole();
+            CmdUtils.printCallHomeMessage();
+            Runtime.getRuntime().exit(0);
         } catch (CliLauncherException e) {
             err.println(e.getMessages());
             Throwable cause = e.getCause();
