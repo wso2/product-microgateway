@@ -96,7 +96,7 @@ public class BuildCmd implements LauncherCmd {
 
     public void execute() {
         Thread callHomeThread = new Thread(() -> {
-            invokeCallhome();
+            invokeCallHome();
         });
         callHomeThread.setName("callHomeThread");
         callHomeThread.start();
@@ -343,31 +343,36 @@ public class BuildCmd implements LauncherCmd {
      * Invoke call home.
      *
      */
-    private void invokeCallhome() {
-        String productHome = CmdUtils.getCLIHome();
-        String trustStoreLocation;
-        String trustStorePassword;
+    private void invokeCallHome() {
+        try {
+            String productHome = CmdUtils.getCLIHome();
+            String trustStoreLocation;
+            String trustStorePassword;
 
-        String toolkitConfigPath = CmdUtils.getMainConfigLocation();
-        initConfig(toolkitConfigPath);
-        Config config = CmdUtils.getConfig();
-        String storeLocation = config.getToken().getTrustStoreLocation();
-        String storePassword = config.getToken().getTrustStorePassword();
+            String toolkitConfigPath = CmdUtils.getMainConfigLocation();
+            initConfig(toolkitConfigPath);
+            Config config = CmdUtils.getConfig();
+            String storeLocation = config.getToken().getTrustStoreLocation();
+            String storePassword = config.getToken().getTrustStorePassword();
 
-        if (storeLocation.isEmpty() || storePassword.isEmpty()) {
-            trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
-            trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
-        } else {
-            trustStoreLocation = storeLocation;
-            trustStorePassword = storePassword;
+            if (storeLocation.isEmpty() || storePassword.isEmpty()) {
+                trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
+                trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+            } else {
+                trustStoreLocation = storeLocation;
+                trustStorePassword = storePassword;
+            }
+
+            CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
+            CallHomeExecutor.execute(callhomeinfo);
+
+            String callHomeResponse = CallHomeExecutor.getMessage();
+            String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+            outStream.println(formattedMessage);
+        } catch (Exception e) {
+            // All the exceptions during call home should be caught in order to continue the toolkit build process.
+            logger.error("Error while initialising call home functionality", e);
         }
-
-        CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
-        CallHomeExecutor.execute(callhomeinfo);
-
-        String callHomeResponse = CallHomeExecutor.getMessage();
-        String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
-        outStream.println(formattedMessage);
     }
 
     /**
