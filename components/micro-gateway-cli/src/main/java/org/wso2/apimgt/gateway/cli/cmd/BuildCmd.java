@@ -95,7 +95,11 @@ public class BuildCmd implements LauncherCmd {
     private String dockerBaseImage;
 
     public void execute() {
-        invokeCallhome();
+        Thread callHomeThread = new Thread(() -> {
+            invokeCallhome();
+        });
+        callHomeThread.setName("callHomeThread");
+        callHomeThread.start();
 
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
@@ -340,22 +344,51 @@ public class BuildCmd implements LauncherCmd {
      */
     private void invokeCallhome() {
         String productHome = CmdUtils.getCLIHome();
-        String trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
-        String trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+        String trustStoreLocation;
+        String trustStorePassword;
+
+        String toolkitConfigPath = CmdUtils.getMainConfigLocation();
+        initConfig(toolkitConfigPath);
+        Config config = CmdUtils.getConfig();
+        String storeLocation = config.getToken().getTrustStoreLocation();
+        String storePassword = config.getToken().getTrustStorePassword();
+
+        if (storeLocation.isEmpty() || storePassword.isEmpty()) {
+            trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
+            trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+        } else {
+            trustStoreLocation = storeLocation;
+            trustStorePassword = storePassword;
+        }
 
         CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
         CallHomeExecutor.execute(callhomeinfo);
 
-        Thread callHomeThread = new Thread(() -> {
-            String callHomeResponse = CallHomeExecutor.getMessage();
-            String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
-            outStream.println(formattedMessage);
-        });
-        callHomeThread.setName("callHomeThread");
-        callHomeThread.start();
-
+        String callHomeResponse = CallHomeExecutor.getMessage();
+        String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+        outStream.println(formattedMessage);
     }
 
+    /**
+     * init configuration.
+     *
+     * @param configPath path of the configureation file.
+     */
+    private static void initConfig(String configPath) {
+        try {
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                CmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
+    }
 
 
 }
