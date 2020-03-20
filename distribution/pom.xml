@@ -83,7 +83,7 @@
             <version>${com.google.guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
@@ -165,7 +165,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.json</includeGroupIds>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.json.wso2</includeGroupIds>
                             <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json</includeArtifactIds>
                         </configuration>
                     </execution>

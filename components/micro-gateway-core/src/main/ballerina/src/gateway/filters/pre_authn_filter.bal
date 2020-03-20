@@ -66,6 +66,7 @@ returns boolean {
 
     context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
     context.attributes[FILTER_FAILED] = false;
+    invocationContext.attributes[FILTER_FAILED] = false;
     string serviceName = context.getServiceName();
     string resourceName = context.getResourceName();
     invocationContext.attributes[SERVICE_TYPE_ATTR] = context.getService();
