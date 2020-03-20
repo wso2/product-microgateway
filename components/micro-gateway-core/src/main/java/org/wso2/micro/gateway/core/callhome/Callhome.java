@@ -16,6 +16,8 @@
 
 package org.wso2.micro.gateway.core.callhome;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.callhome.CallHomeExecutor;
 import org.wso2.callhome.utils.CallHomeInfo;
 import org.wso2.callhome.utils.Util;
@@ -26,14 +28,21 @@ import org.wso2.micro.gateway.core.Constants;
  */
 public class Callhome {
 
+    private static final Logger log = LoggerFactory.getLogger("ballerina");
+
     /**
      * run call home.
      */
     public static void runCallHome(String trustStoreLocation, String trustStorePassword) {
-        String productHome = getRuntimeHome();
+        try {
+            String productHome = getRuntimeHome();
+            CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
+            CallHomeExecutor.execute(callhomeinfo);
 
-        CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
-        CallHomeExecutor.execute(callhomeinfo);
+        } catch (Exception e) {
+            // All the exceptions during call home should be caught in order to continue gateway process.
+            log.error("Error while initialising call home functionality", e);
+        }
     }
 
     /**
