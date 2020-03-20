@@ -1,7 +1,6 @@
 import wso2/gateway;
 
 public function main() {
-    gateway:invokeCallHome();
     int totalResourceLength = 0;
     boolean isRequestValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
     gateway:REQUEST_VALIDATION_ENABLED, gateway:DEFAULT_REQUEST_VALIDATION_ENABLED);
@@ -30,4 +29,6 @@ public function main() {
 
     {{>jwtRevocation}}
     startupExtension();
+
+    future<()> callhome = start gateway:invokeCallHome();
 }
