@@ -176,11 +176,11 @@ public class BasicGrpcTestCase extends BaseTestCase {
             InterruptedException {
         ManagedChannel channel = ManagedChannelBuilder.forTarget(targetUrl).usePlaintext().build();
         try {
-            ThrottlingBlockingClient client = new ThrottlingBlockingClient(channel, token);
+            JwtAuthBlockingClient client = new JwtAuthBlockingClient(channel, token);
             for (int i=0; i< 30; i++) {
-                client.testCallServiceThrottling(requestText);
+                client.testCall(requestText);
             }
-            return client.testCallServiceThrottling(requestText);
+            return client.testCall(requestText);
         } finally {
             channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
         }
