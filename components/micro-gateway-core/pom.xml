@@ -123,7 +123,6 @@
         <dependency>
             <groupId>org.wso2.carbon.callhome</groupId>
             <artifactId>core</artifactId>
-            <version>${carbon.callhome.version}</version>
         </dependency>
     </dependencies>
 
