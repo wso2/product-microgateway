@@ -38,7 +38,8 @@ public type AnalyticsRequestFilter object {
             return true;
         }
         if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
-            boolean filterFailed = <boolean>context.attributes[FILTER_FAILED];
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            boolean filterFailed = <boolean>invocationContext.attributes[FILTER_FAILED];
             if (context.attributes.hasKey(IS_THROTTLE_OUT)) {
                 boolean isThrottleOut = <boolean>context.attributes[IS_THROTTLE_OUT];
                 if (isThrottleOut) {
