@@ -33,8 +33,8 @@ REM Set global variables
 SET PRGDIR=%~dp0
 SET GW_HOME=%PRGDIR%..
 SET MGW_VERSION="3.1.0"
-SET CONF_FILE=%GW_HOME%\conf\micro-gw.conf
-SET CONF_OUT_FILE=%GW_HOME%\.config
+SET CONF_FILE="%GW_HOME%\conf\micro-gw.conf"
+SET CONF_OUT_FILE="%GW_HOME%\.config"
 SET IS_METRICS_ENABLED=F
 SET EXEC_FILE=
 SET BAL_ARGS=
@@ -63,7 +63,7 @@ REM ----------------------------------------------------------------------------
 REM Check for verssion command
 IF "%~1"=="version" (
     IF EXIST %GW_HOME%\version.txt (
-        type %GW_HOME%\version.txt
+        type "%GW_HOME%\version.txt"
         EXIT/B 0
     )
 )
@@ -77,7 +77,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO END
 SET EXEC_FILE=%~1
 CALL :buildBalArgs %*
 
-CALL :runTools "%CONF_FILE% %CONF_OUT_FILE%"
+CALL :runTools %CONF_FILE% %CONF_OUT_FILE%
 
 IF "%b7a_observability_metrics_enabled%"=="true" (
     SET IS_METRICS_ENABLED=T
@@ -131,16 +131,17 @@ REM ----------------------------------------------------------------------------
 REM Start the gateway using internal ballerina distribution as the runtime
 :startGateway
     REM Check if powershell is available
-    SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=%GW_HOME%\heap-dump.hprof
     WHERE POWERSHELL >NUL 2>NUl
 
     IF %ERRORLEVEL% NEQ 0 (
         ECHO WARN: Can't find powershell in the system!
         ECHO WARN: STDERR and STDOUT will be piped to %GW_HOME%\logs\microgateway.log
-        "%JAVA_HOME%\bin\java.exe" %JAVA_ARGS% -Dmgw-runtime.home=%GW_HOME% -Dballerina.home=%GW_HOME%/runtime -Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader -Djava.util.logging.manager=org.ballerinalang.logging.BLogManager -jar "%EXEC_FILE%" %BAL_ARGS% --api.usage.data.path=%USAGE_DATA_PATH% --b7a.config.file="%GW_HOME%\conf\micro-gw.conf" >> "%GW_HOME%\logs\microgateway.log" 2>&1
+        SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%GW_HOME%\heap-dump.hprof"
+        "%JAVA_HOME%\bin\java.exe" %JAVA_ARGS% -Dmgw-runtime.home"=%GW_HOME%" -Dballerina.home="%GW_HOME%/runtime" -Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader -Djava.util.logging.manager=org.ballerinalang.logging.BLogManager -jar "%EXEC_FILE%" %BAL_ARGS% --api.usage.data.path="%USAGE_DATA_PATH%" --b7a.config.file="%GW_HOME%\conf\micro-gw.conf" >> "%GW_HOME%\logs\microgateway.log" 2>&1
 
         EXIT /B %ERRORLEVEL%
     ) ELSE (
+        SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
         REM Get short path for java_home in case java_home was picked from a
         REM standard installation dir with space in the path ex: "program files"
         FOR %%I IN ("%JAVA_HOME%") DO SET JAVA_HOME=%%~sI
@@ -154,11 +155,11 @@ REM Start the gateway using internal ballerina distribution as the runtime
 
         REM TODO: Possible solution for this complexity can be Add-Content Cmdlet. Do some RnD on it.
         IF !PSVersion! LEQ 3 (
-            CALL POWERSHELL "%JAVA_HOME%\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | out-file -encoding Unicode -filepath '%GW_HOME%\logs\microgateway.log' -Append"
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | out-file -encoding Unicode -filepath '%GW_HOME%\logs\microgateway.log' -Append"
             EXIT /B %ERRORLEVEL%
         ) ELSE (
             REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReade' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append %GW_HOME%\logs\microgateway.log"
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReade' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append '%GW_HOME%\logs\microgateway.log'
             EXIT /B %ERRORLEVEL%
         )
     )
@@ -185,14 +186,14 @@ REM Validate the provided runtime artifact
 REM Run a command on external tool library
 REM arg0: command and other arguments to pass to tool library
 :runTools
-    SET METRIC_CLASSPATH=%GW_HOME%\lib\gateway\*
+    SET METRIC_CLASSPATH="%GW_HOME%\lib\gateway\*"
     SET JAVA_CMD=-Xms256m -Xmx1024m ^
         -XX:+HeapDumpOnOutOfMemoryError ^
         -XX:HeapDumpPath="%GW_HOME%\heap-dump.hprof" ^
         %JAVA_OPTS% ^
         -classpath %METRIC_CLASSPATH%
 
-    "%JAVA_HOME%\bin\java.exe" %JAVA_CMD% org.wso2.micro.gateway.tools.Main %~1
+    "%JAVA_HOME%\bin\java.exe" %JAVA_CMD% org.wso2.micro.gateway.tools.Main "%~1" "%~2"
 
     EXIT /B %ERRORLEVEL%
 
