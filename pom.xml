@@ -402,9 +402,9 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
+                <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
+                <version>${org.wso2.json.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -613,7 +613,7 @@
         <jackson-core.version>2.9.9</jackson-core.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
         <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
-        <org.json.version>20190722</org.json.version>
+        <org.wso2.json.version>3.0.0.wso2v1</org.wso2.json.version>
         <carbon.callhome.version>1.0.4</carbon.callhome.version>
     </properties>
 

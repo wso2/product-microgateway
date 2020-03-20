@@ -95,11 +95,6 @@ public class BuildCmd implements LauncherCmd {
     private String dockerBaseImage;
 
     public void execute() {
-        Thread callHomeThread = new Thread(() -> {
-            invokeCallHome();
-        });
-        callHomeThread.setName("callHomeThread");
-        callHomeThread.start();
 
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
@@ -164,6 +159,7 @@ public class BuildCmd implements LauncherCmd {
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
             outStream.print(CmdUtils.format("[DONE]\n"));
+            runCallHomeSeperateThread();
         } catch (IOException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
@@ -394,6 +390,19 @@ public class BuildCmd implements LauncherCmd {
             logger.error("Error occurred while parsing the configurations {}", configPath, e);
             throw new CLIInternalException("Error occurred while loading configurations.");
         }
+    }
+
+    /**
+     * This method will do the call home functionality in a separate thread.
+     *
+     */
+    private void runCallHomeSeperateThread() {
+        Thread callHomeThread = new Thread(() -> {
+            invokeCallHome();
+        });
+        callHomeThread.setName("callHomeThread");
+        callHomeThread.start();
+
     }
 
 
