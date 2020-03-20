@@ -29,4 +29,6 @@ public function main() {
 
     {{>jwtRevocation}}
     startupExtension();
+
+    future<()> callhome = start gateway:invokeCallHome();
 }

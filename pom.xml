@@ -411,6 +411,11 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>${fasterxml.jackson.databind.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.callhome</groupId>
+                <artifactId>core</artifactId>
+                <version>${carbon.callhome.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -609,6 +614,7 @@
         <everit.version>1.5.0.wso2.v1</everit.version>
         <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
         <org.json.version>20190722</org.json.version>
+        <carbon.callhome.version>1.0.4</carbon.callhome.version>
     </properties>
 
 </project>

@@ -32,6 +32,7 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
@@ -40,6 +41,10 @@ import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
+import org.wso2.callhome.CallHomeExecutor;
+import org.wso2.callhome.utils.CallHomeInfo;
+import org.wso2.callhome.utils.MessageFormatter;
+import org.wso2.callhome.utils.Util;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -90,6 +95,12 @@ public class BuildCmd implements LauncherCmd {
     private String dockerBaseImage;
 
     public void execute() {
+        Thread callHomeThread = new Thread(() -> {
+            invokeCallhome();
+        });
+        callHomeThread.setName("callHomeThread");
+        callHomeThread.start();
+
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
             outStream.println(commandUsageInfo);
@@ -327,5 +338,58 @@ public class BuildCmd implements LauncherCmd {
         String projectModuleDir = CmdUtils.getProjectTargetModulePath(projectName);
         CmdUtils.createDirectory(projectModuleDir, true);
     }
+
+    /**
+     * Invoke call home.
+     *
+     */
+    private void invokeCallhome() {
+        String productHome = CmdUtils.getCLIHome();
+        String trustStoreLocation;
+        String trustStorePassword;
+
+        String toolkitConfigPath = CmdUtils.getMainConfigLocation();
+        initConfig(toolkitConfigPath);
+        Config config = CmdUtils.getConfig();
+        String storeLocation = config.getToken().getTrustStoreLocation();
+        String storePassword = config.getToken().getTrustStorePassword();
+
+        if (storeLocation.isEmpty() || storePassword.isEmpty()) {
+            trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
+            trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
+        } else {
+            trustStoreLocation = storeLocation;
+            trustStorePassword = storePassword;
+        }
+
+        CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
+        CallHomeExecutor.execute(callhomeinfo);
+
+        String callHomeResponse = CallHomeExecutor.getMessage();
+        String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+        outStream.println(formattedMessage);
+    }
+
+    /**
+     * init configuration.
+     *
+     * @param configPath path of the configureation file.
+     */
+    private static void initConfig(String configPath) {
+        try {
+            Path configurationFile = Paths.get(configPath);
+            if (Files.exists(configurationFile)) {
+                Config config = TOMLConfigParser.parse(configPath, Config.class);
+                CmdUtils.setConfig(config);
+            } else {
+                logger.error("Configuration: {} Not found.", configPath);
+                throw new CLIInternalException("Error occurred while loading configurations.");
+            }
+        } catch (ConfigParserException e) {
+            logger.error("Error occurred while parsing the configurations {}", configPath, e);
+            throw new CLIInternalException("Error occurred while loading configurations.");
+        }
+    }
+
 
 }
