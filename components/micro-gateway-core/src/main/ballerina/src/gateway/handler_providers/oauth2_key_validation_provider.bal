@@ -133,7 +133,7 @@ public type OAuth2KeyValidationProvider object {
                 if (apiKeyValidationDtoFromcache is APIKeyValidationDto) {
                     if (isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
                         self.gatewayCache.removeFromGatewayKeyValidationCache(cacheKey);
-                        self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDtoFromcache);
+                        self.gatewayCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDtoFromcache);
                         self.gatewayCache.removeFromTokenCache(accessToken);
                         apiKeyValidationDtoFromcache.authorized = false;
                         printDebug(KEY_OAUTH_PROVIDER, "Token has expired");
@@ -151,7 +151,7 @@ public type OAuth2KeyValidationProvider object {
                 printDebug(KEY_OAUTH_PROVIDER, "Access token not found in the gateway token cache.");
 
                 printDebug(KEY_OAUTH_PROVIDER, "Checking for the access token in the invalid token cache.");
-                var cacheAuthorizedValue = self.gatewayCache.retrieveFromInvalidTokenCache(accessToken);
+                var cacheAuthorizedValue = self.gatewayCache.retrieveFromInvalidTokenCache(cacheKey);
                 if (cacheAuthorizedValue is APIKeyValidationDto) {
                     printDebug(KEY_OAUTH_PROVIDER, "Access token found in the invalid token cache.");
                     return cacheAuthorizedValue;
@@ -233,12 +233,12 @@ public type OAuth2KeyValidationProvider object {
             string authorizeValue = keyValidationInfoXML[apim:authorized].getTextValue();
             boolean auth = stringutils:toBoolean(authorizeValue);
             printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth.toString());
+            string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
             if (auth) {
                 apiKeyValidationDto = convertXmlToKeyValidationObject(keyValidationInfoXML);
                 printDebug(KEY_OAUTH_PROVIDER, "key type: " + apiKeyValidationDto.keyType);
                 authorized = auth;
                 if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
-                    string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
                     self.gatewayCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                     self.gatewayCache.addToTokenCache(accessToken, true);
                 }
@@ -246,7 +246,7 @@ public type OAuth2KeyValidationProvider object {
                 apiKeyValidationDto.authorized = false;
                 apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
                 if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
-                    self.gatewayCache.addToInvalidTokenCache(accessToken, apiKeyValidationDto);
+                    self.gatewayCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDto);
                 }
             }
         } else {
