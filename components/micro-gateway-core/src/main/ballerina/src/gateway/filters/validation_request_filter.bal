@@ -16,6 +16,7 @@
 
  import ballerina/http;
  import ballerina/stringutils;
+ import ballerina/runtime;
 
 // Validation Request filter
 public type ValidationRequestFilter object {
@@ -32,9 +33,6 @@ public type ValidationRequestFilter object {
         if (isGrpcRequest(context)) {
             printDebug(KEY_VALIDATION_FILTER, "Skip the filter as the request is GRPC");
             return true;
-        }
-        if (enableRequestValidation || enableResponseValidation) {
-            setPropertiesToFilterContext(request, context);
         }
         if (!enableRequestValidation) {
             return true;
@@ -74,11 +72,16 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
         return true;
     } else {
+        string errorMessage = "Bad Request";
+        string errorDescription = valResult.toString();
         json newPayload = { fault: {
             code: http:STATUS_BAD_REQUEST,
-            message: "Bad Request",
-            description: valResult.toString()
+            message: errorMessage,
+            description: errorDescription
         } };
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        invocationContext.attributes["error_response_code"] = http:STATUS_BAD_REQUEST;
+        invocationContext.attributes["error_response"] = errorDescription;
         http:Response res = new;
         res.statusCode = http:STATUS_BAD_REQUEST;
         res.setJsonPayload(newPayload);
@@ -89,17 +92,3 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         return false;
     }
 }
-
- # to set the Method and Path properties to the filterContext for the use of request and validation filters
-function setPropertiesToFilterContext(http:Request request, http:FilterContext filterContext) {
-    //getting the method of the request
-    string requestMethod = request.method.toLowerAscii();
-    filterContext.attributes[REQ_METHOD] = requestMethod;
-    //getting the resource Name
-    string resourceName = filterContext.getResourceName();
-    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
-    if (httpResourceConfig is http:HttpResourceConfig) {
-        string requestPath = httpResourceConfig.path;
-        filterContext.attributes[REQUEST_PATH] = requestPath;
-    }
-} 

@@ -38,3 +38,21 @@ function getRequestMethodFromFilterContext(http:FilterContext filterContext) ret
     }
     return requestMethod;
 }
+
+ # to set the Method and Path properties to the filterContext for the use of request and validation filters.
+function setReqPathAndMethodToFilterContext(http:Request request, http:FilterContext filterContext) {
+    //It is not required to set these properties, if neither request validation nor response validation is enabled
+    if (!enableRequestValidation && !enableResponseValidation) {
+        return;
+    }
+    //getting the method of the request
+    string requestMethod = request.method.toLowerAscii();
+    filterContext.attributes[REQ_METHOD] = requestMethod;
+    //getting the resource Name
+    string resourceName = filterContext.getResourceName();
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        string requestPath = httpResourceConfig.path;
+        filterContext.attributes[REQUEST_PATH] = requestPath;
+    }
+} 

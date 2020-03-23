@@ -66,11 +66,16 @@ function doValidationFilterResponse(@tainted http:Response response, http:Filter
     if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
         return true;
     } else {
+        string errorMessage = "Bad Response";
+        string errorDescription = valResult.toString();
         json newPayload = { fault: {
                                 code: http:STATUS_INTERNAL_SERVER_ERROR,
-                                message: "Bad Response",
+                                message: errorMessage,
                                 description: valResult.toString()
                             } };
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        invocationContext.attributes["error_response_code"] = http:STATUS_INTERNAL_SERVER_ERROR;
+        invocationContext.attributes["error_response"] = errorDescription;
         response.statusCode = http:STATUS_INTERNAL_SERVER_ERROR;
         response.setJsonPayload(newPayload);
         return true;
