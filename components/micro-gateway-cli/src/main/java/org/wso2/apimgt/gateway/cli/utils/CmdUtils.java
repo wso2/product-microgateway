@@ -229,6 +229,15 @@ public final class CmdUtils {
     }
 
     /**
+     * Get cacerts location
+     *
+     * @return cacerts location
+     */
+    public static String getCacertsLocation() {
+        return System.getProperty(CliConstants.CACERTS_DIR);
+    }
+
+    /**
      * Get cli library location
      *
      * @return cli lib location

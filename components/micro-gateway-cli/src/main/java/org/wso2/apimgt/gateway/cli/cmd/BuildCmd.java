@@ -32,7 +32,6 @@ import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.codegen.ThrottlePolicyGenerator;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
-import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
@@ -347,22 +346,8 @@ public class BuildCmd implements LauncherCmd {
     private void invokeCallHome() {
         try {
             String productHome = CmdUtils.getCLIHome();
-            String trustStoreLocation;
-            String trustStorePassword;
-
-            String toolkitConfigPath = CmdUtils.getMainConfigLocation();
-            initConfig(toolkitConfigPath);
-            Config config = CmdUtils.getConfig();
-            String storeLocation = config.getToken().getTrustStoreLocation();
-            String storePassword = config.getToken().getTrustStorePassword();
-
-            if (storeLocation.isEmpty() || storePassword.isEmpty()) {
-                trustStoreLocation = productHome + File.separator + RESTServiceConstants.DEFAULT_TRUSTSTORE_PATH;
-                trustStorePassword = RESTServiceConstants.DEFAULT_TRUSTSTORE_PASS;
-            } else {
-                trustStoreLocation = storeLocation;
-                trustStorePassword = storePassword;
-            }
+            String trustStoreLocation = CmdUtils.getCacertsLocation();
+            String trustStorePassword = CliConstants.CACERTS_PASS;
 
             CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
             CallHomeExecutor.execute(callhomeinfo);
@@ -378,26 +363,6 @@ public class BuildCmd implements LauncherCmd {
         }
     }
 
-    /**
-     * init configuration.
-     *
-     * @param configPath path of the configureation file.
-     */
-    private static void initConfig(String configPath) {
-        try {
-            Path configurationFile = Paths.get(configPath);
-            if (Files.exists(configurationFile)) {
-                Config config = TOMLConfigParser.parse(configPath, Config.class);
-                CmdUtils.setConfig(config);
-            } else {
-                logger.error("Configuration: {} Not found.", configPath);
-                throw new CLIInternalException("Error occurred while loading configurations.");
-            }
-        } catch (ConfigParserException e) {
-            logger.error("Error occurred while parsing the configurations {}", configPath, e);
-            throw new CLIInternalException("Error occurred while loading configurations.");
-        }
-    }
 
     /**
      * This method will do the call home functionality in a separate thread.
@@ -409,8 +374,5 @@ public class BuildCmd implements LauncherCmd {
         });
         callHomeThread.setName("callHomeThread");
         callHomeThread.start();
-
     }
-
-
 }
