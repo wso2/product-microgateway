@@ -16,7 +16,6 @@
 
  import ballerina/http;
  import ballerina/stringutils;
- import ballerina/log;
 
  int errorItem = 0;
 
@@ -69,7 +68,7 @@
     }
  };
 
-  //to set the Method and Path properties to the filterContext for the use of request and validation filters  
+  # to set the Method and Path properties to the filterContext for the use of request and validation filters
   function setPropertiesToFilterContext(http:Request request, http:FilterContext filterContext) {
      //getting the method of the request
     string requestMethod = request.method.toLowerAscii();
@@ -130,7 +129,7 @@
         res.setJsonPayload(newPayload);
         var rcal = caller->respond(res);
         if (rcal is error) {
-            log:printError("Error occurred while sending the error response", err = rcal);
+            printError(KEY_VALIDATION_FILTER, "Error occurred while sending the error response", rcal);
         }
         return false;
     }
