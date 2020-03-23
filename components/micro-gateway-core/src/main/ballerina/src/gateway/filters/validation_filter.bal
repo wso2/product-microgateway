@@ -31,8 +31,16 @@
   public function filterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                                                                                           returns boolean {
     if (filterContext.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>filterContext.attributes[SKIP_ALL_FILTERS]) {
-        printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+        printDebug(KEY_VALIDATION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
         return true;
+    }
+    //skip validation filter if the request is gRPC
+    if (isGrpcRequest(filterContext)) {
+        printDebug(KEY_VALIDATION_FILTER, "Skip the filter as the request is GRPC");
+        return true;
+    }
+    if (enableRequestValidation || enableResponseValidation) {
+        setPropertiesToFilterContext(request, filterContext);
     }
     if (!enableRequestValidation) {
         return true;
@@ -44,17 +52,36 @@
 
   public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
      if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
-         printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
+         printDebug(KEY_VALIDATION_FILTER, "Skip all filter annotation set in the service. Skip the filter");
          return true;
      }
+     //skip validation filter if the request is gRPC
+    if (isGrpcRequest(context)) {
+        printDebug(KEY_VALIDATION_FILTER, "Skip the filter as the request is GRPC");
+        return true;
+    }
      if (!enableResponseValidation) {
          return true;
      }
      printDebug(KEY_VALIDATION_FILTER, "The response validation filter");
      boolean result = doValidationFilterResponse(response, context);
      return result;
-  }
+    }
  };
+
+  //to set the Method and Path properties to the filterContext for the use of request and validation filters  
+  function setPropertiesToFilterContext(http:Request request, http:FilterContext filterContext) {
+     //getting the method of the request
+    string requestMethod = request.method.toLowerAscii();
+    filterContext.attributes[REQ_METHOD] = requestMethod;
+    //getting the resource Name
+    string resourceName = filterContext.getResourceName();
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        string requestPath = httpResourceConfig.path;
+        filterContext.attributes[REQUEST_PATH] = requestPath;
+    }
+ }
 
  function doValidationFilterRequest(http:Caller caller, http:Request request, http:FilterContext filterContext)
                                                                                                     returns boolean {
@@ -68,47 +95,45 @@
     string requestPath = "";
     string requestMethod = "";
 
-        printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled.");
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[filterContext.getServiceName()];
-        string serviceName = filterContext.getServiceName();
-        printDebug(KEY_VALIDATION_FILTER, "Relevent Service name : " + serviceName);
-       //getting the method of the request
-        requestMethod = request.method.toLowerAscii();
-        filterContext.attributes[REQ_METHOD] = requestMethod;
-       //getting the resource Name
-        string resourceName = filterContext.getResourceName();
-        //getting the payload of the request
-        string payloadVal = "";
+    printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled.");
+    string serviceName = filterContext.getServiceName();
+    printDebug(KEY_VALIDATION_FILTER, "Relevent Service name : " + serviceName);
 
-        var reqPayload  = request.getJsonPayload();
-        if (reqPayload is map<json>) {
-            payloadVal = reqPayload.toJsonString();
+    any path = filterContext.attributes[REQUEST_PATH];
+    if (path is string) {
+        requestPath = path;
+    }
+    any method = filterContext.attributes[REQ_METHOD];
+    if (method is string) {
+        requestMethod = method;
+    }
+    printDebug(KEY_VALIDATION_FILTER, "The Request resource Path : " + requestPath + ", method : " + requestMethod);
+       
+    //getting the payload of the request
+    string payloadVal = "";
+
+    var reqPayload  = request.getJsonPayload();
+    if (reqPayload is map<json>) {
+        payloadVal = reqPayload.toJsonString();
+    }
+    var valResult = requestValidate(requestPath, requestMethod, payloadVal, serviceName);
+    if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
+        return true;
+    } else {
+        json newPayload = { fault: {
+            code: http:STATUS_BAD_REQUEST,
+            message: "Bad Request",
+            description: valResult.toString()
+        } };
+        http:Response res = new;
+        res.statusCode = http:STATUS_BAD_REQUEST;
+        res.setJsonPayload(newPayload);
+        var rcal = caller->respond(res);
+        if (rcal is error) {
+            log:printError("Error occurred while sending the error response", err = rcal);
         }
-        //getting request path
-        http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
-        if (httpResourceConfig is http:HttpResourceConfig) {
-            requestPath = httpResourceConfig.path;
-            filterContext.attributes[REQUEST_PATH] = requestPath;
-            printDebug(KEY_VALIDATION_FILTER, "The Request resource Path : " + requestPath);
-        }
-        var valResult = requestValidate(requestPath, requestMethod, payloadVal, serviceName);
-        if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
-            return true;
-        } else {
-             json newPayload = { fault: {
-                                    code: http:STATUS_BAD_REQUEST,
-                                    message: "Bad Request",
-                                    description: valResult.toString()
-                                } };
-            http:Response res = new;
-            res.statusCode = http:STATUS_BAD_REQUEST;
-            res.setJsonPayload(newPayload);
-            var rcal = caller->respond(res);
-            if (rcal is error) {
-                log:printError("Error occurred while sending the error response", err = rcal);
-            }
-            return false;
-        }
+        return false;
+    }
  }
 
  function doValidationFilterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
