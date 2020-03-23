@@ -90,6 +90,13 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
         apiVersion = <string>apiConfig.apiVersion;
     }
     apiKeyValidationRequest.apiVersion = apiVersion;
+    if (!contains(apiContext, apiVersion)) {
+        if (hasSuffix(apiContext, PATH_SEPERATOR)) {
+            apiContext = apiContext + apiVersion;
+        } else {
+            apiContext = apiContext + PATH_SEPERATOR + apiVersion;
+        }
+    }
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";

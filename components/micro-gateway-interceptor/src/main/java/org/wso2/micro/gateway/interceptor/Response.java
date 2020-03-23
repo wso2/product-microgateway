@@ -22,6 +22,7 @@ import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.http.ValueCreatorUtils;
 import org.ballerinalang.net.http.nativeimpl.ExternResponse;
 import org.ballerinalang.stdlib.io.channels.base.Channel;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.nio.channels.ByteChannel;
@@ -175,6 +176,16 @@ public class Response {
     }
 
     /**
+     * Extracts `json array` payload from the response. If the content type is not JSON, an exception will be thrown.
+     *
+     * @return The `json` {@link JSONArray} payload of the request. Null if json body is not found in the response.
+     * @throws InterceptorException If error while getting json array payload.
+     */
+    public JSONArray getJsonArrayPayload() throws InterceptorException {
+        return getEntity().getJsonArray();
+    }
+
+    /**
      * Extracts `xml` payload from the response. If the content type is not XML, an exception will be thrown.
      *
      * @return {@link BXML} The `xml` payload of the response.
@@ -254,6 +265,16 @@ public class Response {
      */
     public void setJsonPayload(JSONObject jsonPayload) {
         getEntity().setJson(jsonPayload);
+        setEntity(entity);
+    }
+
+    /**
+     * Sets a json array as the payload.
+     *
+     * @param jsonArrayPayload {@link JSONArray} The json payload.
+     */
+    public void setJsonPayload(JSONArray jsonArrayPayload) {
+        getEntity().setJson(jsonArrayPayload);
         setEntity(entity);
     }
 
