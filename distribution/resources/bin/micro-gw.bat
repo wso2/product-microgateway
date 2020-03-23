@@ -50,6 +50,7 @@ SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
 SET PATH=%BALLERINA_HOME%\bin\;%PATH%
+SET JAVA_PATH=%MICROGW_HOME%\lib\jdk8u202-b08-jre
 
 REM Check JAVA availability
 if EXIST "%JAVA_HOME%" (
@@ -172,6 +173,7 @@ goto end
 		-Dfile.encoding=UTF8 ^
 		-Dtemplates.dir.path="%MICROGW_HOME%"\resources\templates ^
 		-Dcli.home="%MICROGW_HOME%" ^
+		-Dcacerts.location="%JAVA_PATH%"\lib\security\cacerts ^
 		-Dcurrent.dir="%CD%" ^
 		-DVERBOSE_ENABLED=%verbose%
 
