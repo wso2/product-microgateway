@@ -43,7 +43,7 @@ public class Constants {
 
     public static final String SCHEMA_REFERENCE = "$ref";
     public static final String PATHS = "$..paths..";
-    public static final String BODY_CONTENT = "..requestBody.content.application/json.schema";
+    public static final String BODY_CONTENT = ".requestBody.content.application/json.schema";
     public static final String JSON_PATH = "$.";
     public static final String ITEMS = "items";
     public static final String OPEN_API = ".openapi";

@@ -140,7 +140,9 @@ public class Validate {
             //refer schema
             StringBuilder jsonPath = new StringBuilder();
             jsonPath.append(Constants.PATHS)
-                    .append(resourcePath).append(Constants.BODY_CONTENT);
+                    .append(resourcePath).append(Constants.JSONPATH_SEPARATE)
+                    .append(requestMethod.toLowerCase())
+                    .append(Constants.BODY_CONTENT);
             schema = JsonPath.read(swagger, jsonPath.toString()).toString();
             if (schema == null || Constants.EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
