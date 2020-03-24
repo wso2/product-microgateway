@@ -91,6 +91,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         invocationContext.attributes["error_response_code"] = http:STATUS_BAD_REQUEST;
         invocationContext.attributes["error_response"] = errorDescription;
+        invocationContext.attributes[FILTER_FAILED] = true;
         http:Response res = new;
         res.statusCode = http:STATUS_BAD_REQUEST;
         res.setJsonPayload(newPayload);
