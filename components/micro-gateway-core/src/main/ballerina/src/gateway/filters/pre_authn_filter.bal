@@ -33,6 +33,8 @@ public type PreAuthnFilter object {
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
+        //To set the properties which are required for the validation filter
+        setReqPathAndMethodToFilterContext(request, context);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return result;
