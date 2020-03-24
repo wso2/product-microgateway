@@ -229,7 +229,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get cacerts location
+     * Get cacerts location.
      *
      * @return cacerts location
      */
@@ -238,7 +238,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get cacerts password
+     * Get cacerts password.
      *
      * @return cacerts password
      */
@@ -246,11 +246,7 @@ public final class CmdUtils {
         String cacertsPassword = "";
         String password = System.getenv("CACERTS_PASS");
 
-        if (password != null) {
-            cacertsPassword = password;
-        } else {
-            cacertsPassword = CliConstants.DEFAULT_CACERTS_PASS;
-        }
+        cacertsPassword = password != null ? password : CliConstants.DEFAULT_CACERTS_PASS;
         return cacertsPassword;
     }
 
