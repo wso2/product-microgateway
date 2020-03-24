@@ -304,6 +304,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         -Dfile.encoding=UTF8 \
         -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
         -Dcli.home="$MICROGW_HOME" \
+        -Dcacerts.location="$JAVA_PATH/lib/security/cacerts" \
         -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
         org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 

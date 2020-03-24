@@ -229,6 +229,28 @@ public final class CmdUtils {
     }
 
     /**
+     * Get cacerts location.
+     *
+     * @return cacerts location
+     */
+    public static String getCacertsLocation() {
+        return System.getProperty(CliConstants.CACERTS_DIR);
+    }
+
+    /**
+     * Get cacerts password.
+     *
+     * @return cacerts password
+     */
+    public static String getCacertsPassword() {
+        String cacertsPassword = "";
+        String password = System.getenv("CACERTS_PASS");
+
+        cacertsPassword = password != null ? password : CliConstants.DEFAULT_CACERTS_PASS;
+        return cacertsPassword;
+    }
+
+    /**
      * Get cli library location
      *
      * @return cli lib location
