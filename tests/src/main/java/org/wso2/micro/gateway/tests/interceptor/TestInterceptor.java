@@ -55,7 +55,11 @@ public class TestInterceptor implements Interceptor {
         appendResponseString(request.getQueryParamValue("test"));
         if ("application/json".equals(contentType)) {
             try {
-                appendResponseString(request.getJsonPayload().toString());
+                if (request.hasHeader("X_JWT")) {
+                    appendResponseString(request.getJsonArrayPayload().toString());
+                } else {
+                    appendResponseString(request.getJsonPayload().toString());
+                }
             } catch (InterceptorException e) {
                 log.error("Error while getting json payload ", e);
             }
