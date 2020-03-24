@@ -347,7 +347,7 @@ public class BuildCmd implements LauncherCmd {
         try {
             String productHome = CmdUtils.getCLIHome();
             String trustStoreLocation = CmdUtils.getCacertsLocation();
-            String trustStorePassword = CliConstants.CACERTS_PASS;
+            String trustStorePassword = CmdUtils.getCacertsPassword();
 
             CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
             CallHomeExecutor.execute(callhomeinfo);
