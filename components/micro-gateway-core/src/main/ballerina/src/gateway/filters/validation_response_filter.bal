@@ -58,7 +58,7 @@ function doValidationFilterResponse(@tainted http:Response response, http:Filter
     printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
     string responseCode = response.statusCode.toString();
     var payload = response.getJsonPayload();
-    if (payload is map<json>)  {
+    if (payload is json)  {
         resPayload = payload.toJsonString();
     }
     string servName = filterContext.getServiceName();

@@ -11,5 +11,8 @@ target = "java8"
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/org.everit.json.schema-1.5.0.wso2.v1.jar"
 
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/json-3.0.0.wso2v1.jar"
+
 [dependencies]
 "wso2/jms" = "0.7.0"

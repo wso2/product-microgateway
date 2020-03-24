@@ -65,7 +65,7 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     string payloadVal = "";
 
     var reqPayload  = request.getJsonPayload();
-    if (reqPayload is map<json>) {
+    if (reqPayload is json) {
         payloadVal = reqPayload.toJsonString();
     }
     var valResult = requestValidate(requestPath, requestMethod, payloadVal, serviceName);
