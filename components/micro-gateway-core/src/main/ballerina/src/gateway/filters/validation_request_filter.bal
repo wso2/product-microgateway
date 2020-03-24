@@ -54,6 +54,15 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     json|error paths = {};
     string requestPath = getRequestPathFromFilterContext(filterContext);
     string requestMethod = getRequestMethodFromFilterContext(filterContext);
+    boolean validationResult = false;
+
+    //todo: Accept only the content types which are mentioned in the openAPI definition
+    //If the content-type is not application/json, validation fiter is not applied.
+    if (!stringutils:equalsIgnoreCase(request.getContentType(), APPLICATION_JSON)) {
+        printDebug(KEY_VALIDATION_FILTER, "Validation Filter is not applied as the request content type is : " + 
+            request.getContentType());
+        return true;
+    }    
 
     printDebug(KEY_VALIDATION_FILTER, "The Request validation is enabled.");
     string serviceName = filterContext.getServiceName();

@@ -55,6 +55,14 @@ function doValidationFilterResponse(@tainted http:Response response, http:Filter
     string requestMethod = getRequestMethodFromFilterContext(filterContext);
     string resPayload = "";
 
+    //todo: Accept only the content types which are mentioned in the openAPI definition
+    //If the content-type is not application/json, validation fiter is not applied.
+    if (!stringutils:equalsIgnoreCase(response.getContentType(), APPLICATION_JSON)) {
+        printDebug(KEY_VALIDATION_FILTER, "Validation Filter is not applied as the response content type is : " + 
+            response.getContentType());
+        return true;
+    }    
+
     printDebug(KEY_VALIDATION_FILTER, "The Response validation is enabled.");
     string responseCode = response.statusCode.toString();
     var payload = response.getJsonPayload();
