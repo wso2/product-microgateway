@@ -33,6 +33,7 @@ import org.ballerinalang.mime.util.MimeConstants;
 import org.ballerinalang.mime.util.MimeUtil;
 import org.ballerinalang.stdlib.io.channels.base.Channel;
 import org.ballerinalang.stdlib.io.utils.IOConstants;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,11 +163,23 @@ public class Entity {
      * @throws InterceptorException If error while getting json payload.
      */
     public JSONObject getJson() throws InterceptorException {
-        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.JSON);
-        if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
-            String jsonPayload = MimeUtil
-                    .getMessageAsString(entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE));
-            return new JSONObject(jsonPayload);
+        String jsonObject = getJsonStringPayload();
+        if (jsonObject != null) {
+            return new JSONObject(jsonObject);
+        }
+        return null;
+    }
+
+    /**
+     * Extracts `json array` payload from the entity. If the content type is not JSON, an exception will be thrown.
+     *
+     * @return The `json array` payload of the request.
+     * @throws InterceptorException If error while getting json payload.
+     */
+    public JSONArray getJsonArray() throws InterceptorException {
+        String jsonObject = getJsonStringPayload();
+        if (jsonObject != null) {
+            return new JSONArray(jsonObject);
         }
         return null;
     }
@@ -260,6 +273,16 @@ public class Entity {
     }
 
     /**
+     * Sets a json array{@link JSONArray} as the payload to the entity.
+     *
+     * @param jsonArrayPayload {@link JSONArray} The json payload.
+     */
+    public void setJson(JSONArray jsonArrayPayload) {
+        MimeEntityBody
+                .setJson(entityObj, JSONParser.parse(jsonArrayPayload.toString()), MimeConstants.APPLICATION_JSON);
+    }
+
+    /**
      * Sets a xml to the entity.
      *
      * @param xmlPayload The xml {@link BXML} payload.
@@ -347,6 +370,15 @@ public class Entity {
             callback.notifyFailure();
             throw new InterceptorException(msg, e);
         }
+    }
+
+    private String getJsonStringPayload() throws InterceptorException {
+        constructPayloadBlockingCallBack(AbstractGetPayloadHandler.SourceType.JSON);
+        if (entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE) != null) {
+            return MimeUtil
+                    .getMessageAsString(entityObj.getNativeData(MimeConstants.MESSAGE_DATA_SOURCE));
+        }
+        return null;
     }
 
 }
