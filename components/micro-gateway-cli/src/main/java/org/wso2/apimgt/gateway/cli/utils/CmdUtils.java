@@ -249,7 +249,7 @@ public final class CmdUtils {
         if (password != null) {
             cacertsPassword = password;
         } else {
-            cacertsPassword = CliConstants.CACERTS_PASS;
+            cacertsPassword = CliConstants.DEFAULT_CACERTS_PASS;
         }
         return cacertsPassword;
     }
