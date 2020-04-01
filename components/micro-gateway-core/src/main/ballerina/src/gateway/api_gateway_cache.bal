@@ -27,6 +27,7 @@ cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictio
 cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache gatewayClaimsCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
 
 public type APIGatewayCache object {
@@ -89,6 +90,20 @@ public type APIGatewayCache object {
     public function removeFromTokenCache(string accessToken) {
         gatewayTokenCache.remove(accessToken);
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
+    }
+
+    public function addClaimMappingCache(string jwtTokens, boolean isModifiedclaims) {
+        gatewayClaimsCache.put(jwtTokens,isModifiedclaims);
+        printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. key: " + mask(jwtTokens));
+    }
+
+    public function retrieveClaimMappingCache(string jwtTokens) returns (boolean | ()) {
+        var isclaims = gatewayClaimsCache.get(jwtTokens);
+        if (isclaims is boolean) {
+            return isclaims;
+        } else {
+            return ();
+        }
     }
 };
 

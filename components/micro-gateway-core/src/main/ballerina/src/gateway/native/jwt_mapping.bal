@@ -1,4 +1,4 @@
-// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -20,23 +20,31 @@ import ballerinax/java;
 #
 # + className - Full qualified class name of the java interceptor
 # + return - return the string array of scope
-public function loadMappingClass(string className) returns string {
+public function loadMappingClass(string className) returns boolean  {
     handle class = java:fromString(className);
-    string classname= <string> java:toString(jLoadMappingClass(class));
-    return classname ;
+    return jLoadMappingClass(class) ;
 }
 
-function jLoadMappingClass(handle className) returns handle = @java:Method {
+public function initiateJwtMap() {
+    jinitiateJwtMap();
+}
+
+function jLoadMappingClass(handle className) returns boolean = @java:Method {
     name: "loadMappingClass",
-    class: "org.wso2.micro.gateway.core.mapping.MappingInvoker",
-    paramTypes: ["java.lang.String"]
+    class: "org.wso2.micro.gateway.core.mapping.MappingInvoker"
 } external;
 
-public function transformJWT(map<any> claims) returns map<any> {
-    return jtransformJWT(claims);
+public function transformJWTValue(map<any> claims, string className) returns map<any> {
+    handle class = java:fromString(className);
+    return jtransformJWTValue(claims, class);
 }
 
-function jtransformJWT(map<any> claims) returns map<any> = @java:Method {
-    name: "transformJWT",
+function jtransformJWTValue(map<any> claims, handle className) returns map<any> = @java:Method {
+    name: "transformJWTValue",
+    class: "org.wso2.micro.gateway.core.mapping.MappingInvoker"
+} external;
+
+function jinitiateJwtMap() = @java:Method {
+    name: "initiateJwtMap",
     class: "org.wso2.micro.gateway.core.mapping.MappingInvoker"
 } external;

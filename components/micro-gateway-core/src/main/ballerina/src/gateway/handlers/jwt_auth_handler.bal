@@ -62,7 +62,6 @@ public type JWTAuthHandler object {
         string headerValue = req.getHeader(authHeader);
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
-        printDebug(authenticationResult.toString(), "authenticationResult***************************************.");
         if (authenticationResult is boolean) {
             setBackendJwtHeader(credential, req);
             return authenticationResult;
@@ -76,7 +75,6 @@ public function setBackendJwtHeader(string credential, http:Request req) {
     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
     if (payload is jwt:JwtPayload) {
         map<json>? customClaims = payload?.customClaims;
-        printDebug(customClaims.toString(), "customClaims***************************************.");
         // validate backend jwt claim and set it to jwt header
         if (customClaims is map<json> && customClaims.hasKey(BACKEND_JWT)) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "Set backend jwt header.");

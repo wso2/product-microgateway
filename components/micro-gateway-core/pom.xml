@@ -124,10 +124,6 @@
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-jwt-transformer</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>mgw-jwt-transformer</artifactId>
-        </dependency>
     </dependencies>
 
     <profiles>

@@ -162,7 +162,7 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.json</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json</includeArtifactIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, json, mgw-jwt-transformer</includeArtifactIds>
                         </configuration>
                     </execution>
                     <execution>
@@ -232,7 +232,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp file="resources/version.txt" match=".*" replace="${project.version}" byline="true" />
+                                <replaceregexp file="resources/version.txt" match="version" replace="${project.version}" byline="true" />
                             </target>
                         </configuration>
                     </execution>

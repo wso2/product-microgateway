@@ -19,32 +19,40 @@ package org.wso2.micro.gateway.core.mapping;
 import org.ballerinalang.jvm.values.MapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.micro.gateway.jwttransformer.JWTTransformer;
+import org.wso2.micro.gateway.jwttransformer.JWTValueTransformer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- * This class Class to dynamically invoke the transformer
+ * This class Class to dynamically invoke the transformer.
  */
 public class MappingInvoker {
-
+    private static Map map;
+    private static int index = 0;
     private static final Logger log = LoggerFactory.getLogger("ballerina");
-    private  static JWTTransformer jwtTransformer;
+    private static JWTValueTransformer jwtValueTransformer;
 
-    public static String loadMappingClass(String className) {
+    public static void initiateJwtMap() {
+        map = new HashMap<String, JWTValueTransformer>();
+    }
+
+    public static boolean loadMappingClass(String className) {
         try {
-
             Class mappingClass = MappingInvoker.class.getClassLoader().loadClass(className);
-             jwtTransformer = (JWTTransformer) mappingClass.newInstance();
-             return className;
-
+            jwtValueTransformer = (JWTValueTransformer) mappingClass.newInstance();
+            map.put(className, jwtValueTransformer);
+            return true;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             log.error("Error while loading the jwttransformer class: " + className, e);
         }
-        return  className;
+        return false;
     }
 
-    public static MapValue transformJWT(MapValue claims) {
-        MapValue scopes = jwtTransformer.transformJWT(claims);
-        return scopes;
+    public static MapValue transformJWTValue(MapValue claims, String className) {
+        jwtValueTransformer = (JWTValueTransformer) map.get(className);
+        MapValue claimSet = jwtValueTransformer.transformJWT(claims);
+        return claimSet;
     }
 }

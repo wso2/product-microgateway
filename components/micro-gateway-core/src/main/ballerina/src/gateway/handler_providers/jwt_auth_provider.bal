@@ -18,30 +18,39 @@ import ballerina/auth;
 import ballerina/jwt;
 import ballerina/runtime;
 import ballerina/stringutils;
-import ballerina/config;
 
 # Represents inbound JWT auth provider.
 #
 # + jwtValidatorConfig - JWT validator configurations
 # + inboundJwtAuthProvider - Reference to b7a inbound auth provider
 # + subscriptionValEnabled - Validate subscription
+# + claims - JWT claim set
+# + className - Transformation class Name
+# + classLoaded - Class loaded or not
+# + gatewayCache - the `APIGatewayCache instence`
 public type JwtAuthProvider object {
     *auth:InboundAuthProvider;
 
     public jwt:JwtValidatorConfig jwtValidatorConfig;
     public jwt:InboundJwtAuthProvider inboundJwtAuthProvider;
     public boolean subscriptionValEnabled;
+    public map<anydata>[] | error claims;
+    public string className;
+    public boolean classLoaded;
+    public APIGatewayCache gatewayCache = new;
 
     # Provides authentication based on the provided JWT token.
     #
     # + jwtValidatorConfig - JWT validator configurations
     # + subscriptionValEnabled - Validate subscription
-    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled) {
+    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled, map<anydata>[] | error claims, string className, boolean classLoaded) {
         self.jwtValidatorConfig = jwtValidatorConfig;
         self.inboundJwtAuthProvider = new (jwtValidatorConfig);
         self.subscriptionValEnabled = subscriptionValEnabled;
+        self.claims = claims;
+        self.className = className;
+        self.classLoaded = classLoaded;
     }
-
 
     public function authenticate(string credential) returns @tainted (boolean | auth:Error) {
         //Start a span attaching to the system span.
@@ -61,16 +70,31 @@ public type JwtAuthProvider object {
             if (authContext is runtime:AuthenticationContext) {
                 string? jwtToken = authContext?.authToken;
                 if (jwtToken is string) {
-                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
-                    if(payload is jwt:JwtPayload ){
-                        doMappingContext(invocationContext,payload);
-                    }
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
                     var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
+                    var isJwtTokenCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
+                    if (isJwtTokenCached is boolean) {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                     }
+                    else {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
+                        (jwt:JwtPayload | error) payloadBody = getDecodedJWTPayload(jwtToken);
+                        if (payloadBody is jwt:JwtPayload) {
+                            string payloadIssuer = payloadBody["iss"].toString();
+                            if( self.jwtValidatorConfig["issuer"] ==  payloadIssuer){
+                                var result = doMappingContext(invocationContext, self.className, self.claims, self.classLoaded);
+                                jwtToken = authContext?.authToken.toString();
+                                self.gatewayCache.addClaimMappingCache(jwtToken, true);
+                                if (result is auth:Error){
+                                    return result;
+                                }
+                            }
+                        }
+                    }
                     if (cachedJwt is jwt:CachedJwt) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
                         jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
@@ -104,6 +128,7 @@ public type JwtAuthProvider object {
                         return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
                     if (payload is jwt:JwtPayload) {
                         return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
                     }
@@ -117,7 +142,7 @@ public type JwtAuthProvider object {
     }
 };
 
-public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled, boolean isGRPC) 
+public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled, boolean isGRPC)
         returns @tainted (boolean | auth:Error) {
     boolean subscriptionValidated = false;
     json subscribedAPIList = [];
@@ -136,7 +161,7 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
         if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validation passed.");
             return true;
-        } else { 
+        } else {
             setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
             return prepareError("Subscriptions validation failed.");
         }
@@ -145,50 +170,52 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
     return prepareError("Failed to decode the JWT.");
 }
 
-public function doMappingContext(runtime:InvocationContext invocationContext,jwt:JwtPayload payload) {
-    string payloadissuer=payload["iss"].toString();
+public function doMappingContext(runtime:InvocationContext invocationContext, string className, map<anydata>[] | error claims, boolean classLoaded) returns @tainted (auth:Error)? {
     map<any>? customClaims = invocationContext["principal"]["claims"];
-    map<any>? invocationvalue = invocationContext;
-    map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
-    if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0 && customClaims is map<any>) {
-        foreach map<anydata> jwtIssuer in jwtIssuers {
-           string issuer=getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER);
-           if (issuer==payloadissuer) {
-                string className=getDefaultStringValue(jwtIssuer[ISSUER_CLASSNAME], DEFAULT_ISSUER_CLASSNAME);
-                map<anydata> claims = <map<anydata>>jwtIssuer["claims"];
-                if (claims.length() > 0) {
-                    string[] keys = claims.keys();
-                    foreach string key in keys {
-                        string claimvalue = claims[key].toString();
-                        if (customClaims is map<anydata>) {
-                            if (customClaims.hasKey(claimvalue) ) {
-                                customClaims[key] = customClaims[claimvalue];
-                                if (key == "scope" && !jwtIssuer.hasKey("className") ) {
-                                    putScopeValue(customClaims["scope"],invocationContext);
-                                }
-                                anydata removedElement = customClaims.remove(claimvalue);
-                            }
-                         }
+    if (customClaims is map<any>) {
+        if ( claims is map<anydata>[] && claims.length() > 0) {
+            foreach map<anydata> claim in claims {
+                string remoteClaim = claim["remoteClaim"].toString();
+                string localClaim = claim["localClaim"].toString();
+                if (customClaims is map<anydata>) {
+                    if (customClaims.hasKey(remoteClaim) ) {
+                        customClaims[localClaim] = customClaims[remoteClaim];
+                        anydata removedElement = customClaims.remove(remoteClaim);
                     }
+                 }
+            }
+        }
+        if (className != "") {
+            if(classLoaded){
+                map<any>? customClaimsEdited = transformJWTValue(customClaims, className );
+                if (customClaimsEdited is map<any>) {
+                    customClaims = customClaimsEdited;
                 }
-                if (jwtIssuer.hasKey("className")) {
-                    var class = loadMappingClass(className);
-                    map<any>? customClaimsEdited = transformJWT(customClaims);
-                    if (customClaimsEdited is map<any>) {
-                        invocationContext["principal"]["claims"]= customClaimsEdited;
-                    }
-                    putScopeValue(invocationContext["principal"]["claims"]["scope"],invocationContext);
-                }
-           }
+             }
+             else{
+                return prepareError("Error while loading the jwttransformer class: " + className);
+             }
+
+        }
+        if(customClaims["scope"].toString() != ""){
+            var result = putScopeValue(customClaims["scope"],invocationContext);
+            if (result is auth:Error) {
+                return result;
+            }
         }
      }
 }
 
-public function putScopeValue(any scope,runtime:InvocationContext invocationContext){
+public function putScopeValue(any scope,runtime:InvocationContext invocationContext) returns @tainted (auth:Error)? {
     if (scope is string && scope != "") {
         string[]? scopes =  stringutils:split(scope.toString(), " ");
         if (scopes is string[]) {
-            invocationContext["principal"]["scopes"] = scopes;
+            invocationContext.principal.scopes = scopes;
+            printDebug("scopes", scopes.toString());
+        } else {
+            return prepareError("Scope cannot be change to string array format");
         }
+    } else {
+        return prepareError("Scope is not a string format.");
     }
 }
