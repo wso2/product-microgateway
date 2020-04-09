@@ -14,5 +14,14 @@ target = "java8"
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/json-3.0.0.wso2v1.jar"
 
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/nimbus-jose-jwt-8.8.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/json-smart-2.3.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/asm-1.0.2.jar"
+
 [dependencies]
 "wso2/jms" = "0.7.0"
