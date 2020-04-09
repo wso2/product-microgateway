@@ -124,6 +124,21 @@
             <groupId>org.wso2.carbon.callhome</groupId>
             <artifactId>core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>8.8</version>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>asm</artifactId>
+            <version>1.0.2</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -226,8 +241,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema, json</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds, net.minidev</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

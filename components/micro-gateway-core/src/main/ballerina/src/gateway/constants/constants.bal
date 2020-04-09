@@ -457,5 +457,22 @@ public const string API_PUBLISHER = "api_publisher";
 public const string API_NAME = "api_name";
 public const string MATCHING_RESOURCE = "matching_resource";
 
-
 public const int DEFAULT_AUTH_FILTER_POSITION = 2;
+
+// jwt generator constants
+public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
+public const string JWT_GENERATOR_DIALECT = "claimDialect";
+public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
+public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";
+public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
+public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
+public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
+public const string JWT_GENERATOR_SKEW_TIME = "skewTime";
+public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
+
+// jwt generator caching mechanism
+public const string JWT_GENERATOR_CACHING_ID = "jwtGeneratorConfig.jwtGeneratorCaching";
+public const string JWT_GENERATOR_TOKEN_CACHE_ENABLED = "tokenCacheEnable";
+public const string JWT_GENERATOR_TOKEN_CACHE_EXPIRY = "tokenCacheExpiryTime";
+public const string JWT_GENERATOR_TOKEN_CACHE_CAPACITY = "tokenCacheCapacity";
+public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvictionFactor";

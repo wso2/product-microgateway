@@ -121,3 +121,17 @@ public const boolean DEFAULT_VALIDATE_APIS_ENABLED = false;
 
 public const boolean DEFAULT_API_KEY_ISSUER_ENABLED = true;
 public const int DEFAULT_API_KEY_VALIDITY_TIME = -1;
+
+public const string DEFAULT_JWT_GENERATOR_DIALECT = "http://wso2.org/claims";
+public const string DEFAULT_JWT_GENERATOR_SIGN_ALGO = "SHA256withRSA";
+public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
+public const string DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS = "";
+public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
+public const string DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE = "http://org.wso2.apimgt/gateway";
+public const int DEFAULT_JWT_GENERATOR_SKEW_TIME = 0;
+public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorImpl";
+
+public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
+public const int DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY = 900000;
+public const int DEFAULT_JWT_GENERATOR_TOKEN_CACHE_CAPACITY = 10000;
+public const float DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = 0.25;
