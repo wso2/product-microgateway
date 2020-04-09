@@ -328,4 +328,3 @@
     tokenCacheCapacity=10000
     # Token cache eviction factor
     tokenCacheEvictionFactor=0.25
-  

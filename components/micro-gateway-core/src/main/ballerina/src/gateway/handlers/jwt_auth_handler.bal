@@ -17,7 +17,6 @@
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
-import ballerinax/java;
 
 # Representation of the jwt self validating handler
 #
@@ -73,7 +72,6 @@ public type JWTAuthHandler object {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }
-
 };
 
 # Identify the api details from the subscribed apis in the authentication token.
@@ -108,7 +106,7 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
                 var subscription = subscribedAPIList[index];
                 if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
                     // API is found in the subscribed APIs
-                    if (isDebugEnabled) { 
+                    if (isDebugEnabled) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Found the API in subscribed APIs:" + subscription.name.toString()
                             + " version:" + subscription.'version.toString());
                     }
@@ -145,8 +143,8 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential, http:Request req) returns @tainted (boolean | http:AuthenticationError){
-    boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID, 
-                                                        JWT_GENERATOR_ENABLED, 
+    boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_ENABLED,
                                                         DEFAULT_JWT_GENERATOR_ENABLED);
     if (enabledJWTGenerator) {
         (boolean | http:AuthenticationError) status = false;
@@ -181,11 +179,11 @@ public function generateAndSetBackendJwtHeader(string credential, http:Request r
         (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
         if (payload is jwt:JwtPayload) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
-            boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID, 
-                                                            JWT_GENERATOR_TOKEN_CACHE_ENABLED, 
+            boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
+                                                            JWT_GENERATOR_TOKEN_CACHE_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
-            int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID, 
-                                                JWT_GENERATOR_TOKEN_CACHE_EXPIRY, 
+            int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
+                                                JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
                                                 DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
             // get the subscribedAPI details
             map<string> apiDetails = checkSubscribedAPIs(payload);
@@ -287,7 +285,7 @@ public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, han
         return true;
     } else {
         return prepareAuthenticationError("Failed to load JWT token generator class");
-    }  
+    }
 }
 
 # To invoke the interop function to create instance of JWT generator
