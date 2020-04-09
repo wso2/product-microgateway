@@ -422,3 +422,20 @@ public const string REQUEST_PATH = "requestPath";
 public const string RESPOND_DONE = "respond_done";
 public const string RESPONSE_OBJECT = "response_object";
 
+// jwt generator constants
+public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
+public const string JWT_GENERATOR_DIALECT = "claimDialect";
+public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
+public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";
+public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
+public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
+public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
+public const string JWT_GENERATOR_SKEW_TIME = "skewTime";
+public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
+
+// jwt generator caching mechanism
+public const string JWT_GENERATOR_CACHING_ID = "jwtGeneratorConfig.jwtGeneratorCaching";
+public const string JWT_GENERATOR_TOKEN_CACHE_ENABLED = "tokenCacheEnable";
+public const string JWT_GENERATOR_TOKEN_CACHE_EXPIRY = "tokenCacheExpiryTime";
+public const string JWT_GENERATOR_TOKEN_CACHE_CAPACITY = "tokenCacheCapacity";
+public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvictionFactor";

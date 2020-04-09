@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
+import ballerinax/java;
 
 # Representation of the jwt self validating handler
 #
@@ -62,22 +63,253 @@ public type JWTAuthHandler object {
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
-            setBackendJwtHeader(credential, req);
-            return authenticationResult;
+            var generationStatus = generateAndSetBackendJwtHeader(credential, req);
+            if (generationStatus is boolean) {
+                return authenticationResult;
+            } else {
+                return prepareAuthenticationError("JWT generation process failed.");
+            }
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }
+
 };
 
-public function setBackendJwtHeader(string credential, http:Request req) {
-    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
-    if (payload is jwt:JwtPayload) {
-        map<json>? customClaims = payload?.customClaims;
-        // validate backend jwt claim and set it to jwt header
-        if (customClaims is map<json> && customClaims.hasKey(BACKEND_JWT)) {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Set backend jwt header.");
-            req.setHeader(jwtheaderName, customClaims.get(BACKEND_JWT).toString());
+public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> {
+    map<string> subscriptionDetails = {
+        apiName: "",
+        apiContext: "",
+        apiVersion: "",
+        apiTier: "",
+        apiPublisher: "",
+        subscriberTenantDomain: ""
+    };
+    json subscribedAPIList = [];
+    map<json>? customClaims = payload?.customClaims;
+    //get allowed apis
+    if (customClaims is map<json> && customClaims.hasKey(SUBSCRIBED_APIS)) {
+        printDebug(KEY_JWT_AUTH_PROVIDER, "subscribedAPIs claim found in the jwt.");
+        subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
+    }
+    if (subscribedAPIList is json[]) {
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString()];
+        if (apiConfig is APIConfiguration) {
+            string apiName = apiConfig.name;
+            string apiVersion = apiConfig.apiVersion;
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Current API name: " + apiName + ", current version: " + apiVersion);
+            int l = subscribedAPIList.length();
+            int index = 0;
+            while (index < l) {
+                var subscription = subscribedAPIList[index];
+                if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+                    // API is found in the subscribed APIs
+                    if (isDebugEnabled) { 
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Found the API in subscribed APIs:" + subscription.name.toString()
+                            + " version:" + subscription.'version.toString());
+                    }
+                    if (subscription.name is json) {
+                        subscriptionDetails["apiName"] = subscription.name.toString();
+                    }
+                    if (subscription.'version is json) {
+                        subscriptionDetails["apiVersion"] = subscription.'version.toString();
+                    }
+                    if (subscription.context is json) {
+                        subscriptionDetails["apiContext"] = subscription.context.toString();
+                    }
+                    if (subscription.subscriptionTier is json) {
+                        subscriptionDetails["apiTier"] = subscription.subscriptionTier.toString();
+                    }
+                    if (subscription.publisher is json) {
+                        subscriptionDetails["apiPublisher"] = subscription.publisher.toString();
+                    }
+                    if (subscription.subscriberTenantDomain is json) {
+                        subscriptionDetails["subscriberTenantDomain"] = subscription.subscriberTenantDomain.toString();
+                    }
+                }
+                index += 1;
+            }
         }
     }
+    return subscriptionDetails;
 }
+
+public function generateAndSetBackendJwtHeader(string credential, http:Request req) returns @tainted (boolean | http:AuthenticationError){
+    (boolean | http:AuthenticationError) status = false;
+    handle jDialectURI = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_DIALECT,
+                                                        DEFAULT_JWT_GENERATOR_DIALECT));
+    handle jSignatureAlgorithm = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                JWT_GENERATOR_SIGN_ALGO,
+                                                                DEFAULT_JWT_GENERATOR_SIGN_ALGO));
+    int jTokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
+                                            JWT_GENERATOR_TOKEN_EXPIRY,
+                                            DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
+    handle jRestrictedClaims = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                JWT_GENERATOR_RESTRICTED_CLAIMS,
+                                                                DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS));
+    handle keyStoreLocationUnresolved = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                        KEY_STORE_PATH,
+                                                                        DEFAULT_KEY_STORE_PATH));
+    handle jKeyStorePath = getKeystoreLocation(keyStoreLocationUnresolved);
+    handle jKeyStorePassword = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                KEY_STORE_PASSWORD,
+                                                                DEFAULT_KEY_STORE_PASSWORD));
+    handle jTokenIssuer = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_TOKEN_ISSUER,
+                                                            DEFAULT_JWT_GENERATOR_TOKEN_ISSUER));
+    handle jTokenAudience = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_TOKEN_AUDIENCE,
+                                                            DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE));
+    int skewTime = getConfigIntValue(JWT_GENERATOR_ID,
+                                        JWT_GENERATOR_SKEW_TIME,
+                                        DEFAULT_JWT_GENERATOR_SKEW_TIME);
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+    if (payload is jwt:JwtPayload) {
+        printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
+        boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID, 
+                                                        JWT_GENERATOR_TOKEN_CACHE_ENABLED, 
+                                                        DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
+        int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID, 
+                                            JWT_GENERATOR_TOKEN_CACHE_EXPIRY, 
+                                            DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
+        // get the subscribedAPI details
+        map<string> apiDetails = checkSubscribedAPIs(payload);
+        // checking if cache is enabled
+        if (enabledCaching) {
+            var cachedToken = jwtGeneratorCache.get(credential);
+            if (cachedToken is string) {
+                printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
+                printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
+                (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
+                if (cachedPayload is jwt:JwtPayload) {
+                    int currentTime = getCurrentTime();
+                    int? cachedTokenExpiry = cachedPayload?.exp;
+                    if (cachedTokenExpiry is int) {
+                        cachedTokenExpiry = cachedTokenExpiry * 1000;
+                        int difference = (cachedTokenExpiry - currentTime);
+                        if (difference < skewTime) {
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
+                            status =setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
+                                         payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+                        } else {
+                            req.setHeader(jwtheaderName, cachedToken);
+                            status = true;
+                        }
+                    } else {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
+                        return prepareAuthenticationError("Failed to read exp claim from cached token");
+                    }
+                }
+            } else {
+                printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the cache");
+                status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
+                                    payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+            }
+        } else {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
+            status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
+                                payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+        }
+    } else {
+        return prepareAuthenticationError("Failed to read JWT token");
+    }
+    return status;
+}
+
+public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, handle jKeyStorePath, handle jKeyStorePassword,
+                            int jTokenExpiry, handle jRestrictedClaims, jwt:JwtPayload payload, http:Request req, string credential,
+                            boolean enabledCaching, int cacheExpiry, handle jTokenIssuer, handle jTokenAudience, map<string> apiDetails)
+                            returns @tainted (boolean | http:AuthenticationError) {
+    handle generatorClass = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_IMPLEMENTATION,
+                                                            DEFAULT_JWT_GENERATOR_IMPLEMENTATION));
+    boolean classLoaded = loadJWTGeneratorClass(generatorClass,
+                                            jDialectURI,
+                                            jSignatureAlgorithm,
+                                            jKeyStorePath,
+                                            jKeyStorePassword,
+                                            jTokenExpiry,
+                                            jRestrictedClaims,
+                                            enabledCaching,
+                                            cacheExpiry,
+                                            jTokenIssuer,
+                                            jTokenAudience,
+                                            apiDetails);
+    if (classLoaded) {
+        handle generatedToken = generateJWTToken(payload);
+
+        printDebug(KEY_JWT_AUTH_PROVIDER, "Generated jwt token");
+        printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + generatedToken.toString());
+
+        // add to cache if cache enabled
+        if (enabledCaching) {
+            jwtGeneratorCache.put(credential, generatedToken.toString());
+            printDebug(KEY_GW_CACHE, "Added to jwt generator token cache.");
+        }
+        req.setHeader(jwtheaderName, generatedToken.toString());
+        return true;
+    } else {
+        return prepareAuthenticationError("Failed to load JWT token generator class");
+    }  
+}
+
+public function loadJWTGeneratorClass(handle className,
+                                        handle dialectURI,
+                                        handle signatureAlgorithm,
+                                        handle keyStorePath,
+                                        handle keyStorePassword,
+                                        int tokenExpiry,
+                                        handle restrictedClaims,
+                                        boolean enabledCaching,
+                                        int cacheExpiry,
+                                        handle tokenIssuer,
+                                        handle tokenAudience,
+                                        map<string> apiDetails) returns boolean {
+    return jLoadJWTGeneratorClass(className,
+                                    dialectURI,
+                                    signatureAlgorithm,
+                                    keyStorePath,
+                                    keyStorePassword,
+                                    tokenExpiry,
+                                    restrictedClaims,
+                                    enabledCaching,
+                                    cacheExpiry,
+                                    tokenIssuer,
+                                    tokenAudience,
+                                    apiDetails);
+}
+
+public function jLoadJWTGeneratorClass(handle className,
+                                        handle dialectURI,
+                                        handle signatureAlgorithm,
+                                        handle keyStorePath,
+                                        handle keyStorePassword,
+                                        int tokenExpiry,
+                                        handle restrictedClaims,
+                                        boolean enabledCaching,
+                                        int cacheExpiry,
+                                        handle tokenIssuer,
+                                        handle tokenAudience,
+                                        map<string> apiDetails) returns boolean = @java:Method {
+    name: "loadJWTGeneratorClass",
+    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+} external;
+
+public function getKeystoreLocation(handle unresolvedPath) returns handle {
+    return jGetKeystoreLocation(unresolvedPath);
+}
+
+public function jGetKeystoreLocation(handle className) returns handle = @java:Method {
+    name: "invokeGetKeystorePath",
+    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+} external;
+
+public function generateJWTToken(jwt:JwtPayload jwtInfo) returns handle {
+    return jGenerateJWTToken(jwtInfo);
+}
+
+public function jGenerateJWTToken(jwt:JwtPayload jwtInfo) returns handle = @java:Method {
+    name: "invokeGenerateToken",
+    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+} external;
