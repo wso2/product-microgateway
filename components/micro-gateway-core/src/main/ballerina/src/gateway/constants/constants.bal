@@ -424,6 +424,7 @@ public const string RESPONSE_OBJECT = "response_object";
 
 // jwt generator constants
 public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
+public const string JWT_GENERATOR_ENABLED = "jwtGeneratorEnabled";
 public const string JWT_GENERATOR_DIALECT = "claimDialect";
 public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
 public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";

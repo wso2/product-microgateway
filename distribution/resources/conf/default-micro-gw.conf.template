@@ -299,6 +299,8 @@
 
 # JWT Generator configurations
 [jwtGeneratorConfig]
+  # Enable jwt generator
+  jwtGeneratorEnabled=false
   # Dialect prefix that can be added to the claims
   claimDialect="http://wso2.org/claims"
   # Signature algorithm used to sign the JWT token (only SHA256withRSA and NONE is supported)
