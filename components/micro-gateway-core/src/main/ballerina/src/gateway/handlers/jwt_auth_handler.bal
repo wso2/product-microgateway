@@ -76,6 +76,10 @@ public type JWTAuthHandler object {
 
 };
 
+# Identify the api details from the subscribed apis in the authentication token.
+#
+# + payload - The payload of the authentication token
+# + return - Returns map<string> with the extracted details.
 public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> {
     map<string> subscriptionDetails = {
         apiName: "",
@@ -134,6 +138,12 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
     return subscriptionDetails;
 }
 
+# Generate the backend JWT token and set to the header of the outgoing request.
+#
+# + credential - Credential
+# + req - The `Request` instance.
+# + return - Returns `true` if the token generation and setting the header completed successfully
+# or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential, http:Request req) returns @tainted (boolean | http:AuthenticationError){
     (boolean | http:AuthenticationError) status = false;
     handle jDialectURI = java:fromString(getConfigValue(JWT_GENERATOR_ID,
@@ -217,6 +227,24 @@ public function generateAndSetBackendJwtHeader(string credential, http:Request r
     return status;
 }
 
+# Refactoring method for setting JWT header
+#
+# + jDialectURI - DialectURI for the standard claims
+# + jSignatureAlgorithm - Signature algorithm to sign the JWT
+# + jKeyStorePath - Keystore path
+# + jKeyStorePassword - Keystore password
+# + jTokenExpiry - Token expiry value
+# + jRestrictedClaims - Restricted claims from the configuration
+# + payload - The payload of the authentication token
+# + req - The `Request` instance.
+# + credential - Credential
+# + enabledCaching - jwt generator caching enabled
+# + cacheExpiry - jwt generator cache expiry
+# + jTokenIssuer - token issuer for the claims
+# + jTokenAudience - token audience for the claims
+# + apiDetails - extracted api details for the current api
+# + return - Returns `true` if the token generation and setting the header completed successfully
+# or the `AuthenticationError` in case of an error.
 public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, handle jKeyStorePath, handle jKeyStorePassword,
                             int jTokenExpiry, handle jRestrictedClaims, jwt:JwtPayload payload, http:Request req, string credential,
                             boolean enabledCaching, int cacheExpiry, handle jTokenIssuer, handle jTokenAudience, map<string> apiDetails)
@@ -225,17 +253,17 @@ public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, han
                                                             JWT_GENERATOR_IMPLEMENTATION,
                                                             DEFAULT_JWT_GENERATOR_IMPLEMENTATION));
     boolean classLoaded = loadJWTGeneratorClass(generatorClass,
-                                            jDialectURI,
-                                            jSignatureAlgorithm,
-                                            jKeyStorePath,
-                                            jKeyStorePassword,
-                                            jTokenExpiry,
-                                            jRestrictedClaims,
-                                            enabledCaching,
-                                            cacheExpiry,
-                                            jTokenIssuer,
-                                            jTokenAudience,
-                                            apiDetails);
+                                                jDialectURI,
+                                                jSignatureAlgorithm,
+                                                jKeyStorePath,
+                                                jKeyStorePassword,
+                                                jTokenExpiry,
+                                                jRestrictedClaims,
+                                                enabledCaching,
+                                                cacheExpiry,
+                                                jTokenIssuer,
+                                                jTokenAudience,
+                                                apiDetails);
     if (classLoaded) {
         handle generatedToken = generateJWTToken(payload);
 
@@ -254,6 +282,21 @@ public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, han
     }  
 }
 
+# To invoke the interop function to create instance of JWT generator
+#
+# + className - className for the jwtgenerator implementation
+# + dialectURI - DialectURI for the standard claims
+# + signatureAlgorithm - Signature algorithm to sign the JWT
+# + keyStorePath - Keystore path
+# + keyStorePassword - Keystore password
+# + tokenExpiry - Token expiry value
+# + restrictedClaims - Restricted claims from the configuration
+# + enabledCaching - jwt generator caching enabled
+# + cacheExpiry - jwt generator cache expiry
+# + tokenIssuer - token issuer for the claims
+# + tokenAudience - token audience for the claims
+# + apiDetails - extracted api details for the current api
+# + return - Returns `true` if the class is created successfully. or `false` if unsuccessful.
 public function loadJWTGeneratorClass(handle className,
                                         handle dialectURI,
                                         handle signatureAlgorithm,
@@ -280,6 +323,21 @@ public function loadJWTGeneratorClass(handle className,
                                     apiDetails);
 }
 
+# Interop function to create instance of JWTGenerator
+#
+# + className - className for the jwtgenerator implementation
+# + dialectURI - DialectURI for the standard claims
+# + signatureAlgorithm - Signature algorithm to sign the JWT
+# + keyStorePath - Keystore path
+# + keyStorePassword - Keystore password
+# + tokenExpiry - Token expiry value
+# + restrictedClaims - Restricted claims from the configuration
+# + enabledCaching - jwt generator caching enabled
+# + cacheExpiry - jwt generator cache expiry
+# + tokenIssuer - token issuer for the claims
+# + tokenAudience - token audience for the claims
+# + apiDetails - extracted api details for the current api
+# + return - Returns `true` if the class is created successfully. or `false` if unsuccessful.
 public function jLoadJWTGeneratorClass(handle className,
                                         handle dialectURI,
                                         handle signatureAlgorithm,
@@ -293,23 +351,39 @@ public function jLoadJWTGeneratorClass(handle className,
                                         handle tokenAudience,
                                         map<string> apiDetails) returns boolean = @java:Method {
     name: "loadJWTGeneratorClass",
-    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
 } external;
 
+# Invoke the interop function to resolves the keystore path
+#
+# + unresolvedPath - unresolved keystore path
+# + return - Returns the resolved keystore path.
 public function getKeystoreLocation(handle unresolvedPath) returns handle {
     return jGetKeystoreLocation(unresolvedPath);
 }
 
-public function jGetKeystoreLocation(handle className) returns handle = @java:Method {
+# Interop function to resolves the keystore path
+#
+# + unresolvedPath - unresolved keystore path
+# + return - Returns the resolved keystore path.
+public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @java:Method {
     name: "invokeGetKeystorePath",
-    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
 } external;
 
+# Invoke the interop function to generate JWT token
+#
+# + jwtInfo - payload of the authentication token
+# + return - Returns the generated JWT token.
 public function generateJWTToken(jwt:JwtPayload jwtInfo) returns handle {
     return jGenerateJWTToken(jwtInfo);
 }
 
+# Interop function to generate JWT token
+#
+# + jwtInfo - payload of the authentication token
+# + return - Returns the generated JWT token.
 public function jGenerateJWTToken(jwt:JwtPayload jwtInfo) returns handle = @java:Method {
     name: "invokeGenerateToken",
-    class: "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
 } external;

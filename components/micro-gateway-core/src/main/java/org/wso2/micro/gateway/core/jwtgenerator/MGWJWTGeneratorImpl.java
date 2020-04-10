@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.core.handlers;
+package org.wso2.micro.gateway.core.jwtgenerator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
