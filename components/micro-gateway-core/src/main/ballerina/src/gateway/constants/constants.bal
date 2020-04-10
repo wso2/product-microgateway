@@ -461,6 +461,7 @@ public const int DEFAULT_AUTH_FILTER_POSITION = 2;
 
 // jwt generator constants
 public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
+public const string JWT_GENERATOR_ENABLED = "jwtGeneratorEnabled";
 public const string JWT_GENERATOR_DIALECT = "claimDialect";
 public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
 public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";

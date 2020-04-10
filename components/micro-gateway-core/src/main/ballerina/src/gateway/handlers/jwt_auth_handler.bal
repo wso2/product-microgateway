@@ -145,86 +145,94 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential, http:Request req) returns @tainted (boolean | http:AuthenticationError){
-    (boolean | http:AuthenticationError) status = false;
-    handle jDialectURI = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_DIALECT,
-                                                        DEFAULT_JWT_GENERATOR_DIALECT));
-    handle jSignatureAlgorithm = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                JWT_GENERATOR_SIGN_ALGO,
-                                                                DEFAULT_JWT_GENERATOR_SIGN_ALGO));
-    int jTokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
-                                            JWT_GENERATOR_TOKEN_EXPIRY,
-                                            DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
-    handle jRestrictedClaims = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                JWT_GENERATOR_RESTRICTED_CLAIMS,
-                                                                DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS));
-    handle keyStoreLocationUnresolved = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                        KEY_STORE_PATH,
-                                                                        DEFAULT_KEY_STORE_PATH));
-    handle jKeyStorePath = getKeystoreLocation(keyStoreLocationUnresolved);
-    handle jKeyStorePassword = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                KEY_STORE_PASSWORD,
-                                                                DEFAULT_KEY_STORE_PASSWORD));
-    handle jTokenIssuer = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                            JWT_GENERATOR_TOKEN_ISSUER,
-                                                            DEFAULT_JWT_GENERATOR_TOKEN_ISSUER));
-    handle jTokenAudience = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                            JWT_GENERATOR_TOKEN_AUDIENCE,
-                                                            DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE));
-    int skewTime = getConfigIntValue(JWT_GENERATOR_ID,
-                                        JWT_GENERATOR_SKEW_TIME,
-                                        DEFAULT_JWT_GENERATOR_SKEW_TIME);
-    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
-    if (payload is jwt:JwtPayload) {
-        printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
-        boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID, 
-                                                        JWT_GENERATOR_TOKEN_CACHE_ENABLED, 
-                                                        DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
-        int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID, 
-                                            JWT_GENERATOR_TOKEN_CACHE_EXPIRY, 
-                                            DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
-        // get the subscribedAPI details
-        map<string> apiDetails = checkSubscribedAPIs(payload);
-        // checking if cache is enabled
-        if (enabledCaching) {
-            var cachedToken = jwtGeneratorCache.get(credential);
-            if (cachedToken is string) {
-                printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
-                printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
-                (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
-                if (cachedPayload is jwt:JwtPayload) {
-                    int currentTime = getCurrentTime();
-                    int? cachedTokenExpiry = cachedPayload?.exp;
-                    if (cachedTokenExpiry is int) {
-                        cachedTokenExpiry = cachedTokenExpiry * 1000;
-                        int difference = (cachedTokenExpiry - currentTime);
-                        if (difference < skewTime) {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
-                            status =setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
-                                         payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+    boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID, 
+                                                        JWT_GENERATOR_ENABLED, 
+                                                        DEFAULT_JWT_GENERATOR_ENABLED);
+    if (enabledJWTGenerator) {
+        (boolean | http:AuthenticationError) status = false;
+        handle jDialectURI = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_DIALECT,
+                                                            DEFAULT_JWT_GENERATOR_DIALECT));
+        handle jSignatureAlgorithm = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                    JWT_GENERATOR_SIGN_ALGO,
+                                                                    DEFAULT_JWT_GENERATOR_SIGN_ALGO));
+        int jTokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_TOKEN_EXPIRY,
+                                                DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
+        handle jRestrictedClaims = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                    JWT_GENERATOR_RESTRICTED_CLAIMS,
+                                                                    DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS));
+        handle keyStoreLocationUnresolved = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                            KEY_STORE_PATH,
+                                                                            DEFAULT_KEY_STORE_PATH));
+        handle jKeyStorePath = getKeystoreLocation(keyStoreLocationUnresolved);
+        handle jKeyStorePassword = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                    KEY_STORE_PASSWORD,
+                                                                    DEFAULT_KEY_STORE_PASSWORD));
+        handle jTokenIssuer = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                JWT_GENERATOR_TOKEN_ISSUER,
+                                                                DEFAULT_JWT_GENERATOR_TOKEN_ISSUER));
+        handle jTokenAudience = java:fromString(getConfigValue(JWT_GENERATOR_ID,
+                                                                JWT_GENERATOR_TOKEN_AUDIENCE,
+                                                                DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE));
+        int skewTime = getConfigIntValue(JWT_GENERATOR_ID,
+                                            JWT_GENERATOR_SKEW_TIME,
+                                            DEFAULT_JWT_GENERATOR_SKEW_TIME);
+        (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+        if (payload is jwt:JwtPayload) {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
+            boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID, 
+                                                            JWT_GENERATOR_TOKEN_CACHE_ENABLED, 
+                                                            DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
+            int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID, 
+                                                JWT_GENERATOR_TOKEN_CACHE_EXPIRY, 
+                                                DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
+            // get the subscribedAPI details
+            map<string> apiDetails = checkSubscribedAPIs(payload);
+            // checking if cache is enabled
+            if (enabledCaching) {
+                var cachedToken = jwtGeneratorCache.get(credential);
+                if (cachedToken is string) {
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
+                    (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
+                    if (cachedPayload is jwt:JwtPayload) {
+                        int currentTime = getCurrentTime();
+                        int? cachedTokenExpiry = cachedPayload?.exp;
+                        if (cachedTokenExpiry is int) {
+                            cachedTokenExpiry = cachedTokenExpiry * 1000;
+                            int difference = (cachedTokenExpiry - currentTime);
+                            if (difference < skewTime) {
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
+                                status =setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
+                                            payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+                            } else {
+                                req.setHeader(jwtheaderName, cachedToken);
+                                status = true;
+                            }
                         } else {
-                            req.setHeader(jwtheaderName, cachedToken);
-                            status = true;
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
+                            return prepareAuthenticationError("Failed to read exp claim from cached token");
                         }
-                    } else {
-                        printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
-                        return prepareAuthenticationError("Failed to read exp claim from cached token");
                     }
+                } else {
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
+                    status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
+                                        payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
                 }
             } else {
-                printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the cache");
+                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
                 status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
                                     payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
             }
         } else {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
-            status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
-                                payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+            return prepareAuthenticationError("Failed to read JWT token");
         }
+        return status;
     } else {
-        return prepareAuthenticationError("Failed to read JWT token");
+        printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Generator is disabled");
+        return true;
     }
-    return status;
 }
 
 # Refactoring method for setting JWT header
