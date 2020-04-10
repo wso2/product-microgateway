@@ -124,7 +124,7 @@ public const string DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS = "";
 public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
 public const string DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE = "http://org.wso2.apimgt/gateway";
 public const int DEFAULT_JWT_GENERATOR_SKEW_TIME = 0;
-public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorImpl";
+public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorImpl";
 
 public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
 public const int DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY = 900000;
