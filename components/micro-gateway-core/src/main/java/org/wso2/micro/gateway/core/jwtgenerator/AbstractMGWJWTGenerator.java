@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.core.handlers;
+package org.wso2.micro.gateway.core.jwtgenerator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;

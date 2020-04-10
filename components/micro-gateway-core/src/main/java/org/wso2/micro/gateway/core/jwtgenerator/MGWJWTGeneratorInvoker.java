@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.core.handlers;
+package org.wso2.micro.gateway.core.jwtgenerator;
 
 import org.ballerinalang.jvm.values.MapValue;
 import org.slf4j.Logger;

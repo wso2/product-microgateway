@@ -349,7 +349,7 @@
   # Skew time to reach the backend from microgateway (ms)
   skewTime=0
   # JWT token generator implementation
-  generatorImpl="org.wso2.micro.gateway.core.handlers.MGWJWTGeneratorImpl"
+  generatorImpl="org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
   [jwtGeneratorConfig.jwtGeneratorCaching]
     # Enable jwt generator token caching
