@@ -40,14 +40,19 @@ public class Main {
     private static final String MICRO_GW = "micro-gw: ";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private static PrintStream outStream = System.err;
+    private static PrintStream err = System.err;
+    private static PrintStream out = System.out;
 
     public static void main(String... args) {
+        Optional<LauncherCmd> invokedCmd = Optional.empty();
         try {
-            Optional<LauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
-            optionalInvokedCmd.ifPresent(LauncherCmd::execute);
+            invokedCmd = getInvokedCmd(args);
+            invokedCmd.ifPresent(LauncherCmd::execute);
+            CmdUtils.printMessagesToConsole();
+            CmdUtils.printCallHomeMessage();
+            Runtime.getRuntime().exit(0);
         } catch (CliLauncherException e) {
-            outStream.println(e.getMessages());
+            err.println(e.getMessages());
             Throwable cause = e.getCause();
             if (cause instanceof ParameterException) {
                 ParameterException paramEx = (ParameterException) cause;
@@ -56,16 +61,19 @@ public class Main {
             logger.error(MICRO_GW + "Error occurred while executing command.", e);
             Runtime.getRuntime().exit(1);
         } catch (CLIInternalException e) {
-            outStream.println(MICRO_GW + INTERNAL_ERROR_MESSAGE + " - " + e.getMessage());
+            showBuildError(invokedCmd);
+            err.println(MICRO_GW + INTERNAL_ERROR_MESSAGE + " - " + e.getMessage());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(1);
         } catch (CLIRuntimeException e) {
-            outStream.println(MICRO_GW + e.getTerminalMsg());
+            showBuildError(invokedCmd);
+            err.println(MICRO_GW + e.getTerminalMsg());
             logger.error(e.getMessage(), e);
             Runtime.getRuntime().exit(e.getExitCode());
         } catch (Exception e) {
             //Use generic exception to catch all the runtime exception
-            outStream.println(MICRO_GW + INTERNAL_ERROR_MESSAGE);
+            showBuildError(invokedCmd);
+            err.println(MICRO_GW + INTERNAL_ERROR_MESSAGE);
             logger.error(INTERNAL_ERROR_MESSAGE, e);
             Runtime.getRuntime().exit(1);
         }
@@ -131,5 +139,11 @@ public class Main {
         }
     }
 
-
+    private static void showBuildError(Optional<LauncherCmd> invokedCmd) {
+        invokedCmd.ifPresent(value -> {
+            if (CliCommands.BUILD.equalsIgnoreCase(value.getName())) {
+                out.print(CmdUtils.format("[ERROR]\n"));
+            }
+        });
+    }
 }

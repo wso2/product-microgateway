@@ -28,6 +28,7 @@ import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import java.util.UUID;
  */
 public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOperation, Operation> {
 
-    public static final String X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String X_THROTTLING_TIER = OpenAPIConstants.APIM_THROTTLING_TIER;
     public static final String X_SCOPE = "x-scope";
     public static final String X_AUTH_TYPE = "x-auth-type";
     public static final String AUTH_TYPE_NONE = "None";
@@ -145,8 +146,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
             }
 
-            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
-            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
+
             Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
             Optional<Object> authType = Optional.ofNullable(exts.get(X_AUTH_TYPE));
@@ -155,9 +155,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
+            Optional<Object> resourceTier = Optional.ofNullable(exts.get(X_THROTTLING_TIER));
+            resourceTier.ifPresent(value -> this.resourceTier = value.toString());
             //set dev-first resource level throttle policy
-            Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
-            extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            if (this.resourceTier == null) {
+                Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
+                extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
+            }
+            if (api.getApiLevelPolicy() != null && this.resourceTier != null) {
+                //if api level policy exists then we are neglecting the resource level policies
+                String message = "[WARN] : Resource level policy: " + this.resourceTier
+                        + " will be neglected due to the presence of API level policy: " + api.getApiLevelPolicy()
+                        + " for the API : " + api.getName() + "\n";
+                CmdUtils.appendMessagesToConsole(message);
+                this.resourceTier = null;
+            }
             Optional<Object> extDisableSecurity = Optional.ofNullable(exts.get(OpenAPIConstants.DISABLE_SECURITY));
             extDisableSecurity.ifPresent(value -> {
                 try {

@@ -75,9 +75,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     //to identify if there is any endpoint with backend security (to insert "import ballerina/auth")
     private boolean hasEpSecurity = false;
 
-    //to recognize whether it is a devfirst approach
-    private boolean isDevFirst = true;
-
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<String> authProviders;
 
@@ -152,6 +149,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         if (appSecurity != null && appSecurity.isOptional() != null) {
             this.applicationSecurityOptional = appSecurity.isOptional();
         }
+        addAPILevelPolicy(definition);
         setHasEpSecurity(endpointConfig);
         setPaths(definition);
         //set default auth providers for api level
@@ -251,28 +249,23 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.setSecuritySchemas(this.authProviders);
 
                 // if it is the developer first approach
-                if (isDevFirst) {
-                    //to add API-level throttling policy
-                    Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.THROTTLING_TIER));
-                    apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
-                    //to add API-level security disable
-                    Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
-                            .get(OpenAPIConstants.DISABLE_SECURITY));
-                    disableSecurity.ifPresent(value -> {
-                        try {
-                            //Since we are considering based on 'x-wso2-disable-security', secured value should be the
-                            // negation
-                            boolean secured = !(Boolean) value;
-                            operation.setSecured(secured);
-                        } catch (ClassCastException e) {
-                            throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
-                                    "' should be a boolean value. But provided '" + value.toString() + "'.");
-                        }
-                    });
-                    //to set scope property of API
-                    operation.setScope(api.getMgwApiScope());
-                }
+                //to add API-level security disable
+                Optional<Object> disableSecurity = Optional.ofNullable(openAPI.getExtensions()
+                        .get(OpenAPIConstants.DISABLE_SECURITY));
+                disableSecurity.ifPresent(value -> {
+                    try {
+                        //Since we are considering based on 'x-wso2-disable-security', secured value should be the
+                        // negation
+                        boolean secured = !(Boolean) value;
+                        operation.setSecured(secured);
+                    } catch (ClassCastException e) {
+                        throw new CLIRuntimeException("The property '" + OpenAPIConstants.DISABLE_SECURITY +
+                                "' should be a boolean value. But provided '" + value.toString() + "'.");
+                    }
+                });
+                //to set scope property of API
+                operation.setScope(api.getMgwApiScope());
+
             });
             paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
         }
@@ -288,6 +281,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         if (!this.importModules.contains(importStmt) && (importStmt != null)) {
             this.importModules.add(importStmt);
         }
+    }
+
+    private void addAPILevelPolicy(OpenAPI openAPI) {
+        // if it is the developer first approach to add API-level throttling policy
+        Optional<Object> apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                .get(OpenAPIConstants.THROTTLING_TIER));
+        if (!apiThrottlePolicy.isPresent()) {
+            apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
+                    .get(OpenAPIConstants.APIM_THROTTLING_TIER));
+        }
+        apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
     }
 
     /**
@@ -432,10 +436,6 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     public void setBasepath(String basepath) {
         this.basepath = basepath;
-    }
-
-    public void setIsDevFirst(boolean value) {
-        isDevFirst = value;
     }
 
     public String getProjectName() {

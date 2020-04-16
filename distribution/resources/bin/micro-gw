@@ -144,7 +144,7 @@ fi
 
 JAVA_PATH=$MICROGW_HOME/lib/jdk8u202-b08-jre
 if [ -d "$JAVA_HOME" ]; then
-  echo "JAVA_HOME is externally set: $JAVA_HOME"
+  echo "JAVA_HOME: $JAVA_HOME"
 else
   JAVA_HOME=$JAVA_PATH
 fi
@@ -298,18 +298,18 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
         $JAVA_OPTS \
         -classpath "$CLI_CLASSPATH" \
         -Djava.security.egd=file:/dev/./urandom \
-        -Dballerina.home=$BALLERINA_HOME \
+        -Dballerina.home="$BALLERINA_HOME" \
         -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
         -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
         -Dfile.encoding=UTF8 \
         -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-        -Dcli.home=$MICROGW_HOME \
+        -Dcli.home="$MICROGW_HOME" \
+        -Dcacerts.location="$JAVA_PATH/lib/security/cacerts" \
         -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
         org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 
     exit_code=$?
     if [ $exit_code -eq 0 ]; then
-        printf "${BOLD}[DONE]${NC}\n"
         # Ballerina path is updated as ballerina platform is extracted
         BALLERINA_HOME="$MICROGW_HOME/lib/platform"
         export BALLERINA_HOME=$BALLERINA_HOME
@@ -327,7 +327,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
 
         update_cli_classpath
         MICRO_GW_LABEL_PROJECT_DIR="$MICRO_GW_PROJECT_DIR/$CMD_PRO_NAME_VAL"
-        pushd $MICRO_GW_LABEL_PROJECT_DIR/target/gen > /dev/null
+        pushd "$MICRO_GW_LABEL_PROJECT_DIR"/target/gen > /dev/null
             # clean the .jar files of target folder
             if ls $MICRO_GW_LABEL_PROJECT_DIR/target/*.jar 1> /dev/null 2>&1; then
                 rm -f $MICRO_GW_LABEL_PROJECT_DIR/target/*.jar
@@ -339,10 +339,10 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
 
             if [ $exit_code -eq 0 ]; then
                 # move all executable ballerina build outputs to MGW_PROJECT/target directory
-                mv $MICRO_GW_LABEL_PROJECT_DIR/target/gen/target/bin/*.jar $TARGET_PATH 2> /dev/null
+                mv "$MICRO_GW_LABEL_PROJECT_DIR"/target/gen/target/bin/*.jar "$TARGET_PATH" 2> /dev/null
             fi
 
-            if [ -f $TARGET_PATH ]; then
+            if [ -f "$TARGET_PATH" ]; then
                 printf "\n${GREEN}${BOLD}BUILD SUCCESSFUL${NC}\n"
                 printf  "${BOLD}Target: ${TARGET_PATH}${NC}\n"
             else
@@ -360,12 +360,12 @@ else
         $JAVA_OPTS \
         -classpath "$CLI_CLASSPATH" \
         -Djava.security.egd=file:/dev/./urandom \
-        -Dballerina.home=$BALLERINA_HOME \
+        -Dballerina.home="$BALLERINA_HOME" \
         -Djava.util.logging.config.class="org.wso2.apimgt.gateway.cli.logging.CLILogConfigReader" \
         -Djava.util.logging.manager="org.wso2.apimgt.gateway.cli.logging.CLILogManager" \
         -Dfile.encoding=UTF8 \
         -Dtemplates.dir.path="$MICROGW_HOME/resources/templates" \
-        -Dcli.home=$MICROGW_HOME \
+        -Dcli.home="$MICROGW_HOME" \
         -DVERBOSE_ENABLED=$VERBOSE_ENABLED \
         org.wso2.apimgt.gateway.cli.cmd.Main "$@"
 fi

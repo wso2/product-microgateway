@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/auth;
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
@@ -39,8 +38,8 @@ public type JWTAuthHandler object {
     public function canProcess(http:Request req) returns @tainted boolean {
         string authHeader = runtime:getInvocationContext().attributes[AUTH_HEADER].toString();
         if (req.hasHeader(authHeader)) {
-            string headerValue = req.getHeader(authHeader);
-            if (hasPrefix(headerValue, auth:AUTH_SCHEME_BEARER)) {
+            string headerValue = req.getHeader(authHeader).toLowerAscii();
+            if (headerValue.startsWith(AUTH_SCHEME_BEARER_LOWERCASE)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential, "\\.");
                 if (splitContent.length() == 3) {

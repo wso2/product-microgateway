@@ -10,133 +10,14 @@ provided to you.
 At the bottom of this file is a table that shows what each license indicated
 below is and where the actual text of the license can be found.
 
-Name                                                                            Type           License
----------------------------------------------------------------------------------------------------------
-andes-client-3.2.86.jar                                                         bundle         apache2   3875
-antlr4-runtime-4.5.1.wso2v1.jar                                                 bundle         bsd       11767
-apache-mime4j-core-0.7.2.jar                                                    bundle         apache2   2112
-awslambda-extension-0.990.5.jar                                                 jar            apache2   3835
-axiom-api-1.2.20.jar                                                            bundle         apache2   2111
-axiom-c14n-1.2.11-wso2v11.jar                                                   bundle         apache2   18914
-axiom-dom-1.2.20.jar                                                            bundle         apache2   2219
-axiom-impl-1.2.20.jar                                                           bundle         apache2   2110
-ballerina-auth-0.990.5.jar                                                      jar            apache2   3894
-ballerina-builtin-0.990.5.jar                                                   jar            apache2   3845
-ballerina-cli-utils-0.990.5.jar                                                 jar            apache2   3885
-ballerina-config-0.990.5.jar                                                    jar            apache2   3897
-ballerina-config-api-0.990.5.jar                                                jar            apache2   3844
-ballerina-core-0.990.5.jar                                                      jar            apache2   3878
-ballerina-crypto-0.990.5.jar                                                    jar            apache2   3840
-ballerina-encoding-0.990.5.jar                                                  jar            apache2   3856
-ballerina-file-0.990.5.jar                                                      jar            apache2   3841
-ballerina-grpc-0.990.5.jar                                                      jar            apache2   3892
-ballerina-h2-0.990.5.jar                                                        jar            apache2   3843
-ballerina-http-0.990.5.jar                                                      jar            apache2   3887
-ballerina-internal-0.990.5.jar                                                  jar            apache2   3864
-ballerina-io-0.990.5.jar                                                        jar            apache2   3849
-ballerina-jaeger-extension-0.990.5.jar                                          jar            apache2   3859
-ballerina-jms-0.990.5.jar                                                       jar            apache2   3891
-ballerina-lang-0.990.5.jar                                                      jar            apache2   3889
-ballerina-launcher-0.990.5.jar                                                  jar            apache2   3860
-ballerina-log-api-0.990.5.jar                                                   jar            apache2   3865
-ballerina-logging-0.990.5.jar                                                   jar            apache2   3867
-ballerina-math-0.990.5.jar                                                      jar            apache2   3857
-ballerina-metrics-extension-0.990.5.jar                                         jar            apache2   3854
-ballerina-mime-0.990.5.jar                                                      jar            apache2   3855
-ballerina-mysql-0.990.5.jar                                                     jar            apache2   3858
-ballerina-observability-0.990.5.jar                                             jar            apache2   3862
-ballerina-privacy-0.990.5.jar                                                   jar            apache2   3850
-ballerina-prometheus-extension-0.990.5.jar                                      jar            apache2   3836
-ballerina-reflect-0.990.5.jar                                                   jar            apache2   3896
-ballerina-runtime-0.990.5.jar                                                   jar            apache2   3884
-ballerina-socket-0.990.5.jar                                                    jar            apache2   3872
-ballerina-sql-0.990.5.jar                                                       jar            apache2   3870
-ballerina-streams-0.990.5.jar                                                   jar            apache2   3881
-ballerina-system-0.990.5.jar                                                    jar            apache2   3886
-ballerina-task-0.990.5.jar                                                      jar            apache2   3876
-ballerina-time-0.990.5.jar                                                      jar            apache2   3888
-ballerina-transactions-0.990.5.jar                                              jar            apache2   3890
-ballerina-websub-0.990.5.jar                                                    jar            apache2   3883
-broker-auth-0.970.5.jar                                                         bundle         apache2   3842
-broker-common-0.970.5.jar                                                       bundle         apache2   3895
-broker-coordination-0.970.5.jar                                                 bundle         apache2   3874
-broker-core-0.970.5.jar                                                         bundle         apache2   3861
-broker-rest-runner-0.970.5.jar                                                  bundle         apache2   3838
-commons-lang3-3.5.jar                                                           bundle         apache2   2105
-commons-logging-1.1.1.jar                                                       jar            apache2   274
-commons-pool-1.5.6.wso2v1.jar                                                   bundle         apache2   5589
-disruptor-3.3.2.wso2v2.jar                                                      bundle         apache2   7613
-docker-extension-0.990.5.jar                                                    jar            apache2   3853
-geronimo-activation_1.1_spec-1.1.jar                                            bundle         apache2   2103
-geronimo-stax-api_1.0_spec-1.0.1.jar                                            bundle         apache2   635
-gson-2.7.jar                                                                    bundle         apache2   2102
-guava-19.0.jar                                                                  bundle         apache2   3032
-h2-1.4.197.jar                                                                  bundle         apache2   3031
-handlebars-4.0.6.jar                                                            bundle         apache2   3030
-HdrHistogram-2.1.10.jar                                                         bundle         ccpd      2983
-HikariCP-3.1.0.jar                                                              bundle         apache2   3029
-jaeger-core-0.24.0.jar                                                          jar            apache2   3024
-jaeger-thrift-0.24.0.jar                                                        jar            apache2   3023
-javax.jms-api-2.0.1.jar                                                         bundle         cddl+gpl  2097
-javax.transaction-api-1.2.jar                                                   bundle         cddl+gpl  2200
-jaxen-1.1.6.jar                                                                 bundle         apache2   2095
-jdbc-extension-0.990.5.jar                                                      jar            apache2   3882
-jzlib-1.1.3.jar                                                                 jar            bsd       3873
-kubernetes-extension-0.990.5.jar                                                jar            apache2   3871
-libthrift-0.10.0.jar                                                            bundle         apache2   3020
-metrics-core-3.1.0.jar                                                          bundle         apache2   3019
-mimepull-1.9.7.jar                                                              bundle         cddl1     3016
-netty-buffer-4.1.19.Final.jar                                                   bundle         apache2   2770
-netty-codec-4.1.19.Final.jar                                                    bundle         apache2   2769
-netty-codec-http-4.1.19.Final.jar                                               bundle         apache2   2768
-netty-codec-http2-4.1.19.Final.jar                                              bundle         apache2   2767
-netty-common-4.1.19.Final.jar                                                   bundle         apache2   2766
-netty-handler-4.1.19.Final.jar                                                  bundle         apache2   2765
-netty-handler-proxy-4.1.19.Final.jar                                            bundle         apache2   2764
-netty-resolver-4.1.19.Final.jar                                                 bundle         apache2   2763
-netty-tcnative-boringssl-static-2.0.7.Final.jar                                 bundle         apache2   3015
-netty-transport-4.1.19.Final.jar                                                bundle         apache2   2762
-okhttp-3.9.1.jar                                                                jar            apache2   3014
-okio-1.13.0.jar                                                                 jar            apache2   3013
-opentracing-api-0.31.0.jar                                                      jar            apache2   3010
-opentracing-util-0.31.0.jar                                                     jar            apache2   3009
-org.wso2.carbon.core-5.1.0.jar                                                  bundle         apache2   11763
-org.wso2.carbon.messaging-2.3.7.jar                                             bundle         apache2   12373
-org.wso2.carbon.metrics.core-2.3.7.jar                                          bundle         apache2   16765
-org.wso2.micro.gateway.core-3.0.1.jar                                           bundle         apache2   20414
-org.wso2.securevault-1.0.0-wso2v2.jar                                           bundle         apache2   3537
-org.wso2.transport.http.netty-6.0.259.jar                                       bundle         apache2   20416
-org.wso2.transport.local-file-system-6.0.53.jar                                 bundle         apache2   16767
-picocli-3.3.0.jar                                                               jar            apache2   3398
-protobuf-java-3.5.1.jar                                                         bundle         bsd3      3007
-quartz-2.3.0.jar                                                                bundle         apache2   2337
-quartz-jobs-2.3.0.jar                                                           jar            apache2   2338
-siddhi-annotations-0.990.5.jar                                                  jar            apache2   3866
-siddhi-core-0.990.5.jar                                                         jar            apache2   3839
-siddhi-query-api-0.990.5.jar                                                    jar            apache2   3868
-siddhi-query-compiler-0.990.5.jar                                               jar            apache2   3869
-slf4j-api-1.7.22.jar                                                            bundle         mit       2078
-slf4j-jdk14-1.7.22.jar                                                          bundle         mit       2131
-snakeyaml-1.16.0.wso2v1.jar                                                     bundle         apache2   11755
-staxon-core-1.2.0.wso2v2.jar                                                    bundle         apache2   11754
-strip-bouncycastle-0.990.5.jar                                                  jar            apache2   3877
-toml-parser-0.990.5.jar                                                         jar            mit       3880
 
+Name                                                                                                Version        License
+_________________________________________________________________________________________________________________________________________________
+jmx_prometheus_javaagent-0.12.0.jar                                                                 jar            apache2
+org.wso2.micro.gateway.tools-3.1.0.jar                                                              bundle         apache2
 
 
 The license types used by the above libraries and their information is given below:
 
-bsd            Berkeley License
-               http://www.opensource.org/licenses/bsd-license.php
 apache2        Apache License Version 2.0
                http://www.apache.org/licenses/LICENSE-2.0.html
-mit            MIT License
-               http://www.opensource.org/licenses/mit-license.php
-ccpd           Creative Commons Public Domain
-               http://creativecommons.org/licenses/publicdomain
-cddl1          Common Development and Distribution License
-               http://www.opensource.org/licenses/cddl1.php
-cddl+gpl       CDDL + GPLv2
-               https://glassfish.dev.java.net/public/CDDL+GPL.html
-bsd3           BSD-3
-               http://opensource.org/licenses/BSD-3-Clause

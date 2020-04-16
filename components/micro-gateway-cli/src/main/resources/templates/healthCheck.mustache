@@ -17,7 +17,7 @@ import wso2/gateway;
 @gateway:Filters {
     skipAll: true
 }
-service healthCheckService on apiSecureListener {
+service healthCheckService on apiListener, apiSecureListener {
 
     @http:ResourceConfig {
         path: "/*",

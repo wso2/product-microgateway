@@ -90,6 +90,13 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
         apiVersion = <string>apiConfig.apiVersion;
     }
     apiKeyValidationRequest.apiVersion = apiVersion;
+    if (!contains(apiContext, apiVersion)) {
+        if (hasSuffix(apiContext, PATH_SEPERATOR)) {
+            apiContext = apiContext + apiVersion;
+        } else {
+            apiContext = apiContext + PATH_SEPERATOR + apiVersion;
+        }
+    }
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
@@ -390,19 +397,39 @@ public function getCurrentTimeForAnalytics() returns int {
 public function rotateFile(string filePath) returns string | error {
     string uuid = system:uuid();
     string fileLocation = retrieveConfig(API_USAGE_PATH, API_USAGE_DIR) + PATH_SEPERATOR;
+    int filePathLength = filePath.length();
+    //to remove the .tmp extension from the filePath ('api-usage-data.dat.tmp'). This is the filename required by the
+    //analytics node "api-usage-data.dat". It is required to rename the file before compressing in order to avoid
+    //the data loss.
+    string eventFilePath = filePath.substring(0, filePathLength - 4) ;
     int rotatingTimeStamp = getCurrentTime();
-    string zipName = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." + uuid + ZIP_EXTENSION;
-    var compressResult = compress(filePath, zipName);
+    var renameFileResult = file:rename(filePath, eventFilePath);
+    if (renameFileResult is error) {
+        printError(KEY_UTILS, "Failed to rename file", renameFileResult);
+    }
+    //Until the compression happens, the file will have the name <fileNameWithoutExtension> with '.tmp' extension.
+    //After the compression is completed successfully, the file will be renamed to <zipName>. Only the files
+    //with .zip extension will be uploaded. Hence the partially compressed files will not be uploaded to the analytics
+    //node.
+    string fileNameWithoutExtension = fileLocation + API_USAGE_FILE + "." + rotatingTimeStamp.toString() + "." +
+        uuid;
+    string tempZipName = fileNameWithoutExtension + TMP_EXTENSION;
+    string zipName = fileNameWithoutExtension + ZIP_EXTENSION;
+    var compressResult = compress(eventFilePath, tempZipName);
     if (compressResult is error) {
         printError(KEY_UTILS, "Failed to compress the file", compressResult);
         return compressResult;
     } else {
         printInfo(KEY_UTILS, "File compressed successfully");
-        var deleteResult = file:remove(filePath);
-        if (deleteResult is ()) {
+        var renameZipResult = file:rename(tempZipName, zipName);
+        var deleteFileResult = file:remove(eventFilePath);
+        if (renameZipResult is error) {
+            printError(KEY_UTILS, "Failed to rename file", renameZipResult);
+        }
+        if (deleteFileResult is ()) {
             printInfo(KEY_UTILS, "Existing file deleted successfully");
         } else {
-            printError(KEY_UTILS, "Failed to delete file", deleteResult);
+            printError(KEY_UTILS, "Failed to delete file", deleteFileResult);
         }
         return zipName;
     }
@@ -882,16 +909,17 @@ function readMultipleJWTIssuers() {
             };
             boolean classLoaded = false;
             string className = "";
-            if(jwtIssuer.hasKey("claimMapperClassName")){
+            if(jwtIssuer.hasKey(ISSUER_CLASSNAME)) {
                className = getDefaultStringValue(jwtIssuer[ISSUER_CLASSNAME], DEFAULT_ISSUER_CLASSNAME);
                classLoaded = loadMappingClass(className);
             }
             map<anydata>[] | error claims = [];
-            if(jwtIssuer.hasKey("claims")){
-                  claims = map<anydata>[].constructFrom((jwtIssuer["claims"]));
+            if(jwtIssuer.hasKey(ISSUER_CLAIMS)) {
+                  claims = map<anydata>[].constructFrom((jwtIssuer[ISSUER_CLAIMS]));
             }
             JwtAuthProvider jwtAuthProvider
-                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION], DEFAULT_VALIDATE_SUBSCRIPTION), claims, className, classLoaded);
+                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
+                    DEFAULT_VALIDATE_SUBSCRIPTION), claims, className, classLoaded);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -919,7 +947,8 @@ function readMultipleJWTIssuers() {
             jwtCache: jwtCache
         };
         JwtAuthProvider jwtAuthProvider
-            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, DEFAULT_VALIDATE_SUBSCRIPTION), [] , "", false);
+            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
+                DEFAULT_VALIDATE_SUBSCRIPTION), [] , "", false);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -942,9 +971,6 @@ function appendMultipleJWTIssuers(http:InboundAuthHandler[] handlers) {
 # + return - auth handlers
 public function getHandlers(string[] appSecurity) returns http:InboundAuthHandler[] {
     http:InboundAuthHandler[] handlers = [];
-    if (isDebugEnabled) {
-        printDebug(KEY_UTILS, "Adding auth handlers : " + appSecurity.toString());
-    }
     //enforce handler order mutualssl, jwts, opaque, basic, apikey
     if (appSecurity.indexOf(AUTH_SCHEME_MUTUAL_SSL) != ()) {
         handlers.push(authHandlersMap.get(MUTUAL_SSL_HANDLER));

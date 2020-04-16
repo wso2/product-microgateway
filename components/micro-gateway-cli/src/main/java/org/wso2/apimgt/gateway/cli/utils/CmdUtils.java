@@ -23,6 +23,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
@@ -32,7 +33,6 @@ import org.wso2.apimgt.gateway.cli.cipher.AESCipherToolException;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerationContext;
 import org.wso2.apimgt.gateway.cli.config.TOMLConfigParser;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
-import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
@@ -88,6 +88,8 @@ public final class CmdUtils {
     private static final String openAPISpec2 = "2";
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
+    private static String consoleMessages = "";
+    private static String callHomeMessage = "";
 
     private CmdUtils() {
 
@@ -224,6 +226,28 @@ public final class CmdUtils {
      */
     public static String getCLIHome() {
         return System.getProperty(CliConstants.CLI_HOME);
+    }
+
+    /**
+     * Get cacerts location.
+     *
+     * @return cacerts location
+     */
+    public static String getCacertsLocation() {
+        return System.getProperty(CliConstants.CACERTS_DIR);
+    }
+
+    /**
+     * Get cacerts password.
+     *
+     * @return cacerts password
+     */
+    public static String getCacertsPassword() {
+        String cacertsPassword = "";
+        String password = System.getenv("CACERTS_PASS");
+
+        cacertsPassword = password != null ? password : CliConstants.DEFAULT_CACERTS_PASS;
+        return cacertsPassword;
     }
 
     /**
@@ -1272,39 +1296,52 @@ public final class CmdUtils {
     }
 
     public static List<String> getExternalJarDependencies(String projectName) {
-        List<String> jarNames = new ArrayList<>();
-        String externalJarFolder =
-                getProjectDirectoryPath(projectName) + File.separator + CliConstants.CLI_LIB;
-        File[] files = new File(externalJarFolder).listFiles();
-        if (files != null) {
-            for (File file : files) {
+        List<String> jars = new ArrayList<>();
+        String extJarDir = getProjectDirectoryPath(projectName) + File.separator + CliConstants.CLI_LIB;
+        File[] jarFiles = new File(extJarDir).listFiles();
+        if (jarFiles != null) {
+            for (File file : jarFiles) {
                 if (file.getName().endsWith(CliConstants.EXTENSION_JAR)) {
-                    jarNames.add(file.getName());
+                    jars.add(file.getAbsolutePath());
                 }
             }
         }
-        return jarNames;
+        return jars;
     }
 
-    public static void updateBallerinaToml(String projectName) throws IOException {
-        String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
-                + CliConstants.BALLERINA_TOML_FILE;
-        String templateFile =
-                CmdUtils.getMicroGWConfResourceLocation() + File.separator + CliConstants.BALLERINA_TOML_FILE;
-        String fileContent = CmdUtils.readFileAsString(templateFile, false);
-
-        // Windows paths contains '\' separator which causes issues when included in ballerina.toml
-        String unixHomePath = CmdUtils.getCLIHome().replace('\\', '/');
-        fileContent = fileContent.replace(CliConstants.MICROGW_HOME_PLACEHOLDER, unixHomePath);
-        String dependencyFileLocation = getProjectTargetModulePath(projectName) + File.separator
-                + GeneratorConstants.BALLERINA_TOML_TEMPLATE_NAME + GeneratorConstants.TOML_EXTENSION;
-        if (Files.exists(Paths.get(dependencyFileLocation))) {
-            String dependencyContent = CmdUtils.readFileAsString(dependencyFileLocation, false);
-            String unixProjectPath = getProjectDirectoryPath(projectName).replace('\\', '/');
-            dependencyContent = dependencyContent
-                    .replaceAll(CliConstants.MICROGW_PROJECT_PLACEHOLDER, unixProjectPath);
-            fileContent += dependencyContent;
+    /**
+     * Formats a message based on the type of OS. On windows there will not
+     * be any formatting since Windows CMD may not output ASCII formatting.
+     * On other OSs message will be printed in bold.
+     *
+     * @param message message to be printed in the console
+     */
+    public static String format(String message) {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return message;
+        } else {
+            return "\033[0;1m" + message + "\033[0m";
         }
-        Files.write(Paths.get(ballerinaTomlFile), fileContent.getBytes(StandardCharsets.UTF_8));
     }
+
+    public static void appendMessagesToConsole(String msg) {
+        consoleMessages += msg;
+    }
+
+    public static void printMessagesToConsole() {
+        if (!"".equals(consoleMessages)) {
+            OUT.println(consoleMessages);
+        }
+    }
+
+    public static void setCallHomeMessage(String message) {
+        callHomeMessage = message;
+    }
+
+    public static void printCallHomeMessage() {
+        if (!"".equals(callHomeMessage)) {
+            OUT.println(callHomeMessage);
+        }
+    }
+
 }

@@ -22,7 +22,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.0-beta2-SNAPSHOT</version>
+    <version>3.1.1-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -407,14 +407,19 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
+                <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
+                <version>${org.wso2.json.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${fasterxml.jackson.databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.callhome</groupId>
+                <artifactId>core</artifactId>
+                <version>${carbon.callhome.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -613,7 +618,8 @@
         <jackson-core.version>2.9.9</jackson-core.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
         <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
-        <org.json.version>20190722</org.json.version>
+        <org.wso2.json.version>3.0.0.wso2v1</org.wso2.json.version>
+        <carbon.callhome.version>1.0.4</carbon.callhome.version>
     </properties>
 
 </project>

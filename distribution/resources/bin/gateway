@@ -49,7 +49,7 @@ export MGW_VERSION="3.1.0"
 
 JAVA_PATH=$GW_HOME/lib/jdk8u202-b08-jre
 if [ -d "$JAVA_HOME" ]; then
-  echo "JAVA_HOME is externally set: $JAVA_HOME"
+  echo "JAVA_HOME: $JAVA_HOME"
 else
   JAVA_HOME=$JAVA_PATH
 fi
@@ -181,7 +181,7 @@ java_cmd_tools () {
       -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
       $JAVA_OPTS \
       -classpath "$METRIC_CLASSPATH" \
-      org.wso2.micro.gateway.tools.Main $1 $2| tee -a $GW_HOME/logs/microgateway.log
+      org.wso2.micro.gateway.tools.Main "$1" "$2" | tee -a "$GW_HOME/logs/microgateway.log"
 }
 
 java_cmd_gateway () {
@@ -190,11 +190,11 @@ java_cmd_gateway () {
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
     $JAVA_OPTS \
-    -Dmgw-runtime.home=${GW_HOME} \
-    -Dballerina.home=${GW_HOME}/runtime \
+    -Dmgw-runtime.home="${GW_HOME}" \
+    -Dballerina.home="${GW_HOME}/runtime" \
     -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" \
     -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$CONFIG_FILE 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path="$GW_HOME/api-usage-data" --b7a.config.file="$CONFIG_FILE" 2>&1 | tee -a "$GW_HOME/logs/microgateway.log"
 }
 
 java_cmd_gateway_background () {
@@ -205,11 +205,11 @@ java_cmd_gateway_background () {
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath="$GW_HOME/heap-dump.hprof" \
     $JAVA_OPTS \
-    -Dmgw-runtime.home=${GW_HOME} \
-    -Dballerina.home=${GW_HOME}/runtime \
+    -Dmgw-runtime.home="${GW_HOME}" \
+    -Dballerina.home="${GW_HOME}/runtime" \
     -Djava.util.logging.config.class="org.ballerinalang.logging.util.LogConfigReader" \
     -Djava.util.logging.manager="org.ballerinalang.logging.BLogManager" \
-    -jar $args --api.usage.data.path=$GW_HOME/api-usage-data --b7a.config.file=$CONFIG_FILE 2>&1 | tee -a $GW_HOME/logs/microgateway.log
+    -jar $args --api.usage.data.path="$GW_HOME/api-usage-data" --b7a.config.file="$CONFIG_FILE" 2>&1 | tee -a "$GW_HOME/logs/microgateway.log"
 EOF
 }
 
@@ -284,7 +284,7 @@ else
 fi
 
 if [ ! "$CMD" = "stop" ]; then
-    java_cmd_tools "$CONFIG_FILE $CONFIG_OUT_FILE"
+    java_cmd_tools "$CONFIG_FILE" "$CONFIG_OUT_FILE"
   if [ -f "$CONFIG_OUT_FILE" ]; then
       if [ "$OBSERVABILITY_FLAG" != "true" ]; then
           if [ $(sed -n '1p' $CONFIG_OUT_FILE) == "true" ]; then
@@ -308,7 +308,7 @@ if [ "$CMD" = "start" ]; then
       exit 0
     fi
   fi
-  rm -f file $GW_HOME/bin/gateway.pid
+  rm -f file "$GW_HOME/bin/gateway.pid"
 
   java_cmd_gateway_background
 

@@ -40,6 +40,10 @@ import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
+import org.wso2.callhome.CallHomeExecutor;
+import org.wso2.callhome.utils.CallHomeInfo;
+import org.wso2.callhome.utils.MessageFormatter;
+import org.wso2.callhome.utils.Util;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,6 +56,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class represents the "build" command and it holds arguments and flags specified by the user.
@@ -89,13 +95,16 @@ public class BuildCmd implements LauncherCmd {
     @Parameter(names = "--docker-base-image")
     private String dockerBaseImage;
 
+    private CountDownLatch latch = new CountDownLatch(1);
     public void execute() {
+
         if (helpFlag) {
             String commandUsageInfo = getCommandUsageInfo("build");
             outStream.println(commandUsageInfo);
             return;
         }
 
+        runCallHomeSeparateThread();
         String projectName = this.projectName.replaceAll("[/\\\\]", "");
         File projectLocation = new File(CmdUtils.getProjectDirectoryPath(projectName));
         try {
@@ -129,7 +138,7 @@ public class BuildCmd implements LauncherCmd {
             }
             String toolkitConfigPath = CmdUtils.getMainConfigLocation();
             init(projectName, toolkitConfigPath, deploymentConfigPath);
-            outStream.print("Generating sources...\n");
+            outStream.print("Generating sources...");
 
             // Create policies directory
             String genPoliciesPath =
@@ -152,8 +161,10 @@ public class BuildCmd implements LauncherCmd {
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
-            CmdUtils.updateBallerinaToml(projectName);
-        } catch (IOException e) {
+            outStream.print(CmdUtils.format("[DONE]\n"));
+            //wait until call home thread finishes the task.
+            latch.await(10, TimeUnit.SECONDS);
+        } catch (IOException | InterruptedException e) {
             throw new CLIInternalException("Error occurred while generating source code for the open API definitions.",
                     e);
         }
@@ -328,4 +339,40 @@ public class BuildCmd implements LauncherCmd {
         CmdUtils.createDirectory(projectModuleDir, true);
     }
 
+    /**
+     * Invoke call home.
+     *
+     */
+    private void invokeCallHome() {
+        try {
+            String productHome = CmdUtils.getCLIHome();
+            String trustStoreLocation = CmdUtils.getCacertsLocation();
+            String trustStorePassword = CmdUtils.getCacertsPassword();
+
+            CallHomeInfo callhomeinfo = Util.createCallHomeInfo(productHome, trustStoreLocation, trustStorePassword);
+            CallHomeExecutor.execute(callhomeinfo);
+
+            String callHomeResponse = CallHomeExecutor.getMessage();
+            String formattedMessage = MessageFormatter.formatMessage(callHomeResponse, 180);
+            CmdUtils.setCallHomeMessage(formattedMessage);
+            latch.countDown();
+        } catch (Exception e) {
+            // All the exceptions during call home should be caught in order to continue the toolkit build process.
+            logger.error("Error while initialising call home functionality", e);
+            latch.countDown();
+        }
+    }
+
+
+    /**
+     * This method will do the call home functionality in a separate thread.
+     *
+     */
+    private void runCallHomeSeparateThread() {
+        Thread callHomeThread = new Thread(() -> {
+            invokeCallHome();
+        });
+        callHomeThread.setName("callHomeThread");
+        callHomeThread.start();
+    }
 }

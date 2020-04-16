@@ -93,7 +93,7 @@ listener http:Listener tokenListenerEndpoint = new (
     }
 );
 
-public function getFilters() returns http:RequestFilter[] {
+public function getFilters() returns (http:RequestFilter|http:ResponseFilter) [] {
     map<json> deployedPolicies = getDeployedPolicies();
 
     // Grpc Filter
@@ -104,8 +104,10 @@ public function getFilters() returns http:RequestFilter[] {
     gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
     // Analytic filter
     gateway:AnalyticsRequestFilter analyticsFilter;
+    //Validation Request filter
+    gateway:ValidationRequestFilter | gateway:ValidationRequestFilterWrapper validationRequestFilter;
     //Validation filter
-    gateway:ValidationFilter | gateway:ValidationFilterWrapper validationFilter;
+    gateway:ValidationResponseFilter | gateway:ValidationResponseFilterWrapper validationResponseFilter;
     // Authorization filter
     gateway:OAuthzFilter | gateway:OAuthzFilterWrapper  authorizationFilter;
 
@@ -116,12 +118,14 @@ public function getFilters() returns http:RequestFilter[] {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
-        validationFilter = new gateway:ValidationFilterWrapper();
+        validationRequestFilter = new gateway:ValidationRequestFilterWrapper();
+        validationResponseFilter = new gateway:ValidationResponseFilterWrapper();
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
         analyticsFilter =  new gateway:AnalyticsRequestFilter();
-        validationFilter = new gateway:ValidationFilter();
+        validationRequestFilter = new gateway:ValidationRequestFilter();
+        validationResponseFilter = new gateway:ValidationResponseFilter();
     }
 
     authorizationFilter = gateway:getDefaultAuthorizationFilter();
@@ -129,7 +133,7 @@ public function getFilters() returns http:RequestFilter[] {
     // Extension filter
     ExtensionFilter extensionFilter = new;
 
-    return [grpcFilter, preAuthnFilter, authorizationFilter, throttleFilter, validationFilter,
-            analyticsFilter, extensionFilter];
+    return [grpcFilter, preAuthnFilter, authorizationFilter, validationRequestFilter, throttleFilter,
+            analyticsFilter, validationResponseFilter, extensionFilter];
 }
 

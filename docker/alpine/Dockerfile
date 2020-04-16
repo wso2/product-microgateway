@@ -29,18 +29,18 @@ ARG USER_HOME=/home/${USER}
 
 # build arguments for WSO2 product installation
 ARG MGW_SERVER_NAME=wso2am-micro-gw-linux
-ARG MGW_SERVER_VERSION=3.1.0-beta
+ARG MGW_SERVER_VERSION=3.1.0
 ARG MGW_SERVER=${MGW_SERVER_NAME}-${MGW_SERVER_VERSION}
 ARG MGW_RUNTIME_HOME=${USER_HOME}/wso2
-ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v${MGW_SERVER_VERSION}/wso2am-micro-gw-linux-${MGW_SERVER_VERSION}.zip
+ARG MGW_SERVER_DIST_URL=https://github.com/wso2/product-microgateway/releases/download/v${MGW_SERVER_VERSION}/${MGW_SERVER}.zip
 
 # build argument for MOTD
-ARG MOTD='printf "\n\
+ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
  This Docker container comprises of a WSO2 product, running with its latest GA release \n\
  which is under the Apache License, Version 2.0. \n\
- Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"'
+ Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n\n"
 ENV ENV=${USER_HOME}"/.ashrc"
 
 # GLIB based alpine image (alpine-glib) source is generously borrowed
@@ -75,10 +75,12 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
 
 # Prepare image with users, groups, packages and other configs.
+# Add motd for both ash and bash
 RUN \
     addgroup -S -g ${USER_GROUP_ID} ${USER_GROUP} \
     && adduser -S -u ${USER_ID} -h ${USER_HOME} -G ${USER_GROUP} ${USER} \
-    && echo ${MOTD} > "${ENV}" \
+    && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && printf "$(cat /etc/motd)"' >> ${ENV}; echo "${MOTD}" > /etc/motd \
+    && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && printf "$(cat /etc/motd)"' >> ${USER_HOME}"/.bashrc" \
     && apk add --update --no-cache bash libxml2-utils netcat-openbsd \
     && wget --no-check-certificate -O /root/${MGW_SERVER}.zip "${MGW_SERVER_DIST_URL}" \
     && unzip /root/${MGW_SERVER}.zip -d /home/${USER}/ >/dev/null 2>&1 \

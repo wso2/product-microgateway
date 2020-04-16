@@ -27,6 +27,8 @@ public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
 public const string AUTH_SCHEME_BASIC = "Basic";
 public const string AUTH_SCHEME_BEARER = "Bearer";
+public const string AUTH_SCHEME_BASIC_LOWERCASE = "basic";
+public const string AUTH_SCHEME_BEARER_LOWERCASE = "bearer";
 public const string ANN_PACKAGE = "ballerina/http";
 public const string RESOURCE_ANN_NAME = "ResourceConfig";
 public const string SERVICE_ANN_NAME = "ServiceConfig";
@@ -82,6 +84,7 @@ public const string USER_NAME_UNKNOWN = "Unknown";
 public const string UNKNOWN_VALUE = "__unknown__";
 public const string STATUS = "status";
 public const string PASSED = "passed";
+public const string FAILED = "failed";
 
 public const string FILTER_FAILED = "filter_failed";
 public const string SKIP_ALL_FILTERS = "skip_filters";
@@ -126,6 +129,7 @@ public const string USERNAME = "username";
 public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
+public const string SHA_PREFIX = "@sha";
 
 //throttle policy prefixes
 public const string RESOURCE_LEVEL_PREFIX = "res_";
@@ -134,8 +138,10 @@ public const string SUB_LEVEL_PREFIX = "sub_";
 
 //Analytics filter related constants
 public const string ZIP_EXTENSION = ".zip";
+public const string TMP_EXTENSION = ".tmp";
 public const string UPLOADING_URL = "uploadingUrl";
 public const string API_USAGE_FILE = "api-usage-data.dat";
+public const string TEMP_API_USAGE_FILE = "api-usage-data.dat.tmp";
 public const string TIME_INTERVAL = "timeInterval";
 public const string FILE_NAME = "FileName";
 public const string ACCEPT = "Accept";
@@ -263,6 +269,7 @@ public const string JWT_INSTANCE_ID = "jwtTokenConfig";
 public const string ISSUER = "issuer";
 public const string AUDIENCE = "audience";
 public const string ISSUER_CLASSNAME = "claimMapperClassName";
+public const string ISSUER_CLAIMS = "claims";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.1.0-beta2-SNAPSHOT</version>
+        <version>3.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,7 +52,7 @@
             <artifactId>ballerina-runtime-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
     </dependencies>

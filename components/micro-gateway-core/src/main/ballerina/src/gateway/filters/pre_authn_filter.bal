@@ -33,6 +33,8 @@ public type PreAuthnFilter object {
         context.attributes[REQUEST_TIME] = startingTime;
         checkOrSetMessageID(context);
         setHostHeaderToFilterContext(request, context);
+        //To set the properties which are required for the validation filter
+        setReqPathAndMethodToFilterContext(request, context);
         boolean result = doAuthnFilterRequest(caller, request, <@untainted>context);
         setLatency(startingTime, context, SECURITY_LATENCY_AUTHN);
         return result;
@@ -66,6 +68,7 @@ returns boolean {
 
     context.attributes[REMOTE_ADDRESS] = getClientIp(request, caller);
     context.attributes[FILTER_FAILED] = false;
+    invocationContext.attributes[FILTER_FAILED] = false;
     string serviceName = context.getServiceName();
     string resourceName = context.getResourceName();
     invocationContext.attributes[SERVICE_TYPE_ATTR] = context.getService();
@@ -152,9 +155,10 @@ returns boolean {
 
 function getAuthenticationProviderType(string authHeader) returns (string) {
     printDebug(KEY_PRE_AUTHN_FILTER, "authHeader: " + authHeader);
-    if (contains(authHeader, AUTH_SCHEME_BASIC)) {
+    string authHdr = authHeader.toLowerAscii();
+    if (contains(authHdr, AUTH_SCHEME_BASIC_LOWERCASE)) {
         return AUTHN_SCHEME_BASIC;
-    } else if (contains(authHeader, AUTH_SCHEME_BEARER) && contains(authHeader, ".")) {
+    } else if (contains(authHdr, AUTH_SCHEME_BEARER_LOWERCASE) && contains(authHeader, ".")) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;

@@ -46,15 +46,10 @@ import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
-import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -395,7 +390,7 @@ public class OpenAPICodegenUtils {
         api.setEndpointConfigRepresentation(mgwEndpointConfigDTO);
 
         setMgwAPISecurityAndScopes(api, openAPI);
-        api.setSpecificBasepath(resolveBasePathFromContextTemplate(extensions, openAPI.getInfo().getVersion()));
+        api.setSpecificBasepath(resolveTemplateBasePath(extensions, openAPI.getInfo().getVersion()));
         //assigns x-wso2-owner value to API provider
         if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
             api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
@@ -734,37 +729,6 @@ public class OpenAPICodegenUtils {
             validateSingleResourceExtensions(entry.getValue().getOptions(), entry.getKey(), "options", openAPIFilePath);
             validateSingleResourceExtensions(entry.getValue().getTrace(), entry.getKey(), "trace", openAPIFilePath);
         });
-    }
-
-    /**
-     * Write ballerina dependency libraries to Ballerina.toml.
-     * These dependencies will be pulled from ballerina central
-     * during the mgw project build.
-     *
-     * @param projectName       The project name
-     * @param definitionContext Currently built ballerina service context
-     */
-    public static void writeDependencies(String projectName, BallerinaService definitionContext) {
-        if (definitionContext.getLibVersions() != null) {
-            HashMap<String, String> moduleVersionMap = definitionContext.getLibVersions();
-            String ballerinaTomlFile = CmdUtils.getProjectTargetGenDirectoryPath(projectName) + File.separator
-                    + CliConstants.BALLERINA_TOML_FILE;
-            File file = new File(ballerinaTomlFile);
-            for (HashMap.Entry<String, String> entry : moduleVersionMap.entrySet()) {
-                try {
-                    List<String> content = Files.readAllLines(Paths.get(ballerinaTomlFile));
-                    Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
-                    String dependency = "\r\"" + entry.getKey() + "\" = \"" + entry.getValue() + "\"";
-                    if (!content.toString().contains(entry.getKey())) {
-                        PrintWriter printWriter = new PrintWriter(fileWriter);
-                        printWriter.print(dependency);
-                        printWriter.close();
-                    }
-                } catch (IOException e) {
-                    logger.error("Error occurred while writing module dependency to Ballerina.toml file.");
-                }
-            }
-        }
     }
 
     /**
@@ -1182,21 +1146,10 @@ public class OpenAPICodegenUtils {
         authProviders.add(OpenAPIConstants.APISecurity.jwt.name());
     }
 
-    private static String resolveBasePathFromContextTemplate(Map<String, Object> extensions, String version) {
+    private static String resolveTemplateBasePath(Map<String, Object> extensions, String version) {
         String basePath = extensions.get(OpenAPIConstants.BASEPATH).toString();
-        if (extensions.containsKey(OpenAPIConstants.CONTEXT_TEMPLATE)) {
-            String contextTemplate = extensions.get(OpenAPIConstants.CONTEXT_TEMPLATE).toString();
-            if (!contextTemplate.contains(OpenAPIConstants.VERSION_PLACEHOLDER) && contextTemplate
-                    .contains(OpenAPIConstants.BASE_PATH_PLACEHOLDER)) {
-                throw new CLIRuntimeException(OpenAPIConstants.CONTEXT_TEMPLATE + " extension : " + contextTemplate
-                        + " present in the open API is in wrong format. It should be in formats "
-                        + "/*{context}*/{version}/* or /*{version}*/{context}/*");
-            }
-            String context;
-            context = contextTemplate.replace(OpenAPIConstants.VERSION_PLACEHOLDER, version);
-            context = context.replace(OpenAPIConstants.BASE_PATH_PLACEHOLDER, basePath);
-            return context;
-        }
-        return basePath;
+        return basePath.replace(OpenAPIConstants.VERSION_PLACEHOLDER, version);
     }
+
+
 }

@@ -37,6 +37,7 @@ service JwtAuthTestService {
 	option (wso2.production_endpoints) = {
 		url : "http://localhost:50051";
 	};
+	option (wso2.throttling_tier) = "15PerMin";
 
 	//service level security
     option (wso2.security) = JWT;
@@ -49,8 +50,6 @@ service ThrottlingTestService {
     rpc testCallMethodThrottling(TestRequest) returns (TestResponse) {
         option (wso2.method_throttling_tier) = "3PerMin";
     };
-
-    option (wso2.throttling_tier) = "15PerMin";
 
     option (wso2.production_endpoints) = {
         url : "http://localhost:50051";

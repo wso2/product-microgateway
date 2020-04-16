@@ -115,10 +115,11 @@
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>${basedir}/resources/updates/product.txt</source>
+            <source>${basedir}/resources/updates/product_windows.txt</source>
             <outputDirectory>wso2am-micro-gw-toolkit-windows-${project.version}/updates</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+            <destName>product.txt</destName>
         </file>
         <file>
             <source>${basedir}/resources/version.txt</source>
@@ -136,6 +137,7 @@
                 <include>org.wso2.am.microgw:org.wso2.micro.gateway.cli:jar</include>
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
+                <include>org.wso2.carbon.callhome:core</include>
             </includes>
         </dependencySet>
         <dependencySet>

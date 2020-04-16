@@ -31,7 +31,6 @@ REM ----------------------------------------------------------------------------
 SETLOCAL EnableDelayedExpansion
 
 if ""%1%""==""--verbose"" ( SET verbose=T ) else ( SET verbose=F )
-if %verbose%==T ( ECHO Verbose mode enabled )
 
 REM Get the location of this(micro-gw.bat) file
 SET PRGDIR=%~sdp0
@@ -41,7 +40,6 @@ REM If the current disk drive ie: `E:\` is different from the drive where this (
 :switchDrive
 	SET curDrive=%CURRENT_D:~0,1%
 	SET wsasDrive=%PRGDIR:~0,1%
-	if %verbose%==T ( ECHO Switch to drive '%wsasDrive%' if current drive '%curDrive%' not equal to program drive '%wsasDrive%' )
 	if NOT "%curDrive%" == "%wsasDrive%" %wsasDrive%:
 
 REM if MICROGW_HOME environment variable not set then set it
@@ -52,37 +50,21 @@ SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
 if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
 SET PATH=%BALLERINA_HOME%\bin\;%PATH%
-if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
-if %verbose%==T ECHO MICROGW_HOME environment variable is set to %MICROGW_HOME%
+SET JAVA_PATH=%MICROGW_HOME%\lib\jdk8u202-b08-jre
 
 REM Check JAVA availability
-:checkJavaHome
-	if "%JAVA_HOME%" == "" goto noJavaHome
-	if NOT EXIST "%JAVA_HOME%\bin\java.exe" goto noJavaHome
-goto checkJava
+if EXIST "%JAVA_HOME%" (
+	ECHO JAVA_HOME: %JAVA_HOME%
+) else (
+	SET JAVA_HOME=%MICROGW_HOME%\lib\jdk8u202-b08-jre
+)
 
-:noJavaHome
-	ECHO "You must set the JAVA_HOME variable before running Micro-Gateway Tooling."
-goto end
-
-:checkJava
-	"%JAVA_HOME%\bin\java" -version >nul 2>&1
-	IF ERRORLEVEL 1 goto noJava
-goto runServer
-
-:noJava
-	ECHO Error: JAVA_HOME is not defined correctly.
-goto end
-
-:runServer
-	if %verbose%==T ECHO JAVA_HOME environment variable was set to %JAVA_HOME%
-	SET originalArgs=%*
-	if ""%1""=="""" goto usageInfo
+SET originalArgs=%*
+if ""%1""=="""" goto usageInfo
 
 REM Slurp the command line arguments. This loop allows for an unlimited number
 REM of arguments (up to the command line limit, anyway).
 :setupArgs
-	if %verbose%==T ECHO Processing argument : `%1`
 	if ""%1""=="""" goto passToJar
 	if ""%1""==""help""     goto passToJar
 	if ""%1""==""build""     goto commandBuild
@@ -96,7 +78,6 @@ goto setupArgs
 goto :end
 
 :commandBuild
-	if %verbose%==T ECHO Running commandBuild
 
 	REM Immediate next parameter should be project name after the `build` command
 	SHIFT
@@ -108,13 +89,11 @@ goto :end
 		goto :usageInfo
 
 	:nameFound
-		if %verbose%==T ECHO Building micro gateway for project %project_name:\=%
 
 		REM Set micro gateway project directory relative to CD (current directory)
 		SET MICRO_GW_PROJECT_DIR=%CURRENT_D%\%project_name:\=%
 		if EXIST "%MICRO_GW_PROJECT_DIR%" goto :continueBuild
 			REM Exit, if can not find a project with given project name
-			if %verbose%==T ECHO Project directory does not exist for given name %MICRO_GW_PROJECT_DIR%
 			ECHO "Incorrect project name `%project_name:\=%` or Workspace not initialized, Run setup befor building the project!"
 			goto :EOF
 
@@ -123,14 +102,11 @@ goto :end
         :continueBuild
             call :passToJar
             if ERRORLEVEL 1 (EXIT /B %ERRORLEVEL%)
-			ECHO [DONE]
             REM set ballerina home again as the platform is extracted at this point.
             SET BALLERINA_HOME=%MICROGW_HOME%\lib\platform
             SET PATH=%BALLERINA_HOME%\bin\;%PATH%
-            if %verbose%==T ECHO BALLERINA_HOME environment variable is set to %BALLERINA_HOME%
             PUSHD "%CURRENT_D%"
             PUSHD "%MICRO_GW_PROJECT_DIR%\target\gen"
-                if %verbose%==T ECHO current dir %CD%
                 SET TARGET_DIR=%MICRO_GW_PROJECT_DIR%\target
                 SET TARGET_FILE=%TARGET_DIR%\%project_name%.jar
                 if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jar"
@@ -153,7 +129,6 @@ goto :end
 goto :end
 
 :commandDebug
-	if %verbose%==T ECHO Running commandDebug
 
 	SHIFT
 	SET DEBUG_PORT=%1
@@ -170,7 +145,6 @@ goto end
 
 :passToJar
 	REM ---------- Add jars to classpath ----------------
-	if %verbose%==T echo Running passToJar
 	SET CLI_CLASSPATH=
 	if EXIST "%BALLERINA_HOME%"\bre\lib (
 		SET CLI_CLASSPATH=!CLI_CLASSPATH!;.\lib\platform\bre\lib\*
@@ -186,7 +160,6 @@ goto end
 		)
 	)
 
-	if %verbose%==T ECHO CLI_CLASSPATH = "%CLI_CLASSPATH%"
 
 	SET JAVACMD=-Xms256m -Xmx1024m ^
 		-XX:+HeapDumpOnOutOfMemoryError ^
@@ -200,9 +173,9 @@ goto end
 		-Dfile.encoding=UTF8 ^
 		-Dtemplates.dir.path="%MICROGW_HOME%"\resources\templates ^
 		-Dcli.home="%MICROGW_HOME%" ^
+		-Dcacerts.location="%JAVA_PATH%"\lib\security\cacerts ^
 		-Dcurrent.dir="%CD%" ^
 		-DVERBOSE_ENABLED=%verbose%
-	if %verbose%==T ECHO JAVACMD = !JAVACMD!
 
 :runJava
 	REM Jump to GW-CLI exec location when running the jar

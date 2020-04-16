@@ -43,7 +43,7 @@ public class Constants {
 
     public static final String SCHEMA_REFERENCE = "$ref";
     public static final String PATHS = "$..paths..";
-    public static final String BODY_CONTENT = "..requestBody.content.application/json.schema";
+    public static final String BODY_CONTENT = ".requestBody.content.application/json.schema";
     public static final String JSON_PATH = "$.";
     public static final String ITEMS = "items";
     public static final String OPEN_API = ".openapi";
@@ -67,4 +67,5 @@ public class Constants {
     public static final String JSONPATH_SCHEMAS = "$..components.schemas.";
     public static final String JSON_SCHEMA = ".content.application/json.schema";
     public static final String VALIDATED_STATUS = "validated";
+    public static final String RUNTIME_HOME_PATH = "mgw-runtime.home";
 }

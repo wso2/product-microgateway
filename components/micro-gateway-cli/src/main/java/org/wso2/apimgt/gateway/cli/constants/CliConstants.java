@@ -91,6 +91,8 @@ public class CliConstants {
     public static final String KEEP_FILE = ".keep";
     public static final String BALLERINA_TOML_FILE = "Ballerina.toml";
     public static final String VERSION_FILE = "version.txt";
+    public static final String CACERTS_DIR = "cacerts.location";
+    public static final String DEFAULT_CACERTS_PASS = "changeit";
 
     public static final String LOGGING_PROPERTIES_FILENAME = "logging.properties";
     public static final Pattern SYS_PROP_PATTERN = Pattern.compile("\\$\\{([^}]*)}");

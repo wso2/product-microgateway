@@ -19,6 +19,7 @@ public class OpenAPIConstants {
     public static final String SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String CORS = "x-wso2-cors";
     public static final String THROTTLING_TIER = "x-wso2-throttling-tier";
+    public static final String APIM_THROTTLING_TIER = "x-throttling-tier";
     public static final String DISABLE_SECURITY = "x-wso2-disable-security";
     public static final String AUTHORIZATION_HEADER = "x-wso2-auth-header";
     public static final String RESPONSE_CACHE = "x-wso2-response-cache";
@@ -30,7 +31,6 @@ public class OpenAPIConstants {
     public static final String TRANSPORT_SECURITY = "x-wso2-transports";
     public static final String MUTUAL_SSL = "x-wso2-mutual-ssl";
     public static final String APPLICATION_SECURITY = "x-wso2-application-security";
-    public static final String CONTEXT_TEMPLATE = "x-wso2-context-template";
     public static final String APPLICATION_SECURITY_TYPES = "security-types";
     public static final String DEFAULT_API_KEY_HEADER_QUERY = "apikey";
     public static final String TRANSPORT_HTTP = "http";

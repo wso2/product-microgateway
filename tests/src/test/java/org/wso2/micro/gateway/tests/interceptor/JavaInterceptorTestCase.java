@@ -32,6 +32,8 @@ import java.util.Map;
  */
 public class JavaInterceptorTestCase extends InterceptorTestCase {
 
+    private final String jsonArrayPayload = "[{'name' : 'foo', 'age': '20'}, "
+            + "{'name': 'bar', 'age' : '30'}]";
     @Test(description = "Test java interceptor request data retrieval with json payload")
     public void testGetRequestJsonBodyInterceptor() throws Exception {
         Map<String, String> headers = new HashMap<>();
@@ -41,6 +43,14 @@ public class JavaInterceptorTestCase extends InterceptorTestCase {
                 .doPost(getServiceURLHttp("/petstore/v1/user?test=value1&test2=value2"), "{'hello':'world'}", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.JSON_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        //test json array payloads
+        headers.put("X_JWT", "true");
+        response = HttpClientRequest
+                .doPost(getServiceURLHttp("/petstore/v1/user?test=value1&test2=value2"), jsonArrayPayload, headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.JSON_ARRAY_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 

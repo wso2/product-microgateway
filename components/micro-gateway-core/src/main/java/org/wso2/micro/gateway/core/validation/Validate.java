@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.core.Constants;
 
@@ -49,7 +51,7 @@ import java.util.zip.ZipInputStream;
  * This class is for validating request/response payload against schema.
  */
 public class Validate {
-    private static final Log logger = LogFactory.getLog(Validate.class);
+    private static final Log logger = LogFactory.getLog("ballerina");
     private static JsonNode rootNode;
     private static String swaggerObject;
     private static Map<String, String> swaggers = new HashMap<>();
@@ -140,7 +142,9 @@ public class Validate {
             //refer schema
             StringBuilder jsonPath = new StringBuilder();
             jsonPath.append(Constants.PATHS)
-                    .append(resourcePath).append(Constants.BODY_CONTENT);
+                    .append(resourcePath).append(Constants.JSONPATH_SEPARATE)
+                    .append(requestMethod.toLowerCase())
+                    .append(Constants.BODY_CONTENT);
             schema = JsonPath.read(swagger, jsonPath.toString()).toString();
             if (schema == null || Constants.EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
@@ -351,18 +355,33 @@ public class Validate {
      * @return Returns "validated" or everit error logs
      */
     private static String validateContent(String payload, String schemaString) {
-        logger.debug("Validating JSON content against the schema");
+
         StringBuilder finalMessage = new StringBuilder();
         List<String> errorMessages;
         JSONObject jsonSchema = new JSONObject(schemaString);
-        JSONObject payloadObject = new JSONObject(payload);
+        JSONObject payloadObject = null;
+
+        //if payload is not a valid json string
+        try {
+            payloadObject = new JSONObject(payload);
+        } catch (JSONException e) {
+            try {
+                new JSONArray(payload);
+                logger.warn("Request/Response validation is not applied for JSON Arrays. payload : " + payload);
+                return Constants.VALIDATED_STATUS;
+            } catch (JSONException e1) {
+                finalMessage.append("Provided payload is not a valid json. " + e.getMessage());
+                return finalMessage.toString();
+            }
+        }
+
         Schema schema = SchemaLoader.load(jsonSchema);
         if (schema == null) {
             return null;
         }
         try {
             schema.validate(payloadObject);
-            return "validated";
+            return Constants.VALIDATED_STATUS;
         } catch (ValidationException e) {
             errorMessages = e.getAllMessages();
             for (String message : errorMessages) {
