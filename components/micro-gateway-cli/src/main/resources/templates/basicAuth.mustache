@@ -1,4 +1,4 @@
 {{#securityConfig}}{{#equals securityConfig.type "basic"}},
     auth: {
-        authHandler: {{operationId}}_{{endpointUrlType}}OutboundBasicAuthHandler
+        authHandler: {{qualifiedServiceName}}{{operationId}}_{{endpointUrlType}}OutboundBasicAuthHandler
     }{{/equals}}{{/securityConfig}}
