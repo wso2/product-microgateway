@@ -67,4 +67,7 @@ public class ResponseConstants {
             "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
+
+    public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
+    public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 }
