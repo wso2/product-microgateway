@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
@@ -311,6 +312,36 @@ public class MockBackEndServer extends Thread {
 
                 InputStream is =  exchange.getRequestBody();
                 byte [] response = IOUtils.toByteArray(is);
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            // to test jwt generator
+            String contextV4 = "/v4";
+            httpServer.createContext(contextV4 + "/jwtheader", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    response = ResponseConstants.VALID_JWT_RESPONSE.getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV4 + "/jwttoken", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    JSONObject responseJSON = new JSONObject();
+                    responseJSON.put("token", exchange.getRequestHeaders().get("X-JWT-Assertion").toString());
+                    response = responseJSON.toString().getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
