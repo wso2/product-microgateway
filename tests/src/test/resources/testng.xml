@@ -40,6 +40,7 @@
             <class name="org.wso2.micro.gateway.tests.endpoints.EndpointWithSecurityTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.DisableSecurityAndCustomAuthHeaderTestCase" />
             <class name="org.wso2.micro.gateway.tests.grpc.BasicGrpcTestCase" />
+            <class name="org.wso2.micro.gateway.tests.jwtTransformer.JwtTransformerTestCase"/>
         </classes>
     </test>
 

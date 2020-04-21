@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/cache;
+import ballerina/runtime;
 
 // TODO: Refactor the cache
 int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
@@ -92,15 +93,15 @@ public type APIGatewayCache object {
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
     }
 
-    public function addClaimMappingCache(string jwtTokens, boolean isModifiedclaims) {
-        gatewayClaimsCache.put(jwtTokens,isModifiedclaims);
+    public function addClaimMappingCache(string jwtTokens, runtime:Principal modifiedPrincipal) {
+        gatewayClaimsCache.put(jwtTokens, modifiedPrincipal);
         printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. key: " + mask(jwtTokens));
     }
 
-    public function retrieveClaimMappingCache(string jwtTokens) returns (boolean | ()) {
-        var isclaims = gatewayClaimsCache.get(jwtTokens);
-        if (isclaims is boolean) {
-            return isclaims;
+    public function retrieveClaimMappingCache(string jwtTokens) returns (runtime:Principal | ()) {
+        var modifiedPrincipal = gatewayClaimsCache.get(jwtTokens);
+        if (modifiedPrincipal is runtime:Principal ) {
+            return modifiedPrincipal;
         } else {
             return ();
         }

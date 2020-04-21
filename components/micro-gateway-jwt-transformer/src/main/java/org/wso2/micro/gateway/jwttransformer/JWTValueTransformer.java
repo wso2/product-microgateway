@@ -16,7 +16,7 @@
 
 package org.wso2.micro.gateway.jwttransformer;
 
-import org.ballerinalang.jvm.values.MapValue;
+import java.util.HashMap;
 
 /**
  * Defines the interface for writing the  jwt tranformation.
@@ -28,5 +28,5 @@ public interface JWTValueTransformer {
      * @param jwtClaims jwtClaims from given JWT
      * @return transformed JWT Claims
      */
-    MapValue transformJWT(MapValue jwtClaims);
+    HashMap<String, Object> transformJWT(HashMap<String, Object> jwtClaims);
 }
