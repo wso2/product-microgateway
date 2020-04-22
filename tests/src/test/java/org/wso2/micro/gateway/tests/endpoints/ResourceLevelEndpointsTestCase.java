@@ -67,6 +67,19 @@ public class ResourceLevelEndpointsTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
+    @Test(description = "Test Invoking the resource which  endpoint defined at resource level "
+            + "which has special characters in endpoint url")
+    public void testPerResourceEndpointWithSpecialCharacters() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v1/pet/findByStatusNew"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBodyV1);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
+
     @Test(description = "Test Invoking the resource which endpoint defined at API level")
     public void testPerAPIEndpoint() throws Exception {
         Map<String, String> headers = new HashMap<>();
