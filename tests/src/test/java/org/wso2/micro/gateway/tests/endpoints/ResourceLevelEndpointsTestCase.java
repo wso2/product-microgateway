@@ -67,7 +67,7 @@ public class ResourceLevelEndpointsTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
-    @Test(description = "Test Invoking the resource which  endpoint defined at resource level "
+    @Test(description = "Test Invoking the resource which endpoint defined at resource level"
             + "which has special characters in endpoint url")
     public void testPerResourceEndpointWithSpecialCharacters() throws Exception {
         Map<String, String> headers = new HashMap<>();

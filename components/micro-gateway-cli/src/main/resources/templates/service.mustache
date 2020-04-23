@@ -106,9 +106,15 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
-    resource function {{operationId}} (http:Caller outboundEp, http:Request req) {
+    resource function {{operationId}} (http:Caller outboundEp, http:Request req{{>pathParameters}}) {
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
+        map<string> pathParams = { {{#parameters}}{{#equals in "path"}}
+            "{{name}}": <@untainted>{{name}}{{#unless @last}},{{/unless}} {{/equals}}{{/parameters}}
+        };
+        invocationContext.attributes["pathParams"] = pathParams;
+
         {{~#if @root.requestInterceptor}}
         {{#equals @root.requestInterceptor requestInterceptor}}
         {{else}}
