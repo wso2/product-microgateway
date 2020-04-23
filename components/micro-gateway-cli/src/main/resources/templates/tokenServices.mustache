@@ -123,8 +123,14 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
     resource function tokenResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
-                 <@untainted>req.rawPath, req);
+        string tokenContext = gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT);
+        if (!tokenContext.startsWith("/")) {
+            tokenContext = "/" + tokenContext;
+        }
+        if (tokenContext.endsWith("/")) {
+            tokenContext = tokenContext.substring(0, tokenContext.length() - 1);
+        }
+        var response = tokenEndpointClient->forward(tokenContext + <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
