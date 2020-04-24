@@ -22,7 +22,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.0-beta2-SNAPSHOT</version>
+    <version>3.1.1-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -540,7 +540,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.1.4</ballerina.platform.version>
+        <ballerina.platform.version>1.1.5</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>

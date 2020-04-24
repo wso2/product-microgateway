@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.0-beta2-SNAPSHOT</version>
+        <version>3.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -232,7 +232,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp file="resources/version.txt" match=".*" replace="${project.version}" byline="true" />
+                                <replaceregexp file="resources/version.txt" match=".*" replace="${project.version}" byline="false" />
                             </target>
                         </configuration>
                     </execution>
