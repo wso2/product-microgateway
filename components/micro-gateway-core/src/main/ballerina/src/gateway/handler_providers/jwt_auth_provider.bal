@@ -198,13 +198,15 @@ public function doMappingContext(runtime:InvocationContext invocationContext, st
                         }
                     }
                 }
+                printDebug(KEY_JWT_AUTH_PROVIDER, "custom claims key value is updated");
             }
             if (className != "" && classLoaded) {
-                map<any>? customClaimsEdited = transformJWTValue(customClaims, className);
+                map<any>|error customClaimsEdited = transformJWTValue(customClaims, className);
                 if (customClaimsEdited is map<any>) {
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "custom claims value change to validated format");
                     customClaims = customClaimsEdited;
                 } else {
-                    return prepareError("Error while loading the jwttransformer class: " + className);
+                    return prepareError("Error occured while loading the custom method ");
                 }
             }
             if (customClaims["scope"].toString() != "") {

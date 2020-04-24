@@ -16,7 +16,7 @@
 
 package org.wso2.micro.gateway.jwttransformer;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Defines the interface for writing the  jwt tranformation.
@@ -28,5 +28,5 @@ public interface JWTValueTransformer {
      * @param jwtClaims jwtClaims from given JWT
      * @return transformed JWT Claims
      */
-    HashMap<String, Object> transformJWT(HashMap<String, Object> jwtClaims);
+    Map<String, Object> transformJWT(Map<String, Object> jwtClaims);
 }

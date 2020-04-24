@@ -16,11 +16,11 @@
 
 package org.wso2.micro.gateway.core.mapping;
 
+import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.MapValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.micro.gateway.core.utils.ErrorUtils;
 import org.wso2.micro.gateway.jwttransformer.JWTValueTransformer;
 
 import java.util.HashMap;
@@ -55,53 +55,41 @@ public class MappingInvoker {
     /**
      * Used to add claims to the claim set
      */
-    public static MapValue transformJWTValue(MapValue claims, String className) {
+    public static MapValue transformJWTValue(MapValue claims, String className) throws Exception {
         jwtValueTransformer = (JWTValueTransformer) map.get(className);
-        editedClaims = new HashMap<String, Object>();
-        editClaimsToJava(claims, editedClaims);
-        Map<String, Object> claimSet = jwtValueTransformer.transformJWT((HashMap<String, Object>) editedClaims);
+        editedClaims = convertMapValueToMap(claims);
+        Map<String, Object> claimSet = jwtValueTransformer.transformJWT(editedClaims);
         mapValue = new MapValueImpl();
         claimSet.forEach((key, value) -> mapValue.put(key, value));
         return mapValue;
     }
 
-    public static void editClaimsToJava(MapValue claims, Map<String, Object> editedClaims) {
-        for (Object key : claims.getKeys()) {
-            if (claims != null) {
-                try {
-                    editedClaims.put(key.toString(), claims.getStringValue(key.toString()));
-                } catch (ClassCastException e1) {
-                    try {
-                        editedClaims.put(key.toString(), claims.getIntValue(key.toString()));
-                    } catch (ClassCastException e2) {
-                        try {
-                            editedClaims.put(key.toString(), claims.getFloatValue(key.toString()));
-                        } catch (ClassCastException e3) {
-                            try {
-                                editedClaims.put(key.toString(), claims.getArrayValue(key.toString()).getJSONString());
-                            } catch (ClassCastException e4) {
-                                try {
-                                    MapValue mapValue = claims.getMapValue(key.toString());
-                                    Map<String, Object> subClaims = new HashMap<>();
-                                    editClaimsToJava(mapValue, subClaims);
-                                    editedClaims.put(key.toString(), subClaims);
-                                } catch (ClassCastException e5) {
-                                    try {
-                                        editedClaims.put(key.toString(), claims.getBooleanValue(key.toString()));
-                                    } catch (ClassCastException e6) {
-                                        try {
-                                            claims.put(key.toString(), claims.getObjectValue(key.toString()));
-                                        } catch (ClassCastException e7) {
-                                            log.error("Failed to convert claim value");
-                                            throw ErrorUtils.getBallerinaError("Failed to convert claim value", e7);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+    /**
+     * Convert MapValue to Map
+     */
+    public static Map<String, Object> convertMapValueToMap(MapValue mapValue) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        for (Object key: mapValue.getKeys()) {
+            Object valueObject = mapValue.get(key.toString());
+            if (valueObject != null && valueObject instanceof MapValue) {
+                MapValue subMapValue = mapValue.getMapValue(key.toString());
+                Map<String, Object> subMap = convertMapValueToMap(subMapValue);
+                map.put(key.toString(), subMap);
+            } else if (valueObject != null && valueObject instanceof ArrayValue) {
+                ArrayValue arrayValue = mapValue.getArrayValue(key.toString());
+                Object[] array = new Object[arrayValue.size()];
+                for (int i = 0; i < arrayValue.size(); i++) {
+                    if (arrayValue.get(i) instanceof MapValue) {
+                        array[i] = convertMapValueToMap((MapValue) arrayValue.get(i));
+                    } else {
+                        array[i] = arrayValue.get(i);
                     }
                 }
+                map.put(key.toString(), array);
+            } else {
+                map.put(key.toString(), valueObject);
             }
         }
+        return map;
     }
 }

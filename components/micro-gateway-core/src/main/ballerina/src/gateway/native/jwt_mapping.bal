@@ -34,12 +34,12 @@ function jLoadMappingClass(handle className) returns boolean = @java:Method {
     class: "org.wso2.micro.gateway.core.mapping.MappingInvoker"
 } external;
 
-public function transformJWTValue(map<any> claims, string className) returns map<any> {
+public function transformJWTValue(map<any> claims, string className) returns map<any> | error {
     handle class = java:fromString(className);
     return jtransformJWTValue(claims, class);
 }
 
-function jtransformJWTValue(map<any> claims, handle className) returns map<any> = @java:Method {
+function jtransformJWTValue(map<any> claims, handle className) returns map<any> | error = @java:Method {
     name: "transformJWTValue",
     class: "org.wso2.micro.gateway.core.mapping.MappingInvoker"
 } external;

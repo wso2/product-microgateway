@@ -95,7 +95,7 @@ public type APIGatewayCache object {
 
     public function addClaimMappingCache(string jwtTokens, runtime:Principal modifiedPrincipal) {
         gatewayClaimsCache.put(jwtTokens, modifiedPrincipal);
-        printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. key: " + mask(jwtTokens));
+        printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. ");
     }
 
     public function retrieveClaimMappingCache(string jwtTokens) returns (runtime:Principal | ()) {

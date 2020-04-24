@@ -1,10 +1,7 @@
 package org.wso2.micro.gateway.tests.jwtvaluetransformer;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
 import org.wso2.micro.gateway.jwttransformer.JWTValueTransformer;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,22 +10,17 @@ import java.util.Map;
 public class DefaultJwtTransformer implements JWTValueTransformer {
 
     @Override
-    public HashMap<String, Object> transformJWT(HashMap<String, Object> jwtClaims) {
+    public Map<String, Object> transformJWT(Map<String, Object> jwtClaims) {
         String scope = "";
-        Map<String, Object> claimSet = jwtClaims;
-        String data = (String) claimSet.get("scope");
-        JsonParser jsonParser = new JsonParser();
-        JsonArray jsonArray = (JsonArray) jsonParser.parse(data);
-        if (claimSet.containsKey("scope")) {
-            if (jsonArray instanceof JsonArray) {
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    scope += jsonArray.get(i) + " ";
+        if (jwtClaims.containsKey("scope")) {
+            if (jwtClaims.get("scope") instanceof Object[]) {
+                for (int i = 0; i < ((Object[]) jwtClaims.get("scope")).length; i++) {
+                    scope += ((Object[]) jwtClaims.get("scope"))[i] + " ";
                 }
                 scope = scope.trim();
-                scope = scope.replace("\"", "");
             }
-            claimSet.put("scope", scope);
+            jwtClaims.put("scope", scope);
         }
-        return (HashMap<String, Object>) claimSet;
+        return jwtClaims;
     }
 }
