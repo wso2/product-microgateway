@@ -211,7 +211,6 @@ public const string INT = "int";
 public const string KM_CONF_INSTANCE_ID = "keyManager";
 public const string KM_SERVER_URL = "serverUrl";
 public const string KM_TOKEN_CONTEXT = "tokenContext";
-public const string TIMESTAMP_SKEW = "timestampSkew";
 public const string EXTERNAL = "external";
 public const string KM_CONF_SECURITY_BASIC_INSTANCE_ID = "keymanager.security.basic";
 public const string KM_CONF_SECURITY_OAUTH2_INSTANCE_ID = "keymanager.security.oauth2";
@@ -464,11 +463,12 @@ public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
 public const string JWT_GENERATOR_ENABLED = "jwtGeneratorEnabled";
 public const string JWT_GENERATOR_DIALECT = "claimDialect";
 public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
+public const string JWT_GENERATOR_CERTIFICATE_ALIAS = "certificateAlias";
+public const string JWT_GENERATOR_PRIVATE_KEY_ALIAS = "privateKeyAlias";
 public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";
 public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
 public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
 public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
-public const string JWT_GENERATOR_SKEW_TIME = "skewTime";
 public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
 
 // jwt generator caching mechanism
@@ -477,3 +477,7 @@ public const string JWT_GENERATOR_TOKEN_CACHE_ENABLED = "tokenCacheEnable";
 public const string JWT_GENERATOR_TOKEN_CACHE_EXPIRY = "tokenCacheExpiryTime";
 public const string JWT_GENERATOR_TOKEN_CACHE_CAPACITY = "tokenCacheCapacity";
 public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvictionFactor";
+
+// server configurations
+public const string SERVER_CONF_ID = "server";
+public const string TIMESTAMP_SKEW = "timestampSkew";
