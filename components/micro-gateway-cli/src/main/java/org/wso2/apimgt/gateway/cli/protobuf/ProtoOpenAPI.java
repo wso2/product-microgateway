@@ -23,6 +23,8 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
@@ -104,7 +106,14 @@ public class ProtoOpenAPI {
         if (openAPI.getPaths() == null) {
             openAPI.setPaths(new Paths());
         }
-        openAPI.getPaths().addPathItem(path, pathItem);
+        //as Responses object is mandatory
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setDescription("gRPC response");
+        ApiResponses apiResponses = new ApiResponses();
+        apiResponses.addApiResponse("200", apiResponse);
+        operation.setResponses(apiResponses);
+        //append forward slash to preserve openAPI syntax
+        openAPI.getPaths().addPathItem("/" + path, pathItem);
     }
 
     /**
