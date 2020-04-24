@@ -18,6 +18,7 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
 import ballerinax/java;
+import ballerinax/java.arrays as javaArr;
 
 # Representation of the jwt self validating handler
 #
@@ -28,8 +29,102 @@ public type JWTAuthHandler object {
 
     public JwtAuthProvider jwtAuthProvider;
 
+    private boolean enabledJWTGenerator = false;
+    private boolean classLoaded = false;
+    private string generatorClass = "";
+    private string dialectURI = "";
+    private string signatureAlgorithm = "";
+    private string certificateAlias = "";
+    private string privateKeyAlias = "";
+    private int tokenExpiry = 0;
+    private any[] restrictedClaims = [];
+    private string keyStoreLocationUnresolved = "";
+    private string keyStorePassword = "";
+    private string tokenIssuer = "";
+    private string tokenAudience = "";
+    private int skewTime = 0;
+    private boolean enabledCaching = false;
+    private int cacheExpiry = 0;
+
     public function __init(JwtAuthProvider jwtAuthProvider) {
         self.jwtAuthProvider = jwtAuthProvider;
+        // initiating generator class if enabled
+        self.enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_ENABLED,
+                                                            DEFAULT_JWT_GENERATOR_ENABLED);
+        if (self.enabledJWTGenerator) {
+            self.generatorClass = getConfigValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_IMPLEMENTATION,
+                                                    DEFAULT_JWT_GENERATOR_IMPLEMENTATION);
+            self.dialectURI = getConfigValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_DIALECT,
+                                                DEFAULT_JWT_GENERATOR_DIALECT);
+            self.signatureAlgorithm = getConfigValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_SIGN_ALGO,
+                                                        DEFAULT_JWT_GENERATOR_SIGN_ALGO);
+            self.certificateAlias = getConfigValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_CERTIFICATE_ALIAS,
+                                                        DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS);
+            self.privateKeyAlias = getConfigValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_PRIVATE_KEY_ALIAS,
+                                                    DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS);
+            self.tokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_TOKEN_EXPIRY,
+                                                    DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
+            self.restrictedClaims = getConfigArrayValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_RESTRICTED_CLAIMS);
+            int len = self.restrictedClaims.length();
+            (handle | error) stringClass = java:getClass("java.lang.String");
+            handle restrictedClaimsArray;
+            if (stringClass is handle) {
+                restrictedClaimsArray = javaArr:newInstance(stringClass, len);
+                int i = 0;
+                while (i < len) {
+                    javaArr:set(restrictedClaimsArray, i, java:fromString(<string>self.restrictedClaims[i]));
+                    i = i + 1;
+                }
+            } else {
+                restrictedClaimsArray = java:fromString("");
+            }
+            self.keyStoreLocationUnresolved = getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                KEY_STORE_PATH,
+                                                                DEFAULT_KEY_STORE_PATH);
+            self.keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                    KEY_STORE_PASSWORD,
+                                                                    DEFAULT_KEY_STORE_PASSWORD);
+            self.tokenIssuer = getConfigValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_TOKEN_ISSUER,
+                                                DEFAULT_JWT_GENERATOR_TOKEN_ISSUER);
+            self.tokenAudience = getConfigValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_TOKEN_AUDIENCE,
+                                                    DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE);
+            self.skewTime = getConfigIntValue(SERVER_CONF_ID,
+                                                TIMESTAMP_SKEW,
+                                                DEFAULT_TIMESTAMP_SKEW);
+            self.enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
+                                                            JWT_GENERATOR_TOKEN_CACHE_ENABLED,
+                                                            DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
+            self.cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
+                                                    JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
+                                                    DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
+
+            self.classLoaded = loadJWTGeneratorClass(self.generatorClass,
+                                                        self.dialectURI,
+                                                        self.signatureAlgorithm,
+                                                        self.keyStoreLocationUnresolved,
+                                                        self.keyStorePassword,
+                                                        self.certificateAlias,
+                                                        self.privateKeyAlias,
+                                                        self.tokenExpiry,
+                                                        restrictedClaimsArray,
+                                                        self.enabledCaching,
+                                                        self.cacheExpiry,
+                                                        self.tokenIssuer,
+                                                        self.tokenAudience);
+            if (!self.classLoaded) {
+                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generator class loading failed.");
+            }
+        }
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -63,12 +158,16 @@ public type JWTAuthHandler object {
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
-            var generationStatus = generateAndSetBackendJwtHeader(credential, req);
-            if (generationStatus is boolean) {
-                return authenticationResult;
-            } else {
-                return prepareAuthenticationError("JWT generation process failed.");
+            boolean generationStatus = generateAndSetBackendJwtHeader(credential,
+                                                                        req,
+                                                                        self.enabledJWTGenerator,
+                                                                        self.classLoaded,
+                                                                        self.skewTime,
+                                                                        self.enabledCaching);
+            if (!generationStatus) {
+                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
             }
+            return authenticationResult;
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
@@ -79,8 +178,10 @@ public type JWTAuthHandler object {
 # Identify the api details from the subscribed apis in the authentication token.
 #
 # + payload - The payload of the authentication token
+# + apiName - name of the current API
+# + apiVersion - version of the current API
 # + return - Returns map<string> with the extracted details.
-public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> {
+public function checkSubscribedAPIs(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
     map<string> subscriptionDetails = {
         apiName: "",
         apiContext: "",
@@ -97,10 +198,7 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
         subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
     }
     if (subscribedAPIList is json[]) {
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString()];
-        if (apiConfig is APIConfiguration) {
-            string apiName = apiConfig.name;
-            string apiVersion = apiConfig.apiVersion;
+        if (!(apiName == "" && apiVersion == "")) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "Current API name: " + apiName + ", current version: " + apiVersion);
             int l = subscribedAPIList.length();
             int index = 0;
@@ -142,93 +240,77 @@ public function checkSubscribedAPIs(jwt:JwtPayload payload) returns map<string> 
 #
 # + credential - Credential
 # + req - The `Request` instance.
+# + enabledJWTGenerator - state of jwt generator
+# + classLoaded - whether the class is loaded successfully
+# + enabledCaching - jwt generator caching enabled
+# + skewTime - skew time to backend
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
-public function generateAndSetBackendJwtHeader(string credential, http:Request req) returns @tainted (boolean | http:AuthenticationError){
-    boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_ENABLED,
-                                                        DEFAULT_JWT_GENERATOR_ENABLED);
+public function generateAndSetBackendJwtHeader(string credential,
+                                                http:Request req,
+                                                boolean enabledJWTGenerator,
+                                                boolean classLoaded,
+                                                int skewTime,
+                                                boolean enabledCaching) returns @tainted boolean {
     if (enabledJWTGenerator) {
-        (boolean | http:AuthenticationError) status = false;
-        handle jDialectURI = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                            JWT_GENERATOR_DIALECT,
-                                                            DEFAULT_JWT_GENERATOR_DIALECT));
-        handle jSignatureAlgorithm = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                    JWT_GENERATOR_SIGN_ALGO,
-                                                                    DEFAULT_JWT_GENERATOR_SIGN_ALGO));
-        int jTokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
-                                                JWT_GENERATOR_TOKEN_EXPIRY,
-                                                DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
-        handle jRestrictedClaims = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                    JWT_GENERATOR_RESTRICTED_CLAIMS,
-                                                                    DEFAULT_JWT_GENERATOR_RESTRICTED_CLAIMS));
-        handle keyStoreLocationUnresolved = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                            KEY_STORE_PATH,
-                                                                            DEFAULT_KEY_STORE_PATH));
-        handle jKeyStorePath = getKeystoreLocation(keyStoreLocationUnresolved);
-        handle jKeyStorePassword = java:fromString(getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                    KEY_STORE_PASSWORD,
-                                                                    DEFAULT_KEY_STORE_PASSWORD));
-        handle jTokenIssuer = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                JWT_GENERATOR_TOKEN_ISSUER,
-                                                                DEFAULT_JWT_GENERATOR_TOKEN_ISSUER));
-        handle jTokenAudience = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                                JWT_GENERATOR_TOKEN_AUDIENCE,
-                                                                DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE));
-        int skewTime = getConfigIntValue(JWT_GENERATOR_ID,
-                                            JWT_GENERATOR_SKEW_TIME,
-                                            DEFAULT_JWT_GENERATOR_SKEW_TIME);
-        (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
-        if (payload is jwt:JwtPayload) {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
-            boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
-                                                            JWT_GENERATOR_TOKEN_CACHE_ENABLED,
-                                                            DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
-            int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
-                                                JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
-                                                DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
-            // get the subscribedAPI details
-            map<string> apiDetails = checkSubscribedAPIs(payload);
-            // checking if cache is enabled
-            if (enabledCaching) {
-                var cachedToken = jwtGeneratorCache.get(credential);
-                if (cachedToken is string) {
-                    printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
-                    printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
-                    (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
-                    if (cachedPayload is jwt:JwtPayload) {
-                        int currentTime = getCurrentTime();
-                        int? cachedTokenExpiry = cachedPayload?.exp;
-                        if (cachedTokenExpiry is int) {
-                            cachedTokenExpiry = cachedTokenExpiry * 1000;
-                            int difference = (cachedTokenExpiry - currentTime);
-                            if (difference < skewTime) {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
-                                status =setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
-                                            payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+        if (classLoaded) {
+            boolean status = false;
+            string apiName = "";
+            string apiVersion = "";
+            APIConfiguration? apiConfig = apiConfigAnnotationMap[runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString()];
+            if (apiConfig is APIConfiguration) {
+                apiName = apiConfig.name;
+                apiVersion = apiConfig.apiVersion;
+            }
+            string cacheKey = credential + apiName + apiVersion;
+            (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+            if (payload is jwt:JwtPayload) {
+                printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
+                // get the subscribedAPI details
+                map<string> apiDetails = checkSubscribedAPIs(payload, apiName, apiVersion);
+                // checking if cache is enabled
+                if (enabledCaching) {
+                    var cachedToken = jwtGeneratorCache.get(cacheKey);
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "Key: " + cacheKey);
+                    if (cachedToken is string) {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
+                        (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
+                        if (cachedPayload is jwt:JwtPayload) {
+                            int currentTime = getCurrentTime();
+                            int? cachedTokenExpiry = cachedPayload?.exp;
+                            if (cachedTokenExpiry is int) {
+                                cachedTokenExpiry = cachedTokenExpiry * 1000;
+                                int difference = (cachedTokenExpiry - currentTime);
+                                if (difference < skewTime) {
+                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
+                                    status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
+                                } else {
+                                    req.setHeader(jwtheaderName, cachedToken);
+                                    status = true;
+                                }
                             } else {
-                                req.setHeader(jwtheaderName, cachedToken);
-                                status = true;
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
+                                return false;
                             }
-                        } else {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
-                            return prepareAuthenticationError("Failed to read exp claim from cached token");
                         }
+                    } else {
+                        printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
+                        status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
                     }
                 } else {
-                    printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
-                    status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
-                                        payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
+                    status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
                 }
             } else {
-                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
-                status = setJWTHeader(jDialectURI, jSignatureAlgorithm, jKeyStorePath, jKeyStorePassword, jTokenExpiry, jRestrictedClaims,
-                                    payload, req, credential, enabledCaching, cacheExpiry, jTokenIssuer, jTokenAudience, apiDetails);
+                printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read JWT token");
+                return false;
             }
+            return status;
         } else {
-            return prepareAuthenticationError("Failed to read JWT token");
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Class loading failed");
+            return false;
         }
-        return status;
     } else {
         printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Generator is disabled");
         return true;
@@ -237,161 +319,29 @@ public function generateAndSetBackendJwtHeader(string credential, http:Request r
 
 # Refactoring method for setting JWT header
 #
-# + jDialectURI - DialectURI for the standard claims
-# + jSignatureAlgorithm - Signature algorithm to sign the JWT
-# + jKeyStorePath - Keystore path
-# + jKeyStorePassword - Keystore password
-# + jTokenExpiry - Token expiry value
-# + jRestrictedClaims - Restricted claims from the configuration
 # + payload - The payload of the authentication token
 # + req - The `Request` instance.
-# + credential - Credential
+# + cacheKey - key for the jwt generator cache
 # + enabledCaching - jwt generator caching enabled
-# + cacheExpiry - jwt generator cache expiry
-# + jTokenIssuer - token issuer for the claims
-# + jTokenAudience - token audience for the claims
 # + apiDetails - extracted api details for the current api
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
-public function setJWTHeader(handle jDialectURI, handle jSignatureAlgorithm, handle jKeyStorePath, handle jKeyStorePassword,
-                            int jTokenExpiry, handle jRestrictedClaims, jwt:JwtPayload payload, http:Request req, string credential,
-                            boolean enabledCaching, int cacheExpiry, handle jTokenIssuer, handle jTokenAudience, map<string> apiDetails)
-                            returns @tainted (boolean | http:AuthenticationError) {
-    handle generatorClass = java:fromString(getConfigValue(JWT_GENERATOR_ID,
-                                                            JWT_GENERATOR_IMPLEMENTATION,
-                                                            DEFAULT_JWT_GENERATOR_IMPLEMENTATION));
-    boolean classLoaded = loadJWTGeneratorClass(generatorClass,
-                                                jDialectURI,
-                                                jSignatureAlgorithm,
-                                                jKeyStorePath,
-                                                jKeyStorePassword,
-                                                jTokenExpiry,
-                                                jRestrictedClaims,
-                                                enabledCaching,
-                                                cacheExpiry,
-                                                jTokenIssuer,
-                                                jTokenAudience,
-                                                apiDetails);
-    if (classLoaded) {
-        handle generatedToken = generateJWTToken(payload);
+public function setJWTHeader(jwt:JwtPayload payload,
+                                http:Request req,
+                                string cacheKey,
+                                boolean enabledCaching,
+                                map<string> apiDetails)
+                                returns @tainted boolean {
+        handle generatedToken = generateJWTToken(payload, apiDetails);
 
         printDebug(KEY_JWT_AUTH_PROVIDER, "Generated jwt token");
         printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + generatedToken.toString());
 
         // add to cache if cache enabled
         if (enabledCaching) {
-            jwtGeneratorCache.put(credential, generatedToken.toString());
-            printDebug(KEY_GW_CACHE, "Added to jwt generator token cache.");
+            jwtGeneratorCache.put(cacheKey, generatedToken.toString());
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Added to jwt generator token cache.");
         }
         req.setHeader(jwtheaderName, generatedToken.toString());
         return true;
-    } else {
-        return prepareAuthenticationError("Failed to load JWT token generator class");
-    }
 }
-
-# To invoke the interop function to create instance of JWT generator
-#
-# + className - className for the jwtgenerator implementation
-# + dialectURI - DialectURI for the standard claims
-# + signatureAlgorithm - Signature algorithm to sign the JWT
-# + keyStorePath - Keystore path
-# + keyStorePassword - Keystore password
-# + tokenExpiry - Token expiry value
-# + restrictedClaims - Restricted claims from the configuration
-# + enabledCaching - jwt generator caching enabled
-# + cacheExpiry - jwt generator cache expiry
-# + tokenIssuer - token issuer for the claims
-# + tokenAudience - token audience for the claims
-# + apiDetails - extracted api details for the current api
-# + return - Returns `true` if the class is created successfully. or `false` if unsuccessful.
-public function loadJWTGeneratorClass(handle className,
-                                        handle dialectURI,
-                                        handle signatureAlgorithm,
-                                        handle keyStorePath,
-                                        handle keyStorePassword,
-                                        int tokenExpiry,
-                                        handle restrictedClaims,
-                                        boolean enabledCaching,
-                                        int cacheExpiry,
-                                        handle tokenIssuer,
-                                        handle tokenAudience,
-                                        map<string> apiDetails) returns boolean {
-    return jLoadJWTGeneratorClass(className,
-                                    dialectURI,
-                                    signatureAlgorithm,
-                                    keyStorePath,
-                                    keyStorePassword,
-                                    tokenExpiry,
-                                    restrictedClaims,
-                                    enabledCaching,
-                                    cacheExpiry,
-                                    tokenIssuer,
-                                    tokenAudience,
-                                    apiDetails);
-}
-
-# Interop function to create instance of JWTGenerator
-#
-# + className - className for the jwtgenerator implementation
-# + dialectURI - DialectURI for the standard claims
-# + signatureAlgorithm - Signature algorithm to sign the JWT
-# + keyStorePath - Keystore path
-# + keyStorePassword - Keystore password
-# + tokenExpiry - Token expiry value
-# + restrictedClaims - Restricted claims from the configuration
-# + enabledCaching - jwt generator caching enabled
-# + cacheExpiry - jwt generator cache expiry
-# + tokenIssuer - token issuer for the claims
-# + tokenAudience - token audience for the claims
-# + apiDetails - extracted api details for the current api
-# + return - Returns `true` if the class is created successfully. or `false` if unsuccessful.
-public function jLoadJWTGeneratorClass(handle className,
-                                        handle dialectURI,
-                                        handle signatureAlgorithm,
-                                        handle keyStorePath,
-                                        handle keyStorePassword,
-                                        int tokenExpiry,
-                                        handle restrictedClaims,
-                                        boolean enabledCaching,
-                                        int cacheExpiry,
-                                        handle tokenIssuer,
-                                        handle tokenAudience,
-                                        map<string> apiDetails) returns boolean = @java:Method {
-    name: "loadJWTGeneratorClass",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
-} external;
-
-# Invoke the interop function to resolves the keystore path
-#
-# + unresolvedPath - unresolved keystore path
-# + return - Returns the resolved keystore path.
-public function getKeystoreLocation(handle unresolvedPath) returns handle {
-    return jGetKeystoreLocation(unresolvedPath);
-}
-
-# Interop function to resolves the keystore path
-#
-# + unresolvedPath - unresolved keystore path
-# + return - Returns the resolved keystore path.
-public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @java:Method {
-    name: "invokeGetKeystorePath",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
-} external;
-
-# Invoke the interop function to generate JWT token
-#
-# + jwtInfo - payload of the authentication token
-# + return - Returns the generated JWT token.
-public function generateJWTToken(jwt:JwtPayload jwtInfo) returns handle {
-    return jGenerateJWTToken(jwtInfo);
-}
-
-# Interop function to generate JWT token
-#
-# + jwtInfo - payload of the authentication token
-# + return - Returns the generated JWT token.
-public function jGenerateJWTToken(jwt:JwtPayload jwtInfo) returns handle = @java:Method {
-    name: "invokeGenerateToken",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
-} external;

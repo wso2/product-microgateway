@@ -3,8 +3,6 @@ package org.wso2.micro.gateway.core.jwtgenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ballerinalang.jvm.values.MapValue;
-import org.wso2.micro.gateway.core.Constants;
 import org.wso2.micro.gateway.core.utils.ErrorUtils;
 
 import java.io.FileInputStream;
@@ -24,7 +22,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,27 +37,33 @@ public abstract class AbstractMGWJWTGenerator {
     private String signatureAlgorithm;
     private String keyStorePath;
     private String keyStorePassword;
+    private String certificateAlias;
+    private String privateKeyAlias;
     private int jwtExpiryTime;
     private ArrayList<String> restrictedClaims;
     private boolean cacheEnabled;
     private int cacheExpiry;
     private String tokenIssuer;
     private String tokenAudience;
-    private MapValue apiDetails;
+    private Map<String, Object> apiDetails;
+    private List<String> defaultRestrictedClaims;
 
     public AbstractMGWJWTGenerator(String dialectURI,
                                    String signatureAlgorithm,
                                    String keyStorePath,
                                    String keyStorePassword,
+                                   String certificateAlias,
+                                   String privateKeyAlias,
                                    int jwtExpiryTime,
-                                   String restrictedClaims,
+                                   String[] restrictedClaims,
                                    boolean cacheEnabled,
                                    int cacheExpiry,
                                    String tokenIssuer,
-                                   String tokenAudience,
-                                   MapValue apiDetails) {
+                                   String tokenAudience) {
         this.keyStorePath = keyStorePath;
         this.keyStorePassword = keyStorePassword;
+        this.certificateAlias = certificateAlias;
+        this.privateKeyAlias = privateKeyAlias;
         this.jwtExpiryTime = jwtExpiryTime;
         this.dialectURI = dialectURI;
         this.signatureAlgorithm = signatureAlgorithm;
@@ -67,19 +71,41 @@ public abstract class AbstractMGWJWTGenerator {
         this.cacheExpiry = cacheExpiry;
         this.tokenIssuer = tokenIssuer;
         this.tokenAudience = tokenAudience;
-        this.apiDetails = apiDetails;
-        if (restrictedClaims.equals("")) {
-            this.restrictedClaims = new ArrayList<>();
-        } else {
-            this.restrictedClaims = new ArrayList<>(Arrays.asList(restrictedClaims.split(",")));
-        }
+        this.restrictedClaims = new ArrayList<>(Arrays.asList(restrictedClaims));
+        defaultRestrictedClaims = new ArrayList<>(Arrays.asList("iss", "sub", "aud", "exp",
+                "nbf", "iat", "jti", "application", "tierInfo", "subscribedAPIs", "keytype"));
+        this.restrictedClaims.addAll(defaultRestrictedClaims);
     }
 
-    public MapValue getApiDetails() {
+    public String getPrivateKeyAlias() {
+        return privateKeyAlias;
+    }
+
+    public void setPrivateKeyAlias(String privateKeyAlias) {
+        this.privateKeyAlias = privateKeyAlias;
+    }
+
+    public List<String> getDefaultRestrictedClaims() {
+        return defaultRestrictedClaims;
+    }
+
+    public void setDefaultRestrictedClaims(List<String> defaultRestrictedClaims) {
+        this.defaultRestrictedClaims = defaultRestrictedClaims;
+    }
+
+    public String getCertificateAlias() {
+        return certificateAlias;
+    }
+
+    public void setCertificateAlias(String certificateAlias) {
+        this.certificateAlias = certificateAlias;
+    }
+
+    public Map<String, Object> getApiDetails() {
         return apiDetails;
     }
 
-    public void setApiDetails(MapValue apiDetails) {
+    public void setApiDetails(Map<String, Object> apiDetails) {
         this.apiDetails = apiDetails;
     }
 
@@ -166,7 +192,7 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to generate the JWT token
      */
-    public String generateToken(MapValue jwtInfo) {
+    public String generateToken(Map<String, Object> jwtInfo) {
         String jwtHeader = buildHeader();
         String jwtBody = buildBody(jwtInfo);
         String base64UrlEncodedHeader = "";
@@ -220,9 +246,8 @@ public abstract class AbstractMGWJWTGenerator {
         try {
             is = new FileInputStream(keyStorePath);
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            String alias = "ballerina";
-            keystore.load(is, alias.toCharArray());
-            Key key = keystore.getKey(alias, keyStorePassword.toCharArray());
+            keystore.load(is, keyStorePassword.toCharArray());
+            Key key = keystore.getKey(privateKeyAlias, keyStorePassword.toCharArray());
             Key privateKey = null;
             if (key instanceof PrivateKey) {
                 privateKey = key;
@@ -272,15 +297,15 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to add the certificate from the keystore to the header
+     * Used to add "ballerina"the certificate from the keystore to the header
      */
     public String addCertToHeader() {
         FileInputStream is = null;
         try {
             is = new FileInputStream(keyStorePath);
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(is, "ballerina".toCharArray());
-            Certificate publicCert = keystore.getCertificate("ballerina");
+            keystore.load(is, keyStorePassword.toCharArray());
+            Certificate publicCert = keystore.getCertificate(certificateAlias);
 
             //generate the SHA-1 thumbprint of the certificate
             MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
@@ -325,7 +350,7 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to build the body with claims
      */
-    public String buildBody(MapValue jwtInfo) {
+    public String buildBody(Map<String, Object> jwtInfo) {
         JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder();
         Map<String, Object> claims = populateStandardClaims(jwtInfo);
         Map<String, Object> customClaims = populateCustomClaims(jwtInfo, restrictedClaims);
@@ -365,61 +390,7 @@ public abstract class AbstractMGWJWTGenerator {
         return buf.toString();
     }
 
-    /**
-     * Used to get the keystore path
-     */
-    public static String getKeyStorePath(String fullPath) {
-        String homePathConst = "\\$\\{mgw-runtime.home}";
-        String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
-        String correctPath = fullPath.replaceAll(homePathConst, homePath);
-        return correctPath;
-    }
-
-    /**
-     * Used to add claims to the claim set
-     */
-    public void addClaim(MapValue claimInToken,
-                         ArrayList<String> restrictedClaims,
-                         Map<String, Object> claims) {
-        for (Object key: claimInToken.getKeys()) {
-            if (!restrictedClaims.contains(key.toString())) {
-                try {
-                    claims.put(key.toString(), claimInToken.getStringValue(key.toString()));
-                } catch (ClassCastException e1) {
-                    try {
-                        claims.put(key.toString(), claimInToken.getIntValue(key.toString()));
-                    } catch (ClassCastException e2) {
-                        try {
-                            claims.put(key.toString(), claimInToken.getFloatValue(key.toString()));
-                        } catch (ClassCastException e3) {
-                            try {
-                                claims.put(key.toString(), claimInToken.getArrayValue(key.toString()).getJSONString());
-                            } catch (ClassCastException e4) {
-                                try {
-                                    MapValue mapValue = claimInToken.getMapValue(key.toString());
-                                    Map<String, Object> subClaims = new HashMap<>();
-                                    addClaim(mapValue, restrictedClaims, subClaims);
-                                    claims.put(key.toString(), subClaims);
-                                } catch (ClassCastException e5) {
-                                    try {
-                                        claims.put(key.toString(), claimInToken.getBooleanValue(key.toString()));
-                                    } catch (ClassCastException e6) {
-                                        try {
-                                            claims.put(key.toString(), claimInToken.getObjectValue(key.toString()));
-                                        } catch (ClassCastException e7) {
-                                            logger.error("Failed to convert claim value");
-                                            throw ErrorUtils.getBallerinaError("Failed to convert claim value", e7);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public abstract Map<String, Object> populateStandardClaims(MapValue jwtInfo);
-    public abstract Map<String, Object> populateCustomClaims(MapValue jwtInfo, ArrayList<String> restrictedClaims);
+    public abstract Map<String, Object> populateStandardClaims(Map<String, Object> jwtInfo);
+    public abstract Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo,
+                                                             ArrayList<String> restrictedClaims);
 }

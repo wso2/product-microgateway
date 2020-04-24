@@ -305,17 +305,19 @@
   claimDialect="http://wso2.org/claims"
   # Signature algorithm used to sign the JWT token (only SHA256withRSA and NONE is supported)
   signingAlgorithm="SHA256withRSA"
+  # Certificate alias from the keystore
+  certificateAlias="ballerina"
+  # Private key alias from the keystore
+  privateKeyAlias="ballerina"
   # JWT token expiry time - ms (valid only if the jwt generator caching mechanism is disabled)
   tokenExpiry=900000
-  # Comma separated restricted claims that should not be included in the backend JWT token
-  # Example: restrictedClaims="claim1,claim2,claim3"
-  restrictedClaims=""
+  # Restricted claims as an array that should not be included in the backend JWT token
+  # Example: restrictedClaims=["claim1","claim2","claim3"]
+  restrictedClaims=[]
   # Token issuer standard claim
   issuer="wso2.org/products/am"
   # Token audience standard claim
   audience="http://org.wso2.apimgt/gateway"
-  # Skew time to reach the backend from microgateway (ms)
-  skewTime=0
   # JWT token generator implementation
   generatorImpl="org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
@@ -328,3 +330,8 @@
     tokenCacheCapacity=10000
     # Token cache eviction factor
     tokenCacheEvictionFactor=0.25
+
+# server configuration
+[server]
+  # timestamp skew in seconds which added when checking the token validity period
+  timestampSkew = 5000
