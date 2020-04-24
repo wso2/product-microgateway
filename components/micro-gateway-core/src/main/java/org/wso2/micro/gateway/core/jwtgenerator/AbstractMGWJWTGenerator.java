@@ -3,23 +3,15 @@ package org.wso2.micro.gateway.core.jwtgenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.micro.gateway.core.utils.ErrorUtils;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -192,7 +184,7 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to generate the JWT token
      */
-    public String generateToken(Map<String, Object> jwtInfo) {
+    public String generateToken(Map<String, Object> jwtInfo) throws Exception {
         String jwtHeader = buildHeader();
         String jwtBody = buildBody(jwtInfo);
         String base64UrlEncodedHeader = "";
@@ -220,7 +212,7 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to build the JWT header
      */
-    public String buildHeader() {
+    public String buildHeader() throws Exception {
         String jwtHeader = null;
         if (NONE.equals(signatureAlgorithm)) {
             StringBuilder jwtHeaderBuilder = new StringBuilder();
@@ -241,39 +233,28 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to sign the JWT using the keystore
      */
-    public byte[] signJWT(String assertion) {
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(keyStorePath);
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(is, keyStorePassword.toCharArray());
-            Key key = keystore.getKey(privateKeyAlias, keyStorePassword.toCharArray());
-            Key privateKey = null;
-            if (key instanceof PrivateKey) {
-                privateKey = key;
-            }
-            //initialize signature with private key and algorithm
-            Signature signature = Signature.getInstance(signatureAlgorithm);
-            signature.initSign((PrivateKey) privateKey);
-            //update signature with data to be signed
-            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
-            signature.update(dataInBytes);
-            //sign the assertion and return the signature
-            return signature.sign();
-        } catch (NoSuchAlgorithmException | KeyStoreException | SignatureException | InvalidKeyException |
-                UnrecoverableKeyException | IOException | CertificateException e) {
-            logger.error("Error occurred while signing the JWT");
-            throw ErrorUtils.getBallerinaError("Error occurred while signing the JWT", e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    logger.error("IO Exception");
-                    throw ErrorUtils.getBallerinaError("IO Exception", e);
-                }
-            }
+    public byte[] signJWT(String assertion) throws Exception {
+        FileInputStream is;
+        is = new FileInputStream(keyStorePath);
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(is, keyStorePassword.toCharArray());
+        Key key = keystore.getKey(privateKeyAlias, keyStorePassword.toCharArray());
+        Key privateKey = null;
+        if (key instanceof PrivateKey) {
+            privateKey = key;
         }
+        //initialize signature with private key and algorithm
+        Signature signature = Signature.getInstance(signatureAlgorithm);
+        signature.initSign((PrivateKey) privateKey);
+        //update signature with data to be signed
+        byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
+        signature.update(dataInBytes);
+
+        // close the file stream
+        is.close();
+
+        //sign the assertion and return the signature
+        return signature.sign();
     }
 
     /**
@@ -299,52 +280,41 @@ public abstract class AbstractMGWJWTGenerator {
     /**
      * Used to add "ballerina"the certificate from the keystore to the header
      */
-    public String addCertToHeader() {
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(keyStorePath);
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(is, keyStorePassword.toCharArray());
-            Certificate publicCert = keystore.getCertificate(certificateAlias);
+    public String addCertToHeader() throws Exception {
+        FileInputStream is;
+        is = new FileInputStream(keyStorePath);
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(is, keyStorePassword.toCharArray());
+        Certificate publicCert = keystore.getCertificate(certificateAlias);
 
-            //generate the SHA-1 thumbprint of the certificate
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            byte[] der = publicCert.getEncoded();
-            digestValue.update(der);
-            byte[] digestInBytes = digestValue.digest();
-            String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint;
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
-            StringBuilder jwtHeader = new StringBuilder();
-            //Sample header
-            //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
-            //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append("RS256");
-            jwtHeader.append("\",");
+        //generate the SHA-1 thumbprint of the certificate
+        MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+        byte[] der = publicCert.getEncoded();
+        digestValue.update(der);
+        byte[] digestInBytes = digestValue.digest();
+        String publicCertThumbprint = hexify(digestInBytes);
+        String base64UrlEncodedThumbPrint;
+        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+        StringBuilder jwtHeader = new StringBuilder();
+        //Sample header
+        //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
+        //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
+        jwtHeader.append("{\"typ\":\"JWT\",");
+        jwtHeader.append("\"alg\":\"");
+        jwtHeader.append("RS256");
+        jwtHeader.append("\",");
 
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append('\"');
+        jwtHeader.append("\"x5t\":\"");
+        jwtHeader.append(base64UrlEncodedThumbPrint);
+        jwtHeader.append('\"');
 
-            jwtHeader.append('}');
-            return jwtHeader.toString();
-        } catch (IOException | CertificateException | NoSuchAlgorithmException |
-                KeyStoreException e) {
-            logger.error("Error occurred while adding certificate to the header of JWT");
-            throw ErrorUtils.getBallerinaError("Error occurred while adding certificate to the header of JWT", e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    logger.error("IO Exception");
-                    throw ErrorUtils.getBallerinaError("IO Exception", e);
-                }
-            }
-        }
+        jwtHeader.append('}');
+
+        // close the file stream
+        is.close();
+
+        return jwtHeader.toString();
     }
 
     /**

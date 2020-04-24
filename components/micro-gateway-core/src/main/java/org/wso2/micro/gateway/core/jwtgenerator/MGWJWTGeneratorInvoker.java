@@ -1,9 +1,7 @@
 package org.wso2.micro.gateway.core.jwtgenerator;
 
 import org.ballerinalang.jvm.values.ArrayValue;
-import org.ballerinalang.jvm.values.ArrayValueImpl;
 import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.MapValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.core.Constants;
@@ -54,7 +52,7 @@ public class MGWJWTGeneratorInvoker {
     /**
      * Invoke token generation method
      */
-    public static String invokeGenerateToken(MapValue jwtInfo, MapValue apiDetails) {
+    public static String invokeGenerateToken(MapValue jwtInfo, MapValue apiDetails) throws Exception {
         Map<String, Object> jwtInfoMap = convertMapValueToMap(jwtInfo);
         Map<String, Object> apiDetailsMap = convertMapValueToMap(apiDetails);
         abstractMGWJWTGenerator.setApiDetails(apiDetailsMap);
@@ -72,15 +70,15 @@ public class MGWJWTGeneratorInvoker {
         Map<String, Object> map = new HashMap<>();
         for (Object key: mapValue.getKeys()) {
             Object valueObject = mapValue.get(key.toString());
-            if (valueObject != null && valueObject.getClass() == MapValueImpl.class) {
+            if (valueObject != null && valueObject instanceof MapValue) {
                 MapValue subMapValue = mapValue.getMapValue(key.toString());
                 Map<String, Object> subMap = convertMapValueToMap(subMapValue);
                 map.put(key.toString(), subMap);
-            } else if (valueObject != null && valueObject.getClass() == ArrayValueImpl.class) {
+            } else if (valueObject != null && valueObject instanceof ArrayValue) {
                 ArrayValue arrayValue = mapValue.getArrayValue(key.toString());
                 Object[] array = new Object[arrayValue.size()];
                 for (int i = 0; i < arrayValue.size(); i++) {
-                    if (arrayValue.get(i).getClass() == MapValueImpl.class) {
+                    if (arrayValue.get(i) instanceof MapValue) {
                         array[i] = convertMapValueToMap((MapValue) arrayValue.get(i));
                     } else {
                         array[i] = arrayValue.get(i);

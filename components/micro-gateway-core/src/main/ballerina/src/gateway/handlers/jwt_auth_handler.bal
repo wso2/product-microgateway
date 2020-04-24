@@ -331,8 +331,11 @@ public function setJWTHeader(jwt:JwtPayload payload,
                                 boolean enabledCaching,
                                 map<string> apiDetails)
                                 returns @tainted boolean {
-        handle generatedToken = generateJWTToken(payload, apiDetails);
-
+        (handle|error) generatedToken = generateJWTToken(payload, apiDetails);
+        if (generatedToken is error) {
+            printError(KEY_JWT_AUTH_PROVIDER, "Token not generated due to error", generatedToken);
+            return false;
+        }
         printDebug(KEY_JWT_AUTH_PROVIDER, "Generated jwt token");
         printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + generatedToken.toString());
 

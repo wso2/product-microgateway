@@ -84,7 +84,7 @@ public function getKeystoreLocation(handle unresolvedPath) returns handle {
 # + jwtInfo - payload of the authentication token
 # + apiDetails - details of the subscribed APIS
 # + return - Returns the generated JWT token.
-public function generateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns handle {
+public function generateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns (handle | error) {
     return jGenerateJWTToken(jwtInfo, apiDetails);
 }
 
@@ -135,7 +135,7 @@ public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @ja
 # + jwtInfo - payload of the authentication token
 # + apiDetails - details of the subscribed APIS
 # + return - Returns the generated JWT token.
-public function jGenerateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns handle = @java:Method {
+public function jGenerateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns (handle | error) = @java:Method {
     name: "invokeGenerateToken",
     class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
 } external;
