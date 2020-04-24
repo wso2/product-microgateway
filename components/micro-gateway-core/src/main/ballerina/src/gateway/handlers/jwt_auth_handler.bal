@@ -172,7 +172,6 @@ public type JWTAuthHandler object {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }
-
 };
 
 # Identify the api details from the subscribed apis in the authentication token.

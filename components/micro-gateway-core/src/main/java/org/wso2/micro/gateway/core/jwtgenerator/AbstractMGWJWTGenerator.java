@@ -261,7 +261,7 @@ public abstract class AbstractMGWJWTGenerator {
             //sign the assertion and return the signature
             return signature.sign();
         } catch (NoSuchAlgorithmException | KeyStoreException | SignatureException | InvalidKeyException |
-                   UnrecoverableKeyException | IOException | CertificateException e) {
+                UnrecoverableKeyException | IOException | CertificateException e) {
             logger.error("Error occurred while signing the JWT");
             throw ErrorUtils.getBallerinaError("Error occurred while signing the JWT", e);
         } finally {
@@ -332,7 +332,7 @@ public abstract class AbstractMGWJWTGenerator {
             jwtHeader.append('}');
             return jwtHeader.toString();
         } catch (IOException | CertificateException | NoSuchAlgorithmException |
-                   KeyStoreException e) {
+                KeyStoreException e) {
             logger.error("Error occurred while adding certificate to the header of JWT");
             throw ErrorUtils.getBallerinaError("Error occurred while adding certificate to the header of JWT", e);
         } finally {
