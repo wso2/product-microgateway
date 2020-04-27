@@ -121,6 +121,28 @@ paths:
           description: Invalid status value
       security:
         - petstore_auth: []
+  /pet/findByStatusNew:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      x-wso2-production-endpoints:
+        urls:
+          - https://localhost:2380/v1/pet/findByStatusNew?value1=foo&value2=bar
+      parameters:
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: true
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid status value
+      security:
+        - petstore_auth: []
   /pet/findByTags:
     get:
       tags:

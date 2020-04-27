@@ -31,7 +31,7 @@ public class GrpcServer {
 
     public void start() throws IOException {
         /* The port on which the server should run */
-        int port = 50051;
+        int port = 50075;
         if (server == null || server.isShutdown() || server.isTerminated()) {
             server = ServerBuilder.forPort(port)
                     .addService(new TestServiceImpl())
