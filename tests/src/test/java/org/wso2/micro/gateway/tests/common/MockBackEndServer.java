@@ -20,24 +20,22 @@ package org.wso2.micro.gateway.tests.common;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-
 import io.netty.handler.codec.http.HttpHeaderNames;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Mock HTTP server for testing Open API tests.
@@ -127,6 +125,17 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(base + "/pet/findByStatusNew", exchange -> {
+                byte[] response = "{\"error\":true}".getBytes();
+                if(exchange.getRequestURI().getQuery().contains("value1=foo&value2=bar")) {
+                    response = ResponseConstants.responseBodyV1.getBytes();
+                }
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);

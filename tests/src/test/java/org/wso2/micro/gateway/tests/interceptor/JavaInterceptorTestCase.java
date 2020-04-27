@@ -45,6 +45,14 @@ public class JavaInterceptorTestCase extends InterceptorTestCase {
         Assert.assertEquals(response.getData(), ResponseConstants.JSON_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
 
+        //test the path parameters and the matrix parameters
+        response = HttpClientRequest.doPost(getServiceURLHttp(
+                "/petstore/v1/pet;a=4;b=5/value1;x=10;y=15/uploadImage?bar=value2&test=value3"), "{'hello':'world'}",
+                headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.JSON_RESPONSE_WITH_PATH_PARAMS);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
         //test json array payloads
         headers.put("X_JWT", "true");
         response = HttpClientRequest

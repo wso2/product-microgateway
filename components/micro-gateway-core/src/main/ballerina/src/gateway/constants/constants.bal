@@ -94,9 +94,6 @@ public const string ERROR_MESSAGE = "error_message";
 public const string ERROR_DESCRIPTION = "error_description";
 public const string HTTP_STATUS_CODE = "status_code";
 
-public const string API_NAME = "api_name";
-public const string API_CONTEXT = "api_context";
-
 public const string AUTHN_FILTER = "AUTHN_FILTER";
 public const string AUTHZ_FILTER = "AUTHZ_FILTER";
 public const string SUBSCRIPTION_FILTER = "SUBSCRIPTION_FILTER";
@@ -421,4 +418,11 @@ public const string REQUEST_PATH = "requestPath";
 // java interceptor related constants
 public const string RESPOND_DONE = "respond_done";
 public const string RESPONSE_OBJECT = "response_object";
+
+//invocation context properties
+public const string API_CONTEXT = "api_context";
+public const string API_VERSION_PROPERTY = "api_version";
+public const string API_PUBLISHER = "api_publisher";
+public const string API_NAME = "api_name";
+public const string MATCHING_RESOURCE = "matching_resource";
 

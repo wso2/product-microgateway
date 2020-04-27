@@ -28,6 +28,7 @@ public class Constants {
     public static final String CONTENT_TYPE_HEADER = "content-type";
     public static final String RESOURCE_PATH = "rawPath";
     public static final String REQUEST_METHOD = "method";
+    public static final String REQUEST_PATH_PARAMS = "pathParams";
     public static final String REQUEST_HTTP_VERSION = "httpVersion";
     public static final String PATH_INFO = "extraPathInfo";
     public static final String USER_INFO = "userAgent";
