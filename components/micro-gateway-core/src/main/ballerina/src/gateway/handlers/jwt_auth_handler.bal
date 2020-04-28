@@ -17,8 +17,6 @@
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
-import ballerinax/java;
-import ballerinax/java.arrays as javaArr;
 
 # Representation of the jwt self validating handler
 #
@@ -73,19 +71,6 @@ public type JWTAuthHandler object {
                                                     DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
             self.restrictedClaims = getConfigArrayValue(JWT_GENERATOR_ID,
                                                         JWT_GENERATOR_RESTRICTED_CLAIMS);
-            int len = self.restrictedClaims.length();
-            (handle | error) stringClass = java:getClass("java.lang.String");
-            handle restrictedClaimsArray;
-            if (stringClass is handle) {
-                restrictedClaimsArray = javaArr:newInstance(stringClass, len);
-                int i = 0;
-                while (i < len) {
-                    javaArr:set(restrictedClaimsArray, i, java:fromString(<string>self.restrictedClaims[i]));
-                    i = i + 1;
-                }
-            } else {
-                restrictedClaimsArray = java:fromString("");
-            }
             self.keyStoreLocationUnresolved = getConfigValue(LISTENER_CONF_INSTANCE_ID,
                                                                 KEY_STORE_PATH,
                                                                 DEFAULT_KEY_STORE_PATH);
@@ -116,7 +101,7 @@ public type JWTAuthHandler object {
                                                         self.certificateAlias,
                                                         self.privateKeyAlias,
                                                         self.tokenExpiry,
-                                                        restrictedClaimsArray,
+                                                        self.restrictedClaims,
                                                         self.enabledCaching,
                                                         self.cacheExpiry,
                                                         self.tokenIssuer,
