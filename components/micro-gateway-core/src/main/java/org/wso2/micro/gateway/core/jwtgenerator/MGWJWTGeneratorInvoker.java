@@ -8,6 +8,7 @@ import org.wso2.micro.gateway.core.Constants;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class MGWJWTGeneratorInvoker {
                                                 String certificateAlias,
                                                 String privateKeyAlias,
                                                 int jwtExpiryTime,
-                                                String[] restrictedClaims,
+                                                ArrayValue restrictedClaims,
                                                 boolean cacheEnabled,
                                                 int cacheExpiry,
                                                 String tokenIssuer,
@@ -37,10 +38,12 @@ public class MGWJWTGeneratorInvoker {
                     .getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class,
                             String.class, int.class, String[].class, boolean.class, int.class, String.class,
                             String.class);
+            Object[] objectArray = convertArrayValueToArray(restrictedClaims);
+            String[] restrictedClaimArray = Arrays.copyOf(objectArray, objectArray.length, String[].class);
             abstractMGWJWTGenerator = (AbstractMGWJWTGenerator) classConstructor
                     .newInstance(dialectURI, signatureAlgorithm, keyStorePath, keyStorePassword, certificateAlias,
-                            privateKeyAlias, jwtExpiryTime, restrictedClaims, cacheEnabled, cacheExpiry, tokenIssuer,
-                            tokenAudience);
+                            privateKeyAlias, jwtExpiryTime, restrictedClaimArray, cacheEnabled, cacheExpiry,
+                            tokenIssuer, tokenAudience);
             return true;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
                     | InvocationTargetException | NoSuchMethodException e) {
@@ -64,6 +67,23 @@ public class MGWJWTGeneratorInvoker {
     }
 
     /**
+     * Convert ArrayValue to Array
+     */
+    public static Object[] convertArrayValueToArray(ArrayValue arrayValue) {
+        Object[] array = new Object[arrayValue.size()];
+        for (int i = 0; i < arrayValue.size(); i++) {
+            if (arrayValue.get(i) instanceof MapValue) {
+                array[i] = convertMapValueToMap((MapValue) arrayValue.get(i));
+            } else if (arrayValue.get(i) instanceof ArrayValue) {
+                array[i] = convertArrayValueToArray((ArrayValue) arrayValue.get(i));
+            } else {
+                array[i] = arrayValue.get(i);
+            }
+        }
+        return array;
+    }
+
+    /**
      * Convert MapValue to Map
      */
     public static Map<String, Object> convertMapValueToMap(MapValue mapValue) {
@@ -76,15 +96,7 @@ public class MGWJWTGeneratorInvoker {
                 map.put(key.toString(), subMap);
             } else if (valueObject != null && valueObject instanceof ArrayValue) {
                 ArrayValue arrayValue = mapValue.getArrayValue(key.toString());
-                Object[] array = new Object[arrayValue.size()];
-                for (int i = 0; i < arrayValue.size(); i++) {
-                    if (arrayValue.get(i) instanceof MapValue) {
-                        array[i] = convertMapValueToMap((MapValue) arrayValue.get(i));
-                    } else {
-                        array[i] = arrayValue.get(i);
-                    }
-                }
-                map.put(key.toString(), array);
+                map.put(key.toString(), convertArrayValueToArray(arrayValue));
             } else {
                 map.put(key.toString(), valueObject);
             }
