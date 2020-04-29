@@ -44,7 +44,7 @@ public class Request {
     }
 
     /**
-     * Gets the requested resource path
+     * Gets the requested resource path.
      *
      * @return Resource path value as a string
      */
@@ -53,7 +53,7 @@ public class Request {
     }
 
     /**
-     * Gets the requested resource http method
+     * Gets the requested resource http method.
      *
      * @return Resource http method as a string. For ex: POST
      */
@@ -71,7 +71,7 @@ public class Request {
     }
 
     /**
-     * Gets the additional path information available in the request
+     * Gets the additional path information available in the request.
      *
      * @return Extra path information as a string
      */

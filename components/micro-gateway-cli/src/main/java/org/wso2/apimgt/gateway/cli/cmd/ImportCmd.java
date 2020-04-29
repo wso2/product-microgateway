@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents the "import" command and it pull the swagger and generate the source code
+ * This class represents the "import" command and it pull the swagger and generate the source code.
  */
 @Parameters(commandNames = "import", commandDescription = "pull APIs from API Publisher")
 public class ImportCmd implements LauncherCmd {
@@ -358,7 +358,7 @@ public class ImportCmd implements LauncherCmd {
     }
 
     /**
-     * Set endpoints of publisher, admin, registration and token
+     * Set endpoints of publisher, admin, registration and token.
      *
      * @param token token from config file
      * @return TokenBuilder modified token to be written back to configuration file
@@ -472,7 +472,7 @@ public class ImportCmd implements LauncherCmd {
     }
 
     /**
-     * validate URLs
+     * validate URLs.
      *
      * @param urlString url string to be validated
      */
@@ -488,7 +488,7 @@ public class ImportCmd implements LauncherCmd {
     }
 
     /**
-     * inform user on REST version of endpoint URLs
+     * inform user on REST version of endpoint URLs.
      *
      * @param restVersion API Manager's REST version
      */
@@ -499,7 +499,7 @@ public class ImportCmd implements LauncherCmd {
     }
 
     /**
-     * prompt to get the base URL
+     * prompt to get the base URL.
      */
     private String getBaseURLFromCmd(String defaultBaseURL) {
         String userInputURL;

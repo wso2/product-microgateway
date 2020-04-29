@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation used to mark fields of APIs/Policies that will be used for hash generation
+ * Annotation used to mark fields of APIs/Policies that will be used for hash generation.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Hash {
