@@ -29,7 +29,7 @@ public class SubscriptionThrottlePolicyListDTO {
     private List<SubscriptionThrottlePolicyDTO> list = new ArrayList<SubscriptionThrottlePolicyDTO>();
 
     /**
-     * Number of Subscription Throttling Policies returned.\n.
+     * Number of Subscription Throttling Policies returned.
      **/
     @JsonProperty("count")
     public Integer getCount() {

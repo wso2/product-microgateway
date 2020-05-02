@@ -36,7 +36,7 @@ public class APIListDTO  {
 
   
   /**
-   * Number of APIs returned.\n.
+   * Number of APIs returned.
    **/
   @JsonProperty("count")
   public Integer getCount() {
@@ -47,7 +47,7 @@ public class APIListDTO  {
   }
   
   /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n.
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.
    **/
   @JsonProperty("next")
   public String getNext() {
@@ -58,7 +58,7 @@ public class APIListDTO  {
   }
   
   /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n.
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.
    **/
   @JsonProperty("previous")
   public String getPrevious() {

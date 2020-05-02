@@ -146,8 +146,8 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
 
 
     /**
-     * Method to set the Path level server opeartions to operation level servers.
-     * if operation level servers are not present
+     * Method to set the Path level server opeartions to operation level servers,
+     * if operation level servers are not present.
      *
      * @param operation {@link Operation} The current considered operation object
      * @param pathLevelServers list if server objects defined in the open API PAth level

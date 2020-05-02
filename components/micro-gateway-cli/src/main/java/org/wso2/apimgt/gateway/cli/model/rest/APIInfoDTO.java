@@ -36,7 +36,7 @@ public class APIInfoDTO {
 
 
     /**
-     * UUID of the api registry artifact\n.
+     * UUID of the api registry artifact.
      **/
     @JsonProperty("id")
     public String getId() {
@@ -99,7 +99,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * If the provider value is not given, the user invoking the APIDetailedDTO will be used as the provider.\n.
+     * If the provider value is not given, the user invoking the APIDetailedDTO will be used as the provider.
      **/
     @JsonProperty("provider")
     public String getProvider() {

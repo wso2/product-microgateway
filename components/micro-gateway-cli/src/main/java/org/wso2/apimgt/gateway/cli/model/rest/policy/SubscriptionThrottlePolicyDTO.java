@@ -71,7 +71,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
 
     /**
-     * Custom attributes added to the Subscription Throttling Policy\n.
+     * Custom attributes added to the Subscription Throttling Policy.
      **/
     @JsonProperty("customAttributes")
     public List<CustomAttributeDTO> getCustomAttributes() {
@@ -86,7 +86,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     /**
      * This indicates the action to be taken when a user goes beyond the allocated quota.
      * If checked, the user's requests will be dropped. If unchecked,
-     * the requests will be allowed to pass through.\n
+     * the requests will be allowed to pass through.
      **/
     @Hash
     @JsonProperty("stopOnQuotaReach")
@@ -100,7 +100,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
 
     /**
-     * define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.\n
+     * define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.
      **/
     @JsonProperty("billingPlan")
     public String getBillingPlan() {

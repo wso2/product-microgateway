@@ -107,7 +107,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private String provider = null;
 
     /**
-     * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes\n.
+     * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes.
      **/
     @Hash
     @JsonProperty("apiDefinition")
@@ -121,7 +121,7 @@ public class APIDetailedDTO extends APIInfoDTO {
 
 
     /**
-     * WSDL URL if the APIDetailedDTO is based on a WSDL endpoint\n.
+     * WSDL URL if the APIDetailedDTO is based on a WSDL endpoint.
      **/
     @JsonProperty("wsdlUri")
     public String getWsdlUri() {
@@ -188,7 +188,7 @@ public class APIDetailedDTO extends APIInfoDTO {
 
 
     /**
-     * Supported transports for the APIDetailedDTO (http and/or https).\n.
+     * Supported transports for the APIDetailedDTO (http and/or https).
      **/
     @Hash
     @JsonProperty("transport")
@@ -255,7 +255,7 @@ public class APIDetailedDTO extends APIInfoDTO {
 
     /**
      * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both.
-     * If it is not set OAuth2 will be set as the security for the current API.\n
+     * If it is not set OAuth2 will be set as the security for the current API.
      **/
     @JsonProperty("apiSecurity")
     public String getApiSecurity() {
@@ -331,7 +331,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     }
 
     /**
-     * Comma separated list of gateway environments.\n.
+     * Comma separated list of gateway environments.
      **/
     @JsonProperty("gatewayEnvironments")
     public String getGatewayEnvironments() {
@@ -343,7 +343,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     }
 
     /**
-     * Labels of micro-gateway environments attached to the APIDetailedDTO.\n.
+     * Labels of micro-gateway environments attached to the APIDetailedDTO.
      **/
     @JsonProperty("labels")
     public List<LabelDTO> getLabels() {

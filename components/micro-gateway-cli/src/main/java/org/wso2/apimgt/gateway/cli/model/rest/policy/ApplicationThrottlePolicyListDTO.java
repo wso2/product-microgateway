@@ -29,7 +29,7 @@ public class ApplicationThrottlePolicyListDTO {
 
 
     /**
-     * Number of Application Throttling Policies returned.\n.
+     * Number of Application Throttling Policies returned.
      **/
     @JsonProperty("count")
     public Integer getCount() {
