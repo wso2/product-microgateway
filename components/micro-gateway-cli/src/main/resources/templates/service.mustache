@@ -38,7 +38,7 @@ import wso2/gateway;
     {{#if @root.requestInterceptor}}
     int {{operationId}}_api_request_interceptor_index = -1;
     {{/if}}
-    {{#if @root.requestInterceptor}}
+    {{#if @root.responseInterceptor}}
     int {{operationId}}_api_response_interceptor_index = -1;
     {{/if}}
 
