@@ -23,6 +23,7 @@ import ballerina/stringutils;
 
 boolean isConfigInitiated = false;
 boolean isDebugEnabled = false;
+int authFilterPosition = DEFAULT_AUTH_FILTER_POSITION;
 
 public type APIGatewayListener object {
     *lang:Listener;
@@ -85,7 +86,7 @@ function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
     http:ListenerAuth auth = {
          authHandlers: getAuthHandlers(), //set empty array
          mandateSecureSocket: false,
-         position: 2
+         position: authFilterPosition
     };
     config.auth = auth;
 }
@@ -283,4 +284,16 @@ public function getKeepAliveValue() returns http:KeepAlive {
     } else {
         return http:KEEPALIVE_NEVER;
     }
+}
+
+public function setAuthFilterPosition(int position) {
+    // This check is to avoid modifying auth position twice because of both http and https listener modifying the index.
+    if(authFilterPosition ==  DEFAULT_AUTH_FILTER_POSITION) {
+        authFilterPosition = position;
+    }
+    printDebug(KEY_GW_LISTNER, "Auth filter position in the filter chain: " + authFilterPosition.toString());
+}
+
+public function getAuthFilterPosition() returns int {
+    return authFilterPosition;
 }

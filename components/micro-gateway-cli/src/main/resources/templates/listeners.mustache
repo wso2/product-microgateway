@@ -7,7 +7,7 @@ import ballerina/config;
 {{else if containerConfig.kubernetes.kubernetesServiceHttps.enable}}import ballerina/kubernetes;
 {{else if containerConfig.kubernetes.kubernetesServiceHttp.enable}}import ballerina/kubernetes;{{/if}}
 
-
+const string KEY_LISTENER_INIT = "ListenerInit";
 //Throttle tier data initiation
 // todo: can remove this since this is not used
 {{#if config.mutualSSL.certificateDetails}}
@@ -113,7 +113,7 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
 
     boolean isObservable = gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_METRICS, gateway:ENABLED, false)
         || gateway:getConfigBooleanValue(gateway:MICRO_GATEWAY_TRACING, gateway:ENABLED, false);
-    
+
     if (isObservable) {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
@@ -133,7 +133,41 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
     // Extension filter
     ExtensionFilter extensionFilter = new;
 
-    return [grpcFilter, preAuthnFilter, authorizationFilter, validationRequestFilter, throttleFilter,
-            analyticsFilter, validationResponseFilter, extensionFilter];
+    (http:RequestFilter|http:ResponseFilter)[] defaultFilters = [grpcFilter, preAuthnFilter, authorizationFilter,
+        validationRequestFilter, throttleFilter, analyticsFilter, validationResponseFilter, extensionFilter];
+
+    (http:RequestFilter|http:ResponseFilter)[] customFilters = [];
+    int[] customFilterIndexes = [];
+    (http:RequestFilter|http:ResponseFilter)[] allFilters = defaultFilters.slice(0,defaultFilters.length());
+{{#containerConfig.filters}}
+    {{name}} {{variableName}} = new;
+    customFilterIndexes[{{@index}}] = {{position}};
+    customFilters[{{@index}}] = {{variableName}};
+    allFilters.push({{variableName}}) ;
+{{/containerConfig.filters}}
+
+    int customFilterIndex = 0;
+    int authFilterPosition = gateway:getAuthFilterPosition();
+
+    foreach var filterIndex in customFilterIndexes {
+        shiftArray(allFilters, filterIndex, customFilters[customFilterIndex]);
+        if (filterIndex <= authFilterPosition) {
+            authFilterPosition = authFilterPosition + 1;
+        }
+        customFilterIndex = customFilterIndex +1;
+    }
+
+    gateway:setAuthFilterPosition(authFilterPosition);
+    gateway:printDebug(KEY_LISTENER_INIT, allFilters.toString());
+    return allFilters;
+}
+
+function shiftArray((http:RequestFilter|http:ResponseFilter)[] allFilters, int position,
+    (http:RequestFilter|http:ResponseFilter) customFilter) {
+    int filterArrayLength = allFilters.length();
+    foreach int currentIndex in position ..< filterArrayLength {
+        allFilters[filterArrayLength-currentIndex-1+position] = allFilters[filterArrayLength-currentIndex-2+position];
+    }
+    allFilters[position] = customFilter;
 }
 
