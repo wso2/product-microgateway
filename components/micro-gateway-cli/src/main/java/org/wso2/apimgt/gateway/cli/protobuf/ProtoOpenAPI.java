@@ -285,7 +285,7 @@ public class ProtoOpenAPI {
     }
 
     /**
-     * Add API-KEY security requirement to the API level
+     * Add API-KEY security requirement to the API level.
      */
     void addAPIKeySecurityRequirement() {
         addAPIKeySecurityScheme();

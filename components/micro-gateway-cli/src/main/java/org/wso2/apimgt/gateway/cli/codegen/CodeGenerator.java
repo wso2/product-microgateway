@@ -257,7 +257,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate common endpoint
+     * Generate common endpoint.
      *
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
@@ -364,7 +364,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate swagger files
+     * Generate swagger files.
      *
      * @param context model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}

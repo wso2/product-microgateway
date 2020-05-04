@@ -36,7 +36,7 @@ public class ThrottlePolicyDTO {
 
 
     /**
-     * Id of policy
+     * Id of policy.
      **/
     @JsonProperty("policyId")
     public String getPolicyId() {
@@ -49,7 +49,7 @@ public class ThrottlePolicyDTO {
 
 
     /**
-     * Name of policy
+     * Name of policy.
      **/
     @Hash
     @JsonProperty("policyName")
@@ -63,7 +63,7 @@ public class ThrottlePolicyDTO {
 
 
     /**
-     * Display name of the policy
+     * Display name of the policy.
      **/
     @JsonProperty("displayName")
     public String getDisplayName() {
@@ -76,7 +76,7 @@ public class ThrottlePolicyDTO {
 
 
     /**
-     * Description of the policy
+     * Description of the policy.
      **/
     @JsonProperty("description")
     public String getDescription() {

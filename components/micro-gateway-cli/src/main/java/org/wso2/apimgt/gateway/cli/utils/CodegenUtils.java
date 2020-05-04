@@ -63,7 +63,7 @@ public final class CodegenUtils {
     }
 
     /**
-     * Compile given template
+     * Compile given template.
      *
      * @param defaultTemplateDir template directory
      * @param templateName template name
@@ -97,7 +97,7 @@ public final class CodegenUtils {
     }
 
     /**
-     * Write generated templates
+     * Write generated templates.
      *
      * @param sources list of source files
      * @param srcPath source location

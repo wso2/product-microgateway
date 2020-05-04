@@ -62,7 +62,7 @@ public class Response {
     }
 
     /**
-     * Get the ultimate request URI that was made to receive the response when redirect is on
+     * Get the ultimate request URI that was made to receive the response when redirect is on.
      * @return the requested URI
      */
     public String getResolvedRequestedURI() {

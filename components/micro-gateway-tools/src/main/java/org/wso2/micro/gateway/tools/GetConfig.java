@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 public class GetConfig {
 
     /**
-     * reading the configurations from micro-gw.conf
+     * reading the configurations from micro-gw.conf.
      *
      * @param confFilePath Path of the micro-gw conf file
      * @param fileWritePath File path of the txt file

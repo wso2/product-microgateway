@@ -33,7 +33,7 @@ public final class RESTAPIUtils {
     }
 
     /**
-     * Get inputStream string as string
+     * Get inputStream string as string.
      *
      * @param input input stream
      * @return inout stream content as string
