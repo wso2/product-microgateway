@@ -1,9 +1,0 @@
-{{#if endpointConfig.sandEndpoints.endpointListEtcdEnabled}}
-    {{#endpointConfig.sandEndpoints}}{{>endpointReinit}}{{/endpointConfig.sandEndpoints}}
-    if (!reinitFailed) {
-        clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, <@untainted>req);
-    }
-{{else}}
-    clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, <@untainted>req);
-{{/if}}
-invocationContext.attributes["destination"] = "{{endpointConfig.sandEndpoints.endpoints.0.endpointUrl}}";

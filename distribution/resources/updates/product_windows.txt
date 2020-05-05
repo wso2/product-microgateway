@@ -1,1 +1,0 @@
-${product.name}-toolkit-windows-${product.version}

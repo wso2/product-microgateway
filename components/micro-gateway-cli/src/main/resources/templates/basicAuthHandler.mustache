@@ -1,8 +1,0 @@
-{{#securityConfig}}{{#equals securityConfig.type "basic"}}
-auth:OutboundBasicAuthProvider {{endpointUrlType}}_{{qualifiedServiceName}}{{operationId}}OutboundBasicAuthProvider = new({
-    username: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_basic_username", "{{securityConfig.username}}"),
-    password: gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_basic_password", "")
-});
-
-http:BasicAuthHandler {{qualifiedServiceName}}{{operationId}}_{{endpointUrlType}}OutboundBasicAuthHandler = new({{endpointUrlType}}_{{qualifiedServiceName}}{{operationId}}OutboundBasicAuthProvider);
-{{/equals}}{{/securityConfig}}

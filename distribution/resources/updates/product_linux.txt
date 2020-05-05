@@ -1,1 +1,0 @@
-${product.name}-toolkit-linux-${product.version}

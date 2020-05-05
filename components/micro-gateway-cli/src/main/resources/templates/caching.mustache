@@ -1,6 +1,0 @@
-{{#equals api.responseCaching "Disabled"}},
-    cache: { enabled: false }{{else}},
-    cache: { enabled: true,
-    isShared: true {{#if api.cacheTimeout}},
-    expiryTimeInMillis: {{api.cacheTimeout}} {{/if}} }{{/equals}}
-
