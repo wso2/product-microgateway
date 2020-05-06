@@ -84,7 +84,7 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
             return session;
         } else {
             jms:Destination dest = check session->createTopic("throttleData");
-            jms:MessageConsumer | error subscriberEndpoint = trap session->createConsumer(dest, "");
+            jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-1");
             if (subscriberEndpoint is error) {
                 printError(KEY_THROTTLE_UTIL, "Error while creating the jms subscriber.", subscriberEndpoint);
             } else {
