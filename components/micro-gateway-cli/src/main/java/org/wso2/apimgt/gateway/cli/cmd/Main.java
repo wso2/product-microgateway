@@ -80,7 +80,7 @@ public class Main {
     }
 
     /**
-     * Get the invoke CMD from the specified arguments
+     * Get the invoke CMD from the specified arguments.
      *
      * @param args list of arguments
      * @return invoked CMD

@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 public class GetConfig {
 
     /**
-     * reading the configurations from micro-gw.conf
+     * reading the configurations from micro-gw.conf.
      *
      * @param confFilePath Path of the micro-gw conf file
      * @param fileWritePath File path of the txt file
@@ -26,7 +26,8 @@ public class GetConfig {
         Config config = toml.to(Config.class);
         boolean enabled = false;
         long jmxPort;
-        if (config.getB7a() != null && config.getB7a().getObservability() != null) {
+        if (config.getB7a() != null && config.getB7a().getObservability() != null &&
+                config.getB7a().getObservability().getMetrics() != null) {
             enabled = config.getB7a().getObservability().getMetrics().isEnabled();
             jmxPort = config.getB7a().getObservability().getMetrics().getPrometheus().getJmxPort();
             File txtConfigs = new File(fileWritePath);

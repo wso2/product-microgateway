@@ -112,7 +112,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Read file as string
+     * Read file as string.
      *
      * @param path       to the file
      * @param inResource whether file is in resources directory of jar or not
@@ -161,7 +161,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Create usage exception
+     * Create usage exception.
      *
      * @param errorMsg error message
      * @return created usage exception
@@ -174,7 +174,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Encrypt given value with provided secret
+     * Encrypt given value with provided secret.
      *
      * @param value  value to encrypt
      * @param secret encryption key
@@ -190,7 +190,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Decrypt given value with provided secret
+     * Decrypt given value with provided secret.
      *
      * @param value  value to decrypt
      * @param secret decryption key
@@ -206,7 +206,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns current user dir
+     * Returns current user dir.
      *
      * @return current user dir
      */
@@ -220,7 +220,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get cli home location
+     * Get cli home location.
      *
      * @return cli home location
      */
@@ -251,7 +251,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get cli library location
+     * Get cli library location.
      *
      * @return cli lib location
      */
@@ -260,7 +260,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get resources file directory path
+     * Get resources file directory path.
      *
      * @return resources file directory path
      */
@@ -279,7 +279,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get resources file directory path
+     * Get resources file directory path.
      *
      * @return resources file directory path
      */
@@ -289,7 +289,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get filters folder location
+     * Get filters folder location.
      *
      * @return filters folder location
      */
@@ -298,7 +298,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get filters folder location
+     * Get filters folder location.
      *
      * @return filters folder location
      */
@@ -307,7 +307,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get temp folder location
+     * Get temp folder location.
      *
      * @param projectName name of the project
      * @return temp folder location
@@ -512,7 +512,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Save openAPI definition (developer first approach)
+     * Save openAPI definition (developer first approach).
      *
      * @param projectName   project name
      * @param apiDefinition api Definition as String
@@ -558,7 +558,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Load the stored resource hash content from the CLI temp folder
+     * Load the stored resource hash content from the CLI temp folder.
      *
      * @param projectName name of the project
      * @return stored resource hash content from the CLI temp folder
@@ -574,7 +574,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Saves the resource hash content to the CLI temp folder
+     * Saves the resource hash content to the CLI temp folder.
      *
      * @param content     resource hash content
      * @param projectName name of the project
@@ -600,7 +600,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Get resource hash holder file path
+     * Get resource hash holder file path.
      *
      * @param projectName name of the project
      * @return resource hash holder file path
@@ -611,7 +611,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns location of the main configuration file of given project root
+     * Returns location of the main configuration file of given project root.
      *
      * @return path configuration file
      */
@@ -621,7 +621,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the project conf folder
+     * Returns path to the project conf folder.
      *
      * @return path to the project conf folder
      */
@@ -630,7 +630,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns location of the deployment configuration file of given project
+     * Returns location of the deployment configuration file of given project.
      *
      * @param projectName name of the project
      * @return path to deployment configuration file
@@ -640,7 +640,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the given project in the current working directory
+     * Returns path to the given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the given project in the current working directory
@@ -650,7 +650,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /gen of a given project in the current working directory
+     * Returns path to the /gen of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /src of a given project in the current working directory
@@ -715,7 +715,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /gen/src of a given project in the current working directory
+     * Returns path to the /gen/src of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /src of a given project in the current working directory
@@ -726,7 +726,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /extensions of a given project in the current working directory
+     * Returns path to the /extensions of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /extensions of a given project in the current working directory
@@ -759,7 +759,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /gen/api-definition of a given project in the current working directory
+     * Returns path to the /gen/api-definition of a given project in the current working directory.
      *
      * @param projectName   name of the project
      * @param apiId         md5 hash value of apiName:apiVersion
@@ -774,7 +774,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /gen/api-definition of a given project in the current working directory
+     * Returns path to the /gen/api-definition of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @param apiId       md5 hash value of apiName:apiVersion
@@ -872,7 +872,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Copy files to resources directory
+     * Copy files to resources directory.
      *
      * @param sourcePath      source directory path
      * @param destinationPath destionation directory path
@@ -883,7 +883,7 @@ public final class CmdUtils {
     }
 
     /**
-     * This function recursively copy all the sub folder and files from sourceFolder to destinationFolder
+     * This function recursively copy all the sub folder and files from sourceFolder to destinationFolder.
      *
      * @param sourceFolder      source location
      * @param destinationFolder destination location
@@ -935,7 +935,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Creates a new folder if not exists
+     * Creates a new folder if not exists.
      *
      * @param path folder path
      * @param overwrite if `true` existing directory will be removed
@@ -993,7 +993,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Write content to a specified file
+     * Write content to a specified file.
      *
      * @param content content to be written
      * @param file    file object initialized with path
@@ -1160,7 +1160,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Replace backslashes `\` in windows path string with forward slashes `/`
+     * Replace backslashes `\` in windows path string with forward slashes `/`.
      *
      * @param path Location of a resource (file or directory)
      * @return {String} File path with unix style file separator
@@ -1170,7 +1170,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Delete project folder
+     * Delete project folder.
      *
      * @param projectPath project path
      */
@@ -1198,7 +1198,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns path to the /API-Files of a given project in the current working directory
+     * Returns path to the /API-Files of a given project in the current working directory.
      *
      * @param projectName name of the project
      * @return path to the /API-Files of a given project in the current working directory
@@ -1209,7 +1209,7 @@ public final class CmdUtils {
     }
 
     /**
-     * Returns the path to the swagger for a defined version of an API
+     * Returns the path to the swagger for a defined version of an API.
      *
      * @param projectName name of the project
      * @param apiId       md5 hash value of apiName:apiVersion
@@ -1242,7 +1242,7 @@ public final class CmdUtils {
     }
 
     /**
-     * To print the message if verbose flag is set
+     * To print the message if verbose flag is set.
      *
      * @param msg Message
      */
@@ -1253,7 +1253,7 @@ public final class CmdUtils {
     }
 
     /**
-     * To read the system variable VERBOSE_ENABLED
+     * To read the system variable VERBOSE_ENABLED.
      *
      * @return true if verbose flag is enabled
      */

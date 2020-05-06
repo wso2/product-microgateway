@@ -18,7 +18,7 @@
 package org.wso2.apimgt.gateway.cli.exception;
 
 /**
- * Hashing Exception class
+ * Hashing Exception class.
  * 
  */
 public class HashingException extends Exception {

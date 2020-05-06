@@ -13,7 +13,7 @@ import java.util.List;
 //todo: add constants
 
 /**
- * This class hold the available endpoints and securityConfig details (in the routes.yaml)
+ * This class hold the available endpoints and securityConfig details (in the routes.yaml).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EndpointListRouteDTO {

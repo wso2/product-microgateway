@@ -23,7 +23,7 @@ package org.wso2.apimgt.gateway.cli.oauth;
 public interface OAuthService {
 
     /**
-     * Generate access token using password grant
+     * Generate access token using password grant.
      *
      * @param tokenEndpoint token endpoint
      * @param username      userid
@@ -37,7 +37,7 @@ public interface OAuthService {
                                String clientSecret, boolean inSecure);
 
     /**
-     * Generate OAuth application via DCR
+     * Generate OAuth application via DCR.
      *
      * @param dcrEndpoint DCR endpoint
      * @param username    user

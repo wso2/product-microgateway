@@ -23,7 +23,7 @@ package org.wso2.apimgt.gateway.cli.exception;
 public class CLIZipException extends RuntimeException {
 
     /**
-     * Creates a CLIZipException using error message and a throwable
+     * Creates a CLIZipException using error message and a throwable.
      * 
      * @param message error message
      * @param e throwable

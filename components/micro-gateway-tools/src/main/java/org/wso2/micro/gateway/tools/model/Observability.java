@@ -1,7 +1,7 @@
 package org.wso2.micro.gateway.tools.model;
 
 /**
- * model Observability for the Main
+ * model Observability for the Main.
  */
 public class Observability {
     public Metrics getMetrics() {
