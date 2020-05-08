@@ -100,6 +100,7 @@ public const string DEFAULT_JMS_CONNECTION_USERNAME = "";
 public const string DEFAULT_JMS_CONNECTION_PASSWORD = "";
 public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endpoints";
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
+public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/throttle/data/v1";
 
 public const boolean DEFAULT_TOKEN_REVOCATION_ENABLED = false;
 public const string DEFAULT_REALTIME_JMS_CONNECTION_TOPIC = "tokenRevocation";

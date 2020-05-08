@@ -59,10 +59,11 @@ deployedPolicies) returns boolean {
     AuthenticationContext keyValidationResult = {};
     string? apiVersion = getVersion(context);
     string? resourceLevelPolicyName = getResourceLevelPolicy(context);
+    string clientIP = (enabledGlobalTMEventPublishing) ? getClientIp(request, caller): "";
     if (invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
         keyValidationResult = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
-        if (isRequestBlocked(caller, request, context, keyValidationResult)) {
+        if (isRequestBlocked(caller, request, context, keyValidationResult, apiContext, clientIP)) {
             setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
             BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
             sendErrorResponse(caller, request, context);
@@ -128,6 +129,10 @@ deployedPolicies) returns boolean {
             return false;
         } else {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
+        }
+        if(enabledGlobalTMEventPublishing && keyTemplateMap.length() > 0 &&
+                !checkCustomThrottlePolicies(caller, request, context, keyValidationResult, apiContext, apiVersion, clientIP)) {
+            return false;
         }
 
     } else if (!isSecured) {
@@ -271,13 +276,7 @@ function isResourceLevelThrottled(http:FilterContext context, string? policy,
             return false;
         }
 
-        string resourceLevelThrottleKey = context.getResourceName();
-        if (apiVersion is string) {
-            resourceLevelThrottleKey += ":" + apiVersion;
-        }
-        if (enabledGlobalTMEventPublishing) {
-            resourceLevelThrottleKey += "_default";
-        }
+        string resourceLevelThrottleKey = getResoureThrottleKey(context, apiVersion);
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
         boolean throttled;
         boolean stopOnQuota;
@@ -305,15 +304,15 @@ function isUnauthenticateLevelThrottled(http:FilterContext context) returns [boo
     return isRequestThrottled(throttleKey);
 }
 
-function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context, AuthenticationContext keyValidationResult) returns (boolean) {
+function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context,
+        AuthenticationContext keyValidationResult, string apiContext, string clientIP) returns (boolean) {
     if (!enabledGlobalTMEventPublishing) {
         return false;
     }
-    string apiLevelBlockingKey = getContext(context);
     string apiTenantDomain = getTenantDomain(context);
-    string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request, caller);
+    string ipLevelBlockingKey = apiTenantDomain + ":" + clientIP;
     string appLevelBlockingKey = keyValidationResult.subscriber + ":" + keyValidationResult.applicationName;
-    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiLevelBlockingKey) ||
+    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiContext) ||
     isBlockConditionExist(ipLevelBlockingKey) || isBlockConditionExist(appLevelBlockingKey)) ||
     isBlockConditionExist(keyValidationResult.username)) {
         return true;
@@ -479,6 +478,45 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
         return false;
     } else {
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
+    }
+    return true;
+}
+
+function checkCustomThrottlePolicies(http:Caller caller, http:Request request, http:FilterContext context,
+                        AuthenticationContext keyValidationDto, string apiContext, string? apiVersion, string clientIp)  returns boolean{
+
+    printDebug(KEY_THROTTLE_FILTER, "Checking custom throttlle policies");
+    string userId = keyValidationDto.username;
+    string resourceLevelThrottleKey = getResoureThrottleKey(context, apiVersion);
+    string appTenant = keyValidationDto.subscriberTenantDomain;
+    string apiTenant = getTenantDomain(context);
+    string appId = keyValidationDto.applicationId;
+
+    foreach string key in keyTemplateMap.keys() {
+        string modifiedKey = replaceAll(key, "\\$resourceKey", resourceLevelThrottleKey);
+        modifiedKey = replaceAll(modifiedKey, "\\$userId", userId);
+        modifiedKey = replaceAll(modifiedKey, "\\$apiContext", apiContext);
+        if(apiVersion is string) {
+            modifiedKey = replaceAll(modifiedKey, "\\$apiVersion", apiVersion);
+        }
+        modifiedKey = replaceAll(modifiedKey, "\\$appTenant", appTenant);
+        modifiedKey = replaceAll(modifiedKey, "\\$apiTenant", apiTenant);
+        modifiedKey = replaceAll(modifiedKey, "\\$appId", appId);
+        modifiedKey = replaceAll(modifiedKey, "\\$clientIp", clientIp);
+        printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle key : " + modifiedKey);
+        boolean isThrottled;
+        boolean stopOnQuota;
+        [isThrottled, stopOnQuota] = isRequestThrottled(modifiedKey);
+        if(isThrottled) {
+            printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle out for key : " + modifiedKey + ". Sending throttled out response.");
+            context.attributes[IS_THROTTLE_OUT] = true;
+            context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
+            setThrottleErrorMessageToContext(context, THROTTLED_OUT, CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
+            THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
+            sendErrorResponse(caller, request, context);
+            return false;
+        }
+
     }
     return true;
 }

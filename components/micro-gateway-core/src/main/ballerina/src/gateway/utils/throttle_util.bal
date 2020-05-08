@@ -14,42 +14,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import ballerina/time;
-import wso2/jms;
 import ballerina/stringutils;
 
-map<string> blockConditions = {};
 map<any> throttleDataMap = {};
 stream<RequestStreamDTO> requestStream = new;
 stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 boolean isStreamsInitialized = false;
-future<()> ftr = start initializeThrottleSubscription();
 
 boolean blockConditionExist = false;
 boolean enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID,
 GLOBAL_TM_EVENT_PUBLISH_ENABLED, false);
 
 public function isBlockConditionExist(string key) returns (boolean) {
-    return blockConditions.hasKey(key);
+    return blockConditionsMap.hasKey(key);
 }
 public function isAnyBlockConditionExist() returns (boolean) {
     return blockConditionExist;
-}
-public function putBlockCondition(jms:MapMessage m) {
-    string? | error condition = m.getString(BLOCKING_CONDITION_KEY);
-    string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
-    string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
-    if (conditionState == TRUE && conditionState is string && conditionValue is string) {
-        blockConditionExist = true;
-        blockConditions[conditionValue] = <@untainted>conditionValue;
-    } else {
-        if (conditionValue is string) {
-            _ = blockConditions.remove(conditionValue);
-            if (blockConditions.keys().length() == 0) {
-                blockConditionExist = false;
-            }
-        }
-    }
 }
 
 //check whether throttle event is in the local map(request is throttled or not)
@@ -98,7 +80,11 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
 public function initializeThrottleSubscription() {
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
-    printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed global throttle stream.");
+    printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed to global throttle stream.");
+    if(enabledGlobalTMEventPublishing) {
+        registerkeyTemplateRetrievalTask();
+        registerBlockingConditionRetrievalTask();
+    }
 }
 
 // insert throttleevent into the map if it is throttled other wise remove the throttle key it from the throttledata map
@@ -199,3 +185,49 @@ public function getAPITier(string serviceName, string tierFromKeyValidation) ret
     }
     return apiTier;
 }
+
+public function getResoureThrottleKey(http:FilterContext context, string? apiVersion) returns string {
+    string resourceLevelThrottleKey = context.getResourceName();
+    if (apiVersion is string) {
+        resourceLevelThrottleKey += ":" + apiVersion;
+    }
+    if (enabledGlobalTMEventPublishing) {
+        resourceLevelThrottleKey += "_default";
+    }
+    return resourceLevelThrottleKey;
+}
+
+public function convertJsonToIpRange(map<json> ip) returns IPRangeDTO {
+    IPRangeDTO ipRange = {
+        id : <int>ip.id,
+        tenantDomain : ip.tenantDomain.toString(),
+        fixedIp : (ip[BLOCKING_CONDITION_FIXED_IP] != ())? ip.fixedIp.toString() : "",
+        startingIp : (ip[BLOCKING_CONDITION_START_IP] != ())? ip.startingIp.toString() : "",
+        endingIp : (ip[BLOCKING_CONDITION_END_IP] != ())? ip.endingIp.toString() : "",
+        invert : <boolean>ip.invert,
+        'type : ip.'type.toString()
+    };
+    return ipRange;
+}
+
+function addIpDataToBlockConditionTable(map<json> ip) {
+    printDebug(KEY_THROTTLE_UTIL, "Retrived IP Blocking condition : " + ip.toJsonString());
+    IPRangeDTO|error ipRange = trap convertJsonToIpRange(ip);
+    if(ipRange is IPRangeDTO) {
+        var ret = IpBlockConditionsMap.add(ipRange);
+        if(ret is error) {
+            printError(KEY_THROTTLE_UTIL, "Error while adding IP or IP range blocking condition to the table.", ret);
+        }
+        blockConditionExist = true;
+    } else {
+        printError(KEY_THROTTLE_UTIL, "Error while parsing IP or IP range blocking condition", ipRange);
+    }
+}
+
+function removeIpDataFromBlockConditionTable(int id) {
+    int|error count = IpBlockConditionsMap.remove(function(IPRangeDTO ipRange) returns boolean {
+        return (ipRange.id == id);
+    });
+    printDebug(KEY_THROTTLE_UTIL, "Removed the IP blocking condition with id : " + id.toString() + " from the map");
+}
+
