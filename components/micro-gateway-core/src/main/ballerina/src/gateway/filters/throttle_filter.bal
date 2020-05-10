@@ -60,10 +60,11 @@ deployedPolicies) returns boolean {
     string? apiVersion = getVersion(context);
     string? resourceLevelPolicyName = getResourceLevelPolicy(context);
     string clientIP = (enabledGlobalTMEventPublishing) ? getClientIp(request, caller): "";
+    string tenantDomain = (enabledGlobalTMEventPublishing) ? getTenantDomain(context) : "";
     if (invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         printDebug(KEY_THROTTLE_FILTER, "Context contains Authentication Context");
         keyValidationResult = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
-        if (isRequestBlocked(caller, request, context, keyValidationResult, apiContext, clientIP)) {
+        if (isRequestBlocked(caller, request, context, keyValidationResult, apiContext, tenantDomain, clientIP)) {
             setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
             BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
             sendErrorResponse(caller, request, context);
@@ -131,7 +132,8 @@ deployedPolicies) returns boolean {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
         }
         if(enabledGlobalTMEventPublishing && keyTemplateMap.length() > 0 &&
-                !checkCustomThrottlePolicies(caller, request, context, keyValidationResult, apiContext, apiVersion, clientIP)) {
+                !checkCustomThrottlePolicies(caller, request, context, keyValidationResult, apiContext,
+                apiVersion, tenantDomain, clientIP)) {
             return false;
         }
 
@@ -195,7 +197,7 @@ deployedPolicies) returns boolean {
     }
 
     //Publish throttle event to another worker flow to publish to internal policies or traffic manager
-    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies);
+    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context, keyValidationResult, deployedPolicies, tenantDomain);
     publishEvent(throttleEvent);
     printDebug(KEY_THROTTLE_FILTER, "Request is not throttled");
     return true;
@@ -305,29 +307,65 @@ function isUnauthenticateLevelThrottled(http:FilterContext context) returns [boo
 }
 
 function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context,
-        AuthenticationContext keyValidationResult, string apiContext, string clientIP) returns (boolean) {
+        AuthenticationContext keyValidationResult, string apiContext, string tenantDomain, string clientIP) returns (boolean) {
     if (!enabledGlobalTMEventPublishing) {
         return false;
     }
-    string apiTenantDomain = getTenantDomain(context);
-    string ipLevelBlockingKey = apiTenantDomain + ":" + clientIP;
+    string apiTenantDomain = tenantDomain;
+    string userBlockingKey = keyValidationResult.username;
     string appLevelBlockingKey = keyValidationResult.subscriber + ":" + keyValidationResult.applicationName;
-    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiContext) ||
-    isBlockConditionExist(ipLevelBlockingKey) || isBlockConditionExist(appLevelBlockingKey)) ||
-    isBlockConditionExist(keyValidationResult.username)) {
+    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiContext) || isBlockConditionExist(appLevelBlockingKey))
+    || isBlockConditionExist(userBlockingKey) || isIpLevelBlocked(clientIP, apiTenantDomain)) {
         return true;
     } else {
         return false;
     }
 }
 
-function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto, map<json> deployedPolicies)
+function isIpLevelBlocked(string clientIp, string tenanatDomain) returns boolean {
+    foreach IPRangeDTO ipRange in IpBlockConditionsMap {
+        if(ipRange.tenantDomain == tenanatDomain) {
+            if(ipRange.'type == BLOCKING_CONDITION_IP) {
+                if(ipRange.fixedIp == clientIp) {
+                    if(!ipRange.invert) {
+                        printDebug(KEY_THROTTLE_FILTER, "Blocked IP selected for blocking : " + clientIp);
+                        return true;
+                    }
+                } else {
+                    if(ipRange.invert) {
+                        printDebug(KEY_THROTTLE_FILTER, "Blocked IP invert condition selected for IP : " + clientIp);
+                        return true;
+                    }
+                }
+            } else if(ipRange.'type == BLOCKING_CONDITION_IP_RANGE) {
+                boolean isIpInRange = isIpWithinRange(clientIp, ipRange.startingIpNumber, ipRange.endingIpNumber);
+                if(isIpInRange) {
+                    if(!ipRange.invert) {
+                        printDebug(KEY_THROTTLE_FILTER, "The client IP : " + clientIp + " is within the blocking " +
+                        "IP range : [" + ipRange.startingIp + ", " + ipRange.endingIp + "].");
+                        return true;
+                    }
+                } else {
+                    if(ipRange.invert) {
+                        printDebug(KEY_THROTTLE_FILTER, "The client IP : " + clientIp + " is within the inverted  " +
+                        "blocking IP range : [" + ipRange.startingIp + ", " + ipRange.endingIp + "].");
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto,
+                        map<json> deployedPolicies, string tenantDomain)
     returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDTO = {};
     if (!enabledGlobalTMEventPublishing) {
         requestStreamDTO = generateLocalThrottleEvent(req, context, keyValidationDto, deployedPolicies);
     } else {
-        requestStreamDTO = generateGlobalThrottleEvent(req, context, keyValidationDto, deployedPolicies);
+        requestStreamDTO = generateGlobalThrottleEvent(req, context, keyValidationDto, deployedPolicies, tenantDomain);
     }
     printDebug(KEY_THROTTLE_FILTER, "Resource key : " + requestStreamDTO.resourceKey +
     "\nSubscription key : " + requestStreamDTO.subscriptionKey +
@@ -365,14 +403,15 @@ function generateLocalThrottleEvent(http:Request req, http:FilterContext context
     return requestStreamDTO;
 }
 
-function generateGlobalThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto, map<json> deployedPolicies)
+function generateGlobalThrottleEvent(http:Request req, http:FilterContext context,
+        AuthenticationContext keyValidationDto, map<json> deployedPolicies, string tenantDomain)
     returns (RequestStreamDTO) {
     RequestStreamDTO requestStreamDTO = setCommonThrottleData(req, context, keyValidationDto, deployedPolicies);
     requestStreamDTO.messageID = <string>context.attributes[MESSAGE_ID];
     requestStreamDTO.userId = keyValidationDto.username;
     requestStreamDTO.apiContext = getContext(context);
     requestStreamDTO.appTenant = keyValidationDto.subscriberTenantDomain;
-    requestStreamDTO.apiTenant = getTenantDomain(context);
+    requestStreamDTO.apiTenant = tenantDomain;
     requestStreamDTO.apiName = context.getServiceName();
     requestStreamDTO.appId = keyValidationDto.applicationId;
     setThrottleKeysWithVersion(requestStreamDTO, context);
@@ -483,13 +522,14 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
 }
 
 function checkCustomThrottlePolicies(http:Caller caller, http:Request request, http:FilterContext context,
-                        AuthenticationContext keyValidationDto, string apiContext, string? apiVersion, string clientIp)  returns boolean{
+                        AuthenticationContext keyValidationDto, string apiContext, string? apiVersion,
+                        string tenantDomain, string clientIp)  returns boolean{
 
     printDebug(KEY_THROTTLE_FILTER, "Checking custom throttlle policies");
     string userId = keyValidationDto.username;
     string resourceLevelThrottleKey = getResoureThrottleKey(context, apiVersion);
     string appTenant = keyValidationDto.subscriberTenantDomain;
-    string apiTenant = getTenantDomain(context);
+    string apiTenant = tenantDomain;
     string appId = keyValidationDto.applicationId;
 
     foreach string key in keyTemplateMap.keys() {

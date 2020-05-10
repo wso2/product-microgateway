@@ -141,7 +141,7 @@ public function initiateThrottlingJmsListener() returns boolean {
 function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValue) {
     printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template value : "+   keyTemplateValue.toString());
     string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
-    if(keyTemplateState is string ) {
+    if (keyTemplateState is string ) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template state : "+   keyTemplateState.toString());
         if (stringutils:equalsIgnoreCase("add", keyTemplateState)) {
             keyTemplateMap[keyTemplateValue] =  <@untainted>keyTemplateValue;
@@ -158,19 +158,19 @@ function handleBlockConditionMessage(jms:MapMessage m) {
     string? | error condition = m.getString(BLOCKING_CONDITION_KEY);
     string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
     string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
-    if(condition is string && conditionValue is string) {
+    if (condition is string && conditionValue is string) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition retrived with type : " + condition + " and value : " + conditionValue );
         if (conditionState is string && conditionState == TRUE) {
             blockConditionExist = true;
-            if(stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
+            if (stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
                    stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
                 io:StringReader sr = new(conditionValue);
                 json ip = checkpanic sr.readJson();
-                if(ip is map<json>) {
+                if (ip is map<json>) {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "IP Blocking condition json : " + ip.toJsonString());
                     int? | error conditionId = m.getInt(BLOCKING_CONDITION_ID);
                     string? | error conditionTenant = m.getString(BLOCKING_CONDITION_TENANAT_DOMAIN);
-                    if(conditionId is int && conditionTenant is string) {
+                    if (conditionId is int && conditionTenant is string) {
                         ip[BLOCKING_CONDITION_TYPE] = condition;
                         ip[BLOCKING_CONDITION_ID] = conditionId;
                         ip[BLOCKING_CONDITION_TENANAT_DOMAIN] = conditionTenant;
@@ -187,10 +187,10 @@ function handleBlockConditionMessage(jms:MapMessage m) {
             }
 
         } else {
-            if(stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
+            if (stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
                                stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
                 int? | error conditionId = m.getInt(BLOCKING_CONDITION_ID);
-                if(conditionId is int) {
+                if (conditionId is int) {
                     removeIpDataFromBlockConditionTable(conditionId);
                 } else {
                     printError(KEY_THROTTLE_EVENT_LISTENER, "Error while removing the IP blocking condition with id : ", conditionId);

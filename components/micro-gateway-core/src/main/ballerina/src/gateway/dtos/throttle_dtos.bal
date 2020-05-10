@@ -97,6 +97,8 @@ public type IPRangeDTO record {
     string 'type;
     string fixedIp;
     string startingIp;
+    string startingIpNumber;
     string endingIp;
+    string endingIpNumber;
     boolean invert = false;
 };

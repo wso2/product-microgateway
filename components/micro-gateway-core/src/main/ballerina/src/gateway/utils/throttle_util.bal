@@ -203,7 +203,9 @@ public function convertJsonToIpRange(map<json> ip) returns IPRangeDTO {
         tenantDomain : ip.tenantDomain.toString(),
         fixedIp : (ip[BLOCKING_CONDITION_FIXED_IP] != ())? ip.fixedIp.toString() : "",
         startingIp : (ip[BLOCKING_CONDITION_START_IP] != ())? ip.startingIp.toString() : "",
+        startingIpNumber: "",
         endingIp : (ip[BLOCKING_CONDITION_END_IP] != ())? ip.endingIp.toString() : "",
+        endingIpNumber: "",
         invert : <boolean>ip.invert,
         'type : ip.'type.toString()
     };
@@ -214,6 +216,7 @@ function addIpDataToBlockConditionTable(map<json> ip) {
     printDebug(KEY_THROTTLE_UTIL, "Retrived IP Blocking condition : " + ip.toJsonString());
     IPRangeDTO|error ipRange = trap convertJsonToIpRange(ip);
     if(ipRange is IPRangeDTO) {
+        modifyIpWithNumericRanges(ipRange);
         var ret = IpBlockConditionsMap.add(ipRange);
         if(ret is error) {
             printError(KEY_THROTTLE_UTIL, "Error while adding IP or IP range blocking condition to the table.", ret);
@@ -228,6 +231,22 @@ function removeIpDataFromBlockConditionTable(int id) {
     int|error count = IpBlockConditionsMap.remove(function(IPRangeDTO ipRange) returns boolean {
         return (ipRange.id == id);
     });
-    printDebug(KEY_THROTTLE_UTIL, "Removed the IP blocking condition with id : " + id.toString() + " from the map");
+    if(count is int) {
+        printDebug(KEY_THROTTLE_UTIL, "Removed the IP blocking condition with id : " + id.toString() + " from the map");
+        printDebug(KEY_THROTTLE_UTIL, "Number of items removed from the map : " + count.toString());
+    } else {
+        printError(KEY_THROTTLE_UTIL, "Error while removing blocking IP condition with id : " + id.toString(), count);
+    }
+
+}
+
+function modifyIpWithNumericRanges(IPRangeDTO ipRange) {
+    if(stringutils:equalsIgnoreCase(ipRange.'type, BLOCKING_CONDITION_IP_RANGE)) {
+        ipRange.startingIpNumber = ipToBigInteger(ipRange.startingIp);
+        ipRange.endingIpNumber = ipToBigInteger(ipRange.endingIp);
+    } else {
+        ipRange.startingIpNumber = "";
+        ipRange.endingIpNumber  = "";
+    }
 }
 

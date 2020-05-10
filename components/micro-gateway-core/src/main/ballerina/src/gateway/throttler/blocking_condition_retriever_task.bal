@@ -58,22 +58,22 @@ service blockingConditionRetrievalService = service {
         http:Request clientRequest = new;
         clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedCredentials);
         var resp = blockingConditionRetrieveClient->get("/block", clientRequest);
-        if(resp is http:Response) {
+        if (resp is http:Response) {
             var blockingConditions = resp.getJsonPayload();
-            if(blockingConditions is json) {
-                if(blockingConditions is map<json>) {
+            if (blockingConditions is json) {
+                if (blockingConditions is map<json>) {
                     printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition json from the service : " + blockingConditions.toString());
                     foreach var key in blockingConditions.keys() {
                         string conditionKey = key.toString();
                         printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition key : " + key.toString());
                         var jsonArray = blockingConditions[key];
-                        if(jsonArray is json[] && jsonArray.length() > 0) {
+                        if (jsonArray is json[] && jsonArray.length() > 0) {
                             printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition value : " + jsonArray.toJsonString());
                             foreach var condition in jsonArray {
-                                if(stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP) ||
+                                if (stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP) ||
                                         stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP_RANGE)) {
                                     printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "IP Blocking condition value : " + condition.toJsonString());
-                                    if(condition is map<json>) {
+                                    if (condition is map<json>) {
                                         addIpDataToBlockConditionTable(condition);
                                     } else {
                                         printWarn(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Could not add IP block condition to the table");
@@ -99,14 +99,14 @@ service blockingConditionRetrievalService = service {
             printError(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Error while retrieving blocking conditions. Retry in 15 seconds", resp);
 
         }
-        if(blockConditionRetriesCount > keyTemplateRetrievalRetries) {
+        if (blockConditionRetriesCount > keyTemplateRetrievalRetries) {
             stopBlockingConditionTask(false);
         }
     }
 };
 
 function stopBlockingConditionTask(boolean isSuccess) {
-    if(isSuccess) {
+    if (isSuccess) {
         printInfo(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition retrieval successful. Stopping the timer task ...");
     } else {
         printInfo(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition retrieval retries are finished. No more retry attempts. " +

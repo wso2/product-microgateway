@@ -66,10 +66,10 @@ service keyTemplateRetrievalService = service {
         http:Request clientRequest = new;
         clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedCredentials);
         var resp = keyTemplateRetrieveClient->get("/keyTemplates", clientRequest);
-        if(resp is http:Response) {
+        if (resp is http:Response) {
             var keyTemplates = resp.getJsonPayload();
-            if(keyTemplates is json) {
-                if(keyTemplates is json[]) {
+            if (keyTemplates is json) {
+                if (keyTemplates is json[]) {
                     foreach var key in keyTemplates {
                         string keyTempalteValue = key.toString();
                         keyTemplateMap[keyTempalteValue] = <@untainted>keyTempalteValue;
@@ -86,14 +86,14 @@ service keyTemplateRetrievalService = service {
             printError(KEY_TEMPLATE_RETIEVAL_TASK, "Error while retrieving key templates. Retry in 15 seconds", resp);
 
         }
-        if(retriesCount > keyTemplateRetrievalRetries) {
+        if (retriesCount > keyTemplateRetrievalRetries) {
             stopKeyTemplateTask(false);
         }
     }
 };
 
 function stopKeyTemplateTask(boolean isSuccess) {
-    if(isSuccess) {
+    if (isSuccess) {
         printInfo(KEY_TEMPLATE_RETIEVAL_TASK, "Key template retrieval successful. Stopping the timer task ...");
     } else {
         printInfo(KEY_TEMPLATE_RETIEVAL_TASK, "Key template retrieval retries are finished. No more retry attempts. " +
