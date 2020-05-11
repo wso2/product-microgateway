@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/task;
 import ballerina/stringutils;
+import ballerina/task;
 
 int blockConditionRetriesCount = 0;
 http:Client blockingConditionRetrieveClient = new (keyTemplateSrerviceURL,
@@ -71,7 +71,7 @@ service blockingConditionRetrievalService = service {
                             printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking condition value : " + jsonArray.toJsonString());
                             foreach var condition in jsonArray {
                                 if (stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP) ||
-                                        stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP_RANGE)) {
+                                stringutils:equalsIgnoreCase(conditionKey, BLOCKING_CONDITION_IP_RANGE)) {
                                     printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "IP Blocking condition value : " + condition.toJsonString());
                                     if (condition is map<json>) {
                                         addIpDataToBlockConditionTable(condition);

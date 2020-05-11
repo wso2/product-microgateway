@@ -60,6 +60,7 @@ public const string THROTTLE_KEY = "throttleKey";
 public const string POLICY_KEY = "policyKey";
 public const string KEY_TEMPLATE_VALUE = "keyTemplateValue";
 public const string KEY_TEMPLATE_STATE = "keyTemplateState";
+public const string KEY_TEMPLATE_ADD = "add";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
 public const string RESOURCE_SECURITY_ANN_NAME = "Security";
@@ -315,7 +316,7 @@ public const string JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
 public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
-public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.keyTemplate";
+public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.dataRetriever";
 
 public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
 public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";

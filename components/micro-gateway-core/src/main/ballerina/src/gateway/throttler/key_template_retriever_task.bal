@@ -19,7 +19,7 @@ import ballerina/task;
 
 const int keyTemplateRetrievalRetries = 15;
 string keyTemplateSrerviceURL = getConfigValue(THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID, KM_SERVER_URL,
-                                    DEFAULT_THROTTLE_KEY_TEMPLATE_URL);
+DEFAULT_THROTTLE_KEY_TEMPLATE_URL);
 string username = getConfigValue(THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID, USERNAME, DEFAULT_USERNAME);
 string password = getConfigValue(THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID, PASSWORD, DEFAULT_PASSWORD);
 string credentials = username + ":" + password;

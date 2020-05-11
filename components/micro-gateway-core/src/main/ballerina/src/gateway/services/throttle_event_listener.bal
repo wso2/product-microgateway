@@ -14,20 +14,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import wso2/jms;
 import ballerina/io;
 import ballerina/stringutils;
+import wso2/jms;
 
 string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
-    DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
+DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
 string jmsConnectionProviderUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PROVIDER_URL,
-    DEFAULT_JMS_CONNECTION_PROVIDER_URL);
+DEFAULT_JMS_CONNECTION_PROVIDER_URL);
 string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, DEFAULT_JMS_CONNECTION_PASSWORD);
 string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, DEFAULT_JMS_CONNECTION_USERNAME);
 
 map<string> keyTemplateMap = {};
 map<string> blockConditionsMap = {};
-table<IPRangeDTO> IpBlockConditionsMap = table {{},[]};
+table<IPRangeDTO> IpBlockConditionsMap = table {
+    {},
+    []
+
+};
 
 service messageServ = service {
     resource function onMessage(jms:Message message) {
@@ -123,7 +127,7 @@ public function startSubscriberService() returns @tainted jms:MessageConsumer | 
 # + return - boolean value of jmslistener started or not
 public function initiateThrottlingJmsListener() returns boolean {
     enabledGlobalTMEventPublishing = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, GLOBAL_TM_EVENT_PUBLISH_ENABLED,
-        DEFAULT_GLOBAL_TM_EVENT_PUBLISH_ENABLED);
+    DEFAULT_GLOBAL_TM_EVENT_PUBLISH_ENABLED);
     if (!enabledGlobalTMEventPublishing) {
         return false;
     } else {
@@ -139,16 +143,16 @@ public function initiateThrottlingJmsListener() returns boolean {
 }
 
 function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValue) {
-    printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template value : "+   keyTemplateValue.toString());
+    printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template value : " + keyTemplateValue.toString());
     string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
-    if (keyTemplateState is string ) {
-        printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template state : "+   keyTemplateState.toString());
-        if (stringutils:equalsIgnoreCase("add", keyTemplateState)) {
-            keyTemplateMap[keyTemplateValue] =  <@untainted>keyTemplateValue;
-            printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template key : "+   keyTemplateValue.toString() + " added to the map");
+    if (keyTemplateState is string) {
+        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template state : " + keyTemplateState.toString());
+        if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
+            keyTemplateMap[keyTemplateValue] = <@untainted>keyTemplateValue;
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " added to the map");
         } else {
             string removedValue = keyTemplateMap.remove(keyTemplateValue);
-            printDebug(KEY_THROTTLE_EVENT_LISTENER,  "Key template key : "+   keyTemplateValue.toString() + " with value : " +
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
             removedValue + " removed from the map");
         }
     }
@@ -159,12 +163,12 @@ function handleBlockConditionMessage(jms:MapMessage m) {
     string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
     string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
     if (condition is string && conditionValue is string) {
-        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition retrived with type : " + condition + " and value : " + conditionValue );
+        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition retrived with type : " + condition + " and value : " + conditionValue);
         if (conditionState is string && conditionState == TRUE) {
             blockConditionExist = true;
             if (stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
-                   stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
-                io:StringReader sr = new(conditionValue);
+            stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
+                io:StringReader sr = new (conditionValue);
                 json ip = checkpanic sr.readJson();
                 if (ip is map<json>) {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "IP Blocking condition json : " + ip.toJsonString());
@@ -179,16 +183,17 @@ function handleBlockConditionMessage(jms:MapMessage m) {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition added to the IP block condition map.");
                 } else {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "IP blocking condition could not be added to the map : " +
-                        ip.toJsonString());
+                    ip.toJsonString());
                 }
             } else {
                 blockConditionsMap[conditionValue] = <@untainted>conditionValue;
                 printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition added to the map.");
+                blockConditionExist = true;
             }
 
         } else {
             if (stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
-                               stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
+            stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
                 int? | error conditionId = m.getInt(BLOCKING_CONDITION_ID);
                 if (conditionId is int) {
                     removeIpDataFromBlockConditionTable(conditionId);
@@ -199,7 +204,7 @@ function handleBlockConditionMessage(jms:MapMessage m) {
                 _ = blockConditionsMap.remove(conditionValue);
                 printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition removed from the map.");
             }
-            if (blockConditionsMap.keys().length() == 0) {
+            if (blockConditionsMap.keys().length() == 0 && !IpBlockConditionsMap.hasNext()) {
                 blockConditionExist = false;
             }
 

@@ -239,7 +239,8 @@
   # username:password to create the connection to the central traffic manager
   throttleEndpointbase64Header = "admin:admin"
   #Configurations related to retrieve custom throttle policy related key templates from traffic manager or key manager.
-  [throttlingConfig.keyTemplate]
+  #TODO: change the name
+  [throttlingConfig.dataRetriever]
     serverUrl = "https://localhost:9443/throttle/data/v1"
     username = "admin"
     password = "admin"
