@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/wso2/envoy-gw/cmd/microgateway"
+	"github.com/wso2/micro-gw/cmd/microgateway"
 	"os"
 )
 

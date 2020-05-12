@@ -19,7 +19,7 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/envoy-gw/internal/pkg/confTypes"
+	"github.com/wso2/micro-gw/internal/pkg/confTypes"
 	"log"
 	"net/http"
 )
@@ -33,7 +33,7 @@ func Start(config *confTypes.Config) {
 	apiService := new(RESTService)
 	// API specific routs
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/add", apiService.ApiPOST).Methods("GET")
+	apiRouter.HandleFunc("/add", apiService.ApiPOST).Methods("POST")
 	// TODO: Immplement
 	//Configuration specific routes
 	//configRouter := router.PathPrefix("/config").Subrouter()

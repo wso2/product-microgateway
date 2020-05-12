@@ -18,9 +18,9 @@ package swaggerOperator
 
 import (
 	"encoding/json"
-	"github.com/wso2/envoy-gw/internal/pkg/oasparser/constants"
-	"github.com/wso2/envoy-gw/internal/pkg/oasparser/models/apiDefinition"
-	"github.com/wso2/envoy-gw/internal/pkg/oasparser/utills"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
 
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"

@@ -19,10 +19,10 @@ package microgateway
 import (
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/envoy-gw/internal/pkg/mgw"
+	"github.com/wso2/micro-gw/internal/pkg/mgw"
 	"os"
 
-	config "github.com/wso2/envoy-gw/internal/pkg/confTypes"
+	config "github.com/wso2/micro-gw/internal/pkg/confTypes"
 	"io/ioutil"
 	"log"
 )

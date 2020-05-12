@@ -1,4 +1,4 @@
-module github.com/wso2/envoy-gw
+module github.com/wso2/micro-gw
 
 go 1.13
 

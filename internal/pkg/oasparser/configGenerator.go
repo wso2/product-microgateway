@@ -20,9 +20,9 @@ package oasparser
 
 import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	e "github.com/wso2/envoy-gw/internal/pkg/oasparser/envoyCodegen"
-	"github.com/wso2/envoy-gw/internal/pkg/oasparser/models/envoy"
-	swgger "github.com/wso2/envoy-gw/internal/pkg/oasparser/swaggerOperator"
+	e "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
+	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"strings"
 )
 

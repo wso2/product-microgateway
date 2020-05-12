@@ -24,7 +24,7 @@ import (
 	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/envoy-gw/internal/pkg/oasparser/config"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
 )
 
 func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {

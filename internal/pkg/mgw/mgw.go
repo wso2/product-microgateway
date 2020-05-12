@@ -23,9 +23,9 @@ import (
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	"github.com/fsnotify/fsnotify"
-	myals "github.com/wso2/envoy-gw/internal/pkg/accesslogs"
-	apiserver "github.com/wso2/envoy-gw/internal/pkg/api"
-	mgwconfig "github.com/wso2/envoy-gw/internal/pkg/confTypes"
+	myals "github.com/wso2/micro-gw/internal/pkg/accesslogs"
+	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
+	mgwconfig "github.com/wso2/micro-gw/internal/pkg/confTypes"
 	"net"
 	"os"
 	"os/signal"
@@ -33,7 +33,7 @@ import (
 
 	cachev2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
-	oasParser "github.com/wso2/envoy-gw/internal/pkg/oasparser"
+	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
 
 	logrus "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -184,7 +184,7 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 	//}()
 }
 
-func update(location string) {
+func updateEnvoy(location string) {
 	var nodeId string
 	if len(cache.GetStatusKeys()) > 0 {
 		nodeId = cache.GetStatusKeys()[0]
@@ -208,9 +208,11 @@ func Run(conf *mgwconfig.Config) {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
 	watcher, _ := fsnotify.NewWatcher()
-	watcher.Add(conf.Apis.Location)
+	err := watcher.Add(conf.Apis.Location)
 
-	fmt.Println(conf.Apis.Location)
+	if err != nil {
+		logrus.Panic("Error reading the api definitions.", err)
+	}
 
 	flag.Parse()
 	if debug {
@@ -229,7 +231,7 @@ func Run(conf *mgwconfig.Config) {
 	RunManagementServer(ctx, srv, port)
 	go apiserver.Start(conf)
 
-	update(conf.Apis.Location)
+	updateEnvoy(conf.Apis.Location)
 OUTER:
 	for {
 		select {
@@ -237,7 +239,7 @@ OUTER:
 			switch c.Op.String() {
 			case "WRITE":
 				logrus.Info("Loading updated swagger definition...")
-				update(conf.Apis.Location)
+				updateEnvoy(conf.Apis.Location)
 			}
 		case s := <-sig:
 			switch s {
