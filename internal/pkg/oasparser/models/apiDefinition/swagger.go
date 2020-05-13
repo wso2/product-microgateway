@@ -14,38 +14,47 @@
  *  limitations under the License.
  *
  */
+
+//swagger vresion 2
 package apiDefinition
 
-import "github.com/go-openapi/spec"
+import (
+	"github.com/go-openapi/spec"
+)
 
 func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
-	swagger.Id = swagger2.ID
-	swagger.SwaggerVersion = swagger2.Swagger
-	swagger.Description = swagger2.Info.Description
-	swagger.Title = swagger2.Info.Title
-	swagger.Version = swagger2.Info.Version
-	swagger.BasePath = swagger2.BasePath
-	swagger.VendorExtensible = swagger2.VendorExtensible.Extensions
-	swagger.Resources = SetResourcesSwagger(swagger2)
+	swagger.id = swagger2.ID
+	swagger.swaggerVersion = swagger2.Swagger
+	if swagger2.Info != nil {
+		swagger.description = swagger2.Info.Description
+		swagger.title = swagger2.Info.Title
+		swagger.version = swagger2.Info.Version
+	}
+	swagger.basePath = swagger2.BasePath
+	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
+	swagger.resources = SetResourcesSwagger(swagger2)
+
+	host,_ := getHostandBasepath(swagger2.Host)
+	swagger.hostUrl = host
 }
 
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
-	for contxt, _ := range swagger2.Paths.Paths {
-		var pathItem spec.PathItemProps = swagger2.Paths.Paths[contxt].PathItemProps
+	for path, _ := range swagger2.Paths.Paths {
+		var pathItem spec.PathItemProps = swagger2.Paths.Paths[path].PathItemProps
 		var resource Resource
 		if pathItem.Get != nil {
-			resource = setOperationSwagger(contxt, "get", pathItem.Get)
+			resource = setOperationSwagger(path, "get", pathItem.Get)
 		} else if pathItem.Post != nil {
-			resource = setOperationSwagger(contxt, "post", pathItem.Post)
+			resource = setOperationSwagger(path, "post", pathItem.Post)
 		} else if pathItem.Put != nil {
-			resource = setOperationSwagger(contxt, "put", pathItem.Put)
+			resource = setOperationSwagger(path, "put", pathItem.Put)
 		} else if pathItem.Delete != nil {
-			resource = setOperationSwagger(contxt, "delete", pathItem.Delete)
+			resource = setOperationSwagger(path, "delete", pathItem.Delete)
 		} else if pathItem.Head != nil {
-			resource = setOperationSwagger(contxt, "head", pathItem.Head)
+			resource = setOperationSwagger(path, "head", pathItem.Head)
 		} else if pathItem.Patch != nil {
-			resource = setOperationSwagger(contxt, "patch", pathItem.Patch)
+			resource = setOperationSwagger(path, "patch", pathItem.Patch)
 		} else {
 			//resource = setOperation(contxt,"get",pathItem.Get)
 		}
@@ -55,16 +64,17 @@ func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	return resources
 }
 
-func setOperationSwagger(context string, rtype string, operation *spec.Operation) Resource {
+func setOperationSwagger(path string, pathtype string, operation *spec.Operation) Resource {
 	var resource Resource
 	resource = Resource{
-		Context:          context,
-		Rtype:            rtype,
-		ID:               operation.ID,
-		Summary:          operation.Summary,
-		Schemes:          operation.Schemes,
-		Tags:             operation.Tags,
-		Security:         operation.Security,
-		VendorExtensible: operation.VendorExtensible.Extensions}
+		path:          path,
+		pathtype:            pathtype,
+		iD:               operation.ID,
+		summary:          operation.Summary,
+		schemes:          operation.Schemes,
+		tags:             operation.Tags,
+		security:         operation.Security,
+		vendorExtensible: operation.VendorExtensible.Extensions}
 	return resource
 }
+
