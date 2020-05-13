@@ -27,8 +27,10 @@ public class InterceptorUtils {
 
     protected static Map<String, String> convertBMapToMap(BMap bMap) {
         Map<String, String> convertedMap = new HashMap<>();
-        for (Object key : bMap.getKeys()) {
-            convertedMap.put(key.toString(), bMap.get(key).toString());
+        if (bMap != null) {
+            for (Object key : bMap.getKeys()) {
+                convertedMap.put(key.toString(), bMap.get(key).toString());
+            }
         }
         return convertedMap;
     }

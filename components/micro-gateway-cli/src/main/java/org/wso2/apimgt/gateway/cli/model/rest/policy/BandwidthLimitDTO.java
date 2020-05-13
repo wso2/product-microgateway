@@ -27,7 +27,7 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO {
 
 
     /**
-     * Amount of data allowed to be transfered
+     * Amount of data allowed to be transfered.
      **/
     @JsonProperty("dataAmount")
     public Long getDataAmount() {

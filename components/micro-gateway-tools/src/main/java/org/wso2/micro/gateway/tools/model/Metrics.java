@@ -1,7 +1,7 @@
 package org.wso2.micro.gateway.tools.model;
 
 /**
- * model Metrics for the Main
+ * model Metrics for the Main.
  */
 public class Metrics {
     private boolean enabled;

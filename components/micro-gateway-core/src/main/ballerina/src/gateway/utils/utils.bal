@@ -187,7 +187,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
     string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3) {
+    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
         // this check if basepath have /t/domain in
         return splittedContext[2];
     } else {
@@ -597,6 +597,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
     http:ResourceAuth? serviceLevelAuthAnn = ();
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
+    setRequestDataToInvocationContext(httpServiceConfig, httpResourceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
         resourceLevelAuthAnn = httpResourceConfig?.auth;
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
@@ -994,5 +995,22 @@ public function setResourceScopesToPrincipal(http:HttpResourceConfig httpResourc
             runtime:Principal principal = {username: user, scopes: resourceScopes};
             invocationContext.principal = principal;
         }
+    }
+}
+
+function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceConfig, http:HttpResourceConfig? httpResourceConfig) {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string serviceName = invocationContext.attributes[http:SERVICE_NAME].toString();
+    string apiContext = <string>httpServiceConfig.basePath;
+    invocationContext.attributes[API_CONTEXT] = apiContext;
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        string requestPath = httpResourceConfig.path;
+        invocationContext.attributes[MATCHING_RESOURCE] =  requestPath;
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        invocationContext.attributes[API_VERSION_PROPERTY] = <string>apiConfig.apiVersion;
+        invocationContext.attributes[API_PUBLISHER] = <string>apiConfig.publisher;
+        invocationContext.attributes[API_NAME] = <string>apiConfig.name;
     }
 }

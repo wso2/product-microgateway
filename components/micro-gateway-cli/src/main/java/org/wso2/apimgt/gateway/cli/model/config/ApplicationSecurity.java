@@ -45,7 +45,7 @@ public class ApplicationSecurity {
     }
 
     /**
-     * Return if application security is optional(true), mandatory(false) or undefined(null)
+     * Return if application security is optional(true), mandatory(false) or undefined(null).
      * @return Boolean isOptional
      */
     public Boolean isOptional() {

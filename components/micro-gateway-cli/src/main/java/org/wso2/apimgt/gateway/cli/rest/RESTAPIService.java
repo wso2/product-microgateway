@@ -32,7 +32,7 @@ import java.util.List;
 public interface RESTAPIService {
 
     /**
-     * Get APIs of given label
+     * Get APIs of given label.
      *
      * @param labelName   label name
      * @param accessToken access token
@@ -41,7 +41,7 @@ public interface RESTAPIService {
     List<ExtendedAPI> getAPIs(String labelName, String accessToken);
 
     /**
-     * Gets the API specified by name and version
+     * Gets the API specified by name and version.
      *
      * @param apiName     Name of the API
      * @param version     Version of the API
@@ -51,7 +51,7 @@ public interface RESTAPIService {
     ExtendedAPI getAPI(String apiName, String version, String accessToken);
 
     /**
-     * Get list of application
+     * Get list of application.
      *
      * @param accessToken access token
      * @return list of application policies
@@ -59,7 +59,7 @@ public interface RESTAPIService {
     List<ApplicationThrottlePolicyDTO> getApplicationPolicies(String accessToken);
 
     /**
-     * Get list of subsription policies
+     * Get list of subsription policies.
      *
      * @param accessToken access token
      * @return list of subscription policies
@@ -67,7 +67,7 @@ public interface RESTAPIService {
     List<SubscriptionThrottlePolicyDTO> getSubscriptionPolicies(String accessToken);
 
     /**
-     * Get list of client certificates
+     * Get list of client certificates.
      *
      * @param accessToken access token
      * @return list of  client certificates

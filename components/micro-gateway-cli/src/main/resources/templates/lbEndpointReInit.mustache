@@ -1,6 +1,6 @@
 http:LoadBalanceClient|error reInitializedEndpoint = new({
                                                    targets: [
-                                                       {{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{endpointUrl}}")}{{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}"){{>secureSocket}} }{{/if}}{{#unless @last}},
+                                                       {{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{{endpointUrl}}}")}{{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{{endpointUrl}}}"){{>secureSocket}} }{{/if}}{{#unless @last}},
                                                        {{/unless}}{{/endpoints}}
 
                                                    ],

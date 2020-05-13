@@ -161,7 +161,7 @@ public final class RouteUtils {
     }
 
     /**
-     * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation
+     * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation.
      *
      * @param prodEpListDTO list of production endpoints
      * @param sandEpListDTO list of sandbox endpoints

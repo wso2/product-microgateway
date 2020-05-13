@@ -29,8 +29,8 @@ public class DockerConfig {
     private String dockerHost;
     private String dockerCertPath;
     private String baseImage;
-    private String enableDebug;
-    private String debugPort;
+    private boolean enableDebug;
+    private int debugPort;
     private String push;
     private String username;
     private String password;
@@ -93,19 +93,19 @@ public class DockerConfig {
         this.baseImage = baseImage;
     }
 
-    public String getEnableDebug() {
+    public boolean getEnableDebug() {
         return enableDebug;
     }
 
-    public void setEnableDebug(String enableDebug) {
+    public void setEnableDebug(boolean enableDebug) {
         this.enableDebug = enableDebug;
     }
 
-    public String getDebugPort() {
+    public int getDebugPort() {
         return debugPort;
     }
 
-    public void setDebugPort(String debugPort) {
+    public void setDebugPort(int debugPort) {
         this.debugPort = debugPort;
     }
 

@@ -36,7 +36,7 @@ public class APIInfoDTO {
 
 
     /**
-     * UUID of the api registry artifact\n
+     * UUID of the api registry artifact.
      **/
     @JsonProperty("id")
     public String getId() {
@@ -48,7 +48,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * Name of the APIDetailedDTO
+     * Name of the APIDetailedDTO.
      **/
     @Hash
     @JsonProperty("name")
@@ -61,7 +61,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * A brief description about the APIDetailedDTO
+     * A brief description about the APIDetailedDTO.
      **/
     @JsonProperty("description")
     public String getDescription() {
@@ -73,7 +73,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * A string that represents the context of the user's request
+     * A string that represents the context of the user's request.
      **/
     @Hash
     @JsonProperty("context")
@@ -86,7 +86,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * The version of the APIDetailedDTO
+     * The version of the APIDetailedDTO.
      **/
     @Hash
     @JsonProperty("version")
@@ -99,7 +99,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * If the provider value is not given, the user invoking the APIDetailedDTO will be used as the provider.\n
+     * If the provider value is not given, the user invoking the APIDetailedDTO will be used as the provider.
      **/
     @JsonProperty("provider")
     public String getProvider() {
@@ -111,7 +111,7 @@ public class APIInfoDTO {
     }
 
     /**
-     * This describes in which status of the lifecycle the APIDetailedDTO is
+     * This describes in which status of the lifecycle the APIDetailedDTO is.
      **/
     @JsonProperty("status")
     public String getStatus() {

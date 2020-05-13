@@ -51,6 +51,12 @@ public class TestInterceptor implements Interceptor {
         appendResponseString(request.getRequestPath());
         appendResponseString(request.getRequestHttpMethod());
         appendResponseString(request.getRequestHttpVersion());
+        if (request.getPathParams().size() > 0) {
+            appendResponseString(request.getPathParams().toString());
+        }
+        if (request.getMatrixParams("/petstore/v1/pet").size() > 0) {
+            appendResponseString(request.getMatrixParams("/petstore/v1/pet").toString());
+        }
         appendResponseString(request.getQueryParams().toString());
         appendResponseString(request.getQueryParamValue("test"));
         if ("application/json".equals(contentType)) {
