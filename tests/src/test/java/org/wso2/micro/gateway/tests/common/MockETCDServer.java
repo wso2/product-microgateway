@@ -90,7 +90,6 @@ public class MockETCDServer extends Thread {
             log.error("Error occurred while setting up mock server", e);
         } catch (Exception e) {
             log.error("Error occurred while setting up mock server", e);
-
         }
     }
 
