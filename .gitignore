@@ -34,3 +34,4 @@ target
 *dependency-reduced-pom.xml
 *.lock
 *.factorypath
+vendor

@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.14.1
+    volumes:
+      - ./envoy.yaml:/etc/envoy.yaml
+#    expose:
+#      - "80"
+#      - "8001"
+    ports:
+      - "10000:10000"
+      - "9000:9000"
+  # zipkin:
+  #   image: openzipkin/zipkin
+  #   expose:
+  #   - "9411"
+  #   ports:
+  #   - "9411:9411"

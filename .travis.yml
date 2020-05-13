@@ -1,10 +1,12 @@
-language: java
+language: go
+go:
+  - "1.13"
 dist: trusty
 # Skip install phase to avoid unwanted mvn build
 install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
 # Only errors and Maven version information will be printed in the CI logs.
-script: mvn clean install -B -V | grep -e "\[ERROR\]" -e Maven -e "// Start Running" -e "Building"; test ${PIPESTATUS[0]} -eq 0;
+script: go build
 cache:
   directories:
   - $HOME/.m2
