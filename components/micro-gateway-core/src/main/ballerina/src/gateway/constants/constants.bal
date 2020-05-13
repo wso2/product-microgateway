@@ -443,3 +443,5 @@ public const string API_PUBLISHER = "api_publisher";
 public const string API_NAME = "api_name";
 public const string MATCHING_RESOURCE = "matching_resource";
 
+
+public const int DEFAULT_AUTH_FILTER_POSITION = 2;

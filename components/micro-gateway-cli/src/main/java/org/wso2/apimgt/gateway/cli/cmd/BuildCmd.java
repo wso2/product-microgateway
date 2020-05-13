@@ -38,6 +38,7 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.config.DockerConfig;
+import org.wso2.apimgt.gateway.cli.model.config.Filter;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.ToolkitLibExtractionUtils;
 import org.wso2.callhome.CallHomeExecutor;
@@ -56,6 +57,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -269,6 +272,7 @@ public class BuildCmd implements LauncherCmd {
             }
             String deploymentConfigPath = CmdUtils.getDeploymentConfigLocation(projectName);
             ContainerConfig containerConfig = TOMLConfigParser.parse(deploymentConfigPath, ContainerConfig.class);
+            sortFilterBasedOnPosition(containerConfig);
             createDockerImageFromCLI(projectName, containerConfig);
             CmdUtils.setContainerConfig(containerConfig);
 
@@ -374,5 +378,12 @@ public class BuildCmd implements LauncherCmd {
         });
         callHomeThread.setName("callHomeThread");
         callHomeThread.start();
+    }
+
+    private void sortFilterBasedOnPosition(ContainerConfig containerConfig) {
+        if (containerConfig.getFilters() != null) {
+            Comparator<Filter> compareByPosition = Comparator.comparing(Filter::getPosition);
+            Collections.sort(containerConfig.getFilters(), compareByPosition);
+        }
     }
 }
