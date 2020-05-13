@@ -36,7 +36,6 @@ table<IPRangeDTO> IpBlockConditionsMap = table {
 service messageServ = service {
     resource function onMessage(jms:Message message) {
         if (message is jms:MapMessage) {
-            io:println(message.getMapNames());
             string? | error keyTemplateValue = message.getString(KEY_TEMPLATE_VALUE);
             string? | error throttleKey = message.getString(THROTTLE_KEY);
             int remainingQuota = 0;

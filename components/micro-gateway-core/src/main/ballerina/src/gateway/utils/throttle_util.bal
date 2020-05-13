@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/time;
 import ballerina/stringutils;
+import ballerina/runtime;
 
 map<any> throttleDataMap = {};
 stream<RequestStreamDTO> requestStream = new;
@@ -180,20 +180,16 @@ public function getAPITier(string serviceName, string tierFromKeyValidation) ret
     if(apiTier == "") {
         apiTier = tierFromKeyValidation;
     }
-    if(apiTier.length() == 0) {
-        return UNLIMITED_TIER;
-    }
     return apiTier;
 }
 
-public function getResoureThrottleKey(http:FilterContext context, string? apiVersion) returns string {
-    string resourceLevelThrottleKey = context.getResourceName();
+public function getResourceThrottleKey(runtime:InvocationContext invocationContext, string apiContext, string? apiVersion) returns string {
+    string resourceLevelThrottleKey = apiContext;
     if (apiVersion is string) {
-        resourceLevelThrottleKey += ":" + apiVersion;
+        resourceLevelThrottleKey += "/" + apiVersion;
     }
-    if (enabledGlobalTMEventPublishing) {
-        resourceLevelThrottleKey += "_default";
-    }
+    resourceLevelThrottleKey += invocationContext.attributes[MATCHING_RESOURCE].toString() + ":" +
+        invocationContext.attributes[REQUEST_METHOD].toString();
     return resourceLevelThrottleKey;
 }
 

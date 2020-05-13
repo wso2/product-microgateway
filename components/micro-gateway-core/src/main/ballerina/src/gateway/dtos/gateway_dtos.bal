@@ -18,7 +18,7 @@
 public type APIKeyValidationDto record {
     string apiName?;
     string apiPublisher = UNKNOWN_VALUE;
-    string apiTier = UNLIMITED_TIER;
+    string apiTier = "";
     string applicationId = UNKNOWN_VALUE;
     string applicationName = UNKNOWN_VALUE;
     string applicationTier = UNLIMITED_TIER;
@@ -57,7 +57,7 @@ public type AuthenticationContext record {
     string username = "";
     string applicationTier = UNLIMITED_TIER;
     string tier = DEFAULT_SUBSCRIPTION_TIER;
-    string apiTier = UNLIMITED_TIER;
+    string apiTier = "";
     boolean isContentAwareTierPresent = false;
     string apiKey = "";
     string keyType = PRODUCTION_KEY_TYPE;
