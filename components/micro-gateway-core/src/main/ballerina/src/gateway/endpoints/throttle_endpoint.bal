@@ -20,6 +20,7 @@ import ballerina/log;
 string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL, DEFAULT_THROTTLE_ENDPOINT_URL);
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
 DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER);
+string encodedBasicAuthHeader = throttleEndpointbase64Header.toBytes().toBase64();
 
 http:Client throttleEndpoint = new (throttleEndpointUrl,
 {
@@ -62,7 +63,6 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     };
 
     http:Request clientRequest = new;
-    string encodedBasicAuthHeader = throttleEndpointbase64Header.toBytes().toBase64();
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
 
@@ -71,7 +71,12 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     var response = throttleEndpoint->post("/throttleEventReceiver", clientRequest);
 
     if (response is http:Response) {
-        printDebug(KEY_THROTTLE_UTIL, "\nStatus Code: " + response.statusCode.toString());
+        int responseCode = response.statusCode;
+        printDebug(KEY_THROTTLE_UTIL, "\nStatus Code: " + responseCode.toString());
+        if(responseCode != 200) {
+            printError(KEY_THROTTLE_UTIL, "Error while publishing to traffic manager. Returned status code : " +
+            responseCode.toString());
+        }
     } else {
         log:printError(response.reason(), err = response);
     }

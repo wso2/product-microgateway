@@ -72,6 +72,7 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
             }
             if (application.hasKey("owner")) {
                 authenticationContext.subscriber = application.owner.toString();
+                setSubsciberTenantDomain(authenticationContext);
             }
         }
     }
@@ -147,5 +148,17 @@ public function getDecodedJWTPayload(string jwtToken) returns @tainted (jwt:JwtP
         }
         [jwt:JwtHeader, jwt:JwtPayload][jwtHeader, payload] = <[jwt:JwtHeader,jwt:JwtPayload]> decodedJWT;
         return payload;
+    }
+}
+
+function setSubsciberTenantDomain(AuthenticationContext authContext) {
+    if(authContext.subscriberTenantDomain == UNKNOWN_VALUE) {
+        string owner = authContext.subscriber;
+        if(contains(owner, TENANT_DOMAIN_SEPERATOR)) {
+            string[] splittedName = split(owner, TENANT_DOMAIN_SEPERATOR);
+            authContext.subscriberTenantDomain = splittedName[splittedName.length() -1];
+            return;
+        }
+        authContext.subscriberTenantDomain = SUPER_TENANT_DOMAIN_NAME;
     }
 }

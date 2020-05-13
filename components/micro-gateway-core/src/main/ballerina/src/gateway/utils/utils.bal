@@ -187,7 +187,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
     string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3) {
+    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
         // this check if basepath have /t/domain in
         return splittedContext[2];
     } else {

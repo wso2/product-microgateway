@@ -49,6 +49,18 @@ public function isSubLevelThrottled(string subscriptionKey) returns boolean {
     return jIsSubscriptionLevelThrottled(key);
 }
 
+public function ipToBigInteger(string ipAddress) returns string {
+    handle ip = java:fromString(ipAddress);
+    return jIpToBigInteger(ip).toString();
+}
+
+public function isIpWithinRange(string ip, string startingIp, string endingIp) returns boolean {
+    handle ipHandle = java:fromString(ip);
+    handle startingIpHandle = java:fromString(startingIp);
+    handle endingIpHandle = java:fromString(endingIp);
+    return jIsIpWithinRange(ipHandle, startingIpHandle, endingIpHandle);
+}
+
 public function jIsResourceThrottled(handle resourceKey) returns boolean = @java:Method  {
     name: "isResourceThrottled",
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
@@ -79,4 +91,14 @@ public function jInitThrottleDataPublisher(int processThreadPoolCoreSize, int pr
 public function jPublishNonThrottledEvent(RequestStreamDTO throttleEvent) = @java:Method {
     name: "processNonThrottledEvent",
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
+} external;
+
+public function jIpToBigInteger(handle ip) returns handle = @java:Method {
+    name: "ipToBigInteger",
+    class: "org.wso2.micro.gateway.core.throttle.global.ThrottleUtils"
+} external;
+
+public function jIsIpWithinRange(handle ip, handle startingIp, handle endingIp) returns boolean = @java:Method  {
+    name: "isIpWithinRange",
+    class: "org.wso2.micro.gateway.core.throttle.global.ThrottleUtils"
 } external;
