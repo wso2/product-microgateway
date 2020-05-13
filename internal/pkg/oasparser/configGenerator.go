@@ -19,25 +19,59 @@ package oasparser
 //package envoy_config_generator
 
 import (
+	"fmt"
+	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
+	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
+	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	e "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	"log"
 	"strings"
 )
 
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	mgwSwagger := swgger.GenerateMgwSwagger(location)
+	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
+	if err != nil {
+		log.Panic("Error Generating mgwSwagger struct", err)
+	}
+
 	//fmt.Println(mgwSwagger)
+	var (
+		routesP []*v2route.Route
+		clustersP []*v2.Cluster
+		endpointsP []*core.Address
+		//version string
+	)
 
-	routesP, clustersP, endpointsP, _, _, _ := e.CreateRoutesWithClusters(mgwSwagger)
+	//flagIsDuplicated := false
+	for _, swagger := range mgwSwaggers {
+		/*if i == 0 {
+			version = swagger.GetVersion()
+		} else {
+			if version == swagger.GetVersion() {
+				fmt.Print("version ",version, " is duplicated across multiple openAPI definitions")
+				flagIsDuplicated = true
+				break
+			}
+		} */
+		routes, clusters, endpoints, _, _, _ := e.CreateRoutesWithClusters(swagger)
+		routesP = append(routesP,routes...)
+		clustersP = append(clustersP,clusters...)
+		endpointsP = append(endpointsP,endpoints...)
+	}
 
-	vHost_NameP := "serviceProd_" + strings.Replace(mgwSwagger.Title, " ", "", -1) + mgwSwagger.Version
+	fmt.Println("clusters are ",clustersP)
+	fmt.Println("routes are ",routesP)
+
+
+	vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	vHostP, _ := e.CreateVirtualHost(vHost_NameP, routesP)
 
 	listenerNameP := "listenerProd_1"
-	routeConfigNameP := "routeProd_" + strings.Replace(mgwSwagger.Title, " ", "", -1) + mgwSwagger.Version
+	routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	listnerProd := e.CreateListener(listenerNameP, routeConfigNameP, vHostP)
 
@@ -48,26 +82,50 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	envoyNodeProd.SetEndpoints(endpointsP)
 	//fmt.Println(endpointsP)
 
+	/*if flagIsDuplicated {
+		//should return error
+		return envoyNodeProd.GetSources()
+	} */
+
+
+	fmt.Println(len(routesP), "routes are generated successfully")
+	fmt.Println(len(clustersP), "clusters are generated successfully")
+	fmt.Println(len(endpointsP), "endpoints are generated successfully")
 	return envoyNodeProd.GetSources()
 }
 
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	mgwSwagger := swgger.GenerateMgwSwagger(location)
+	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
+	if err != nil {
+		log.Panic("Error Generating mgwSwagger struct", err)
+	}
 	//fmt.Println(mgwSwagger)
+	var (
+		routesS []*v2route.Route
+		clustersS []*v2.Cluster
+		endpointsS []*core.Address
+	)
 
-	_, _, _, routesS, clustersS, endpointsS := e.CreateRoutesWithClusters(mgwSwagger)
+	for _, swagger := range mgwSwaggers {
+		_, _, _, routes, clusters, endpoints := e.CreateRoutesWithClusters(swagger)
+		routesS = append(routes)
+		clustersS = append(clusters)
+		endpointsS = append(endpoints)
+	}
+
+
 	if routesS == nil {
 		return nil, nil, nil, nil
 	}
 
-	vHost_NameS := "serviceSand_" + strings.Replace(mgwSwagger.Title, " ", "", -1) + mgwSwagger.Version
+	vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	vHostS, _ := e.CreateVirtualHost(vHost_NameS, routesS)
 
 	//fmt.Println(err)
 
 	listenerNameS := "listenerSand_1"
-	routeConfigNameS := "routeSand_" + strings.Replace(mgwSwagger.Title, " ", "", -1) + mgwSwagger.Version
+	routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	listnerSand := e.CreateListener(listenerNameS, routeConfigNameS, vHostS)
 

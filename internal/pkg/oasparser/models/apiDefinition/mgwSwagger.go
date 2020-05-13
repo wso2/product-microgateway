@@ -18,7 +18,7 @@ package apiDefinition
 
 import (
 	"fmt"
-	c "github.com/wso2/envoy-gw/internal/pkg/oasparser/constants"
+	c "github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
 )
 
 type MgwSwagger struct {
