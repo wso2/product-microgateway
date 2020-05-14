@@ -10,9 +10,9 @@ services:
     ports:
       - "8080:10000"
       - "9901:9901"
-  zipkin:
-    image: openzipkin/zipkin
-    expose:
-    - "9411"
-    ports:
-    - "9411:9411"
+#  zipkin:
+#    image: openzipkin/zipkin
+#    expose:
+#    - "9411"
+#    ports:
+#    - "9411:9411"

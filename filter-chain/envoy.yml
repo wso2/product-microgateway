@@ -45,7 +45,7 @@ static_resources:
             config: {}
   clusters:
   - name: clusterProd_SwaggerPetstoreNew1.0.0
-    connect_timeout: 1s
+    connect_timeout: 0.25s
     type: LOGICAL_DNS
     # Comment out the following line to test on v6 networks
     dns_lookup_family: V4_ONLY
@@ -74,7 +74,7 @@ static_resources:
 
     # This timeout controls the initial TCP handshake timeout - not the timeout for the
     # entire request.
-    connect_timeout: 1s
+    connect_timeout: 0.25s
 #  - name: zipkin
 #    connect_timeout: 1s
 #    type: strict_dns

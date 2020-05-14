@@ -273,7 +273,6 @@ func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz
 
 	caCert,_ := ReadFile("./filter-chain/artifacts/security/server.pem")
 
-	var keys []string
 	auth := false
 	for k := range req.Attributes.Request.Http.Headers {
 		if k == "authorization" {
@@ -281,8 +280,8 @@ func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz
 			//header := req.Attributes.Request.Http.Headers["authorization"]
 			auth, _, _ = HandleJWT(false, caCert,req.Attributes.Request.Http.Headers )
 			fmt.Println("JWT header detected" + k)
+			break;
 		}
-		keys = append(keys, k)
 	}
 
 	resp := &ext_authz.CheckResponse{}
