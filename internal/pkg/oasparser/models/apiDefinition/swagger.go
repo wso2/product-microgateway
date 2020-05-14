@@ -34,8 +34,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
 	swagger.resources = SetResourcesSwagger(swagger2)
 
-	host,_ := getHostandBasepath(swagger2.Host)
+	host,_ ,port:= getHostandBasepath(swagger2.Host)
 	swagger.hostUrl = host
+	swagger.port = port
 }
 
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {

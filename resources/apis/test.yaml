@@ -1,39 +1,41 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.frenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swaggr.io) or on [irc.frode.net, #swagger](http://swagger.io/irc/).      For this sample, you cn us te api key `spcil-key` to tet the authorization     filters."
   version: "1.0.0"
   title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+
 host: "petstore.swagger.io"
-basePath: "/v2"
+basePath: "/api/v3"
+
 x-wso2-production-endpoints:
   urls:
-    - 'petstore.swagger.io'
+    - 'https://petstore.swagger.io:8080/api/v3'
+  type: https
+x-wso2-sandbox-endpoints:
+  urls:
+    - 'http://example.com:8000/api/v3'
   type: http
-tags:
-- name: "pet"
-  description: "Everything about your Pets"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-- name: "stre"
-  description: "Acces to Petstore orders"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out moe about our store"
-    url: "http://swagger.io"
+
+servers:
+  - url: https://petstore.swagger.io:8000/api/v3
+
+
+Host: petstore.swagger.io
+basepath: /api/v3
+port: 8000
+
+
 schemes:
 - "https"
 - "http"
 paths:
-  /pet:
-    post:
+  /WSO2Inc:
+    get:
+      x-wso2-production-endpoints:
+        urls:
+          - 'https://www.facebook.com:80'
+        type: https
       tags:
       - "pet"
       summary: "Add a new pet to the store"

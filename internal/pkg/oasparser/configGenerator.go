@@ -62,10 +62,6 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		endpointsP = append(endpointsP,endpoints...)
 	}
 
-	fmt.Println("clusters are ",clustersP)
-	fmt.Println("routes are ",routesP)
-
-
 	vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	vHostP, _ := e.CreateVirtualHost(vHost_NameP, routesP)

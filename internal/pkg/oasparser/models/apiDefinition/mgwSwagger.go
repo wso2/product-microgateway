@@ -29,6 +29,7 @@ type MgwSwagger struct {
 	version          string `json:"version,omitempty"`
 	basePath         string `json:"basePath,omitempty"`
 	hostUrl         string
+	port            uint32
 	vendorExtensible           map[string]interface{}
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
@@ -54,6 +55,7 @@ type Endpoint struct {
 	Host      string
 	Basepath  string
 	UrlType   string
+	Port      uint32
 }
 
 func (swagger *MgwSwagger) GetSwaggerVersion() string {
@@ -144,18 +146,19 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 					ainterface := val.([]interface{})
 					//urls := make([]string, len(ainterface))
 					for _, v := range ainterface {
-						host,basepath := getHostandBasepath(v.(string))
+						host,basepath,port:= getHostandBasepath(v.(string))
 						endpoint := Endpoint{
 							Host: host,
 							Basepath: basepath,
 							UrlType: urlType,
+							Port: port,
 						}
 						Endpoints = append(Endpoints,endpoint)
 					}
 				}
 			}
 		} else {
-			fmt.Println("X-wso2 production endpoint is not having a correct structure")
+			fmt.Println("X-wso2 production endpoint is not having a correct map structure")
 			return nil
 		}
 

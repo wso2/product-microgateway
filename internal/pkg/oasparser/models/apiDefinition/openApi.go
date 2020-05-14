@@ -18,8 +18,10 @@ package apiDefinition
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -34,9 +36,10 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.resources = SetResourcesOpenApi3(swagger3)
 
 	if IsServerUrlIsAvailable(swagger3) {
-		host,basepath := getHostandBasepath(swagger3.Servers[0].URL)
+		host,basepath,port := getHostandBasepath(swagger3.Servers[0].URL)
 		swagger.basePath = basepath
 		swagger.hostUrl = host
+		swagger.port = port
 	}
 }
 
@@ -82,17 +85,26 @@ func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 	return resources
 }
 
-func getHostandBasepath(rawUrl string) (string, string) {
+func getHostandBasepath(rawUrl string) (string, string, uint32) {
 	basepath := ""
 	host := ""
+	port := config.API_DEFAULT_PORT
 	u, err := url.Parse(rawUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if strings.Contains(rawUrl, "://") {
-		host = u.Host
+		host = u.Hostname()
 		basepath = u.Path
+		if u.Port() != "" {
+			u32, err := strconv.ParseUint(u.Port(),10,32)
+			if err != nil {
+				log.Println("Error passing port value to mgwSwagger",err)
+			}
+			port = uint32(u32)
+		}
+
 	} else {
 		if strings.Contains(rawUrl, "/") {
 			i := strings.Index(rawUrl, "/")
@@ -102,7 +114,7 @@ func getHostandBasepath(rawUrl string) (string, string) {
 			host = 	rawUrl
 		}
 	}
-	return host,basepath
+	return host,basepath, port
 }
 
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
