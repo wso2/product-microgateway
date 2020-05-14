@@ -28,14 +28,12 @@ type MgwSwagger struct {
 	title            string `json:"title,omitempty"`
 	version          string `json:"version,omitempty"`
 	basePath         string `json:"basePath,omitempty"`
-	hostUrl         string
-	port            uint32
+	hostUrl          string
+	port             uint32
 	vendorExtensible           map[string]interface{}
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
 	resources        []Resource
-	//Consumes            []string                    `json:"consumes,omitempty"`
-	//Produces            []string                    `json:"produces,omitempty"`
 	//Schemes             []string                    `json:"schemes,omitempty"`
 	//info                *spec.Info                       `json:"info,omitempty"`
 	//Host                string                      `json:"host,omitempty"`

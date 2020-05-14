@@ -15,7 +15,7 @@
  *
  */
 
-//swagger vresion 2
+//swagger version 2
 package apiDefinition
 
 import (

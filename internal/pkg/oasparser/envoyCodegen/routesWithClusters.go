@@ -235,20 +235,33 @@ func createRoute(HostUrl string, basepath string, resourcePath string, clusterNa
 			Metadata: nil,
 		}
 	}
-
 	fmt.Println(HostUrl, routepath)
 	return route
 }
+
+
 func GenerateRegex(fullpath string) (string, bool) {
 	isHavingPathparameters := true
 	regex := ".*"
+	newPath := ""
+
 	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
-		regex = "/api/v3/pet/[0-9]+"
+		res1 := strings.Split(fullpath, "/")
+		fmt.Println(res1)
+
+		for i, p := range res1 {
+			if strings.Contains(p, "{") || strings.Contains(p, "}"){
+				res1[i] = regex
+			}
+		}
+		newPath = strings.Join(res1[:], "/")
 
 	} else {
+		newPath = fullpath
 		isHavingPathparameters = false
-		regex = fullpath
 	}
-	return regex, isHavingPathparameters
+
+
+	return newPath, isHavingPathparameters
 }
 

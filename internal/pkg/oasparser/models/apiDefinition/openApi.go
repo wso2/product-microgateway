@@ -14,6 +14,8 @@
  *  limitations under the License.
  *
  */
+
+//OpenApi version 3
 package apiDefinition
 
 import (

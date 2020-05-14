@@ -33,14 +33,5 @@ func main() {
 
 
 	microgateway.StartMicroGateway(os.Args)
-	/*fullpath := "/pet/v2/{id}/x/{co}"
-	regex := ".*"
-	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
-		newstr :=
-
-	} else {
-
-	} */
-
 
 }

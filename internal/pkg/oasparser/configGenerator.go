@@ -37,25 +37,14 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		log.Panic("Error Generating mgwSwagger struct", err)
 	}
 
-	//fmt.Println(mgwSwagger)
 	var (
 		routesP []*v2route.Route
 		clustersP []*v2.Cluster
 		endpointsP []*core.Address
-		//version string
 	)
 
-	//flagIsDuplicated := false
 	for _, swagger := range mgwSwaggers {
-		/*if i == 0 {
-			version = swagger.GetVersion()
-		} else {
-			if version == swagger.GetVersion() {
-				fmt.Print("version ",version, " is duplicated across multiple openAPI definitions")
-				flagIsDuplicated = true
-				break
-			}
-		} */
+
 		routes, clusters, endpoints, _, _, _ := e.CreateRoutesWithClusters(swagger)
 		routesP = append(routesP,routes...)
 		clustersP = append(clustersP,clusters...)
@@ -76,12 +65,6 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	envoyNodeProd.SetClusters(clustersP)
 	envoyNodeProd.SetRoutes(routesP)
 	envoyNodeProd.SetEndpoints(endpointsP)
-	//fmt.Println(endpointsP)
-
-	/*if flagIsDuplicated {
-		//should return error
-		return envoyNodeProd.GetSources()
-	} */
 
 
 	fmt.Println(len(routesP), "routes are generated successfully")

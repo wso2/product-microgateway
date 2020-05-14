@@ -34,7 +34,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 	files, err := ioutil.ReadDir(location)
 	if err != nil {
-		log.Panic("Error reading dorectory. ", err)
+		log.Panic("Error reading directory. ", err)
 	}
 
 	for _, f := range files {
@@ -92,9 +92,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 		}
 
 		mgwSwagger.SetEndpoints()
-
 		mgwSwaggers = append(mgwSwaggers, mgwSwagger)
-
 
 	}
 	return mgwSwaggers, err
