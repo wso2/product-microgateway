@@ -17,8 +17,8 @@
 package apiDefinition
 
 import (
-	"fmt"
 	c "github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
+	"log"
 )
 
 type MgwSwagger struct {
@@ -27,9 +27,6 @@ type MgwSwagger struct {
 	description      string `json:"description,omitempty"`
 	title            string `json:"title,omitempty"`
 	version          string `json:"version,omitempty"`
-	basePath         string `json:"basePath,omitempty"`
-	hostUrl          string
-	port             uint32
 	vendorExtensible           map[string]interface{}
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
@@ -86,24 +83,15 @@ func (swagger *MgwSwagger) GetResources() []Resource {
 
 
 func (swagger *MgwSwagger) SetEndpoints() {
-	swagger.SetPrdoductionEndpoint()
-	swagger.SetSandboxEndpoint()
+	swagger.SetXWso2PrdoductionEndpoint()
+	swagger.SetXWso2SandboxEndpoint()
 }
 
-func (swagger *MgwSwagger) SetPrdoductionEndpoint() {
+func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
 	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,c.PRODUCTION_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.productionUrls = xwso2EndpointsApi
-	} else if swagger.hostUrl != "" {
-		endpoint := Endpoint{
-			Host: swagger.hostUrl,
-			Basepath: swagger.basePath,
-		}
-		swagger.productionUrls = append(swagger.productionUrls,endpoint)
-	} else {
-
 	}
-
 
 	//resources
 	for i,resource := range swagger.resources {
@@ -115,7 +103,7 @@ func (swagger *MgwSwagger) SetPrdoductionEndpoint() {
 
 }
 
-func (swagger *MgwSwagger) SetSandboxEndpoint() {
+func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
 	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,c.SANDBOX_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.sandboxUrls = xwso2EndpointsApi
@@ -144,20 +132,14 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 					ainterface := val.([]interface{})
 					//urls := make([]string, len(ainterface))
 					for _, v := range ainterface {
-						host,basepath,port:= getHostandBasepath(v.(string))
-						endpoint := Endpoint{
-							Host: host,
-							Basepath: basepath,
-							UrlType: urlType,
-							Port: port,
-						}
+						endpoint:= getHostandBasepathandPort(v.(string))
+						endpoint.UrlType = urlType
 						Endpoints = append(Endpoints,endpoint)
 					}
 				}
 			}
 		} else {
-			fmt.Println("X-wso2 production endpoint is not having a correct map structure")
-			return nil
+			log.Fatal("X-wso2 production endpoint is not having a correct map structure")
 		}
 
 	} else {

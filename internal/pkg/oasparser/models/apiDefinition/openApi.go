@@ -38,10 +38,11 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.resources = SetResourcesOpenApi3(swagger3)
 
 	if IsServerUrlIsAvailable(swagger3) {
-		host,basepath,port := getHostandBasepath(swagger3.Servers[0].URL)
-		swagger.basePath = basepath
-		swagger.hostUrl = host
-		swagger.port = port
+		for i, _ := range swagger3.Servers {
+			endpoint := getHostandBasepathandPort(swagger3.Servers[i].URL)
+			swagger.productionUrls = append(swagger.productionUrls,endpoint)
+		}
+
 	}
 }
 
@@ -87,36 +88,30 @@ func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 	return resources
 }
 
-func getHostandBasepath(rawUrl string) (string, string, uint32) {
+func getHostandBasepathandPort(rawUrl string) (Endpoint) {
 	basepath := ""
 	host := ""
 	port := config.API_DEFAULT_PORT
+
+	if !strings.Contains(rawUrl, "://") {
+		rawUrl = "http://" + rawUrl
+	}
+
 	u, err := url.Parse(rawUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if strings.Contains(rawUrl, "://") {
-		host = u.Hostname()
-		basepath = u.Path
-		if u.Port() != "" {
-			u32, err := strconv.ParseUint(u.Port(),10,32)
-			if err != nil {
-				log.Println("Error passing port value to mgwSwagger",err)
-			}
-			port = uint32(u32)
+	host = u.Hostname()
+	basepath = u.Path
+	if u.Port() != "" {
+		u32, err := strconv.ParseUint(u.Port(),10,32)
+		if err != nil {
+			log.Println("Error passing port value to mgwSwagger",err)
 		}
-
-	} else {
-		if strings.Contains(rawUrl, "/") {
-			i := strings.Index(rawUrl, "/")
-			host = 	rawUrl[:i]
-			basepath = rawUrl[i:]
-		} else {
-			host = 	rawUrl
-		}
+		port = uint32(u32)
 	}
-	return host,basepath, port
+	return Endpoint{Host: host, Basepath: basepath, Port: port}
 }
 
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {

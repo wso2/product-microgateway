@@ -34,7 +34,7 @@ import (
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Panic("Error Generating mgwSwagger struct", err)
+		log.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 
 	var (
@@ -76,7 +76,7 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Panic("Error Generating mgwSwagger struct", err)
+		log.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 	//fmt.Println(mgwSwagger)
 	var (
@@ -92,7 +92,6 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 		endpointsS = append(endpoints)
 	}
 
-
 	if routesS == nil {
 		return nil, nil, nil, nil
 	}
@@ -100,8 +99,6 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
 
 	vHostS, _ := e.CreateVirtualHost(vHost_NameS, routesS)
-
-	//fmt.Println(err)
 
 	listenerNameS := "listenerSand_1"
 	routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()

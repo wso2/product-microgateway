@@ -30,19 +30,20 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 		swagger.title = swagger2.Info.Title
 		swagger.version = swagger2.Info.Version
 	}
-	swagger.basePath = swagger2.BasePath
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
 	swagger.resources = SetResourcesSwagger(swagger2)
 
-	host,_ ,port:= getHostandBasepath(swagger2.Host)
-	swagger.hostUrl = host
-	swagger.port = port
+	if swagger2.Host != "" {
+		endpoint := getHostandBasepathandPort(swagger2.Host + swagger2.BasePath)
+		swagger.productionUrls = append(swagger.productionUrls,endpoint)
+	}
+
 }
 
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
 	for path, _ := range swagger2.Paths.Paths {
-		var pathItem spec.PathItemProps = swagger2.Paths.Paths[path].PathItemProps
+		var pathItem = swagger2.Paths.Paths[path].PathItemProps
 		var resource Resource
 		if pathItem.Get != nil {
 			resource = setOperationSwagger(path, "get", pathItem.Get)

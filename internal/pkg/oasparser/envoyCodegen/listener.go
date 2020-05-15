@@ -104,7 +104,6 @@ func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.Virt
 		Domains: vHost_Domains,
 		Routes:  routes,
 	}
-
 	return virtual_host, nil
 }
 

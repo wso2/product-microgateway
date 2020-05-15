@@ -24,11 +24,11 @@ import (
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	s "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"log"
 	"strings"
-	"time"
 )
 
 func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.Route, []*v2.Cluster, []*core.Address, []*v2route.Route, []*v2.Cluster, []*core.Address) {
@@ -146,7 +146,7 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 	h := &address
 	cluster := v2.Cluster{
 		Name:                 clusterName,
-		ConnectTimeout:       ptypes.DurationProto(8 * time.Second),
+		ConnectTimeout:       ptypes.DurationProto(config.CLUSTER_CONNECT_TIMEOUT),
 		ClusterDiscoveryType: &v2.Cluster_Type{Type: v2.Cluster_STRICT_DNS},
 		DnsLookupFamily:      v2.Cluster_V4_ONLY,
 		LbPolicy:             v2.Cluster_ROUND_ROBIN,
@@ -167,6 +167,7 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 			},
 		},
 	}
+	fmt.Println(h.GetAddress())
 	return cluster
 }
 
@@ -174,7 +175,7 @@ func createRoute(HostUrl string, basepath string, resourcePath string, clusterNa
 	var fullPath = basepath + resourcePath
 	var route v2route.Route
 
-	routepath, isPathparameter := GenerateRegex(fullPath)
+	routepath, isHavingPathparameter := GenerateRegex(fullPath)
 
 	RouteAction := &v2route.Route_Route{
 		Route: &v2route.RouteAction{
@@ -187,7 +188,7 @@ func createRoute(HostUrl string, basepath string, resourcePath string, clusterNa
 		},
 	}
 
-	if isPathparameter {
+	if isHavingPathparameter {
 		route = v2route.Route{
 			Match: &v2route.RouteMatch{
 				PathSpecifier: &v2route.RouteMatch_SafeRegex{
@@ -260,8 +261,6 @@ func GenerateRegex(fullpath string) (string, bool) {
 		newPath = fullpath
 		isHavingPathparameters = false
 	}
-
-
 	return newPath, isHavingPathparameters
 }
 

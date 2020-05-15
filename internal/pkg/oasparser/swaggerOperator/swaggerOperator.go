@@ -21,8 +21,6 @@ import (
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
 	"log"
-
-	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	"io/ioutil"
@@ -34,7 +32,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 	files, err := ioutil.ReadDir(location)
 	if err != nil {
-		log.Panic("Error reading directory. ", err)
+		log.Fatal("Error reading",location,"directory:", err)
 	}
 
 	for _, f := range files {
@@ -43,8 +41,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 		// if we os.Open returns an error then handle it
 		if err != nil {
-			//log.Panic("Error opening a api yaml file ", err)
-			log.Println("Error opening a api yaml file ", err)
+			log.Fatal("Error opening a api yaml file:", err)
 		}
 		//fmt.Println("Successfully Opened open api file",f.Name())
 		log.Println("Successfully Opened open api file",f.Name())
@@ -57,17 +54,13 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 		apiJsn, err := utills.ToJSON(jsn)
 		if err != nil {
-			//fmt.Printf("err: %v\n", err)
-			//log.Panic("Error converting api file to json ", err)
-			log.Println("Error converting api file to json ", err)
+			log.Fatal("Error converting api file to json:", err)
 
 		}
 
 		swaggerVerison, err := utills.FindSwaggerVersion(apiJsn)
 		if err != nil {
-			//fmt.Printf("err: %v\n", err)
-			//log.Panic("Error finding a swagger version of the api definition ", err)
-			log.Println("Error finding a swagger version of the api definition ", err)
+			log.Println("Error finding a swagger version of the api definition:", err)
 		}
 
 		if swaggerVerison == "2" {
@@ -75,7 +68,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 			var ApiData spec.Swagger
 			err = json.Unmarshal(apiJsn, &ApiData)
 			if err != nil {
-				fmt.Printf("openAPI unmarsheliing err: %v\n", err)
+				log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			} else {
 				mgwSwagger.SetInfoSwagger(ApiData)
 			}
@@ -85,7 +78,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 			var ApiData openapi3.Swagger
 			err = json.Unmarshal(apiJsn, &ApiData)
 			if err != nil {
-				fmt.Printf("openAPI unmarsheliing err: %v\n", err)
+				log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			} else {
 				mgwSwagger.SetInfoOpenApi(ApiData)
 			}

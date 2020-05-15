@@ -16,9 +16,12 @@
  */
 package config
 
+import "time"
+
 const (
-	LISTENER_ADDRESS   string = "0.0.0.0"
-	LISTENER_PORT      uint32 = 10000
-	API_DEFAULT_PORT    uint32 = 8080
-	MANAGER_STATPREFIX string = "ingress_http"
+	LISTENER_ADDRESS  string = "0.0.0.0"
+	LISTENER_PORT     uint32 = 10000
+	API_DEFAULT_PORT   uint32 = 8080
+	MANAGER_STATPREFIX    string = "ingress_http"
+	CLUSTER_CONNECT_TIMEOUT    = 5 * time.Second
 )
