@@ -63,7 +63,7 @@ func FindSwaggerVersion(jsn []byte) (string, error) {
 	} else if _, ok := result["openapi"]; ok {
 		version = "3"
 	} else {
-		return version, errors.New("swagger file version is not defined. Default version assigned to 3 ")
+		return version, errors.New("swagger file version is not defined. Default version set as to 3 ")
 	}
 
 	return version, nil

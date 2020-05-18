@@ -30,5 +30,8 @@ func main() {
 		fmt.Println(file)
 	}
 
+
+
 	microgateway.StartMicroGateway(os.Args)
+
 }

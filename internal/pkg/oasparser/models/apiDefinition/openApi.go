@@ -14,58 +14,71 @@
  *  limitations under the License.
  *
  */
+
+//OpenApi version 3
 package apiDefinition
 
-import "github.com/getkin/kin-openapi/openapi3"
+import (
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
+	"log"
+	"net/url"
+	"strconv"
+	"strings"
+)
 
 func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
-	//swagger.Id = swagger3.
-	swagger.SwaggerVersion = swagger3.OpenAPI
-	//swagger.Info = swagger3.Info
-	//swagger.BasePath = swagger3.Servers
-	swagger.Description = swagger3.Info.Description
-	swagger.Title = swagger3.Info.Title
-	swagger.Version = swagger3.Info.Version
-	swagger.VendorExtensible = swagger3.Extensions
-	swagger.Resources = SetResourcesOpenApi3(swagger3)
+	swagger.swaggerVersion = swagger3.OpenAPI
+	if swagger3.Info != nil {
+		swagger.description = swagger3.Info.Description
+		swagger.title = swagger3.Info.Title
+		swagger.version = swagger3.Info.Version
+	}
+	swagger.vendorExtensible = swagger3.Extensions
+	swagger.resources = SetResourcesOpenApi3(swagger3)
+
+	if IsServerUrlIsAvailable(swagger3) {
+		for i, _ := range swagger3.Servers {
+			endpoint := getHostandBasepathandPort(swagger3.Servers[i].URL)
+			swagger.productionUrls = append(swagger.productionUrls,endpoint)
+		}
+
+	}
 }
 
-func setOperationOpenApi(context string, rtype string, operation *openapi3.Operation) Resource {
+func setOperationOpenApi(path string, pathtype string, operation *openapi3.Operation) Resource {
 	var resource Resource
 	resource = Resource{
-		Context: context,
-		Rtype:   rtype,
-		ID:      operation.OperationID,
-		Summary: operation.Summary,
+		path: path,
+		pathtype:   pathtype,
+		iD:      operation.OperationID,
+		summary: operation.Summary,
 		//Schemes: operation.,
-		Tags: operation.Tags,
+		tags: operation.Tags,
 		//Security: operation.Security.,
-		VendorExtensible: operation.Extensions}
+		vendorExtensible: operation.Extensions}
 	return resource
 }
 
-func GetResources(swagger MgwSwagger) []Resource {
-	return swagger.Resources
-}
 
 func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
 
-	for contxt, pathItem := range openApi.Paths {
+	for path, pathItem := range openApi.Paths {
 
 		var resource Resource
 		if pathItem.Get != nil {
-			resource = setOperationOpenApi(contxt, "get", pathItem.Get)
+			resource = setOperationOpenApi(path, "get", pathItem.Get)
 		} else if pathItem.Post != nil {
-			resource = setOperationOpenApi(contxt, "post", pathItem.Post)
+			resource = setOperationOpenApi(path, "post", pathItem.Post)
 		} else if pathItem.Put != nil {
-			resource = setOperationOpenApi(contxt, "put", pathItem.Put)
+			resource = setOperationOpenApi(path, "put", pathItem.Put)
 		} else if pathItem.Delete != nil {
-			resource = setOperationOpenApi(contxt, "delete", pathItem.Delete)
+			resource = setOperationOpenApi(path, "delete", pathItem.Delete)
 		} else if pathItem.Head != nil {
-			resource = setOperationOpenApi(contxt, "head", pathItem.Head)
+			resource = setOperationOpenApi(path, "head", pathItem.Head)
 		} else if pathItem.Patch != nil {
-			resource = setOperationOpenApi(contxt, "patch", pathItem.Patch)
+			resource = setOperationOpenApi(path, "patch", pathItem.Patch)
 		} else {
 			//resource = setOperation(contxt,"get",pathItem.Get)
 		}
@@ -74,3 +87,42 @@ func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 	}
 	return resources
 }
+
+func getHostandBasepathandPort(rawUrl string) (Endpoint) {
+	basepath := ""
+	host := ""
+	port := config.API_DEFAULT_PORT
+
+	if !strings.Contains(rawUrl, "://") {
+		rawUrl = "http://" + rawUrl
+	}
+
+	u, err := url.Parse(rawUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	host = u.Hostname()
+	basepath = u.Path
+	if u.Port() != "" {
+		u32, err := strconv.ParseUint(u.Port(),10,32)
+		if err != nil {
+			log.Println("Error passing port value to mgwSwagger",err)
+		}
+		port = uint32(u32)
+	}
+	return Endpoint{Host: host, Basepath: basepath, Port: port}
+}
+
+func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
+	if swagger3.Servers != nil {
+		if len(swagger3.Servers) > 0 && (swagger3.Servers[0].URL != "") {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		return false
+	}
+}
+

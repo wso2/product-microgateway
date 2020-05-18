@@ -3,7 +3,7 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.14.1
     volumes:
-      - ./envoy.yaml:/etc/envoy.yaml
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
 #    expose:
 #      - "80"
 #      - "8001"

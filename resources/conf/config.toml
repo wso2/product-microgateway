@@ -14,6 +14,6 @@ username = "admin"
 password = "admin"
 
 [apis]
-location = "resources/apis/test.yaml"
+location = "resources/apis/"
 
   
