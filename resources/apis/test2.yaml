@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petsore server. You can find out more about   Swagger at [http://swagger.io](http://swaggr.io) or on [irc.re.et, #sgger](htp://swgger.io/irc/).      For this sample, you cn us te api ky `spcil-ey` to e the auzion"
+  description: "This is a sample server Petsore server. You can find out more about   Swagger at [http://swagger.io](http://swaggr.io) or on [irc.re.et, #sg](t//swgerio/irc/)Forthis sample you cn us te api ky `spcil-ey` to e the auzion"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -26,11 +26,11 @@ schemes:
 - "http"
 
 paths:
-  /chashikaweerathunga:
+  /WSO2Inc:
     get:
       x-wso2-production-endpoints:
         urls:
-          - 'https://www.linkedin.com:8080/in'   
+          - 'https://www.facebook.com:80'
         type: https
       tags:
       - "pet"
@@ -316,37 +316,6 @@ paths:
         maximum: 10.0
         minimum: 1.0
         format: "int64"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Order not found"
-    delete:
-      tags:
-      - "store"
-      summary: "Delete purchase order by ID"
-      description: "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors"
-      operationId: "deleteOrder"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of the order that needs to be deleted"
-        required: true
-        type: "integer"
-        minimum: 1.0
-        format: "int64"
-      responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Order not found"
   /user:
     post:
       tags:

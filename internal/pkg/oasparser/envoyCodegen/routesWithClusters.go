@@ -167,7 +167,7 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 			},
 		},
 	}
-	fmt.Println(h.GetAddress())
+	//fmt.Println(h.GetAddress())
 	return cluster
 }
 
@@ -243,19 +243,22 @@ func createRoute(HostUrl string, basepath string, resourcePath string, clusterNa
 
 func GenerateRegex(fullpath string) (string, bool) {
 	isHavingPathparameters := true
-	regex := ".*"
+	regex := "([^/]+)"
 	newPath := ""
+	start := "^"
+	end := "$"
+
 
 	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
 		res1 := strings.Split(fullpath, "/")
-		fmt.Println(res1)
+		//fmt.Println(res1)
 
 		for i, p := range res1 {
 			if strings.Contains(p, "{") || strings.Contains(p, "}"){
 				res1[i] = regex
 			}
 		}
-		newPath = strings.Join(res1[:], "/")
+		newPath = start + strings.Join(res1[:], "/") + end
 
 	} else {
 		newPath = fullpath
