@@ -31,6 +31,7 @@ type MgwSwagger struct {
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
 	resources        []Resource
+	xWso2Basepath    string
 	//Schemes             []string                    `json:"schemes,omitempty"`
 	//info                *spec.Info                       `json:"info,omitempty"`
 	//Host                string                      `json:"host,omitempty"`
@@ -47,11 +48,24 @@ type MgwSwagger struct {
 
 
 type Endpoint struct {
-	Host      string
-	Basepath  string
-	UrlType   string
-	Port      uint32
+	host      string
+	basepath  string
+	urlType   string
+	port      uint32
 }
+
+func (endpoint *Endpoint) GetHost() string {
+	return endpoint.host
+}
+func (endpoint *Endpoint) GetBasepath() string {
+	return endpoint.basepath
+}
+
+func (endpoint *Endpoint) GetPort() uint32 {
+	return endpoint.port
+}
+
+
 
 func (swagger *MgwSwagger) GetSwaggerVersion() string {
 	return swagger.swaggerVersion
@@ -63,6 +77,10 @@ func (swagger *MgwSwagger) GetVersion() string {
 
 func (swagger *MgwSwagger) GetTitle() string {
 	return swagger.title
+}
+
+func (swagger *MgwSwagger) GetXWso2Basepath() string {
+	return swagger.xWso2Basepath
 }
 
 func (swagger *MgwSwagger) GetVendorExtensible() map[string]interface{} {
@@ -82,7 +100,8 @@ func (swagger *MgwSwagger) GetResources() []Resource {
 }
 
 
-func (swagger *MgwSwagger) SetEndpoints() {
+func (swagger *MgwSwagger) SetXWso2Extenstions() {
+	swagger.SetXWso2Basepath()
 	swagger.SetXWso2PrdoductionEndpoint()
 	swagger.SetXWso2SandboxEndpoint()
 }
@@ -133,7 +152,7 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 					//urls := make([]string, len(ainterface))
 					for _, v := range ainterface {
 						endpoint:= getHostandBasepathandPort(v.(string))
-						endpoint.UrlType = urlType
+						endpoint.urlType = urlType
 						Endpoints = append(Endpoints,endpoint)
 					}
 				}
@@ -147,6 +166,21 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 	}
 
 	return Endpoints
+}
+
+func GetXWso2Basepath(vendorExtensible map[string]interface{}) string {
+	xWso2basepath := ""
+	if y, found := vendorExtensible["x-wso2-basepath"]; found {
+		if val, ok := y.(string); ok {
+			xWso2basepath = val
+		}
+	}
+
+	return xWso2basepath
+}
+
+func (swagger *MgwSwagger) SetXWso2Basepath() {
+	swagger.xWso2Basepath = GetXWso2Basepath(swagger.vendorExtensible)
 }
 
 

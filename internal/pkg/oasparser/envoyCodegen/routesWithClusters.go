@@ -17,7 +17,6 @@
 package envoyCodegen
 
 import (
-	"fmt"
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	envoy_api_v2_endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
@@ -58,7 +57,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 	//check API level sandbox endpoints availble
 	if s.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
-		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
+		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].GetHost(), apiLevelEndpointSand[0].GetPort())
 		apiLevelClusterNameS := "clusterSand_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion()
 		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameS)
 		clustersSand = append(clustersSand, &apilevelClusterSand)
@@ -69,7 +68,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 	//check API level production endpoints available
 	if s.IsEndpointsAvailable(mgwSwagger.GetProdEndpoints()) {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
-		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
+		apilevelAddressP := createAddress(apiLevelEndpointProd[0].GetHost(), apiLevelEndpointProd[0].GetPort())
 		apiLevelClusterNameP := "clusterProd_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion()
 		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameP)
 		clustersProd = append(clustersProd, &apilevelClusterProd)
@@ -85,7 +84,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		//resource level check sandbox endpoints
 		if s.IsEndpointsAvailable(resource.GetSandEndpoints()) {
 			endpointSand = resource.GetSandEndpoints()
-			addressSand = createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			addressSand = createAddress(endpointSand[0].GetHost(), endpointSand[0].GetPort())
 			clusterNameSand = "clusterSand_" + strings.Replace(resource.GetId(), " ", "", -1) + string(ind)
 			clusterSand = createCluster(addressSand, clusterNameSand)
 			clustersSand = append(clustersSand, &clusterSand)
@@ -93,7 +92,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			cluster_refSand = clusterSand.GetName()
 
 			//sandbox endpoints
-			routeS := createRoute(endpointSand[0].Host,endpointSand[0].Basepath, resource.GetPath(), cluster_refSand)
+			routeS := createRoute(mgwSwagger.GetXWso2Basepath(), endpointSand[0], resource.GetPath(), cluster_refSand)
 			routesSand = append(routesSand, &routeS)
 
 			endpointsSand = append(endpointsSand, &addressSand)
@@ -104,7 +103,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			cluster_refSand = apilevelClusterSand.GetName()
 
 			//sandbox endpoints
-			routeS := createRoute(endpointSand[0].Host,endpointSand[0].Basepath, resource.GetPath(), cluster_refSand)
+			routeS := createRoute(mgwSwagger.GetXWso2Basepath(), endpointSand[0], resource.GetPath(), cluster_refSand)
 			routesSand = append(routesSand, &routeS)
 
 		}
@@ -112,7 +111,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		//resource level check production endpoints
 		if s.IsEndpointsAvailable(resource.GetProdEndpoints()) {
 			endpointProd = resource.GetProdEndpoints()
-			addressProd = createAddress(endpointProd[0].Host, endpointProd[0].Port)
+			addressProd = createAddress(endpointProd[0].GetHost(), endpointProd[0].GetPort())
 			clusterNameProd = "clusterProd_" + strings.Replace(resource.GetId(), " ", "", -1) + string(ind)
 			clusterProd = createCluster(addressProd, clusterNameProd)
 			clustersProd = append(clustersProd, &clusterProd)
@@ -120,7 +119,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			cluster_refProd = clusterProd.GetName()
 
 			//production endpoints
-			routeP := createRoute(endpointProd[0].Host,endpointProd[0].Basepath, resource.GetPath(), cluster_refProd)
+			routeP := createRoute(mgwSwagger.GetXWso2Basepath(), endpointProd[0], resource.GetPath(), cluster_refProd)
 			routesProd = append(routesProd, &routeP)
 
 			endpointsProd = append(endpointsProd, &addressProd)
@@ -131,7 +130,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			cluster_refProd = apilevelClusterProd.GetName()
 
 			//production endpoints
-			routeP := createRoute(endpointProd[0].Host,endpointProd[0].Basepath, resource.GetPath(), cluster_refProd)
+			routeP := createRoute(mgwSwagger.GetXWso2Basepath(), endpointProd[0], resource.GetPath(), cluster_refProd)
 			routesProd = append(routesProd, &routeP)
 
 		} else {
@@ -171,22 +170,10 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 	return cluster
 }
 
-func createRoute(HostUrl string, basepath string, resourcePath string, clusterName string) v2route.Route {
-	var fullPath = basepath + resourcePath
+func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourcePath string, clusterName string) v2route.Route {
 	var route v2route.Route
 
-	routepath, isHavingPathparameter := GenerateRegex(fullPath)
-
-	RouteAction := &v2route.Route_Route{
-		Route: &v2route.RouteAction{
-			HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-				HostRewrite: HostUrl,
-			},
-			ClusterSpecifier: &v2route.RouteAction_Cluster{
-				Cluster: clusterName,
-			},
-		},
-	}
+	routePath,rewritePath, isHavingPathparameter := GenerateRoutePaths(xWso2Basepath,endpoint.GetBasepath(), resourcePath)
 
 	if isHavingPathparameter {
 		route = v2route.Route{
@@ -198,67 +185,83 @@ func createRoute(HostUrl string, basepath string, resourcePath string, clusterNa
 								MaxProgramSize: nil,
 							},
 						},
-						Regex: routepath,
+						Regex: routePath,
 					},
 				},
-				/*Headers: []*v2route.HeaderMatcher {
-					{
-						Name: "x-some-host",
-						HeaderMatchSpecifier: &v2route.HeaderMatcher_ExactMatch{
-							ExactMatch: HostUrl,
-						},
-					},
-					{
-						Name: "x-some-proto",
-						HeaderMatchSpecifier: &v2route.HeaderMatcher_ExactMatch{
-							ExactMatch: "https",
-						},
-					},
-					{
-						Name: "x-some-port",
-						HeaderMatchSpecifier: &v2route.HeaderMatcher_ExactMatch{
-							ExactMatch: "443",
-						},
-					},
-				},  */
+
 			},
-			Action: RouteAction,
+			Action: &v2route.Route_Route{
+				Route: &v2route.RouteAction{
+					RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
+						Pattern:              &envoy_type_matcher.RegexMatcher{
+							EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
+								GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
+									MaxProgramSize: nil,
+								},
+							},
+							Regex: xWso2Basepath,
+						},
+						Substitution: endpoint.GetBasepath(),
+					},
+					ClusterSpecifier: &v2route.RouteAction_Cluster{
+						Cluster: clusterName,
+					},
+				},
+			},
 			Metadata: nil,
 		}
 	} else {
 		route = v2route.Route{
 			Match: &v2route.RouteMatch{
-				PathSpecifier: &v2route.RouteMatch_Path{Path: routepath},
+				PathSpecifier: &v2route.RouteMatch_Prefix{routePath},
 			},
 
-			Action: RouteAction,
-
+			Action: &v2route.Route_Route{
+				Route: &v2route.RouteAction{
+					PrefixRewrite: rewritePath,
+					ClusterSpecifier: &v2route.RouteAction_Cluster{
+						Cluster: clusterName,
+					},
+				},
+			},
 			Metadata: nil,
 		}
 	}
-	fmt.Println(HostUrl, routepath)
+	//fmt.Println(endpoint.GetHost(), rewritePath, routePath)
 	return route
 }
 
+//generates route paths for the api resources
+func GenerateRoutePaths(xWso2Basepath string, basePath string, resourcePath string) (string, string, bool) {
+	newPath := ""
+	rewritePath, isHavingPathparameters := GenerateRegex(basePath + resourcePath)
+	if xWso2Basepath != "" {
+		fullpath := xWso2Basepath + resourcePath
+		newPath, _ = GenerateRegex(fullpath)
 
+	} else {
+		fullpath := basePath + resourcePath
+		newPath, _ = GenerateRegex(fullpath)
+	}
+
+	return newPath, rewritePath, isHavingPathparameters
+}
+
+//generates regex for the resources which have path paramaters.
 func GenerateRegex(fullpath string) (string, bool) {
 	isHavingPathparameters := true
 	regex := "([^/]+)"
 	newPath := ""
-	start := "^"
-	end := "$"
-
 
 	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
 		res1 := strings.Split(fullpath, "/")
-		//fmt.Println(res1)
 
 		for i, p := range res1 {
 			if strings.Contains(p, "{") || strings.Contains(p, "}"){
 				res1[i] = regex
 			}
 		}
-		newPath = start + strings.Join(res1[:], "/") + end
+		newPath = "^" + strings.Join(res1[:], "/") + "$"
 
 	} else {
 		newPath = fullpath
@@ -266,4 +269,3 @@ func GenerateRegex(fullpath string) (string, bool) {
 	}
 	return newPath, isHavingPathparameters
 }
-

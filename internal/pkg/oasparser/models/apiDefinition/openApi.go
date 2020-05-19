@@ -111,7 +111,7 @@ func getHostandBasepathandPort(rawUrl string) (Endpoint) {
 		}
 		port = uint32(u32)
 	}
-	return Endpoint{Host: host, Basepath: basepath, Port: port}
+	return Endpoint{host: host, basepath: basepath, port: port}
 }
 
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
@@ -125,4 +125,6 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 		return false
 	}
 }
+
+
 

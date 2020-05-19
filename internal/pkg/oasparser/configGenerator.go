@@ -51,20 +51,28 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		endpointsP = append(endpointsP,endpoints...)
 	}
 
-	vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	vHostP, _ := e.CreateVirtualHost(vHost_NameP, routesP)
-
-	listenerNameP := "listenerProd_1"
-	routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	listnerProd := e.CreateListener(listenerNameP, routeConfigNameP, vHostP)
-
 	envoyNodeProd := new(envoy.EnvoyNode)
-	envoyNodeProd.SetListener(&listnerProd)
-	envoyNodeProd.SetClusters(clustersP)
-	envoyNodeProd.SetRoutes(routesP)
-	envoyNodeProd.SetEndpoints(endpointsP)
+
+	if len(mgwSwaggers) > 0 {
+		vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+
+		vHostP, _ := e.CreateVirtualHost(vHost_NameP, routesP)
+
+		listenerNameP := "listenerProd_1"
+		routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+
+		listnerProd := e.CreateListener(listenerNameP, routeConfigNameP, vHostP)
+
+
+		envoyNodeProd.SetListener(&listnerProd)
+		envoyNodeProd.SetClusters(clustersP)
+		envoyNodeProd.SetRoutes(routesP)
+		envoyNodeProd.SetEndpoints(endpointsP)
+
+	} else {
+		log.Println("No Api definitions found")
+	}
+
 
 
 	fmt.Println(len(routesP), "routes are generated successfully")
@@ -95,21 +103,27 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	if routesS == nil {
 		return nil, nil, nil, nil
 	}
-
-	vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	vHostS, _ := e.CreateVirtualHost(vHost_NameS, routesS)
-
-	listenerNameS := "listenerSand_1"
-	routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	listnerSand := e.CreateListener(listenerNameS, routeConfigNameS, vHostS)
-
 	envoyNodeSand := new(envoy.EnvoyNode)
-	envoyNodeSand.SetListener(&listnerSand)
-	envoyNodeSand.SetClusters(clustersS)
-	envoyNodeSand.SetRoutes(routesS)
-	envoyNodeSand.SetEndpoints(endpointsS)
+
+	if len(mgwSwaggers) > 0 {
+		vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+
+		vHostS, _ := e.CreateVirtualHost(vHost_NameS, routesS)
+
+		listenerNameS := "listenerSand_1"
+		routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+
+		listnerSand := e.CreateListener(listenerNameS, routeConfigNameS, vHostS)
+
+
+		envoyNodeSand.SetListener(&listnerSand)
+		envoyNodeSand.SetClusters(clustersS)
+		envoyNodeSand.SetRoutes(routesS)
+		envoyNodeSand.SetEndpoints(endpointsS)
+	} else {
+		log.Println("No Api definitions found")
+	}
+
 	//fmt.Println(endpointsS)
 	return envoyNodeSand.GetSources()
 }

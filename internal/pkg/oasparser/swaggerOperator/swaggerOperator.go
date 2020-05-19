@@ -18,12 +18,12 @@ package swaggerOperator
 
 import (
 	"encoding/json"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
-	"log"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -54,7 +54,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 		apiJsn, err := utills.ToJSON(jsn)
 		if err != nil {
-			log.Fatal("Error converting api file to json:", err)
+			//log.Fatal("Error converting api file to json:", err)
 
 		}
 
@@ -68,7 +68,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 			var ApiData spec.Swagger
 			err = json.Unmarshal(apiJsn, &ApiData)
 			if err != nil {
-				log.Fatal("Error openAPI unmarsheliing: %v\n", err)
+				//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			} else {
 				mgwSwagger.SetInfoSwagger(ApiData)
 			}
@@ -78,13 +78,13 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 			var ApiData openapi3.Swagger
 			err = json.Unmarshal(apiJsn, &ApiData)
 			if err != nil {
-				log.Fatal("Error openAPI unmarsheliing: %v\n", err)
+				//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			} else {
 				mgwSwagger.SetInfoOpenApi(ApiData)
 			}
 		}
 
-		mgwSwagger.SetEndpoints()
+		mgwSwagger.SetXWso2Extenstions()
 		mgwSwaggers = append(mgwSwaggers, mgwSwagger)
 
 	}
