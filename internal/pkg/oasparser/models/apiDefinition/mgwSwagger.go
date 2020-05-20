@@ -170,12 +170,11 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 
 func GetXWso2Basepath(vendorExtensible map[string]interface{}) string {
 	xWso2basepath := ""
-	if y, found := vendorExtensible["x-wso2-basepath"]; found {
+	if y, found := vendorExtensible[c.XWSO2BASEPATH]; found {
 		if val, ok := y.(string); ok {
 			xWso2basepath = val
 		}
 	}
-
 	return xWso2basepath
 }
 

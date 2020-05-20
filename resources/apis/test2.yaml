@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petsore server. You can fid out more about   Swagger at [http://swagger.io](http://swaggr.io) or on [ir.re.esg](/ei)Fhis sample you cn us teapi ky `spcil-ey` to e the auzion"
+  description: "This is a sample server Petsore server. You can fid out ore about   Swagger at [http://swagger.io](http://swaggr.io)  on [r.res](i)s me y cn s epi  `spciey` t e the auzion"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -8,7 +8,7 @@ info:
 host: "petstore.swagger.io:8000"
 basePath: "/api/v3"
 
-x-wso2-basepath: "/petstore/v1"
+x-wso2-basepath: /petstore/v2
 
 x-wso2-production-endpoints:
   urls:
@@ -258,10 +258,8 @@ paths:
     get:
       x-wso2-production-endpoints:
         urls:
-          - 'http://www.mocky.io:80/v2'
+          - "http://www.mocky.io:443/v2"
         type: http
-      tags:
-        - "store"
       summary: "Returns pet inventories by status"
       description: "Returns a map of status codes to quantities"
       operationId: "getInventory"
@@ -278,11 +276,16 @@ paths:
               format: "int32"
       security:
         - api_key: []
-  /store/order:
-    post:
+  /get-current-statistical:  
+    get:
+      x-wso2-production-endpoints:
+        urls:
+          - "https://www.hpb.health.gov.lk:80/api"
+        type: http
       tags:
         - "store"
       summary: "Place an order for a pet"
+      
       description: ""
       operationId: "placeOrder"
       produces:
