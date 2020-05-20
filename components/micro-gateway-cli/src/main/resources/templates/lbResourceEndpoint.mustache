@@ -4,5 +4,5 @@ targets: [
 {{>secureSocket}} }{{#unless @last}},
 {{/unless}}{{/endpoints}}
 ],
-{{>http2}}{{>caching}}{{>basicAuth}}
+{{>clientsHttp2}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}}
 });

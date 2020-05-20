@@ -46,6 +46,7 @@ public class MockBackEndServer extends Thread {
     private HttpsServer httpServer;
     private String backEndServerUrl;
     private static int backEndServerPort;
+    private static boolean retryDone = false;
 
     public static void main(String[] args) {
 
@@ -325,6 +326,54 @@ public class MockBackEndServer extends Thread {
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
                 exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/timeout", exchange -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    log.error("Error while invoking timeout back end", e);
+                }
+                byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/retry", exchange -> {
+                if (!retryDone) {
+                    byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_GATEWAY_TIMEOUT, 0);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                    retryDone = true;
+                }
+                byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/circuitBreaker", exchange -> {
+                if (exchange.getRequestURI().getQuery() != null && exchange.getRequestURI().getQuery()
+                        .contains("cb=true")) {
+                    byte[] response = ResponseConstants.ERROR_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
             });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;

@@ -110,6 +110,10 @@ public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";
 
 public const boolean DEFAULT_HOSTNAME_VERIFICATION_ENABLED = true;
+public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = -1;
+public const int DEFAULT_HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = 100;
+public const int DEFAULT_HTTP_CLIENTS_WAIT_TIME = 30000;
+public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_STREAMS = 50;
 
 public const string DEFAULT_API_KEY_ISSUER = "https://localhost:9095/apikey";
 public const string DEFAULT_API_KEY_ALIAS = "ballerina";

@@ -232,7 +232,21 @@ public const string NAME = "name";
 public const string VERSIONS = "versions";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
+public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
+public const string HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = "maxActiveConnections";
+public const string HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
+public const string HTTP_CLIENTS_WAIT_TIME = "waitTimeInMillis";
+public const string HTTP_CLIENTS_MAX_ACTIVE_STREAMS = "maxActiveStreamsPerConnection";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
+public const string HTTP_CLIENTS_DISABLE_SSL_VERIFICATION = "disableSslVerification";
+public const string HTTP_CLIENTS_ENABLE_HTTP2 = "enableHttp2";
+public const string HTTP_CLIENTS_PROXY_INSTANCE_ID = "httpClients.proxy";
+public const string HTTP_CLIENTS_PROXY_ENABLE = "enable";
+public const string HTTP_CLIENTS_PROXY_ENABLE_INTERNAL_SERVICES = "enableInternalServices";
+public const string HTTP_CLIENTS_PROXY_HOST = "host";
+public const string HTTP_CLIENTS_PROXY_PORT = "port";
+public const string HTTP_CLIENTS_PROXY_USERNAME = "username";
+public const string HTTP_CLIENTS_PROXY_PASSWORD = "password";
 
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
