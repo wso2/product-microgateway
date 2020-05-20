@@ -16,8 +16,8 @@
 
 package org.wso2.micro.gateway.core.throttle.global;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -28,7 +28,7 @@ import java.net.UnknownHostException;
  */
 public class ThrottleUtils {
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(ThrottleUtils.class);
     /**
      * This method provides the BigInteger string value for the given IP address.
      * This supports both IPv4 and IPv6 address.
