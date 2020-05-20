@@ -17,7 +17,6 @@
 package envoyCodegen
 
 import (
-	"fmt"
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	envoy_api_v2_endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
@@ -112,8 +111,6 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 
 			clustersProd = append(clustersProd, &clusterProd)
 
-			clustersProd = append(clustersProd, &apilevelClusterProd)
-
 			cluster_refProd = clusterProd.GetName()
 
 			//production endpoints
@@ -135,6 +132,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			log.Panic("Producton endpoints are not defined")
 		}
 	}
+
 	return routesProd, clustersProd, endpointsProd, routesSand, clustersSand, endpointsSand
 }
 
@@ -194,6 +192,9 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		if xWso2Basepath != "" {
 			action = &v2route.Route_Route{
 				Route: &v2route.RouteAction{
+					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+						HostRewrite: endpoint.GetHost(),
+					},
 					RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
 						Pattern:              &envoy_type_matcher.RegexMatcher{
 							EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
@@ -213,6 +214,9 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		} else {
 			action =  &v2route.Route_Route{
 				Route: &v2route.RouteAction{
+					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+						HostRewrite: endpoint.GetHost(),
+					},
 					ClusterSpecifier: &v2route.RouteAction_Cluster{
 						Cluster: clusterName,
 					},
@@ -227,6 +231,9 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		if xWso2Basepath != "" {
 			action = &v2route.Route_Route{
 				Route: &v2route.RouteAction{
+					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+						HostRewrite: endpoint.GetHost(),
+					},
 					PrefixRewrite: rewritePath,
 					ClusterSpecifier: &v2route.RouteAction_Cluster{
 						Cluster: clusterName,
@@ -236,6 +243,9 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		} else {
 			action = &v2route.Route_Route{
 				Route: &v2route.RouteAction{
+					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+						HostRewrite: endpoint.GetHost(),
+					},
 					ClusterSpecifier: &v2route.RouteAction_Cluster{
 						Cluster: clusterName,
 					},
@@ -251,7 +261,7 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		Metadata: nil,
 	}
 
-	fmt.Println(endpoint.GetHost(), rewritePath, routePath)
+	//fmt.Println(endpoint.GetHost(), rewritePath, routePath)
 	return route
 }
 

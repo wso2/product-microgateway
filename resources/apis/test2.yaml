@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petsore server. You can fid out ore about   Swagger at [http://swagger.io](http://swaggr.io)  on [r.res](i)s me y cn s epi  `spciey` t e the auzion"
+  description: "This is a sample server Petsore server. You can fid out ore about   Swagger at [http://swagger.io](http://swaggr.io)  on [r.es]()s me y cn s epi  `spciey` t e he auzion"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -16,7 +16,7 @@ x-wso2-production-endpoints:
   type: https
 x-wso2-sandbox-endpoints:
   urls:
-    - 'http://example.com:8000/api/v3'
+    - 'http://sandbox.com:8000/api/v3'
   type: http
 
 servers:
@@ -58,36 +58,7 @@ paths:
         - petstore_auth:
             - "write:pets"
             - "read:pets"
-    put:
-      tags:
-        - "pet"
-      summary: "Update an existing pet"
-      description: ""
-      operationId: "updatePet"
-      consumes:
-        - "application/json"
-        - "application/xml"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Pet object that needs to be added to the store"
-          required: true
-          schema:
-            $ref: "#/definitions/Pet"
-      responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Pet not found"
-        "405":
-          description: "Validation exception"
-      security:
-        - petstore_auth:
-            - "write:pets"
-            - "read:pets"
+   
   /pet/findByStatus:
     get:
       tags:
@@ -153,70 +124,7 @@ paths:
           description: "Pet not found"
       security:
         - api_key: []
-    post:
-      tags:
-        - "pet"
-      summary: "Updates a pet in the store with form data"
-      description: ""
-      operationId: "updatePetWithForm"
-      consumes:
-        - "application/x-www-form-urlencoded"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "petId"
-          in: "path"
-          description: "ID of pet that needs to be updated"
-          required: true
-          type: "integer"
-          format: "int64"
-        - name: "name"
-          in: "formData"
-          description: "Updated name of the pet"
-          required: false
-          type: "string"
-        - name: "status"
-          in: "formData"
-          description: "Updated status of the pet"
-          required: false
-          type: "string"
-      responses:
-        "405":
-          description: "Invalid input"
-      security:
-        - petstore_auth:
-            - "write:pets"
-            - "read:pets"
-    delete:
-      tags:
-        - "pet"
-      summary: "Deletes a pet"
-      description: ""
-      operationId: "deletePet"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "api_key"
-          in: "header"
-          required: false
-          type: "string"
-        - name: "petId"
-          in: "path"
-          description: "Pet id to delete"
-          required: true
-          type: "integer"
-          format: "int64"
-      responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Pet not found"
-      security:
-        - petstore_auth:
-            - "write:pets"
-            - "read:pets"
+    
   /pet/{petId}/uploadImage:
     post:
       tags:
@@ -254,28 +162,6 @@ paths:
         - petstore_auth:
             - "write:pets"
             - "read:pets"
-  /5ec43d59300000f33d39c782:    
-    get:
-      x-wso2-production-endpoints:
-        urls:
-          - "http://www.mocky.io:443/v2"
-        type: http
-      summary: "Returns pet inventories by status"
-      description: "Returns a map of status codes to quantities"
-      operationId: "getInventory"
-      produces:
-        - "application/json"
-      parameters: []
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
-      security:
-        - api_key: []
   /get-current-statistical:  
     get:
       x-wso2-production-endpoints:
@@ -305,211 +191,6 @@ paths:
             $ref: "#/definitions/Order"
         "400":
           description: "Invalid Order"
-  /store/order/{orderId}:
-    get:
-      tags:
-        - "store"
-      summary: "Find purchase order by ID"
-      description: "For valid response try integer IDs with value >= 1 and <= 10.         Other values will generated exceptions"
-      operationId: "getOrderById"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "orderId"
-          in: "path"
-          description: "ID of pet that needs to be fetched"
-          required: true
-          type: "integer"
-          maximum: 10.0
-          minimum: 1.0
-          format: "int64"
-  /user:
-    post:
-      tags:
-        - "user"
-      summary: "Create user"
-      description: "This can only be done by the logged in user."
-      operationId: "createUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Created user object"
-          required: true
-          schema:
-            $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/createWithArray:
-    post:
-      tags:
-        - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "List of user object"
-          required: true
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/createWithList:
-    post:
-      tags:
-        - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "List of user object"
-          required: true
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/login:
-    get:
-      tags:
-        - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "username"
-          in: "query"
-          description: "The user name for login"
-          required: true
-          type: "string"
-        - name: "password"
-          in: "query"
-          description: "The password for login in clear text"
-          required: true
-          type: "string"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        "400":
-          description: "Invalid username/password supplied"
-  /user/logout:
-    get:
-      tags:
-        - "user"
-      summary: "Logs out current logged in user session"
-      description: ""
-      operationId: "logoutUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters: []
-      responses:
-        default:
-          description: "successful operation"
-  /user/{username}:
-    get:
-      tags:
-        - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "username"
-          in: "path"
-          description: "The name that needs to be fetched. Use user1 for testing. "
-          required: true
-          type: "string"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/User"
-        "400":
-          description: "Invalid username supplied"
-        "404":
-          description: "User not found"
-    put:
-      tags:
-        - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "username"
-          in: "path"
-          description: "name that need to be updated"
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "Updated user object"
-          required: true
-          schema:
-            $ref: "#/definitions/User"
-      responses:
-        "400":
-          description: "Invalid user supplied"
-        "404":
-          description: "User not found"
-    delete:
-      tags:
-        - "user"
-      summary: "Delete user"
-      description: "This can only be done by the logged in user."
-      operationId: "deleteUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "username"
-          in: "path"
-          description: "The name that needs to be deleted"
-          required: true
-          type: "string"
-      responses:
-        "400":
-          description: "Invalid username supplied"
-        "404":
-          description: "User not found"
 securityDefinitions:
   petstore_auth:
     type: "oauth2"

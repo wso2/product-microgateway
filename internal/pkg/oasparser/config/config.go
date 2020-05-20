@@ -23,5 +23,5 @@ const (
 	LISTENER_PORT     uint32 = 10000
 	API_DEFAULT_PORT   uint32 = 8080
 	MANAGER_STATPREFIX    string = "ingress_http"
-	CLUSTER_CONNECT_TIMEOUT    = 5 * time.Second
+	CLUSTER_CONNECT_TIMEOUT    = 20 * time.Second
 )
