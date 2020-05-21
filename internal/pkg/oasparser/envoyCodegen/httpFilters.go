@@ -56,13 +56,10 @@ func GetExtAauthzHttpFilter() hcm.HttpFilter {
 			},
 		},
 	}
-
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
 		panic(err2)
 	}
-	//fmt.Println(ext)
-
 	extAuthzFilter := hcm.HttpFilter{
 		Name: "envoy.filters.http.ext_authz",
 		ConfigType: &hcm.HttpFilter_TypedConfig{

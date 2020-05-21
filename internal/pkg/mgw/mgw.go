@@ -58,7 +58,6 @@ var (
 
 	cache cachev2.SnapshotCache
 
-	strSlice = []string{"www.bbc.com", "www.yahoo.com", "blog.salrashid.me"}
 )
 
 const (

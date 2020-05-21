@@ -17,7 +17,7 @@
 package apiDefinition
 
 import (
-	c "github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
+	constants "github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
 	"log"
 )
 
@@ -32,20 +32,7 @@ type MgwSwagger struct {
 	sandboxUrls      []Endpoint
 	resources        []Resource
 	xWso2Basepath    string
-	//Schemes             []string                    `json:"schemes,omitempty"`
-	//info                *spec.Info                       `json:"info,omitempty"`
-	//Host                string                      `json:"host,omitempty"`
-	//Paths               *spec.Paths                      `json:"paths"`
-	//Definitions         spec.Definitions            `json:"definitions,omitempty"`
-	//Parameters          map[string]spec.Parameter   `json:"parameters,omitempty"`
-	//Responses           map[string]spec.Response    `json:"responses,omitempty"`
-	//SecurityDefinitions spec.SecurityDefinitions    `json:"securityDefinitions,omitempty"`
-	//Security            []map[string][]string       `json:"security,omitempty"`
-	//tags                []spec.Tag                  `json:"tags,omitempty"`
-	//ExternalDocs        *spec.ExternalDocumentation `json:"externalDocs,omitempty"`
-
 }
-
 
 type Endpoint struct {
 	host      string
@@ -64,8 +51,6 @@ func (endpoint *Endpoint) GetBasepath() string {
 func (endpoint *Endpoint) GetPort() uint32 {
 	return endpoint.port
 }
-
-
 
 func (swagger *MgwSwagger) GetSwaggerVersion() string {
 	return swagger.swaggerVersion
@@ -107,35 +92,33 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 }
 
 func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
-	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,c.PRODUCTION_ENDPOINTS)
+	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.PRODUCTION_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.productionUrls = xwso2EndpointsApi
 	}
 
 	//resources
 	for i,resource := range swagger.resources {
-		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,c.PRODUCTION_ENDPOINTS)
+		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,constants.PRODUCTION_ENDPOINTS)
 		if xwso2EndpointsResource != nil {
 			swagger.resources[i].productionUrls = xwso2EndpointsResource
 		}
 	}
-
 }
 
 func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
-	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,c.SANDBOX_ENDPOINTS)
+	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.SANDBOX_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.sandboxUrls = xwso2EndpointsApi
 	}
 
 	//resources
 	for i,resource := range swagger.resources {
-		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,c.SANDBOX_ENDPOINTS)
+		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,constants.SANDBOX_ENDPOINTS)
 		if xwso2EndpointsResource != nil {
 			swagger.resources[i].sandboxUrls = xwso2EndpointsResource
 		}
 	}
-
 }
 
 func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType string) []Endpoint {
@@ -170,7 +153,7 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 
 func GetXWso2Basepath(vendorExtensible map[string]interface{}) string {
 	xWso2basepath := ""
-	if y, found := vendorExtensible[c.XWSO2BASEPATH]; found {
+	if y, found := vendorExtensible[constants.XWSO2BASEPATH]; found {
 		if val, ok := y.(string); ok {
 			xWso2basepath = val
 		}
@@ -181,6 +164,3 @@ func GetXWso2Basepath(vendorExtensible map[string]interface{}) string {
 func (swagger *MgwSwagger) SetXWso2Basepath() {
 	swagger.xWso2Basepath = GetXWso2Basepath(swagger.vendorExtensible)
 }
-
-
-

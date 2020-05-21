@@ -17,13 +17,9 @@
 package microgateway
 
 import (
-	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/pkg/mgw"
-	"os"
-
-	config "github.com/wso2/micro-gw/internal/pkg/confTypes"
-	"io/ioutil"
 	"log"
 )
 
@@ -31,32 +27,16 @@ func initServer() error {
 	return nil
 }
 
-func readConfigs() (*config.Config, error) {
-	anc := new(config.Config)
-	mgwHome, _ := os.Getwd()
-	logrus.Info("MGW_HOME: ", mgwHome)
-	_, err := os.Stat(mgwHome + "/resources/conf/config.toml")
-	if err != nil {
-		log.Panic("Configuration file not found.", err)
-	}
-	content, readErr := ioutil.ReadFile(mgwHome + "/resources/conf/config.toml")
-	if readErr != nil {
-		log.Panic("Error reading configurations. ", readErr)
-	}
-	_, e := toml.Decode(string(content), anc)
-	return anc, e
-}
-
 func StartMicroGateway(args []string) {
 
 	logrus.Info("Starting Microgateway")
 	err := initServer()
 	if err != nil {
-		log.Panic("Error starting the control plane", err)
+		log.Fatal("Error starting the control plane", err)
 	}
-	conf, errReadConfig := readConfigs()
+	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		log.Panic("Error loading configuration. ", errReadConfig)
+		log.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	mgw.Run(conf)
 }

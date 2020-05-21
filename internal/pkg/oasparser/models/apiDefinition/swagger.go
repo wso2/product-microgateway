@@ -37,7 +37,6 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 		endpoint := getHostandBasepathandPort(swagger2.Host + swagger2.BasePath)
 		swagger.productionUrls = append(swagger.productionUrls,endpoint)
 	}
-
 }
 
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
@@ -60,7 +59,6 @@ func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 		} else {
 			//resource = setOperation(contxt,"get",pathItem.Get)
 		}
-
 		resources = append(resources, resource)
 	}
 	return resources
@@ -79,4 +77,3 @@ func setOperationSwagger(path string, pathtype string, operation *spec.Operation
 		vendorExtensible: operation.VendorExtensible.Extensions}
 	return resource
 }
-

@@ -32,7 +32,6 @@ type EnvoyNode struct {
 
 func (envoy *EnvoyNode) SetListener(listener *v2.Listener) {
 	envoy.listeners = []types.Resource{listener}
-
 }
 
 func (envoy *EnvoyNode) SetClusters(clusters []*v2.Cluster) {

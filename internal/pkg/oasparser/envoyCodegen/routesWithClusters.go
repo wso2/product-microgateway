@@ -22,12 +22,13 @@ import (
 	envoy_api_v2_endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
+	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/config"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
-	s "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"log"
 	"strings"
+	"time"
 )
 
 func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.Route, []*v2.Cluster, []*core.Address, []*v2route.Route, []*v2.Cluster, []*core.Address) {
@@ -49,50 +50,45 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		endpointsSand        []*core.Address
 	)
 	//check API level sandbox endpoints availble
-	if s.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
+	if swag_operator.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].GetHost(), apiLevelEndpointSand[0].GetPort())
 		apiLevelClusterNameS := strings.TrimSpace("clusterSand_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameS)
 		clustersSand = append(clustersSand, &apilevelClusterSand)
-
 		endpointsSand = append(endpointsSand, &apilevelAddressSand)
 	}
 
 	//check API level production endpoints available
-	if s.IsEndpointsAvailable(mgwSwagger.GetProdEndpoints()) {
+	if swag_operator.IsEndpointsAvailable(mgwSwagger.GetProdEndpoints()) {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].GetHost(), apiLevelEndpointProd[0].GetPort())
 		apiLevelClusterNameP := strings.TrimSpace("clusterProd_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameP)
 		clustersProd = append(clustersProd, &apilevelClusterProd)
-
 		endpointsProd = append(endpointsProd, &apilevelAddressP)
 
 	} else {
 		log.Println("API level Producton endpoints are not defined")
 	}
-
 	for ind, resource := range mgwSwagger.GetResources() {
 
 		//resource level check sandbox endpoints
-		if s.IsEndpointsAvailable(resource.GetSandEndpoints()) {
+		if swag_operator.IsEndpointsAvailable(resource.GetSandEndpoints()) {
 			endpointSand = resource.GetSandEndpoints()
 			addressSand := createAddress(endpointSand[0].GetHost(), endpointSand[0].GetPort())
 			clusterNameSand := strings.TrimSpace("clusterSand_" + strings.Replace(resource.GetId(), " ", "", -1) + string(ind))
 			clusterSand := createCluster(addressSand, clusterNameSand)
 			clustersSand = append(clustersSand, &clusterSand)
-
 			cluster_refSand = clusterSand.GetName()
 
 			//sandbox endpoints
 			routeS := createRoute(mgwSwagger.GetXWso2Basepath(), endpointSand[0], resource.GetPath(), cluster_refSand)
 			routesSand = append(routesSand, &routeS)
-
 			endpointsSand = append(endpointsSand, &addressSand)
 
 			//API level check
-		} else if s.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
+		} else if swag_operator.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
 			endpointSand = apiLevelEndpointSand
 			cluster_refSand = apilevelClusterSand.GetName()
 
@@ -103,24 +99,21 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		}
 
 		//resource level check production endpoints
-		if s.IsEndpointsAvailable(resource.GetProdEndpoints()) {
+		if swag_operator.IsEndpointsAvailable(resource.GetProdEndpoints()) {
 			endpointProd = resource.GetProdEndpoints()
 			addressProd := createAddress(endpointProd[0].GetHost(), endpointProd[0].GetPort())
 			clusterNameProd := strings.TrimSpace("clusterProd_" + strings.Replace(resource.GetId(), " ", "", -1) + string(ind))
 			clusterProd := createCluster(addressProd, clusterNameProd)
-
 			clustersProd = append(clustersProd, &clusterProd)
-
 			cluster_refProd = clusterProd.GetName()
 
 			//production endpoints
 			routeP := createRoute(mgwSwagger.GetXWso2Basepath(), endpointProd[0], resource.GetPath(), cluster_refProd)
 			routesProd = append(routesProd, &routeP)
-
 			endpointsProd = append(endpointsProd, &addressProd)
 
 			//API level check
-		} else if s.IsEndpointsAvailable(mgwSwagger.GetProdEndpoints()) {
+		} else if swag_operator.IsEndpointsAvailable(mgwSwagger.GetProdEndpoints()) {
 			endpointProd = apiLevelEndpointProd
 			cluster_refProd = apilevelClusterProd.GetName()
 
@@ -137,11 +130,15 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 }
 
 func createCluster(address core.Address, clusterName string) v2.Cluster {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		log.Fatal("Error loading configuration. ", errReadConfig)
+	}
 
 	h := &address
 	cluster := v2.Cluster{
 		Name:                 clusterName,
-		ConnectTimeout:       ptypes.DurationProto(config.CLUSTER_CONNECT_TIMEOUT),
+		ConnectTimeout:       ptypes.DurationProto(conf.Envoy.ClusterTimeoutInSeconds* time.Second),
 		ClusterDiscoveryType: &v2.Cluster_Type{Type: v2.Cluster_STRICT_DNS},
 		DnsLookupFamily:      v2.Cluster_V4_ONLY,
 		LbPolicy:             v2.Cluster_ROUND_ROBIN,
@@ -172,7 +169,6 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		action *v2route.Route_Route
 		match *v2route.RouteMatch
 	)
-
 	routePath,rewritePath, isHavingPathparameter := GenerateRoutePaths(xWso2Basepath,endpoint.GetBasepath(), resourcePath)
 
 	if isHavingPathparameter {
@@ -252,9 +248,7 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 				},
 			}
 		}
-
 	}
-
 	route = v2route.Route{
 		Match: match,
 		Action: action,
