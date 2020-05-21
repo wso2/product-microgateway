@@ -230,6 +230,10 @@ public const string ACCESS_TOKEN = "accessToken";
 public const string CREDENTIAL_BEARER = "credentialBearer";
 public const string NAME = "name";
 public const string VERSIONS = "versions";
+public const string VERSION = "version";
+public const string ALIAS_LIST = "aliasList";
+
+
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
@@ -262,6 +266,7 @@ public const string FILTERS = "filters";
 
 public const string MTSL = "mutualSSL";
 public const string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
+public const string MTSL_CONF_CERT_HEADER_NAME = "certificateHeadername";
 public const string MTSL_CONF_PROTOCOL_NAME = "protocolName";
 public const string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
 public const string MTSL_CONF_CIPHERS = "ciphers";
@@ -421,6 +426,9 @@ const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";
 
 //auth handlers
 public const string MUTUAL_SSL_HANDLER = "mutualSSLHandler";
+public const string MUTUAL_SSL_API_CERTIFICATE = "mutualSSLConfig.api.certificates";
+
+
 public const string JWT_AUTH_HANDLER = "jwtAuthHandler";
 public const string API_KEY_HANDLER = "apiKeyHandler";
 public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
