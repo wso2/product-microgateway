@@ -22,10 +22,10 @@ import (
 	envoy_api_v2_endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
-	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"github.com/wso2/micro-gw/config"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"log"
 	"strings"
 	"time"
@@ -169,86 +169,56 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		action *v2route.Route_Route
 		match *v2route.RouteMatch
 	)
-	routePath,rewritePath, isHavingPathparameter := GenerateRoutePaths(xWso2Basepath,endpoint.GetBasepath(), resourcePath)
+	routePath := GenerateRoutePaths(xWso2Basepath,endpoint.GetBasepath(), resourcePath)
 
-	if isHavingPathparameter {
-		match = &v2route.RouteMatch{
-			PathSpecifier: &v2route.RouteMatch_SafeRegex{
-				SafeRegex: &envoy_type_matcher.RegexMatcher{
-					EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
+	match = &v2route.RouteMatch{
+		PathSpecifier: &v2route.RouteMatch_SafeRegex{
+			SafeRegex: &envoy_type_matcher.RegexMatcher{
+				EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
+					GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
+						MaxProgramSize: nil,
 					},
-					Regex: routePath,
+				},
+				Regex: routePath,
+			},
+		},
+	}
+
+	if xWso2Basepath != "" {
+		action = &v2route.Route_Route{
+			Route: &v2route.RouteAction{
+				HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+					HostRewrite: endpoint.GetHost(),
+				},
+				RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
+					Pattern:              &envoy_type_matcher.RegexMatcher{
+						EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
+							GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
+								MaxProgramSize: nil,
+							},
+						},
+						Regex: xWso2Basepath,
+					},
+					Substitution: endpoint.GetBasepath(),
+				},
+				ClusterSpecifier: &v2route.RouteAction_Cluster{
+					Cluster: clusterName,
 				},
 			},
 		}
-
-		if xWso2Basepath != "" {
-			action = &v2route.Route_Route{
-				Route: &v2route.RouteAction{
-					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-						HostRewrite: endpoint.GetHost(),
-					},
-					RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
-						Pattern:              &envoy_type_matcher.RegexMatcher{
-							EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
-								GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
-									MaxProgramSize: nil,
-								},
-							},
-							Regex: xWso2Basepath,
-						},
-						Substitution: endpoint.GetBasepath(),
-					},
-					ClusterSpecifier: &v2route.RouteAction_Cluster{
-						Cluster: clusterName,
-					},
-				},
-			}
-		} else {
-			action =  &v2route.Route_Route{
-				Route: &v2route.RouteAction{
-					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-						HostRewrite: endpoint.GetHost(),
-					},
-					ClusterSpecifier: &v2route.RouteAction_Cluster{
-						Cluster: clusterName,
-					},
-				},
-			}
-		}
-
 	} else {
-		match = &v2route.RouteMatch{
-			PathSpecifier: &v2route.RouteMatch_Prefix{routePath},
-		}
-		if xWso2Basepath != "" {
-			action = &v2route.Route_Route{
-				Route: &v2route.RouteAction{
-					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-						HostRewrite: endpoint.GetHost(),
-					},
-					PrefixRewrite: rewritePath,
-					ClusterSpecifier: &v2route.RouteAction_Cluster{
-						Cluster: clusterName,
-					},
+		action =  &v2route.Route_Route{
+			Route: &v2route.RouteAction{
+				HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
+					HostRewrite: endpoint.GetHost(),
 				},
-			}
-		} else {
-			action = &v2route.Route_Route{
-				Route: &v2route.RouteAction{
-					HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-						HostRewrite: endpoint.GetHost(),
-					},
-					ClusterSpecifier: &v2route.RouteAction_Cluster{
-						Cluster: clusterName,
-					},
+				ClusterSpecifier: &v2route.RouteAction_Cluster{
+					Cluster: clusterName,
 				},
-			}
+			},
 		}
 	}
+
 	route = v2route.Route{
 		Match: match,
 		Action: action,
@@ -260,25 +230,24 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 }
 
 //generates route paths for the api resources
-func GenerateRoutePaths(xWso2Basepath string, basePath string, resourcePath string) (string, string, bool) {
+func GenerateRoutePaths(xWso2Basepath string, basePath string, resourcePath string) string {
 	newPath := ""
-	rewritePath, isHavingPathparameters := GenerateRegex(basePath + resourcePath)
 	if xWso2Basepath != "" {
 		fullpath := xWso2Basepath + resourcePath
-		newPath, _ = GenerateRegex(fullpath)
+		newPath = GenerateRegex(fullpath)
 
 	} else {
 		fullpath := basePath + resourcePath
-		newPath, _ = GenerateRegex(fullpath)
+		newPath = GenerateRegex(fullpath)
 	}
 
-	return newPath, rewritePath, isHavingPathparameters
+	return newPath
 }
 
 //generates regex for the resources which have path paramaters.
-func GenerateRegex(fullpath string) (string, bool) {
-	isHavingPathparameters := true
-	regex := "([^/]+)"
+func GenerateRegex(fullpath string) string {
+	pathParaRegex := "([^/]+)"
+	endRegex := "(\\?([^/]+))?"
 	newPath := ""
 
 	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
@@ -286,14 +255,13 @@ func GenerateRegex(fullpath string) (string, bool) {
 
 		for i, p := range res1 {
 			if strings.Contains(p, "{") || strings.Contains(p, "}"){
-				res1[i] = regex
+				res1[i] = pathParaRegex
 			}
 		}
-		newPath = "^" + strings.Join(res1[:], "/") + "$"
+		newPath = "^" + strings.Join(res1[:], "/") + endRegex + "$"
 
 	} else {
-		newPath = fullpath
-		isHavingPathparameters = false
+		newPath = fullpath + endRegex
 	}
-	return newPath, isHavingPathparameters
+	return newPath
 }
