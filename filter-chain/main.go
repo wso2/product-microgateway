@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/wso2/product-microgateway/filters"
 	"log"
 	"net"
 	"os"
@@ -23,6 +24,7 @@ func main() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt)
 
+	filters.InitThrottleDataReceiver()
 	go listen(":8081", &server{mode: "GATEWAY"})
 
 	<-c

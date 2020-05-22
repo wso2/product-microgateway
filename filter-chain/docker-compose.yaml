@@ -8,7 +8,7 @@ services:
 #      - "80"
 #      - "8001"
     ports:
-      - "8080:10000"
+      - "8082:10000"
       - "9901:9901"
 #  zipkin:
 #    image: openzipkin/zipkin

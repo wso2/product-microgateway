@@ -39,13 +39,13 @@ static_resources:
                   cluster_name: ext-authz
 
                 # Default is 200ms; override if your server needs e.g. warmup time.
-                timeout: 10s
+                timeout: 100s
 #              include_peer_certificate: false
           - name: envoy.router
             config: {}
   clusters:
   - name: clusterProd_SwaggerPetstoreNew1.0.0
-    connect_timeout: 1s
+    connect_timeout: 100s
     type: LOGICAL_DNS
     # Comment out the following line to test on v6 networks
     dns_lookup_family: V4_ONLY
@@ -60,7 +60,7 @@ static_resources:
                 address: petstore.swagger.io
                 port_value: 80
   - name: ext-authz
-    type: static
+    type: STRICT_DNS
     http2_protocol_options: {}
     load_assignment:
       cluster_name: ext-authz
@@ -69,12 +69,12 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: 172.17.0.1
+                address: 192.168.1.2
                 port_value: 8081
 
     # This timeout controls the initial TCP handshake timeout - not the timeout for the
     # entire request.
-    connect_timeout: 1s
+    connect_timeout: 100s
 #  - name: zipkin
 #    connect_timeout: 1s
 #    type: strict_dns

@@ -39,7 +39,7 @@ func readFile(file string) ([]byte, error) {
 func readApis() ([]oapi3.Swagger, error) {
 
 	//Reading the files in the API directory
-	ff, err := ioutil.ReadDir("./filter-chain/artifacts/apis/")
+	ff, err := ioutil.ReadDir("./artifacts/apis/")
 
 	//if reading directory fails,
 	if err != nil {
@@ -48,7 +48,7 @@ func readApis() ([]oapi3.Swagger, error) {
 	}
 	var apis = make([]oapi3.Swagger, len(ff))
 	for i, f := range ff {
-		cont, err := readFile("./filter-chain/artifacts/apis/" + f.Name())
+		cont, err := readFile("./artifacts/apis/" + f.Name())
 		if err != nil {
 			//Handle error
 		}

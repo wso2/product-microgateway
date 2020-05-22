@@ -56,6 +56,15 @@ func ExecuteFilters(ctx context.Context, req *ext_authz.CheckRequest) (*ext_auth
 	// Publish metrics
 	resp, err = filters.PublishMetrics(ctx, req)
 	//todo: handle failure
+
+	//Do throttling
+	resp , err = filters.ThrottleFilter(ctx, req)
+
+	//Return if the throttling failed
+	if resp.Status.Code != int32(rpc.OK) {
+		return resp, nil
+	}
+
 	return resp, err
 
 }

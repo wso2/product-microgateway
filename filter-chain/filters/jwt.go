@@ -271,7 +271,7 @@ func ReadFile(fileName string) ([]byte, error) {
 
 func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz.CheckResponse, error) {
 
-	caCert,_ := ReadFile("./filter-chain/artifacts/security/server.pem")
+	caCert,_ := ReadFile("./artifacts/security/server.pem")
 
 	auth := false
 	for k := range req.Attributes.Request.Http.Headers {
