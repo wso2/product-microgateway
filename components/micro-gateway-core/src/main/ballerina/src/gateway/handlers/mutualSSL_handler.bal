@@ -17,8 +17,8 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
-import ballerinax/java;
 import ballerina/config;
+import ballerina/io;
 
 # Representation of the mutual ssl handler
 #
@@ -59,10 +59,8 @@ public type MutualSSLHandler object {
             string? cert = req.mutualSslHandshake["base64EncodedCert"];
             if (clientCertificate != "" &&  req.hasHeader(clientCertificate)) {
                 string headerValue = req.getHeader("base64EncodedCert");
-                if(headerValue != "" && mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
-
-                    //boolean|error decodedCert =  getcert(cert.toString(),trustStorePath.toString(),trustStorePassword.toString());
-                    printDebug("decoded cert *************ddfddddssss***wwwwwwwww", cert.toString());
+                if(headerValue != "" && mutualSSLVerifyClient is string &&
+                    stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
                     boolean|error isCertexistInTrustStore =  isExistCert(headerValue,trustStorePath.toString(),trustStorePassword.toString());
                     if(isCertexistInTrustStore is boolean && !isCertexistInTrustStore  ){
                         printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. API is not associated with the certificate");
@@ -71,24 +69,21 @@ public type MutualSSLHandler object {
                 }
             } else {
                 handle|error cert_alias = getAlias(cert.toString(),trustStorePath.toString(),trustStorePassword.toString());
+                if(cert_alias is error){
+                    return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
+                }
                 if(cert_alias is handle && mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient))
                 {
                     string certAlias = cert_alias.toString();
-                    anydata cert_list = isExistApiAlias(apiVersion,apiNamee,certAlias);
-                    //string | error MutualSSLcertificateInformation = getMutualSSLcertificateInformation();
-                    //printDebug("MutualSSLcertificateInformationfddddssss***wwwwwwwww", MutualSSLcertificateInformation.toString());
-                    //if(!(MutualSSLcertificateInformation is string && stringutils:equalsIgnoreCase(MutualSSLcertificateInformation,serialNumber)))
-                    //{
-                    //    printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. API is not associated with the certificate");
-                    //    return false;
-                    //
-                    //}
+                    boolean isExistAlias = isExistApiAlias(apiVersion,apiNamee,certAlias);
+                    if(!isExistAlias) {
+                        printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. API is not associated with the certificate");
+                        return false;
+                    }
                 }
             }
-            printDebug("decoded cert ****************wwwwwwwww", cert.toString());
             printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
-
-            doMTSLFilterRequest(req, invocationContext); 
+            doMTSLFilterRequest(req, invocationContext);
         }
         return true;
     }
@@ -111,18 +106,21 @@ function doMTSLFilterRequest(http:Request request, runtime:InvocationContext con
     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 }
 
-public function isExistApiAlias(string apiVersionFromRequest,string apiNameFromRequest,string certAliasFromRequest) returns boolean {
-
+public function isExistApiAlias(string apiVersionFromRequest,string apiNameFromRequest,string certAliasFromRequest)
+    returns boolean {
     map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
     if (apiCertificateList is map<anydata>[] && apiCertificateList.length() > 0) {
         foreach map<anydata> apiCertificate in apiCertificateList {
             anydata apiName = apiCertificate[NAME];
             anydata apiVersion = apiCertificate[VERSION];
-            anydata aliasList = apiCertificate[ALIAS_LIST];
-            if (apiName is string && apiVersion is string && stringutils:equalsIgnoreCase(apiName,apiNameFromRequest)
-                && stringutils:equalsIgnoreCase(apiVersion,apiVersionFromRequest)) {
-                printDebug("apiVersion*************", apiVersionFromRequest);
-                return true;
+            string aliasList = apiCertificate[ALIAS_LIST].toString();
+            string[] aliasListResult = stringutils:split(aliasList, " ");
+            io:println(aliasListResult.indexOf(certAliasFromRequest));
+            int? index = aliasListResult.indexOf(certAliasFromRequest);
+            if (apiName is string && apiVersion is string && stringutils:equalsIgnoreCase(apiName,apiNameFromRequest) &&
+                index is int && stringutils:equalsIgnoreCase(apiVersion,apiVersionFromRequest)) {
+                 printDebug("KEY_AUTHN_FILTER","Mutual SSL authentication success. Certfiacate alias correctly validate against per API");
+                 return true;
             }
         }
     }
@@ -130,28 +128,3 @@ public function isExistApiAlias(string apiVersionFromRequest,string apiNameFromR
 }
 
 
-public function getAlias(string cert,string trustStorePath,string trustStorePassword) returns handle|error {
-    handle cert1 = java:fromString(cert);
-    handle trustStorePath1 = java:fromString(trustStorePath);
-    handle trustStorePassword1 = java:fromString(trustStorePassword);
-    handle|error certAlias = jgetAlias(cert1,trustStorePath1,trustStorePassword1);
-    return certAlias;
-}
-
-function jgetAlias(handle cert, handle trustStorePath,handle trustStorePassword) returns handle|error = @java:Method {
-    name: "getAlias",
-    class: "org.wso2.micro.gateway.core.mutualssl.MutualsslRequestInvoker"
-} external;
-
-public function isExistCert(string cert,string trustStorePath,string trustStorePassword) returns boolean|error {
-    handle cert1 = java:fromString(cert);
-    handle trustStorePath1 = java:fromString(trustStorePath);
-    handle trustStorePassword1 = java:fromString(trustStorePassword);
-    boolean|error certt = jisExistCert(cert1,trustStorePath1,trustStorePassword1);
-    return certt;
-}
-
-function jisExistCert(handle cert, handle trustStorePath,handle trustStorePassword) returns boolean|error = @java:Method {
-    name: "isExistCert",
-    class: "org.wso2.micro.gateway.core.mutualssl.MutualsslHeaderInvoker"
-} external;
