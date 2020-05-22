@@ -286,7 +286,6 @@ fi
 # setup log4j configuration file to debug native implementation
 LOG4J_CONFIGURATION_FILE="${GW_HOME}/conf/log4j2.properties"
 if [ -f "$LOG4J_CONFIGURATION_FILE" ]
-then
   export JAVA_OPTS="$JAVA_OPTS -Dlog4j.configurationFile=${LOG4J_CONFIGURATION_FILE}"
 fi
 
