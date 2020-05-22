@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.core.Constants;
 
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,19 +15,30 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateFactory;
 
+import javax.security.cert.CertificateException;
+import javax.security.cert.X509Certificate;
 
+import static org.wso2.micro.gateway.core.Constants.BEGIN_CERTIFICATE_STRING;
+import static org.wso2.micro.gateway.core.Constants.END_CERTIFICATE_STRING;
+
+/**
+ * This class is responsible for validate the certificate per API in mutual SSL handshake
+ * when the header send by the load balancer.
+ */
 public class MutualsslHeaderInvoker {
     private static final Logger log = LoggerFactory.getLogger("ballerina");
     public static FileInputStream localTrustStoreStream;
-    public static boolean isExistCert(String base64EncodedCertificate, String trustStorePath, String trustStorePassword) throws IOException, KeyStoreException, java.security.cert.CertificateException, NoSuchAlgorithmException {
+
+    public static boolean isExistCert(String base64EncodedCertificate, String trustStorePath,
+                                      String trustStorePassword) throws IOException, KeyStoreException,
+            java.security.cert.CertificateException, NoSuchAlgorithmException {
         localTrustStoreStream = new FileInputStream(getKeyStorePath(trustStorePath));
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         trustStore.load(localTrustStoreStream, trustStorePassword.toCharArray());
         if (base64EncodedCertificate != null) {
             base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                    replaceAll("-----BEGIN CERTIFICATE-----\n", "")
-                    .replaceAll("-----END CERTIFICATE-----", "");
-
+                    replaceAll(BEGIN_CERTIFICATE_STRING, "")
+                    .replaceAll(END_CERTIFICATE_STRING, "");
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
@@ -44,15 +53,18 @@ public class MutualsslHeaderInvoker {
                 log.error(msg, e);
                 return false;
             }
-
-
         }
         return false;
     }
 
-
+    /**
+     * Check whether the certificate is exist in the trust store.
+     *
+     * @param certificate
+     * @param truststore
+     * @return
+     */
     public static boolean isCertificateExistsInTrustStore(X509Certificate certificate, KeyStore truststore) {
-
         if (certificate != null) {
             try {
                 KeyStore trustStore = truststore;
@@ -68,7 +80,7 @@ public class MutualsslHeaderInvoker {
                         }
                     }
                 }
-            } catch (KeyStoreException | CertificateException  | IOException e) {
+            } catch (KeyStoreException | CertificateException | IOException e) {
                 String msg = "Error in validating certificate existence";
                 log.error(msg, e);
             } catch (java.security.cert.CertificateException e) {
@@ -87,6 +99,4 @@ public class MutualsslHeaderInvoker {
         String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
         return fullPath.replaceAll(homePathConst, homePath);
     }
-
-
 }

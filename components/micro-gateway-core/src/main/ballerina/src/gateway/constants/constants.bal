@@ -233,8 +233,6 @@ public const string VERSIONS = "versions";
 public const string VERSION = "version";
 public const string ALIAS_LIST = "aliasList";
 
-
-
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
 
@@ -428,7 +426,6 @@ const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";
 public const string MUTUAL_SSL_HANDLER = "mutualSSLHandler";
 public const string MUTUAL_SSL_API_CERTIFICATE = "mutualSSLConfig.api.certificates";
 
-
 public const string JWT_AUTH_HANDLER = "jwtAuthHandler";
 public const string API_KEY_HANDLER = "apiKeyHandler";
 public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";
@@ -450,6 +447,5 @@ public const string API_VERSION_PROPERTY = "api_version";
 public const string API_PUBLISHER = "api_publisher";
 public const string API_NAME = "api_name";
 public const string MATCHING_RESOURCE = "matching_resource";
-
 
 public const int DEFAULT_AUTH_FILTER_POSITION = 2;

@@ -1,7 +1,5 @@
 package org.wso2.micro.gateway.core.mutualssl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.core.Constants;
 
 import java.io.ByteArrayInputStream;
@@ -15,16 +13,15 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 
-public  class MutualsslRequestInvoker {
-    private String trustStorePath;
-    private String trustStorePassword;
+/**
+ * This class is invoke for getting the certificate alias for a certificate to validate against per API.
+ */
+public class MutualsslRequestInvoker {
     public static FileInputStream localTrustStoreStream;
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
-
-    public static String getAlias(String certB64, String trustStorePath, String trustStorePassword) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
+    public static String getAlias(String certB64, String trustStorePath, String trustStorePassword)
+            throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
         byte[] decoded = Base64.getDecoder().decode(certB64);
-
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509")
                 .generateCertificate(new ByteArrayInputStream(decoded));
         localTrustStoreStream = new FileInputStream(getKeyStorePath(trustStorePath));
@@ -42,5 +39,4 @@ public  class MutualsslRequestInvoker {
         String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
         return fullPath.replaceAll(homePathConst, homePath);
     }
-
 }

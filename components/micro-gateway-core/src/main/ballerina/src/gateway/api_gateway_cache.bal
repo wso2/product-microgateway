@@ -27,6 +27,8 @@ cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictio
 cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache mutualSslCertificateCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+
 
 
 public type APIGatewayCache object {
@@ -90,5 +92,18 @@ public type APIGatewayCache object {
         gatewayTokenCache.remove(accessToken);
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
     }
-};
 
+    public function addMutualSslCertificateCache(string cert, string certInfo) {
+        mutualSslCertificateCache.put(cert, certInfo);
+        printDebug(KEY_GW_CACHE, "Added mutual certificate information to the  mutualSslCertificateCache ");
+    }
+
+    public function retrieveFromMutualSslCertificateCache(string cert) returns string? {
+        var certInfo = mutualSslCertificateCache.get(cert);
+        if (certInfo is string) {
+            return certInfo;
+        } else {
+            return ();
+        }
+    }
+};
