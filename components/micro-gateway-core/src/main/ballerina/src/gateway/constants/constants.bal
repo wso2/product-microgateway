@@ -318,6 +318,38 @@ public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.dataRetriever";
 
+public const string BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary";
+public const string BINARY_PUBLISHER_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.publisherPool";
+public const string BINARY_PUBLISHER_THREAD_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary" +
+    ".publisherThreadPool";
+public const string TM_BINARY_URL_GROUP = "throttlingConfig.binary.URLGroup";
+public const string TM_BINARY_RECEIVER_URL = "receiverURL";
+public const string TM_BINARY_AUTH_URL = "authURL";
+public const string TM_USERNAME = "username";
+public const string TM_PASSWORD = "password";
+public const string TM_PUBLISHER_POOL_MAX_IDLE = "maxIdle";
+public const string TM_PUBLISHER_POOL_INIT_IDLE_CAPACITY = "initIdleCapacity";
+public const string TM_PUBLISHER_THREAD_POOL_CORE_SIZE = "corePoolSize";
+public const string TM_PUBLISHER_THREAD_POOL_MAXIMUM_SIZE = "maxPoolSize";
+public const string TM_PUBLISHER_THREAD_POOL_KEEP_ALIVE_TIME = "keepAliveTime";
+
+public const string BINARY_AGENT_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.agent";
+public const string TM_AGENT_QUEUE_SIZE = "queueSize";
+public const string TM_AGENT_BATCH_SIZE = "batchSize";
+public const string TM_AGENT_THREAD_POOL_CORE_SIZE = "corePoolSize";
+public const string TM_AGENT_THREAD_POOL_MAXIMUM_SIZE = "maxPoolSize";
+public const string TM_AGENT_SOCKET_TIMEOUT_MS = "socketTimeoutMS";
+public const string TM_AGENT_THREAD_POOL_KEEP_ALIVE_TIME = "keepAliveTimeInPool";
+public const string TM_AGENT_RECONNECTION_INTERVAL = "reconnectionInterval";
+public const string TM_AGENT_MAX_TRANSPORT_POOL_SIZE = "maxTransportPoolSize";
+public const string TM_AGENT_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
+public const string TM_AGENT_EVICTION_TIME_PERIOD = "evictionTimePeriod";
+public const string TM_AGENT_MIN_IDLE_TIME_IN_POOL = "minIdleTimeInPool";
+public const string TM_AGENT_SECURE_MAX_TRANSPORT_POOL_SIZE = "secureMaxIdleTransportPoolSize";
+public const string TM_AGENT_SECURE_MAX_IDLE_CONNECTIONS = "secureMaxIdleConnections";
+public const string TM_AGENT_SECURE_EVICTION_TIME_PERIOD = "secureEvictionTimePeriod";
+public const string TM_AGENT_SECURE_MIN_IDLE_TIME_IN_POOL = "secureMinIdleTimeInPool";
+
 public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
 public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
 public const string REALTIME_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.realtime";
@@ -379,6 +411,7 @@ const string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
 const string KEY_VALIDATION_FILTER = "ValidationFilter";
 const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
+public const string KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER = "GlobalThrottleEventPublisher";
 const string KEY_THROTTLE_EVENT_LISTENER = "ThrottleEventListener";
 const string KEY_TEMPLATE_RETIEVAL_TASK = "KeyTemplateRetrievalTask";
 const string KEY_BLOCKING_CONDITION_RETRIEVAL_TASK = "BlockingConditionRetrievalTask";

@@ -102,6 +102,35 @@ public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endp
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
 public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/throttle/data/v1";
 
+//global throttling - binary publisher related constants
+public const boolean DEFAULT_TM_BINARY_PUBLISHER_ENABLED = false;
+public const string DEFAULT_TM_RECEIVER_URL_GROUP = "tcp://localhost:9611";
+public const string DEFAULT_TM_AUTH_URL_GROUP = "ssl://localhost:9711";
+public const string DEFAULT_TM_USERNAME = "admin";
+public const string DEFAULT_TM_PASSWORD = "admin";
+public const int DEFAULT_TM_PUBLISHER_POOL_MAX_IDLE = 1000;
+public const int DEFAULT_TM_PUBLISHER_POOL_INIT_IDLE_CAPACITY = 200;
+public const int DEFAULT_TM_PUBLISHER_THREAD_POOL_CORE_SIZE = 200;
+public const int DEFAULT_TM_PUBLISHER_THREAD_POOL_MAXIMUM_SIZE = 1000;
+public const int DEFAULT_TM_PUBLISHER_THREAD_POOL_KEEP_ALIVE_TIME = 200;
+
+//global throttling - binary agent related constants
+public const int DEFAULT_TM_AGENT_QUEUE_SIZE = 32768;
+public const int DEFAULT_TM_AGENT_BATCH_SIZE = 200;
+public const int DEFAULT_TM_AGENT_THREAD_POOL_CORE_SIZE = 1;
+public const int DEFAULT_TM_AGENT_SOCKET_TIMEOUT_MS = 30000;
+public const int DEFAULT_TM_AGENT_THREAD_POOL_MAXIMUM_SIZE = 1;
+public const int DEFAULT_TM_AGENT_THREAD_POOL_KEEP_ALIVE_TIME = 20;
+public const int DEFAULT_TM_AGENT_RECONNECTION_INTERVAL = 30;
+public const int DEFAULT_TM_AGENT_MAX_TRANSPORT_POOL_SIZE = 250;
+public const int DEFAULT_TM_AGENT_MAX_IDLE_CONNECTIONS = 250;
+public const int DEFAULT_TM_AGENT_EVICTION_TIME_PERIOD = 5500;
+public const int DEFAULT_TM_AGENT_MIN_IDLE_TIME_IN_POOL = 5000;
+public const int DEFAULT_TM_AGENT_SECURE_MAX_TRANSPORT_POOL_SIZE = 250;
+public const int DEFAULT_TM_AGENT_SECURE_MAX_IDLE_CONNECTIONS = 250;
+public const int DEFAULT_TM_AGENT_SECURE_EVICTION_TIME_PERIOD = 5500;
+public const int DEFAULT_TM_AGENT_SECURE_MIN_IDLE_TIME_IN_POOL = 5000;
+
 public const boolean DEFAULT_TOKEN_REVOCATION_ENABLED = false;
 public const string DEFAULT_REALTIME_JMS_CONNECTION_TOPIC = "tokenRevocation";
 public const boolean DEFAULT_PERSISTENT_USE_DEFAULT = true;

@@ -124,6 +124,32 @@
             <groupId>org.wso2.carbon.callhome</groupId>
             <artifactId>core</artifactId>
         </dependency>
+<!--        dependencies for distributed throttling-->
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${org.wso2.orbit.com.lmax}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.13.3</version>
+        </dependency>
     </dependencies>
 
     <profiles>
