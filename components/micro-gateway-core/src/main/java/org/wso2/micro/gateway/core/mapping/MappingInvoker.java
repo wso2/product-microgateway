@@ -27,24 +27,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class Class to dynamically invoke the transformer.
+ * This class to dynamically invoke the transformer.
  */
 public class MappingInvoker {
-    private static Map map;
+    private static Map jwtClassMap;
     private static int index = 0;
     private static Map editedClaims;
     private static MapValue<String, Object> mapValue;
     private static final Logger log = LoggerFactory.getLogger("ballerina");
     private static JWTValueTransformer jwtValueTransformer;
     public static void initiateJwtMap() {
-        map = new HashMap<String, JWTValueTransformer>();
+        jwtClassMap = new HashMap<String, JWTValueTransformer>();
     }
 
     public static boolean loadMappingClass(String className) {
         try {
             Class mappingClass = MappingInvoker.class.getClassLoader().loadClass(className);
             jwtValueTransformer = (JWTValueTransformer) mappingClass.newInstance();
-            map.put(className, jwtValueTransformer);
+            jwtClassMap.put(className, jwtValueTransformer);
             return true;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             log.error("Error while loading the jwttransformer class: " + className, e);
@@ -56,7 +56,7 @@ public class MappingInvoker {
      * Used to add claims to the claim set
      */
     public static MapValue transformJWTValue(MapValue claims, String className) throws Exception {
-        jwtValueTransformer = (JWTValueTransformer) map.get(className);
+        jwtValueTransformer = (JWTValueTransformer) jwtClassMap.get(className);
         editedClaims = convertMapValueToMap(claims);
         Map<String, Object> claimSet = jwtValueTransformer.transformJWT(editedClaims);
         mapValue = new MapValueImpl();

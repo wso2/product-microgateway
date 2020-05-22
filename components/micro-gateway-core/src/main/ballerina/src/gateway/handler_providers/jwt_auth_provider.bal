@@ -57,6 +57,7 @@ public type JwtAuthProvider object {
         //Start a span attaching to the system span.
         int | error | () spanIdAuth = startSpan(JWT_PROVIDER_AUTHENTICATE);
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
+        map<anydata>[] | error claimsSet = self.claims;
         //finishing span
         finishSpan(JWT_PROVIDER_AUTHENTICATE, spanIdAuth);
         if (handleVar is boolean) {
@@ -107,35 +108,39 @@ public type JwtAuthProvider object {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
                         }
                         var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
-                        if (jwtTokenClaimCached is runtime:Principal) {
-                            invocationContext.principal =  jwtTokenClaimCached;
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
-                        } else {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
-                            var result = doMappingContext(invocationContext, self.className, self.claims,
-                                self.classLoaded, jwtPayloadFromCache, self.jwtValidatorConfig, self.gatewayCache, authContext);
-                            if (result is auth:Error){
-                                return result;
+                        if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
+                            if (jwtTokenClaimCached is runtime:Principal) {
+                                invocationContext.principal =  jwtTokenClaimCached;
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                            } else {
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
+                                var result = doMappingContext(invocationContext, self.className, self.claims,
+                                    self.classLoaded, jwtPayloadFromCache, self.jwtValidatorConfig, self.gatewayCache, authContext);
+                                if (result is auth:Error){
+                                    return result;
+                                }
+                                jwtToken = authContext?.authToken.toString();
                             }
-                            jwtToken = authContext?.authToken.toString();
-                        }
+                         }
                         return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
                     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
                     if (payload is jwt:JwtPayload) {
                         var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
-                        if (jwtTokenClaimCached is runtime:Principal) {
-                            invocationContext.principal =  jwtTokenClaimCached;
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
-                        } else {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
-                            var result = doMappingContext(invocationContext, self.className, self.claims,
-                                self.classLoaded, payload, self.jwtValidatorConfig, self.gatewayCache, authContext);
-                            if (result is auth:Error){
-                                return result;
+                        if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
+                            if (jwtTokenClaimCached is runtime:Principal) {
+                                invocationContext.principal =  jwtTokenClaimCached;
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                            } else {
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
+                                var result = doMappingContext(invocationContext, self.className, self.claims,
+                                    self.classLoaded, payload, self.jwtValidatorConfig, self.gatewayCache, authContext);
+                                if (result is auth:Error){
+                                    return result;
+                                }
+                                jwtToken = authContext?.authToken.toString();
                             }
-                            jwtToken = authContext?.authToken.toString();
                         }
                         return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
                     }
