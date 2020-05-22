@@ -84,7 +84,7 @@ function publishHttpGlobalThrottleEvent(RequestStreamDTO throttleEvent) {
     http:Request clientRequest = new;
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
-
+    printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage is sent to traffic manager");
     var response = httpThrottleEndpoint->post("/throttleEventReceiver", clientRequest);
     if (response is http:Response) {
         int responseCode = response.statusCode;
