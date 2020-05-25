@@ -45,7 +45,10 @@ public type PreAuthnFilter object {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
         }
-        if (response.statusCode == 401) {
+        map<any> attributes = runtime:getInvocationContext().attributes;
+        boolean didEpRespond = attributes.hasKey(DID_EP_RESPOND) && <boolean>attributes[DID_EP_RESPOND];
+
+        if (response.statusCode == 401 && !didEpRespond) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
             //This handles the case where the empty Bearer/Basic value provided for authorization header. If all the
             //auth handlers are invoked and returning 401 without proper error message in the context means, invalid
