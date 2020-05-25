@@ -46,7 +46,7 @@ public type PreAuthnFilter object {
             return true;
         }
         map<any> attributes = runtime:getInvocationContext().attributes;
-        boolean didEpRespond = attributes.hasKey("didEpRespond") && <boolean>attributes["didEpRespond"];
+        boolean didEpRespond = attributes.hasKey(DID_EP_RESPOND) && <boolean>attributes[DID_EP_RESPOND];
 
         if (response.statusCode == 401 && !didEpRespond) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();

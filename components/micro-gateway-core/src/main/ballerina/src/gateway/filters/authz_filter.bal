@@ -79,7 +79,7 @@ public function doAuthzFilterResponse(http:Response response, http:FilterContext
     // In authorization filter we have specifically set the error payload since we are using ballerina in built
     // authzFilter
     map<any> attributes = runtime:getInvocationContext().attributes;
-    boolean didEpRespond = attributes.hasKey("didEpRespond") && <boolean>attributes["didEpRespond"];
+    boolean didEpRespond = attributes.hasKey(DID_EP_RESPOND) && <boolean>attributes[DID_EP_RESPOND];
 
     if (response.statusCode == FORBIDDEN && !didEpRespond) {
         if (runtime:getInvocationContext().attributes[ERROR_CODE] is ()) {
