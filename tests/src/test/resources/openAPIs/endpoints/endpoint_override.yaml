@@ -16,7 +16,6 @@ x-wso2-basePath: /petstore/v2
 x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint2"
 security:
   - petstore_auth: []
-x-wso2-sandbox-endpoints: "#/x-wso2-endpoints/myEndpoint2"
 tags:
   - name: pet
     description: Everything about your Pets
@@ -210,34 +209,6 @@ paths:
         - petstore_auth:
             - write:pets
             - read:pets
-    delete:
-      tags:
-        - pet
-      summary: Deletes a pet
-      description: ""
-      operationId: deletePet
-      parameters:
-        - name: api_key
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: petId
-          in: path
-          description: Pet id to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "400":
-          description: Invalid ID supplied
-        "404":
-          description: Pet not found
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
   "/pet/{petId}/uploadImage":
     post:
       tags:
@@ -295,32 +266,6 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int32
-  /store/order:
-    post:
-      tags:
-        - store
-      summary: Place an order for a pet
-      description: ""
-      operationId: placeOrder
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Order"
-        description: order placed for purchasing the pet
-        required: true
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/xml:
-              schema:
-                $ref: "#/components/schemas/Order"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Order"
-        "400":
-          description: Invalid Order
   "/store/order/{orderId}":
     get:
       tags:
@@ -389,30 +334,6 @@ paths:
               $ref: "#/components/schemas/User"
         description: Created user object
         required: true
-      responses:
-        default:
-          description: successful operation
-  /user/createWithArray:
-    post:
-      tags:
-        - user
-      summary: Creates list of users with given input array
-      description: ""
-      operationId: createUsersWithArrayInput
-      requestBody:
-        $ref: "#/components/requestBodies/UserArray"
-      responses:
-        default:
-          description: successful operation
-  /user/createWithList:
-    post:
-      tags:
-        - user
-      summary: Creates list of users with given input array
-      description: ""
-      operationId: createUsersWithListInput
-      requestBody:
-        $ref: "#/components/requestBodies/UserArray"
       responses:
         default:
           description: successful operation
@@ -493,49 +414,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        "400":
-          description: Invalid username supplied
-        "404":
-          description: User not found
-    put:
-      tags:
-        - user
-      summary: Updated user
-      description: This can only be done by the logged in user.
-      operationId: updateUser
-      parameters:
-        - name: username
-          in: path
-          description: name that need to be updated
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-        description: Updated user object
-        required: true
-      responses:
-        "400":
-          description: Invalid user supplied
-        "404":
-          description: User not found
-    delete:
-      tags:
-        - user
-      summary: Delete user
-      description: This can only be done by the logged in user.
-      operationId: deleteUser
-      parameters:
-        - name: username
-          in: path
-          description: The name that needs to be deleted
-          required: true
-          schema:
-            type: string
-      responses:
         "400":
           description: Invalid username supplied
         "404":

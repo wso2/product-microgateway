@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: AdvanceEndpoint
+x-wso2-basePath: /advanceEp
+x-wso2-production-endpoints: "#/x-wso2-endpoints/timeout"
+paths:
+  /timeout:
+    get:
+      operationId: timeout
+      responses:
+        "200":
+          description: Successful
+        "405":
+          description: Invalid input
+  /circuitBreaker:
+    get:
+      operationId: circuitBreaker
+      x-wso2-production-endpoints:
+        urls:
+          - https://localhost:2380/v3
+        advanceEndpointConfig:
+          circuitBreaker:
+            rollingWindow:
+              requestVolumeThreshold: 1
+              timeWindowInMillis: 60000
+              bucketSizeInMillis: 2000
+            failureThreshold: 0.2
+            resetTimeInMillis: 5000
+            statusCodes:
+              - 500
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid status value
+  /retry:
+    get:
+      operationId: retry
+      x-wso2-production-endpoints:
+        urls:
+          - https://localhost:2380/v3
+        advanceEndpointConfig:
+          timeoutInMillis: 7000
+          retryConfig:
+            count: 1
+            intervalInMillis: 1000
+            backOffFactor: 1.2
+            statusCodes:
+              - 504
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid tag value
+      deprecated: true
+x-wso2-endpoints:
+  - timeout:
+      urls:
+        - https://localhost:2380/v3
+      advanceEndpointConfig:
+        timeoutInMillis: 3000
+  - myEndpoint2:
+      urls:
+        - https://non.existant.host:2380/v1
+  - myEndpoint3:
+      urls:
+        - https://non.existant.host:2380/v1
+        - https://non.existant.host:2380/v2
+  - myEndpoint4:
+      urls:
+        - https://non.existant.host:2380/v1
+        - https://non.existant.host:2380/v2
+      type: failover

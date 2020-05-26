@@ -71,4 +71,5 @@ public class ResponseConstants {
             "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
+    public static final String ERROR_RESPONSE = "error:true";
 }

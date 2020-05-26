@@ -1,0 +1,6 @@
+,{{#if advanceEndpointConfig.poolConfig}}
+    poolConfig: gateway:getClientPoolConfig(false, {{advanceEndpointConfig.poolConfig.maxActiveConnections}}, {{advanceEndpointConfig.poolConfig.maxIdleConnections}},
+            {{advanceEndpointConfig.poolConfig.waitTimeInMillis}}, {{advanceEndpointConfig.poolConfig.maxActiveStreamsPerConnection}})
+{{else}}
+    poolConfig: gateway:getClientPoolConfig(true, 0, -1, -1, -1)
+{{/if}}
