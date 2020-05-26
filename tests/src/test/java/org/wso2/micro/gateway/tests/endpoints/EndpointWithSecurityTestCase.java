@@ -52,6 +52,31 @@ public class EndpointWithSecurityTestCase extends MultipleEndpointsTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
+    @Test(description = "Test Invoking the resource which endpoint defined at API level using references")
+    public void testSecureEndpointWithAuthnFailure() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v5/store/order/1"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 401, "Response code mismatched");
+    }
+
+
+    @Test(description = "Test Invoking the resource which endpoint defined at API level using references")
+    public void testSecureEndpointWithAuthzFailure() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v5/user/john"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.AUTHZ_FAILURE_RESPONSE);
+        Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
+    }
+
     @Test(description = "Test Invoking the load balanced endpoints in resource level using references")
     public void testLoadBalancedSecureEndpointResourceLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();

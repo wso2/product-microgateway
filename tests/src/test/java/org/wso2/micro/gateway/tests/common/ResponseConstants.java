@@ -44,6 +44,7 @@ public class ResponseConstants {
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";
+    public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
     public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
             "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String RESPONSE_INTERCEPTOR_RESPONSE_HEDAER = "ResponseHeader";
@@ -51,6 +52,7 @@ public class ResponseConstants {
             "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
     public static final String PAYLOAD = "payload";
+    public static final String userResponse = "{ \"name\": \"john\" }";
 
     public static final String JSON_RESPONSE = ":application/json:Accept:Cache-Control:Connection:Content-Length"
             + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
