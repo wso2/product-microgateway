@@ -831,7 +831,10 @@ public function initAuthHandlers() {
     http:ClientConfiguration clientConfig = {
         auth: auth,
         cache: {enabled: false},
-        secureSocket: secureSocket
+        secureSocket: secureSocket,
+        http1Settings : {
+            proxy: getClientProxyForInternalServices()
+        }
     };
     oauth2:IntrospectionServerConfig keyValidationConfig = {
         url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),

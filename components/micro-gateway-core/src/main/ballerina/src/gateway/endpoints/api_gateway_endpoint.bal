@@ -27,6 +27,9 @@ getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    },
+    http1Settings : {
+        proxy: getClientProxyForInternalServices()
     }
 });
 
@@ -40,6 +43,10 @@ getConfigValue(FILE_UPLOAD_ANALYTICS, UPLOADING_EP, DEFAULT_UPLOADING_EP),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+
+    },
+    http1Settings : {
+        proxy: getClientProxyForInternalServices()
     }
 });
 

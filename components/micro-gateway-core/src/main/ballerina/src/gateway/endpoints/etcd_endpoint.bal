@@ -24,6 +24,9 @@ retrieveConfig("etcdurl", "http://127.0.0.1:2379"), {
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    },
+    http1Settings : {
+        proxy: getClientProxyForInternalServices()
     }
 }
 );

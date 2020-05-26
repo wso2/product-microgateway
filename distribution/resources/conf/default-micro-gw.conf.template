@@ -191,14 +191,41 @@
   enableRequestValidation = false
   enableResponseValidation = false
 
-# Enable http2
+# Enable http2 for the microgateway listeners.
 [http2]
   enable = true
 
-# HTTP client configuration
+# HTTP client configuration. These are used when gateway connects with the upstream backend endpoints
 [httpClients]
   # Hostname verification
   verifyHostname=true
+  # Skip validating certificates when ssl is used
+  disableSslVerification = false
+  # Enable http2 when connecting with upstream backend endpoints.
+  enableHttp2 = true
+  #Proxy configurations required when microgateway connects to an upstream back end via a corporate proxy.
+  [httpClients.proxy]
+    #Enable proxy when connecting with backend services.
+    enable = false
+    #Enable proxy when microgateway communicating with internal components like key manager, analytics and etc
+    enableInternalServices = false
+    # Host or IP address of the proxy server
+    host = ""
+    # Port on which proxy server is listening
+    port = 0
+    # Security credentials if the proxy server is protected.
+    username = ""
+    password = ""
+  # Configurations for managing HTTP client(sender) connection pool
+  [httpClients.poolConfig]
+    #Max active connections per route(host:port). Default value is -1 which indicates unlimited
+    maxActiveConnections = -1
+    #Maximum number of idle connections allowed for the pool
+    maxIdleConnections = 100
+    #Maximum amount of time, the client should wait for an idle connection before it sends an error when the pool is exhausted
+    waitTimeInMillis = 30000
+    #Maximum active streams per connection. This only applies to HTTP/2.
+    maxActiveStreamsPerConnection = 50
 
 # Mutual SSL configuration
 [mutualSSLConfig]

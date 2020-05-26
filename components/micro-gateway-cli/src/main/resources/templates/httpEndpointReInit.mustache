@@ -1,4 +1,4 @@
-http:Client|error reInitializedEndpoint = trap new(<string>etcdUrls[<string> gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_0_etcdKey","{{etcdKey}}")], { {{>http2}}{{>caching}}{{>basicAuth}}{{>secureSocket}} });
+http:Client|error reInitializedEndpoint = trap new(<string>etcdUrls[<string> gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_0_etcdKey","{{etcdKey}}")], { {{>clientsHttp2}}{{>caching}}{{>basicAuth}}{{>secureSocket}}{{>advanceEndpoint}} });
 if(reInitializedEndpoint is http:Client) {
 {{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
 {{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
