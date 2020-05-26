@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class CircuitBreakerConfigDTO {
     private RollingWindowConfigDTO rollingWindow;
+    //ballerina circuit breaker default values
     private double failureThreshold = 0.0;
     private int resetTimeInMillis = 0;
     private List<Integer> statusCodes = new ArrayList<>();

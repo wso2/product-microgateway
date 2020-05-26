@@ -19,9 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This DTO holds the data related to endpoint retries in case of a failure scenario
+ * This DTO holds the data related to endpoint retries in case of a failure scenario.
  */
 public class EndpointRetryDTO {
+    //ballerina retry default values
     private int count = 0;
     private int intervalInMillis = 0;
     private double backOffFactor = 0.0;

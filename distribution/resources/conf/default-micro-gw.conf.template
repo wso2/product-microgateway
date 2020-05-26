@@ -205,13 +205,18 @@
   enableHttp2 = true
   #Proxy configurations required when microgateway connects to an upstream back end via a corporate proxy.
   [httpClients.proxy]
+    #Enable proxy when connecting with backend services.
     enable = false
+    #Enable proxy when microgateway communicating with internal components like key manager, analytics and etc
     enableInternalServices = false
+    # Host or IP address of the proxy server
     host = ""
+    # Port on which proxy server is listening
     port = 0
+    # Security credentials if the proxy server is protected.
     username = ""
     password = ""
-  # Configurations for managing HTTP client connection pool
+  # Configurations for managing HTTP client(sender) connection pool
   [httpClients.poolConfig]
     #Max active connections per route(host:port). Default value is -1 which indicates unlimited
     maxActiveConnections = -1

@@ -355,6 +355,7 @@ public class MockBackEndServer extends Thread {
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
+                retryDone = false;
                 exchange.close();
             });
             httpServer.createContext(contextV3 + "/circuitBreaker", exchange -> {
