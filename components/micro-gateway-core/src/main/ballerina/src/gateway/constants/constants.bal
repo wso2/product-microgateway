@@ -265,6 +265,7 @@ public const string FILTERS = "filters";
 public const string MTSL = "mutualSSL";
 public const string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
 public const string MTSL_CONF_CERT_HEADER_NAME = "certificateHeadername";
+public const string MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED = "isClientCertificateValidationEnabled";
 public const string MTSL_CONF_PROTOCOL_NAME = "protocolName";
 public const string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
 public const string MTSL_CONF_CIPHERS = "ciphers";

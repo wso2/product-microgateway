@@ -20,7 +20,7 @@ import ballerina/http;
 #
 public type MutualSSLHandlerWrapper object {
     *http:InboundAuthHandler;
-    MutualSSLHandler mutualSSLHandler = new;
+    MutualSSLHandler mutualSSLHandler = new(apiCertificateList, headerName, isClientCertificateValidationEnabled);
 
     # Checks if the request can be authenticated with the Bearer Auth header.
     #

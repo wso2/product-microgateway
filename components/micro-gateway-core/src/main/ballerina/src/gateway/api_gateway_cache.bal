@@ -93,15 +93,15 @@ public type APIGatewayCache object {
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
     }
 
-    public function addMutualSslCertificateCache(string cert, string certInfo) {
-        mutualSslCertificateCache.put(cert, certInfo);
+    public function addMutualSslCertificateCache(string cert, boolean isCertExist) {
+        mutualSslCertificateCache.put(cert, isCertExist);
         printDebug(KEY_GW_CACHE, "Added mutual certificate information to the  mutualSslCertificateCache ");
     }
 
-    public function retrieveFromMutualSslCertificateCache(string cert) returns string? {
-        var certInfo = mutualSslCertificateCache.get(cert);
-        if (certInfo is string) {
-            return certInfo;
+    public function retrieveFromMutualSslCertificateCache(string cert) returns (boolean | ()) {
+        var isCertExist = mutualSslCertificateCache.get(cert);
+        if (isCertExist is boolean) {
+            return isCertExist;
         } else {
             return ();
         }

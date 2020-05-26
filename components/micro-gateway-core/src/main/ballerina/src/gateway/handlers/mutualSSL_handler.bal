@@ -17,14 +17,28 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
-import ballerina/config;
 
 # Representation of the mutual ssl handler.
 # + gatewayCache - the `APIGatewayCache instence`
-#
+# + apiCertificateList - Api Certificate List
+# + headerName - Header name append by Loadbalncer
+# + isClientCertificateValidationEnabled - Is client certificateValidation enabled
 public type MutualSSLHandler object {
     *http:InboundAuthHandler;
     public APIGatewayCache gatewayCache = new;
+    public map<anydata>[] | error apiCertificateList;
+    public string headerName;
+    public boolean isClientCertificateValidationEnabled;
+
+    # Mutual SSL handler.
+    # + apiCertificateList - Api Certificate List
+    # + headerName - Header name append by Loadbalncer
+    # + isClientCertificateValidationEnabled - Is client certificateValidation enabled
+    public function __init(map<anydata>[] | error apiCertificateList, string headerName, boolean isClientCertificateValidationEnabled) {
+        self.apiCertificateList = apiCertificateList;
+        self.headerName = headerName;
+        self.isClientCertificateValidationEnabled = isClientCertificateValidationEnabled;
+     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
     #
@@ -42,7 +56,7 @@ public type MutualSSLHandler object {
     public function process(http:Request req) returns boolean | http:AuthenticationError {
         string|error mutualSSLVerifyClient = getMutualSSL();
         if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
-                && req.mutualSslHandshake[STATUS] != PASSED ) {
+                && req.mutualSslHandshake[STATUS] != PASSED) {
             if (req.mutualSslHandshake[STATUS] == FAILED) {
                 printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: FAILED");
             }
@@ -50,74 +64,70 @@ public type MutualSSLHandler object {
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS); 
             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
         }
-        string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
-        string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
         if (req.mutualSslHandshake[STATUS] == PASSED) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
             string apiVersion = invocationContext.attributes[API_VERSION_PROPERTY].toString();
-            string apiNamee = invocationContext.attributes[API_NAME].toString();
-            string clientCertificate = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, "");
-            string? cert = req.mutualSslHandshake["base64EncodedCert"];
-            if (clientCertificate != "" &&  req.hasHeader(clientCertificate)) {
-                string headerValue = req.getHeader(clientCertificate);
-                if(headerValue != "" && mutualSSLVerifyClient is string &&
+            string apiName = invocationContext.attributes[API_NAME].toString();
+            if (!self.isClientCertificateValidationEnabled && self.headerName != "" &&  req.hasHeader(self.headerName)) {
+                string headerValue = req.getHeader(self.headerName);
+                if (headerValue != "" && mutualSSLVerifyClient is string &&
                     stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
-                    var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(headerValue);
-                    if (isExistCertCache is string) {
-                        if (stringutils:equalsIgnoreCase(isExistCertCache, "MSSLAF")) {
+                    var cacheKey = headerValue + apiName + apiVersion;
+                    var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);
+                    if (isExistCertCache is boolean) {
+                        if (!isExistCertCache) {
                             printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. " +
-                                "API is not associated with the certificate");
+                            "API is not associated with the certificate");
                             return false;
-                         } else if (stringutils:equalsIgnoreCase(isExistCertCache, "FAMH")) {
-                             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
                          }
                     } else {
-                        boolean|error isCertExistInTrustStore = isExistCert(headerValue, trustStorePath.toString(),
-                            trustStorePassword.toString());
-                        if (isCertExistInTrustStore is error) {
-                            self.gatewayCache.addMutualSslCertificateCache(headerValue, "FAMH");
-                            return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
-                        }
-
-                        if (isCertExistInTrustStore is boolean && !isCertExistInTrustStore) {
-                            printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. " +
-                                "API is not associated with the certificate");
-                                self.gatewayCache.addMutualSslCertificateCache(headerValue, "MSSLAF");
-                            return false;
-                        }
-                        self.gatewayCache.addMutualSslCertificateCache(headerValue, "MSSLAS");
+                        handle|error aliasAFromHeaderCert = getAliasAFromHeaderCert(headerValue);
+                          if (aliasAFromHeaderCert is error) {
+                             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+                             return prepareAuthenticationError("Unclassified Authentication Failure");
+                          }
+                          if (aliasAFromHeaderCert is handle) {
+                              boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasAFromHeaderCert.toString(),
+                              self.apiCertificateList);
+                              if (!isExistAlias || aliasAFromHeaderCert.toString() == "") {
+                                  printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
+                                  "with the certificate");
+                                  self.gatewayCache.addMutualSslCertificateCache(cacheKey, false);
+                                  setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                                  return false;
+                              }
+                          }
+                        self.gatewayCache.addMutualSslCertificateCache(cacheKey, true);
                     }
-                    printDebug("KEY_AUTHN_FILTER", "Mutual SSL authentication success. Certfiacate is correctly" +
-                                     " validated against per API");
                 }
-            } else {
-                var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cert.toString());
-                if (isExistCertCache is string) {
-                    if (stringutils:equalsIgnoreCase(isExistCertCache, "MSSLAF")) {
+            } else if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
+                string? cert = req.mutualSslHandshake["base64EncodedCert"];
+                var cacheKey = cert.toString() + apiName + apiVersion;
+                var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);
+                if (isExistCertCache is boolean) {
+                    if (!isExistCertCache) {
                         printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. " +
-                            "API is not associated with the certificate");
+                        "API is not associated with the certificate");
                         return false;
-                     } else if (stringutils:equalsIgnoreCase(isExistCertCache, "FAMH")) {
-                         return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
                      }
                 } else {
-                    handle|error certificateAlias = getAlias(cert.toString(), trustStorePath.toString(),
-                        trustStorePassword.toString());
+                    handle|error certificateAlias = getAlias(cert.toString());
                     if (certificateAlias is error) {
-                        self.gatewayCache.addMutualSslCertificateCache(cert.toString(), "FAMH");
-                        return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
+                        setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+                        return prepareAuthenticationError("Unclassified Authentication Failure");
                     }
-                    if (certificateAlias is handle && mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY,
-                        mutualSSLVerifyClient)) {
-                        boolean isExistAlias = isExistApiAlias(apiVersion, apiNamee, certificateAlias.toString());
-                        if (!isExistAlias) {
-                            printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated" +
-                            " with the certificate");
-                            self.gatewayCache.addMutualSslCertificateCache(cert.toString(), "MSSLAF");
+                    if (certificateAlias is handle ) {
+                        boolean isExistAlias = isExistApiAlias(apiVersion, apiName, certificateAlias.toString(),
+                        self.apiCertificateList);
+                        if (!isExistAlias || certificateAlias.toString() == "") {
+                            printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
+                            "with the certificate");
+                            self.gatewayCache.addMutualSslCertificateCache(cacheKey, false);
+                            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                             return false;
                         }
                     }
-                    self.gatewayCache.addMutualSslCertificateCache(cert.toString(), "MSSLAS");
+                    self.gatewayCache.addMutualSslCertificateCache(cacheKey, true);
                 }
             }
             printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
@@ -127,12 +137,10 @@ public type MutualSSLHandler object {
     }
 };
 
-
 function doMTSLFilterRequest(http:Request request, runtime:InvocationContext context) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     AuthenticationContext authenticationContext = {};
     printDebug(KEY_AUTHN_FILTER, "Processing request via MutualSSL filter.");
-
     context.attributes[IS_SECURED] = true;
     int startingTime = getCurrentTimeForAnalytics();
     context.attributes[REQUEST_TIME] = startingTime;
@@ -144,9 +152,8 @@ function doMTSLFilterRequest(http:Request request, runtime:InvocationContext con
     context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 }
 
-public function isExistApiAlias(string apiVersionFromRequest, string apiNameFromRequest, string certAliasFromRequest)
-    returns boolean {
-    map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
+public function isExistApiAlias(string apiVersionFromRequest, string apiNameFromRequest, string certAliasFromRequest,
+    map<anydata>[] | error apiCertificateList) returns boolean {
     if (apiCertificateList is map<anydata>[] && apiCertificateList.length() > 0) {
         foreach map<anydata> apiCertificate in apiCertificateList {
             anydata apiName = apiCertificate[NAME];
@@ -156,9 +163,9 @@ public function isExistApiAlias(string apiVersionFromRequest, string apiNameFrom
             int? index = aliasListResult.indexOf(certAliasFromRequest);
             if (apiName is string && apiVersion is string && stringutils:equalsIgnoreCase(apiName, apiNameFromRequest) &&
                 index is int && stringutils:equalsIgnoreCase(apiVersion, apiVersionFromRequest)) {
-                 printDebug("KEY_AUTHN_FILTER", "Mutual SSL authentication success. Certfiacate alias correctly" +
-                 " validated against per API");
-                 return true;
+                printDebug("KEY_AUTHN_FILTER", "Mutual SSL authentication is successful. Certfiacate alias correctly " +
+                "validated against per API");
+                return true;
             }
         }
     }
