@@ -130,6 +130,7 @@ public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
 public const string SHA_PREFIX = "@sha";
+public const string DID_EP_RESPOND = "didEpRespond";
 
 //throttle policy prefixes
 public const string RESOURCE_LEVEL_PREFIX = "res_";
