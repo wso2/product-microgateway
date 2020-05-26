@@ -88,6 +88,8 @@ public class ThrottleDataPublisher {
         }
     }
 
+    //todo: test the api manager in jmeter scenario
+    //todo: test the number of records printed in the log.
     /**
      * This method used to pass message context and let it run within separate thread.
      */

@@ -38,6 +38,7 @@ public class PublisherConfiguration {
     private String receiverUrlGroup = "tcp://localhost:9611";
     private String authUrlGroup = "ssl://localhost:9711";
     private String userName = "admin";
+    // todo: change to charset
     private String password = "admin";
 
     private PublisherConfiguration() {

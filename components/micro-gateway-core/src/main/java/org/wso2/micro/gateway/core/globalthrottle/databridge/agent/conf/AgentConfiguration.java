@@ -37,9 +37,11 @@ public class AgentConfiguration {
     private AgentConfiguration() {
     }
 
+    //todo: remove the default values in the native impl
     private final String publishingStrategy = DataEndpointConstants.ASYNC_STRATEGY;
     private String trustStorePath =
             preProcessTrustStorePath("${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12");
+    // Todo: add charset
     private String trustStorePassword = "ballerina";
     private int queueSize = 32768;
     private int batchSize = 200;

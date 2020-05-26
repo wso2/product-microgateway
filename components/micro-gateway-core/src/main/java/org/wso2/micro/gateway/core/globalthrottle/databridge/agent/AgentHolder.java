@@ -28,7 +28,6 @@ import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.Dat
  */
 public class AgentHolder {
 
-    private static final Logger log = LogManager.getLogger(AgentHolder.class);
     private static AgentHolder instance;
     private DataEndpointAgent agent;
 

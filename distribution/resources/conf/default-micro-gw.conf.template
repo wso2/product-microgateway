@@ -247,6 +247,7 @@
 
 
   # Throttling configurations related to event publishing using a binary connection
+  # todo: add type ?
   [throttlingConfig.binary]
     enabled = false
     # Credentials required to establish connection between Traffic Manager
@@ -256,7 +257,10 @@
     [[throttlingConfig.binary.URLGroup]]
       receiverURL = "tcp://localhost:9611"
       authURL = "ssl://localhost:9711"
+      # todo: type load balance or failover and keep it hidden
     # Data publisher object pool configurations
+    # todo: remove these configs publisher
+    # todo: do a tuning and assign values
     [throttlingConfig.binary.publisherPool]
       maxIdle = 1000
       initIdleCapacity = 200
@@ -291,6 +295,7 @@
       secureMaxIdleConnections = 250
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
+      # todo: add ciphers and ssl protocols
 
 # Observability configurations
 [b7a.observability]
