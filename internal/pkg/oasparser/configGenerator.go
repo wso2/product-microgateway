@@ -24,7 +24,7 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	e "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
+	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"log"
@@ -44,28 +44,29 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	)
 
 	for _, swagger := range mgwSwaggers {
-
-		routes, clusters, endpoints, _, _, _ := e.CreateRoutesWithClusters(swagger)
+		routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(swagger)
 		routesP = append(routesP,routes...)
 		clustersP = append(clustersP,clusters...)
 		endpointsP = append(endpointsP,endpoints...)
 	}
 
-	vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	vHostP, _ := e.CreateVirtualHost(vHost_NameP, routesP)
-
-	listenerNameP := "listenerProd_1"
-	routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	listnerProd := e.CreateListener(listenerNameP, routeConfigNameP, vHostP)
-
 	envoyNodeProd := new(envoy.EnvoyNode)
-	envoyNodeProd.SetListener(&listnerProd)
-	envoyNodeProd.SetClusters(clustersP)
-	envoyNodeProd.SetRoutes(routesP)
-	envoyNodeProd.SetEndpoints(endpointsP)
 
+	if len(mgwSwaggers) > 0 {
+		vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+		vHostP, _ := enovoy.CreateVirtualHost(vHost_NameP, routesP)
+		listenerNameP := "listenerProd_1"
+		routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+		listnerProd := enovoy.CreateListener(listenerNameP, routeConfigNameP, vHostP)
+
+		envoyNodeProd.SetListener(&listnerProd)
+		envoyNodeProd.SetClusters(clustersP)
+		envoyNodeProd.SetRoutes(routesP)
+		envoyNodeProd.SetEndpoints(endpointsP)
+
+	} else {
+		log.Println("No Api definitions found")
+	}
 
 	fmt.Println(len(routesP), "routes are generated successfully")
 	fmt.Println(len(clustersP), "clusters are generated successfully")
@@ -86,7 +87,7 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	)
 
 	for _, swagger := range mgwSwaggers {
-		_, _, _, routes, clusters, endpoints := e.CreateRoutesWithClusters(swagger)
+		_, _, _, routes, clusters, endpoints := enovoy.CreateRoutesWithClusters(swagger)
 		routesS = append(routes)
 		clustersS = append(clusters)
 		endpointsS = append(endpoints)
@@ -95,21 +96,22 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	if routesS == nil {
 		return nil, nil, nil, nil
 	}
-
-	vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	vHostS, _ := e.CreateVirtualHost(vHost_NameS, routesS)
-
-	listenerNameS := "listenerSand_1"
-	routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-
-	listnerSand := e.CreateListener(listenerNameS, routeConfigNameS, vHostS)
-
 	envoyNodeSand := new(envoy.EnvoyNode)
-	envoyNodeSand.SetListener(&listnerSand)
-	envoyNodeSand.SetClusters(clustersS)
-	envoyNodeSand.SetRoutes(routesS)
-	envoyNodeSand.SetEndpoints(endpointsS)
-	//fmt.Println(endpointsS)
+
+	if len(mgwSwaggers) > 0 {
+		vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+		vHostS, _ := enovoy.CreateVirtualHost(vHost_NameS, routesS)
+		listenerNameS := "listenerSand_1"
+		routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+		listnerSand :=enovoy.CreateListener(listenerNameS, routeConfigNameS, vHostS)
+
+		envoyNodeSand.SetListener(&listnerSand)
+		envoyNodeSand.SetClusters(clustersS)
+		envoyNodeSand.SetRoutes(routesS)
+		envoyNodeSand.SetEndpoints(endpointsS)
+	} else {
+		log.Println("No Api definitions found")
+	}
+
 	return envoyNodeSand.GetSources()
 }

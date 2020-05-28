@@ -16,4 +16,10 @@ password = "admin"
 [apis]
 location = "resources/apis/"
 
+[envoy]
+listenerAddress = "0.0.0.0"
+listenerPort = 10000
+apiDefaultPort = 8080
+clusterTimeoutInSeconds = 20
+
   

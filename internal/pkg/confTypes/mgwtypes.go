@@ -1,6 +1,9 @@
 package confTypes
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 /**
 * Experimenting asynchronous communication between go routines using channels
@@ -66,5 +69,13 @@ type Config struct {
 	// it is the individual file path. Should be improved to use with directory)
 	Apis struct {
 		Location string
+	}
+
+	//envoy proxy configuration
+	Envoy struct {
+		ListenerAddress string
+		ListenerPort uint32
+		ApiDefaultPort uint32
+		ClusterTimeoutInSeconds time.Duration
 	}
 }

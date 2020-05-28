@@ -20,11 +20,11 @@ package apiDefinition
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
-	"log"
+	"github.com/wso2/micro-gw/config"
 	"net/url"
 	"strconv"
 	"strings"
+	"log"
 )
 
 func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
@@ -65,7 +65,6 @@ func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
 
 	for path, pathItem := range openApi.Paths {
-
 		var resource Resource
 		if pathItem.Get != nil {
 			resource = setOperationOpenApi(path, "get", pathItem.Get)
@@ -82,16 +81,20 @@ func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
 		} else {
 			//resource = setOperation(contxt,"get",pathItem.Get)
 		}
-
 		resources = append(resources, resource)
 	}
 	return resources
 }
 
 func getHostandBasepathandPort(rawUrl string) (Endpoint) {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		log.Fatal("Error loading configuration. ", errReadConfig)
+	}
+
 	basepath := ""
 	host := ""
-	port := config.API_DEFAULT_PORT
+	port := conf.Envoy.ApiDefaultPort
 
 	if !strings.Contains(rawUrl, "://") {
 		rawUrl = "http://" + rawUrl
@@ -111,7 +114,8 @@ func getHostandBasepathandPort(rawUrl string) (Endpoint) {
 		}
 		port = uint32(u32)
 	}
-	return Endpoint{Host: host, Basepath: basepath, Port: port}
+
+	return Endpoint{host: host, basepath: basepath, port: port}
 }
 
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
@@ -125,4 +129,3 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 		return false
 	}
 }
-

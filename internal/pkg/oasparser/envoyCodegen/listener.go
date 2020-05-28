@@ -24,20 +24,25 @@ import (
 	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/config"
+	"github.com/wso2/micro-gw/config"
+	"log"
 )
 
 func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		log.Fatal("Error loading configuration. ", errReadConfig)
+	}
+
 	listenerAddress := &core.Address_SocketAddress{
 		SocketAddress: &core.SocketAddress{
 			Protocol: core.SocketAddress_TCP,
-			Address:  config.LISTENER_ADDRESS,
+			Address:  conf.Envoy.ListenerAddress,
 			PortSpecifier: &core.SocketAddress_PortValue{
-				PortValue: config.LISTENER_PORT,
+				PortValue: conf.Envoy.ListenerPort,
 			},
 		},
 	}
-
 	listenerFilters := CreateListenerFilters(routeConfigName, vHostP)
 
 	listener := v2.Listener{
@@ -49,9 +54,7 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
 			Filters: listenerFilters},
 		},
 	}
-
 	return listener
-
 }
 
 func CreateListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
@@ -74,7 +77,6 @@ func CreateListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
 	//add filters
 	filters = append(filters, &connectionManagerFilterP)
 	return filters
-
 }
 
 func CreateConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
@@ -83,7 +85,7 @@ func CreateConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
 
 	manager := &hcm.HttpConnectionManager{
 		CodecType:  hcm.HttpConnectionManager_AUTO,
-		StatPrefix: config.MANAGER_STATPREFIX,
+		StatPrefix: "ingress_http",
 		RouteSpecifier: &hcm.HttpConnectionManager_RouteConfig{
 			RouteConfig: &v2.RouteConfiguration{
 				Name:         routeConfigName,
