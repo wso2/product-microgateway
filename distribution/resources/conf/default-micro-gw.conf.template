@@ -100,6 +100,14 @@
   certificateAlias = "wso2apim310"
   # Validate subscribed APIs
   validateSubscription = false
+  #support custom claim mapping
+  claimMapperClassName = "class name of jwt claims value transformer 1"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "attribute name of remote claim 1"
+    localClaim = "attribute name of local claim 1"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "attribute name of remote claim 2"
+    localClaim = "attribute name of local claim 2"
 # Issuer 2
 [[jwtTokenConfig]]
   issuer = "https://host:port/issuer"
@@ -107,6 +115,14 @@
   certificateAlias = "alias"
   # Validate subscribed APIs
   validateSubscription = false
+  #support custom claim mapping
+  claimMapperClassName = "class name of jwt claims value transformer 2"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "attribute name of remote claim 1"
+    localClaim = "attribute name of local claim 1"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "attribute name of remote claim 2"
+    localClaim = "attribute name of local claim 2"
 
 # JWT token revocation configurations
 [tokenRevocationConfig]

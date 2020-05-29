@@ -107,8 +107,8 @@ public type JwtAuthProvider object {
                         } else {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim not found in the jwt");
                         }
-                        var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                         if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
+                            var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
@@ -127,8 +127,8 @@ public type JwtAuthProvider object {
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
                     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
                     if (payload is jwt:JwtPayload) {
-                        var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                         if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
+                            var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
