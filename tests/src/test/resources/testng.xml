@@ -37,7 +37,7 @@
             <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP1BackEndTestCase" />
-            <class name="org.wso2.micro.gateway.tests.endpoints.EndpointWithSecurityTestCase" />
+            <class name="org.wso2.micro.gateway.tests.endpoints.AdvanceEndpointConfigTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.DisableSecurityAndCustomAuthHeaderTestCase" />
             <class name="org.wso2.micro.gateway.tests.grpc.BasicGrpcTestCase" />
         </classes>

@@ -21,6 +21,7 @@ public const int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
 public const int INTERNAL_ERROR_CODE = 900808;
 public const int INTERNAL_ERROR_CODE_POLICY_NOT_FOUND = 900809;
 public const int BLOCKING_ERROR_CODE = 900805;
+public const int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
 
 public const string THROTTLE_OUT_MESSAGE = "Message throttled out";
 public const string THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";

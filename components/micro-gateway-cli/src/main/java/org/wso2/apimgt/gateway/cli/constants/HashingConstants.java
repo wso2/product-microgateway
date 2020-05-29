@@ -16,7 +16,7 @@
 package org.wso2.apimgt.gateway.cli.constants;
 
 /**
- * Constants used for hashing
+ * Constants used for hashing.
  */
 public class HashingConstants {
 

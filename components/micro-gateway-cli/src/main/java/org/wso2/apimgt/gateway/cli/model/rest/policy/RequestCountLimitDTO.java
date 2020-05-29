@@ -26,7 +26,7 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO {
 
 
     /**
-     * Maximum number of requests allowed
+     * Maximum number of requests allowed.
      **/
     @JsonProperty("requestCount")
     public Long getRequestCount() {

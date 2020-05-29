@@ -161,7 +161,7 @@ public final class RouteUtils {
     }
 
     /**
-     * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation
+     * Convert the RouteEndpointConfig object to MgwEndpointConfigDTO for the ease of source code generation.
      *
      * @param prodEpListDTO list of production endpoints
      * @param sandEpListDTO list of sandbox endpoints
@@ -180,6 +180,7 @@ public final class RouteUtils {
             setEndpointUrls(prodEpListDTO, prod);
             prod.setSecurityConfig(prodEpListDTO.getSecurityConfig());
             prod.setName(prodEpListDTO.getName());
+            prod.setAdvanceEndpointConfig(prodEpListDTO.getAdvanceEndpointConfig());
         }
 
         if (sandEpListDTO != null) {
@@ -189,6 +190,7 @@ public final class RouteUtils {
             setEndpointUrls(sandEpListDTO, sandbox);
             sandbox.setSecurityConfig(sandEpListDTO.getSecurityConfig());
             sandbox.setName(sandEpListDTO.getName());
+            sandbox.setAdvanceEndpointConfig(sandEpListDTO.getAdvanceEndpointConfig());
         }
 
         endpointConfigDTO.setProdEndpointList(prod);

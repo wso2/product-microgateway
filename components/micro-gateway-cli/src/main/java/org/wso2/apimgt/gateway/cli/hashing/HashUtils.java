@@ -96,7 +96,7 @@ public class HashUtils {
     }
 
     /**
-     * Loads the stored resource hashes
+     * Loads the stored resource hashes.
      *
      * @param projectName name of the project
      * @return a map with id to hash mapping loaded from the CLI temp
@@ -113,7 +113,7 @@ public class HashUtils {
     }
 
     /**
-     * Store the calculated hashes of API/policy resources in CLI temp folder
+     * Store the calculated hashes of API/policy resources in CLI temp folder.
      *
      * @param hashesMap   map of id against hashes to be stored
      * @param projectName name of the project
@@ -126,7 +126,7 @@ public class HashUtils {
     }
 
     /**
-     * Calculate the hashes of the given list of APIs or Throttle policies and return as a map with id -> hash mapping
+     * Calculate the hashes of the given list of APIs or Throttle policies and return as a map with id -> hash mapping.
      *
      * @param objects List of APIs
      * @return map with id -> hash mapping
@@ -186,7 +186,7 @@ public class HashUtils {
     }
 
     /**
-     * Iterate through the given maps and check if they are both having equal entries
+     * Iterate through the given maps and check if they are both having equal entries.
      *
      * @param map1 First map
      * @param map2 Second map
@@ -209,7 +209,7 @@ public class HashUtils {
     }
 
     /**
-     * Calculates the MD5 hash for a given String
+     * Calculates the MD5 hash for a given String.
      *
      * @param inputString input string
      * @return calculated md5 hash value
@@ -230,7 +230,7 @@ public class HashUtils {
 
 
     /**
-     * Convert the given byte array to a hex string
+     * Convert the given byte array to a hex string.
      *
      * @param byteData byte array
      * @return converted hex string for the byte array

@@ -1,7 +1,7 @@
 package org.wso2.micro.gateway.tools.model;
 
 /**
- * model B7a for the Main
+ * model B7a for the Main.
  */
 public class B7a {
     public Observability getObservability() {

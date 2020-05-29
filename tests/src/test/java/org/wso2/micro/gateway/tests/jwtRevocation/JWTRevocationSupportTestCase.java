@@ -123,7 +123,6 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
 
         //Send Extracted JTI to the jwtRevocation Topic
         publishMessage();
-
     }
 
     /**
@@ -150,7 +149,6 @@ public class JWTRevocationSupportTestCase extends BaseTestCase {
         if (response.getResponseCode() != 200) {
             retryPolicy(MockETCDServer.ALL_KEYS_RESPONSE, 200);
         }
-
     }
      //todo update APIM to 3.0.0
 //    @Test(description = "Test to check revoked token response")

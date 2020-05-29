@@ -175,16 +175,8 @@ public class CodeGenerator {
         String tomlPath = CmdUtils.getProjectTargetGenDirectoryPath(projectName)
                 + File.separator + CliConstants.BALLERINA_TOML_FILE;
         CodegenUtils.writeFile(Paths.get(tomlPath), toml.getContent());
-
-        CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER,
-                projectSrcPath + File.separator + CliConstants.GW_DIST_EXTENSION_FILTER);
-        CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION,
-                projectSrcPath + File.separator + CliConstants.GW_DIST_TOKEN_REVOCATION_EXTENSION);
-        CmdUtils.copyFilesToSources(CmdUtils.getProjectExtensionsDirectoryPath(projectName)
-                        + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION,
-                projectSrcPath + File.separator + CliConstants.GW_DIST_START_UP_EXTENSION);
+        // copy the files inside the extensions folder.
+        CmdUtils.copyFolder(CmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
     }
 
     private BallerinaService generateDefinitionContext(OpenAPI openAPI, String openAPIContent, Path path,
@@ -257,7 +249,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate common endpoint
+     * Generate common endpoint.
      *
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
@@ -364,7 +356,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Generate swagger files
+     * Generate swagger files.
      *
      * @param context model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}

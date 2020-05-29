@@ -58,6 +58,9 @@ public const string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 public const int SUPER_TENANT_ID = -1234;
 public const string THROTTLE_KEY = "throttleKey";
 public const string POLICY_KEY = "policyKey";
+public const string KEY_TEMPLATE_VALUE = "keyTemplateValue";
+public const string KEY_TEMPLATE_STATE = "keyTemplateState";
+public const string KEY_TEMPLATE_ADD = "add";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
 public const string RESOURCE_SECURITY_ANN_NAME = "Security";
@@ -229,11 +232,33 @@ public const string NAME = "name";
 public const string VERSIONS = "versions";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
+public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
+public const string HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = "maxActiveConnections";
+public const string HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
+public const string HTTP_CLIENTS_WAIT_TIME = "waitTimeInMillis";
+public const string HTTP_CLIENTS_MAX_ACTIVE_STREAMS = "maxActiveStreamsPerConnection";
 public const string ENABLE_HOSTNAME_VERIFICATION = "verifyHostname";
+public const string HTTP_CLIENTS_DISABLE_SSL_VERIFICATION = "disableSslVerification";
+public const string HTTP_CLIENTS_ENABLE_HTTP2 = "enableHttp2";
+public const string HTTP_CLIENTS_PROXY_INSTANCE_ID = "httpClients.proxy";
+public const string HTTP_CLIENTS_PROXY_ENABLE = "enable";
+public const string HTTP_CLIENTS_PROXY_ENABLE_INTERNAL_SERVICES = "enableInternalServices";
+public const string HTTP_CLIENTS_PROXY_HOST = "host";
+public const string HTTP_CLIENTS_PROXY_PORT = "port";
+public const string HTTP_CLIENTS_PROXY_USERNAME = "username";
+public const string HTTP_CLIENTS_PROXY_PASSWORD = "password";
 
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
 public const string BLOCKING_CONDITION_VALUE = "conditionValue";
+public const string BLOCKING_CONDITION_IP = "IP";
+public const string BLOCKING_CONDITION_IP_RANGE = "IPRANGE";
+public const string BLOCKING_CONDITION_ID = "id";
+public const string BLOCKING_CONDITION_TENANAT_DOMAIN = "tenantDomain";
+public const string BLOCKING_CONDITION_TYPE = "type";
+public const string BLOCKING_CONDITION_FIXED_IP = "fixedIp";
+public const string BLOCKING_CONDITION_START_IP = "startingIp";
+public const string BLOCKING_CONDITION_END_IP = "endingIp";
 
 public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
@@ -305,6 +330,7 @@ public const string JMS_CONNECTION_USERNAME = "jmsConnectionUsername";
 public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
+public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.dataRetriever";
 
 public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
 public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
@@ -347,6 +373,8 @@ public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
 const string PATH_SEPERATOR = "/";
+const string TENANT_DOMAIN_PREFIX = "/t/";
+const string TENANT_DOMAIN_SEPERATOR = "@";
 
 //http2 constants
 public const string HTTP2_INSTANCE_ID = "http2";
@@ -365,6 +393,9 @@ const string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
 const string KEY_VALIDATION_FILTER = "ValidationFilter";
 const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
+const string KEY_THROTTLE_EVENT_LISTENER = "ThrottleEventListener";
+const string KEY_TEMPLATE_RETIEVAL_TASK = "KeyTemplateRetrievalTask";
+const string KEY_BLOCKING_CONDITION_RETRIEVAL_TASK = "BlockingConditionRetrievalTask";
 const string KEY_GW_CACHE = "GatewayCache";
 const string KEY_UTILS = "Utils";
 const string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
@@ -426,3 +457,5 @@ public const string API_PUBLISHER = "api_publisher";
 public const string API_NAME = "api_name";
 public const string MATCHING_RESOURCE = "matching_resource";
 
+
+public const int DEFAULT_AUTH_FILTER_POSITION = 2;

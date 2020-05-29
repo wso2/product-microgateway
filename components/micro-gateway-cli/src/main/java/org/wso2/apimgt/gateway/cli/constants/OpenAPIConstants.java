@@ -68,7 +68,7 @@ public class OpenAPIConstants {
             "romania", "rwanda", "kigali", "castries", "kingstown", "victoria", "slovenia", "bern");
 
     /**
-     * API security types supported by mgw
+     * API security types supported by mgw.
      */
     public enum APISecurity {
         basic,

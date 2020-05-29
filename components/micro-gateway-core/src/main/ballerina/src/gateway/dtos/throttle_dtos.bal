@@ -90,3 +90,15 @@ public type GlobalThrottleStreamDTO record {
     int? remainingQuota;
     boolean isThrottled = false;
 };
+
+public type IPRangeDTO record {
+    int id;
+    string tenantDomain = "carbon.super";
+    string 'type;
+    string fixedIp;
+    string startingIp;
+    string startingIpNumber;
+    string endingIp;
+    string endingIpNumber;
+    boolean invert = false;
+};

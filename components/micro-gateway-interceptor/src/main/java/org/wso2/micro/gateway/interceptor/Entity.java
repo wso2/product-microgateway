@@ -213,7 +213,7 @@ public class Entity {
     }
 
     /**
-     * Given an entity, gets the entity body as a byte channel
+     * Given an entity, gets the entity body as a byte channel.
      *
      * @return {@link ByteChannel} A byte channel from which the message payload can be read.
      * @throws InterceptorException If error while getting byte channel of the entity.

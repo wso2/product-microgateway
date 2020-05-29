@@ -98,7 +98,7 @@ public class Validate {
     }
 
     /***
-     * Extract resource artifacts from the jar file
+     * Extract resource artifacts from the jar file.
      * @param projectName project name.
      * @param serviceName ballerina service name
      * @throws IOException

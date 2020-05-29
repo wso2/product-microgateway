@@ -1,0 +1,13 @@
+{{#if circuitBreaker}},
+circuitBreaker : {
+    {{#if circuitBreaker.rollingWindow}}
+    rollingWindow : {
+    requestVolumeThreshold : {{circuitBreaker.rollingWindow.requestVolumeThreshold}},
+    timeWindowInMillis : {{circuitBreaker.rollingWindow.timeWindowInMillis}},
+    bucketSizeInMillis : {{circuitBreaker.rollingWindow.bucketSizeInMillis}}
+    },{{/if}}
+    failureThreshold : {{circuitBreaker.failureThreshold}},
+    resetTimeInMillis : {{circuitBreaker.resetTimeInMillis}} {{#if circuitBreaker.statusCodes}},
+    statusCodes : [ {{#circuitBreaker.statusCodes}} {{.}}{{#unless @last}},{{/unless}} {{/circuitBreaker.statusCodes}}]  {{/if}}
+}
+{{/if}}

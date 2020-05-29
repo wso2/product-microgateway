@@ -713,7 +713,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * validate all resource extensions for single path
+     * validate all resource extensions for single path.
      *
      * @param openAPI         {@link OpenAPI} object
      * @param openAPIFilePath file path to openAPI definition
@@ -732,7 +732,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Validate Resource level extensions for Single Resource
+     * Validate Resource level extensions for Single Resource.
      *
      * @param operation       {@link Operation} object
      * @param pathItem        path name
@@ -749,7 +749,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Validate API Level and Resource Level interceptors
+     * Validate API Level and Resource Level interceptors.
      *
      * @param extensions      {@link Map} object to access api level and operation level extensions
      * @param pathItem        path name
@@ -919,7 +919,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Provide api keys for a given security requirement list
+     * Provide api keys for a given security requirement list.
      *
      * @param securityRequirementList {@link List<SecurityRequirement>} object
      * @return list of API Keys
@@ -997,7 +997,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * store the security schemas of type "basic" and "apikey"
+     * store the security schemas of type "basic" and "apikey".
      *
      * @param openAPI {@link OpenAPI} object
      */
@@ -1096,7 +1096,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Get auth providers for given schema
+     * Get auth providers for given schema.
      * @param schemas oas definition schemas
      * @param appSecurity security defined by the extension
      * @return list of auth providers
