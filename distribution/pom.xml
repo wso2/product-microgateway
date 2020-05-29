@@ -101,16 +101,6 @@
             <groupId>org.wso2.carbon.callhome</groupId>
             <artifactId>core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${org.apache.logging.log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${org.apache.logging.log4j.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -171,10 +161,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
-                                org.apache.logging.log4j</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, log4j-core,
-                                log4j-api</includeArtifactIds>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor</includeArtifactIds>
                         </configuration>
                     </execution>
                     <execution>

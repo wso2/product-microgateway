@@ -236,8 +236,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema, json</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, org.apache.logging.log4j</includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema, json, log4j-api, log4j-core</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
