@@ -52,7 +52,7 @@ public class EndpointWithSecurityTestCase extends MultipleEndpointsTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
-    @Test(description = "Test Invoking the resource which endpoint defined at API level using references")
+    @Test(description = "Test invoking a resource with authentication failure.")
     public void testSecureEndpointWithAuthnFailure() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
@@ -65,7 +65,7 @@ public class EndpointWithSecurityTestCase extends MultipleEndpointsTestCase {
     }
 
 
-    @Test(description = "Test Invoking the resource which endpoint defined at API level using references")
+    @Test(description = "Test Invoking a resource with authorization failure.")
     public void testSecureEndpointWithAuthzFailure() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
