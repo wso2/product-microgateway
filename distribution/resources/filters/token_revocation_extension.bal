@@ -14,17 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//import ballerina/http;
-//import ballerina/log;
-//import ballerina/auth;
-//import ballerina/config;
-//import ballerina/runtime;
-//import ballerina/system;
-//import ballerina/time;
-//import ballerina/io;
-//import ballerina/reflect;
-//import wso2/gateway;
-
 # This method can be used to add custom logic to add revoked token to the revoked token map.
 #
 function initiatePersistentRevokedTokenRetrieval(map<string> revokedTokenMapReceived) {

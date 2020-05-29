@@ -15,16 +15,7 @@
 // under the License.
 
 import ballerina/http;
-//import ballerina/log;
-//import ballerina/auth;
-//import ballerina/config;
-//import ballerina/runtime;
-//import ballerina/system;
-//import ballerina/time;
-//import ballerina/io;
-//import ballerina/reflect;
 import wso2/gateway;
-
 
 # Represents the extension filter, which used to customize and extend the request and response handling
 #
