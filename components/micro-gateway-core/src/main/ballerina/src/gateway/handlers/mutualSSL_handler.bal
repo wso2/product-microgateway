@@ -66,41 +66,57 @@ public type MutualSSLHandler object {
         }
         if (req.mutualSslHandshake[STATUS] == PASSED) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-            string apiVersion = invocationContext.attributes[API_VERSION_PROPERTY].toString();
-            string apiName = invocationContext.attributes[API_NAME].toString();
-            if (!self.isClientCertificateValidationEnabled && self.headerName != "" &&  req.hasHeader(self.headerName)) {
-                string headerValue = req.getHeader(self.headerName);
-                if (headerValue != "" && mutualSSLVerifyClient is string &&
-                    stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
-                    var cacheKey = headerValue + apiName + apiVersion;
-                    var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);
-                    if (isExistCertCache is boolean) {
-                        if (!isExistCertCache) {
-                            printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. " +
-                            "API is not associated with the certificate");
+            if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
+                string apiVersion = invocationContext.attributes[API_VERSION_PROPERTY].toString();
+                string apiName = invocationContext.attributes[API_NAME].toString();
+                if (self.headerName != "" &&  req.hasHeader(self.headerName)) {
+                    if (!self.isClientCertificateValidationEnabled) {
+                        string headerValue = req.getHeader(self.headerName);
+                        if (headerValue != "") {
+                            var cacheKey = headerValue + apiName + apiVersion;
+                            var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);
+                            if (isExistCertCache is boolean) {
+                                if (!isExistCertCache) {
+                                    printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. " +
+                                    "API is not associated with the certificate");
+                                    setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                                    return false;
+                                } else {
+                                    printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
+                                    doMTSLFilterRequest(req, invocationContext);
+                                    return true;
+                                }
+                            } else {
+                                handle|error aliasAFromHeaderCert = getAliasAFromHeaderCert(headerValue);
+                                if (aliasAFromHeaderCert is error) {
+                                    setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+                                    return prepareAuthenticationError("Unclassified Authentication Failure");
+                                }
+                                if (aliasAFromHeaderCert is handle) {
+                                    boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasAFromHeaderCert.toString(),
+                                    self.apiCertificateList);
+                                    if (!isExistAlias || aliasAFromHeaderCert.toString() == "") {
+                                        printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
+                                        "with the certificate");
+                                        self.gatewayCache.addMutualSslCertificateCache(cacheKey, false);
+                                        setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                                        return false;
+                                    } else {
+                                        printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
+                                        doMTSLFilterRequest(req, invocationContext);
+                                        self.gatewayCache.addMutualSslCertificateCache(cacheKey, true);
+                                        return true;
+                                    }
+                                }
+
+                            }
+                        } else {
+                            printDebug(KEY_AUTHN_FILTER, "Header has empty value sent by the payload");
+                            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                             return false;
-                         }
-                    } else {
-                        handle|error aliasAFromHeaderCert = getAliasAFromHeaderCert(headerValue);
-                          if (aliasAFromHeaderCert is error) {
-                             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
-                             return prepareAuthenticationError("Unclassified Authentication Failure");
-                          }
-                          if (aliasAFromHeaderCert is handle) {
-                              boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasAFromHeaderCert.toString(),
-                              self.apiCertificateList);
-                              if (!isExistAlias || aliasAFromHeaderCert.toString() == "") {
-                                  printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
-                                  "with the certificate");
-                                  self.gatewayCache.addMutualSslCertificateCache(cacheKey, false);
-                                  setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-                                  return false;
-                              }
-                          }
-                        self.gatewayCache.addMutualSslCertificateCache(cacheKey, true);
+                        }
                     }
                 }
-            } else if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
                 string? cert = req.mutualSslHandshake["base64EncodedCert"];
                 var cacheKey = cert.toString() + apiName + apiVersion;
                 var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);

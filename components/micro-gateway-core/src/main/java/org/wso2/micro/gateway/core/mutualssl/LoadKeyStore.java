@@ -32,7 +32,7 @@ public class LoadKeyStore {
     }
 
     /**
-     * Used to get the keystore path
+     * Used to get the keystore path.
      */
     public static String getKeyStorePath(String fullPath) {
         String homePathConst = "\\$\\{mgw-runtime.home}";

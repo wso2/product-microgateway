@@ -17,7 +17,7 @@ import static org.wso2.micro.gateway.core.Constants.BEGIN_CERTIFICATE_STRING;
 import static org.wso2.micro.gateway.core.Constants.END_CERTIFICATE_STRING;
 
 /**
- * This class is responsible for get the alias from the certificate  in mutual SSL handshake
+ * This class is responsible for get the alias from the certificate  in mutual SSL handshake,
  * when the header send by the load balancer.
  */
 public class MutualsslWithLoadBalancerHeader {
