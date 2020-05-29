@@ -36,7 +36,12 @@ public class Log4j2Configuration {
     private static final String appenderPatternKey = "pattern";
     private static final String appenderPatternValue = "%d %-5p [%c] - [%c{1}] %x %m%n";
 
-    public static void initialize(boolean isDebugEnabled) {
+    private static final String traceLogLevel = "TRACE";
+    private static final String debugLogLevel = "DEBUG";
+    private static final String infoLogLevel = "INFO";
+    private static final String warnLogLevel = "WARN";
+
+    public static void initialize(String logLevel) {
         if (System.getProperty(log4jConfigurationProperty) == null) {
             ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder()
                     .setStatusLevel(Level.ERROR)
@@ -45,10 +50,22 @@ public class Log4j2Configuration {
                     .add(builder.newLayout(appenderLayoutPluginType)
                             .addAttribute(appenderPatternKey, appenderPatternValue));
             builder.add(appenderBuilder);
-            if (isDebugEnabled) {
-                builder.add(builder.newRootLogger(Level.DEBUG).add(builder.newAppenderRef(appenderName)));
-            } else {
-                builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef(appenderName)));
+            switch (logLevel) {
+                case traceLogLevel:
+                    builder.add(builder.newRootLogger(Level.TRACE).add(builder.newAppenderRef(appenderName)));
+                    break;
+                case debugLogLevel:
+                    builder.add(builder.newRootLogger(Level.DEBUG).add(builder.newAppenderRef(appenderName)));
+                    break;
+                case infoLogLevel:
+                    builder.add(builder.newRootLogger(Level.INFO).add(builder.newAppenderRef(appenderName)));
+                    break;
+                case warnLogLevel:
+                    builder.add(builder.newRootLogger(Level.WARN).add(builder.newAppenderRef(appenderName)));
+                    break;
+                default:
+                    builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef(appenderName)));
+                    break;
             }
             Configurator.initialize(builder.build());
         }

@@ -15,18 +15,13 @@
 // under the License.
 
 import ballerinax/java;
-import ballerina/stringutils;
 
 public function initNativeImpLog4jConfig() {
     string logLevel = getConfigValue(B7A_LOG, LOG_LEVEL, INFO);
-    if (stringutils:equalsIgnoreCase(DEBUG, logLevel) || stringutils:equalsIgnoreCase(TRACE, logLevel)) {
-        jInitNativeImpLog4jConfig(true);
-    } else {
-       jInitNativeImpLog4jConfig(false);
-    }
+    jInitNativeImpLog4jConfig(java:fromString(logLevel));
 }
 
-public function jInitNativeImpLog4jConfig(boolean isDebugEnabled) = @java:Method {
+public function jInitNativeImpLog4jConfig(handle isDebugEnabled) = @java:Method {
     name: "initialize",
     class: "org.wso2.micro.gateway.core.logging.Log4j2Configuration"
 } external;
