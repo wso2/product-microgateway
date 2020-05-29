@@ -372,7 +372,7 @@ public const int THROTTLED_OUT = 429;
 public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
-const string PATH_SEPERATOR = "/";
+public const string PATH_SEPERATOR = "/";
 const string TENANT_DOMAIN_PREFIX = "/t/";
 const string TENANT_DOMAIN_SEPERATOR = "@";
 

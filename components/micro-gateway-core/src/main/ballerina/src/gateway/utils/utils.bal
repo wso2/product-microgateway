@@ -1017,3 +1017,18 @@ function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceCon
         invocationContext.attributes[API_NAME] = <string>apiConfig.name;
     }
 }
+
+# Format context to remove preceding and trailing "/".
+#
+# + context - context to be formatted
+# + return - context
+public function removePrePostSlash(string context) returns string {
+    string formattedContext = context;
+    if (formattedContext.startsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(1, formattedContext.length());
+    }
+    if (formattedContext.endsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(0, formattedContext.length() - 1);
+    }
+    return formattedContext;
+}
