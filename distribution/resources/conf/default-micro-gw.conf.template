@@ -257,7 +257,6 @@
     [[throttlingConfig.binary.URLGroup]]
       receiverURL = "tcp://localhost:9611"
       authURL = "ssl://localhost:9711"
-      # todo: type load balance or failover and keep it hidden
     # Data publisher object pool configurations
     # todo: remove these configs publisher
     # todo: do a tuning and assign values

@@ -18,8 +18,6 @@
 
 package org.wso2.micro.gateway.core.globalthrottle.databridge.agent;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.DataEndpointException;
 

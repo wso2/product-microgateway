@@ -16,6 +16,7 @@
 
 import ballerinax/java;
 import ballerina/config;
+import ballerina/stringutils;
 
 # Initialize the Binary Throttle Data Publisher
 public function initBinaryThrottleDataPublisher() {
@@ -41,6 +42,55 @@ function loadTMBinaryPublisherConfiguration() {
     jSetTMBinaryPublisherConfiguration(dto);
 }
 
+// # The receiverURLGroup and the authURLGroup is preprocessed such that to make them compatible with the binary agent.
+// # + return - [receiverURLGroup , authURLGroup]
+// function processTMPublisherURLGroup () returns [string, string] {
+//     string restructuredReceiverURL = "";
+//     string restructuredAuthURL = "";
+//     map<anydata>[] | error urlGroups = map<anydata>[].constructFrom(config:getAsArray(TM_BINARY_URL_GROUP));
+
+//     if (urlGroups is map<anydata>[] && urlGroups.length() > 0) {
+//         foreach map<anydata> urlGroup in urlGroups {
+//             string receiverUrl = "";
+//             string authUrl = "";
+
+//             if (urlGroup[TM_BINARY_RECEIVER_URL] is string) {
+//                 receiverUrl = <string>urlGroup[TM_BINARY_RECEIVER_URL];
+//             } else {
+//                 printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is skipped as "
+//                     + TM_BINARY_RECEIVER_URL + " property is not provided under " + TM_BINARY_URL_GROUP);
+//             }
+
+//             if (urlGroup[TM_BINARY_AUTH_URL] is string) {
+//                 authUrl = <string>urlGroup[TM_BINARY_AUTH_URL];
+//             } else {
+//                 printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is " +
+//                     "skipped as " + TM_BINARY_AUTH_URL + " property is not provided under "  + TM_BINARY_URL_GROUP);
+//             }
+
+//             //the urlGroup is added only if both URLs are provided.
+//             if (receiverUrl != "" && authUrl != "") {
+//                 restructuredReceiverURL += "{ " + receiverUrl + " },";
+//                 restructuredAuthURL += "{ " + authUrl + " },";
+//             }
+//         }
+//         //to remove the final ',' in the URLs
+//         if(restructuredReceiverURL != "" && restructuredAuthURL != "") {
+//             restructuredReceiverURL = restructuredReceiverURL.substring(0, restructuredReceiverURL.length() - 1);
+//             restructuredAuthURL = restructuredAuthURL.substring(0, restructuredAuthURL.length() - 1);
+//             return [restructuredReceiverURL, restructuredAuthURL];
+//         }
+//     } else {
+//         printDebug(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_AUTH_URL + " property is not identified " +
+//             "in the configuration file");
+//     }
+//     //If receiverURLGroup and AuthURLGroup is not set, task will proceed with the default configurations.
+//     printDebug(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, "Proceeding with the default parameters for " +
+//         TM_BINARY_URL_GROUP);
+//     return [DEFAULT_TM_RECEIVER_URL_GROUP,DEFAULT_TM_AUTH_URL_GROUP];
+// }
+
+
 # The receiverURLGroup and the authURLGroup is preprocessed such that to make them compatible with the binary agent.
 # + return - [receiverURLGroup , authURLGroup]
 function processTMPublisherURLGroup () returns [string, string] {
@@ -50,27 +100,32 @@ function processTMPublisherURLGroup () returns [string, string] {
 
     if (urlGroups is map<anydata>[] && urlGroups.length() > 0) {
         foreach map<anydata> urlGroup in urlGroups {
-            string receiverUrl = "";
-            string authUrl = "";
 
-            if (urlGroup[TM_BINARY_RECEIVER_URL] is string) {
-                receiverUrl = <string>urlGroup[TM_BINARY_RECEIVER_URL];
-            } else {
-                printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is skipped as "
-                    + TM_BINARY_RECEIVER_URL + " property is not provided under " + TM_BINARY_URL_GROUP);
+            string urlType = "";
+            if (urlGroup.hasKey(TM_BINARY_URL_GROUP_TYPE)) {
+                if (urlGroup[TM_BINARY_URL_GROUP_TYPE] is string) {
+                    urlType = <string> urlGroup[TM_BINARY_URL_GROUP_TYPE];
+                } else {
+                    printWarn(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element's "
+                        + TM_BINARY_URL_GROUP_TYPE + " property is not a valid string. Hence proceeding as a "
+                        + TM_BINARY_FAILOVER + " configuration.");
+                    urlType = TM_BINARY_FAILOVER;
+                }
             }
 
-            if (urlGroup[TM_BINARY_AUTH_URL] is string) {
-                authUrl = <string>urlGroup[TM_BINARY_AUTH_URL];
+            string | error receiverUrl = processSingleURLGroup(urlGroup[TM_BINARY_RECEIVER_URL], urlType);
+            string | error authUrl = processSingleURLGroup (urlGroup[TM_BINARY_AUTH_URL], urlType);
+            if (receiverUrl is string && authUrl is string) {
+                restructuredReceiverURL += receiverUrl + ",";
+                restructuredAuthURL += authUrl + ",";
             } else {
-                printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is " +
-                    "skipped as " + TM_BINARY_AUTH_URL + " property is not provided under "  + TM_BINARY_URL_GROUP);
-            }
-
-            //the urlGroup is added only if both URLs are provided.
-            if (receiverUrl != "" && authUrl != "") {
-                restructuredReceiverURL += "{ " + receiverUrl + " },";
-                restructuredAuthURL += "{ " + authUrl + " },";
+                if (receiverUrl is error) {
+                    printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is skipped as "
+                        + TM_BINARY_RECEIVER_URL + " property is not provided correctly.", receiverUrl);
+                } else if (authUrl is error) {
+                    printError(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP + " element is skipped as "
+                        + TM_BINARY_AUTH_URL + " property is not provided correctly.", authUrl);
+                }
             }
         }
         //to remove the final ',' in the URLs
@@ -81,12 +136,55 @@ function processTMPublisherURLGroup () returns [string, string] {
         }
     } else {
         printDebug(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_AUTH_URL + " property is not identified " +
-            "in the configuration file");
+            "in the configuration file.");
     }
     //If receiverURLGroup and AuthURLGroup is not set, task will proceed with the default configurations.
     printDebug(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, "Proceeding with the default parameters for " +
         TM_BINARY_URL_GROUP);
     return [DEFAULT_TM_RECEIVER_URL_GROUP,DEFAULT_TM_AUTH_URL_GROUP];
+}
+
+function processSingleURLGroup(anydata urlArrayConfigValue, string urlType) returns string | error {
+
+    if (urlArrayConfigValue is anydata[]) {
+        anydata[] urlArray = <anydata[]> urlArrayConfigValue;
+        string concatenatedURLString = "{";
+        if (urlArray.length() == 1) {
+            string | error url = <string> urlArray[0];
+            if (url is string) {
+                return "{" + url + "}";
+            }
+            return url;
+        }
+        foreach var urlItem in urlArray {
+            string | error url = <string> urlItem;
+            if (url is string) {
+                if (stringutils:equalsIgnoreCase(urlType, TM_BINARY_LOADBALANCE)) {
+                    concatenatedURLString += url + TM_BINARY_LOADBALANCE_SEPARATOR;
+                } else if (stringutils:equalsIgnoreCase(urlType, TM_BINARY_FAILOVER)) {
+                    concatenatedURLString += url + TM_BINARY_FAILOVER_SEPARATOR;
+                } else {
+                    printWarn(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP_TYPE + " property value is not "
+                        + TM_BINARY_LOADBALANCE + " or " + TM_BINARY_FAILOVER + ". Hence proceeding as a "
+                        + TM_BINARY_FAILOVER + " configuration.");
+                    concatenatedURLString += url + TM_BINARY_FAILOVER_SEPARATOR;
+                }
+            } else {
+                return url;
+            }
+        }
+        //to remove the trailing additional '|' or ','
+        concatenatedURLString = concatenatedURLString.substring(0, concatenatedURLString.length() - 1) + "}";
+        return concatenatedURLString;
+    } else {
+        string | error url = <string> urlArrayConfigValue;
+        if (url is string) {
+            return "{" + url + "}";
+        } else {
+            //explicitly throwing an error
+            return url;
+        }
+    }
 }
 
 # set configurations related to binary agent
