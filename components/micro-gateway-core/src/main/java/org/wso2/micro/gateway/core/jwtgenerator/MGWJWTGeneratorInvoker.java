@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.micro.gateway.core.jwtgenerator;
 
 import org.ballerinalang.jvm.values.ArrayValue;
@@ -31,19 +47,25 @@ public class MGWJWTGeneratorInvoker {
                                                 boolean cacheEnabled,
                                                 int cacheExpiry,
                                                 String tokenIssuer,
-                                                String tokenAudience) {
+                                                ArrayValue tokenAudience) {
         try {
             Class jwtGeneratorClass = MGWJWTGeneratorInvoker.class.getClassLoader().loadClass(className);
             Constructor classConstructor = jwtGeneratorClass
                     .getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class,
                             String.class, int.class, String[].class, boolean.class, int.class, String.class,
-                            String.class);
-            Object[] objectArray = convertArrayValueToArray(restrictedClaims);
-            String[] restrictedClaimArray = Arrays.copyOf(objectArray, objectArray.length, String[].class);
+                            String[].class);
+            Object[] restrictedClaimObjectArray = convertArrayValueToArray(restrictedClaims);
+            String[] restrictedClaimArray = Arrays.copyOf(restrictedClaimObjectArray,
+                                                            restrictedClaimObjectArray.length,
+                                                            String[].class);
+            Object[] tokenAudienceObjectArray = convertArrayValueToArray(tokenAudience);
+            String[] tokenAudienceArray = Arrays.copyOf(tokenAudienceObjectArray,
+                                                        tokenAudienceObjectArray.length,
+                                                        String[].class);
             abstractMGWJWTGenerator = (AbstractMGWJWTGenerator) classConstructor
                     .newInstance(dialectURI, signatureAlgorithm, keyStorePath, keyStorePassword, certificateAlias,
                             privateKeyAlias, jwtExpiryTime, restrictedClaimArray, cacheEnabled, cacheExpiry,
-                            tokenIssuer, tokenAudience);
+                            tokenIssuer, tokenAudienceArray);
             return true;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
                     | InvocationTargetException | NoSuchMethodException e) {
@@ -53,7 +75,7 @@ public class MGWJWTGeneratorInvoker {
     }
 
     /**
-     * Invoke token generation method
+     * Invoke token generation method.
      */
     public static String invokeGenerateToken(MapValue jwtInfo, MapValue apiDetails) throws Exception {
         Map<String, Object> jwtInfoMap = convertMapValueToMap(jwtInfo);
@@ -67,7 +89,7 @@ public class MGWJWTGeneratorInvoker {
     }
 
     /**
-     * Convert ArrayValue to Array
+     * Convert ArrayValue to Array.
      */
     public static Object[] convertArrayValueToArray(ArrayValue arrayValue) {
         Object[] array = new Object[arrayValue.size()];
@@ -84,7 +106,7 @@ public class MGWJWTGeneratorInvoker {
     }
 
     /**
-     * Convert MapValue to Map
+     * Convert MapValue to Map.
      */
     public static Map<String, Object> convertMapValueToMap(MapValue mapValue) {
         Map<String, Object> map = new HashMap<>();
@@ -105,7 +127,7 @@ public class MGWJWTGeneratorInvoker {
     }
 
     /**
-     * Used to get the keystore path
+     * Used to get the keystore path.
      */
     public static String getKeyStorePath(String fullPath) {
         String homePathConst = "\\$\\{mgw-runtime.home}";

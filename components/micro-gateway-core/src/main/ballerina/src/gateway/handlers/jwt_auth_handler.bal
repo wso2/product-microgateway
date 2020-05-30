@@ -39,7 +39,7 @@ public type JWTAuthHandler object {
     private string keyStoreLocationUnresolved = "";
     private string keyStorePassword = "";
     private string tokenIssuer = "";
-    private string tokenAudience = "";
+    private any[] tokenAudience = [];
     private int skewTime = 0;
     private boolean enabledCaching = false;
     private int cacheExpiry = 0;
@@ -80,9 +80,17 @@ public type JWTAuthHandler object {
             self.tokenIssuer = getConfigValue(JWT_GENERATOR_ID,
                                                 JWT_GENERATOR_TOKEN_ISSUER,
                                                 DEFAULT_JWT_GENERATOR_TOKEN_ISSUER);
-            self.tokenAudience = getConfigValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_TOKEN_AUDIENCE,
-                                                    DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE);
+            self.tokenAudience = getConfigArrayValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_TOKEN_AUDIENCE);
+            // provide backward compatibility for skew time
+            self.skewTime = getConfigIntValue(SERVER_CONF_ID, 
+                                                SERVER_TIMESTAMP_SKEW, 
+                                                DEFAULT_SERVER_TIMESTAMP_SKEW);
+            if (self.skewTime == -1) {
+                self.skewTime = getConfigIntValue(KM_CONF_INSTANCE_ID, 
+                                                    TIMESTAMP_SKEW, 
+                                                    DEFAULT_TIMESTAMP_SKEW);
+            }
             self.skewTime = getConfigIntValue(SERVER_CONF_ID,
                                                 TIMESTAMP_SKEW,
                                                 DEFAULT_TIMESTAMP_SKEW);
@@ -166,7 +174,7 @@ public type JWTAuthHandler object {
 # + apiName - name of the current API
 # + apiVersion - version of the current API
 # + return - Returns map<string> with the extracted details.
-public function checkSubscribedAPIs(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
+public function getAPIDetails(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
     map<string> subscriptionDetails = {
         apiName: "",
         apiContext: "",
@@ -252,7 +260,7 @@ public function generateAndSetBackendJwtHeader(string credential,
             if (payload is jwt:JwtPayload) {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
                 // get the subscribedAPI details
-                map<string> apiDetails = checkSubscribedAPIs(payload, apiName, apiVersion);
+                map<string> apiDetails = getAPIDetails(payload, apiName, apiVersion);
                 // checking if cache is enabled
                 if (enabledCaching) {
                     var cachedToken = jwtGeneratorCache.get(cacheKey);

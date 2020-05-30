@@ -45,7 +45,7 @@ public function loadJWTGeneratorClass(string className,
                                         boolean enabledCaching,
                                         int cacheExpiry,
                                         string tokenIssuer,
-                                        string tokenAudience) returns boolean {
+                                        any[] tokenAudience) returns boolean {
     handle jClassName = java:fromString(className);
     handle jDialectURI = java:fromString(dialectURI);
     handle jSignatureAlgorithm = java:fromString(signatureAlgorithm);
@@ -54,7 +54,6 @@ public function loadJWTGeneratorClass(string className,
     handle jKeyStorePath = getKeystoreLocation(java:fromString(keyStorePathUnresolved));
     handle jKeyStorePassword = java:fromString(keyStorePassword);
     handle jTokenIssuer = java:fromString(tokenIssuer);
-    handle jTokenAudience = java:fromString(tokenAudience);
     return jLoadJWTGeneratorClass(jClassName,
                                     jDialectURI,
                                     jSignatureAlgorithm,
@@ -67,7 +66,7 @@ public function loadJWTGeneratorClass(string className,
                                     enabledCaching,
                                     cacheExpiry,
                                     jTokenIssuer,
-                                    jTokenAudience);
+                                    tokenAudience);
 }
 
 # Invoke the interop function to resolves the keystore path
@@ -116,7 +115,7 @@ public function jLoadJWTGeneratorClass(handle className,
                                         boolean enabledCaching,
                                         int cacheExpiry,
                                         handle tokenIssuer,
-                                        handle tokenAudience) returns boolean = @java:Method {
+                                        any[] tokenAudience) returns boolean = @java:Method {
     name: "loadJWTGeneratorClass",
     class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
 } external;

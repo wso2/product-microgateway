@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.micro.gateway.core.jwtgenerator;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- *  Class to implement standard claims and custom claims
+ *  Class to implement standard claims and custom claims.
  */
 public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
     private static final Log logger = LogFactory.getLog(MGWJWTGeneratorImpl.class);
@@ -27,7 +43,7 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
                                boolean jwtCacheEnabled,
                                int jwtCacheExpiry,
                                String tokenIssuer,
-                               String tokenAudience) {
+                               String[] tokenAudience) {
         super(dialectURI, signatureAlgorithm, trustStorePath, trustStorePassword, certificateAlias, privateKeyAlias,
                 jwtExpiryTime, restrictedClaims, jwtCacheEnabled, jwtCacheExpiry, tokenIssuer, tokenAudience);
     }
@@ -40,7 +56,11 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
         Map<String, Object> claims = new HashMap<>();
         HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo.get("customClaims");
         claims.put("iss", getTokenIssuer());
-        claims.put("aud", getTokenAudience());
+        if (getTokenAudience().length == 1) {
+            claims.put("aud", getTokenAudience()[0]);
+        } else if (getTokenAudience().length != 0) {
+            claims.put("aud", arrayToJSONArray(getTokenAudience()));
+        }
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("iat", (int) (currentTime / 1000));
         claims.put("exp", (int) (expireIn / 1000));

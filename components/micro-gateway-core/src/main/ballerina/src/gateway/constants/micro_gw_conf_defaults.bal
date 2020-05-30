@@ -34,6 +34,7 @@ public const boolean DEFAULT_REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE = true;
 
 public const string DEFAULT_KM_SERVER_URL = "https://localhost:9443";
 public const string DEFAULT_KM_TOKEN_CONTEXT = "oauth2";
+public const int DEFAULT_TIMESTAMP_SKEW = 5000;
 public const boolean DEFAULT_EXTERNAL = false;
 
 public const boolean DEFAULT_KM_CONF_SECURITY_BASIC_ENABLED = true;
@@ -128,7 +129,6 @@ public const string DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS = "ballerina";
 public const string DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS = "ballerina";
 public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
 public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
-public const string DEFAULT_JWT_GENERATOR_TOKEN_AUDIENCE = "http://org.wso2.apimgt/gateway";
 public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorImpl";
 
 public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
@@ -136,4 +136,4 @@ public const int DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY = 900000;
 public const int DEFAULT_JWT_GENERATOR_TOKEN_CACHE_CAPACITY = 10000;
 public const float DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = 0.25;
 
-public const int DEFAULT_TIMESTAMP_SKEW = 5000;
+public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;

@@ -1,6 +1,23 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.micro.gateway.core.jwtgenerator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONArray;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,13 +35,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  Abstract class for generate JWT for backend claims
+ *  Abstract class for generate JWT for backend claims.
  */
 public abstract class AbstractMGWJWTGenerator {
     private static final Log logger = LogFactory.getLog(AbstractMGWJWTGenerator.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
-    private static volatile long ttl = -1L;
     private String dialectURI;
     private String signatureAlgorithm;
     private String keyStorePath;
@@ -36,7 +52,7 @@ public abstract class AbstractMGWJWTGenerator {
     private boolean cacheEnabled;
     private int cacheExpiry;
     private String tokenIssuer;
-    private String tokenAudience;
+    private String[] tokenAudience;
     private Map<String, Object> apiDetails;
     private List<String> defaultRestrictedClaims;
 
@@ -51,7 +67,7 @@ public abstract class AbstractMGWJWTGenerator {
                                    boolean cacheEnabled,
                                    int cacheExpiry,
                                    String tokenIssuer,
-                                   String tokenAudience) {
+                                   String[] tokenAudience) {
         this.keyStorePath = keyStorePath;
         this.keyStorePassword = keyStorePassword;
         this.certificateAlias = certificateAlias;
@@ -101,11 +117,11 @@ public abstract class AbstractMGWJWTGenerator {
         this.apiDetails = apiDetails;
     }
 
-    public String getTokenAudience() {
+    public String[] getTokenAudience() {
         return tokenAudience;
     }
 
-    public void setTokenAudience(String tokenAudience) {
+    public void setTokenAudience(String[] tokenAudience) {
         this.tokenAudience = tokenAudience;
     }
 
@@ -182,7 +198,7 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to generate the JWT token
+     * Used to generate the JWT token.
      */
     public String generateToken(Map<String, Object> jwtInfo) throws Exception {
         String jwtHeader = buildHeader();
@@ -210,7 +226,7 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to build the JWT header
+     * Used to build the JWT header.
      */
     public String buildHeader() throws Exception {
         String jwtHeader = null;
@@ -221,9 +237,7 @@ public abstract class AbstractMGWJWTGenerator {
             jwtHeaderBuilder.append("none");
             jwtHeaderBuilder.append('\"');
             jwtHeaderBuilder.append('}');
-
             jwtHeader = jwtHeaderBuilder.toString();
-
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader();
         }
@@ -231,7 +245,7 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to sign the JWT using the keystore
+     * Used to sign the JWT using the keystore.
      */
     public byte[] signJWT(String assertion) throws Exception {
         FileInputStream is;
@@ -258,27 +272,18 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to get the expiration time of the token
+     * Used to get the expiration time of the token.
      */
     public long getTTL() {
-        if (ttl != -1) {
-            return ttl;
-        }
-        synchronized (AbstractMGWJWTGenerator.class) {
-            if (ttl != -1) {
-                return ttl;
-            }
-            if (cacheEnabled) {
-                ttl = cacheExpiry;
-            } else {
-                ttl = jwtExpiryTime;
-            }
-            return ttl;
+        if (cacheEnabled) {
+            return cacheExpiry;
+        } else {
+            return jwtExpiryTime;
         }
     }
 
     /**
-     * Used to add "ballerina"the certificate from the keystore to the header
+     * Used to add "ballerina"the certificate from the keystore to the header.
      */
     public String addCertToHeader() throws Exception {
         FileInputStream is;
@@ -318,7 +323,7 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to build the body with claims
+     * Used to build the body with claims.
      */
     public String buildBody(Map<String, Object> jwtInfo) {
         JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder();
@@ -341,13 +346,15 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used for base64 encoding
+     * Used for base64 encoding.
      */
     public String encode(byte[] stringToBeEncoded) {
         return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
     }
 
-    //Helper method to hexify a byte array
+    /**
+     * Helper method to hexify a byte array.
+     */
     public String hexify(byte bytes[]) {
         char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -358,6 +365,15 @@ public abstract class AbstractMGWJWTGenerator {
             buf.append(hexDigits[aByte & 0x0f]);
         }
         return buf.toString();
+    }
+
+    /**
+     * Method to convert Java array to JSONArray.
+     */
+    public JSONArray arrayToJSONArray(Object[] objectArray) {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.addAll(Arrays.asList(objectArray));
+        return jsonArray;
     }
 
     public abstract Map<String, Object> populateStandardClaims(Map<String, Object> jwtInfo);

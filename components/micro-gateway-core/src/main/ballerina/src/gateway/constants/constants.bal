@@ -211,6 +211,7 @@ public const string INT = "int";
 public const string KM_CONF_INSTANCE_ID = "keyManager";
 public const string KM_SERVER_URL = "serverUrl";
 public const string KM_TOKEN_CONTEXT = "tokenContext";
+public const string TIMESTAMP_SKEW = "timestampSkew";
 public const string EXTERNAL = "external";
 public const string KM_CONF_SECURITY_BASIC_INSTANCE_ID = "keymanager.security.basic";
 public const string KM_CONF_SECURITY_OAUTH2_INSTANCE_ID = "keymanager.security.oauth2";
@@ -480,4 +481,4 @@ public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvict
 
 // server configurations
 public const string SERVER_CONF_ID = "server";
-public const string TIMESTAMP_SKEW = "timestampSkew";
+public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";

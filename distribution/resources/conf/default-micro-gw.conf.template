@@ -52,8 +52,6 @@
   serverUrl = "https://localhost:9443"
   # The token endpoint context of the Key Manager server
   tokenContext = "oauth2"
-  # timestamp skew in seconds which added when checking the token validity period
-  timestampSkew = 5000
   # External Key Manager
   external = false
   # Basic security configurations
@@ -351,7 +349,7 @@
   # Token issuer standard claim
   issuer="wso2.org/products/am"
   # Token audience standard claim
-  audience="http://org.wso2.apimgt/gateway"
+  audience=["http://org.wso2.apimgt/gateway"]
   # JWT token generator implementation
   generatorImpl="org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
