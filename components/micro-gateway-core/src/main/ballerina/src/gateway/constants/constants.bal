@@ -318,9 +318,9 @@ public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.dataRetriever";
 
-public const string BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary";
-public const string BINARY_PUBLISHER_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.publisherPool";
-public const string BINARY_PUBLISHER_THREAD_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary" +
+public const string TM_BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary";
+public const string TM_BINARY_PUBLISHER_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.publisherPool";
+public const string TM_BINARY_PUBLISHER_THREAD_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary" +
     ".publisherThreadPool";
 public const string TM_BINARY_URL_GROUP = "throttlingConfig.binary.URLGroup";
 public const string TM_BINARY_RECEIVER_URL = "receiverURL";
@@ -339,7 +339,9 @@ public const string TM_BINARY_FAILOVER = "failover";
 public const string TM_BINARY_LOADBALANCE_SEPARATOR = ",";
 public const string TM_BINARY_FAILOVER_SEPARATOR = "|";
 
-public const string BINARY_AGENT_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.agent";
+public const string TM_BINARY_AGENT_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.agent";
+public const string TM_BINARY_AGENT_PROTOCOL_VERSIONS = "sslEnabledProtocols";
+public const string TM_BINARY_AGENT_CIPHERS = "ciphers";
 public const string TM_AGENT_QUEUE_SIZE = "queueSize";
 public const string TM_AGENT_BATCH_SIZE = "batchSize";
 public const string TM_AGENT_THREAD_POOL_CORE_SIZE = "corePoolSize";

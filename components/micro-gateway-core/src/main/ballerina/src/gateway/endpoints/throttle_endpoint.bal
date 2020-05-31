@@ -99,6 +99,6 @@ function publishHttpGlobalThrottleEvent(RequestStreamDTO throttleEvent) {
 }
 
 function isBinaryPublisherEnabled() returns boolean {
-    return  getConfigBooleanValue(BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID, ENABLED,
+    return  getConfigBooleanValue(TM_BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID, ENABLED,
     DEFAULT_TM_BINARY_PUBLISHER_ENABLED);
 }
