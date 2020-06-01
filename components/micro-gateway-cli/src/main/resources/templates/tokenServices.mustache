@@ -2,6 +2,9 @@ import ballerina/http;
 import ballerina/reflect;
 import wso2/gateway;
 
+string tokenContext = gateway:removePrePostSlash(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID,
+    gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT));
+
 @http:ServiceConfig {
     basePath:"/authorize",
     auth: {
@@ -29,8 +32,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
     resource function authorizeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
-                 <@untainted>req.rawPath, req);
+        var response = tokenEndpointClient->forward(gateway:PATH_SEPERATOR + tokenContext + <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
@@ -76,8 +78,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
     resource function revokeResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
-             <@untainted>req.rawPath, req);
+        var response = tokenEndpointClient->forward(gateway:PATH_SEPERATOR + tokenContext + <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
@@ -123,8 +124,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
     resource function tokenResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
-                 <@untainted>req.rawPath, req);
+        var response = tokenEndpointClient->forward(gateway:PATH_SEPERATOR + tokenContext + <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
@@ -211,8 +211,7 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
     resource function userInfoResource(http:Caller caller, http:Request req) {
         gateway:checkExpectHeaderPresent(req);
         http:Client tokenEndpointClient = gateway:getTokenEndpoint();
-        var response = tokenEndpointClient->forward(gateway:getConfigValue(gateway:KM_CONF_INSTANCE_ID, gateway:KM_TOKEN_CONTEXT, gateway:DEFAULT_KM_TOKEN_CONTEXT) +
-                 <@untainted>req.rawPath, req);
+        var response = tokenEndpointClient->forward(gateway:PATH_SEPERATOR + tokenContext + <@untainted>req.rawPath, req);
         http:Response forwardedResponse = new;
         if(response is http:Response) {
             forwardedResponse = response;
