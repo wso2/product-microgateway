@@ -1,6 +1,6 @@
 package org.wso2.micro.gateway.tests.jwtvaluetransformer;
 
-import org.wso2.micro.gateway.jwttransformer.JWTValueTransformer;
+import org.wso2.micro.gateway.jwt.transformer.JWTValueTransformer;
 
 import java.util.Map;
 

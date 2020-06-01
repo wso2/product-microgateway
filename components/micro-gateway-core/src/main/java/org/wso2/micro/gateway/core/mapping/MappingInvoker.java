@@ -21,7 +21,7 @@ import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.MapValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.micro.gateway.jwttransformer.JWTValueTransformer;
+import org.wso2.micro.gateway.jwt.transformer.JWTValueTransformer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,13 +47,13 @@ public class MappingInvoker {
             jwtClassMap.put(className, jwtValueTransformer);
             return true;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            log.error("Error while loading the jwttransformer class: " + className, e);
+            log.error("Error while loading the jwt transformer class: " + className, e);
         }
         return false;
     }
 
     /**
-     * Used to add claims to the claim set
+     * Used to add claims to the claim set.
      */
     public static MapValue transformJWTValue(MapValue claims, String className) throws Exception {
         jwtValueTransformer = (JWTValueTransformer) jwtClassMap.get(className);
@@ -65,7 +65,7 @@ public class MappingInvoker {
     }
 
     /**
-     * Convert MapValue to Map
+     * Convert MapValue to Map.
      */
     public static Map<String, Object> convertMapValueToMap(MapValue mapValue) throws Exception {
         Map<String, Object> map = new HashMap<>();

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.jwttransformer;
+package org.wso2.micro.gateway.jwt.transformer;
 
 import java.util.Map;
 
