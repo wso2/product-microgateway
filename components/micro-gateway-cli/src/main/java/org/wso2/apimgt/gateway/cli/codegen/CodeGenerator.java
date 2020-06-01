@@ -74,18 +74,20 @@ public class CodeGenerator {
         String projectSrcPath = CmdUtils.getProjectTargetModulePath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
-        List<BallerinaService> openAPIServiceList = new ArrayList<>();
-        List<String> openAPIDirectoryLocations = new ArrayList<>();
-        String projectAPIDefGenLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
-        openAPIDirectoryLocations.add(CmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + CliConstants.PROJECT_API_DEFINITIONS_DIR);
         String grpcDirLocation = CmdUtils.getGrpcDefinitionsDirPath(projectName);
-        if (Files.exists(Paths.get(projectAPIDefGenLocation))) {
-            openAPIDirectoryLocations.add(projectAPIDefGenLocation);
-        }
         CodeGenerator.projectName = projectName;
         BallerinaToml ballerinaToml = new BallerinaToml();
         ballerinaToml.setToolkitHome(CmdUtils.getCLIHome());
+        List<String> openAPIDirectoryLocations = new ArrayList<>();
+        String importedApisPath = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
+        String devApisPath = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+
+        if (Files.exists(Paths.get(devApisPath))) {
+            openAPIDirectoryLocations.add(devApisPath);
+        }
+        if (Files.exists(Paths.get(importedApisPath))) {
+            openAPIDirectoryLocations.add(importedApisPath);
+        }
 
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
@@ -116,7 +118,6 @@ public class CodeGenerator {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
-                        openAPIServiceList.add(definitionContext);
                         ballerinaToml.addDependencies(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
