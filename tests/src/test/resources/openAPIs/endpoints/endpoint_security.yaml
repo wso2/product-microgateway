@@ -225,6 +225,7 @@ paths:
     get:
       tags:
         - store
+      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint5"
       summary: Find purchase order by ID
       description: For valid response try integer IDs with value >= 1 and <= 10. Other
         values will generated exceptions
@@ -328,6 +329,7 @@ paths:
     get:
       tags:
         - user
+      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint6"
       summary: Get user by user name
       description: ""
       operationId: getUserByName
@@ -534,6 +536,18 @@ x-wso2-endpoints:
   - myEndpoint4:
       urls:
         - https://non.existant.host:2380/v1Basic
+        - https://localhost:2380/v2Basic
+      securityConfig:
+        type: basic
+        username: admin
+  - myEndpoint5:
+      urls:
+        - https://localhost:2380/v2Basic
+      securityConfig:
+        type: basic
+        username: admin
+  - myEndpoint6:
+      urls:
         - https://localhost:2380/v2Basic
       securityConfig:
         type: basic

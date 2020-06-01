@@ -58,7 +58,9 @@ public class EndpointsByReferenceTestCase extends BaseTestCase {
                 "--myEndpoint1_prod_basic_password=admin",
                 "--myEndpoint2_prod_basic_password=admin",
                 "--myEndpoint3_prod_basic_password=admin",
-                "--myEndpoint4_prod_basic_password=admin"
+                "--myEndpoint4_prod_basic_password=admin",
+                "--myEndpoint5_prod_basic_password=invalid",
+                "--myEndpoint6_prod_basic_password=wrong",
         };
         //generate apis with CLI and start the micro gateway server
         super.init(project, new String[] { "endpoints/endpoints_by_reference.yaml", "endpoints/endpoint_override.yaml",
