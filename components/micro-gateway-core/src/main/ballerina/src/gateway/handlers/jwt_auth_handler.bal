@@ -86,7 +86,7 @@ public type JWTAuthHandler object {
             self.skewTime = getConfigIntValue(SERVER_CONF_ID, 
                                                 SERVER_TIMESTAMP_SKEW, 
                                                 DEFAULT_SERVER_TIMESTAMP_SKEW);
-            if (self.skewTime == -1) {
+            if (self.skewTime == DEFAULT_SERVER_TIMESTAMP_SKEW) {
                 self.skewTime = getConfigIntValue(KM_CONF_INSTANCE_ID, 
                                                     TIMESTAMP_SKEW, 
                                                     DEFAULT_TIMESTAMP_SKEW);

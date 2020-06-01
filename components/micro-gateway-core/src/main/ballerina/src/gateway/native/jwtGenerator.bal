@@ -117,7 +117,7 @@ public function jLoadJWTGeneratorClass(handle className,
                                         handle tokenIssuer,
                                         any[] tokenAudience) returns boolean = @java:Method {
     name: "loadJWTGeneratorClass",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
 
 # Interop function to resolves the keystore path
@@ -126,7 +126,7 @@ public function jLoadJWTGeneratorClass(handle className,
 # + return - Returns the resolved keystore path.
 public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @java:Method {
     name: "invokeGetKeystorePath",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
 
 # Interop function to generate JWT token
@@ -136,5 +136,5 @@ public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @ja
 # + return - Returns the generated JWT token.
 public function jGenerateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns (handle | error) = @java:Method {
     name: "invokeGenerateToken",
-    class: "org.wso2.micro.gateway.core.jwtgenerator.MGWJWTGeneratorInvoker"
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
