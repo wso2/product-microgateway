@@ -43,7 +43,6 @@ import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -59,7 +58,6 @@ import java.util.List;
  */
 public class CodeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
-    private static PrintStream outStream = System.out;
     public static String projectName;
 
     /**
@@ -354,20 +352,6 @@ public class CodeGenerator {
         if (!dir.delete() || !temp.delete()) {
             logger.debug("Failed to delete GRPC temp files");
         }
-    }
-
-    /**
-     * Generate swagger files.
-     *
-     * @param context model context to be used by the templates
-     * @return generated source files as a list of {@link GenSrcFile}
-     * @throws IOException when code generation with specified templates fails
-     */
-    private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
-        String concatTitle = context.getName();
-        String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
-        String mainContent = getContent(context, GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
-        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     /**
