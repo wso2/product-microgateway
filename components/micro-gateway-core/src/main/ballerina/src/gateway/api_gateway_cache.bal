@@ -29,8 +29,6 @@ cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache mutualSslCertificateCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
-
-
 public type APIGatewayCache object {
 
     public function authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns
