@@ -19,10 +19,18 @@ import ballerina/cache;
 // TODO: Refactor the cache
 int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
 int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
-float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
-int jwtGeneratorCacheExpiryTime = getConfigIntValue(JWT_GENERATOR_CACHING_ID, JWT_GENERATOR_TOKEN_CACHE_EXPIRY, DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
-int jwtGeneratorCacheSize = getConfigIntValue(JWT_GENERATOR_CACHING_ID, JWT_GENERATOR_TOKEN_CACHE_CAPACITY, DEFAULT_JWT_GENERATOR_TOKEN_CACHE_CAPACITY);
-float jwtGeneratorEvictionFactor = getConfigFloatValue(JWT_GENERATOR_CACHING_ID, JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR);
+float evictionFactor = getConfigFloatValue(CACHING_ID,
+                                            TOKEN_CACHE_EVICTION_FACTOR,
+                                            DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
+int jwtGeneratorCacheExpiryTime = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
+                                                    JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
+                                                    DEFAULT_TOKEN_CACHE_EXPIRY);
+int jwtGeneratorCacheSize = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
+                                                JWT_GENERATOR_TOKEN_CACHE_CAPACITY,
+                                                DEFAULT_TOKEN_CACHE_CAPACITY);
+float jwtGeneratorEvictionFactor = getConfigFloatValue(JWT_GENERATOR_CACHING_ID,
+                                                        JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR,
+                                                        DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
 
 // Caches are globally defined in order to initialize them before the authentication handlers are initialized.
 // These cache objects are passed in authentication handlers while handler init phase.

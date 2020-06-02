@@ -99,7 +99,7 @@ public type JWTAuthHandler object {
                                                             DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
             self.cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
                                                     JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
-                                                    DEFAULT_JWT_GENERATOR_TOKEN_CACHE_EXPIRY);
+                                                    DEFAULT_TOKEN_CACHE_EXPIRY);
 
             self.classLoaded = loadJWTGeneratorClass(self.generatorClass,
                                                         self.dialectURI,
@@ -168,6 +168,7 @@ public type JWTAuthHandler object {
 
 };
 
+// TODO: Try to merge with the subscription validation method
 # Identify the api details from the subscribed apis in the authentication token.
 #
 # + payload - The payload of the authentication token
@@ -175,7 +176,7 @@ public type JWTAuthHandler object {
 # + apiVersion - version of the current API
 # + return - Returns map<string> with the extracted details.
 public function getAPIDetails(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
-    map<string> subscriptionDetails = {
+    map<string> apiDetails = {
         apiName: "",
         apiContext: "",
         apiVersion: "",
@@ -204,29 +205,29 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
                             + " version:" + subscription.'version.toString());
                     }
                     if (subscription.name is json) {
-                        subscriptionDetails["apiName"] = subscription.name.toString();
+                        apiDetails["apiName"] = subscription.name.toString();
                     }
                     if (subscription.'version is json) {
-                        subscriptionDetails["apiVersion"] = subscription.'version.toString();
+                        apiDetails["apiVersion"] = subscription.'version.toString();
                     }
                     if (subscription.context is json) {
-                        subscriptionDetails["apiContext"] = subscription.context.toString();
+                        apiDetails["apiContext"] = subscription.context.toString();
                     }
                     if (subscription.subscriptionTier is json) {
-                        subscriptionDetails["apiTier"] = subscription.subscriptionTier.toString();
+                        apiDetails["apiTier"] = subscription.subscriptionTier.toString();
                     }
                     if (subscription.publisher is json) {
-                        subscriptionDetails["apiPublisher"] = subscription.publisher.toString();
+                        apiDetails["apiPublisher"] = subscription.publisher.toString();
                     }
                     if (subscription.subscriberTenantDomain is json) {
-                        subscriptionDetails["subscriberTenantDomain"] = subscription.subscriberTenantDomain.toString();
+                        apiDetails["subscriberTenantDomain"] = subscription.subscriberTenantDomain.toString();
                     }
                 }
                 index += 1;
             }
         }
     }
-    return subscriptionDetails;
+    return apiDetails;
 }
 
 # Generate the backend JWT token and set to the header of the outgoing request.
