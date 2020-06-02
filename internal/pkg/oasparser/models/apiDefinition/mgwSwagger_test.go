@@ -161,4 +161,3 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 		}
 	}
 }
-
