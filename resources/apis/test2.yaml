@@ -1,6 +1,6 @@
 openapi: "3.0"
 info:
-  description: "This is a samle server Petsore server. You can fid out ore about   Swagger at [http://swagger.io](htp//swagr.o)  on [.es()s me y cn s ep  `spcie` t e he auzion"
+  description: "This is a samle server etsore server. You can fid out ore about   Swagger at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn s ep  `spcie` t e he auzion"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -13,7 +13,7 @@ x-wso2-basepath: /petstore/v2
 x-wso2-production-endpoints:
   urls:
     - 'https://petstore.swagger.io/api/v3'
-  type: https
+  type: "https"
 x-wso2-sandbox-endpoints:
   urls:
     - 'http://sandbox.com:8000/api/v3'
