@@ -32,11 +32,11 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 	files, err := ioutil.ReadDir(location)
 	if err != nil {
-		log.Fatal("Error reading",location,"directory:", err)
+		log.Fatal("Error reading", location, "directory:", err)
 	}
 
 	for _, f := range files {
-		var mgwSwagger apiDefinition.MgwSwagger
+
 		openApif, err := os.Open(location + f.Name())
 
 		// if we os.Open returns an error then handle it
@@ -44,7 +44,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 			log.Fatal("Error opening a api yaml file:", err)
 		}
 		//fmt.Println("Successfully Opened open api file",f.Name())
-		log.Println("Successfully Opened open api file",f.Name())
+		log.Println("Successfully Opened open api file", f.Name())
 
 		// defer the closing of our jsonFile so that we can parse it later on
 		defer openApif.Close()
@@ -52,44 +52,52 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 		// read our opened jsonFile as a byte array.
 		jsn, _ := ioutil.ReadAll(openApif)
 
-		apiJsn, err := utills.ToJSON(jsn)
-		if err != nil {
-			//log.Fatal("Error converting api file to json:", err)
-
-		}
-
-		swaggerVerison, err := utills.FindSwaggerVersion(apiJsn)
-		if err != nil {
-			log.Println("Error finding a swagger version of the api definition:", err)
-		}
-
-		if swaggerVerison == "2" {
-			//map json to struct
-			var ApiData spec.Swagger
-			err = json.Unmarshal(apiJsn, &ApiData)
-			if err != nil {
-				//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			} else {
-				mgwSwagger.SetInfoSwagger(ApiData)
-			}
-
-		} else if swaggerVerison == "3" {
-			//map json to struct
-			var ApiData openapi3.Swagger
-			err = json.Unmarshal(apiJsn, &ApiData)
-			if err != nil {
-				//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			} else {
-				mgwSwagger.SetInfoOpenApi(ApiData)
-			}
-		}
-
-		mgwSwagger.SetXWso2Extenstions()
+		mgwSwagger := GetMgwSwagger(jsn)
 		mgwSwaggers = append(mgwSwaggers, mgwSwagger)
 
 	}
 	return mgwSwaggers, err
 }
+
+func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
+	var mgwSwagger apiDefinition.MgwSwagger
+
+	apiJsn, err := utills.ToJSON(apiContent)
+	if err != nil {
+		//log.Fatal("Error converting api file to json:", err)
+	}
+
+	swaggerVerison:= utills.FindSwaggerVersion(apiJsn)
+
+	if swaggerVerison == "2" {
+		//map json to struct
+		var ApiData2 spec.Swagger
+		err = json.Unmarshal(apiJsn, &ApiData2)
+		if err != nil {
+			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
+			log.Println("Error openAPI unmarsheliing",err)
+		} else {
+			mgwSwagger.SetInfoSwagger(ApiData2)
+		}
+
+	} else if swaggerVerison == "3" {
+		//map json to struct
+		var ApiData3 *openapi3.Swagger
+
+		err = json.Unmarshal(apiJsn, &ApiData3)
+
+		if err != nil {
+			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
+			log.Println("Error openAPI unmarsheliing",err)
+		} else {
+			mgwSwagger.SetInfoOpenApi(*ApiData3)
+		}
+	}
+
+	mgwSwagger.SetXWso2Extenstions()
+	return mgwSwagger
+}
+
 
 func IsEndpointsAvailable(endpoints []apiDefinition.Endpoint) bool {
 	if len(endpoints) > 0 {

@@ -122,7 +122,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			routesProd = append(routesProd, &routeP)
 
 		} else {
-			log.Panic("Producton endpoints are not defined")
+			log.Fatalf("Producton endpoints are not defined")
 		}
 	}
 
@@ -191,7 +191,7 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 					HostRewrite: endpoint.GetHost(),
 				},
 				RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
-					Pattern:              &envoy_type_matcher.RegexMatcher{
+					Pattern: &envoy_type_matcher.RegexMatcher{
 						EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
 							GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
 								MaxProgramSize: nil,
@@ -225,7 +225,7 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		Metadata: nil,
 	}
 
-	//fmt.Println(endpoint.GetHost(), rewritePath, routePath)
+	//fmt.Println(endpoint.GetHost(), routePath)
 	return route
 }
 
@@ -254,14 +254,14 @@ func GenerateRegex(fullpath string) string {
 		res1 := strings.Split(fullpath, "/")
 
 		for i, p := range res1 {
-			if strings.Contains(p, "{") || strings.Contains(p, "}"){
+			if strings.Contains(p, "{") || strings.Contains(p, "}") {
 				res1[i] = pathParaRegex
 			}
 		}
 		newPath = "^" + strings.Join(res1[:], "/") + endRegex + "$"
 
 	} else {
-		newPath = fullpath + endRegex
+		newPath = "^" + fullpath + endRegex + "$"
 	}
 	return newPath
 }

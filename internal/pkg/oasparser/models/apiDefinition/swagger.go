@@ -35,45 +35,51 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 
 	if swagger2.Host != "" {
 		endpoint := getHostandBasepathandPort(swagger2.Host + swagger2.BasePath)
-		swagger.productionUrls = append(swagger.productionUrls,endpoint)
+		swagger.productionUrls = append(swagger.productionUrls, endpoint)
 	}
 }
 
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
-	for path, _ := range swagger2.Paths.Paths {
-		var pathItem = swagger2.Paths.Paths[path].PathItemProps
-		var resource Resource
-		if pathItem.Get != nil {
-			resource = setOperationSwagger(path, "get", pathItem.Get)
-		} else if pathItem.Post != nil {
-			resource = setOperationSwagger(path, "post", pathItem.Post)
-		} else if pathItem.Put != nil {
-			resource = setOperationSwagger(path, "put", pathItem.Put)
-		} else if pathItem.Delete != nil {
-			resource = setOperationSwagger(path, "delete", pathItem.Delete)
-		} else if pathItem.Head != nil {
-			resource = setOperationSwagger(path, "head", pathItem.Head)
-		} else if pathItem.Patch != nil {
-			resource = setOperationSwagger(path, "patch", pathItem.Patch)
-		} else {
-			//resource = setOperation(contxt,"get",pathItem.Get)
+	if swagger2.Paths != nil {
+		for path, _ := range swagger2.Paths.Paths {
+			var pathItem = swagger2.Paths.Paths[path].PathItemProps
+			var resource Resource
+			if pathItem.Get != nil {
+				resource = setOperationSwagger(path, "get", pathItem.Get)
+			} else if pathItem.Post != nil {
+				resource = setOperationSwagger(path, "post", pathItem.Post)
+			} else if pathItem.Put != nil {
+				resource = setOperationSwagger(path, "put", pathItem.Put)
+			} else if pathItem.Delete != nil {
+				resource = setOperationSwagger(path, "delete", pathItem.Delete)
+			} else if pathItem.Head != nil {
+				resource = setOperationSwagger(path, "head", pathItem.Head)
+			} else if pathItem.Patch != nil {
+				resource = setOperationSwagger(path, "patch", pathItem.Patch)
+			} else {
+				//resource = setOperation(contxt,"get",pathItem.Get)
+			}
+			resources = append(resources, resource)
 		}
-		resources = append(resources, resource)
 	}
+
 	return resources
 }
 
 func setOperationSwagger(path string, pathtype string, operation *spec.Operation) Resource {
 	var resource Resource
-	resource = Resource{
-		path:          path,
-		pathtype:            pathtype,
-		iD:               operation.ID,
-		summary:          operation.Summary,
-		schemes:          operation.Schemes,
-		tags:             operation.Tags,
-		security:         operation.Security,
-		vendorExtensible: operation.VendorExtensible.Extensions}
+	if operation != nil {
+		resource = Resource{
+			path:             path,
+			pathtype:         pathtype,
+			iD:               operation.ID,
+			summary:          operation.Summary,
+			description:  operation.Description,
+			//schemes:          operation.Schemes,
+			//tags:             operation.Tags,
+			//security:         operation.Security,
+			vendorExtensible: operation.VendorExtensible.Extensions}
+	}
 	return resource
 }

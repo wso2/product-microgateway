@@ -27,7 +27,7 @@ type MgwSwagger struct {
 	description      string `json:"description,omitempty"`
 	title            string `json:"title,omitempty"`
 	version          string `json:"version,omitempty"`
-	vendorExtensible           map[string]interface{}
+	vendorExtensible map[string]interface{}
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
 	resources        []Resource
@@ -35,21 +35,21 @@ type MgwSwagger struct {
 }
 
 type Endpoint struct {
-	host      string
-	basepath  string
-	urlType   string
-	port      uint32
+	Host     string
+	Basepath string
+	UrlType  string
+	Port     uint32
 }
 
 func (endpoint *Endpoint) GetHost() string {
-	return endpoint.host
+	return endpoint.Host
 }
 func (endpoint *Endpoint) GetBasepath() string {
-	return endpoint.basepath
+	return endpoint.Basepath
 }
 
 func (endpoint *Endpoint) GetPort() uint32 {
-	return endpoint.port
+	return endpoint.Port
 }
 
 func (swagger *MgwSwagger) GetSwaggerVersion() string {
@@ -83,7 +83,6 @@ func (swagger *MgwSwagger) GetSandEndpoints() []Endpoint {
 func (swagger *MgwSwagger) GetResources() []Resource {
 	return swagger.resources
 }
-
 
 func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.SetXWso2Basepath()
@@ -134,9 +133,9 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 					ainterface := val.([]interface{})
 					//urls := make([]string, len(ainterface))
 					for _, v := range ainterface {
-						endpoint:= getHostandBasepathandPort(v.(string))
-						endpoint.urlType = urlType
-						Endpoints = append(Endpoints,endpoint)
+						endpoint := getHostandBasepathandPort(v.(string))
+						endpoint.UrlType = urlType
+						Endpoints = append(Endpoints, endpoint)
 					}
 				}
 			}

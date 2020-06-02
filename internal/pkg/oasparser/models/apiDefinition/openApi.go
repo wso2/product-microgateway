@@ -19,13 +19,18 @@
 package apiDefinition
 
 import (
+	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/wso2/micro-gw/config"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
-	"log"
 )
+
+type Base struct {
+	basetest string
+}
 
 func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.swaggerVersion = swagger3.OpenAPI
@@ -34,72 +39,71 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 		swagger.title = swagger3.Info.Title
 		swagger.version = swagger3.Info.Version
 	}
-	swagger.vendorExtensible = swagger3.Extensions
-	swagger.resources = SetResourcesOpenApi3(swagger3)
+
+	swagger.vendorExtensible = converExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.resources = SetResourcesOpenApi(swagger3)
 
 	if IsServerUrlIsAvailable(swagger3) {
 		for i, _ := range swagger3.Servers {
 			endpoint := getHostandBasepathandPort(swagger3.Servers[i].URL)
-			swagger.productionUrls = append(swagger.productionUrls,endpoint)
+			swagger.productionUrls = append(swagger.productionUrls, endpoint)
 		}
-
 	}
 }
 
 func setOperationOpenApi(path string, pathtype string, operation *openapi3.Operation) Resource {
 	var resource Resource
-	resource = Resource{
-		path: path,
-		pathtype:   pathtype,
-		iD:      operation.OperationID,
-		summary: operation.Summary,
-		//Schemes: operation.,
-		tags: operation.Tags,
-		//Security: operation.Security.,
-		vendorExtensible: operation.Extensions}
+	if operation != nil {
+		resource = Resource{
+			path:     path,
+			pathtype: pathtype,
+			iD:       operation.OperationID,
+			summary:  operation.Summary,
+			description: operation.Description,
+			//Schemes: operation.,
+			//tags: operation.Tags,
+			//Security: operation.Security.,
+			vendorExtensible: converExtensibletoReadableFormat(operation.ExtensionProps)}
+	}
 	return resource
 }
 
-
-func SetResourcesOpenApi3(openApi openapi3.Swagger) []Resource {
+func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
-
-	for path, pathItem := range openApi.Paths {
-		var resource Resource
-		if pathItem.Get != nil {
-			resource = setOperationOpenApi(path, "get", pathItem.Get)
-		} else if pathItem.Post != nil {
-			resource = setOperationOpenApi(path, "post", pathItem.Post)
-		} else if pathItem.Put != nil {
-			resource = setOperationOpenApi(path, "put", pathItem.Put)
-		} else if pathItem.Delete != nil {
-			resource = setOperationOpenApi(path, "delete", pathItem.Delete)
-		} else if pathItem.Head != nil {
-			resource = setOperationOpenApi(path, "head", pathItem.Head)
-		} else if pathItem.Patch != nil {
-			resource = setOperationOpenApi(path, "patch", pathItem.Patch)
-		} else {
-			//resource = setOperation(contxt,"get",pathItem.Get)
+	if openApi.Paths != nil {
+		for path, pathItem := range openApi.Paths {
+			var resource Resource
+			if pathItem.Get != nil {
+				resource = setOperationOpenApi(path, "get", pathItem.Get)
+			} else if pathItem.Post != nil {
+				resource = setOperationOpenApi(path, "post", pathItem.Post)
+			} else if pathItem.Put != nil {
+				resource = setOperationOpenApi(path, "put", pathItem.Put)
+			} else if pathItem.Delete != nil {
+				resource = setOperationOpenApi(path, "delete", pathItem.Delete)
+			} else if pathItem.Head != nil {
+				resource = setOperationOpenApi(path, "head", pathItem.Head)
+			} else if pathItem.Patch != nil {
+				resource = setOperationOpenApi(path, "patch", pathItem.Patch)
+			} else {
+				//resource = setOperation(contxt,"get",pathItem.Get)
+			}
+			resources = append(resources, resource)
 		}
-		resources = append(resources, resource)
 	}
+
 	return resources
 }
 
-func getHostandBasepathandPort(rawUrl string) (Endpoint) {
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		log.Fatal("Error loading configuration. ", errReadConfig)
-	}
-
-	basepath := ""
-	host := ""
-	port := conf.Envoy.ApiDefaultPort
-
+func getHostandBasepathandPort(rawUrl string) Endpoint {
+    var (
+    	basepath string
+		host string
+		port uint32
+    )
 	if !strings.Contains(rawUrl, "://") {
 		rawUrl = "http://" + rawUrl
 	}
-
 	u, err := url.Parse(rawUrl)
 	if err != nil {
 		log.Fatal(err)
@@ -108,14 +112,20 @@ func getHostandBasepathandPort(rawUrl string) (Endpoint) {
 	host = u.Hostname()
 	basepath = u.Path
 	if u.Port() != "" {
-		u32, err := strconv.ParseUint(u.Port(),10,32)
+		u32, err := strconv.ParseUint(u.Port(), 10, 32)
 		if err != nil {
-			log.Println("Error passing port value to mgwSwagger",err)
+			log.Println("Error passing port value to mgwSwagger", err)
 		}
 		port = uint32(u32)
+	} else {
+		//read default port from config
+		conf, errReadConfig := config.ReadConfigs()
+		if errReadConfig != nil {
+			log.Fatal("Error loading configuration. ", errReadConfig)
+		}
+		port = conf.Envoy.ApiDefaultPort
 	}
-
-	return Endpoint{host: host, basepath: basepath, port: port}
+	return Endpoint{Host: host, Basepath: basepath, Port: port}
 }
 
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
@@ -128,4 +138,19 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 	} else {
 		return false
 	}
+}
+
+func converExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
+	jsnRawExtensible := vendorExtensible.Extensions
+	b, err := json.Marshal(jsnRawExtensible)
+	if err != nil {
+		log.Println("Error unmarshelinn vendor extenstions: ",err)
+	}
+
+	var extensible map[string]interface{}
+	err = json.Unmarshal(b, &extensible)
+	if err != nil {
+		log.Println("error:", err)
+	}
+	return extensible
 }
