@@ -68,4 +68,3 @@ func TestFindSwaggerVersion(t *testing.T) {
 		assert.Equal(t, item.result, resultswaggerVerison, item.message)
 	}
 }
-

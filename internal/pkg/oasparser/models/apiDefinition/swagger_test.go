@@ -133,5 +133,3 @@ func TestSetResourcesSwagger(t *testing.T) {
 	}
 }
 
-
-
