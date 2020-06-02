@@ -38,16 +38,16 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	}
 
 	var (
-		routesP []*v2route.Route
-		clustersP []*v2.Cluster
+		routesP    []*v2route.Route
+		clustersP  []*v2.Cluster
 		endpointsP []*core.Address
 	)
 
 	for _, swagger := range mgwSwaggers {
 		routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(swagger)
-		routesP = append(routesP,routes...)
-		clustersP = append(clustersP,clusters...)
-		endpointsP = append(endpointsP,endpoints...)
+		routesP = append(routesP, routes...)
+		clustersP = append(clustersP, clusters...)
+		endpointsP = append(endpointsP, endpoints...)
 	}
 
 	envoyNodeProd := new(envoy.EnvoyNode)
@@ -81,8 +81,8 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	}
 	//fmt.Println(mgwSwagger)
 	var (
-		routesS []*v2route.Route
-		clustersS []*v2.Cluster
+		routesS    []*v2route.Route
+		clustersS  []*v2.Cluster
 		endpointsS []*core.Address
 	)
 
@@ -103,7 +103,7 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 		vHostS, _ := enovoy.CreateVirtualHost(vHost_NameS, routesS)
 		listenerNameS := "listenerSand_1"
 		routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-		listnerSand :=enovoy.CreateListener(listenerNameS, routeConfigNameS, vHostS)
+		listnerSand := enovoy.CreateListener(listenerNameS, routeConfigNameS, vHostS)
 
 		envoyNodeSand.SetListener(&listnerSand)
 		envoyNodeSand.SetClusters(clustersS)

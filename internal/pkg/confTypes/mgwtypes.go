@@ -73,9 +73,9 @@ type Config struct {
 
 	//envoy proxy configuration
 	Envoy struct {
-		ListenerAddress string
-		ListenerPort uint32
-		ApiDefaultPort uint32
+		ListenerAddress         string
+		ListenerPort            uint32
+		ApiDefaultPort          uint32
 		ClusterTimeoutInSeconds time.Duration
 	}
 }

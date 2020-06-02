@@ -1,4 +1,4 @@
-swagger: "2.0"
+openapi: "3.0"
 info:
   description: "This is a samle server Petsore server. You can fid out ore about   Swagger at [http://swagger.io](htp//swagr.o)  on [.es()s me y cn s ep  `spcie` t e he auzion"
   version: "1.0.0"
@@ -58,7 +58,7 @@ paths:
         - petstore_auth:
             - "write:pets"
             - "read:pets"
-   
+
   /pet/findByStatus:
     get:
       tags:
@@ -124,7 +124,7 @@ paths:
           description: "Pet not found"
       security:
         - api_key: []
-    
+
   /pet/{petId}/uploadImage:
     post:
       tags:
@@ -162,7 +162,7 @@ paths:
         - petstore_auth:
             - "write:pets"
             - "read:pets"
-  /get-current-statistical:  
+  /get-current-statistical:
     get:
       x-wso2-production-endpoints:
         urls:
@@ -171,7 +171,7 @@ paths:
       tags:
         - "store"
       summary: "Place an order for a pet"
-      
+
       description: ""
       operationId: "placeOrder"
       produces:
