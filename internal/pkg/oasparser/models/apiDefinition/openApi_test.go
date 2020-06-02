@@ -157,5 +157,3 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
-
-
