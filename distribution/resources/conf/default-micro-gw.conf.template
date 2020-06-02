@@ -101,13 +101,13 @@
   # Validate subscribed APIs
   validateSubscription = false
   #support custom claim mapping
-  claimMapperClassName = "class name of jwt claims value transformer 1"
+  claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
   [[jwtTokenConfig.claims]]
-    remoteClaim = "attribute name of remote claim 1"
-    localClaim = "attribute name of local claim 1"
+    remoteClaim = "scp"
+    localClaim = "scope"
   [[jwtTokenConfig.claims]]
-    remoteClaim = "attribute name of remote claim 2"
-    localClaim = "attribute name of local claim 2"
+    remoteClaim = "FName"
+    localClaim = "firstName"
 # Issuer 2
 [[jwtTokenConfig]]
   issuer = "https://host:port/issuer"
@@ -116,13 +116,13 @@
   # Validate subscribed APIs
   validateSubscription = false
   #support custom claim mapping
-  claimMapperClassName = "class name of jwt claims value transformer 2"
+  claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
   [[jwtTokenConfig.claims]]
-    remoteClaim = "attribute name of remote claim 1"
-    localClaim = "attribute name of local claim 1"
+    remoteClaim = "scps"
+    localClaim = "scope"
   [[jwtTokenConfig.claims]]
-    remoteClaim = "attribute name of remote claim 2"
-    localClaim = "attribute name of local claim 2"
+    remoteClaim = "FN"
+    localClaim = "firstName"
 
 # JWT token revocation configurations
 [tokenRevocationConfig]
