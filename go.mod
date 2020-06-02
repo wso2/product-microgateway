@@ -13,6 +13,7 @@ require (
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/sirupsen/logrus v1.5.0
+	github.com/stretchr/testify v1.5.1
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.21.0 // indirect
 )
