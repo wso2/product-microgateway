@@ -122,6 +122,42 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            httpServer.createContext(context + "/store/order/1", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                {
+                    response = ResponseConstants.storeInventoryResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/user/john", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                {
+                    response = ResponseConstants.userResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHZ_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             String base = "/v1";
             httpServer.createContext(base + "/pet/findByStatus", exchange -> {
 
@@ -204,42 +240,6 @@ public class MockBackEndServer extends Thread {
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                             TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
-                }
-                exchange.getResponseBody().write(response);
-                exchange.close();
-            });
-            httpServer.createContext(contextWithSecurity2 + "/store/order/1", exchange -> {
-                byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
-                {
-                    response = ResponseConstants.storeInventoryResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
-                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                } else {
-                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
-                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
-                }
-                exchange.getResponseBody().write(response);
-                exchange.close();
-            });
-            httpServer.createContext(contextWithSecurity2 + "/user/john", exchange -> {
-                byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
-                {
-                    response = ResponseConstants.userResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
-                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                } else {
-                    response = ResponseConstants.AUTHZ_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
-                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
                 }
                 exchange.getResponseBody().write(response);
                 exchange.close();
