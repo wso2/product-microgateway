@@ -340,6 +340,11 @@
                 <version>${ballerina.platform.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-config-api</artifactId>
+                <version>${ballerina.platform.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.moandjiezana.toml</groupId>
                 <artifactId>toml4j</artifactId>
                 <version>${toml.parser.version}</version>
