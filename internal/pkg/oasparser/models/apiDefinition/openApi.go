@@ -28,10 +28,6 @@ import (
 	"strings"
 )
 
-type Base struct {
-	basetest string
-}
-
 func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.swaggerVersion = swagger3.OpenAPI
 	if swagger3.Info != nil {
