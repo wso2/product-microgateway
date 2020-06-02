@@ -26,31 +26,20 @@ import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataEndp
  */
 public class DataEndpointConfiguration {
 
-    private String receiverURL;
+    private final String receiverURL;
+    private final String authURL;
+    private final String username;
+    private final char[] password;
 
-    private String authURL;
-
-    private String username;
-
-    private String password;
-
-    private GenericKeyedObjectPool transportPool;
-
-    private GenericKeyedObjectPool securedTransportPool;
-
-    private int batchSize;
-
-    private String publisherKey;
-
-    private String authKey;
-
+    private final GenericKeyedObjectPool transportPool;
+    private final GenericKeyedObjectPool securedTransportPool;
+    private final int batchSize;
+    private final String publisherKey;
+    private final String authKey;
     private String sessionId;
-
-    private int corePoolSize;
-
-    private int maxPoolSize;
-
-    private int keepAliveTimeInPool;
+    private final int corePoolSize;
+    private final int maxPoolSize;
+    private final int keepAliveTimeInPool;
 
     /**
      * Protocol Type.
@@ -71,7 +60,7 @@ public class DataEndpointConfiguration {
         this.receiverURL = receiverURL;
         this.authURL = authURL;
         this.username = username;
-        this.password = password;
+        this.password = password.toCharArray();
         this.transportPool = transportPool;
         this.securedTransportPool = securedTransportPool;
         this.publisherKey = this.receiverURL + DataEndpointConstants.SEPARATOR + username;
@@ -95,7 +84,7 @@ public class DataEndpointConfiguration {
     }
 
     public String getPassword() {
-        return password;
+        return String.valueOf(password);
     }
 
     public String toString() {

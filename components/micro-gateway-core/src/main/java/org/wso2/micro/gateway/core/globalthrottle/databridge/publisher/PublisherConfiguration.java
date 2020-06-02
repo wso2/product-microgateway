@@ -28,18 +28,17 @@ import org.ballerinalang.jvm.values.api.BMap;
 public class PublisherConfiguration {
     private static final Logger log = LogManager.getLogger(PublisherConfiguration.class);
 
-    private int maxIdleDataPublishingAgents = 250;
-    private int initIdleObjectDataPublishingAgents = 250;
+    private int maxIdleDataPublishingAgents;
+    private int initIdleObjectDataPublishingAgents;
 
-    private int publisherThreadPoolCoreSize = 200;
-    private int publisherThreadPoolMaximumSize = 1000;
-    private int publisherThreadPoolKeepAliveTime = 20;
+    private int publisherThreadPoolCoreSize;
+    private int publisherThreadPoolMaximumSize;
+    private int publisherThreadPoolKeepAliveTime;
 
-    private String receiverUrlGroup = "tcp://localhost:9611";
-    private String authUrlGroup = "ssl://localhost:9711";
-    private String userName = "admin";
-    // todo: change to charset
-    private String password = "admin";
+    private String receiverUrlGroup;
+    private String authUrlGroup;
+    private String userName;
+    private char[] password;
 
     private PublisherConfiguration() {
     }
@@ -77,7 +76,7 @@ public class PublisherConfiguration {
     }
 
     public String getPassword() {
-        return password;
+        return String.valueOf(password);
     }
 
     private static class InnerPublisherConfiguration {
@@ -92,7 +91,7 @@ public class PublisherConfiguration {
         this.receiverUrlGroup = String.valueOf(publisherConfiguration.get(DataPublisherConstants.RECEIVER_URL_GROUP));
         this.authUrlGroup = String.valueOf(publisherConfiguration.get(DataPublisherConstants.AUTH_URL_GROUP));
         this.userName = String.valueOf(publisherConfiguration.get(DataPublisherConstants.USERNAME));
-        this.password = String.valueOf(publisherConfiguration.get(DataPublisherConstants.PASSWORD));
+        this.password = String.valueOf(publisherConfiguration.get(DataPublisherConstants.PASSWORD)).toCharArray();
         try {
             this.maxIdleDataPublishingAgents =
                     Math.toIntExact((long) publisherConfiguration.get(DataPublisherConstants.MAX_IDLE));

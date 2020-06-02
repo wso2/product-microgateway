@@ -37,40 +37,33 @@ public class AgentConfiguration {
     private AgentConfiguration() {
     }
 
-    //todo: remove the default values in the native impl
     private final String publishingStrategy = DataEndpointConstants.ASYNC_STRATEGY;
-    private String trustStorePath =
-            preProcessTrustStorePath("${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12");
-    // Todo: add charset
-    private String trustStorePassword = "ballerina";
-    private int queueSize = 32768;
-    private int batchSize = 200;
-    private int corePoolSize = 1;
-    private int socketTimeoutMS = 30000;
-    private int maxPoolSize = 1;
-    private int keepAliveTimeInPool = 20;
-    private int reconnectionInterval = 30;
-    private int maxTransportPoolSize = 250;
-    private int maxIdleConnections = 250;
-    private int evictionTimePeriod = 5500;
-    private int minIdleTimeInPool = 5000;
-    private int secureMaxTransportPoolSize = 250;
-    private int secureMaxIdleConnections = 250;
-    private int secureEvictionTimePeriod = 5500;
-    private int secureMinIdleTimeInPool = 5000;
-    private String sslEnabledProtocols = "TLSv1,TLSv1.1,TLSv1.2";
-    private String ciphers = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256," +
-            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA," +
-            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA," +
-            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256," +
-            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256";
+    private String trustStorePath;
+    private char[] trustStorePassword;
+    private int queueSize;
+    private int batchSize;
+    private int corePoolSize;
+    private int socketTimeoutMS;
+    private int maxPoolSize;
+    private int keepAliveTimeInPool;
+    private int reconnectionInterval;
+    private int maxTransportPoolSize;
+    private int maxIdleConnections;
+    private int evictionTimePeriod;
+    private int minIdleTimeInPool;
+    private int secureMaxTransportPoolSize;
+    private int secureMaxIdleConnections;
+    private int secureEvictionTimePeriod;
+    private int secureMinIdleTimeInPool;
+    private String sslEnabledProtocols;
+    private String ciphers;
 
     public String getTrustStorePath() {
         return trustStorePath;
     }
 
     public String getTrustStorePassword() {
-        return trustStorePassword;
+        return String.valueOf(trustStorePassword);
     }
 
     public int getQueueSize() {
@@ -181,7 +174,8 @@ public class AgentConfiguration {
         String trustStorePath = String.valueOf(configuration.get(DataAgentConstants.TRUST_STORE_PATH));
         //TrustStore path provided from the microgateway configuration needs to be preprocessed.
         this.trustStorePath = preProcessTrustStorePath(trustStorePath);
-        this.trustStorePassword = String.valueOf(configuration.get(DataAgentConstants.TRUST_STORE_PASSWORD));
+        this.trustStorePassword = String.valueOf(configuration.get(DataAgentConstants.TRUST_STORE_PASSWORD))
+                .toCharArray();
         this.sslEnabledProtocols = String.valueOf(configuration.get(DataAgentConstants.SSL_ENABLED_PROTOCOLS));
         this.ciphers = String.valueOf(configuration.get(DataAgentConstants.CIPHERS));
 
