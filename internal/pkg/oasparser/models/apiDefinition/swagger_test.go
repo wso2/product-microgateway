@@ -132,4 +132,3 @@ func TestSetResourcesSwagger(t *testing.T) {
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
-

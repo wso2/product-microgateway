@@ -89,5 +89,3 @@ func TestGenerateRegex(t *testing.T) {
 		assert.Nil(t,err)
 	}
 }
-
-
