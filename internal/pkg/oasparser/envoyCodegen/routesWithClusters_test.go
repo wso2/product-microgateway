@@ -2,7 +2,6 @@ package envoyCodegen
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"regexp"
 	"testing"
 )
@@ -75,8 +74,3 @@ func TestGenerateRegex(t *testing.T) {
 	}
 }
 
-func TestCreateRoutesWithClusters(t *testing.T) {
-	var swagger apiDefinition.MgwSwagger
-
-
-}
