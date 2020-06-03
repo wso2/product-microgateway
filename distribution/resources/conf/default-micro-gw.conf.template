@@ -98,6 +98,14 @@
   certificateAlias = "wso2apim310"
   # Validate subscribed APIs
   validateSubscription = false
+  #support custom claim mapping
+  claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "scp"
+    localClaim = "scope"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "FName"
+    localClaim = "firstName"
 # Issuer 2
 [[jwtTokenConfig]]
   issuer = "https://host:port/issuer"
@@ -105,6 +113,14 @@
   certificateAlias = "alias"
   # Validate subscribed APIs
   validateSubscription = false
+  #support custom claim mapping
+  claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "scps"
+    localClaim = "scope"
+  [[jwtTokenConfig.claims]]
+    remoteClaim = "FN"
+    localClaim = "firstName"
 
 # JWT token revocation configurations
 [tokenRevocationConfig]

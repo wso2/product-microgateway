@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/cache;
+import ballerina/runtime;
 
 // TODO: Refactor the cache
 int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
@@ -39,6 +40,8 @@ cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictio
 cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache gatewayClaimsCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+
 cache:Cache jwtGeneratorCache = new (jwtGeneratorCacheExpiryTime, jwtGeneratorCacheSize, jwtGeneratorEvictionFactor);
 
 public type APIGatewayCache object {
@@ -101,6 +104,20 @@ public type APIGatewayCache object {
     public function removeFromTokenCache(string accessToken) {
         gatewayTokenCache.remove(accessToken);
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
+    }
+
+    public function addClaimMappingCache(string jwtTokens, runtime:Principal modifiedPrincipal) {
+        gatewayClaimsCache.put(jwtTokens, modifiedPrincipal);
+        printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. ");
+    }
+
+    public function retrieveClaimMappingCache(string jwtTokens) returns (runtime:Principal | ()) {
+        var modifiedPrincipal = gatewayClaimsCache.get(jwtTokens);
+        if (modifiedPrincipal is runtime:Principal ) {
+            return modifiedPrincipal;
+        } else {
+            return ();
+        }
     }
 };
 

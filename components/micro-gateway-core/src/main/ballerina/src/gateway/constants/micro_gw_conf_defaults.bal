@@ -46,6 +46,7 @@ public const string DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER = "AUTH_HE
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2 = "";
 
 public const string DEFAULT_JWT_ISSUER = "https://localhost:9443/oauth2/token";
+public const string DEFAULT_ISSUER_CLASSNAME = "DefaultJWTTransformer";
 public const boolean DEFAULT_VALIDATE_SUBSCRIPTION = false;
 public const string DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
 public const string DEFAULT_CERTIFICATE_ALIAS = "wso2apim310";

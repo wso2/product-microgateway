@@ -69,4 +69,14 @@ public class TokenUtil {
         }
         return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
     }
+
+    public static String getJwtWithCustomClaimsTransformer(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo,
+                                                           String keyType, int validityPeriod,
+                                                           Map<String, Object > claims)
+            throws Exception {
+        for(Map.Entry<String, Object> entry : claims.entrySet()) {
+            jwtTokenInfo.put(entry.getKey(), entry.getValue());
+        }
+        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
+    }
 }
