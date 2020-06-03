@@ -126,7 +126,13 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+
+    // provide backward compatibility for skew time
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
+   
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -187,7 +193,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
     string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3) {
+    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
         // this check if basepath have /t/domain in
         return splittedContext[2];
     } else {
@@ -227,6 +233,10 @@ public function getConfigFloatValue(string instanceId, string property, float de
 
 public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
+}
+
+public function getConfigArrayValue(string instanceId, string property) returns any[] {
+    return config:getAsArray(instanceId + "." + property);
 }
 
 function getDefaultStringValue(anydata val, string defaultVal) returns string {
@@ -597,6 +607,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
     http:ResourceAuth? serviceLevelAuthAnn = ();
     http:HttpServiceConfig httpServiceConfig = <http:HttpServiceConfig>serviceAnnotationMap[serviceName];
     http:HttpResourceConfig? httpResourceConfig = <http:HttpResourceConfig?>resourceAnnotationMap[resourceName];
+    setRequestDataToInvocationContext(httpServiceConfig, httpResourceConfig);
     if (httpResourceConfig is http:HttpResourceConfig) {
         resourceLevelAuthAnn = httpResourceConfig?.auth;
         boolean resourceSecured = isServiceResourceSecured(resourceLevelAuthAnn);
@@ -830,7 +841,10 @@ public function initAuthHandlers() {
     http:ClientConfiguration clientConfig = {
         auth: auth,
         cache: {enabled: false},
-        secureSocket: secureSocket
+        secureSocket: secureSocket,
+        http1Settings : {
+            proxy: getClientProxyForInternalServices()
+        }
     };
     oauth2:IntrospectionServerConfig keyValidationConfig = {
         url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
@@ -1008,4 +1022,36 @@ public function setResourceScopesToPrincipal(http:HttpResourceConfig httpResourc
             invocationContext.principal = principal;
         }
     }
+}
+
+function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceConfig, http:HttpResourceConfig? httpResourceConfig) {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string serviceName = invocationContext.attributes[http:SERVICE_NAME].toString();
+    string apiContext = <string>httpServiceConfig.basePath;
+    invocationContext.attributes[API_CONTEXT] = apiContext;
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        string requestPath = httpResourceConfig.path;
+        invocationContext.attributes[MATCHING_RESOURCE] =  requestPath;
+    }
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
+    if (apiConfig is APIConfiguration) {
+        invocationContext.attributes[API_VERSION_PROPERTY] = <string>apiConfig.apiVersion;
+        invocationContext.attributes[API_PUBLISHER] = <string>apiConfig.publisher;
+        invocationContext.attributes[API_NAME] = <string>apiConfig.name;
+    }
+}
+
+# Format context to remove preceding and trailing "/".
+#
+# + context - context to be formatted
+# + return - context
+public function removePrePostSlash(string context) returns string {
+    string formattedContext = context;
+    if (formattedContext.startsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(1, formattedContext.length());
+    }
+    if (formattedContext.endsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(0, formattedContext.length() - 1);
+    }
+    return formattedContext;
 }

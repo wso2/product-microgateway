@@ -17,13 +17,24 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import java.util.List;
+
 /**
- * Configuration for containerized deployment.
- * Docker and k8s.
+ * Configuration dto object for project level configurations and containerized deployment.
+ * Custom Filters, Docker and k8s.
  */
 public class ContainerConfig {
+    private List<Filter> filters;
     private Docker docker;
     private Kubernetes kubernetes;
+
+    public List<Filter> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<Filter> filters) {
+        this.filters = filters;
+    }
 
     public Docker getDocker() {
         return docker;

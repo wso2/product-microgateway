@@ -101,6 +101,7 @@ public const string DEFAULT_JMS_CONNECTION_USERNAME = "";
 public const string DEFAULT_JMS_CONNECTION_PASSWORD = "";
 public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endpoints";
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
+public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/throttle/data/v1";
 
 public const boolean DEFAULT_TOKEN_REVOCATION_ENABLED = false;
 public const string DEFAULT_REALTIME_JMS_CONNECTION_TOPIC = "tokenRevocation";
@@ -110,6 +111,10 @@ public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";
 
 public const boolean DEFAULT_HOSTNAME_VERIFICATION_ENABLED = true;
+public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = -1;
+public const int DEFAULT_HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = 100;
+public const int DEFAULT_HTTP_CLIENTS_WAIT_TIME = 30000;
+public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_STREAMS = 50;
 
 public const string DEFAULT_API_KEY_ISSUER = "https://localhost:9095/apikey";
 public const string DEFAULT_API_KEY_ALIAS = "ballerina";
@@ -117,3 +122,15 @@ public const boolean DEFAULT_VALIDATE_APIS_ENABLED = false;
 
 public const boolean DEFAULT_API_KEY_ISSUER_ENABLED = true;
 public const int DEFAULT_API_KEY_VALIDITY_TIME = -1;
+
+public const boolean DEFAULT_JWT_GENERATOR_ENABLED = false;
+public const string DEFAULT_JWT_GENERATOR_DIALECT = "http://wso2.org/claims";
+public const string DEFAULT_JWT_GENERATOR_SIGN_ALGO = "SHA256withRSA";
+public const string DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS = "ballerina";
+public const string DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS = "ballerina";
+public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
+public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
+public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl";
+public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
+
+public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;

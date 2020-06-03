@@ -1,10 +1,10 @@
 http:LoadBalanceClient|error reInitializedEndpoint = new({
                                                    targets: [
-                                                       {{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{endpointUrl}}")}{{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{endpointUrl}}"){{>secureSocket}} }{{/if}}{{#unless @last}},
+                                                       {{#endpoints}}    {url: {{#if isEtcdEnabled}}<string> getUrlOfEtcdKeyForReInit{{cut qualifiedServiceName " "}}("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{etcdKey}}", "{{{endpointUrl}}}")}{{else}} <string>gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{{endpointUrl}}}"){{>secureSocket}} }{{/if}}{{#unless @last}},
                                                        {{/unless}}{{/endpoints}}
 
                                                    ],
-                                                   {{>http2}}{{>caching}}{{>basicAuth}} });
+                                                   {{>clientsHttp2}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}} });
 if(reInitializedEndpoint is http:LoadBalanceClient) {
 {{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
 {{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}

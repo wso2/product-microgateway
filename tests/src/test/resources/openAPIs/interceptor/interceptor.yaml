@@ -260,6 +260,7 @@ paths:
       summary: uploads an image
       description: ""
       operationId: uploadFile
+      x-wso2-request-interceptor: java:org.wso2.micro.gateway.tests.interceptor.TestInterceptor
       parameters:
         - name: petId
           in: path
@@ -289,9 +290,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
       security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+        - petstore_auth:[]
   /store/inventory:
     get:
       tags:

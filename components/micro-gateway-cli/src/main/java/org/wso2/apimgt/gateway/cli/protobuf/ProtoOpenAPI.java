@@ -23,6 +23,8 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
@@ -32,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
+import org.wso2.apimgt.gateway.cli.constants.ProtoToOpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
@@ -68,12 +71,11 @@ public class ProtoOpenAPI {
     void addOpenAPIInfo(String name) {
         Info info = new Info();
         info.setTitle(name);
-        //todo: decide if we bring versioning into this.
+        //version is mandatory for openAPI
         //version is set to 1.0.0 as default.
-        info.setVersion("1.0.0");
+        info.setVersion(ProtoToOpenAPIConstants.DEFAULT_VERSION);
         openAPI.setInfo(info);
-        //todo: remove if basePath is not mandatory
-        openAPI.addExtension(OpenAPIConstants.BASEPATH, "/" + name);
+        openAPI.addExtension(OpenAPIConstants.BASEPATH, ProtoToOpenAPIConstants.PATH_SEPARATOR + name);
     }
 
     /**
@@ -104,7 +106,14 @@ public class ProtoOpenAPI {
         if (openAPI.getPaths() == null) {
             openAPI.setPaths(new Paths());
         }
-        openAPI.getPaths().addPathItem(path, pathItem);
+        //as Responses object is mandatory
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setDescription(ProtoToOpenAPIConstants.RESPONSE_DESCRIPTION);
+        ApiResponses apiResponses = new ApiResponses();
+        apiResponses.addApiResponse(ProtoToOpenAPIConstants.SUCCESS_RESPONSE_CODE, apiResponse);
+        operation.setResponses(apiResponses);
+        //append forward slash to preserve openAPI syntax
+        openAPI.getPaths().addPathItem(ProtoToOpenAPIConstants.PATH_SEPARATOR + path, pathItem);
     }
 
     /**
@@ -285,7 +294,7 @@ public class ProtoOpenAPI {
     }
 
     /**
-     * Add API-KEY security requirement to the API level
+     * Add API-KEY security requirement to the API level.
      */
     void addAPIKeySecurityRequirement() {
         addAPIKeySecurityScheme();

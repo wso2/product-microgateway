@@ -3,6 +3,7 @@ package org.wso2.apimgt.gateway.cli.model.route;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.AdvanceEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 
 import java.net.MalformedURLException;
@@ -13,7 +14,7 @@ import java.util.List;
 //todo: add constants
 
 /**
- * This class hold the available endpoints and securityConfig details (in the routes.yaml)
+ * This class hold the available endpoints and securityConfig details (in the routes.yaml).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EndpointListRouteDTO {
@@ -22,6 +23,7 @@ public class EndpointListRouteDTO {
     private EndpointType type = null;
     private List<String> endpoints = null;
     private String name;
+    private AdvanceEndpointConfigDTO advanceEndpointConfig = null;
 
     @JsonProperty("securityConfig")
     public APIEndpointSecurityDTO getSecurityConfig() {
@@ -62,6 +64,14 @@ public class EndpointListRouteDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public AdvanceEndpointConfigDTO getAdvanceEndpointConfig() {
+        return advanceEndpointConfig;
+    }
+
+    public void setAdvanceEndpointConfig(AdvanceEndpointConfigDTO advanceEndpointConfig) {
+        this.advanceEndpointConfig = advanceEndpointConfig;
     }
 
     /**

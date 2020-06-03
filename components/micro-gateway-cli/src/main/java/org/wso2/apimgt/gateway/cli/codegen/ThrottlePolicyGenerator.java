@@ -73,7 +73,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate ballerina and stream source for a given app and subs policies
+     * Generate ballerina and stream source for a given app and subs policies.
      *
      * @param outPath     Destination file path to save generated source files. If not provided
      *                    {@code definitionPath} will be used as the default destination path
@@ -106,7 +106,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate generic policies source
+     * Generate generic policies source.
      *
      * @param policies list of application policies
      * @return list of {@code GenSrcFile}
@@ -128,7 +128,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate application policies source
+     * Generate application policies source.
      *
      * @param applicationPolicies list of application policies
      * @return list of {@code GenSrcFile}
@@ -150,7 +150,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate subscription policies source
+     * Generate subscription policies source.
      *
      * @param subscriptionPolicies list of subscription policies
      * @return list of {@code GenSrcFile}
@@ -171,7 +171,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate init ballerina source which start all other policy ballerina
+     * Generate init ballerina source which start all other policy ballerina.
      *
      * @param applicationPolicies  list of application policies
      * @param subscriptionPolicies list of subscription policies
@@ -194,7 +194,7 @@ public class ThrottlePolicyGenerator {
 
 
     /**
-     * Generate init ballerina source which start all other policy ballerina
+     * Generate init ballerina source which start all other policy ballerina.
      *
      * @param applicationPolicies  list of application policies
      * @param subscriptionPolicies list of subscription policies
@@ -251,7 +251,7 @@ public class ThrottlePolicyGenerator {
     }
 
     /**
-     * Generate code for throttle policy
+     * Generate code for throttle policy.
      *
      * @param context model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}

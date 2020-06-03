@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.nio.channels.ByteChannel;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -43,7 +44,7 @@ public class Request {
     }
 
     /**
-     * Gets the requested resource path
+     * Gets the requested resource path.
      *
      * @return Resource path value as a string
      */
@@ -52,7 +53,7 @@ public class Request {
     }
 
     /**
-     * Gets the requested resource http method
+     * Gets the requested resource http method.
      *
      * @return Resource http method as a string. For ex: POST
      */
@@ -70,7 +71,7 @@ public class Request {
     }
 
     /**
-     * Gets the additional path information available in the request
+     * Gets the additional path information available in the request.
      *
      * @return Extra path information as a string
      */
@@ -88,9 +89,24 @@ public class Request {
     }
 
     /**
-     * Gets the query parameters of the request as a ballerina map.
+     * Gets the path parameters of the request as a map.
      *
-     * @return {@link BMap} Ballerina map value object containing query parameters.
+     * @return {@link Map} Map of path parameters. Map with size 0 is returned if path parameters does not present.
+     */
+    public Map<String, String> getPathParams() {
+        Map<String, String> pathParamMap = new HashMap<>();
+        Map<String, Object> attributes = Utils.getInvocationContextAttributes();
+        if (attributes.containsKey(Constants.REQUEST_PATH_PARAMS)) {
+            BMap mapValues = (BMap) attributes.get(Constants.REQUEST_PATH_PARAMS);
+            pathParamMap = InterceptorUtils.convertBMapToMap(mapValues);
+        }
+        return pathParamMap;
+    }
+
+    /**
+     * Gets the query parameters of the request as a map.
+     *
+     * @return {@link Map} map containing query parameters.
      */
     public Map<String, String> getQueryParams() {
         return InterceptorUtils.convertBMapToMap(getNativeQueryParams());

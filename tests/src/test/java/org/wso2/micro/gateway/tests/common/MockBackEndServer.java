@@ -20,24 +20,23 @@ package org.wso2.micro.gateway.tests.common;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-
 import io.netty.handler.codec.http.HttpHeaderNames;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.TokenManagementConstants;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Mock HTTP server for testing Open API tests.
@@ -48,6 +47,7 @@ public class MockBackEndServer extends Thread {
     private HttpsServer httpServer;
     private String backEndServerUrl;
     private static int backEndServerPort;
+    private static boolean retryDone = false;
 
     public static void main(String[] args) {
 
@@ -132,10 +132,57 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            httpServer.createContext(context + "/store/order/1", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                {
+                    response = ResponseConstants.storeInventoryResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/user/john", exchange -> {
+                byte[] response;
+                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                {
+                    response = ResponseConstants.userResponse.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                } else {
+                    response = ResponseConstants.AUTHZ_FAILURE_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
+                }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             String base = "/v1";
             httpServer.createContext(base + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(base + "/pet/findByStatusNew", exchange -> {
+                byte[] response = "{\"error\":true}".getBytes();
+                if(exchange.getRequestURI().getQuery().contains("value1=foo&value2=bar")) {
+                    response = ResponseConstants.responseBodyV1.getBytes();
+                }
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -320,6 +367,85 @@ public class MockBackEndServer extends Thread {
 
                 InputStream is =  exchange.getRequestBody();
                 byte [] response = IOUtils.toByteArray(is);
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/timeout", exchange -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    log.error("Error while invoking timeout back end", e);
+                }
+                byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/retry", exchange -> {
+                if (!retryDone) {
+                    byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_GATEWAY_TIMEOUT, 0);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                    retryDone = true;
+                }
+                byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                retryDone = false;
+                exchange.close();
+            });
+            httpServer.createContext(contextV3 + "/circuitBreaker", exchange -> {
+                if (exchange.getRequestURI().getQuery() != null && exchange.getRequestURI().getQuery()
+                        .contains("cb=true")) {
+                    byte[] response = ResponseConstants.ERROR_RESPONSE.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.responseBodyV1.getBytes();
+                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                            TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    exchange.getResponseBody().write(response);
+                    exchange.close();
+                }
+            });
+            // to test jwt generator
+            String contextV4 = "/v4";
+            httpServer.createContext(contextV4 + "/jwtheader", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    response = ResponseConstants.VALID_JWT_RESPONSE.getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(contextV4 + "/jwttoken", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    JSONObject responseJSON = new JSONObject();
+                    responseJSON.put("token", exchange.getRequestHeaders().get("X-JWT-Assertion").toString());
+                    response = responseJSON.toString().getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
                 exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);

@@ -33,7 +33,7 @@ public class CustomAttributeDTO {
 
 
     /**
-     * Name of the custom attribute
+     * Name of the custom attribute.
      **/
     @JsonProperty("name")
     public String getName() {
@@ -46,7 +46,7 @@ public class CustomAttributeDTO {
 
 
     /**
-     * Value of the custom attribute
+     * Value of the custom attribute.
      **/
     @JsonProperty("value")
     public String getValue() {

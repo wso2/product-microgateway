@@ -47,6 +47,7 @@ public class ResponseConstants {
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";
+    public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
     public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
             "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String RESPONSE_INTERCEPTOR_RESPONSE_HEDAER = "ResponseHeader";
@@ -54,9 +55,15 @@ public class ResponseConstants {
             "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
     public static final String PAYLOAD = "payload";
+    public static final String userResponse = "{ \"name\": \"john\" }";
+
     public static final String JSON_RESPONSE = ":application/json:Accept:Cache-Control:Connection:Content-Length"
             + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
             + "{test2=value2, test=value1}:value1:{\"hello\":\"world\"}";
+    public static final String JSON_RESPONSE_WITH_PATH_PARAMS = ":application/json:Accept:Cache-Control:Connection:"
+            + "Content-Length:content-type:Host:Pragma::/petstore/v1/pet;a=4;b=5/value1;x=10;y=15/uploadImage"
+            + "?bar=value2&test=value3:POST:1.1:{petId=value1}:{a=4, b=5}:{bar=value2, test=value3}:"
+            + "value3:{\"hello\":\"world\"}";
     public static final String JSON_ARRAY_RESPONSE = ":application/json:Accept:Cache-Control:Connection:Content-Length"
             + ":content-type:Host:Pragma:X_JWT::/petstore/v1/user?test=value1&test2=value2:POST:1.1:{test2=value2, "
             + "test=value1}:value1:[{\"name\":\"foo\",\"age\":\"20\"},{\"name\":\"bar\",\"age\":\"30\"}]";
@@ -69,4 +76,8 @@ public class ResponseConstants {
             "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
+    public static final String ERROR_RESPONSE = "error:true";
+
+    public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
+    public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 }
