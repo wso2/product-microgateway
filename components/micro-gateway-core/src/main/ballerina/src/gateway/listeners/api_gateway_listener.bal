@@ -174,6 +174,9 @@ function getOauth2OutboundProvider() returns oauth2:OutboundOAuth2Provider | err
                 password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
             },
             verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        },
+        http1Settings : {
+            proxy: getClientProxyForInternalServices()
         }
     };
     if (getConfigBooleanValue(KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID, ENABLED, DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED)) {

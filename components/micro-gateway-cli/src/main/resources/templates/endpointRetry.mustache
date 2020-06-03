@@ -1,0 +1,9 @@
+{{#if retryConfig}},
+retryConfig : {
+    count : {{retryConfig.count}},
+    intervalInMillis : {{retryConfig.intervalInMillis}},
+    backOffFactor : {{retryConfig.backOffFactor}},
+    maxWaitIntervalInMillis : {{retryConfig.maxWaitIntervalInMillis}} {{#if retryConfig.statusCodes}},
+    statusCodes : [ {{#retryConfig.statusCodes}} {{.}}{{#unless @last}},{{/unless}} {{/retryConfig.statusCodes}}]  {{/if}}
+}
+{{/if}}

@@ -131,7 +131,13 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+
+    // provide backward compatibility for skew time
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
+   
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -232,6 +238,10 @@ public function getConfigFloatValue(string instanceId, string property, float de
 
 public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
+}
+
+public function getConfigArrayValue(string instanceId, string property) returns any[] {
+    return config:getAsArray(instanceId + "." + property);
 }
 
 function getDefaultStringValue(anydata val, string defaultVal) returns string {
@@ -836,7 +846,10 @@ public function initAuthHandlers() {
     http:ClientConfiguration clientConfig = {
         auth: auth,
         cache: {enabled: false},
-        secureSocket: secureSocket
+        secureSocket: secureSocket,
+        http1Settings : {
+            proxy: getClientProxyForInternalServices()
+        }
     };
     oauth2:IntrospectionServerConfig keyValidationConfig = {
         url: getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL),
@@ -897,6 +910,7 @@ public function initAuthHandlers() {
 function readMultipleJWTIssuers() {
     map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
+        initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
         foreach map<anydata> jwtIssuer in jwtIssuers {
             jwt:JwtValidatorConfig jwtValidatorConfig = {
@@ -912,8 +926,19 @@ function readMultipleJWTIssuers() {
                 },
                 jwtCache: jwtCache
             };
-            JwtAuthProvider jwtAuthProvider 
-                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION], DEFAULT_VALIDATE_SUBSCRIPTION));
+            boolean classLoaded = false;
+            string className = "";
+            if(jwtIssuer.hasKey(ISSUER_CLASSNAME)) {
+               className = getDefaultStringValue(jwtIssuer[ISSUER_CLASSNAME], DEFAULT_ISSUER_CLASSNAME);
+               classLoaded = loadMappingClass(className);
+            }
+            map<anydata>[] | error claims = [];
+            if(jwtIssuer.hasKey(ISSUER_CLAIMS)) {
+                  claims = map<anydata>[].constructFrom((jwtIssuer[ISSUER_CLAIMS]));
+            }
+            JwtAuthProvider jwtAuthProvider
+                = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
+                    DEFAULT_VALIDATE_SUBSCRIPTION), claims, className, classLoaded);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -940,8 +965,9 @@ function readMultipleJWTIssuers() {
             },
             jwtCache: jwtCache
         };
-        JwtAuthProvider jwtAuthProvider 
-            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION, DEFAULT_VALIDATE_SUBSCRIPTION));
+        JwtAuthProvider jwtAuthProvider
+            = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
+                DEFAULT_VALIDATE_SUBSCRIPTION), [] , "", false);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -1018,4 +1044,19 @@ function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceCon
         invocationContext.attributes[API_PUBLISHER] = <string>apiConfig.publisher;
         invocationContext.attributes[API_NAME] = <string>apiConfig.name;
     }
+}
+
+# Format context to remove preceding and trailing "/".
+#
+# + context - context to be formatted
+# + return - context
+public function removePrePostSlash(string context) returns string {
+    string formattedContext = context;
+    if (formattedContext.startsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(1, formattedContext.length());
+    }
+    if (formattedContext.endsWith(PATH_SEPERATOR)) {
+        formattedContext = formattedContext.substring(0, formattedContext.length() - 1);
+    }
+    return formattedContext;
 }

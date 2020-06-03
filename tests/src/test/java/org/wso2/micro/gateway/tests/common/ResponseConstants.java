@@ -36,6 +36,9 @@ public class ResponseConstants {
             " \"status\":\"hello\"}";
     public static final String storeInventoryResponse = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
             + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
+    public static final String RESPONSE_VALID_JWT_TRANSFORMER = "{\"id\":3, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
+            "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}], " +
+            "\"status\":\"hello\"}";
     public static final String PER_RESOURCE_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900802," +
             " \"message\":\"Message throttled out\", \"description\":\"You have exceeded your quota\"}}";
     public static final String PER_API_THROTTLING_RESPONSE = "{\"fault\":{\"code\":900800," +
@@ -44,6 +47,7 @@ public class ResponseConstants {
             "\"message\":\"Internal server error occured\", \"description\":\"POLICY ENFORCEMENT ERROR\"}}";
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";
+    public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
     public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
             "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String RESPONSE_INTERCEPTOR_RESPONSE_HEDAER = "ResponseHeader";
@@ -51,6 +55,7 @@ public class ResponseConstants {
             "\"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
     public static final String PER_APIRESPONSE_HEADER = "PerAPIResponse_Header";
     public static final String PAYLOAD = "payload";
+    public static final String userResponse = "{ \"name\": \"john\" }";
 
     public static final String JSON_RESPONSE = ":application/json:Accept:Cache-Control:Connection:Content-Length"
             + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
@@ -71,4 +76,8 @@ public class ResponseConstants {
             "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
+    public static final String ERROR_RESPONSE = "error:true";
+
+    public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
+    public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 }

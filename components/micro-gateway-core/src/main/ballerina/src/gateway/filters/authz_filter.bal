@@ -78,7 +78,15 @@ public type OAuthzFilter object {
 public function doAuthzFilterResponse(http:Response response, http:FilterContext context) returns boolean {
     // In authorization filter we have specifically set the error payload since we are using ballerina in built
     // authzFilter
-    if (response.statusCode == FORBIDDEN) {
+    // when unauthorized response is coming from a backend/interceptor,
+    // we should avoid sending mgw unauthorized error response to the client
+    map<any> attributes = runtime:getInvocationContext().attributes;
+    // check if the response is coming from the backend.
+    boolean didEpRespond = attributes.hasKey(DID_EP_RESPOND) && <boolean>attributes[DID_EP_RESPOND];
+    // check if the response is coming from an interceptor.
+    boolean isRespondDone = attributes.hasKey(RESPOND_DONE) && <boolean>attributes[RESPOND_DONE];
+
+    if (response.statusCode == FORBIDDEN && !didEpRespond && !isRespondDone) {
         if (runtime:getInvocationContext().attributes[ERROR_CODE] is ()) {
             if (context.attributes[ERROR_CODE] is ()) {
                 setAuthorizationFailureMessage(response, context);
