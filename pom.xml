@@ -416,6 +416,21 @@
                 <artifactId>core</artifactId>
                 <version>${carbon.callhome.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${com.nimbusds.nimbus-jose-jwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${net.minidev.json-smart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>asm</artifactId>
+                <version>${net.minidev.asm.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -615,6 +630,9 @@
         <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
         <org.wso2.json.version>3.0.0.wso2v1</org.wso2.json.version>
         <carbon.callhome.version>1.0.4</carbon.callhome.version>
+        <com.nimbusds.nimbus-jose-jwt>8.8</com.nimbusds.nimbus-jose-jwt>
+        <net.minidev.json-smart.version>2.3</net.minidev.json-smart.version>
+        <net.minidev.asm.version>1.0.2</net.minidev.asm.version>
     </properties>
 
 </project>

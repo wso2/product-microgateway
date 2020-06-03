@@ -126,7 +126,13 @@ public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) re
     if (issueTime is string) {
         issuedTime = 'int:fromString(issueTime);
     }
-    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+
+    // provide backward compatibility for skew time
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
+   
     int currentTime = time:currentTime().time;
     int intMaxValue = 9223372036854775807;
     if (!(validityPeriod is int) || !(issuedTime is int)) {
@@ -227,6 +233,10 @@ public function getConfigFloatValue(string instanceId, string property, float de
 
 public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
+}
+
+public function getConfigArrayValue(string instanceId, string property) returns any[] {
+    return config:getAsArray(instanceId + "." + property);
 }
 
 function getDefaultStringValue(anydata val, string defaultVal) returns string {

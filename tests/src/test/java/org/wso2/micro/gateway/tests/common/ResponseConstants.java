@@ -74,4 +74,7 @@ public class ResponseConstants {
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
     public static final String ERROR_RESPONSE = "error:true";
+
+    public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
+    public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 }

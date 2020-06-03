@@ -121,3 +121,15 @@ public const boolean DEFAULT_VALIDATE_APIS_ENABLED = false;
 
 public const boolean DEFAULT_API_KEY_ISSUER_ENABLED = true;
 public const int DEFAULT_API_KEY_VALIDITY_TIME = -1;
+
+public const boolean DEFAULT_JWT_GENERATOR_ENABLED = false;
+public const string DEFAULT_JWT_GENERATOR_DIALECT = "http://wso2.org/claims";
+public const string DEFAULT_JWT_GENERATOR_SIGN_ALGO = "SHA256withRSA";
+public const string DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS = "ballerina";
+public const string DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS = "ballerina";
+public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
+public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
+public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl";
+public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
+
+public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;
