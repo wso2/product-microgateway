@@ -111,9 +111,9 @@ public type JwtAuthProvider object {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims in the cache");
                             } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims is not in the cache");
                                 var result = doMappingContext(invocationContext, self.className, claimsSet,
                                     self.classLoaded, jwtPayloadFromCache, self.jwtValidatorConfig, self.gatewayCache, authContext);
                                 if (result is auth:Error){
@@ -131,9 +131,9 @@ public type JwtAuthProvider object {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims in the cache");
                             } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims is not in the cache");
                                 var result = doMappingContext(invocationContext, self.className, claimsSet,
                                     self.classLoaded, payload, self.jwtValidatorConfig, self.gatewayCache, authContext);
                                 if (result is auth:Error){
