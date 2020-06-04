@@ -36,7 +36,7 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 		swagger.version = swagger3.Info.Version
 	}
 
-	swagger.vendorExtensible = converExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = SetResourcesOpenApi(swagger3)
 
 	if IsServerUrlIsAvailable(swagger3) {
@@ -59,7 +59,7 @@ func setOperationOpenApi(path string, pathtype string, operation *openapi3.Opera
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: converExtensibletoReadableFormat(operation.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(operation.ExtensionProps)}
 	}
 	return resource
 }
@@ -136,17 +136,17 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 	}
 }
 
-func converExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
+func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
 	jsnRawExtensible := vendorExtensible.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		log.Println("Error unmarshelinn vendor extenstions: ",err)
+		log.Println("Error marsheling vendor extenstions: ",err)
 	}
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("Error unmarsheling vendor extenstions:", err)
 	}
 	return extensible
 }

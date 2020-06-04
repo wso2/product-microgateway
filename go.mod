@@ -10,10 +10,9 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.19.7
 	github.com/golang/protobuf v1.4.0
-	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1
 	google.golang.org/grpc v1.29.1
-	google.golang.org/protobuf v1.21.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

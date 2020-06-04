@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package accesslogs
+package logging
 
 import (
 	"fmt"

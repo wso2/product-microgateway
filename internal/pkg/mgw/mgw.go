@@ -23,7 +23,7 @@ import (
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	"github.com/fsnotify/fsnotify"
-	myals "github.com/wso2/micro-gw/internal/pkg/accesslogs"
+	myals "github.com/wso2/micro-gw/internal/pkg/logging"
 	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
 	mgwconfig "github.com/wso2/micro-gw/internal/pkg/confTypes"
 	"net"
