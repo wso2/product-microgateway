@@ -133,6 +133,8 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${org.apache.logging.log4j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-jwt-transformer</artifactId>
         </dependency>
