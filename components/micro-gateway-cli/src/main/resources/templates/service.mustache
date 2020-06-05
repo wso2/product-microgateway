@@ -1,4 +1,3 @@
-import ballerina/log;
 import ballerina/http;
 import ballerina/time;
 import ballerina/runtime;{{#importModules}}
@@ -52,6 +51,9 @@ import wso2/gateway;
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
 {{>kubernetes}}
+
+//This variable is added for logging purposes
+string {{cut qualifiedServiceName " "}}Key = "{{api.name}}-{{api.version}}";
 
 @http:ServiceConfig {
     basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}},
@@ -287,7 +289,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             }{{/equals}}{{/if}}
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
-                log:printError("Error when sending response", err = outboundResult);
+                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error when sending response", outboundResult);
             }
         } else {
             http:Response res = new;
@@ -317,10 +319,10 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             } else {
                 gateway:attachGrpcErrorHeaders (res, errorDescription);
             }
-            log:printError("Error in client response", err = clientResponse);
+            gateway:printError({{cut qualifiedServiceName " "}}Key, "Error in client response", clientResponse);
             var outboundResult = outboundEp->respond(res);
             if (outboundResult is error) {
-                log:printError("Error when sending response", err = outboundResult);
+                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error when sending response", outboundResult);
             }
         }
     }
@@ -332,7 +334,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
             req.removeHeader("Expect");
             var result = outboundEp->continue();
             if (result is error) {
-            log:printError("Error while sending 100 continue response", err = result);
+            gateway:printError({{cut qualifiedServiceName " "}}Key, "Error while sending 100 continue response", result);
             }
         }
     }
@@ -357,7 +359,7 @@ function respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(runtime:Invo
             http:Response clientResponse = <http:Response>invocationContext.attributes[gateway:RESPONSE_OBJECT];
             var outboundResult = outboundEp->respond(clientResponse);
             if (outboundResult is error) {
-                log:printError("Error when sending response from the interceptor", err = outboundResult);
+                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error when sending response from the interceptor", outboundResult);
             }
             tryRespond = true;
         }

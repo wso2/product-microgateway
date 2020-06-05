@@ -294,7 +294,8 @@ public function setErrorMessageToInvocationContext(int errorCode) {
 # + caller - http caller object.
 # + request - http request object.
 # + context - filter context object.
-public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
+# + filterName - filter from which the method is invoked (for logging purposes).
+public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context, string filterName) {
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
     string errorMessage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
@@ -315,7 +316,7 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     }
     var value = caller->respond(response);
     if (value is error) {
-        log:printError("Error occurred while sending the error response", err = value);
+        printError(filterName, "Error occurred while sending the error response", value);
     }
 }
 
@@ -610,7 +611,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
     serviceLevelAuthAnn = httpResourceConfig?.auth;
     boolean serviceSecured = isServiceResourceSecured(serviceLevelAuthAnn);
     if (!serviceSecured) {
-        log:printWarn("Service is not secured. `enabled: false`.");
+        printWarn(KEY_UTILS, "Service is not secured. `enabled: false`.");
         return true;
     }
     return true;
