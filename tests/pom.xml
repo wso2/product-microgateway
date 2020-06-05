@@ -136,6 +136,10 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>mgw-jwt-transformer</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -194,6 +198,9 @@
                         <interceptor_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </interceptor_jar>
+                        <jwt_transformer_jar>
+                            ${basedir}/target/test-integration-${project.version}.jar
+                        </jwt_transformer_jar>
                         <project.build.directory>${project.build.directory}</project.build.directory>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                         <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
@@ -362,6 +369,9 @@
                                 <interceptor_jar>
                                     ${basedir}/../tests/target/test-integration-${project.version}.jar
                                 </interceptor_jar>
+                                <jwt_transformer_jar>
+                                    ${basedir}/../tests/target/test-integration-${project.version}.jar
+                                </jwt_transformer_jar>
                                 <project.build.directory>${project.build.directory}</project.build.directory>
                                 <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                                 <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>

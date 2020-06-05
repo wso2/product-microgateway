@@ -130,6 +130,7 @@ public const string PASSWORD = "password";
 public const string ENABLE = "enable";
 public const string REQUIRE = "require";
 public const string SHA_PREFIX = "@sha";
+public const string DID_EP_RESPOND = "didEpRespond";
 
 //throttle policy prefixes
 public const string RESOURCE_LEVEL_PREFIX = "res_";
@@ -290,6 +291,8 @@ public const string REMOVE_AUTH_HEADER_FROM_OUT_MESSAGE = "removeAuthHeaderFromO
 public const string JWT_INSTANCE_ID = "jwtTokenConfig";
 public const string ISSUER = "issuer";
 public const string AUDIENCE = "audience";
+public const string ISSUER_CLASSNAME = "claimMapperClassName";
+public const string ISSUER_CLAIMS = "claims";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
@@ -372,7 +375,7 @@ public const int THROTTLED_OUT = 429;
 public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
-const string PATH_SEPERATOR = "/";
+public const string PATH_SEPERATOR = "/";
 const string TENANT_DOMAIN_PREFIX = "/t/";
 const string TENANT_DOMAIN_SEPERATOR = "@";
 
@@ -459,5 +462,28 @@ public const string API_PUBLISHER = "api_publisher";
 public const string API_NAME = "api_name";
 public const string MATCHING_RESOURCE = "matching_resource";
 
-
 public const int DEFAULT_AUTH_FILTER_POSITION = 2;
+
+// jwt generator constants
+public const string JWT_GENERATOR_ID = "jwtGeneratorConfig";
+public const string JWT_GENERATOR_ENABLED = "jwtGeneratorEnabled";
+public const string JWT_GENERATOR_DIALECT = "claimDialect";
+public const string JWT_GENERATOR_SIGN_ALGO = "signingAlgorithm";
+public const string JWT_GENERATOR_CERTIFICATE_ALIAS = "certificateAlias";
+public const string JWT_GENERATOR_PRIVATE_KEY_ALIAS = "privateKeyAlias";
+public const string JWT_GENERATOR_TOKEN_EXPIRY = "tokenExpiry";
+public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
+public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
+public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
+public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
+
+// jwt generator caching mechanism
+public const string JWT_GENERATOR_CACHING_ID = "jwtGeneratorConfig.jwtGeneratorCaching";
+public const string JWT_GENERATOR_TOKEN_CACHE_ENABLED = "tokenCacheEnable";
+public const string JWT_GENERATOR_TOKEN_CACHE_EXPIRY = "tokenCacheExpiryTime";
+public const string JWT_GENERATOR_TOKEN_CACHE_CAPACITY = "tokenCacheCapacity";
+public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvictionFactor";
+
+// server configurations
+public const string SERVER_CONF_ID = "server";
+public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";

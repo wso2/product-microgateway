@@ -500,6 +500,7 @@ paths:
       summary: Get user by user name
       description: ""
       operationId: getUserByName
+      x-wso2-request-interceptor: java:org.wso2.micro.gateway.tests.interceptor.ConfigInterceptor
       parameters:
         - name: username
           in: path

@@ -15,9 +15,12 @@
  */
 package org.wso2.micro.gateway.interceptor;
 
+import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.api.BMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,5 +36,15 @@ public class InterceptorUtils {
             }
         }
         return convertedMap;
+    }
+
+    protected static List<Map<String, String>> convertArrayValueToList(ArrayValue arrayValue) {
+        List<Map<String, String>> listValue = new ArrayList<>();
+        if (arrayValue != null) {
+            for (Object obj : arrayValue.getValues()) {
+                listValue.add(convertBMapToMap((BMap) obj));
+            }
+        }
+        return listValue;
     }
 }

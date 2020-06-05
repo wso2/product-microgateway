@@ -541,7 +541,7 @@ The variable format is **\<epName\>_\<epType\>_basic_password**
 - epType : either prod or sand
 So the complete command for the above sample is like
 ```
-bash gateway -e myEndpoint3_prod_basic_password=123456 <path_to_the_excutable_file>
+bash gateway <path_to_the_excutable_file> --myEndpoint3_prod_basic_password=123456
 ```
 
 #### 6. Override backend service connection URLS
@@ -556,7 +556,7 @@ The variable format is **\<epName\>\_\<epType\>\_endpoint_\<epIndex\>**
 So the complete command for the above sample is like
 
 ```
-bash gateway -e myEndpoint3_prod_endpoint_0=<new back end url> <path_to_the_excutable_file>
+bash gateway <path_to_the_excutable_file> --myEndpoint3_prod_endpoint_0=<new back end url>
 ```
 
 #### 7. Disable security for resources
