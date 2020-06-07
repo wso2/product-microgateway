@@ -59,10 +59,11 @@ public class JWTGenerationTestCase extends BaseTestCase {
                 TestConstant.KEY_TYPE_PRODUCTION, 3600, customClaims);
 
         // generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"jwtGeneration/jwt_generation.yaml"}, null,"confs/jwt-generator-test-config.conf");
+        super.init(project, new String[]{"jwtGeneration/jwt_generation.yaml", "mgw-JwtGenerator.jar"},
+                null,"confs/jwt-generator-test-config.conf");
     }
 
-    @Test(description = "Test the availability of JWT Generator")
+    @Test(description = "Test the availability of JWT Generator header")
     public void testResponseJWTGenerationHeader() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token

@@ -367,7 +367,7 @@
   # Token audience standard claim
   audience=["http://org.wso2.apimgt/gateway"]
   # JWT token generator implementation
-  generatorImpl="org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl"
+  generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
   [jwtGeneratorConfig.jwtGeneratorCaching]
     # Enable jwt generator token caching

@@ -129,6 +129,10 @@
             <artifactId>mgw-jwt-transformer</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>mgw-jwt-generator</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>

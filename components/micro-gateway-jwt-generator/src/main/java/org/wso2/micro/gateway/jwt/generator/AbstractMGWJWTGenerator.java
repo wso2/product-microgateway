@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.jwt.generator;
+package org.wso2.micro.gateway.jwt.generator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONArray;
