@@ -58,11 +58,12 @@ public class EndpointsByReferenceTestCase extends BaseTestCase {
                 "--myEndpoint1_prod_basic_password=admin",
                 "--myEndpoint2_prod_basic_password=admin",
                 "--myEndpoint3_prod_basic_password=admin",
-                "--myEndpoint4_prod_basic_password=admin"
+                "--myEndpoint4_prod_basic_password=admin",
         };
         //generate apis with CLI and start the micro gateway server
         super.init(project, new String[] { "endpoints/endpoints_by_reference.yaml", "endpoints/endpoint_override.yaml",
-                "endpoints/load_balance.yaml", "endpoints/fail_over.yaml", "endpoints/endpoint_security.yaml" }, args);
+                "endpoints/load_balance.yaml", "endpoints/fail_over.yaml", "endpoints/endpoint_security.yaml",
+                "endpoints/advance_config.yaml" }, args);
     }
 
     @Test(description = "Test Invoking the resource which  endpoint defined at resource level")

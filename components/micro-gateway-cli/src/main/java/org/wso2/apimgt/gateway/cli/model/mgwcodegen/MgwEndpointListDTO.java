@@ -28,6 +28,7 @@ public class MgwEndpointListDTO {
     private List<MgwEndpointDTO> endpoints = null;
     private EndpointUrlTypeEnum endpointUrlType = null;
     private String name = null;
+    private AdvanceEndpointConfigDTO advanceEndpointConfig = null;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean endpointListEtcdEnabled = false;
@@ -74,5 +75,13 @@ public class MgwEndpointListDTO {
 
     public void setEndpointListEtcdEnabled(boolean endpointListEtcdEnabled) {
         this.endpointListEtcdEnabled = endpointListEtcdEnabled;
+    }
+
+    public AdvanceEndpointConfigDTO getAdvanceEndpointConfig() {
+        return advanceEndpointConfig;
+    }
+
+    public void setAdvanceEndpointConfig(AdvanceEndpointConfigDTO advanceEndpointConfig) {
+        this.advanceEndpointConfig = advanceEndpointConfig;
     }
 }

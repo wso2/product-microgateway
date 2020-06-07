@@ -30,6 +30,9 @@ http:Client httpThrottleEndpoint = new (throttleEndpointUrl,
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+    },
+    http1Settings : {
+        proxy: getClientProxyForInternalServices()
     }
 });
 

@@ -180,6 +180,7 @@ public final class RouteUtils {
             setEndpointUrls(prodEpListDTO, prod);
             prod.setSecurityConfig(prodEpListDTO.getSecurityConfig());
             prod.setName(prodEpListDTO.getName());
+            prod.setAdvanceEndpointConfig(prodEpListDTO.getAdvanceEndpointConfig());
         }
 
         if (sandEpListDTO != null) {
@@ -189,6 +190,7 @@ public final class RouteUtils {
             setEndpointUrls(sandEpListDTO, sandbox);
             sandbox.setSecurityConfig(sandEpListDTO.getSecurityConfig());
             sandbox.setName(sandEpListDTO.getName());
+            sandbox.setAdvanceEndpointConfig(sandEpListDTO.getAdvanceEndpointConfig());
         }
 
         endpointConfigDTO.setProdEndpointList(prod);

@@ -176,10 +176,12 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
+                            <includeGroupIds>
+                                org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
                                 org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax
                             </includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor,
+                            <includeArtifactIds>
+                                andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer,
                                 org.wso2.carbon.databridge.commons, org.wso2.carbon.databridge.commons.binary,
                                 disruptor
                             </includeArtifactIds>

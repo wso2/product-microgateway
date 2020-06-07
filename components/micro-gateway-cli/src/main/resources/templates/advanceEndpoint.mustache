@@ -1,0 +1,6 @@
+{{#advanceEndpointConfig}},
+timeoutInMillis:{{advanceEndpointConfig.timeoutInMillis}} {{#advanceEndpointConfig}}{{>endpointRetry}}{{/advanceEndpointConfig}}
+{{#advanceEndpointConfig}}{{>circuitBreaker}}{{/advanceEndpointConfig}}
+{{/advanceEndpointConfig}}
+{{>endpointPoolConfig}}
+{{>endpointProxy}}
