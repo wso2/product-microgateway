@@ -41,6 +41,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
+    private BinaryTestServer b;
 
     @Override
     protected void init(String label, String project) throws Exception {
@@ -140,6 +141,8 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         info3.setApplication(appWithNonExistPolicy);
         info.setSubscriptionTier(subscriptionPolicy.getPolicyName());
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
+        b = new BinaryTestServer();
+        b.startTestServer();
 
         //generate apis with CLI and start the micro gateway server
         init(label, project);
@@ -217,6 +220,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
 
     public void finalize() throws Exception {
         mockHttpServer.stopIt();
+        b.stop();
         microGWServer.stopServer(false);
         MockAPIPublisher.getInstance().clear();
     }
