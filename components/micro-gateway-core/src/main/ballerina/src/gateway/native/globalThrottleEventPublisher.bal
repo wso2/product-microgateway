@@ -62,6 +62,11 @@ function processTMPublisherURLGroup () returns [string, string] {
                         + TM_BINARY_FAILOVER + " configuration.");
                     urlType = TM_BINARY_FAILOVER;
                 }
+            } else {
+                printWarn(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP_TYPE + " property value is not "
+                    + TM_BINARY_LOADBALANCE + " or " + TM_BINARY_FAILOVER + ". Hence proceeding as a "
+                    + TM_BINARY_FAILOVER + " configuration.");
+                urlType = TM_BINARY_FAILOVER;
             }
 
             string | error receiverUrl = processSingleURLGroup(urlGroup[TM_BINARY_RECEIVER_URL], urlType);
@@ -115,9 +120,6 @@ function processSingleURLGroup(anydata urlArrayConfigValue, string urlType) retu
                 } else if (stringutils:equalsIgnoreCase(urlType, TM_BINARY_FAILOVER)) {
                     concatenatedURLString += url + TM_BINARY_FAILOVER_SEPARATOR;
                 } else {
-                    printWarn(KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER, TM_BINARY_URL_GROUP_TYPE + " property value is not "
-                        + TM_BINARY_LOADBALANCE + " or " + TM_BINARY_FAILOVER + ". Hence proceeding as a "
-                        + TM_BINARY_FAILOVER + " configuration.");
                     concatenatedURLString += url + TM_BINARY_FAILOVER_SEPARATOR;
                 }
             } else {
