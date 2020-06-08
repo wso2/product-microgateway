@@ -16,7 +16,7 @@
 
 import ballerina/io;
 import ballerina/stringutils;
-import wso2/jms;
+import ballerina/java.jms;
 
 string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
 DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);

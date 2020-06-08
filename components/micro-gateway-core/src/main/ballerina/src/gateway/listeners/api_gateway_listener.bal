@@ -132,11 +132,8 @@ public function getAuthHandlers(string[] appSecurity = [], boolean appSecurityOp
 }
 
 public function getDefaultAuthorizationFilter() returns OAuthzFilter | OAuthzFilterWrapper {
-    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
-    int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
-    float evictionFactor = getConfigFloatValue(CACHING_ID, TOKEN_CACHE_EVICTION_FACTOR, DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
-    cache:Cache positiveAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-    cache:Cache negativeAuthzCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+    cache:Cache positiveAuthzCache = new (genericCacheConfig);
+    cache:Cache negativeAuthzCache = new (genericCacheConfig);
     if (isTracingEnabled || isMetricsEnabled) {
         OAuthzFilterWrapper authzFilterWrapper = new (positiveAuthzCache, negativeAuthzCache, ());        //TODO: set the proper scopes
         return authzFilterWrapper;

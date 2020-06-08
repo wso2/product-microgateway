@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/jwt;
-import ballerinax/java;
+import ballerina/java;
 
 # To invoke the interop function to create instance of JWT generator
 #

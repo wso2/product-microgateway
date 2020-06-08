@@ -55,7 +55,7 @@ public type AnalyticsRequestFilter object {
                         if (isAnalyticsEnabled) {
                             EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                             if (eventDTO is EventDTO) {
-                                eventStream.publish(eventDTO);
+                                future<()> responseDataPublishFuture = start writeEventToFile(eventDTO);
                                 printDebug(KEY_ANALYTICS_FILTER, "File upload throttle stream data published." + eventDTO.streamId);
                             } else {
                                 printError(KEY_ANALYTICS_FILTER, "Error while creating throttle analytics event", eventDTO);
@@ -104,7 +104,7 @@ function doFilterFault(http:FilterContext context, string errorMessage) {
         if (eventDTO is EventDTO) {
             if (isAnalyticsEnabled != false) {
                 printDebug(KEY_ANALYTICS_FILTER, "File Upload fault stream invoked for API : " + faultDTO.apiName);
-                eventStream.publish(eventDTO);
+                future<()> responseDataPublishFuture = start writeEventToFile(eventDTO);
             }
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genaratting analytics data for fault event", eventDTO);
@@ -131,7 +131,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         if(event is EventDTO) {
             if (isAnalyticsEnabled) {
                 printDebug(KEY_ANALYTICS_FILTER, "File Upload eventRequestStream called for API : " + requestResponseExecutionDTO.apiName);
-                eventStream.publish(event);
+                future<()> responseDataPublishFuture = start writeEventToFile(event);
             }
         } else {
             printError(KEY_ANALYTICS_FILTER, "Error while genarating analytics data event", event);

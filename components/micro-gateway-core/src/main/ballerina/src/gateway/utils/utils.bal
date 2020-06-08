@@ -781,10 +781,14 @@ function isGrpcRequest(http:FilterContext context) returns boolean {
 public function initAuthHandlers() {
     //Initializes jwt handlers
     readMultipleJWTIssuers();
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
-        clockSkewInSeconds: 60,
+        clockSkewInSeconds: timestampSkew/1000,
         trustStoreConfig: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
@@ -907,11 +911,15 @@ function readMultipleJWTIssuers() {
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
         string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
         string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+        int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+        if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+            timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+        }
         foreach map<anydata> jwtIssuer in jwtIssuers {
             jwt:JwtValidatorConfig jwtValidatorConfig = {
                 issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
                 audience: getDefaultStringValue(jwtIssuer[AUDIENCE], DEFAULT_AUDIENCE),
-                clockSkewInSeconds: 60,
+                clockSkewInSeconds: timestampSkew/1000,
                 trustStoreConfig: {
                     trustStore: {
                         path: trustStorePath,

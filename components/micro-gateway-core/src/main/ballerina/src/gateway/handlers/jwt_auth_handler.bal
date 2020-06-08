@@ -336,7 +336,10 @@ public function setJWTHeader(jwt:JwtPayload payload,
 
         // add to cache if cache enabled
         if (enabledCaching) {
-            jwtGeneratorCache.put(cacheKey, generatedToken.toString());
+            error? err = jwtGeneratorCache.put(<@untainted>cacheKey, <@untainted>generatedToken.toString());
+            if(err is error) {
+                printError(KEY_JWT_AUTH_PROVIDER, "Error while adding entry to jwt generator cache", err);
+            }
             printDebug(KEY_JWT_AUTH_PROVIDER, "Added to jwt generator token cache.");
         }
         req.setHeader(jwtheaderName, generatedToken.toString());

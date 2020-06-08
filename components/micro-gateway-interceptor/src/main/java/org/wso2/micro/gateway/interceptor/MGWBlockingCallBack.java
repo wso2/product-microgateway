@@ -17,7 +17,6 @@ package org.wso2.micro.gateway.interceptor;
 
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,12 +45,6 @@ public class MGWBlockingCallBack extends NonBlockingCallback {
     @Override
     public void notifySuccess() {
         super.notifySuccess();
-        executionWaitSem.release();
-    }
-
-    @Override
-    public void notifyFailure(ErrorValue error) {
-        super.notifyFailure(error);
         executionWaitSem.release();
     }
 
