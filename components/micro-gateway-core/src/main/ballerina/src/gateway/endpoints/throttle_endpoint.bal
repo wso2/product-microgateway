@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 
 string throttleEndpointUrl = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_URL, DEFAULT_THROTTLE_ENDPOINT_URL);
 string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, THROTTLE_ENDPOINT_BASE64_HEADER,
@@ -81,7 +80,7 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
             responseCode.toString());
         }
     } else {
-        log:printError(response.reason(), err = response);
+        printError(KEY_THROTTLE_UTIL, response.reason(), response);
     }
 
 }

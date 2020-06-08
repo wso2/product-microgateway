@@ -415,6 +415,8 @@ const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
 public const string MAIN = "Main function";
+public const string OBSERVABILITY_UTIL = "ObservabilityUtil";
+public const string OBSERVABILITY_METRIC_LISTENER = "ObservabilityMetricListener";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds

@@ -125,6 +125,16 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${org.apache.logging.log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${org.apache.logging.log4j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-jwt-transformer</artifactId>
         </dependency>
@@ -242,8 +252,12 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds, net.minidev</includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm</includeArtifactIds>
+                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
+                                net.minidev, org.apache.logging.log4j
+                            </includeGroupIds>
+                            <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
+                                log4j-api, log4j-core
+                            </includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

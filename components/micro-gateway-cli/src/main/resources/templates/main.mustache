@@ -1,6 +1,7 @@
 import wso2/gateway;
 
 public function main() {
+    gateway:initNativeImpLog4jConfig();
     int totalResourceLength = 0;
     boolean isRequestValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
     gateway:REQUEST_VALIDATION_ENABLED, gateway:DEFAULT_REQUEST_VALIDATION_ENABLED);

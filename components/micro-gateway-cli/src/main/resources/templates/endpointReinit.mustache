@@ -18,7 +18,7 @@
                         }
                     }
                 } else {
-                log:printError("Error in checking for Re-initialization", err = hasUrlChanged);
+                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error in checking for Re-initialization", hasUrlChanged);
                 }
             }
         }
@@ -52,7 +52,7 @@
                                 invocationContext.attributes["error_code"] = "101503";
 
                                 clientResponse = res;
-                                log:printError("URL defined at etcd for key " + gateway:getConfigValue("", failedEtcdKeyConfigValue, "") + " is invalid");
+                                gateway:printError({{cut qualifiedServiceName " "}}Key, "URL defined at etcd for key " + gateway:getConfigValue("", failedEtcdKeyConfigValue, "") + " is invalid");
                             }
                             reinitRequired = false;
                         }
