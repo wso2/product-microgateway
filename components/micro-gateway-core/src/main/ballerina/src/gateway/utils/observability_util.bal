@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 import ballerina/observe;
 import ballerina/runtime;
 
@@ -54,7 +53,7 @@ public function updateGauge(observe:Gauge | () localGauge, float | () latency) {
 public function registerGauge(observe:Gauge gauge) {
     error? result = gauge.register();
     if (result is error) {
-        log:printError("Error in registering Counter", err = result);
+        printError(OBSERVABILITY_UTIL, "Error in registering Counter", result);
     }
 }
 
@@ -160,6 +159,6 @@ public function finishSpan(string spanName, int | error | () spanId) {
 
 public function checkFinishSpanError(error? result, string spanName) {
     if (result is error) {
-        log:printError(spanName, err = result);
+        printError(OBSERVABILITY_UTIL, "Error while finishing the span of : " + spanName, result);
     }
 }

@@ -148,14 +148,14 @@ returns boolean {
             printDebug(KEY_PRE_AUTHN_FILTER, "Authentication header is missing for secured resource");
             setErrorMessageToInvocationContext(API_AUTH_MISSING_CREDENTIALS);
             setErrorMessageToFilterContext(context, API_AUTH_MISSING_CREDENTIALS);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_PRE_AUTHN_FILTER);
             return false;
         }
         if (!canHandleAuthentication) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Request does not have a valid authentication scheme");
             setErrorMessageToInvocationContext(API_AUTH_PROVIDER_INVALID);
             setErrorMessageToFilterContext(context, API_AUTH_PROVIDER_INVALID);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_PRE_AUTHN_FILTER);
             return false;
         }
     }
