@@ -142,21 +142,46 @@ public type JWTAuthHandler object {
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
-            boolean generationStatus = generateAndSetBackendJwtHeader(credential,
-                                                                        req,
-                                                                        self.enabledJWTGenerator,
-                                                                        self.classLoaded,
-                                                                        self.skewTime,
-                                                                        self.enabledCaching);
-            if (!generationStatus) {
-                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
-            }
-            return authenticationResult;
+            boolean backendJWTfromClaim = setBackendJwtHeader(credential, req);
+                        if (!backendJWTfromClaim) {
+                            boolean generationStatus = generateAndSetBackendJwtHeader(credential,
+                                                                                        req,
+                                                                                        self.enabledJWTGenerator,
+                                                                                        self.classLoaded,
+                                                                                        self.skewTime,
+                                                                                        self.enabledCaching);
+                            if (!generationStatus) {
+                                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
+                            }
+                            return authenticationResult;
+                        } else {
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT is set from the payload claim");
+                            return true;
+                        }
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
     }
 };
+
+# Check whether backendJwt claim is in the payload and set the header if avaialable.
+#
+# + credential - Credential
+# + req - The `Request` instance.
+# + return - Returns boolean based on backend jwt setting.
+public function setBackendJwtHeader(string credential, http:Request req) returns @tainted boolean {
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+    if (payload is jwt:JwtPayload) {
+        map<json>? customClaims = payload?.customClaims;
+        // validate backend jwt claim and set it to jwt header
+        if (customClaims is map<json> && customClaims.hasKey(BACKEND_JWT)) {
+            printDebug(KEY_JWT_AUTH_PROVIDER, "Set backend jwt header from payload claim.");
+            req.setHeader(jwtheaderName, customClaims.get(BACKEND_JWT).toString());
+            return true;
+        }
+    }
+    return false;
+}
 
 // TODO: Try to merge with the subscription validation method
 # Identify the api details from the subscribed apis in the authentication token.
