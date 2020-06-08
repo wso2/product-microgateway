@@ -632,6 +632,7 @@
         <jayway.jsonpath.version>2.4.0</jayway.jsonpath.version>
         <com.google.guava.version>27.1-jre</com.google.guava.version>
         <commons-logging.version>1.1.1</commons-logging.version>
+        <org.apache.logging.log4j.version>2.13.3</org.apache.logging.log4j.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <com.jayway.jsonpath.version>2.4.0.wso2v2</com.jayway.jsonpath.version>

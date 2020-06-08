@@ -16,7 +16,6 @@
 
 import ballerina/auth;
 import ballerina/http;
-import ballerina/log;
 
 public type ObservabilityMetricListener object {
 
@@ -47,7 +46,9 @@ public type ObservabilityMetricListener object {
     public function __start() returns error? {
         error? gwListener = self.metricListener.__start();
 
-        log:printInfo(self.listenerType + " Secured Observability listener is active on port " + self.listenerPort.toString());
+        string message = self.listenerType + " Secured Observability listener is active on port "
+            + self.listenerPort.toString();
+        printInfo(OBSERVABILITY_METRIC_LISTENER, message);
         return gwListener;
     }
 
