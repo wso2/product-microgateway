@@ -91,9 +91,6 @@ public type JWTAuthHandler object {
                                                     TIMESTAMP_SKEW, 
                                                     DEFAULT_TIMESTAMP_SKEW);
             }
-            self.skewTime = getConfigIntValue(SERVER_CONF_ID,
-                                                TIMESTAMP_SKEW,
-                                                DEFAULT_TIMESTAMP_SKEW);
             self.enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
                                                             JWT_GENERATOR_TOKEN_CACHE_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);

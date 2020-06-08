@@ -381,5 +381,5 @@
 
 # server configuration
 [server]
-  # timestamp skew in seconds which added when checking the token validity period
+  # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000
