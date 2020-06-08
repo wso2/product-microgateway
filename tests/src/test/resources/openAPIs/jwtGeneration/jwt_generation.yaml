@@ -1,0 +1,61 @@
+---
+openapi: 3.0.0
+servers:
+  - url: https://petstore.swagger.io/v2
+  - url: http://petstore.swagger.io/v2
+info:
+  description: 'This is a sample server Petstore server.  You can find out more about
+    Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For
+    this sample, you can use the api key `special-key` to test the authorization filters.'
+  version: 1.0.0
+  title: Swagger Sample
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+x-wso2-basePath: /petstore/v2
+x-wso2-production-endpoints:
+  urls:
+    - https://localhost:2380/v4
+security:
+  - petstore_auth: []
+x-wso2-sandbox-endpoints:
+  urls:
+    - https://localhost:2380/v4
+paths:
+  "/jwtheader":
+    get:
+      summary: Get the status of the backend header
+      description: Identify backend JWT header
+      operationId: jwtheader
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth: []
+  "/jwttoken":
+    get:
+      summary: Get the backend jwt token
+      description: Identify backend JWT token
+      operationId: jwttoken
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth: []
+components:
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore.swagger.io/oauth/authorize
+
+
