@@ -42,9 +42,10 @@ public class BinaryTestServer {
     }
 
     public void startTestServer() throws DataBridgeException, InterruptedException, IOException {
-        this.start(9611, 9711);
+        BinaryTestServer binaryTestServer = new BinaryTestServer();
+        binaryTestServer.startServer(9611, 9711);
         Thread.sleep(100000000);
-        this.stop();
+        binaryTestServer.stopServer();
     }
 
     public void addStreamDefinition(StreamDefinition streamDefinition)
@@ -65,7 +66,7 @@ public class BinaryTestServer {
         return streamDefinitionStore;
     }
 
-    public void start(int tcpPort, int securePort) throws DataBridgeException, IOException {
+    public void startServer(int tcpPort, int securePort) throws DataBridgeException, IOException {
         DataPublisherTestUtil.setKeyStoreParams();
         streamDefinitionStore = getStreamDefinitionStore();
         numberOfEventsReceived = new AtomicInteger(0);
@@ -129,7 +130,7 @@ public class BinaryTestServer {
         numberOfEventsReceived.set(0);
     }
 
-    public void stop() {
+    public void stopServer() {
         binaryDataReceiver.stop();
         log.info("Test Server Stopped");
     }
@@ -183,7 +184,7 @@ public class BinaryTestServer {
                 if (binaryDataReceiver != null) {
                     binaryDataReceiver.start();
                 } else {
-                    start(port, sslPort);
+                    startServer(port, sslPort);
                 }
             } catch (DataBridgeException e) {
                 log.error(e.getMessage(), e);
