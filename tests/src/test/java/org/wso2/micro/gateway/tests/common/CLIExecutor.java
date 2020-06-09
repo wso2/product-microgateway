@@ -249,7 +249,7 @@ public class CLIExecutor {
     }
 
     private void copyJwtValueTranformerJarToProjectLib(String project) throws MicroGWTestException {
-        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_JWTTRANSFORMER_JAR);
+        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_JWT_TRANSFORMER_JAR);
         File jarFile = new File(jarLocation);
         File desPath = new File(
                 homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator

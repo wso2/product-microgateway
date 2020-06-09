@@ -43,6 +43,7 @@ cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 cache:Cache gatewayClaimsCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
 cache:Cache jwtGeneratorCache = new (jwtGeneratorCacheExpiryTime, jwtGeneratorCacheSize, jwtGeneratorEvictionFactor);
+cache:Cache mutualSslCertificateCache = new (cacheExpiryTime, cacheSize, evictionFactor);
 
 public type APIGatewayCache object {
 
@@ -119,5 +120,18 @@ public type APIGatewayCache object {
             return ();
         }
     }
-};
 
+    public function addMutualSslCertificateCache(string cert, boolean isCertExist) {
+        mutualSslCertificateCache.put(cert, isCertExist);
+        printDebug(KEY_GW_CACHE, "Added mutual certificate information to the  mutualSslCertificateCache ");
+    }
+
+    public function retrieveFromMutualSslCertificateCache(string cert) returns (boolean | ()) {
+        var isCertExist = mutualSslCertificateCache.get(cert);
+        if (isCertExist is boolean) {
+            return isCertExist;
+        } else {
+            return ();
+        }
+    }
+};

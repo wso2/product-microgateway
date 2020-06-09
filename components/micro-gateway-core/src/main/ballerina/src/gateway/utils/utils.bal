@@ -43,6 +43,11 @@ http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
 // values read from configuration
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
+map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
+string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
+string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, "");
+boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -881,13 +886,15 @@ public function initAuthHandlers() {
         basicAuthHandler = new BasicAuthHandler(configBasicAuthProvider);
     }
 
+    //load the Keystore
+    loadKeyStore(trustStorePath,trustStorePassword);
 
     //Initializes the mutual ssl handler
     MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         mutualSSLHandler = new MutualSSLHandlerWrapper();
     } else {
-        mutualSSLHandler = new MutualSSLHandler();
+        mutualSSLHandler = new MutualSSLHandler(apiCertificateList, headerName, isClientCertificateValidationEnabled);
     }
 
     //Initializes the cookie based handler
@@ -906,8 +913,6 @@ function readMultipleJWTIssuers() {
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
         initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
-        string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
-        string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
         foreach map<anydata> jwtIssuer in jwtIssuers {
             jwt:JwtValidatorConfig jwtValidatorConfig = {
                 issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
