@@ -43,7 +43,6 @@ import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -59,7 +58,6 @@ import java.util.List;
  */
 public class CodeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
-    private static PrintStream outStream = System.out;
     public static String projectName;
 
     /**
@@ -74,18 +72,20 @@ public class CodeGenerator {
         String projectSrcPath = CmdUtils.getProjectTargetModulePath((projectName));
         List<GenSrcFile> genFiles = new ArrayList<>();
         List<BallerinaService> serviceList = new ArrayList<>();
-        List<BallerinaService> openAPIServiceList = new ArrayList<>();
-        List<String> openAPIDirectoryLocations = new ArrayList<>();
-        String projectAPIDefGenLocation = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
-        openAPIDirectoryLocations.add(CmdUtils.getProjectDirectoryPath(projectName) + File.separator
-                + CliConstants.PROJECT_API_DEFINITIONS_DIR);
         String grpcDirLocation = CmdUtils.getGrpcDefinitionsDirPath(projectName);
-        if (Files.exists(Paths.get(projectAPIDefGenLocation))) {
-            openAPIDirectoryLocations.add(projectAPIDefGenLocation);
-        }
         CodeGenerator.projectName = projectName;
         BallerinaToml ballerinaToml = new BallerinaToml();
         ballerinaToml.setToolkitHome(CmdUtils.getCLIHome());
+        List<String> openAPIDirectoryLocations = new ArrayList<>();
+        String importedApisPath = CmdUtils.getProjectGenAPIDefinitionPath(projectName);
+        String devApisPath = CmdUtils.getProjectAPIFilesDirectoryPath(projectName);
+
+        if (Files.exists(Paths.get(devApisPath))) {
+            openAPIDirectoryLocations.add(devApisPath);
+        }
+        if (Files.exists(Paths.get(importedApisPath))) {
+            openAPIDirectoryLocations.add(importedApisPath);
+        }
 
         //to store the available interceptors for validation purposes
         OpenAPICodegenUtils.setInterceptors(projectName);
@@ -116,7 +116,6 @@ public class CodeGenerator {
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
-                        openAPIServiceList.add(definitionContext);
                         ballerinaToml.addDependencies(definitionContext);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
@@ -353,20 +352,6 @@ public class CodeGenerator {
         if (!dir.delete() || !temp.delete()) {
             logger.debug("Failed to delete GRPC temp files");
         }
-    }
-
-    /**
-     * Generate swagger files.
-     *
-     * @param context model context to be used by the templates
-     * @return generated source files as a list of {@link GenSrcFile}
-     * @throws IOException when code generation with specified templates fails
-     */
-    private GenSrcFile generateSwagger(BallerinaService context) throws IOException {
-        String concatTitle = context.getName();
-        String srcFile = concatTitle + GeneratorConstants.SWAGGER_FILE_SUFFIX + GeneratorConstants.JSON_EXTENSION;
-        String mainContent = getContent(context, GeneratorConstants.GENERATESWAGGER_TEMPLATE_NAME);
-        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent);
     }
 
     /**

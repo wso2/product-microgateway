@@ -18,8 +18,8 @@ package org.wso2.micro.gateway.jwt.generator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONArray;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
@@ -38,7 +38,7 @@ import java.util.Map;
  *  Abstract class for generate JWT for backend claims.
  */
 public abstract class AbstractMGWJWTGenerator {
-    private static final Log logger = LogFactory.getLog(AbstractMGWJWTGenerator.class);
+    private static final Logger logger = LogManager.getLogger(AbstractMGWJWTGenerator.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private String dialectURI;

@@ -68,7 +68,7 @@ deployedPolicies) returns boolean {
         if (isRequestBlocked(caller, request, context, keyValidationResult, apiContext, tenantDomain, clientIP)) {
             setThrottleErrorMessageToContext(context, FORBIDDEN, BLOCKING_ERROR_CODE,
             BLOCKING_MESSAGE, BLOCKING_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
         string apiLevelPolicy = getAPITier(context.getServiceName(),keyValidationResult.apiTier);
@@ -86,7 +86,7 @@ deployedPolicies) returns boolean {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
             INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
             INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking subscription level throttling-out.");
@@ -101,7 +101,7 @@ deployedPolicies) returns boolean {
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                 THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                sendErrorResponse(caller, request, context);
+                sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
                 return false;
             } else {
                 // set properties in order to publish into analytics for billing
@@ -118,7 +118,7 @@ deployedPolicies) returns boolean {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
             INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
             INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Checking application level throttling-out.");
@@ -128,7 +128,7 @@ deployedPolicies) returns boolean {
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, APPLICATION_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         } else {
             printDebug(KEY_THROTTLE_FILTER, "Application level throttled out: false");
@@ -159,7 +159,7 @@ deployedPolicies) returns boolean {
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
             INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
             INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
         [isThrottled, stopOnQuota] = isUnauthenticateLevelThrottled(context, apiContext, apiVersion);
@@ -172,7 +172,7 @@ deployedPolicies) returns boolean {
                 context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
                 setThrottleErrorMessageToContext(context, THROTTLED_OUT, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                 THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-                sendErrorResponse(caller, request, context);
+                sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
                 return false;
             } else {
                 // set properties in order to publish into analytics for billing
@@ -194,7 +194,7 @@ deployedPolicies) returns boolean {
         printDebug(KEY_THROTTLE_FILTER, "Unknown error.");
         setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE,
         INTERNAL_SERVER_ERROR_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
-        sendErrorResponse(caller, request, context);
+        sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
         return false;
     }
 
@@ -482,7 +482,7 @@ function checkAPILevelThrottled(http:Caller caller, http:Request request, http:F
         setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
         INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
         INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-        sendErrorResponse(caller, request, context);
+        sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
         return false;
     }
     printDebug(KEY_THROTTLE_FILTER, "Checking API level throttling-out.");
@@ -492,7 +492,7 @@ function checkAPILevelThrottled(http:Caller caller, http:Request request, http:F
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
         setThrottleErrorMessageToContext(context, THROTTLED_OUT, API_THROTTLE_OUT_ERROR_CODE,
         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-        sendErrorResponse(caller, request, context);
+        sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
         return false;
     } else {
         printDebug(KEY_THROTTLE_FILTER, "API level throttled out: false");
@@ -511,7 +511,7 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
             setThrottleErrorMessageToContext(context, INTERNAL_SERVER_ERROR,
             INTERNAL_ERROR_CODE_POLICY_NOT_FOUND,
             INTERNAL_SERVER_ERROR_MESSAGE, POLICY_NOT_FOUND_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
     }
@@ -522,7 +522,7 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
         setThrottleErrorMessageToContext(context, THROTTLED_OUT, RESOURCE_THROTTLE_OUT_ERROR_CODE,
         THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-        sendErrorResponse(caller, request, context);
+        sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
         return false;
     } else {
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out: false");
@@ -561,7 +561,7 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
             context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
             setThrottleErrorMessageToContext(context, THROTTLED_OUT, CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
             THROTTLE_OUT_MESSAGE, THROTTLE_OUT_DESCRIPTION);
-            sendErrorResponse(caller, request, context);
+            sendErrorResponse(caller, request, context, KEY_THROTTLE_FILTER);
             return false;
         }
 

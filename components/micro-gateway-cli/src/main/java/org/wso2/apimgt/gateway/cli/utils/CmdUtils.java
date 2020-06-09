@@ -458,6 +458,7 @@ public final class CmdUtils {
 
         String definitionsPath = projectDir + File.separator + CliConstants.PROJECT_API_DEFINITIONS_DIR;
         createDirectory(definitionsPath, false);
+        createFile(definitionsPath, CliConstants.KEEP_FILE, true);
         if (!StringUtils.isEmpty(apiDefinition)) {
             setApiDefinition(projectName, apiDefinition, headers, values, insecure);
         }
