@@ -143,21 +143,21 @@ public type JWTAuthHandler object {
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
             boolean backendJWTfromClaim = setBackendJwtHeader(credential, req);
-                        if (!backendJWTfromClaim) {
-                            boolean generationStatus = generateAndSetBackendJwtHeader(credential,
-                                                                                        req,
-                                                                                        self.enabledJWTGenerator,
-                                                                                        self.classLoaded,
-                                                                                        self.skewTime,
-                                                                                        self.enabledCaching);
-                            if (!generationStatus) {
-                                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
-                            }
-                            return authenticationResult;
-                        } else {
-                            printDebug(KEY_JWT_AUTH_PROVIDER, "JWT is set from the payload claim");
-                            return true;
-                        }
+            if (!backendJWTfromClaim) {
+                boolean generationStatus = generateAndSetBackendJwtHeader(credential,
+                                                                            req,
+                                                                            self.enabledJWTGenerator,
+                                                                            self.classLoaded,
+                                                                            self.skewTime,
+                                                                            self.enabledCaching);
+                if (!generationStatus) {
+                    printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
+                }
+                return authenticationResult;
+            } else {
+                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT is set from the payload claim");
+                return true;
+            }
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
