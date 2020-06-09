@@ -40,6 +40,7 @@ public class JWTGenerationTestCase extends BaseTestCase {
     private static String JWT_GENERATOR_AUDIENCE = "http://org.wso2.apimgt/gateway";
 
     protected String jwtTokenProd;
+    protected String jwtWithBackendJwtClaim;
 
     @BeforeClass
     public void start() throws Exception {
@@ -58,11 +59,19 @@ public class JWTGenerationTestCase extends BaseTestCase {
         jwtTokenProd = TokenUtil.getJwtWithCustomClaims(application, new JSONObject(),
                 TestConstant.KEY_TYPE_PRODUCTION, 3600, customClaims);
 
+        // Create map with backendJwt claim
+        Map<String, String> jwtClaim = new HashMap<>();
+        jwtClaim.put("backendJwt", jwtTokenProd);
+
+        jwtWithBackendJwtClaim = TokenUtil.getJwtWithCustomClaims(application, new JSONObject(),
+                TestConstant.KEY_TYPE_PRODUCTION, 3600, jwtClaim);
+
         // generate apis with CLI and start the micro gateway server
-        super.init(project, new String[]{"jwtGeneration/jwt_generation.yaml"}, null,"confs/jwt-generator-test-config.conf");
+        super.init(project, new String[]{"jwtGeneration/jwt_generation.yaml", "mgw-JwtGenerator.jar"},
+                null,"confs/jwt-generator-test-config.conf");
     }
 
-    @Test(description = "Test the availability of JWT Generator")
+    @Test(description = "Test the availability of JWT Generator header")
     public void testResponseJWTGenerationHeader() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
@@ -132,6 +141,25 @@ public class JWTGenerationTestCase extends BaseTestCase {
                 "JWT generator audience not set correctly");
         Assert.assertTrue(tokenBody.keySet().contains("claim1"), "JWT generator custom claims not set correctly");
         Assert.assertFalse(tokenBody.keySet().contains("claim2"), "JWT generator restricted claims not removed");
+    }
+
+    @Test(description = "Test backendJwt claim configuration")
+    public void testResponseJWTGenerationJWTClaim() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithBackendJwtClaim);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v2/jwttoken"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        JSONObject responseJSON = new JSONObject(response.getData());
+        String tokenFull = responseJSON.get("token").toString();
+        String strTokenBody = tokenFull.split("\\.")[1];
+        String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
+        JSONObject tokenBody = new JSONObject(decodedTokenBody);
+
+        Assert.assertTrue(tokenBody.keySet().contains("claim2"), "Backend JWT not set from claim");
     }
 
     @AfterClass

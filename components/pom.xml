@@ -33,5 +33,6 @@
         <module>micro-gateway-cli</module>
         <module>micro-gateway-tools</module>
         <module>micro-gateway-jwt-transformer</module>
+        <module>micro-gateway-jwt-generator</module>
     </modules>
 </project>

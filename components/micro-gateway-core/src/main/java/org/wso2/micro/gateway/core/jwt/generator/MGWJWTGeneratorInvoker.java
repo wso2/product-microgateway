@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.MapValue;
 import org.wso2.micro.gateway.core.Constants;
+import org.wso2.micro.gateway.jwt.generator.AbstractMGWJWTGenerator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

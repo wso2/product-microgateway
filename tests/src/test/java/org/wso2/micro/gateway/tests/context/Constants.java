@@ -29,6 +29,8 @@ public class Constants {
     public static final String SYSTEM_PROP_WINDOWS_RUNTIME = "runtime_windows";
     //Name of the system property define the location of the linux runtime distribution
     public static final String SYSTEM_PROP_LINUX_RUNTIME = "runtime_linux";
+    // Name of the system property define the custom jwt generator jar file location
+    public static final String SYSTEM_PROP_JWT_GENERATOR_JAR = "jwt_generator_jar";
     // Name of the system property define the custom value  transformer jar file location
     public static final String SYSTEM_PROP_JWT_TRANSFORMER_JAR = "jwt_transformer_jar";
     // Name of the system property define the custom interceptor jar file location
