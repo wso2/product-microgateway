@@ -231,6 +231,8 @@ public const string ACCESS_TOKEN = "accessToken";
 public const string CREDENTIAL_BEARER = "credentialBearer";
 public const string NAME = "name";
 public const string VERSIONS = "versions";
+public const string VERSION = "version";
+public const string ALIAS_LIST = "aliasList";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
@@ -277,6 +279,8 @@ public const string FILTERS = "filters";
 
 public const string MTSL = "mutualSSL";
 public const string MTSL_CONF_INSTANCE_ID = "mutualSSLConfig";
+public const string MTSL_CONF_CERT_HEADER_NAME = "certificateHeadername";
+public const string MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED = "isClientCertificateValidationEnabled";
 public const string MTSL_CONF_PROTOCOL_NAME = "protocolName";
 public const string MTSL_CONF_PROTOCOL_VERSIONS = "protocolVersions";
 public const string MTSL_CONF_CIPHERS = "ciphers";
@@ -293,6 +297,7 @@ public const string ISSUER = "issuer";
 public const string AUDIENCE = "audience";
 public const string ISSUER_CLASSNAME = "claimMapperClassName";
 public const string ISSUER_CLAIMS = "claims";
+public const string PRINCIPAL = "principal";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
@@ -334,6 +339,46 @@ public const string JMS_CONNECTION_PASSWORD = "jmsConnectionPassword";
 public const string THROTTLE_ENDPOINT_URL = "throttleEndpointUrl";
 public const string THROTTLE_ENDPOINT_BASE64_HEADER = "throttleEndpointbase64Header";
 public const string THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID = "throttlingConfig.dataRetriever";
+
+public const string TM_BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary";
+public const string TM_BINARY_PUBLISHER_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.publisherPool";
+public const string TM_BINARY_PUBLISHER_THREAD_POOL_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary" +
+    ".publisherThreadPool";
+public const string TM_BINARY_URL_GROUP = "throttlingConfig.binary.URLGroup";
+public const string TM_BINARY_RECEIVER_URL = "receiverURL";
+public const string TM_BINARY_AUTH_URL = "authURL";
+public const string TM_BINARY_URL_GROUP_TYPE = "type";
+public const string TM_USERNAME = "username";
+public const string TM_PASSWORD = "password";
+public const string TM_PUBLISHER_POOL_MAX_IDLE = "maxIdle";
+public const string TM_PUBLISHER_POOL_INIT_IDLE_CAPACITY = "initIdleCapacity";
+public const string TM_PUBLISHER_THREAD_POOL_CORE_SIZE = "corePoolSize";
+public const string TM_PUBLISHER_THREAD_POOL_MAXIMUM_SIZE = "maxPoolSize";
+public const string TM_PUBLISHER_THREAD_POOL_KEEP_ALIVE_TIME = "keepAliveTime";
+
+public const string TM_BINARY_LOADBALANCE = "loadbalance";
+public const string TM_BINARY_FAILOVER = "failover";
+public const string TM_BINARY_LOADBALANCE_SEPARATOR = ",";
+public const string TM_BINARY_FAILOVER_SEPARATOR = "|";
+
+public const string TM_BINARY_AGENT_THROTTLE_CONF_INSTANCE_ID = "throttlingConfig.binary.agent";
+public const string TM_BINARY_AGENT_PROTOCOL_VERSIONS = "sslEnabledProtocols";
+public const string TM_BINARY_AGENT_CIPHERS = "ciphers";
+public const string TM_AGENT_QUEUE_SIZE = "queueSize";
+public const string TM_AGENT_BATCH_SIZE = "batchSize";
+public const string TM_AGENT_THREAD_POOL_CORE_SIZE = "corePoolSize";
+public const string TM_AGENT_THREAD_POOL_MAXIMUM_SIZE = "maxPoolSize";
+public const string TM_AGENT_SOCKET_TIMEOUT_MS = "socketTimeoutMS";
+public const string TM_AGENT_THREAD_POOL_KEEP_ALIVE_TIME = "keepAliveTimeInPool";
+public const string TM_AGENT_RECONNECTION_INTERVAL = "reconnectionInterval";
+public const string TM_AGENT_MAX_TRANSPORT_POOL_SIZE = "maxTransportPoolSize";
+public const string TM_AGENT_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
+public const string TM_AGENT_EVICTION_TIME_PERIOD = "evictionTimePeriod";
+public const string TM_AGENT_MIN_IDLE_TIME_IN_POOL = "minIdleTimeInPool";
+public const string TM_AGENT_SECURE_MAX_TRANSPORT_POOL_SIZE = "secureMaxIdleTransportPoolSize";
+public const string TM_AGENT_SECURE_MAX_IDLE_CONNECTIONS = "secureMaxIdleConnections";
+public const string TM_AGENT_SECURE_EVICTION_TIME_PERIOD = "secureEvictionTimePeriod";
+public const string TM_AGENT_SECURE_MIN_IDLE_TIME_IN_POOL = "secureMinIdleTimeInPool";
 
 public const string TOKEN_REVOCATION_CONF_INSTANCE_ID = "tokenRevocationConfig";
 public const string TOKEN_REVOCATION_ENABLED = "enabledTokenRevocation";
@@ -396,6 +441,7 @@ const string KEY_MUTUAL_SSL_FILTER = "MutualSSLFilter";
 const string KEY_VALIDATION_FILTER = "ValidationFilter";
 const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
+public const string KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER = "GlobalThrottleEventPublisher";
 const string KEY_THROTTLE_EVENT_LISTENER = "ThrottleEventListener";
 const string KEY_TEMPLATE_RETIEVAL_TASK = "KeyTemplateRetrievalTask";
 const string KEY_BLOCKING_CONDITION_RETRIEVAL_TASK = "BlockingConditionRetrievalTask";
@@ -415,6 +461,8 @@ const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
 public const string MAIN = "Main function";
+public const string OBSERVABILITY_UTIL = "ObservabilityUtil";
+public const string OBSERVABILITY_METRIC_LISTENER = "ObservabilityMetricListener";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
@@ -438,6 +486,8 @@ const string GRPC_CONTENT_TYPE_HEADER = "application/grpc";
 
 //auth handlers
 public const string MUTUAL_SSL_HANDLER = "mutualSSLHandler";
+public const string MUTUAL_SSL_API_CERTIFICATE = "mutualSSLConfig.api.certificates";
+
 public const string JWT_AUTH_HANDLER = "jwtAuthHandler";
 public const string API_KEY_HANDLER = "apiKeyHandler";
 public const string KEY_VALIDATION_HANDLER = "keyValidationHandler";

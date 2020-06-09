@@ -43,6 +43,11 @@ http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
 // values read from configuration
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
+map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
+string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
+string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, "");
+boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -304,7 +309,8 @@ public function setErrorMessageToInvocationContext(int errorCode) {
 # + caller - http caller object.
 # + request - http request object.
 # + context - filter context object.
-public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context) {
+# + filterName - filter from which the method is invoked (for logging purposes).
+public function sendErrorResponse(http:Caller caller, http:Request request, http:FilterContext context, string filterName) {
     string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
     string errorMessage = <string>context.attributes[ERROR_MESSAGE];
     int errorCode = <int>context.attributes[ERROR_CODE];
@@ -325,7 +331,7 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
     }
     var value = caller->respond(response);
     if (value is error) {
-        log:printError("Error occurred while sending the error response", err = value);
+        printError(filterName, "Error occurred while sending the error response", value);
     }
 }
 
@@ -620,7 +626,7 @@ public function isSecured(string serviceName, string resourceName) returns boole
     serviceLevelAuthAnn = httpResourceConfig?.auth;
     boolean serviceSecured = isServiceResourceSecured(serviceLevelAuthAnn);
     if (!serviceSecured) {
-        log:printWarn("Service is not secured. `enabled: false`.");
+        printWarn(KEY_UTILS, "Service is not secured. `enabled: false`.");
         return true;
     }
     return true;
@@ -884,13 +890,15 @@ public function initAuthHandlers() {
         basicAuthHandler = new BasicAuthHandler(configBasicAuthProvider);
     }
 
+    //load the Keystore
+    loadKeyStore(trustStorePath,trustStorePassword);
 
     //Initializes the mutual ssl handler
     MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         mutualSSLHandler = new MutualSSLHandlerWrapper();
     } else {
-        mutualSSLHandler = new MutualSSLHandler();
+        mutualSSLHandler = new MutualSSLHandler(apiCertificateList, headerName, isClientCertificateValidationEnabled);
     }
 
     //Initializes the cookie based handler
@@ -909,8 +917,6 @@ function readMultipleJWTIssuers() {
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
         initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
-        string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
-        string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
         int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
         if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
             timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);

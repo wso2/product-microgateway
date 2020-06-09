@@ -26,7 +26,6 @@ public class GeneratorConstants {
     public static final String MAIN_TEMPLATE_NAME = "main";
     public static final String BALLERINA_TOML_TEMPLATE_NAME = "ballerinaToml";
     public static final String OPEN_API_JSON_CONSTANTS = "openAPIJsonConstants";
-    public static final String GENERATESWAGGER_TEMPLATE_NAME = "generateSwagger";
     public static final String THROTTLE_POLICY_TEMPLATE_NAME = "policy";
     public static final String LISTENERS_TEMPLATE_NAME = "listeners";
     public static final String TOKEN_SERVICES = "tokenServices";
@@ -36,7 +35,6 @@ public class GeneratorConstants {
     public static final String TOML_EXTENSION = ".toml";
     public static final String JSON_EXTENSION = ".json";
     public static final String THROTTLE_POLICY_INIT_TEMPLATE_NAME = "policy_init";
-    public static final String SWAGGER_FILE_SUFFIX = "_swagger";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";

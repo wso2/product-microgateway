@@ -16,11 +16,12 @@
 
 package org.wso2.micro.gateway.core.jwt.generator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.MapValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.core.Constants;
+import org.wso2.micro.gateway.jwt.generator.AbstractMGWJWTGenerator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +33,7 @@ import java.util.Map;
  * Class to dynamically invoke the jwt generators defined.
  */
 public class MGWJWTGeneratorInvoker {
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(MGWJWTGeneratorInvoker.class);
     private static AbstractMGWJWTGenerator abstractMGWJWTGenerator;
 
     public static boolean loadJWTGeneratorClass(String className,

@@ -101,6 +101,21 @@
             <groupId>org.wso2.carbon.callhome</groupId>
             <artifactId>core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${org.wso2.orbit.com.lmax}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -163,6 +178,15 @@
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
                             <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer</includeArtifactIds>
+                            <includeGroupIds>
+                                org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
+                                org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax
+                            </includeGroupIds>
+                            <includeArtifactIds>
+                                andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer,
+                                mgw-jwt-generator, org.wso2.carbon.databridge.commons,
+                                org.wso2.carbon.databridge.commons.binary, disruptor
+                            </includeArtifactIds>
                         </configuration>
                     </execution>
                     <execution>

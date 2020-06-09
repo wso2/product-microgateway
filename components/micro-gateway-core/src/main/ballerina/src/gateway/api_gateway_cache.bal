@@ -55,6 +55,7 @@ cache:Cache introspectCache = new (genericCacheConfig);
 cache:Cache gatewayClaimsCache = new (genericCacheConfig);
 
 cache:Cache jwtGeneratorCache = new (jwtGenerationCacheConfig);
+cache:Cache mutualSslCertificateCache = new (genericCacheConfig);
 
 public type APIGatewayCache object {
 
@@ -152,5 +153,21 @@ public type APIGatewayCache object {
             return ();
         }
     }
-};
 
+    public function addMutualSslCertificateCache(string cert, boolean isCertExist) {
+        error? err = mutualSslCertificateCache.put(<@untainted>cert, <@untainted>isCertExist);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding certificate information to the mtls cache", err);
+        }
+        printDebug(KEY_GW_CACHE, "Added mutual certificate information to the  mutualSslCertificateCache ");
+    }
+
+    public function retrieveFromMutualSslCertificateCache(string cert) returns (boolean | ()) {
+        var isCertExist = mutualSslCertificateCache.get(cert);
+        if (isCertExist is boolean) {
+            return isCertExist;
+        } else {
+            return ();
+        }
+    }
+};

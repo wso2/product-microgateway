@@ -14,11 +14,11 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.jwt.generator;
+package org.wso2.micro.gateway.jwt.generator;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.UUID;
  *  Class to implement standard claims and custom claims.
  */
 public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
-    private static final Log logger = LogFactory.getLog(MGWJWTGeneratorImpl.class);
+    private static final Logger logger = LogManager.getLogger(MGWJWTGeneratorImpl.class);
     private static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_user";
 
     public MGWJWTGeneratorImpl(String dialectURI,

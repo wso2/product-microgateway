@@ -98,8 +98,9 @@
   certificateAlias = "wso2apim310"
   # Validate subscribed APIs
   validateSubscription = false
-  #support custom claim mapping
+  #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
+  # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scp"
     localClaim = "scope"
@@ -113,8 +114,9 @@
   certificateAlias = "alias"
   # Validate subscribed APIs
   validateSubscription = false
-  #support custom claim mapping
+  #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
+  # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scps"
     localClaim = "scope"
@@ -251,6 +253,26 @@
   ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
   # The type of client certificate verification. (e.g.: "require" or "optional")
   sslVerifyClient = "optional"
+  # Header name apend by the load balancer
+  certificateHeadername = "Header name given by the load balancer"
+  # Is client certificate validation enable
+  isClientCertificateValidationEnabled = true
+    # [[mutualSSLConfig.api.certificates]]
+      # name = "API name given in the API Definition"
+      # version = "API version given in the API definition"
+      # aliasList = "list of aliases for a given API"
+    # Examples :
+    # API 1
+    [[mutualSSLConfig.api.certificates]]
+      name = "Swagger Petstore"
+      version = "1.0.5"
+      aliasList = ["ballerina", "wso2apim310"]
+    # API 2
+    [[mutualSSLConfig.api.certificates]]
+      name = "MyAPI"
+      version = "2.0.0"
+      aliasList = ["myAlias1", "myAlias2"]
+
 
 # Throttling configurations
 [throttlingConfig]
@@ -280,12 +302,61 @@
   # username:password to create the connection to the central traffic manager
   throttleEndpointbase64Header = "admin:admin"
   #Configurations related to retrieve custom throttle policy related key templates from traffic manager or key manager.
-  #TODO: change the name
   [throttlingConfig.dataRetriever]
     serverUrl = "https://localhost:9443/throttle/data/v1"
     username = "admin"
     password = "admin"
 
+
+  # Throttling configurations related to event publishing using a binary connection
+  [throttlingConfig.binary]
+    enabled = true
+    # Credentials required to establish connection between Traffic Manager
+    username = "admin"
+    password = "admin"
+    # Receiver URL and the authentication URL of the Traffic manager node/nodes
+    [[throttlingConfig.binary.URLGroup]]
+      receiverURL = "tcp://localhost:9611"
+      authURL = "ssl://localhost:9711"
+    # Data publisher object pool configurations
+    [throttlingConfig.binary.publisherPool]
+      maxIdle = 1000
+      initIdleCapacity = 200
+    # Data publisher thread pool configurations
+    [throttlingConfig.binary.publisherThreadPool]
+      corePoolSize = 200
+      maxPoolSize = 1000
+      keepAliveTime = 200
+    [throttlingConfig.binary.agent]
+      # SSL Protocols
+      sslEnabledProtocols = "TLSv1,TLSv1.1,TLSv1.2"
+      # ciphers
+      ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+      # The size of the queue event disruptor which handles events before they are published.
+      # The value specified should always be the result of an exponent with 2 as the base.
+      queueSize = 32768
+      # The maximum number of events in a batch sent to the queue event disruptor at a given time
+      batchSize = 200
+      # The number of threads that will be reserved to handle events at the time you start
+      corePoolSize = 1
+      # Socket timeout
+      socketTimeoutMS = 30000
+      # The maximum number of threads that should be reserved at any given time to handle events
+      maxPoolSize = 1
+      # The amount of time which threads in excess of the core pool size may remain idle before being terminated.
+      keepAliveTimeInPool = 20
+      # The time interval between reconnection
+      reconnectionInterval = 30
+      # TCP connection pool configurations (for data publishing)
+      maxTransportPoolSize = 250
+      maxIdleConnections = 250
+      evictionTimePeriod = 5500
+      minIdleTimeInPool = 5000
+      # SSL connection pool configurations (for authentication)
+      secureMaxIdleTransportPoolSize = 250
+      secureMaxIdleConnections = 250
+      secureEvictionTimePeriod = 5500
+      secureMinIdleTimeInPool = 5000
 
 # Observability configurations
 [b7a.observability]
@@ -367,7 +438,7 @@
   # Token audience standard claim
   audience=["http://org.wso2.apimgt/gateway"]
   # JWT token generator implementation
-  generatorImpl="org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl"
+  generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
   [jwtGeneratorConfig.jwtGeneratorCaching]
     # Enable jwt generator token caching
@@ -381,5 +452,5 @@
 
 # server configuration
 [server]
-  # timestamp skew in seconds which added when checking the token validity period
+  # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000

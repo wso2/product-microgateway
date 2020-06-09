@@ -15,6 +15,12 @@ target = "java8"
     path = "../../../target/lib/dependencies/json-3.0.0.wso2v1.jar"
 
     [[platform.libraries]]
+    path = "../../../target/lib/dependencies/log4j-core-2.13.3.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/log4j-api-2.13.3.jar"
+
+    [[platform.libraries]]
     path = "../../../target/lib/dependencies/nimbus-jose-jwt-8.8.jar"
 
     [[platform.libraries]]

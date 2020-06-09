@@ -16,7 +16,6 @@
 import ballerina/auth;
 import ballerina/http;
 import ballerina/lang.'int;
-import ballerina/log;
 import ballerina/runtime;
 import ballerina/stringutils;
 import ballerina/time;
@@ -109,7 +108,7 @@ public type OAuth2KeyValidationProvider object {
                 return false;
             }
         } else {
-            log:printError(<string>apiKeyValidationDto.reason(), err = apiKeyValidationDto);
+            printError(KEY_AUTHN_FILTER, <string>apiKeyValidationDto.reason(), apiKeyValidationDto);
             //TODO: Send proper error messages
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
             //sendErrorResponse(caller, request, <@untainted>  context);
@@ -203,7 +202,7 @@ public type OAuth2KeyValidationProvider object {
             keyValidationResponse = result;
         } else {
             string message = "Error occurred while reading the key validation response";
-            log:printError(message, err = result);
+            printError(KEY_OAUTH_PROVIDER, message, result);
             return result;
         }
         var responseXml = keyValidationResponse.getXmlPayload();
@@ -212,7 +211,7 @@ public type OAuth2KeyValidationProvider object {
 
         } else {
             string message = "Error occurred while getting the key validation service XML response payload";
-            log:printError(message, err = responseXml);
+            printError(KEY_OAUTH_PROVIDER, message, responseXml);
         }
         return responseXml;
 
@@ -252,7 +251,7 @@ public type OAuth2KeyValidationProvider object {
             }
         } else {
             string errorMessage = "Error occurred while the key validation request";
-            log:printError(errorMessage, err = keyValidationResponseXML);
+            printError(KEY_OAUTH_PROVIDER, errorMessage, keyValidationResponseXML);
             panic error(errorMessage);
         }
 
