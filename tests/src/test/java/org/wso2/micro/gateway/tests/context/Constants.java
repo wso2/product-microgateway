@@ -31,6 +31,8 @@ public class Constants {
     public static final String SYSTEM_PROP_LINUX_RUNTIME = "runtime_linux";
     // Name of the system property define the custom interceptor jar file location
     public static final String SYSTEM_PROP_INTERCEPTOR_JAR = "interceptor_jar";
+    // Name of the system property define the custom jwt generator jar file location
+    public static final String SYSTEM_PROP_JWT_GENERATOR_JAR = "jwt_generator_jar";
     //Microgateway runtime executable file name
     public static final String GATEWAY_SCRIPT_NAME = "gateway";
     //File extension the the ballerina rest file

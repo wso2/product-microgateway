@@ -229,6 +229,10 @@ public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
 }
 
+public function getConfigArrayValue(string instanceId, string property) returns any[] {
+    return config:getAsArray(instanceId + "." + property);
+}
+
 function getDefaultStringValue(anydata val, string defaultVal) returns string {
     if (val is string) {
         return <string>val;

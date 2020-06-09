@@ -52,7 +52,7 @@
   serverUrl = "https://localhost:9443"
   # The token endpoint context of the Key Manager server
   tokenContext = "oauth2"
-  # timestamp skew in seconds which added when checking the token validity period
+  # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000
   # External Key Manager
   external = false
@@ -296,3 +296,37 @@
     [[apikey.issuer.api]]
       name="MyAPI"
       versions="*"
+
+# JWT Generator configurations
+[jwtGeneratorConfig]
+  # Enable jwt generator
+  jwtGeneratorEnabled=false
+  # Dialect prefix that can be added to the claims
+  claimDialect="http://wso2.org/claims"
+  # Signature algorithm used to sign the JWT token (only SHA256withRSA and NONE is supported)
+  signingAlgorithm="SHA256withRSA"
+  # Certificate alias from the keystore
+  certificateAlias="ballerina"
+  # Private key alias from the keystore
+  privateKeyAlias="ballerina"
+  # JWT token expiry time - ms (valid only if the jwt generator caching mechanism is disabled)
+  tokenExpiry=900000
+  # Restricted claims as an array that should not be included in the backend JWT token
+  # Example: restrictedClaims=["claim1","claim2","claim3"]
+  restrictedClaims=[]
+  # Token issuer standard claim
+  issuer="wso2.org/products/am"
+  # Token audience standard claim
+  audience=["http://org.wso2.apimgt/gateway"]
+  # JWT token generator implementation
+  generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
+  # JWT Generator cache configurations
+  [jwtGeneratorConfig.jwtGeneratorCaching]
+    # Enable jwt generator token caching
+    tokenCacheEnable=true
+    # Token cache expiry time (ms)
+    tokenCacheExpiryTime=900000
+    # Token cache capacity
+    tokenCacheCapacity=10000
+    # Token cache eviction factor
+    tokenCacheEvictionFactor=0.25
