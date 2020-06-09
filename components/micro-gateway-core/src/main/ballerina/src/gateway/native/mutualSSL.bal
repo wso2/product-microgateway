@@ -21,30 +21,30 @@ import ballerinax/java;
 # + cert - Certicate used in Mutual SSL handshake
 # + return - Name of the certificate alias or error occurs during the process
 
-public function getAlias(string cert) returns handle|error {
+public function getAliasFromRequest(string cert) returns handle|error {
     handle certificate = java:fromString(cert);
-    handle|error certAlias = jgetAlias(certificate);
+    handle|error certAlias = jgetAliasFromRequest(certificate);
     return certAlias;
 }
 
-function jgetAlias(handle cert) returns handle|error = @java:Method {
-    name: "getAlias",
-    class: "org.wso2.micro.gateway.core.mutualssl.MutualsslWithoutLoadBalancerHeader"
+function jgetAliasFromRequest(handle cert) returns handle|error = @java:Method {
+    name: "getAliasFromRequest",
+    class: "org.wso2.micro.gateway.core.mutualssl.CertificateUtils"
 } external;
 
 # Get the Alias name of the cert used in header append by load balancer.
 #
 # + cert - Certicate append in the header
 # + return - Name of the certificate alias or error occurs during the process
-public function getAliasAFromHeaderCert(string cert) returns handle|error {
+public function getAliasFromHeaderCert(string cert) returns handle|error {
     handle certificate = java:fromString(cert);
-    handle|error certAlias = jisExistCert(certificate);
+    handle|error certAlias = jgetAliasFromHeaderCert(certificate);
     return certAlias;
 }
 
-function jisExistCert(handle cert) returns handle|error = @java:Method {
-    name: "getAliasAFromHeaderCert",
-    class: "org.wso2.micro.gateway.core.mutualssl.MutualsslWithLoadBalancerHeader"
+function jgetAliasFromHeaderCert(handle cert) returns handle|error = @java:Method {
+    name: "getAliasFromHeaderCert",
+    class: "org.wso2.micro.gateway.core.mutualssl.CertificateUtils"
 } external;
 
 # Load the trustore in keystore.

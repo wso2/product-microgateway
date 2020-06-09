@@ -87,15 +87,15 @@ public type MutualSSLHandler object {
                                     return true;
                                 }
                             } else {
-                                handle|error aliasAFromHeaderCert = getAliasAFromHeaderCert(headerValue);
-                                if (aliasAFromHeaderCert is error) {
+                                handle|error aliasFromHeaderCert = getAliasFromHeaderCert(headerValue);
+                                if (aliasFromHeaderCert is error) {
                                     setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
                                     return prepareAuthenticationError("Unclassified Authentication Failure");
                                 }
-                                if (aliasAFromHeaderCert is handle) {
-                                    boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasAFromHeaderCert.toString(),
+                                if (aliasFromHeaderCert is handle) {
+                                    boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasFromHeaderCert.toString(),
                                     self.apiCertificateList);
-                                    if (!isExistAlias || aliasAFromHeaderCert.toString() == "") {
+                                    if (!isExistAlias || aliasFromHeaderCert.toString() == "") {
                                         printDebug(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
                                         "with the certificate");
                                         self.gatewayCache.addMutualSslCertificateCache(cacheKey, false);
@@ -120,14 +120,14 @@ public type MutualSSLHandler object {
                 string? cert = req.mutualSslHandshake["base64EncodedCert"];
                 var cacheKey = cert.toString() + apiName + apiVersion;
                 var isExistCertCache = self.gatewayCache.retrieveFromMutualSslCertificateCache(cacheKey);
-                if (isExistCertCache is boolean) {
+                if (isExistCertCache is boolean)    {
                     if (!isExistCertCache) {
                         printDebug(KEY_AUTHN_FILTER,"Mutual SSL authentication failure. " +
                         "API is not associated with the certificate");
                         return false;
                      }
                 } else {
-                    handle|error certificateAlias = getAlias(cert.toString());
+                    handle|error certificateAlias = getAliasFromRequest(cert.toString());
                     if (certificateAlias is error) {
                         setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
                         return prepareAuthenticationError("Unclassified Authentication Failure");
