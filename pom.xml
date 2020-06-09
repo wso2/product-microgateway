@@ -641,6 +641,8 @@
         <fasterxml.jackson.databind.version>2.9.10</fasterxml.jackson.databind.version>
         <org.wso2.json.version>3.0.0.wso2v1</org.wso2.json.version>
         <carbon.callhome.version>1.0.4</carbon.callhome.version>
+        <org.wso2.carbon.analytics-common>6.1.45</org.wso2.carbon.analytics-common>
+        <org.wso2.orbit.com.lmax>3.4.2.wso2v1</org.wso2.orbit.com.lmax>
         <com.nimbusds.nimbus-jose-jwt>8.8</com.nimbusds.nimbus-jose-jwt>
         <net.minidev.json-smart.version>2.3</net.minidev.json-smart.version>
         <net.minidev.asm.version>1.0.2</net.minidev.asm.version>

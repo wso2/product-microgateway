@@ -26,6 +26,7 @@ public function main() {
     addTokenServicesFilterAnnotation();
     initThrottlePolicies();
     gateway:initThrottleDataPublisher();
+    gateway:initGlobalThrottleDataPublisher();
     gateway:startObservabilityListener();
 
     {{>jwtRevocation}}

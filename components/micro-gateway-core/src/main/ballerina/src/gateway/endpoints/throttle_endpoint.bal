@@ -21,7 +21,7 @@ string throttleEndpointbase64Header = getConfigValue(THROTTLE_CONF_INSTANCE_ID, 
 DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER);
 string encodedBasicAuthHeader = throttleEndpointbase64Header.toBytes().toBase64();
 
-http:Client throttleEndpoint = new (throttleEndpointUrl,
+http:Client httpThrottleEndpoint = new (throttleEndpointUrl,
 {
     cache: {enabled: false},
     secureSocket: {
@@ -36,8 +36,28 @@ http:Client throttleEndpoint = new (throttleEndpointUrl,
     }
 });
 
+public function initGlobalThrottleDataPublisher() {
+    if(enabledGlobalTMEventPublishing && isBinaryPublisherEnabled()) {
+        printDebug(KEY_THROTTLE_UTIL, "ThrottleEvents will be published via binary endpoint.");
+        initBinaryThrottleDataPublisher();
+    } else {
+        printDebug(KEY_THROTTLE_UTIL, "ThrottleEvents will be published via HTTPS endpoint.");
+    }
+}
+
 public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEvent) {
 
+    //Event will be published via http, if and only if the throttle_endpoint_url is available and binary_endpoint
+    //configurations are not provided.
+    if (isBinaryPublisherEnabled()) {
+        publishBinaryGlobalThrottleEvent(throttleEvent);
+        printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage is added to the event queue");
+    } else {
+        publishHttpGlobalThrottleEvent(throttleEvent);
+    }
+}
+
+function publishHttpGlobalThrottleEvent(RequestStreamDTO throttleEvent) {
     json sendEvent = {
         event: {
             metaData: {},
@@ -67,11 +87,8 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
     http:Request clientRequest = new;
     clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE + encodedBasicAuthHeader);
     clientRequest.setPayload(sendEvent);
-
     printDebug(KEY_THROTTLE_UTIL, "ThrottleMessage is sent to traffic manager");
-
-    var response = throttleEndpoint->post("/throttleEventReceiver", clientRequest);
-
+    var response = httpThrottleEndpoint->post("/throttleEventReceiver", clientRequest);
     if (response is http:Response) {
         int responseCode = response.statusCode;
         printDebug(KEY_THROTTLE_UTIL, "\nStatus Code: " + responseCode.toString());
@@ -80,7 +97,11 @@ public function publishThrottleEventToTrafficManager(RequestStreamDTO throttleEv
             responseCode.toString());
         }
     } else {
-        printError(KEY_THROTTLE_UTIL, response.reason(), response);
+        printError(KEY_THROTTLE_UTIL, "Throttle event publishing is failed due to: " + response.reason(), response);
     }
+}
 
+function isBinaryPublisherEnabled() returns boolean {
+    return  getConfigBooleanValue(TM_BINARY_PUBLISHER_THROTTLE_CONF_INSTANCE_ID, ENABLED,
+    DEFAULT_TM_BINARY_PUBLISHER_ENABLED);
 }
