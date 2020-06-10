@@ -20,6 +20,7 @@ import ballerina/runtime;
 import ballerina/stringutils;
 import ballerina/time;
 import ballerina/oauth2;
+import ballerina/lang.'xml;
 
 
 xmlns "http://schemas.xmlsoap.org/soap/envelope/" as soapenv;
@@ -206,7 +207,7 @@ public type OAuth2KeyValidationProvider object {
         }
         var responseXml = keyValidationResponse.getXmlPayload();
         if (responseXml is xml) {
-            printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responseXml.getTextValue());
+            printTrace(KEY_OAUTH_PROVIDER, "Key validation response:" + responseXml.toString());
 
         } else {
             string message = "Error occurred while getting the key validation service XML response payload";
@@ -227,9 +228,9 @@ public type OAuth2KeyValidationProvider object {
         //finishing span
         finishSpan(OAUTH_AUTHPROVIDER_INVOKEKEYVALIDATION, spanId_KeyValidate);
         if (keyValidationResponseXML is xml) {
-            printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.getTextValue());
-            xml keyValidationInfoXML = keyValidationResponseXML[soapenv:Body][xsd:validateKeyResponse][xsd:'return];
-            string authorizeValue = keyValidationInfoXML[apim:authorized].getTextValue();
+            printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.toString());
+            xml keyValidationInfoXML = keyValidationResponseXML/<soapenv:Body>/<xsd:validateKeyResponse>/<xsd:'return>;
+            string authorizeValue = (keyValidationInfoXML/<apim:authorized>/*).toString();
             boolean auth = stringutils:toBoolean(authorizeValue);
             printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth.toString());
             string cacheKey = getAccessTokenCacheKey(apiRequestMetaDataDto);
@@ -243,7 +244,7 @@ public type OAuth2KeyValidationProvider object {
                 }
             } else {
                 apiKeyValidationDto.authorized = false;
-                apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
+                apiKeyValidationDto.validationStatus = (keyValidationInfoXML/<apim:validationStatus>/*).toString();
                 if (getConfigBooleanValue(CACHING_ID, TOKEN_CACHE_ENABLED, DEFAULT_CACHING_ENABLED)) {
                     self.gatewayCache.addToInvalidTokenCache(cacheKey, apiKeyValidationDto);
                 }
@@ -273,31 +274,38 @@ public type KeyValidationServerConfig record {|
 
 function convertXmlToKeyValidationObject(xml keyValidationInfoXML) returns APIKeyValidationDto {
     APIKeyValidationDto apiKeyValidationDto = {};
-    apiKeyValidationDto.apiName = keyValidationInfoXML[apim:apiName].getTextValue();
-    apiKeyValidationDto.apiPublisher = keyValidationInfoXML[apim:apiPublisher].getTextValue();
-    apiKeyValidationDto.apiTier = keyValidationInfoXML[apim:apiTier].getTextValue();
-    apiKeyValidationDto.applicationId = keyValidationInfoXML[apim:applicationId].getTextValue();
-    apiKeyValidationDto.applicationName = keyValidationInfoXML[apim:applicationName].getTextValue();
-    apiKeyValidationDto.applicationTier = keyValidationInfoXML[apim:applicationTier].getTextValue();
-    apiKeyValidationDto.authorized = stringutils:toBoolean(keyValidationInfoXML[apim:authorized].getTextValue());
-    apiKeyValidationDto.authorizedDomains = keyValidationInfoXML[apim:authorizedDomains].getTextValue();
-    apiKeyValidationDto.consumerKey = keyValidationInfoXML[apim:consumerKey].getTextValue();
-    apiKeyValidationDto.contentAware = keyValidationInfoXML[apim:contentAware].getTextValue();
-    apiKeyValidationDto.endUserName = keyValidationInfoXML[apim:endUserName].getTextValue();
-    apiKeyValidationDto.endUserToken = keyValidationInfoXML[apim:endUserToken].getTextValue();
-    apiKeyValidationDto.issuedTime = keyValidationInfoXML[apim:issuedTime].getTextValue();
-    apiKeyValidationDto.spikeArrestLimit = keyValidationInfoXML[apim:spikeArrestLimit].getTextValue();
-    apiKeyValidationDto.spikeArrestUnit = keyValidationInfoXML[apim:spikeArrestUnit].getTextValue();
-    apiKeyValidationDto.stopOnQuotaReach = keyValidationInfoXML[apim:stopOnQuotaReach].getTextValue();
-    apiKeyValidationDto.subscriber = keyValidationInfoXML[apim:subscriber].getTextValue();
-    apiKeyValidationDto.subscriberTenantDomain = keyValidationInfoXML[apim:subscriberTenantDomain].getTextValue();
-    apiKeyValidationDto.throttlingDataList = keyValidationInfoXML[apim:throttlingDataList].getTextValue();
-    apiKeyValidationDto.tier = keyValidationInfoXML[apim:tier].getTextValue();
-    apiKeyValidationDto.keyType = keyValidationInfoXML[apim:'type].getTextValue();
-    apiKeyValidationDto.userType = keyValidationInfoXML[apim:userType].getTextValue();
-    apiKeyValidationDto.validationStatus = keyValidationInfoXML[apim:validationStatus].getTextValue();
-    apiKeyValidationDto.validityPeriod = keyValidationInfoXML[apim:validityPeriod].getTextValue();
+    apiKeyValidationDto.apiName = getXMLValue(keyValidationInfoXML/<apim:apiName>/*);
+    apiKeyValidationDto.apiPublisher = getXMLValue(keyValidationInfoXML/<apim:apiPublisher>/*);
+    apiKeyValidationDto.apiTier = getXMLValue(keyValidationInfoXML/<apim:apiTier>/*);
+    apiKeyValidationDto.applicationId = getXMLValue(keyValidationInfoXML/<apim:applicationId>/*);
+    apiKeyValidationDto.applicationName = getXMLValue(keyValidationInfoXML/<apim:applicationName>/*);
+    apiKeyValidationDto.applicationTier = getXMLValue(keyValidationInfoXML/<apim:applicationTier>/*);
+    apiKeyValidationDto.authorized = true;
+    apiKeyValidationDto.authorizedDomains = getXMLValue(keyValidationInfoXML/<apim:authorizedDomains>/*);
+    apiKeyValidationDto.consumerKey = getXMLValue(keyValidationInfoXML/<apim:consumerKey>/*);
+    apiKeyValidationDto.contentAware = getXMLValue(keyValidationInfoXML/<apim:contentAware>/*);
+    apiKeyValidationDto.endUserName = getXMLValue(keyValidationInfoXML/<apim:endUserName>/*);
+    apiKeyValidationDto.endUserToken = getXMLValue(keyValidationInfoXML/<apim:endUserToken>/*);
+    apiKeyValidationDto.issuedTime = getXMLValue(keyValidationInfoXML/<apim:issuedTime>/*);
+    apiKeyValidationDto.spikeArrestLimit = getXMLValue(keyValidationInfoXML/<apim:spikeArrestLimit>/*);
+    apiKeyValidationDto.spikeArrestUnit = getXMLValue(keyValidationInfoXML/<apim:spikeArrestUnit>/*);
+    apiKeyValidationDto.stopOnQuotaReach = getXMLValue(keyValidationInfoXML/<apim:stopOnQuotaReach>/*);
+    apiKeyValidationDto.subscriber = getXMLValue(keyValidationInfoXML/<apim:subscriber>/*);
+    apiKeyValidationDto.subscriberTenantDomain = getXMLValue(keyValidationInfoXML/<apim:subscriberTenantDomain>/*);
+    apiKeyValidationDto.throttlingDataList = getXMLValue(keyValidationInfoXML/<apim:throttlingDataList>/*);
+    apiKeyValidationDto.tier = getXMLValue(keyValidationInfoXML/<apim:tier>/*);
+    apiKeyValidationDto.keyType = getXMLValue(keyValidationInfoXML/<apim:'type>/*);
+    apiKeyValidationDto.userType = getXMLValue(keyValidationInfoXML/<apim:userType>/*);
+    apiKeyValidationDto.validationStatus = getXMLValue(keyValidationInfoXML/<apim:validationStatus>/*);
+    apiKeyValidationDto.validityPeriod = getXMLValue(keyValidationInfoXML/<apim:validityPeriod>/*);
     return apiKeyValidationDto;
+}
+
+function getXMLValue(xml xmlValue) returns string {
+    if (xmlValue is 'xml:Text) {
+        return xmlValue.toString();
+    }
+    return "";
 }
 
 function getAccessTokenCacheKey(APIRequestMetaDataDto dto) returns string {

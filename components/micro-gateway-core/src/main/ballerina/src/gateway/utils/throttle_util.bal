@@ -19,8 +19,6 @@ import ballerina/stringutils;
 import ballerina/runtime;
 
 map<any> throttleDataMap = {};
-stream<RequestStreamDTO> requestStream = new;
-stream<GlobalThrottleStreamDTO> globalThrottleStream = new;
 boolean isStreamsInitialized = false;
 
 boolean blockConditionExist = false;
@@ -72,13 +70,11 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
     //Publish throttle event to internal policies
     else {
         publishNonThrottledEvent(throttleEvent);
-        printDebug(KEY_THROTTLE_UTIL, "Request stream : " + requestStream.toString());
         printDebug(KEY_THROTTLE_UTIL, "Throttle out event is sent to the queue.");
     }
 }
 
 public function initializeThrottleSubscription() {
-    globalThrottleStream.subscribe(onReceiveThrottleEvent);
     isStreamsInitialized = true;
     printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed to global throttle stream.");
     if(enabledGlobalTMEventPublishing) {
@@ -145,14 +141,6 @@ public function getPolicyDetails(map<json> deployedPolicies, string policyName, 
         return { count : -1, unitTime :-1, timeUnit : "min", stopOnQuota : true };
     }
     return <map<json>>deployedPolicies.get(prefix + policyName);
-}
-
-public function getRequestStream() returns stream<RequestStreamDTO> {
-    return requestStream;
-}
-
-public function getGlobalThrottleStream() returns stream<GlobalThrottleStreamDTO> {
-    return globalThrottleStream;
 }
 
 public function getIsStreamsInitialized() returns boolean {

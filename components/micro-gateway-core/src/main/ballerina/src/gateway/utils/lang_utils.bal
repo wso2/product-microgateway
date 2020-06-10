@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/java;
-import ballerinax/ 'java\.arrays as arrays;
+import ballerina/java;
+import ballerina/ 'java\.arrays as arrays;
 
 public function split(string str, string delimeter) returns string[] {
     handle delim = java:fromString(delimeter);

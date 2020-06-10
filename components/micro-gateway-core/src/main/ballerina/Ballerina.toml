@@ -30,4 +30,4 @@ target = "java8"
     path = "../../../target/lib/dependencies/asm-1.0.2.jar"
 
 [dependencies]
-"wso2/jms" = "0.7.0"
+"ballerina/java.jms" = "0.8.1"

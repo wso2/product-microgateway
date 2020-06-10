@@ -75,10 +75,10 @@ public type JwtAuthProvider object {
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
-                    var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
+                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>jwtCache.get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
-                    if (cachedJwt is jwt:CachedJwt) {
+                    if (cachedJwt is jwt:InboundJwtCacheEntry) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
                         jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
                         jti = jwtPayloadFromCache["jti"];

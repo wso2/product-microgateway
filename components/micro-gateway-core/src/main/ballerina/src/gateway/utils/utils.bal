@@ -785,12 +785,16 @@ function isGrpcRequest(http:FilterContext context) returns boolean {
 }
 
 public function initAuthHandlers() {
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
     //Initializes jwt handlers
-    readMultipleJWTIssuers();
+    readMultipleJWTIssuers(timestampSkew);
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
-        clockSkewInSeconds: 60,
+        clockSkewInSeconds: timestampSkew/1000,
         trustStoreConfig: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
@@ -908,7 +912,7 @@ public function initAuthHandlers() {
     authHandlersMap[API_KEY_HANDLER] = apiKeyHandler;
 }
 
-function readMultipleJWTIssuers() {
+function readMultipleJWTIssuers(int timestampSkew) {
     map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
         initiateJwtMap();
@@ -917,7 +921,7 @@ function readMultipleJWTIssuers() {
             jwt:JwtValidatorConfig jwtValidatorConfig = {
                 issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
                 audience: getDefaultStringValue(jwtIssuer[AUDIENCE], DEFAULT_AUDIENCE),
-                clockSkewInSeconds: 60,
+                clockSkewInSeconds: timestampSkew/1000,
                 trustStoreConfig: {
                     trustStore: {
                         path: trustStorePath,

@@ -135,8 +135,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
 
 public function getDecodedJWTPayload(string jwtToken) returns @tainted (jwt:JwtPayload | error) {
     //decode jwt
-    var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
-    if (cachedJwt is jwt:CachedJwt) {
+    var cachedJwt = trap <jwt:InboundJwtCacheEntry>jwtCache.get(jwtToken);
+    if (cachedJwt is jwt:InboundJwtCacheEntry) {
         printDebug(JWT_UTIL, "jwt found from the jwt cache");
         return cachedJwt.jwtPayload;
 
