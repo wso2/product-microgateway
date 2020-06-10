@@ -302,7 +302,7 @@ function convertXmlToKeyValidationObject(xml keyValidationInfoXML) returns APIKe
 }
 
 function getXMLValue(xml xmlValue) returns string {
-    if(xmlValue is 'xml:Text){
+    if (xmlValue is 'xml:Text) {
         return xmlValue.toString();
     }
     return "";
