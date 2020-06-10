@@ -14,10 +14,11 @@
  *  limitations under the License.
  *
  */
-package utills
+package utills_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
 	"testing"
 )
 
@@ -62,8 +63,8 @@ func TestFindSwaggerVersion(t *testing.T) {
 	}
 
 	for _, item := range dataItems{
-		apiJsn, _ := ToJSON([]byte(item.inputSwagger))
-		resultswaggerVerison:= FindSwaggerVersion(apiJsn)
+		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
+		resultswaggerVerison:= utills.FindSwaggerVersion(apiJsn)
 
 		assert.Equal(t, item.result, resultswaggerVerison, item.message)
 	}
