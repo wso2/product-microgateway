@@ -349,7 +349,7 @@ public abstract class AbstractMGWJWTGenerator {
      * Used for base64 encoding.
      */
     public String encode(byte[] stringToBeEncoded) {
-        return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
     }
 
     /**
