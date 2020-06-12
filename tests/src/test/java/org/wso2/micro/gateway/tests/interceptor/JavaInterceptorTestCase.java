@@ -114,6 +114,16 @@ public class JavaInterceptorTestCase extends InterceptorTestCase {
 
     }
 
+    @Test(description = "Test java interceptor reading the open API")
+    public void testInterceptorOpenAPIRead()
+            throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("/petstore/v1/store/order/1"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.getData().contains("PetStoreAPI"));
+    }
+
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
