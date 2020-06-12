@@ -301,7 +301,6 @@ public const string PRINCIPAL = "principal";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
-public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
 public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
 public const string API_KEY_ISSUER_ENABLED = "enabled";
@@ -401,6 +400,18 @@ public const string LOG_LEVEL = "level";
 public const string INFO = "INFO";
 public const string DEBUG = "DEBUG";
 public const string TRACE = "TRACE";
+
+// subscription validation configs
+public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
+public const string KEY_SUBSCRIPTION_STORE = "SubscriptionDataStore";
+public const string KEY_API_STORE = "ApiDataStore";
+public const string KEY_KEYMAP_STORE = "KeyMappingDataStore";
+public const string KEY_APPLICATION_STORE = "ApplicationDataStore";
+public const string PILOT_CONF_INSTANCE_ID = "pilotConf";
+public const string PILOT_SERVER_URL = "serviceUrl";
+public const string PILOT_INT_CONTEXT = "internalDataContext";
+public const string PILOT_USERNAME = "admin";
+public const string PILOT_PASSWORD = "admin";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";
