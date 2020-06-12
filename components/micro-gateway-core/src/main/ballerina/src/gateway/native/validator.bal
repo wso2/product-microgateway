@@ -53,17 +53,15 @@ public function responseValidate(string reqPath, string requestMethod, string re
 # Extract Resource artifcats.
 #
 # + projectName - project Name
-# + serviceName - Service Name
 # + return - Extracted resources map
-public function extractJAR(string projectName, string serviceName) returns error? {
+public function extractJAR(string projectName) returns error? {
      handle prjtName = java:fromString(projectName);
-     handle servName = java:fromString(serviceName);
-     return extract(prjtName, servName);
+     return extract(prjtName);
 }
 
-function extract(handle Name, handle serv) returns error?  = @java:Method {
+function extract(handle Name) returns error?  = @java:Method {
      name: "extractResources",
-     class: "org.wso2.micro.gateway.core.validation.Validate"
+     class: "org.wso2.micro.gateway.core.utils.CommonUtils"
 
 } external;
 

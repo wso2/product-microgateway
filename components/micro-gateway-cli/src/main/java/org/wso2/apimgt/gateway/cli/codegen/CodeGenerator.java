@@ -117,6 +117,7 @@ public class CodeGenerator {
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
                         ballerinaToml.addDependencies(definitionContext);
+                        copySwaggerToResourcesFolder(api.getName(), api.getVersion(), path);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
                     } catch (IOException e) {
@@ -191,6 +192,17 @@ public class CodeGenerator {
         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
         definitionContext = new BallerinaService().buildContext(openAPI, api);
         return definitionContext;
+    }
+
+    private void copySwaggerToResourcesFolder(String apiName, String apiVersion, Path openAPIFilePath)
+            throws IOException {
+        String resourcesPath =
+                CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
+        String fileExtension = (openAPIFilePath.getFileName().toString().endsWith(CliConstants.YAML_EXTENSION)) ?
+                CliConstants.YAML_EXTENSION :
+                CliConstants.JSON_EXTENSION;
+        String destinationFilename = apiName + "_" + apiVersion + fileExtension;
+        CmdUtils.copyFilesToSources(openAPIFilePath.toString(), resourcesPath + File.separator + destinationFilename);
     }
 
     /**

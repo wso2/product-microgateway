@@ -152,18 +152,16 @@ public class BuildCmd implements LauncherCmd {
             ThrottlePolicyGenerator policyGenerator = new ThrottlePolicyGenerator();
             policyGenerator.generate(genPoliciesPath, projectName);
 
-            // Created resources directory
+            // Create resources directory
             String resourcesPath =
                     CmdUtils.getProjectTargetModulePath(projectName) + File.separator + CliConstants.RESOURCES_DIR;
-            CmdUtils.copyFolder(CmdUtils.getAPIDefinitionPath(projectName), resourcesPath);
-            CmdUtils.copyFolder(CmdUtils.getProjectGenAPIDefinitionPath(projectName), resourcesPath);
-            // If resources folder contains .yaml file, replace the .yaml with .json file
-            replaceYAMLFilesToJson(resourcesPath);
-
+            CmdUtils.createDirectory(resourcesPath, false);
             // Copy static source files
             CmdUtils.copyAndReplaceFolder(CmdUtils.getProjectInterceptorsPath(projectName),
                     CmdUtils.getProjectTargetInterceptorsPath(projectName));
             new CodeGenerator().generate(projectName, true);
+            // If resources folder contains .yaml file, replace the .yaml with .json file
+            replaceYAMLFilesToJson(resourcesPath);
             outStream.print(CmdUtils.format("[DONE]\n"));
             //wait until call home thread finishes the task.
             latch.await(10, TimeUnit.SECONDS);
@@ -192,14 +190,16 @@ public class BuildCmd implements LauncherCmd {
             try {
                 for (File child : directoryListing) {
                     String ch = child.toString();
-                    if (ch.endsWith("yaml")) {
+                    if (ch.endsWith(CliConstants.YAML_EXTENSION)) {
+                        String fileName = child.getName()
+                                .replace(CliConstants.YAML_EXTENSION, CliConstants.JSON_EXTENSION);
                         fileInputStream = new FileInputStream(child);
                         byte[] value = new byte[(int) child.length()];
                         fileInputStream.read(value);
                         fileInputStream.close();
                         fileContent = new String(value, StandardCharsets.UTF_8);
                         val = convertYamlToJson(fileContent);
-                        writer = new FileWriter(resPath + "/" + Math.random() + ".json");
+                        writer = new FileWriter(resPath + "/" + fileName);
                         writer.write(val);
                         writer.close();
                         child.delete();

@@ -32,19 +32,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.core.Constants;
+import org.wso2.micro.gateway.core.utils.CommonUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.security.CodeSource;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 /**
@@ -54,7 +47,6 @@ public class Validate {
     private static final Logger logger = LogManager.getLogger(Validate.class);
     private static JsonNode rootNode;
     private static String swaggerObject;
-    private static Map<String, String> swaggers = new HashMap<>();
 
     /**
      * Validate request message.
@@ -66,7 +58,7 @@ public class Validate {
      */
     public static String validateRequest(String requestPath, String reqMethod, String payload, String serviceName)
             throws IOException {
-        String swagger = swaggers.get(serviceName);
+        String swagger = CommonUtils.getOpenAPIMap().get(serviceName);
         if ("get".equals(reqMethod) || "GET".equals(reqMethod)) {
             return Constants.VALIDATED_STATUS;
         }
@@ -88,7 +80,7 @@ public class Validate {
      */
     public static String validateResponse(String resourcePath, String reqMethod, String responseCode, String response,
                                           String serviceName) {
-        String swagger = swaggers.get(serviceName);
+        String swagger = CommonUtils.getOpenAPIMap().get(serviceName);
         String responseSchema = extractResponse(resourcePath, reqMethod, responseCode, swagger);
         if (responseSchema != null && !Constants.EMPTY_ARRAY.equals(responseSchema)) {
             return validateContent(response, responseSchema);
@@ -97,38 +89,7 @@ public class Validate {
         }
     }
 
-    /***
-     * Extract resource artifacts from the jar file.
-     * @param projectName project name.
-     * @param serviceName ballerina service name
-     * @throws IOException
-     */
-    public static void extractResources(String projectName, String serviceName) throws IOException {
-        String path = "resources/wso2/" + projectName + "/";
-        CodeSource src = Validate.class.getProtectionDomain().getCodeSource();
-        StringBuffer stringBuffer;
-        if (src != null) {
-            URL jar = src.getLocation();
-            ZipInputStream zip = new ZipInputStream(jar.openStream());
-            while (true) {
-                ZipEntry e = zip.getNextEntry();
-                if (e == null) {
-                    break;
-                }
-                String name = e.getName();
-                if (name.startsWith(path)) {
-                    InputStream in = Validate.class.getResourceAsStream("/" + name);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    stringBuffer = new StringBuffer();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        stringBuffer.append(line).append("\n");
-                    }
-                    swaggers.put(serviceName, stringBuffer.toString());
-                }
-            }
-        }
-    }
+
 
     private static String extractSchemaFromRequest(String resourcePath, String requestMethod, String swagger)
             throws IOException {

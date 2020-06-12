@@ -48,6 +48,12 @@ public class Utils {
         return convertMapValueToMap((MapValue<String, Object>) getInvocationContext().get("attributes"));
     }
 
+    /**
+     * Add the data to invocation context attributes map as key, value pairs.
+     *
+     * @param key The string type key used in the attribute map.
+     * @param value The value to be inserted in to the attribute map.
+     */
     public static void addDataToContextAttributes(String key, Object value) {
         BMap attributesMap = (BMap) GetInvocationContext.getInvocationContext().get("attributes");
         attributesMap.put(key, value);
