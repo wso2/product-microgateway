@@ -46,7 +46,7 @@ string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAUL
 map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
 string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
 string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
-string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, "");
+string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, DEFAULT_MTSL_CONF_CERT_HEADER_NAME);
 boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {

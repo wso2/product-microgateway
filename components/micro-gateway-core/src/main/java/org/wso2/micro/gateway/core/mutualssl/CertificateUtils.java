@@ -48,9 +48,8 @@ public class CertificateUtils {
             X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
             if (getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore) != null) {
                 return getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore);
-            } else {
-                return "";
             }
+            return "";
         } catch (KeyStoreException | java.security.cert.CertificateException | CertificateException e) {
             String msg = "Error while decoding certificate present in the header and validating with the trust store.";
             log.error(msg, e);
@@ -85,9 +84,8 @@ public class CertificateUtils {
             String certificateAlias = LoadKeyStore.trustStore.getCertificateAlias(cert);
             if (certificateAlias != null) {
                 return certificateAlias;
-            } else {
-                return "";
             }
+            return "";
         } catch (java.security.cert.CertificateException | KeyStoreException e) {
             String msg = "Error while decoding certificate present in the context and validating with the trust store.";
             log.error(msg, e);

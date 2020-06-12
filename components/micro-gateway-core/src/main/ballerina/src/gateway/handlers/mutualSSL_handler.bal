@@ -72,35 +72,38 @@ public type MutualSSLHandler object {
                 string apiName = invocationContext.attributes[API_NAME].toString();
                 if (self.headerName != "" &&  req.hasHeader(self.headerName)) {
                     printDebug(KEY_AUTHN_FILTER, "Mutual ssl expected header " + self.headerName + " present in the request");
-                    //If validation is disabled for client certificate present in the context , we should always
+                    //If certificate header is present and if validation is disabled for client certificate present
+                    //in the context (i.e. 'isClientCertificateValidationEnabled' is false), then we should always
                     //validate the certificate present in the header.
                     //This scenario represents where mtls is required between client and mgw, but mtls is not enabled
                     //between LB and mgw. So microgateway only validates the certificate present in the header, which
                     //is the client certificate not the certificate in the context which is always going to be
-                    //LB certificate but will not be available due to no MTLS between mgw and LB.
+                    //LB certificate, but will not be present in the context due to no MTLS between mgw and LB.
                     if (!self.isClientCertificateValidationEnabled) {
                         mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
                     } else { // if client certificate validation enabled for the certificate present in context
-                        //and header is also present then both should be validated.
+                        //((i.e. 'isClientCertificateValidationEnabled' is true))and header is also present then both
+                        //should be validated.
                         //This is the scenario where both client certificate is also should be verified and mtls is
                         //also enabled between mgw and LB. So both client certificate present in the header should be
                         //validated and the LB certificate present in the context.
                         // When validating the certificate in the context we do not need to validate it with the alias
                         //list present in the config as this would always be the LB certificate.
                         mutualSSLStatus =  self.checkCertificatePresentInContext(req, apiName, apiVersion, false);
-                        if(mutualSSLStatus is boolean && mutualSSLStatus) {
+                        if (mutualSSLStatus is boolean && mutualSSLStatus) {
                             mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
                         }
                     }
                 } else {
-                //If certificate not in the header, and mutual ssl client validation config is enabled, then
-                // checking the certificate in request context is mandatory.(This case is when there is no LB fronted.)
+                //If certificate not in the header, then irrespective of the config
+                //'isClientCertificateValidationEnabled' validating  the certificate in request context is mandatory.
+                //(This case is when there is no LB fronted.)
                 //And also cert should be validated against with the API alias list. This is because the certificate
-                //available via the context would be the client certificate,not the LB one Hence the
+                //available via the context would be the client certificate,not the LB one. Hence the
                 //'isValidateCertificateWithAPI' value is set as true.
                     mutualSSLStatus =  self.checkCertificatePresentInContext(req, apiName, apiVersion, true);
                 }
-                if(mutualSSLStatus is boolean && mutualSSLStatus) {
+                if (mutualSSLStatus is boolean && mutualSSLStatus) {
                     printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
                     doMTSLFilterRequest(req, invocationContext);
                 } else {
@@ -138,7 +141,7 @@ public type MutualSSLHandler object {
                 boolean isExistAlias = (isValidateCertificateWithAPI) ? isExistApiAlias(apiVersion, apiName,
                                                         certificateAlias.toString(),self.apiCertificateList) : true;
                 if (!isExistAlias || certificateAlias.toString() == "") {
-                    if(!isExistAlias) {
+                    if (!isExistAlias) {
                         printError(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
                     "with the certificate");
                     } else if (certificateAlias.toString() == "") {
@@ -179,14 +182,13 @@ public type MutualSSLHandler object {
                 if (aliasFromHeaderCert is error) {
                     setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
                     return prepareAuthenticationError("Unclassified Authentication Failure");
-                }
-                else {
+                } else {
                     boolean isExistAlias = isExistApiAlias(apiVersion, apiName, aliasFromHeaderCert.toString(),
                     self.apiCertificateList);
                     if (!isExistAlias || aliasFromHeaderCert.toString() == "") {
-                        if(!isExistAlias) {
+                        if (!isExistAlias) {
                             printError(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. API is not associated " +
-                        "with the certificate");
+                            "with the certificate");
                         } else if (aliasFromHeaderCert.toString() == "") {
                             printError(KEY_AUTHN_FILTER, "Mutual SSL authentication failure. Certificate alias not " +
                             "found in the trust store");
