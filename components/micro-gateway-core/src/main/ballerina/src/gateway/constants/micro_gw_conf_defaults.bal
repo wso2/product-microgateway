@@ -102,7 +102,7 @@ public const string DEFAULT_JMS_CONNECTION_USERNAME = "";
 public const string DEFAULT_JMS_CONNECTION_PASSWORD = "";
 public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endpoints";
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
-public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/throttle/data/v1";
+public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/internal/data/v1";
 
 //global throttling - binary publisher related constants
 public const boolean DEFAULT_TM_BINARY_PUBLISHER_ENABLED = true;

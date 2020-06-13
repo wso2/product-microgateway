@@ -94,8 +94,8 @@ service blockingConditionRetrievalService = service {
                 printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking IP condition map : " + IpBlockConditionsMap.toString());
                 stopBlockingConditionTask(true);
             } else {
-                blockConditionRetriesCount = blockConditionRetriesCount + 1;
-                printError(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Error while retrieving blocking conditions. Retry in 15 seconds", blockingConditions);
+                printDebug(KEY_BLOCKING_CONDITION_RETRIEVAL_TASK, "Blocking conditions are not found.");
+                stopBlockingConditionTask(true);
             }
         } else {
             blockConditionRetriesCount = blockConditionRetriesCount + 1;
