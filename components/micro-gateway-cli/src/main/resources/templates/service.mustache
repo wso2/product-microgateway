@@ -50,10 +50,10 @@ import wso2/gateway;
 
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
-{{>kubernetes}}
-
 //This variable is added for logging purposes
 string {{cut qualifiedServiceName " "}}Key = "{{api.name}}-{{api.version}}";
+
+{{>kubernetes}}
 
 @http:ServiceConfig {
     basePath: "{{basepath}}"{{!-- {{only one base path is allowed for all  endpoints}} --}},
