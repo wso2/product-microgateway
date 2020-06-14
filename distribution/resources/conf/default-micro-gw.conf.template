@@ -305,7 +305,7 @@
   throttleEndpointbase64Header = "admin:admin"
   #Configurations related to retrieve custom throttle policy related key templates from traffic manager or key manager.
   [throttlingConfig.dataRetriever]
-    serverUrl = "https://localhost:9443/throttle/data/v1"
+    serverUrl = "https://localhost:9443/internal/data/v1"
     username = "admin"
     password = "admin"
 

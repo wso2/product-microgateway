@@ -186,6 +186,8 @@ public type OAuth2KeyValidationProvider object {
                                             <xsd:clientDomain>${apiRequestMetaDataDto.clientDomain}</xsd:clientDomain>
                                             <xsd:matchingResource>${apiRequestMetaDataDto.matchingResource}</xsd:matchingResource>
                                             <xsd:httpVerb>${apiRequestMetaDataDto.httpVerb}</xsd:httpVerb>
+                                            <xsd:tenantDomain>${apiRequestMetaDataDto.tenantDomain}</xsd:tenantDomain>
+                                            <xsd:keyManagers>${apiRequestMetaDataDto.keyManagers}</xsd:keyManagers>
                                         </xsd:validateKey>
                                     </soapenv:Body>
                                 </soapenv:Envelope>`;

@@ -105,6 +105,8 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
+    apiKeyValidationRequest.tenantDomain = getTenantFromBasePath(apiContext);
+    apiKeyValidationRequest.keyManagers = "all";
 
     apiKeyValidationRequest.accessToken = accessToken;
     printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
@@ -116,8 +118,13 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
 
 
 public function getTenantFromBasePath(string basePath) returns string {
-    string[] splittedArray = split(basePath, "/");
-    return splittedArray[splittedArray.length() - 1];
+    string[] splittedContext = split(basePath, "/");
+    if (splittedContext.length() > 3 && basePath.startsWith(TENANT_DOMAIN_PREFIX)) {
+        // this check if basepath have /t/domain in
+        return splittedContext[2];
+    } else {
+        return SUPER_TENANT_DOMAIN_NAME;
+    }
 }
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
@@ -197,13 +204,8 @@ public function handleError(string message) returns ( error) {
 public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
-    string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
-        // this check if basepath have /t/domain in
-        return splittedContext[2];
-    } else {
-        return SUPER_TENANT_DOMAIN_NAME;
-    }
+    return getTenantFromBasePath(apiContext);
+
 }
 
 public function getApiName(http:FilterContext context) returns (string) {

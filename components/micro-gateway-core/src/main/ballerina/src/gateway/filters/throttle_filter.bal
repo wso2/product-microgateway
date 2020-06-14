@@ -406,7 +406,6 @@ function generateLocalThrottleEvent(http:Request req, http:FilterContext context
     requestStreamDTO.apiTierCount = <int>apiPolicyDetails.count;
     requestStreamDTO.apiTierUnitTime = <int>apiPolicyDetails.unitTime;
     requestStreamDTO.apiTierTimeUnit = apiPolicyDetails.timeUnit.toString();
-    setThrottleKeysWithVersion(requestStreamDTO, context);
     return requestStreamDTO;
 }
 
@@ -422,7 +421,6 @@ function generateGlobalThrottleEvent(http:Request req, http:FilterContext contex
     requestStreamDTO.apiTenant = tenantDomain;
     requestStreamDTO.apiName = context.getServiceName();
     requestStreamDTO.appId = keyValidationDto.applicationId;
-    setThrottleKeysWithVersion(requestStreamDTO, context);
     json properties = {};
     requestStreamDTO.properties = properties.toJsonString();
     return requestStreamDTO;
@@ -437,7 +435,9 @@ function setCommonThrottleData(http:Request req, http:FilterContext context, Aut
     requestStreamDTO.apiTier = getAPITier(context.getServiceName(), keyValidationDto.apiTier);
     requestStreamDTO.subscriptionTier = keyValidationDto.tier;
     requestStreamDTO.apiKey = apiContext;
-
+    requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + apiContext;
+    requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
+    setThrottleKeysWithVersion(requestStreamDTO, context);
     if (requestStreamDTO.apiTier != UNLIMITED_TIER && requestStreamDTO.apiTier != "") {
         requestStreamDTO.resourceTier = requestStreamDTO.apiTier;
         requestStreamDTO.resourceKey = requestStreamDTO.apiKey;
@@ -446,9 +446,6 @@ function setCommonThrottleData(http:Request req, http:FilterContext context, Aut
         requestStreamDTO.resourceTier = getResourceTier(context.getResourceName());
         requestStreamDTO.resourceKey = resourceKey;
     }
-
-    requestStreamDTO.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
-    requestStreamDTO.subscriptionKey = keyValidationDto.applicationId + ":" + apiContext;
     return requestStreamDTO;
 
 }
