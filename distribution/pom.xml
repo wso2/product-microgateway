@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.2.0-alpha</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
