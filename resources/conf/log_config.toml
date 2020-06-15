@@ -1,0 +1,39 @@
+# The logging configuration file for mgw
+
+######### root Level #############
+logfile = "asasasas"
+format = "time"
+logLevel = "DEBG"
+
+[rotation]
+MaxSize = 1    #megabytes
+MaxBackups = 3
+MaxAge =  28   #days
+Compress = true
+
+######### package Level #############
+# Debug_L = "DEBG"
+# Fatal_L = "FATL"
+# Error_L = "ERRO"
+# Warn_L = "WARN"
+# Info_L = "INFO"
+# Panic_L = "PANC"
+
+[[pkg]]
+name = "main"
+logLevel = "DEBG"
+
+[[pkg]]
+name = "hello"
+logLevel = "INFO"
+
+[[pkg]]
+name = "bye"
+logLevel = "DEBG"
+
+
+[accessLogs]
+logfile = "ssdsd"
+format = "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% '%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n"
+
+
