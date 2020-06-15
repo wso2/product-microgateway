@@ -127,6 +127,7 @@ func createAddress(remoteHost string, Port uint32) core.Address {
 }
 
 func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
+	logFormat := ""
 
 	logConfig := &structpb.Struct{
 		Fields: map[string]*structpb.Value{
@@ -136,6 +137,30 @@ func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
 				},
 			},
 		},
+	}
+
+	logConf, errReadConfig := config.ReadLogConfigs()
+	if errReadConfig != nil {
+		log.Println("Error loading configuration. ", errReadConfig)
+	} else {
+		logFormat = logConf.AccessLogs.Format
+	}
+
+	if logFormat != "" {
+		logConfig = &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"path": {
+					Kind: &structpb.Value_StringValue{
+						StringValue: "/tmp/envoy.access.log",
+					},
+				},
+				"format": {
+					Kind: &structpb.Value_StringValue{
+						StringValue: logConf.AccessLogs.Format,
+					},
+				},
+			},
+		}
 	}
 
 	access_log := envoy_config_filter_accesslog_v2.AccessLog{
