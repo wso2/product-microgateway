@@ -19,7 +19,6 @@ package oasparser
 //package envoy_config_generator
 
 import (
-	"fmt"
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
@@ -27,14 +26,13 @@ import (
 	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"log"
 	"strings"
 )
 
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Fatal("Error Generating mgwSwagger struct:", err)
+		Logger.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 
 	var (
@@ -65,19 +63,19 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		envoyNodeProd.SetEndpoints(endpointsP)
 
 	} else {
-		log.Println("No Api definitions found")
+		Logger.Warn("No Api definitions found")
 	}
 
-	fmt.Println(len(routesP), "routes are generated successfully")
-	fmt.Println(len(clustersP), "clusters are generated successfully")
-	fmt.Println(len(endpointsP), "endpoints are generated successfully")
+	Logger.Info(len(routesP), " routes are generated successfully")
+	Logger.Info(len(clustersP), " clusters are generated successfully")
+	Logger.Info(len(endpointsP), " endpoints are generated successfully")
 	return envoyNodeProd.GetSources()
 }
 
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Fatal("Error Generating mgwSwagger struct:", err)
+		Logger.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 	//fmt.Println(mgwSwagger)
 	var (
@@ -110,7 +108,7 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 		envoyNodeSand.SetRoutes(routesS)
 		envoyNodeSand.SetEndpoints(endpointsS)
 	} else {
-		log.Println("No Api definitions found")
+		Logger.Warn("No Api definitions found")
 	}
 
 	return envoyNodeSand.GetSources()

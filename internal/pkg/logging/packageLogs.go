@@ -1,7 +1,6 @@
 package logging
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
 	"io"
@@ -9,12 +8,8 @@ import (
 	"os"
 )
 
-
-var defaultLogLevel = logrus.WarnLevel
-
-
 func logLevelMapper(pkgLevel string) logrus.Level {
-	logLevel := defaultLogLevel
+	logLevel := DEFAULT_LOG_LEVEL
 	switch pkgLevel {
 	case LEVEL_WARN:
 		logLevel =  logrus.WarnLevel
@@ -37,9 +32,9 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 func InitPackageLogger(pkgName string) *logrus.Logger {
 
 	// Create the log file if doesn't exist. And append to it if it already exists.
-	_, err := os.OpenFile(logFilename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	_, err := os.OpenFile(LOG_FILE_NAME, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 
-	pkgLogLevel := defaultLogLevel //default log level
+	pkgLogLevel := DEFAULT_LOG_LEVEL //default log level
 	isPackegeLevelDefined := false
 
 	logger := logrus.New()
@@ -53,7 +48,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 		log.Println("failed to open logfile", err)
 	} else {
 		//log output set to stdout and file
-		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(logFilename))
+		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(LOG_FILE_NAME))
 		logger.SetOutput(multiWriter)
 	}
 
@@ -61,7 +56,6 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	if errReadConfig != nil {
 		log.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	fmt.Println("this is accessLogs",logConf.AccessLogs)
 
 	for _, pkg := range logConf.Pkg {
 		if pkg.Name == pkgName {

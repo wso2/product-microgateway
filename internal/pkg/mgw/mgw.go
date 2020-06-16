@@ -23,9 +23,10 @@ import (
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	"github.com/fsnotify/fsnotify"
-	myals "github.com/wso2/micro-gw/internal/pkg/logging"
+	//myals "github.com/wso2/micro-gw/internal/pkg/logging"
 	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
 	mgwconfig "github.com/wso2/micro-gw/internal/pkg/confTypes"
+	//"google.golang.org/appengine/log"
 	"net"
 	"os"
 	"os/signal"
@@ -35,10 +36,9 @@ import (
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
 
-	logrus "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
-	accesslog "github.com/envoyproxy/go-control-plane/envoy/service/accesslog/v2"
+	//accesslog "github.com/envoyproxy/go-control-plane/envoy/service/accesslog/v2"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2"
 )
 
@@ -76,47 +76,6 @@ func init() {
 	flag.StringVar(&mode, "ads", Ads, "Management server type (ads, xds, rest)")
 }
 
-type logger struct {
-	*logrus.Logger
-}
-
-var log = &logger{
-	Logger: logrus.StandardLogger(),
-}
-
-// OnStreamOpen is called once an xDS stream is open with a stream ID and the type URL (or "" for ADS).
-func (l logger) OnStreamOpen(_ context.Context, sid int64, stype string) error {
-	l.Infof("Stream open[%v]: %v", sid, stype)
-	return nil
-}
-
-// OnStreamClosed is called immediately prior to closing an xDS stream with a stream ID.
-func (l logger) OnStreamClosed(sid int64) {
-	l.Infof("Stream closed[%v]", sid)
-}
-
-// OnStreamRequest is called once a request is received on a stream.
-func (l logger) OnStreamRequest(sid int64, req *v2.DiscoveryRequest) error {
-	l.Infof("Stream request[%v]: %v", sid, req)
-	return nil
-}
-
-// OnStreamResponse is called immediately prior to sending a response on a stream.
-func (l logger) OnStreamResponse(sid int64, req *v2.DiscoveryRequest, res *v2.DiscoveryResponse) {
-	l.Infof("Stream response[%v]: %v -> %v", sid, req, res)
-}
-
-// OnFetchRequest is called for each Fetch request
-func (l logger) OnFetchRequest(_ context.Context, r *v2.DiscoveryRequest) error {
-	l.Infof("Fetch request: %v", r)
-	return nil
-}
-
-// OnFetchResponse is called immediately prior to sending a response.
-func (l logger) OnFetchResponse(req *v2.DiscoveryRequest, res *v2.DiscoveryResponse) {
-	l.Infof("Fetch response: %v -> %v", req, res)
-}
-
 // Hasher returns node ID as an ID
 type Hasher struct {
 }
@@ -129,26 +88,6 @@ func (h Hasher) ID(node *core.Node) string {
 	return node.Id
 }
 
-//RunAccessLogServer starts an accesslog service. TODO: Remove
-func RunAccessLogServer(ctx context.Context, als *myals.AccessLogService, port uint) {
-	grpcServer := grpc.NewServer()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to listen")
-	}
-
-	accesslog.RegisterAccessLogServiceServer(grpcServer, als)
-	logrus.WithFields(logrus.Fields{"port": port}).Info("access log server listening")
-	//log.Fatalf("", Serve(lis))
-	go func() {
-		if err = grpcServer.Serve(lis); err != nil {
-			logrus.Error(err)
-		}
-	}()
-	<-ctx.Done()
-
-	grpcServer.GracefulStop()
-}
 
 const grpcMaxConcurrentStreams = 1000000
 
@@ -160,7 +99,7 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		logrus.WithError(err).Fatal("failed to listen")
+		Logger.Fatal("failed to listen: ", err)
 	}
 
 	// register services
@@ -170,17 +109,18 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 	v2.RegisterRouteDiscoveryServiceServer(grpcServer, server)
 	v2.RegisterListenerDiscoveryServiceServer(grpcServer, server)
 
-	logrus.WithFields(logrus.Fields{"port": port}).Info("management server listening")
+	Logger.Info("port: ",port, " management server listening")
 	//log.Fatalf("", Serve(lis))
 	//go func() {
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
-			logrus.Error(err)
+			Logger.Error(err)
 		}
 	}()
 	//<-ctx.Done()
 	//grpcServer.GracefulStop()
 	//}()
+
 }
 
 func updateEnvoy(location string) {
@@ -192,13 +132,13 @@ func updateEnvoy(location string) {
 	listeners, clusters, routes, endpoints := oasParser.GetProductionSources(location)
 
 	atomic.AddInt32(&version, 1)
-	log.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
+	Logger.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
 	snap := cachev2.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
 	snap.Consistent()
 
 	err := cache.SetSnapshot(nodeId, snap)
 	if err != nil {
-		logrus.Error(err)
+		Logger.Error(err)
 	}
 }
 
@@ -210,21 +150,22 @@ func Run(conf *mgwconfig.Config) {
 	err := watcher.Add(conf.Apis.Location)
 
 	if err != nil {
-		logrus.Panic("Error reading the api definitions.", err)
+		Logger.Panic("Error reading the api definitions.", err)
 	}
 
 	flag.Parse()
-	if debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logrus.Printf("Starting control plane")
+	Logger.Info("Starting control plane")
 
 	cache = cachev2.NewSnapshotCache(mode != Ads, Hasher{}, nil)
 
 	srv := xds.NewServer(ctx, cache, nil)
+
+	//als := &myals.AccessLogService{}
+	//go RunAccessLogServer(ctx, als, alsPort)
 
 	// start the xDS server
 	RunManagementServer(ctx, srv, port)
@@ -237,16 +178,16 @@ OUTER:
 		case c := <-watcher.Events:
 			switch c.Op.String() {
 			case "WRITE":
-				logrus.Info("Loading updated swagger definition...")
+				Logger.Info("Loading updated swagger definition...")
 				updateEnvoy(conf.Apis.Location)
 			}
 		case s := <-sig:
 			switch s {
 			case os.Interrupt:
-				logrus.Info("Shutting down...")
+				Logger.Info("Shutting down...")
 				break OUTER
 			}
 		}
 	}
-	logrus.Info("Bye!")
+	Logger.Info("Bye!")
 }

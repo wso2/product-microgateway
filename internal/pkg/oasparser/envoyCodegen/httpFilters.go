@@ -22,6 +22,7 @@ import (
 	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser"
 )
 
 func getHttpFilters() []*hcm.HttpFilter {
@@ -58,7 +59,7 @@ func getExtAauthzHttpFilter() hcm.HttpFilter {
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
-		panic(err2)
+		oasparser.Logger.Error(err2)
 	}
 	extAuthzFilter := hcm.HttpFilter{
 		Name: "envoy.filters.http.ext_authz",

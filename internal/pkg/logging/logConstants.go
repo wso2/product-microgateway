@@ -1,9 +1,10 @@
 package logging
 
-
+import "github.com/sirupsen/logrus"
 
 const (
-    logFilename = "resources/logs/microgateway.log"
+    LOG_FILE_NAME = "resources/logs/microgateway.log"
+    DEFAULT_LOG_LEVEL = logrus.WarnLevel
 
     //log levels
 	LEVEL_PANIC = "PANC"

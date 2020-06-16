@@ -19,7 +19,7 @@ type PlainFormatter struct {
 
 func init() {
 
-	err := initGlobalLogger(logFilename)
+	err := initGlobalLogger(LOG_FILE_NAME)
 	if err != nil {
 		log.Println("Failed to initialize logging")
 	}
@@ -34,16 +34,23 @@ func initGlobalLogger(filename string) (error) {
 	formatter := loggerFromat()
 	logrus.SetFormatter(formatter)
 
-	//default log level set to warn level
-	logrus.SetLevel(defaultLogLevel)
-
 	if err != nil {
 		// Cannot open log file. Logging to stderr
 		log.Println("failed to open logfile", err)
+		logrus.SetOutput(os.Stdout)
+
 	} else {
 		//log output set to stdout and file
 		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(filename))
 		logrus.SetOutput(multiWriter)
+	}
+
+	logConf, errReadConfig := config.ReadLogConfigs()
+	if errReadConfig != nil {
+		log.Println("Error loading configuration. ", errReadConfig)
+		logrus.SetLevel(logLevelMapper(logConf.LogLevel))
+	} else {
+		logrus.SetLevel(DEFAULT_LOG_LEVEL)
 	}
 
 	return err

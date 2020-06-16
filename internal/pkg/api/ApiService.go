@@ -18,7 +18,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -29,7 +28,7 @@ type RESTService struct{}
 // TODO: Implement. Simply copy the swagger content to the location defined in the config or directly deploy the api.
 // Deploy API in microgateway.
 func (rest *RESTService) ApiPOST(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Your API is added")
+	logger.Println(w, "Your API is added")
 
 }
 

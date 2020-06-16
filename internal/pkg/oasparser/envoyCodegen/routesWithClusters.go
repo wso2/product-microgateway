@@ -24,9 +24,9 @@ import (
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"log"
 	"strings"
 	"time"
 )
@@ -69,7 +69,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		endpointsProd = append(endpointsProd, &apilevelAddressP)
 
 	} else {
-		log.Println("API level Producton endpoints are not defined")
+		oasparser.Logger.Warn("API level Producton endpoints are not defined")
 	}
 	for ind, resource := range mgwSwagger.GetResources() {
 
@@ -122,7 +122,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			routesProd = append(routesProd, &routeP)
 
 		} else {
-			log.Fatalf("Producton endpoints are not defined")
+			oasparser.Logger.Fatalf("Producton endpoints are not defined")
 		}
 	}
 
@@ -132,7 +132,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 func createCluster(address core.Address, clusterName string) v2.Cluster {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		log.Fatal("Error loading configuration. ", errReadConfig)
+		oasparser.Logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
 	h := &address

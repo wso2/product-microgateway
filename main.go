@@ -17,31 +17,25 @@
 package main
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/internal/pkg/logging"
+
 	"github.com/wso2/micro-gw/cmd/microgateway"
 	_ "github.com/wso2/micro-gw/internal/pkg/logging"
 	"os"
 )
 
-
+var pkgName = "main"
+var logger = logging.InitPackageLogger(pkgName)
 
 func main() {
 
 	var file string
 	if len(os.Args) > 1 {
 		file = os.Args[1]
-		fmt.Println(file)
+		logger.Debug(file)
 	}
 
-	logrus.Info("Info level")
-	logrus.Warn("warn level")
-	logrus.Info("Info level")
-	logrus.Debug("Debug level level")
-	logrus.Error("Error level")
-
 	microgateway.StartMicroGateway(os.Args)
-	logrus.Fatal("Fatal level exit 1")
-	//logrus.Panic("panic level")
+
 
 }

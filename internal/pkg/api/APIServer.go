@@ -18,7 +18,6 @@ package api
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/internal/pkg/confTypes"
 	"log"
 	"net/http"
@@ -47,6 +46,6 @@ func Start(config *confTypes.Config) {
 		Addr:    serverAddr,
 		Handler: router,
 	}
-	logrus.Info("Starting API Server at ", serverAddr)
+	logger.Info("Starting API Server at ", serverAddr)
 	log.Fatal(server.ListenAndServe())
 }

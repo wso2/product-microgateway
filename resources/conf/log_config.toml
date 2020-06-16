@@ -1,9 +1,8 @@
 # The logging configuration file for mgw
 
 ######### root Level #############
-logfile = "asasasas"
-format = "time"
-logLevel = "DEBG"
+logfile = "resources/logs/microgateway.log"
+logLevel = "INFO"
 
 [rotation]
 MaxSize = 1    #megabytes
@@ -12,28 +11,23 @@ MaxAge =  28   #days
 Compress = true
 
 ######### package Level #############
-# Debug_L = "DEBG"
-# Fatal_L = "FATL"
-# Error_L = "ERRO"
-# Warn_L = "WARN"
-# Info_L = "INFO"
-# Panic_L = "PANC"
+# LogLevels = "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [[pkg]]
-name = "main"
+name = "github.com/wso2/micro-gw/cmd/microgateway"
 logLevel = "DEBG"
 
 [[pkg]]
-name = "hello"
+name = "microgateway"
 logLevel = "INFO"
 
 [[pkg]]
-name = "bye"
+name = "oasparser"
 logLevel = "DEBG"
 
 
 [accessLogs]
-logfile = "ssdsd"
+logfile = "/tmp/envoy.access.log"
 format = "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% '%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n"
 
 

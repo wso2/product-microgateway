@@ -1,6 +1,6 @@
 openapi: "3.0"
 info:
-  description: "This is a samle server etsore server You can d out ore aout   Swagge at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn  p  `spcie`    un"
+  description: "This is a samle server etsore srver Yo can d out ore aut   Swagge at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn  p  `spcie`    un"
   version: "1.0.0"
   title: "Swagger Petstore"
 
