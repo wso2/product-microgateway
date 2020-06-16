@@ -41,6 +41,11 @@ public const boolean DEFAULT_KM_CONF_SECURITY_BASIC_ENABLED = true;
 public const string DEFAULT_USERNAME = "admin";
 public const string DEFAULT_PASSWORD = "admin";
 
+public const string DEFAULT_PILOT_SERVER_URL = "https://localhost:9443";
+public const string DEFAULT_PILOT_INT_CONTEXT = "/internal/data/v1/";
+public const string DEFAULT_PILOT_USERNAME = "admin";
+public const string DEFAULT_PILOT_PASSWORD = "admin";
+
 public const boolean DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED = false;
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER = "AUTH_HEADER_BEARER";
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2 = "";

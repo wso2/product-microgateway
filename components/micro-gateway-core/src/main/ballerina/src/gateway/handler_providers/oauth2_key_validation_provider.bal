@@ -30,7 +30,7 @@ xmlns "http://dto.impl.apimgt.carbon.wso2.org/xsd" as apim;
 # Represents inbound OAuth2 provider, which calls the key validation service of the WSO2 Key manager
 #
 # + keyValidationClient - key validation client endpoint
-# + gatewayCache - the `APIGatewayCache instence`
+# + gatewayCache - the `APIGatewayCache` instance
 # 
 public type OAuth2KeyValidationProvider object {
 

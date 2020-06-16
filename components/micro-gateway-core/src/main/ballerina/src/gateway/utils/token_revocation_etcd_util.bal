@@ -40,7 +40,7 @@ public function etcdRevokedTokenLookup(string tokenKey) returns string {
     var response = etcdTokenRevocationEndpoint->get(tokenKey, message = req);
 
     if (response is http:Response) {
-        printError(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Http Response object obtained");
+        printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Http Response object obtained");
         var msg = response.getJsonPayload();
         if (msg is json) {
             json jsonPayload = msg;

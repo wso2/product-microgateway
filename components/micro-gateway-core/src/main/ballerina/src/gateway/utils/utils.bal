@@ -1067,3 +1067,17 @@ public function removePrePostSlash(string context) returns string {
     }
     return formattedContext;
 }
+
+# Build a string value to be used as the value for baisc authorization header.
+#
+# + username - Username to be included in the header
+# + password - Password to be included in the header
+# + return - Returns the base64 enoded value of string `username:password` with the prefix
+# `BASIC_PREFIX_WITH_SPACE`
+# Ex: `Basic YWRtaW46YWRtaW4=`
+public function buildBasicAuthHeader(string username, string password) returns string {
+    string basicKey = username + ":" + password;
+    string headerValue = basicKey.toBytes().toBase64();
+
+    return BASIC_PREFIX_WITH_SPACE + headerValue;
+}

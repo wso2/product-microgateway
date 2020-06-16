@@ -18,6 +18,75 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
 
+public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isValidationEnabled) returns boolean {
+    boolean isAllowed = !isValidationEnabled;
+    // TODO: substore: need to take this from jwt issuer config
+    string appKeyClaim = CONSUMER_KEY;
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
+    map<json>? customClaims = payload?.customClaims;
+    // if validation is not enabled, mark as an allowed key.
+    // if validation is enabled, validation will be done to find if the key is allowed.
+    AuthenticationContext authenticationContext = {
+        apiKey: token,
+        callerToken: token,
+        authenticated: !isValidationEnabled
+    };
+
+    string? username = payload?.sub;
+    if (username is string) {
+        authenticationContext.username = username;
+    }
+    if (apiConfig is APIConfiguration && customClaims is map<json> && customClaims.hasKey(appKeyClaim)) {
+        string apiName = apiConfig.name;
+        string apiVersion = apiConfig.apiVersion;
+        string apiProvider = apiConfig.publisher;
+        string consumerKey = customClaims.get(appKeyClaim).toString();
+        var keyMap = pilotDataProvider.getKeyMapping(consumerKey);
+        var api = pilotDataProvider.getApi(apiProvider, apiName, apiVersion);
+        authenticationContext.consumerKey = consumerKey.toString();
+
+        if (keyMap is KeyMap) {
+            authenticationContext.keyType = keyMap.keyType;
+            invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+            var app = pilotDataProvider.getApplication(keyMap.appId);
+            if (app is Application) {
+                authenticationContext.applicationId = app.id.toString();
+                authenticationContext.applicationName = app.name;
+                authenticationContext.applicationTier = app.policyId;
+                authenticationContext.subscriber = app.owner;
+            }
+
+            if (api is Api) {
+                var sub = pilotDataProvider.getSubscription(keyMap.appId, api.id);
+
+                // if subscription in "UNBLOCKED" state is found in the pilot data, key is allowed
+                if (sub is Subscription && sub.state == "UNBLOCKED") {
+                    printDebug(JWT_UTIL, "Found a subscription for api: " + apiName + "__" + apiVersion);
+                    isAllowed = true;
+                    authenticationContext.authenticated = true;
+                    authenticationContext.apiPublisher = apiProvider;
+                    authenticationContext.tier = sub.policyId;
+                    setSubsciberTenantDomain(authenticationContext);
+                }
+            }
+        }
+    }
+
+    // TODO: substore: if possible print authenticationContext object as a json
+    printDebug(JWT_UTIL, "username : " + authenticationContext.username + ", keytype : "
+        + authenticationContext.keyType + ", consumer key : " + authenticationContext.consumerKey
+        + ", application ID : " + authenticationContext.applicationId + ", application name : "
+        + authenticationContext.applicationName + ", application tier : " + authenticationContext.applicationTier
+        + ", application owner : " + authenticationContext.subscriber + ", application tier : "
+        + authenticationContext.tier + ", apiTier : " + authenticationContext.apiTier
+        + ", apiPublisher : " + authenticationContext.apiPublisher + ", subscriberTenantDomain : "
+        + authenticationContext.subscriberTenantDomain);
+
+    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+    return isAllowed;
+}
+
 # Handle additional claims in JWT token and set them to invocation context.
 # Then return check subscription is validated or not.
 #

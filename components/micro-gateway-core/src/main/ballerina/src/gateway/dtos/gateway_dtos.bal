@@ -86,3 +86,36 @@ public type Credentials record {
     string password = "";
 };
 
+public type Subscription record {|
+    int id;
+    int apiId = 1;
+    int appId = 1;
+    string policyId = "";
+    string state = "";
+|};
+
+public type Application record {|
+    int id;
+    string name = "";
+    string owner = "";
+    string policyId = "";
+    string tokenType = "";
+    json[] groupIds?;
+    json[] attributes?;
+|};
+
+public type KeyMap record {|
+    int appId;
+    string consumerKey = "";
+    string keyType = "";
+|};
+
+public type Api record {|
+    int id;
+    string provider = "";
+    string name = "";
+    string apiVersion = "";
+    string context = "";
+    string policyId = "";
+    any urlMaping?;
+|};
