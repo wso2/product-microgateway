@@ -24,9 +24,9 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-func GetHttpFilters() []*hcm.HttpFilter {
+func getHttpFilters() []*hcm.HttpFilter {
 	//extAauth := GetExtAauthzHttpFilter()
-	router := GetRouterHttpFilter()
+	router := getRouterHttpFilter()
 
 	httpFilters := []*hcm.HttpFilter{
 		//&extAauth,
@@ -36,11 +36,11 @@ func GetHttpFilters() []*hcm.HttpFilter {
 	return httpFilters
 }
 
-func GetRouterHttpFilter() hcm.HttpFilter {
+func getRouterHttpFilter() hcm.HttpFilter {
 	return hcm.HttpFilter{Name: wellknown.Router}
 }
 
-func GetExtAauthzHttpFilter() hcm.HttpFilter {
+func getExtAauthzHttpFilter() hcm.HttpFilter {
 	extAuthzConfig := &envoyconfigfilterhttpextauthzv2.ExtAuthz{
 		WithRequestBody: &envoyconfigfilterhttpextauthzv2.BufferSettings{
 			MaxRequestBytes:     1024,

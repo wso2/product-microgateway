@@ -1,6 +1,6 @@
 openapi: "3.0"
 info:
-  description: "This is a samle server etsore server. You can fid out ore about   Swagger at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn  ep  `spcie` t e he auzion"
+  description: "This is a samle server etsore server You can d out ore aout   Swagge at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn  p  `spcie`    un"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -125,8 +125,12 @@ paths:
       security:
         - api_key: []
 
-  /pet/{petId}/uploadImage:
-    post:
+  /data:
+    get:
+      x-wso2-production-endpoints:
+        urls:
+          - 'http://0.0.0.0:5000/base'
+        type: https
       tags:
         - "pet"
       summary: "uploads an image"

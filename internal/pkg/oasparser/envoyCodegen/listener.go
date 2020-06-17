@@ -21,9 +21,11 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	listenerv2 "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
+	envoy_config_filter_accesslog_v2 "github.com/envoyproxy/go-control-plane/envoy/config/filter/accesslog/v2"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/wso2/micro-gw/config"
 	"log"
 )
@@ -43,7 +45,7 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
 			},
 		},
 	}
-	listenerFilters := CreateListenerFilters(routeConfigName, vHostP)
+	listenerFilters := createListenerFilters(routeConfigName, vHostP)
 
 	listener := v2.Listener{
 		Name: listenerName,
@@ -57,11 +59,11 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
 	return listener
 }
 
-func CreateListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
+func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
 	var filters []*listenerv2.Filter
 
 	//set connection manager filter for production
-	managerP := CreateConectionManagerFilter(vHost, routeConfigName)
+	managerP := createConectionManagerFilter(vHost, routeConfigName)
 
 	pbst, err := ptypes.MarshalAny(managerP)
 	if err != nil {
@@ -79,9 +81,10 @@ func CreateListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
 	return filters
 }
 
-func CreateConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
+func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
 
-	httpFilters := GetHttpFilters()
+	httpFilters := getHttpFilters()
+	accessLogs := getAccessLogConfigs()
 
 	manager := &hcm.HttpConnectionManager{
 		CodecType:  hcm.HttpConnectionManager_AUTO,
@@ -93,6 +96,7 @@ func CreateConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
 			},
 		},
 		HttpFilters: httpFilters,
+		AccessLog: []*envoy_config_filter_accesslog_v2.AccessLog{&accessLogs},
 	}
 	return manager
 }
@@ -120,4 +124,29 @@ func createAddress(remoteHost string, Port uint32) core.Address {
 		},
 	}}
 	return address
+}
+
+func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
+
+	logConfig := &structpb.Struct{
+		Fields: map[string]*structpb.Value{
+			"path": {
+				Kind: &structpb.Value_StringValue{
+					StringValue: "/tmp/envoy.access.log",
+				},
+			},
+		},
+	}
+
+	access_log := envoy_config_filter_accesslog_v2.AccessLog{
+		Name:                 "envoy.file_access_log",
+		ConfigType: &envoy_config_filter_accesslog_v2.AccessLog_Config{
+			Config: logConfig,
+		} ,
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	}
+
+	return access_log
 }
