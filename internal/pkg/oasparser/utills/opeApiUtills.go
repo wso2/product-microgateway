@@ -19,9 +19,9 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
+	"log"
 	"unicode"
 )
 
@@ -49,8 +49,8 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
-func FindSwaggerVersion(jsn []byte) (string, error) {
-	var version string = "3"
+func FindSwaggerVersion(jsn []byte) string {
+	var version string = "2"
 	var result map[string]interface{}
 
 	err := json.Unmarshal(jsn, &result)
@@ -63,8 +63,10 @@ func FindSwaggerVersion(jsn []byte) (string, error) {
 	} else if _, ok := result["openapi"]; ok {
 		version = "3"
 	} else {
-		return version, errors.New("swagger file version is not defined. Default version set as to 3 ")
+		log.Print("swagger file version is not defined. Default version set as to 2 ")
+		return version
+
 	}
 
-	return version, nil
+	return version
 }
