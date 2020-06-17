@@ -33,11 +33,11 @@ func TestGetMgwSwagger(t *testing.T) {
 	dataItems := []getMgwSwaggerTestItem {
 		{
 			inputSwagger: `{
-							"swagger": "2.0",
-							"host": "petstore.io:80",
-							"basepath": "/api/v2"
+				"swagger": "2.0",
+				"host": "petstore.io:80",
+				"basepath": "/api/v2"
 							
-                           }`,
+							}`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
 				{
 					Host: "petstore.io",
@@ -64,15 +64,15 @@ servers:
 		},
 		{
 			inputSwagger: `{
-							"swagger": "2.0",
-							"host": "facebook.io:80",
-							"basepath": "/api/v2",
-                             "x-wso2-production-endpoints": {
-								"urls": [
-								  "https://petstore.io:80/api/v2"
-								],
-								"type": "https"
-							  }
+				"swagger": "2.0",
+				"host": "facebook.io:80",
+				"basepath": "/api/v2",
+				"x-wso2-production-endpoints": {
+				"urls": [
+						"https://petstore.io:80/api/v2"
+						],
+						"type": "https"
+				}
 							
                            }`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
