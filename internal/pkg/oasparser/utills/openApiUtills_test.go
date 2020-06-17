@@ -33,30 +33,30 @@ func TestFindSwaggerVersion(t *testing.T) {
 	dataItems := []findSwaggerVersionTestItem {
 		{
 			inputSwagger: `{
-							"swagger": "2.0",
-							"host": "petstore.io",
-							"basepath": "api/v2"
+				"swagger": "2.0",
+				"host": "petstore.io",
+				"basepath": "api/v2"
 							
-							}`,
+				}`,
             result: "2",
             message: "when swagger version is 2",
 		},
 		{
 			inputSwagger: `{
-							"openapi": "3.0",
-							"host": "petstore.io",
-							"basepath": "api/v2"
+				"openapi": "3.0",
+				"host": "petstore.io",
+				"basepath": "api/v2"
 							
-							}`,
+				}`,
 			result: "3",
 			message: "when openAPi version is 3",
 		},
 		{
 			inputSwagger: `{
-							"host": "petstore.io",
-							"basepath": "api/v2"
+				"host": "petstore.io",
+				"basepath": "api/v2"
 							
-							}`,
+				}`,
 			result: "2",
 			message: "when openAPi version is not provided",
 		},
