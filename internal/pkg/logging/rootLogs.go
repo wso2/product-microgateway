@@ -33,8 +33,12 @@ type PlainFormatter struct {
 }
 
 func init() {
+	logConf, errReadConfig := config.ReadLogConfigs()
+	if errReadConfig != nil {
+		logrus.Error("Error loading log configuration. ", errReadConfig)
+	}
 
-	err := initGlobalLogger(LOG_FILE_NAME)
+	err := initGlobalLogger(logConf.Logfile)
 	if err != nil {
 		logrus.Error("Failed to initialize logging")
 	}

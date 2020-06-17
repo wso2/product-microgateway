@@ -19,9 +19,8 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/ghodss/yaml"
-	"log"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"unicode"
 )
 
@@ -55,7 +54,7 @@ func FindSwaggerVersion(jsn []byte) string {
 
 	err := json.Unmarshal(jsn, &result)
 	if err != nil {
-		fmt.Printf("json unmarsheliing err when finding the swaggerVersion : %v\n", err)
+		logger.LoggerOasparser.Error("json unmarsheliing err when finding the swaggerVersion : ", err)
 	}
 
 	if _, ok := result["swagger"]; ok {
@@ -63,7 +62,7 @@ func FindSwaggerVersion(jsn []byte) string {
 	} else if _, ok := result["openapi"]; ok {
 		version = "3"
 	} else {
-		log.Print("swagger file version is not defined. Default version set as to 2 ")
+		logger.LoggerOasparser.Warn("swagger file version is not defined. Default version set as to 2 ")
 		return version
 
 	}

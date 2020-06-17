@@ -46,9 +46,6 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 
 func InitPackageLogger(pkgName string) *logrus.Logger {
 
-	// Create the log file if doesn't exist. And append to it if it already exists.
-	_, err := os.OpenFile(LOG_FILE_NAME, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-
 	pkgLogLevel := DEFAULT_LOG_LEVEL //default log level
 	isPackegeLevelDefined := false
 
@@ -58,19 +55,22 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	formatter := loggerFromat()
 	logger.SetFormatter(formatter)
 
+	logConf, errReadConfig := config.ReadLogConfigs()
+	if errReadConfig != nil {
+		logger.Error("Error loading log configuration. ", errReadConfig)
+	}
+
+	// Create the log file if doesn't exist. And append to it if it already exists.
+	_, err := os.OpenFile(logConf.Logfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+
 	if err != nil {
 		// Cannot open log file. Logging to stderr
 		logger.Error("failed to open logfile", err)
 		logger.SetOutput(os.Stdout)
 	} else {
 		//log output set to stdout and file
-		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(LOG_FILE_NAME))
+		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(logConf.Logfile))
 		logger.SetOutput(multiWriter)
-	}
-
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logger.Error("Error loading log configuration. ", errReadConfig)
 	}
 
 	for _, pkg := range logConf.Pkg {

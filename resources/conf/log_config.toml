@@ -4,21 +4,17 @@ logfile = "resources/logs/microgateway.log"
 logLevel = "INFO"
 
 [rotation]
-MaxSize = 1    #megabytes
+MaxSize = 10    #megabytes
 MaxBackups = 3
-MaxAge =  28   #days
+MaxAge =  2   #days
 Compress = true
 
 ######### package Level #############
 # LogLevels = "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [[pkg]]
-name = "github.com/wso2/micro-gw/cmd/microgateway"
+name = "github.com/wso2/micro-gw/internal/pkg/mgw"
 logLevel = "DEBG"
-
-[[pkg]]
-name = "microgateway"
-logLevel = "INFO"
 
 [[pkg]]
 name = "github.com/wso2/micro-gw/internal/pkg/oasparser"
