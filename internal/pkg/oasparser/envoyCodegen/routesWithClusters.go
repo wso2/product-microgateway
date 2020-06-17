@@ -24,7 +24,7 @@ import (
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"strings"
@@ -131,7 +131,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 
 func createCluster(address core.Address, clusterName string) v2.Cluster {
 	logger.LoggerOasparser.Debug("creating a cluster....")
-	conf, errReadConfig := config.ReadConfigs()
+	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}

@@ -1,15 +1,15 @@
-# The logging configuration file for 
-######### root Level #############
-logfile = "resources/logs/microgateway.log"
+# The logging configuration file for control plane
+######### root Level #######
+logfile = "resources/logs/controlPlane.log"
 logLevel = "INFO"
 
 [rotation]
-MaxSize = 10    #megabytes
+MaxSize = 10    #meabytes
 MaxBackups = 3
 MaxAge =  2   #days
 Compress = true
 
-######### package Level #############
+######### package Level ############
 # LogLevels = "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [[pkg]]

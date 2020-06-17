@@ -18,7 +18,7 @@ package logging
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	"io"
 	"os"
 )
@@ -55,7 +55,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	formatter := loggerFromat()
 	logger.SetFormatter(formatter)
 
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.Error("Error loading log configuration. ", errReadConfig)
 	}

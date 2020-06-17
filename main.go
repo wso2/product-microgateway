@@ -17,15 +17,12 @@
 package main
 
 import (
-	"github.com/wso2/micro-gw/internal/pkg/logging"
-
+	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/cmd/microgateway"
 	_ "github.com/wso2/micro-gw/internal/pkg/logging"
 	"os"
 )
 
-var pkgName = "main"
-var logger = logging.InitPackageLogger(pkgName)
 
 func main() {
 

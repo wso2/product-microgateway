@@ -26,12 +26,12 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
-	conf, errReadConfig := config.ReadConfigs()
+	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
@@ -139,7 +139,7 @@ func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
 		},
 	}
 
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {

@@ -26,7 +26,7 @@ import (
 
 type RESTService struct{}
 
-// TODO: Implement. Simply copy the swagger content to the location defined in the config or directly deploy the api.
+// TODO: Implement. Simply copy the swagger content to the location defined in the configs or directly deploy the api.
 // Deploy API in microgateway.
 func (rest *RESTService) ApiPOST(w http.ResponseWriter, r *http.Request) {
 	logger.LoggerApi.Info(w, "Your API is added")

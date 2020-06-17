@@ -31,7 +31,7 @@ func init() {
 }
 
 func UpdateLoggers() {
-	logrus.Info("....updating loggers....")
+	logrus.Info("Updating loggers....")
 
 	LoggerApi = logging.InitPackageLogger(pkgApi)
 	LoggerAuth = logging.InitPackageLogger(pkgAuth)

@@ -18,7 +18,7 @@ package microgateway
 
 import (
 	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	"github.com/wso2/micro-gw/internal/pkg/mgw"
 )
 
@@ -33,7 +33,7 @@ func StartMicroGateway(args []string) {
 	if err != nil {
 		logger.Fatal("Error starting the control plane", err)
 	}
-	conf, errReadConfig := config.ReadConfigs()
+	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}

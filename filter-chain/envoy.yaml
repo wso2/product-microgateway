@@ -17,7 +17,7 @@ static_resources:
     - filters:
       - name: envoy.http_connection_manager
         typed_config:
-          "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
+          "@type": type.googleapis.com/envoy.configs.filter.network.http_connection_manager.v2.HttpConnectionManager
           stat_prefix: ingress_http
           route_config:
             name: routeProd_SwaggerPetstoreNew1.0.0
@@ -33,7 +33,7 @@ static_resources:
           http_filters:
           - name: envoy.ext_authz
             typed_config:
-              "@type": type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
+              "@type": type.googleapis.com/envoy.configs.filter.http.ext_authz.v2.ExtAuthz
               grpc_service:
                 envoy_grpc:
                   cluster_name: ext-authz
@@ -90,7 +90,7 @@ static_resources:
 #                port_value: 9411
 #stats_sinks:
 #  name: envoy.stat_sinks.statsd
-#  config:
+#  configs:
 #    address:
 #      socket_address:
 #        address: 172.17.0.1

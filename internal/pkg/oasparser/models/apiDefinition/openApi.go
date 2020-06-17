@@ -21,7 +21,7 @@ package apiDefinition
 import (
 	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/url"
 	"strconv"
@@ -114,8 +114,8 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 		}
 		port = uint32(u32)
 	} else {
-		//read default port from config
-		conf, errReadConfig := config.ReadConfigs()
+		//read default port from configs
+		conf, errReadConfig := configs.ReadConfigs()
 		if errReadConfig != nil {
 			logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		}

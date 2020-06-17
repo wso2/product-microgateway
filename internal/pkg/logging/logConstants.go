@@ -20,7 +20,7 @@ import "github.com/sirupsen/logrus"
 
 const (
     //LOG_FILE_NAME = "resources/logs/microgateway.log"
-    DEFAULT_LOG_LEVEL = logrus.WarnLevel
+    DEFAULT_LOG_LEVEL = logrus.InfoLevel
 
     //log levels
 	LEVEL_PANIC = "PANC"

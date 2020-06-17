@@ -19,7 +19,7 @@ package logging
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/configs"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
@@ -33,7 +33,7 @@ type PlainFormatter struct {
 }
 
 func init() {
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logrus.Error("Error loading log configuration. ", errReadConfig)
 	}
@@ -64,7 +64,7 @@ func initGlobalLogger(filename string) (error) {
 		logrus.SetOutput(multiWriter)
 	}
 
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logrus.Error("Error loading configuration. ", errReadConfig)
 		logrus.SetLevel(logLevelMapper(logConf.LogLevel))
@@ -107,7 +107,7 @@ func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 }
 
 func setLogRotation(filename string) io.Writer {
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf, errReadConfig := configs.ReadLogConfigs()
 	var rotationWriter io.Writer
 
 	if errReadConfig != nil {

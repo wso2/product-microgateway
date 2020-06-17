@@ -41,7 +41,7 @@ type LogConfig struct {
 		Compress  bool
 	}
 
-	Pkg []pkg
+	Pkg        []pkg
 	AccessLogs accessLog
 
 }

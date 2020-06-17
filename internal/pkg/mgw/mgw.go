@@ -23,18 +23,19 @@ import (
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	"github.com/fsnotify/fsnotify"
+	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
 	//myals "github.com/wso2/micro-gw/internal/pkg/logging"
 	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
-	mgwconfig "github.com/wso2/micro-gw/internal/pkg/confTypes"
+	cachev2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
+	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
+	logger "github.com/wso2/micro-gw/internal/loggers"
+	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
+	"github.com/wso2/micro-gw/configs"
 	//"google.golang.org/appengine/log"
 	"net"
 	"os"
 	"os/signal"
 	"sync/atomic"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	cachev2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
-	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
-	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
 	//logger "github.com/wso2/micro-gw/internal/loggers"
 
 	"google.golang.org/grpc"
@@ -159,6 +160,15 @@ func Run(conf *mgwconfig.Config) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//log config watcher
+	watcherLogConf, _ := fsnotify.NewWatcher()
+	errC := watcherLogConf.Add("resources/conf/log_config.toml")
+
+	if errC != nil {
+		logger.LoggerMgw.Fatal("Error reading the log configs. ", err)
+	}
+
+
 	logger.LoggerMgw.Info("Starting control plane ....")
 
 	cache = cachev2.NewSnapshotCache(mode != Ads, Hasher{}, nil)
@@ -181,6 +191,13 @@ OUTER:
 			case "WRITE":
 				logger.LoggerMgw.Info("Loading updated swagger definition...")
 				updateEnvoy(conf.Apis.Location)
+			}
+		case l := <-watcherLogConf.Events:
+			switch l.Op.String() {
+			case "WRITE":
+				logger.LoggerMgw.Info("Loading updated log config file...")
+				configs.ClearLogConfigInstance()
+				logger.UpdateLoggers()
 			}
 		case s := <-sig:
 			switch s {

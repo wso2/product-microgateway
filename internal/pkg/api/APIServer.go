@@ -18,7 +18,7 @@ package api
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/wso2/micro-gw/internal/pkg/confTypes"
+	"github.com/wso2/micro-gw/configs/confTypes"
 	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/http"
 )
@@ -35,12 +35,12 @@ func Start(config *confTypes.Config) {
 	apiRouter.HandleFunc("/add", apiService.ApiPOST).Methods("POST")
 	// TODO: Immplement
 	//Configuration specific routes
-	//configRouter := router.PathPrefix("/config").Subrouter()
+	//configRouter := router.PathPrefix("/configs").Subrouter()
 	//
 	//authRouter := router.PathPrefix("/apikey").Subrouter()
 	//configService := new(ConfigService)
 	serverAddr := config.Server.IP + ":" + string(config.Server.Port)
-	//certFile := config.TLS.Alias
+	//certFile := configs.TLS.Alias
 
 	server := &http.Server{
 		Addr:    serverAddr,

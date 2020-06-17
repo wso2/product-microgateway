@@ -1,9 +1,9 @@
-package config
+package configs
 
 import (
 	"github.com/BurntSushi/toml"
 	logger "github.com/sirupsen/logrus"
-	config "github.com/wso2/micro-gw/internal/pkg/confTypes"
+	config "github.com/wso2/micro-gw/configs/confTypes"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -39,7 +39,7 @@ func ReadLogConfigs() (*config.LogConfig, error) {
 	once_lc.Do(func() {
 		logConfigs = new(config.LogConfig)
 		mgwHome, _ := os.Getwd()
-		logger.Info("MGW_HOME: ", mgwHome)
+		//logger.Info("MGW_HOME: ", mgwHome)
 		_, err := os.Stat(mgwHome + "/resources/conf/log_config.toml")
 		if err != nil {
 			logger.Fatal("Log configuration file not found.", err)
@@ -53,4 +53,8 @@ func ReadLogConfigs() (*config.LogConfig, error) {
 	})
 
 	return logConfigs, e
+}
+
+func ClearLogConfigInstance()  {
+	once_lc = sync.Once{}
 }
