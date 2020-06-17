@@ -17,8 +17,8 @@
 package apiDefinition
 
 import (
-	constants "github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
-	"log"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 type MgwSwagger struct {
@@ -140,7 +140,7 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 				}
 			}
 		} else {
-			log.Fatal("X-wso2 production endpoint is not having a correct map structure")
+			logger.LoggerOasparser.Fatal("X-wso2 production endpoint is not having a correct map structure")
 		}
 
 	} else {

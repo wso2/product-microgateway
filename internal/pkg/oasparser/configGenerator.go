@@ -23,6 +23,7 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
@@ -30,9 +31,11 @@ import (
 )
 
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
+	logger.LoggerOasparser.Debug("debug check....................")
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		Logger.Fatal("Error Generating mgwSwagger struct:", err)
+		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
+
 	}
 
 	var (
@@ -63,19 +66,19 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		envoyNodeProd.SetEndpoints(endpointsP)
 
 	} else {
-		Logger.Warn("No Api definitions found")
+		logger.LoggerOasparser.Error("No Api definitions found")
 	}
 
-	Logger.Info(len(routesP), " routes are generated successfully")
-	Logger.Info(len(clustersP), " clusters are generated successfully")
-	Logger.Info(len(endpointsP), " endpoints are generated successfully")
+	logger.LoggerOasparser.Info(len(routesP), " routes are generated successfully")
+	logger.LoggerOasparser.Info(len(clustersP), " clusters are generated successfully")
+	logger.LoggerOasparser.Info(len(endpointsP), " endpoints are generated successfully")
 	return envoyNodeProd.GetSources()
 }
 
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		Logger.Fatal("Error Generating mgwSwagger struct:", err)
+		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 	//fmt.Println(mgwSwagger)
 	var (
@@ -108,7 +111,7 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 		envoyNodeSand.SetRoutes(routesS)
 		envoyNodeSand.SetEndpoints(endpointsS)
 	} else {
-		Logger.Warn("No Api definitions found")
+		logger.LoggerOasparser.Error("No Api definitions found")
 	}
 
 	return envoyNodeSand.GetSources()

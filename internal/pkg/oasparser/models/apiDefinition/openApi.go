@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/wso2/micro-gw/config"
-	"log"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/url"
 	"strconv"
 	"strings"
@@ -102,7 +102,7 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 	}
 	u, err := url.Parse(rawUrl)
 	if err != nil {
-		log.Fatal(err)
+		logger.LoggerOasparser.Fatal(err)
 	}
 
 	host = u.Hostname()
@@ -110,14 +110,14 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 	if u.Port() != "" {
 		u32, err := strconv.ParseUint(u.Port(), 10, 32)
 		if err != nil {
-			log.Println("Error passing port value to mgwSwagger", err)
+			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
 		}
 		port = uint32(u32)
 	} else {
 		//read default port from config
 		conf, errReadConfig := config.ReadConfigs()
 		if errReadConfig != nil {
-			log.Fatal("Error loading configuration. ", errReadConfig)
+			logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		}
 		port = conf.Envoy.ApiDefaultPort
 	}
@@ -140,13 +140,13 @@ func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps)
 	jsnRawExtensible := vendorExtensible.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		log.Println("Error marsheling vendor extenstions: ",err)
+		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ",err)
 	}
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
 	if err != nil {
-		log.Println("Error unmarsheling vendor extenstions:", err)
+		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
 	}
 	return extensible
 }

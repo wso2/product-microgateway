@@ -17,6 +17,7 @@
 package microgateway
 
 import (
+	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/pkg/mgw"
 )

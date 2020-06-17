@@ -1,5 +1,4 @@
-# The logging configuration file for mgw
-
+# The logging configuration file for 
 ######### root Level #############
 logfile = "resources/logs/microgateway.log"
 logLevel = "INFO"
@@ -22,8 +21,8 @@ name = "microgateway"
 logLevel = "INFO"
 
 [[pkg]]
-name = "oasparser"
-logLevel = "DEBG"
+name = "github.com/wso2/micro-gw/internal/pkg/oasparser"
+logLevel = "INFO"
 
 
 [accessLogs]

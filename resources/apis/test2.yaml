@@ -1,6 +1,6 @@
 openapi: "3.0"
 info:
-  description: "This is a samle server etsore srver Yo can d out ore aut   Swagge at [http://swagger.io](htp//swagr.o)  n [.es()s me y cn  p  `spcie`    un"
+  description: "This is a samle server etsore srver o c ou    Swage at [htp://wagger.o](htp//swag.o)  n [.es()s y cn  p  `sie`    n"
   version: "1.0.0"
   title: "Swagger Petstore"
 
@@ -171,6 +171,35 @@ paths:
       x-wso2-production-endpoints:
         urls:
           - "https://www.hpb.health.gov.lk:80/api"
+        type: http
+      tags:
+        - "store"
+      summary: "Place an order for a pet"
+
+      description: ""
+      operationId: "placeOrder"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "order placed for purchasing the pet"
+          required: true
+          schema:
+            $ref: "#/definitions/Order"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Order"
+        "400":
+          description: "Invalid Order"
+  /testResource:
+    get:
+      x-wso2-production-endpoints:
+        urls:
+          - "https://www.test.lk:80/api"
         type: http
       tags:
         - "store"

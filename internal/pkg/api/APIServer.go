@@ -19,7 +19,7 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"github.com/wso2/micro-gw/internal/pkg/confTypes"
-	"log"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/http"
 )
 
@@ -46,6 +46,6 @@ func Start(config *confTypes.Config) {
 		Addr:    serverAddr,
 		Handler: router,
 	}
-	logger.Info("Starting API Server at ", serverAddr)
-	log.Fatal(server.ListenAndServe())
+	logger.LoggerApi.Info("Starting API Server at ", serverAddr)
+	logger.LoggerApi.Fatal(server.ListenAndServe())
 }

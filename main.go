@@ -37,5 +37,4 @@ func main() {
 
 	microgateway.StartMicroGateway(os.Args)
 
-
 }

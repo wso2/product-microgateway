@@ -31,10 +31,11 @@ import (
 	"os"
 	"os/signal"
 	"sync/atomic"
-
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	cachev2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
+	//logger "github.com/wso2/micro-gw/internal/loggers"
 
 	"google.golang.org/grpc"
 
@@ -99,7 +100,7 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		Logger.Fatal("failed to listen: ", err)
+		logger.LoggerMgw.Fatal("failed to listen: ", err)
 	}
 
 	// register services
@@ -109,12 +110,12 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 	v2.RegisterRouteDiscoveryServiceServer(grpcServer, server)
 	v2.RegisterListenerDiscoveryServiceServer(grpcServer, server)
 
-	Logger.Info("port: ",port, " management server listening")
+	logger.LoggerMgw.Info("port: ",port, " management server listening")
 	//log.Fatalf("", Serve(lis))
 	//go func() {
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
-			Logger.Error(err)
+			logger.LoggerMgw.Error(err)
 		}
 	}()
 	//<-ctx.Done()
@@ -132,13 +133,13 @@ func updateEnvoy(location string) {
 	listeners, clusters, routes, endpoints := oasParser.GetProductionSources(location)
 
 	atomic.AddInt32(&version, 1)
-	Logger.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
+	logger.LoggerMgw.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
 	snap := cachev2.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
 	snap.Consistent()
 
 	err := cache.SetSnapshot(nodeId, snap)
 	if err != nil {
-		Logger.Error(err)
+		logger.LoggerMgw.Error(err)
 	}
 }
 
@@ -150,7 +151,7 @@ func Run(conf *mgwconfig.Config) {
 	err := watcher.Add(conf.Apis.Location)
 
 	if err != nil {
-		Logger.Panic("Error reading the api definitions.", err)
+		logger.LoggerMgw.Fatal("Error reading the api definitions.", err)
 	}
 
 	flag.Parse()
@@ -158,7 +159,7 @@ func Run(conf *mgwconfig.Config) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	Logger.Info("Starting control plane")
+	logger.LoggerMgw.Info("Starting control plane ....")
 
 	cache = cachev2.NewSnapshotCache(mode != Ads, Hasher{}, nil)
 
@@ -178,16 +179,16 @@ OUTER:
 		case c := <-watcher.Events:
 			switch c.Op.String() {
 			case "WRITE":
-				Logger.Info("Loading updated swagger definition...")
+				logger.LoggerMgw.Info("Loading updated swagger definition...")
 				updateEnvoy(conf.Apis.Location)
 			}
 		case s := <-sig:
 			switch s {
 			case os.Interrupt:
-				Logger.Info("Shutting down...")
+				logger.LoggerMgw.Info("Shutting down...")
 				break OUTER
 			}
 		}
 	}
-	Logger.Info("Bye!")
+	logger.LoggerMgw.Info("Bye!")
 }

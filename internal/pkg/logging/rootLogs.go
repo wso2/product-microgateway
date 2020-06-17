@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package logging
 
 import (
@@ -6,7 +22,6 @@ import (
 	"github.com/wso2/micro-gw/config"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"io"
-	"log"
 	"os"
 	"strings"
 )
@@ -21,7 +36,7 @@ func init() {
 
 	err := initGlobalLogger(LOG_FILE_NAME)
 	if err != nil {
-		log.Println("Failed to initialize logging")
+		logrus.Error("Failed to initialize logging")
 	}
 }
 
@@ -36,7 +51,7 @@ func initGlobalLogger(filename string) (error) {
 
 	if err != nil {
 		// Cannot open log file. Logging to stderr
-		log.Println("failed to open logfile", err)
+		logrus.Warn("failed to open logfile", err)
 		logrus.SetOutput(os.Stdout)
 
 	} else {
@@ -47,7 +62,7 @@ func initGlobalLogger(filename string) (error) {
 
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
-		log.Println("Error loading configuration. ", errReadConfig)
+		logrus.Error("Error loading configuration. ", errReadConfig)
 		logrus.SetLevel(logLevelMapper(logConf.LogLevel))
 	} else {
 		logrus.SetLevel(DEFAULT_LOG_LEVEL)
@@ -89,12 +104,21 @@ func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 func setLogRotation(filename string) io.Writer {
 	logConf, errReadConfig := config.ReadLogConfigs()
+	var rotationWriter io.Writer
+
 	if errReadConfig != nil {
-		log.Println("Error loading configuration. ", errReadConfig)
-		return nil
+		logrus.Error("Error loading log configuration. ", errReadConfig)
+		//set default values
+		rotationWriter = &lumberjack.Logger{
+			Filename:   filename,
+			MaxSize:    10, // megabytes
+			MaxBackups: 3,
+			MaxAge:     2,   //days
+			Compress:   true, // disabled by default
+		}
 	}
 
-	rotationWriter := &lumberjack.Logger{
+	rotationWriter = &lumberjack.Logger{
 		Filename:   filename,
 		MaxSize:    logConf.Rotation.MaxSize, // megabytes
 		MaxBackups: logConf.Rotation.MaxBackups,

@@ -23,8 +23,8 @@ import (
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
 	"github.com/golang/protobuf/ptypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	"strings"
@@ -69,7 +69,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		endpointsProd = append(endpointsProd, &apilevelAddressP)
 
 	} else {
-		oasparser.Logger.Warn("API level Producton endpoints are not defined")
+		logger .LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
 	for ind, resource := range mgwSwagger.GetResources() {
 
@@ -122,7 +122,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			routesProd = append(routesProd, &routeP)
 
 		} else {
-			oasparser.Logger.Fatalf("Producton endpoints are not defined")
+			logger.LoggerOasparser.Fatalf("Producton endpoints are not defined")
 		}
 	}
 
@@ -130,9 +130,10 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 }
 
 func createCluster(address core.Address, clusterName string) v2.Cluster {
+	logger.LoggerOasparser.Debug("creating a cluster....")
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		oasparser.Logger.Fatal("Error loading configuration. ", errReadConfig)
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
 	h := &address
@@ -164,6 +165,7 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 }
 
 func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourcePath string, clusterName string) v2route.Route {
+	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		route v2route.Route
 		action *v2route.Route_Route

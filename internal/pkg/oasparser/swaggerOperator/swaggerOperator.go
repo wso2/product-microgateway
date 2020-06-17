@@ -22,8 +22,8 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -32,7 +32,7 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 	files, err := ioutil.ReadDir(location)
 	if err != nil {
-		log.Fatal("Error reading", location, "directory:", err)
+		logger.LoggerOasparser.Fatal("Error reading", location, "directory:", err)
 	}
 
 	for _, f := range files {
@@ -41,10 +41,10 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 		// if we os.Open returns an error then handle it
 		if err != nil {
-			log.Fatal("Error opening a api yaml file:", err)
+			logger.LoggerOasparser.Fatal("Error opening a api yaml file:", err)
 		}
 		//fmt.Println("Successfully Opened open api file",f.Name())
-		log.Println("Successfully Opened open api file", f.Name())
+		logger.LoggerOasparser.Info("Successfully Opened open api file", f.Name())
 
 		// defer the closing of our jsonFile so that we can parse it later on
 		defer openApif.Close()
@@ -75,7 +75,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 		err = json.Unmarshal(apiJsn, &ApiData2)
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			log.Println("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
 		} else {
 			mgwSwagger.SetInfoSwagger(ApiData2)
 		}
@@ -88,7 +88,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			log.Println("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
 		} else {
 			mgwSwagger.SetInfoOpenApi(*ApiData3)
 		}

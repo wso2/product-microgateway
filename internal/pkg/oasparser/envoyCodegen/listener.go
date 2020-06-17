@@ -27,13 +27,13 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/wso2/micro-gw/config"
-	"log"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		log.Fatal("Error loading configuration. ", errReadConfig)
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
 	listenerAddress := &core.Address_SocketAddress{
@@ -141,7 +141,7 @@ func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
 
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
-		log.Println("Error loading configuration. ", errReadConfig)
+		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
 		logFormat = logConf.AccessLogs.Format
 	}
