@@ -124,7 +124,10 @@ public final class CodegenUtils {
         if (key == null) {
             return null;
         }
-        key = key.replaceAll("(\\.)|(-)|(\\{)|(})|(\\s)|(/)", "_");
+        key = key.replaceAll("(\\{)|(})|(/)", "_");
+        key = key.replaceAll("(-)", "_hyphen_");
+        key = key.replaceAll("(\\.)", "_dot_");
+        key = key.replaceAll("(\\s)", "_space_");
         if (key.contains("*")) {
             key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
         }

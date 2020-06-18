@@ -197,12 +197,11 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
 
 public function getApiName(http:FilterContext context) returns (string) {
     string serviceName = context.getServiceName();
-    string apiName = split(serviceName, "__")[0];
-
-    if (contains(apiName, "_")) {
-        apiName = replaceAll(apiName, "_", "-");
-    }
-
+    string apiVersion = split(serviceName, "__").pop();
+    string apiName = strings:substring(serviceName, 0, strings:length(serviceName) - strings:length(apiVersion) - 2);
+    apiName = replaceAll(apiName, "_hyphen_", "-");
+    apiName = replaceAll(apiName, "_dot_", ".");
+    apiName = replaceAll(apiName, "_space_", " ");
     return apiName;
 }
 
