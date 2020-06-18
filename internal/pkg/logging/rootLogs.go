@@ -44,6 +44,14 @@ func init() {
 	}
 }
 
+/**
+ * Initialise the global logger.
+ * If the package root level is defined in the log_config.toml file, it is set.
+ * otherwise log level is assigned to default lo level.
+ *
+ * @param filename   Log file name
+ * @return *error Error
+ */
 func initGlobalLogger(filename string) (error) {
 
 	// Create the log file if doesn't exist. And append to it if it already exists.
@@ -75,6 +83,10 @@ func initGlobalLogger(filename string) (error) {
 	return err
 }
 
+/**
+ * Initiate the log formatter.
+ * @return *PlainFormatter Reference for a Plain formatter instance
+ */
 func loggerFromat() *PlainFormatter {
 
 	formatter := new(PlainFormatter)
@@ -90,11 +102,24 @@ func loggerFromat() *PlainFormatter {
 	return formatter
 }
 
+/**
+ * Retrieve only the last part from a path.
+ *
+ * @param path   Path
+ * @return string Last part of the path
+ */
 func formatFilePath(path string) string {
 	arr := strings.Split(path, "/")
 	return arr[len(arr)-1]
 }
 
+/**
+ * Set a custom format for loggers.
+ * This method overrides the logrus library Format method.
+ *
+ * @param entry   Log entry
+ * @return io.Writer  File as a io.Writer instance along with log rotation
+ */
 func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
 
@@ -106,6 +131,14 @@ func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		formatFilePath(entry.Caller.Function), entry.Message)), nil
 }
 
+/**
+ * Initiate the log rotation feature using lumberjack library.
+ * All the rotation params reads for the configs and if it occurs
+ * a error, all the params are set to the default values.
+ *
+ * @param filename   Name of the log file
+ * @return io.Writer  File as a io.Writer instance along with log rotation
+ */
 func setLogRotation(filename string) io.Writer {
 	logConf, errReadConfig := configs.ReadLogConfigs()
 	var rotationWriter io.Writer

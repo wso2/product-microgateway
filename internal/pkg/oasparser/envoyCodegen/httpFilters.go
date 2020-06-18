@@ -25,6 +25,11 @@ import (
 	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
+/**
+ * Append all the http filters.
+ *
+ * @return []*hcm.HttpFilter  Http filter set as a array
+ */
 func getHttpFilters() []*hcm.HttpFilter {
 	//extAauth := GetExtAauthzHttpFilter()
 	router := getRouterHttpFilter()
@@ -37,10 +42,20 @@ func getHttpFilters() []*hcm.HttpFilter {
 	return httpFilters
 }
 
+/**
+ * Get router http filter.
+ *
+ * @return hcm.HttpFilter  Http filter instance
+ */
 func getRouterHttpFilter() hcm.HttpFilter {
 	return hcm.HttpFilter{Name: wellknown.Router}
 }
 
+/**
+ * Get ExtAauthz http filter.
+ *
+ * @return hcm.HttpFilter  Http filter instance
+ */
 func getExtAauthzHttpFilter() hcm.HttpFilter {
 	extAuthzConfig := &envoyconfigfilterhttpextauthzv2.ExtAuthz{
 		WithRequestBody: &envoyconfigfilterhttpextauthzv2.BufferSettings{

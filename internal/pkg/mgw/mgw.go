@@ -93,7 +93,13 @@ func (h Hasher) ID(node *core.Node) string {
 
 const grpcMaxConcurrentStreams = 1000000
 
-// RunManagementServer starts an xDS server at the given port.
+/**
+ * This starts an xDS server at the given port.
+ *
+ * @param ctx   Context
+ * @param server   Xds server instance
+ * @param port   Management server port
+ */
 func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
@@ -125,6 +131,11 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 
 }
 
+/**
+ * Recreate the envoy instances from swaggers.
+ *
+ * @param location   Swagger files location
+ */
 func updateEnvoy(location string) {
 	var nodeId string
 	if len(cache.GetStatusKeys()) > 0 {
@@ -144,7 +155,11 @@ func updateEnvoy(location string) {
 	}
 }
 
-// Run the management grpc server.
+/**
+ * Run the management grpc server.
+ *
+ * @param conf  Swagger files location
+ */
 func Run(conf *mgwconfig.Config) {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)

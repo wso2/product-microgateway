@@ -23,6 +23,12 @@ import (
 	"os"
 )
 
+/**
+ * Map the log level strings to logrus log levels.
+ *
+ * @param pkgLevel   Package level as a string
+ * @return logrus.Level Logrus log level
+ */
 func logLevelMapper(pkgLevel string) logrus.Level {
 	logLevel := DEFAULT_LOG_LEVEL
 	switch pkgLevel {
@@ -43,7 +49,14 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 	return logLevel
 }
 
-
+/**
+ * Initialise the package loggers.
+ * If the package log level is defined in the log_config.toml file, it override the
+ * root log level.
+ *
+ * @param pkgName   Package name
+ * @return *logrus.Logger Reference for the logger instance
+ */
 func InitPackageLogger(pkgName string) *logrus.Logger {
 
 	pkgLogLevel := DEFAULT_LOG_LEVEL //default log level

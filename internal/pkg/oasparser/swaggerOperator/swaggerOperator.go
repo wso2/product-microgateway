@@ -27,6 +27,13 @@ import (
 	"os"
 )
 
+/**
+ * Generate mgw swagger instance.
+ *
+ * @param location   Swagger file location
+ * @return []apiDefinition.MgwSwagger  Mgw swagger instances as a array
+ * @return error  Error
+ */
 func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 	var mgwSwaggers []apiDefinition.MgwSwagger
 
@@ -59,6 +66,12 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 	return mgwSwaggers, err
 }
 
+/**
+ * Get mgw swagger instance.
+ *
+ * @param apiContent   Api content as a byte array
+ * @return apiDefinition.MgwSwagger  Mgw swagger instance
+ */
 func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 	var mgwSwagger apiDefinition.MgwSwagger
 
@@ -98,7 +111,12 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 	return mgwSwagger
 }
 
-
+/**
+ * Check availability of endpoint.
+ *
+ * @param endpoints  Api endpoints array
+ * @return bool Availability as a bool value
+ */
 func IsEndpointsAvailable(endpoints []apiDefinition.Endpoint) bool {
 	if len(endpoints) > 0 {
 		return true

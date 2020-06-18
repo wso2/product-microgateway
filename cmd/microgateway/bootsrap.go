@@ -26,6 +26,10 @@ func initServer() error {
 	return nil
 }
 
+/**
+ * Start the control plane.
+ *
+ */
 func StartMicroGateway(args []string) {
 
 	logger.Info("Starting Microgateway")

@@ -45,5 +45,3 @@ type LogConfig struct {
 	AccessLogs accessLog
 
 }
-
-

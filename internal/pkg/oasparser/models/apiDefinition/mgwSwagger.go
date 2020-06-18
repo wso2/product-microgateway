@@ -84,12 +84,20 @@ func (swagger *MgwSwagger) GetResources() []Resource {
 	return swagger.resources
 }
 
+/**
+ * Set all xwso2 extenstion.
+ *
+ */
 func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.SetXWso2Basepath()
 	swagger.SetXWso2PrdoductionEndpoint()
 	swagger.SetXWso2SandboxEndpoint()
 }
 
+/**
+ * Set xwso2 prdoduction endpoint extenstions.
+ *
+ */
 func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
 	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.PRODUCTION_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
@@ -105,6 +113,10 @@ func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
 	}
 }
 
+/**
+ * Set xwso2 sandbox endpoint extenstions.
+ *
+ */
 func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
 	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.SANDBOX_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
@@ -120,6 +132,13 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
 	}
 }
 
+/**
+ * Get xwso2 endpoints from vendor extenstion map.
+ *
+ * @param vendorExtensible  VendorExtensible map
+ * @param endpointType  Type of the endpoint(production or sandbox)
+ * @return []Endpoint  Endpoints as a array
+ */
 func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType string) []Endpoint {
 	var Endpoints []Endpoint
 	var urlType string
@@ -150,6 +169,12 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 	return Endpoints
 }
 
+/**
+ * Get xwso2 basepath from vendor extenstion map.
+ *
+ * @param vendorExtensible  VendorExtensible map
+ * @return string Xwso2 basepath
+ */
 func GetXWso2Basepath(vendorExtensible map[string]interface{}) string {
 	xWso2basepath := ""
 	if y, found := vendorExtensible[constants.XWSO2BASEPATH]; found {

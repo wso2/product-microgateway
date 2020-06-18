@@ -16,6 +16,12 @@ var (
 	e error
 )
 
+/**
+ * Read the control plane main configs.
+ *
+ * @return *config.Config Reference for config instance
+ * @return *error Error
+ */
 func ReadConfigs() (*config.Config, error) {
 	once_c.Do(func() {
 		configs = new(config.Config)
@@ -35,6 +41,12 @@ func ReadConfigs() (*config.Config, error) {
 	return configs, e
 }
 
+/**
+ * Read the control plane log configs.
+ *
+ * @return *config.LogConfig Reference for log config instance
+ * @return *error Error
+ */
 func ReadLogConfigs() (*config.LogConfig, error) {
 	once_lc.Do(func() {
 		logConfigs = new(config.LogConfig)
@@ -55,6 +67,10 @@ func ReadLogConfigs() (*config.LogConfig, error) {
 	return logConfigs, e
 }
 
+/**
+ * Clear the singleton log config instance for the hot update.
+ *
+ */
 func ClearLogConfigInstance()  {
 	once_lc = sync.Once{}
 }

@@ -22,6 +22,11 @@ import (
 	"github.com/go-openapi/spec"
 )
 
+/**
+ * Set swagger2 data to mgwSwagger  Instance.
+ *
+ * @param swagger2  Swagger2 unmarshalled data
+ */
 func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.id = swagger2.ID
 	swagger.swaggerVersion = swagger2.Swagger
@@ -39,6 +44,12 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	}
 }
 
+/**
+ * Set swagger2 all resource to mgwSwagger resources.
+ *
+ * @param swagger2  Swagger2 unmarshalled data
+ * @return []Resource  MgwSwagger resource array
+ */
 func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
 	if swagger2.Paths != nil {
@@ -67,6 +78,14 @@ func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	return resources
 }
 
+/**
+ * Set swagger2 resource path details to mgwSwagger  Instance.
+ *
+ * @param path  Resource path
+ * @param pathtype  Path type(Get, Post ... )
+ * @param operation  Operation type
+ * @return Resource  MgwSwagger resource instance
+ */
 func setOperationSwagger(path string, pathtype string, operation *spec.Operation) Resource {
 	var resource Resource
 	if operation != nil {

@@ -24,9 +24,15 @@ import (
 	"unicode"
 )
 
-// ToJSON converts a single YAML document into a JSON document
-// or returns an error. If the document appears to be JSON the
-// YAML decoding path is not used.
+/**
+ * ToJSON converts a single YAML document into a JSON document
+ * or returns an error. If the document appears to be JSON the
+ * YAML decoding path is not used.
+ *
+ * @param data  Yaml or Json data
+ * @return []byte Json as a byte array
+ * @return error Error
+ */
 func ToJSON(data []byte) ([]byte, error) {
 	if hasJSONPrefix(data) {
 		return data, nil
@@ -36,18 +42,36 @@ func ToJSON(data []byte) ([]byte, error) {
 
 var jsonPrefix = []byte("{")
 
-// hasJSONPrefix returns true if the provided buffer appears to start with
-// a JSON open brace.
+/**
+ * This returns true if the provided buffer appears to start with
+ * a JSON open brace.
+ *
+ * @param buf  Data buffer
+ * @return []byte Json as a byte array
+ * @return bool Bool value
+ */
 func hasJSONPrefix(buf []byte) bool {
 	return hasPrefix(buf, jsonPrefix)
 }
 
-// Return true if the first non-whitespace bytes in buf is prefix.
+/**
+ * Return true if the first non-whitespace bytes in buf is prefix.
+ *
+ * @param buf  Data buffer
+ * @param prefix  Prefix of json
+ * @return bool Bool value
+ */
 func hasPrefix(buf []byte, prefix []byte) bool {
 	trim := bytes.TrimLeftFunc(buf, unicode.IsSpace)
 	return bytes.HasPrefix(trim, prefix)
 }
 
+/**
+ * Find the swagger version from json file.
+ *
+ * @param jsn  Json data
+ * @return string Swagger version
+ */
 func FindSwaggerVersion(jsn []byte) string {
 	var version string = "2"
 	var result map[string]interface{}

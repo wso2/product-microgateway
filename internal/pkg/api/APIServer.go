@@ -26,6 +26,11 @@ import (
 type Server struct {
 }
 
+/**
+ * Start the api server.
+ *
+ * @param config   Control plane configs
+ */
 func Start(config *confTypes.Config) {
 	router := mux.NewRouter()
 

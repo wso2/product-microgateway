@@ -30,6 +30,15 @@ import (
 	"strings"
 )
 
+/**
+ * Get all production resources for envoy.
+ *
+ * @param location  Location of swagger files
+ * @return []types.Resource Production listeners
+ * @return []types.Resource Production clusters
+ * @return []types.Resource Production routes
+ * @return []types.Resource Production endpoints
+ */
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	logger.LoggerOasparser.Debug("debug check....................")
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
@@ -75,6 +84,15 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	return envoyNodeProd.GetSources()
 }
 
+/**
+ * Get all sandbox resources for envoy.
+ *
+ * @param location  Location of swagger files
+ * @return []types.Resource sandbox listeners
+ * @return []types.Resource sandbox clusters
+ * @return []types.Resource sandbox routes
+ * @return []types.Resource sandbox endpoints
+ */
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {

@@ -30,6 +30,14 @@ import (
 	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
+/**
+ * Create a listener for envoy.
+ *
+ * @param listenerName   Name of the listener
+ * @param routeConfigName   Name of the route config
+ * @param vHostP  Virtual host
+ * @return v2.Listener  V2 listener instance
+ */
 func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
 	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
@@ -59,6 +67,13 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
 	return listener
 }
 
+/**
+ * Create listener filters for envoy.
+ *
+ * @param routeConfigName   Name of the route config
+ * @param vHost  Virtual host
+ * @return []*listenerv2.Filter  Listener filters as a array
+ */
 func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
 	var filters []*listenerv2.Filter
 
@@ -81,6 +96,13 @@ func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
 	return filters
 }
 
+/**
+ * Create connection manager filter.
+ *
+ * @param vHostP  Virtual host
+ * @param routeConfigName   Name of the route config
+ * @return *hcm.HttpConnectionManager  Reference for a connection manager instance
+ */
 func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
 
 	httpFilters := getHttpFilters()
@@ -101,6 +123,14 @@ func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
 	return manager
 }
 
+/**
+ * Create a virtual host for envoy listener.
+ *
+ * @param vHost_Name  Name for virtual host
+ * @param routes   Routes of the virtual host
+ * @return v2route.VirtualHost  Virtual host instance
+ * @return error  Error
+ */
 func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.VirtualHost, error) {
 
 	vHost_Domains := []string{"*"}
@@ -113,19 +143,31 @@ func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.Virt
 	return virtual_host, nil
 }
 
-func createAddress(remoteHost string, Port uint32) core.Address {
+/**
+ * Create a socket address.
+ *
+ * @param remoteHost  Host address or host ip
+ * @param port  Port
+ * @return core.Address  Endpoint as a core address
+ */
+func createAddress(remoteHost string, port uint32) core.Address {
 	address := core.Address{Address: &core.Address_SocketAddress{
 		SocketAddress: &core.SocketAddress{
 			Address:  remoteHost,
 			Protocol: core.SocketAddress_TCP,
 			PortSpecifier: &core.SocketAddress_PortValue{
-				PortValue: uint32(Port),
+				PortValue: uint32(port),
 			},
 		},
 	}}
 	return address
 }
 
+/**
+ * Get access log configs for envoy.
+ *
+ * @return envoy_config_filter_accesslog_v2.AccessLog  Access log config
+ */
 func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
 	logFormat := ""
 
