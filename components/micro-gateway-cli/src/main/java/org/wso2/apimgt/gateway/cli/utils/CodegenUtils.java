@@ -124,7 +124,12 @@ public final class CodegenUtils {
         if (key == null) {
             return null;
         }
-        key = key.replaceAll("(\\.)|(-)|(\\{)|(})|(\\s)|(/)", "_");
+        //Replacing special characters with some tokens to avoid parsing issues during code generation
+        key = key.replaceAll("(\\{)|(})|(/)", "_");
+        //Following are handled individually, so that they can be reverted back, to keep the api name unchanged
+        key = key.replaceAll("(-)", "_hyphen_");
+        key = key.replaceAll("(\\.)", "_dot_");
+        key = key.replaceAll("(\\s)", "_space_");
         if (key.contains("*")) {
             key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
         }
