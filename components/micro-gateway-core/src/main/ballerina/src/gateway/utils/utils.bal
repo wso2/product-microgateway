@@ -242,7 +242,7 @@ public function getConfigMapValue(string property) returns map<any> {
     return config:getAsMap(property);
 }
 
-public function getConfigArrayValue(string instanceId, string property) returns any[] {
+public function getConfigArrayValue(string instanceId, string property) returns anydata[] {
     return config:getAsArray(instanceId + "." + property);
 }
 
@@ -920,9 +920,9 @@ function readMultipleJWTIssuers(int timestampSkew) {
         initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
         foreach map<anydata> jwtIssuer in jwtIssuers {
+            var aud = jwtIssuer[AUDIENCE];
             jwt:JwtValidatorConfig jwtValidatorConfig = {
                 issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
-                audience: getDefaultStringValue(jwtIssuer[AUDIENCE], DEFAULT_AUDIENCE),
                 clockSkewInSeconds: timestampSkew/1000,
                 trustStoreConfig: {
                     trustStore: {
@@ -933,6 +933,10 @@ function readMultipleJWTIssuers(int timestampSkew) {
                 },
                 jwtCache: jwtCache
             };
+            if(aud is string) {
+                jwtValidatorConfig.audience = aud;
+            }
+            string consumerKeyClaim = getDefaultStringValue(jwtIssuer[CONSUMER_KEY_CLAIM], DEFAULT_CONSUMER_KEY_CLAIM);
             boolean classLoaded = false;
             string className = "";
             if(jwtIssuer.hasKey(ISSUER_CLASSNAME)) {
@@ -945,7 +949,7 @@ function readMultipleJWTIssuers(int timestampSkew) {
             }
             JwtAuthProvider jwtAuthProvider
                 = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
-                    DEFAULT_VALIDATE_SUBSCRIPTION), claims, className, classLoaded);
+                    DEFAULT_VALIDATE_SUBSCRIPTION), consumerKeyClaim, claims, className, classLoaded);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -959,9 +963,9 @@ function readMultipleJWTIssuers(int timestampSkew) {
     if (jwtHandlers.length() < 1) {
         //Support old config model
         printDebug(KEY_UTILS, "Find old jwt configurations or set default JWT configurations.");
+        string aud = getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "");
         jwt:JwtValidatorConfig jwtValidatorConfig = {
             issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
-            audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, DEFAULT_AUDIENCE),
             clockSkewInSeconds: 60,
             trustStoreConfig: {
                 trustStore: {
@@ -972,9 +976,13 @@ function readMultipleJWTIssuers(int timestampSkew) {
             },
             jwtCache: jwtCache
         };
+        if (aud.length() != 0) {
+            jwtValidatorConfig.audience = aud;
+        }
+        string consumerKeyClaim = getConfigValue(JWT_INSTANCE_ID, CONSUMER_KEY_CLAIM, DEFAULT_CONSUMER_KEY_CLAIM);
         JwtAuthProvider jwtAuthProvider
             = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
-                DEFAULT_VALIDATE_SUBSCRIPTION), [] , "", false);
+                DEFAULT_VALIDATE_SUBSCRIPTION), consumerKeyClaim, [] , "", false);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);

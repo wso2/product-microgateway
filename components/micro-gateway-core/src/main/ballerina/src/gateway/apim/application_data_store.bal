@@ -15,22 +15,25 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/io;
 
 # Data holder for Application details available in Gateway Pilot node. 
 # 
 # + applications - Map of `Application` objects
 type ApplicationDataStore object {
-    map<Application> applications = {};
+    //Tenant wise applications map
+    map<map<Application>> applications = {};
 
     private string pilotUsername;
     private string pilotPassword;
     private string serviceContext;
+    private string[]|error listOfTenants;
 
-    public function __init(string username, string password, string context) {
+    public function __init(string username, string password, string context, string[]|error listOfTenants) {
         self.pilotUsername = username;
         self.pilotPassword = password;
         self.serviceContext = context + "/applications";
-
+        self.listOfTenants = listOfTenants;
         self.fetchApplications();
     }
 
@@ -38,45 +41,76 @@ type ApplicationDataStore object {
     # 
     # + appId - Application Id of the required `Application`
     # + return - `Application` with provided `appId`. If no match was found `()` is returned.
-    function getApplication(string appId) returns (Application | ()) {
-        if (!self.applications.hasKey(appId)) {
-            return ();
+    function getApplication(string tenantDomain, string appId) returns (Application | ()) {
+        if (self.applications.hasKey(tenantDomain) && self.applications.get(tenantDomain).hasKey(appId)) {
+            return self.applications.get(tenantDomain).get(appId);
         }
+        return ();
+    }
 
-        return self.applications.get(appId);
+    function addApplication(string tenantDomain, Application app) {
+        map<Application> applicationMap;
+        string appKey = app.id.toString();
+        if (!self.applications.hasKey(tenantDomain)) {
+            applicationMap = {};
+            applicationMap[appKey] = app;
+        } else {
+            applicationMap = self.applications.get(tenantDomain);
+            applicationMap[appKey] = app;
+        }
+        self.applications[tenantDomain] = applicationMap;
+    }
+
+    function removeApplication(string tenantDomain, Application app) {
+        Application removedApp = self.applications.get(tenantDomain).remove(app.id.toString());
     }
 
     private function fetchApplications() {
+        io:println("application fetch is called");
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request appReq = new;
         appReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
-        var response = gatewayPilotEndpoint->get(self.serviceContext, message = appReq);
-
-        if (response is http:Response) {
-            var payload = response.getJsonPayload();
-
-            if (payload is json) {
-                json[] list = <json[]>payload.list;
-                printDebug(KEY_APPLICATION_STORE, "Received valid application details");
-
-                foreach json jsonApp in list {
-                    Application app = {
-                        id: <int>jsonApp.id,
-                        owner: jsonApp.subName.toString(),
-                        name: jsonApp.name.toString(),
-                        policyId: jsonApp.policy.toString(),
-                        tokenType: jsonApp.tokenType.toString(),
-                        groupIds: <json[]>jsonApp.groupIds,
-                        attributes: <json[]>jsonApp.attributes
-                    };
-                    string appKey = app.id.toString();
-                    self.applications[appKey] = app;
+        var tenantList = self.listOfTenants;
+        io:println("tenantList : " + tenantList.toString());
+        if (tenantList is string[]) {
+            io:println("inside tenant list");
+            foreach string tenant in tenantList {
+                io:println("tnenat : " + tenant);
+                appReq.setHeader(EVENT_HUB_TENANT_HEADER, tenant);
+                var response = gatewayPilotEndpoint->get(self.serviceContext, message = appReq);
+                io:println(response);
+                if (response is http:Response) {
+                    map<Application> applicationMap = {};
+                    var payload = response.getJsonPayload();
+                    if (payload is json) {
+                        io:println(KEY_APPLICATION_STORE, "Application list of tenant : " + tenant + " is : " + payload.toJsonString());
+                        printDebug(KEY_APPLICATION_STORE, "Application list of tenant : " + tenant + " is : " + payload.toJsonString());
+                        json[] list = <json[]>payload.list;
+                        printDebug(KEY_APPLICATION_STORE, "Received valid application details");
+                        foreach json jsonApp in list {
+                            Application app = {
+                                id: <int>jsonApp.id,
+                                owner: jsonApp.subName.toString(),
+                                name: jsonApp.name.toString(),
+                                policyId: jsonApp.policy.toString(),
+                                tokenType: jsonApp.tokenType.toString(),
+                                groupIds: <json[]>jsonApp.groupIds,
+                                attributes: <json[]>jsonApp.attributes
+                            };
+                            string appKey = app.id.toString();
+                            applicationMap[appKey] = app;
+                        }
+                        self.applications[tenant] = applicationMap;
+                    } else {
+                        printError(KEY_APPLICATION_STORE, "Received invalid application data", payload);
+                    }
+                } else {
+                    printError(KEY_APPLICATION_STORE, "Failed to retrieve application data", response);
                 }
-            } else {
-                printError(KEY_APPLICATION_STORE, "Received invalid application data", payload);
             }
+            io:println("Tenant application map : " + self.applications.toString());
         } else {
-            printError(KEY_APPLICATION_STORE, "Failed to retrieve application data", response);
+            printError(KEY_APPLICATION_STORE, "Error while reading tenant list map from config.", tenantList);
         }
     }
 };

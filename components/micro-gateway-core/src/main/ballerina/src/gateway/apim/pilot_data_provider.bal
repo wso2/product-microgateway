@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-PilotDataProvider pilotDataProvider = new;
+import ballerina/http;
 
 # Provides a common interface to interact with Gateway Pilot data stores.
 # Initializing an instance of this object will initialize all pilot data stores
@@ -34,56 +34,79 @@ public type PilotDataProvider object {
     private string username;
     private string password;
     private string serviceContext;
+    private string[]|error listOfTenants;
+    private http:Client gatewayPilotEndpoint;
 
-    public function __init() {
-        self.username = getConfigValue(PILOT_CONF_INSTANCE_ID, PILOT_USERNAME, DEFAULT_PILOT_USERNAME);
-        self.password = getConfigValue(PILOT_CONF_INSTANCE_ID, PILOT_PASSWORD, DEFAULT_PILOT_PASSWORD);
-        self.serviceContext = getConfigValue(PILOT_CONF_INSTANCE_ID, PILOT_INT_CONTEXT, DEFAULT_PILOT_INT_CONTEXT);
+    public function __init(http:Client gatewayPilotEndpoint) {
+        self.username = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_USERNAME, DEFAULT_PILOT_USERNAME);
+        self.password = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_PASSWORD, DEFAULT_PILOT_PASSWORD);
+        self.serviceContext = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_INT_CONTEXT, DEFAULT_PILOT_INT_CONTEXT);
+        self.listOfTenants = string[].constructFrom(getConfigArrayValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_TENANT_LIST));
+        self.gatewayPilotEndpoint = gatewayPilotEndpoint;
 
-        self.subStore = new(self.username, self.password, self.serviceContext);
-        self.apiStore = new(self.username, self.password, self.serviceContext);
-        self.keyMapStore = new(self.username, self.password, self.serviceContext);
-        self.appStore = new(self.username, self.password, self.serviceContext);
+        self.subStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
+        self.apiStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
+        self.keyMapStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
+        self.appStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
     }
 
     # Get Api details from `ApiDataStore`.
     #
-    # + provider - Api provider
+    # + tenantDomain - Tenant domain of API
     # + name - Api name
     # + apiVersion - Api version
     # + return - `Api` object if requested Api is found. If not `()`
-    public function getApi(string provider, string name, string apiVersion) returns Api | () {
-        string apiKey = provider + ":" + name + ":" + apiVersion;
+    public function getApi(string tenantDomain, string name, string apiVersion) returns Api | () {
+        string apiKey = name + ":" + apiVersion;
 
-        return self.apiStore.getApi(apiKey);
+        return self.apiStore.getApi(tenantDomain, apiKey);
     }
 
     # Get Key Mapping details from `KeyMappingDataStore`.
     #
+    # + tenantDomain - Tenant domain to which the application belongs to.
     # + consumerKey - Consumer key of the application
     # + return - `KeyMap` object if requested Key Mapping is found. If not `()`
-    public function getKeyMapping(string consumerKey) returns KeyMap | () {
-        return self.keyMapStore.getMapping(consumerKey);
+    public function getKeyMapping(string tenantDomain, string consumerKey) returns KeyMap | () {
+        return self.keyMapStore.getMapping(tenantDomain, consumerKey);
     }
 
     # Get Subscription details from `SubscriptionDataStore`.
     #
+    # + tenantDomain - Tenant domain of the subscriber
     # + appId - Application Id of the subscription
     # + apiId - Api Id of the subscription
     # + return - `Subscription` object if requested Subscription is found. If not `()`
-    public function getSubscription(int appId, int apiId) returns Subscription | () {
+    public function getSubscription(string tenantDomain, int appId, int apiId) returns Subscription | () {
         string subKey = appId.toString() + ":" + apiId.toString();
 
-        return self.subStore.getSubscription(subKey);
+        return self.subStore.getSubscription(tenantDomain, subKey);
+    }
+
+    public function addSubscription(string tenantDomain,  Subscription sub) {
+        self.subStore.addSubscription(tenantDomain, sub);
+    }
+
+    public function removeSubscription(string tenantDomain, Subscription sub) {
+        self.subStore.removeSubscription(tenantDomain, sub);
     }
 
     # Get Application details from `ApplicationDataStore`.
     #
+    # # + tenantDomain - Tenant domain to which the application belongs
     # + appId - Application Id of the application
     # + return - `Application` object if requested Application is found. If not `()`
-    public function getApplication(int appId) returns Application | () {
+    public function getApplication(string tenantDomain, int appId) returns Application | () {
         string appKey = appId.toString();
 
-        return self.appStore.getApplication(appKey);
+        return self.appStore.getApplication(tenantDomain, appKey);
+    }
+
+    public function addApplication(string tenantDomain, Application app) {
+        self.appStore.addApplication(tenantDomain, app);
+    }
+
+    public function removeApplication(string tenantDomain, Application app) {
+        self.appStore.removeApplication(tenantDomain, app);
     }
 };

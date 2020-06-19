@@ -34,6 +34,7 @@ public type JwtAuthProvider object {
     public jwt:JwtValidatorConfig jwtValidatorConfig;
     public jwt:InboundJwtAuthProvider inboundJwtAuthProvider;
     public boolean subscriptionValEnabled;
+    public string consumerKeyClaim;
     public map<anydata>[] | error claims;
     public string className;
     public boolean classLoaded;
@@ -43,11 +44,12 @@ public type JwtAuthProvider object {
     #
     # + jwtValidatorConfig - JWT validator configurations
     # + subscriptionValEnabled - Validate subscription
-    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled,
+    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled, string consumerKeyClaim,
         map<anydata>[] | error claims, string className, boolean classLoaded) {
         self.jwtValidatorConfig = jwtValidatorConfig;
         self.inboundJwtAuthProvider = new (jwtValidatorConfig);
         self.subscriptionValEnabled = subscriptionValEnabled;
+        self.consumerKeyClaim = consumerKeyClaim;
         self.claims = claims;
         self.className = className;
         self.classLoaded = classLoaded;
@@ -122,7 +124,8 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                          }
-                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
+                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled,
+                                self.consumerKeyClaim, isGRPC);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
                     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
@@ -142,7 +145,7 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                         }
-                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
+                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, self.consumerKeyClaim, isGRPC);
                     }
                 }
             }
@@ -154,12 +157,12 @@ public type JwtAuthProvider object {
     }
 };
 
-public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled, boolean isGRPC)
-        returns @tainted (boolean | auth:Error) {
+public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled,
+                            string consumerKeyClaim, boolean isGRPC) returns @tainted (boolean | auth:Error) {
     boolean subscriptionValidated = false;
     map<json>? customClaims = payload?.customClaims;
 
-    subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled);
+    subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled, consumerKeyClaim);
     if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
         printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
         return true;
