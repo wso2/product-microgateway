@@ -18,13 +18,25 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/runtime;
 
-public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isValidationEnabled) returns boolean {
+public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isValidationEnabled, string consumerKeyClaim) returns boolean {
     boolean isAllowed = !isValidationEnabled;
-    // TODO: substore: need to take this from jwt issuer config
-    string appKeyClaim = CONSUMER_KEY;
+    string appKeyClaim = consumerKeyClaim;
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
     map<json>? customClaims = payload?.customClaims;
+    json subscribedAPIList = [];
+    //If application claim present in the jwt then its a self contained token. Can validate from the
+    //claims present in the token
+    if (customClaims is map<json> && customClaims.hasKey(APPLICATION)) {
+        subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
+        if(subscribedAPIList is json[]) {
+            return handleSubscribedAPIs(token, payload, subscribedAPIList, isValidationEnabled);
+        } else if (isValidationEnabled){
+            return false;
+        } else {
+            return true;
+        }
+    }
     // if validation is not enabled, mark as an allowed key.
     // if validation is enabled, validation will be done to find if the key is allowed.
     AuthenticationContext authenticationContext = {
@@ -37,28 +49,42 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
     if (username is string) {
         authenticationContext.username = username;
     }
-    if (apiConfig is APIConfiguration && customClaims is map<json> && customClaims.hasKey(appKeyClaim)) {
+    string|string[]? audiencePayload = payload?.aud;
+    printDebug(JWT_UTIL,"Audiemce value retrieved : " + audiencePayload.toString());
+    string consumerKey = "";
+    if (customClaims is map<json> && customClaims.hasKey(appKeyClaim)) {
+        consumerKey = customClaims.get(appKeyClaim).toString();
+    } else if (audiencePayload is string) {
+        consumerKey = audiencePayload;
+    } else if (audiencePayload is string[] && audiencePayload.length() > 0 ) {
+        consumerKey = audiencePayload[0];
+    }
+    printDebug(JWT_UTIL,"Consumer key resolved : " + consumerKey);
+    if (apiConfig is APIConfiguration && consumerKey != "") {
         string apiName = apiConfig.name;
         string apiVersion = apiConfig.apiVersion;
         string apiProvider = apiConfig.publisher;
-        string consumerKey = customClaims.get(appKeyClaim).toString();
-        var keyMap = pilotDataProvider.getKeyMapping(consumerKey);
-        var api = pilotDataProvider.getApi(apiProvider, apiName, apiVersion);
+        //TODO: substore: set the correct tenant domain
+        var keyMap = pilotDataProvider.getKeyMapping("carbon.super", consumerKey);
+        var api = pilotDataProvider.getApi("carbon.super", apiName, apiVersion);
         authenticationContext.consumerKey = consumerKey.toString();
 
         if (keyMap is KeyMap) {
             authenticationContext.keyType = keyMap.keyType;
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-            var app = pilotDataProvider.getApplication(keyMap.appId);
+            //TODO: substore: set the correct tenant domain
+            var app = pilotDataProvider.getApplication("carbon.super", keyMap.appId);
             if (app is Application) {
                 authenticationContext.applicationId = app.id.toString();
                 authenticationContext.applicationName = app.name;
                 authenticationContext.applicationTier = app.policyId;
                 authenticationContext.subscriber = app.owner;
+            } else {
+                printError(JWT_UTIL, "Application not found for consumer key : " + consumerKey + " and app Id : " + keyMap.appId.toString());
             }
 
             if (api is Api) {
-                var sub = pilotDataProvider.getSubscription(keyMap.appId, api.id);
+                var sub = pilotDataProvider.getSubscription("carbon.super", keyMap.appId, api.id);
 
                 // if subscription in "UNBLOCKED" state is found in the pilot data, key is allowed
                 if (sub is Subscription && sub.state == "UNBLOCKED") {
@@ -69,7 +95,11 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
                     authenticationContext.tier = sub.policyId;
                     setSubsciberTenantDomain(authenticationContext);
                 }
+            } else {
+                printError(JWT_UTIL, "API not found for name : " + apiName + " and version : " + apiVersion);
             }
+        } else {
+            printError(JWT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
         }
     }
 

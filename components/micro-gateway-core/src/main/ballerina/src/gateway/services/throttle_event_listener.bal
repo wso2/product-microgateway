@@ -133,7 +133,14 @@ public function initiateThrottlingJmsListener() returns boolean {
         jms:MessageConsumer | error topicSubscriber = trap startSubscriberService();
         if (topicSubscriber is jms:MessageConsumer) {
             printDebug(KEY_THROTTLE_EVENT_LISTENER, "subscriber service for global throttling is started.");
-            return true;
+            jms:MessageConsumer | error gatewayNotificationSubscriber = trap startGatewayNotificationSubscriberService();
+            if (gatewayNotificationSubscriber is jms:MessageConsumer) {
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "subscriber service for gateway notifications is started.");
+                return true;
+            } else {
+                printError(KEY_THROTTLE_EVENT_LISTENER, "Error while starting subscriber service for gateway notofications.");
+                return false;
+            }
         } else {
             printError(KEY_THROTTLE_EVENT_LISTENER, "Error while starting subscriber service for global throttling");
             return false;

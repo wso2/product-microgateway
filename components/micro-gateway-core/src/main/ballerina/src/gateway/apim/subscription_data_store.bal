@@ -20,61 +20,87 @@ import ballerina/http;
 # 
 # + subscriptions - Map of `Subscription` objects
 type SubscriptionDataStore object {
-    map<Subscription> subscriptions = {};
+    map<map<Subscription>> subscriptions = {};
 
     private string pilotUsername;
     private string pilotPassword;
     private string serviceContext;
+    private string[]|error listOfTenants;
 
-    public function __init(string username, string password, string context) {
+    public function __init(string username, string password, string context, string[]|error listOfTenants) {
         self.pilotUsername = username;
         self.pilotPassword = password;
         self.serviceContext = context + "/subscriptions";
+        self.listOfTenants = listOfTenants;
 
         self.fetchSubscriptions();
     }
 
     # Retrieve a specific `Subscription` object from the Subscription Data Store.
-    # 
+    # + tenantDomain - Tenant domain of the subscriber
     # + subKey - A subscription key in the format of `applicationId:apiId`
     # + return - `Subscription` object for `appId` and `apiId`. If no match was found `()` is returned
-    function getSubscription(string subKey) returns (Subscription | ()) {
-        if (!self.subscriptions.hasKey(subKey)) {
-            return ();
+    function getSubscription(string tenantDomain, string subKey) returns (Subscription | ()) {
+        if (self.subscriptions.hasKey(tenantDomain) && self.subscriptions.get(tenantDomain).hasKey(subKey)) {
+            return self.subscriptions.get(tenantDomain).get(subKey);
         }
+        return ();
+    }
 
-        return self.subscriptions.get(subKey);
+    function addSubscription(string tenantDomain, Subscription sub) {
+        map<Subscription> subscriptionMap;
+        string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
+        if (!self.subscriptions.hasKey(tenantDomain)) {
+            subscriptionMap = {};
+            subscriptionMap[subKey] = sub;
+        } else {
+            subscriptionMap = self.subscriptions.get(tenantDomain);
+            subscriptionMap[subKey] = sub;
+        }
+        self.subscriptions[tenantDomain] = subscriptionMap;
+    }
+
+    function removeSubscription(string tenantDomain, Subscription sub) {
+        string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
+        Subscription removeSub = self.subscriptions.get(tenantDomain).remove(subKey.toString());
     }
 
     private function fetchSubscriptions() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request subReq = new;
         subReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
-        var response = gatewayPilotEndpoint->get(self.serviceContext, message = subReq);
+        var tenantList = self.listOfTenants;
+        if (tenantList is string[]) {
+            foreach string tenant in tenantList {
+                var response = gatewayPilotEndpoint->get(self.serviceContext, message = subReq);
+                subReq.setHeader(EVENT_HUB_TENANT_HEADER, tenant);
+                if (response is http:Response) {
+                    map<Subscription> subscriptionnMap = {};
+                    var payload = response.getJsonPayload();
 
-        if (response is http:Response) {
-            var payload = response.getJsonPayload();
+                    if (payload is json) {
+                        json[] list = <json[]>payload.list;
+                        printDebug(KEY_SUBSCRIPTION_STORE, "Received valid subscription details");
 
-            if (payload is json) {
-                json[] list = <json[]>payload.list;
-                printDebug(KEY_SUBSCRIPTION_STORE, "Received valid subscription details");
-
-                foreach json jsonSub in list {
-                    Subscription sub = {
-                        id: <int>jsonSub.subscriptionId,
-                        apiId: <int>jsonSub.apiId,
-                        appId: <int>jsonSub.appId,
-                        policyId: jsonSub.policyId.toString(),
-                        state: jsonSub.subscriptionState.toString()
-                    };
-                    string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
-                    self.subscriptions[subKey] = sub;
+                        foreach json jsonSub in list {
+                            Subscription sub = {
+                                id: <int>jsonSub.subscriptionId,
+                                apiId: <int>jsonSub.apiId,
+                                appId: <int>jsonSub.appId,
+                                policyId: jsonSub.policyId.toString(),
+                                state: jsonSub.subscriptionState.toString()
+                            };
+                            string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
+                            subscriptionnMap[subKey] = sub;
+                        }
+                        self.subscriptions[tenant] = subscriptionnMap;
+                    } else {
+                        printError(KEY_SUBSCRIPTION_STORE, "Received invalid subscription data", payload);
+                    }
+                } else {
+                    printError(KEY_SUBSCRIPTION_STORE, "Failed to retrieve subscription data", response);
                 }
-            } else {
-                printError(KEY_SUBSCRIPTION_STORE, "Received invalid subscription data", payload);
             }
-        } else {
-            printError(KEY_SUBSCRIPTION_STORE, "Failed to retrieve subscription data", response);
         }
     }
 

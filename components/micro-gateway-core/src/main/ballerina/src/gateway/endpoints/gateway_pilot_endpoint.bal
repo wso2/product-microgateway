@@ -17,7 +17,7 @@
 import ballerina/http;
 
 http:Client gatewayPilotEndpoint = new (
-getConfigValue(PILOT_CONF_INSTANCE_ID, PILOT_SERVER_URL, DEFAULT_PILOT_SERVER_URL),
+getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_SERVER_URL, DEFAULT_PILOT_SERVER_URL),
 {
     cache: {enabled: false},
     secureSocket: {
@@ -32,3 +32,5 @@ getConfigValue(PILOT_CONF_INSTANCE_ID, PILOT_SERVER_URL, DEFAULT_PILOT_SERVER_UR
         proxy: getClientProxyForInternalServices()
     }
 });
+
+PilotDataProvider pilotDataProvider = new(gatewayPilotEndpoint);

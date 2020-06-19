@@ -263,6 +263,21 @@ public const string BLOCKING_CONDITION_FIXED_IP = "fixedIp";
 public const string BLOCKING_CONDITION_START_IP = "startingIp";
 public const string BLOCKING_CONDITION_END_IP = "endingIp";
 
+// Gateway notification event related constants
+public const string NOTIFICATION_EVENT_TYPE = "eventType";
+public const string NOTIFICATION_EVENT_TIMESTAMP = "timestamp";
+public const string NOTIFICATION_EVENT = "event";
+public const string APPLICATION_CREATE_EVENT = "APPLICATION_CREATE";
+public const string APPLICATION_UPDATE_EVENT = "APPLICATION_UPDATE";
+public const string APPLICATION_DELETE_EVENT = "APPLICATION_DELETE";
+public const string APPLICATION_REGISTRATION_CREATE_EVENT = "APPLICATION_REGISTRATION_CREATE";
+public const string POLICY_CREATE_EVENT = "POLICY_CREATE";
+public const string POLICY_UPDATE_EVENT = "POLICY_UPDATE";
+public const string POLICY_DELETE_EVENT = "POLICY_DELETE";
+public const string SUBSCRIPTIONS_CREATE_EVENT = "SUBSCRIPTIONS_CREATE";
+public const string SUBSCRIPTIONS_UPDATE_EVENT = "SUBSCRIPTIONS_UPDATE";
+public const string SUBSCRIPTIONS_DELETE_EVENT = "SUBSCRIPTIONS_DELETE";
+
 public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
 public const string LISTENER_CONF_HTTP_PORT = "httpPort";
@@ -296,6 +311,7 @@ public const string JWT_INSTANCE_ID = "jwtTokenConfig";
 public const string ISSUER = "issuer";
 public const string AUDIENCE = "audience";
 public const string ISSUER_CLASSNAME = "claimMapperClassName";
+public const string CONSUMER_KEY_CLAIM = "consumerKeyClaim";
 public const string ISSUER_CLAIMS = "claims";
 public const string PRINCIPAL = "principal";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
@@ -407,11 +423,13 @@ public const string KEY_SUBSCRIPTION_STORE = "SubscriptionDataStore";
 public const string KEY_API_STORE = "ApiDataStore";
 public const string KEY_KEYMAP_STORE = "KeyMappingDataStore";
 public const string KEY_APPLICATION_STORE = "ApplicationDataStore";
-public const string PILOT_CONF_INSTANCE_ID = "pilotConf";
-public const string PILOT_SERVER_URL = "serviceUrl";
-public const string PILOT_INT_CONTEXT = "internalDataContext";
-public const string PILOT_USERNAME = "admin";
-public const string PILOT_PASSWORD = "admin";
+public const string EVENT_HUB_INSTANCE_ID = "eventHub";
+public const string EVENT_HUB_SERVER_URL = "serviceUrl";
+public const string EVENT_HUB_INT_CONTEXT = "internalDataContext";
+public const string EVENT_HUB_USERNAME = "admin";
+public const string EVENT_HUB_PASSWORD = "admin";
+public const string EVENT_HUB_TENANT_LIST = "listOfTenants";
+public const string EVENT_HUB_TENANT_HEADER = "xWSO2Tenant";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";
@@ -454,6 +472,7 @@ const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
 public const string KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER = "GlobalThrottleEventPublisher";
 const string KEY_THROTTLE_EVENT_LISTENER = "ThrottleEventListener";
+const string KEY_NOTIFICATION_EVENT_LISTENER = "NotificationEventListener";
 const string KEY_TEMPLATE_RETIEVAL_TASK = "KeyTemplateRetrievalTask";
 const string KEY_BLOCKING_CONDITION_RETRIEVAL_TASK = "BlockingConditionRetrievalTask";
 const string KEY_GW_CACHE = "GatewayCache";
