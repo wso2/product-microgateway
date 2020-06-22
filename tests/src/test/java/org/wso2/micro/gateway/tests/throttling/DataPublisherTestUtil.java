@@ -17,8 +17,6 @@ public class DataPublisherTestUtil {
         String keyStore = filePath.getAbsolutePath();
         System.setProperty("Security.KeyStore.Location", keyStore);
         System.setProperty("Security.KeyStore.Password", "wso2carbon");
-
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
     }
 
     public static String getDataBridgeConfigPath(String configFileName) {
