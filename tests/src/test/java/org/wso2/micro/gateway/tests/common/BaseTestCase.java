@@ -136,6 +136,21 @@ public class BaseTestCase {
     }
 
     /**
+     * Restart the microgateway from already built project.
+     *
+     * @param project          project name
+     * @param args             additional commandline arguments
+     * @param configFilePath   relative path of the config file (use forward slash to mention the path)
+     * @throws Exception
+     */
+    protected void restartWithDifferentConfig(String project, String[] args, String configFilePath)
+            throws Exception {
+        microGWServer.stopServer(false);
+        String balPath = CLIExecutor.getInstance().getLabelJar(project);
+        initAndStartMicroGWServer(configFilePath, balPath, args);
+    }
+
+    /**
      * Initialize the project using developer first approach (Using openAPI definitions).
      *
      * @param project          project name

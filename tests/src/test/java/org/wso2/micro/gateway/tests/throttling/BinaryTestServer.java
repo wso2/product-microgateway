@@ -30,7 +30,7 @@ public class BinaryTestServer {
     Logger log = LoggerFactory.getLogger(BinaryTestServer.class);
     BinaryDataReceiver binaryDataReceiver;
     InMemoryStreamDefinitionStore streamDefinitionStore;
-    AtomicInteger numberOfEventsReceived;
+    volatile int eventCount = 0;
     RestarterThread restarterThread;
 
     public BinaryTestServer() {
@@ -69,11 +69,12 @@ public class BinaryTestServer {
     public void startServer(int tcpPort, int securePort) throws DataBridgeException, IOException {
         DataPublisherTestUtil.setKeyStoreParams();
         streamDefinitionStore = getStreamDefinitionStore();
-        numberOfEventsReceived = new AtomicInteger(0);
         DataBridge databridge = new DataBridge(new AuthenticationHandler() {
             @Override
             public boolean authenticate(String userName,
                                         String password) {
+                //todo: add admin admin to authenticate
+                log.info("Received Credentials: " + userName + ":" + password);
                 return true; // allays authenticate to true
             }
 
@@ -106,8 +107,9 @@ public class BinaryTestServer {
 
             @Override
             public void receive(List<Event> eventList, Credentials credentials) {
-                numberOfEventsReceived.addAndGet(eventList.size());
-                log.info("Received events : " + numberOfEventsReceived);
+                synchronized (new Object()) {
+                    eventCount += eventList.size();
+                }
             }
 
         });
@@ -119,15 +121,13 @@ public class BinaryTestServer {
     }
 
     public int getNumberOfEventsReceived() {
-        if (numberOfEventsReceived != null) {
-            return numberOfEventsReceived.get();
-        } else {
-            return 0;
-        }
+        return eventCount;
     }
 
     public void resetReceivedEvents() {
-        numberOfEventsReceived.set(0);
+        synchronized (new Object()) {
+            eventCount = 0;
+        }
     }
 
     public void stopServer() {
