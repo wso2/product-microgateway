@@ -81,8 +81,8 @@ service keyTemplateRetrievalService = service {
                 printDebug(KEY_TEMPLATE_RETIEVAL_TASK, "Key template map : " + keyTemplateMap.toString());
                 stopKeyTemplateTask(true);
             } else {
-                retriesCount = retriesCount + 1;
-                printError(KEY_TEMPLATE_RETIEVAL_TASK, "Error while retrieving key templates. Retry in 15 seconds", keyTemplates);
+                printDebug(KEY_TEMPLATE_RETIEVAL_TASK, "Key templates are not found.");
+                stopKeyTemplateTask(true);
             }
         } else {
             retriesCount = retriesCount + 1;

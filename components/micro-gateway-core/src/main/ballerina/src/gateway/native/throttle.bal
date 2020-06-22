@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/java;
+import ballerina/java;
 
 public function initThrottleDataPublisher() {
     int processThreadPoolCoreSize = getConfigIntValue(LOCAL_THROTTLE_CONF_INSTANCE_ID, PROCESS_THREAD_POOL_CORE_SIZE, DEFAULT_PROCESS_THREAD_POOL_CORE_SIZE);

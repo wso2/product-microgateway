@@ -43,6 +43,11 @@ http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
 // values read from configuration
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
+map<anydata>[] | error apiCertificateList = map<anydata>[].constructFrom(config:getAsArray(MUTUAL_SSL_API_CERTIFICATE));
+string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
+string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
+string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, DEFAULT_MTSL_CONF_CERT_HEADER_NAME);
+boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -100,6 +105,8 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     apiKeyValidationRequest.context = apiContext;
     apiKeyValidationRequest.requiredAuthenticationLevel = ANY_AUTHENTICATION_LEVEL;
     apiKeyValidationRequest.clientDomain = "*";
+    apiKeyValidationRequest.tenantDomain = getTenantFromBasePath(apiContext);
+    apiKeyValidationRequest.keyManagers = "all";
 
     apiKeyValidationRequest.accessToken = accessToken;
     printDebug(KEY_UTILS, "Created request meta-data object with context: " + apiContext
@@ -111,8 +118,13 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
 
 
 public function getTenantFromBasePath(string basePath) returns string {
-    string[] splittedArray = split(basePath, "/");
-    return splittedArray[splittedArray.length() - 1];
+    string[] splittedContext = split(basePath, "/");
+    if (splittedContext.length() > 3 && basePath.startsWith(TENANT_DOMAIN_PREFIX)) {
+        // this check if basepath have /t/domain in
+        return splittedContext[2];
+    } else {
+        return SUPER_TENANT_DOMAIN_NAME;
+    }
 }
 
 public function isAccessTokenExpired(APIKeyValidationDto apiKeyValidationDto) returns boolean {
@@ -192,13 +204,8 @@ public function handleError(string message) returns ( error) {
 public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
-    string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
-        // this check if basepath have /t/domain in
-        return splittedContext[2];
-    } else {
-        return SUPER_TENANT_DOMAIN_NAME;
-    }
+    return getTenantFromBasePath(apiContext);
+
 }
 
 public function getApiName(http:FilterContext context) returns (string) {
@@ -780,12 +787,16 @@ function isGrpcRequest(http:FilterContext context) returns boolean {
 }
 
 public function initAuthHandlers() {
+    int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
+    if (timestampSkew == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+        timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    }
     //Initializes jwt handlers
-    readMultipleJWTIssuers();
+    readMultipleJWTIssuers(timestampSkew);
     //Initializes apikey handler
     jwt:JwtValidatorConfig apiKeyValidatorConfig = {
         issuer: getConfigValue(API_KEY_INSTANCE_ID, ISSUER, DEFAULT_API_KEY_ISSUER),
-        clockSkewInSeconds: 60,
+        clockSkewInSeconds: timestampSkew/1000,
         trustStoreConfig: {
             trustStore: {
                 path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH,
@@ -881,13 +892,15 @@ public function initAuthHandlers() {
         basicAuthHandler = new BasicAuthHandler(configBasicAuthProvider);
     }
 
+    //load the Keystore
+    loadKeyStore(trustStorePath,trustStorePassword);
 
     //Initializes the mutual ssl handler
     MutualSSLHandler | MutualSSLHandlerWrapper mutualSSLHandler;
     if (isMetricsEnabled || isTracingEnabled) {
         mutualSSLHandler = new MutualSSLHandlerWrapper();
     } else {
-        mutualSSLHandler = new MutualSSLHandler();
+        mutualSSLHandler = new MutualSSLHandler(apiCertificateList, headerName, isClientCertificateValidationEnabled);
     }
 
     //Initializes the cookie based handler
@@ -901,18 +914,16 @@ public function initAuthHandlers() {
     authHandlersMap[API_KEY_HANDLER] = apiKeyHandler;
 }
 
-function readMultipleJWTIssuers() {
+function readMultipleJWTIssuers(int timestampSkew) {
     map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
         initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
-        string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
-        string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
         foreach map<anydata> jwtIssuer in jwtIssuers {
             jwt:JwtValidatorConfig jwtValidatorConfig = {
                 issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
                 audience: getDefaultStringValue(jwtIssuer[AUDIENCE], DEFAULT_AUDIENCE),
-                clockSkewInSeconds: 60,
+                clockSkewInSeconds: timestampSkew/1000,
                 trustStoreConfig: {
                     trustStore: {
                         path: trustStorePath,

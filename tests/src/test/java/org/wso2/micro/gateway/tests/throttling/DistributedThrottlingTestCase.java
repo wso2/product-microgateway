@@ -199,11 +199,11 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
     }
 
-    @Test(description = "Test throttling with non auth mode" , priority = 1)
-    public void testApplicationThrottlingInNonAuthMode() throws Exception {
-        responseCode = invokeAndAssert2(null, getServiceURLHttp("/pizzashack/1.0.0/noauth"));
-        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
-    }
+//    @Test(description = "Test throttling with non auth mode" , priority = 1)
+//    public void testApplicationThrottlingInNonAuthMode() throws Exception {
+//        responseCode = invokeAndAssert2(null, getServiceURLHttp("/pizzashack/1.0.0/noauth"));
+//        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
+//    }
 
     @Test(description = "test subscription policy with stop on quota is false", priority = 1)
     public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
@@ -226,7 +226,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
             Assert.assertNotNull(response);
         }
         Thread.sleep(1000);
-        Assert.assertEquals(b.getNumberOfEventsReceived(), 20, "Eventcount mismatch");
+        Assert.assertEquals(b.getNumberOfEventsReceived(), 20, "Event count mismatch");
     }
 
     @Test(description = "test event publishing over binary connection with multiple TMs", priority = 2)

@@ -50,6 +50,8 @@ public type APIRequestMetaDataDto record {
     string clientDomain = "*";
     string matchingResource = "";
     string httpVerb = "";
+    string tenantDomain = "carbon.super";
+    string keyManagers = "all";
 };
 
 public type AuthenticationContext record {

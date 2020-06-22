@@ -23,6 +23,12 @@ int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKE
 float evictionFactor = getConfigFloatValue(CACHING_ID,
                                             TOKEN_CACHE_EVICTION_FACTOR,
                                             DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
+
+cache:CacheConfig genericCacheConfig = {
+    capacity: cacheSize,
+    evictionFactor: evictionFactor,
+    defaultMaxAgeInSeconds: cacheExpiryTime
+};
 int jwtGeneratorCacheExpiryTime = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
                                                     JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
                                                     DEFAULT_TOKEN_CACHE_EXPIRY);
@@ -33,16 +39,23 @@ float jwtGeneratorEvictionFactor = getConfigFloatValue(JWT_GENERATOR_CACHING_ID,
                                                         JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR,
                                                         DEFAULT_TOKEN_CACHE_EVICTION_FACTOR);
 
+cache:CacheConfig jwtGenerationCacheConfig = {
+    capacity: jwtGeneratorCacheSize,
+    evictionFactor: jwtGeneratorEvictionFactor,
+    defaultMaxAgeInSeconds: jwtGeneratorCacheExpiryTime
+};
+
 // Caches are globally defined in order to initialize them before the authentication handlers are initialized.
 // These cache objects are passed in authentication handlers while handler init phase.
-cache:Cache gatewayTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-cache:Cache gatewayKeyValidationCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-cache:Cache invalidTokenCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-cache:Cache jwtCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-cache:Cache introspectCache = new (cacheExpiryTime, cacheSize, evictionFactor);
-cache:Cache gatewayClaimsCache = new (cacheExpiryTime, cacheSize, evictionFactor);
+cache:Cache gatewayTokenCache = new (genericCacheConfig);
+cache:Cache gatewayKeyValidationCache = new (genericCacheConfig);
+cache:Cache invalidTokenCache = new (genericCacheConfig);
+cache:Cache jwtCache = new (genericCacheConfig);
+cache:Cache introspectCache = new (genericCacheConfig);
+cache:Cache gatewayClaimsCache = new (genericCacheConfig);
 
-cache:Cache jwtGeneratorCache = new (jwtGeneratorCacheExpiryTime, jwtGeneratorCacheSize, jwtGeneratorEvictionFactor);
+cache:Cache jwtGeneratorCache = new (jwtGenerationCacheConfig);
+cache:Cache mutualSslCertificateCache = new (genericCacheConfig);
 
 public type APIGatewayCache object {
 
@@ -59,12 +72,18 @@ public type APIGatewayCache object {
 
     public function addToGatewayKeyValidationCache(string tokenCacheKey, APIKeyValidationDto
     apiKeyValidationDto) {
-        gatewayKeyValidationCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
+        error? err = gatewayKeyValidationCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding token cache key to the gateway key validation cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Added key validation information to the key validation cache. key: " + mask(tokenCacheKey));
     }
 
     public function removeFromGatewayKeyValidationCache(string tokenCacheKey) {
-        gatewayKeyValidationCache.remove(tokenCacheKey);
+        error? err = gatewayKeyValidationCache.invalidate(tokenCacheKey);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while removing token cache key from gateway key validation cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Removed key validation information from the key validation cache. key: " + mask(tokenCacheKey));
     }
 
@@ -78,12 +97,18 @@ public type APIGatewayCache object {
     }
 
     public function addToInvalidTokenCache(string tokenCacheKey, APIKeyValidationDto apiKeyValidationDto) {
-        invalidTokenCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
+        error? err = invalidTokenCache.put(tokenCacheKey, <@untainted>apiKeyValidationDto);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding token cache key to the invalid token cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Added key validation information to the invalid token cache. key: " + mask(tokenCacheKey));
     }
 
     public function removeFromInvalidTokenCache(string tokenCacheKey) {
-        invalidTokenCache.remove(tokenCacheKey);
+        error? err = invalidTokenCache.invalidate(tokenCacheKey);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while removing token cache key from invalid token cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Removed from the invalid key validation cache. key: " + mask(tokenCacheKey));
     }
 
@@ -97,17 +122,26 @@ public type APIGatewayCache object {
     }
 
     public function addToTokenCache(string accessToken, boolean isValid) {
-        gatewayTokenCache.put(accessToken, isValid);
+        error? err = gatewayTokenCache.put(accessToken, isValid);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding access token to the gateway token cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Added validity information to the token cache. key: " + mask(accessToken));
     }
 
     public function removeFromTokenCache(string accessToken) {
-        gatewayTokenCache.remove(accessToken);
+        error? err = gatewayTokenCache.invalidate(accessToken);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while removing access token from gateway token cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Removed from the token cache. key: " + mask(accessToken));
     }
 
     public function addClaimMappingCache(string jwtTokens, runtime:Principal modifiedPrincipal) {
-        gatewayClaimsCache.put(jwtTokens, modifiedPrincipal);
+        error? err = gatewayClaimsCache.put(jwtTokens, <@untainted>modifiedPrincipal);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding modified token to the claim mapping cache", err);
+        }
         printDebug(KEY_GW_CACHE, "Added modified claims information to the token cache. ");
     }
 
@@ -119,5 +153,21 @@ public type APIGatewayCache object {
             return ();
         }
     }
-};
 
+    public function addMutualSslCertificateCache(string cert, boolean isCertExist) {
+        error? err = mutualSslCertificateCache.put(<@untainted>cert, <@untainted>isCertExist);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding certificate information to the mtls cache", err);
+        }
+        printDebug(KEY_GW_CACHE, "Added mutual certificate information to the  mutualSslCertificateCache ");
+    }
+
+    public function retrieveFromMutualSslCertificateCache(string cert) returns (boolean | ()) {
+        var isCertExist = mutualSslCertificateCache.get(cert);
+        if (isCertExist is boolean) {
+            return isCertExist;
+        } else {
+            return ();
+        }
+    }
+};

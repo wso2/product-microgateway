@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 /**
  * Execute APIM CLI functions.
@@ -116,6 +115,7 @@ public class CLIExecutor {
         copyValidationArtifactsToProject(sourcePath, des);
         copyOpenAPIDefinitionsToProject(project, openAPIFileNames);
         copyJwtValueTranformerJarToProjectLib(project);
+        copyJwtGeneratorJarToProjectLib(project);
         copyCustomizedPolicyFileFromResources(project);
         runBuildCmd(mgwCommand, project);
     }
@@ -249,11 +249,30 @@ public class CLIExecutor {
     }
 
     private void copyJwtValueTranformerJarToProjectLib(String project) throws MicroGWTestException {
-        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_JWTTRANSFORMER_JAR);
+        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_JWT_TRANSFORMER_JAR);
         File jarFile = new File(jarLocation);
         File desPath = new File(
                 homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator
                         + "mgw-JwtValueTransformer.jar");
+        try {
+            FileUtils.copyFile(jarFile, desPath);
+        } catch (IOException e) {
+            throw new MicroGWTestException("Error while copying the file from " + jarLocation + " to " + desPath + ".",
+                    e);
+        }
+    }
+
+    /**
+     * Copy the jwt generator jar to the project lib directory
+     * @param project project name
+     * @throws MicroGWTestException
+     */
+    private void copyJwtGeneratorJarToProjectLib(String project) throws MicroGWTestException {
+        String jarLocation = System.getProperty(Constants.SYSTEM_PROP_JWT_GENERATOR_JAR);
+        File jarFile = new File(jarLocation);
+        File desPath = new File(
+                homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator
+                        + "mgw-JwtGenerator.jar");
         try {
             FileUtils.copyFile(jarFile, desPath);
         } catch (IOException e) {

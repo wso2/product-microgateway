@@ -353,6 +353,7 @@ paths:
         values will generated exceptions
       operationId: getOrderById
       x-wso2-throttling-tier: NonExistingPolicy
+      x-wso2-request-interceptor: java:org.wso2.micro.gateway.tests.interceptor.OpenAPIReadInterceptor
       parameters:
         - name: orderId
           in: path

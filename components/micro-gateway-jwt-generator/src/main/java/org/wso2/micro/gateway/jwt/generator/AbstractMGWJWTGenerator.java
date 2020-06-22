@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.micro.gateway.core.jwt.generator;
+package org.wso2.micro.gateway.jwt.generator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONArray;
@@ -349,7 +349,7 @@ public abstract class AbstractMGWJWTGenerator {
      * Used for base64 encoding.
      */
     public String encode(byte[] stringToBeEncoded) {
-        return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
     }
 
     /**

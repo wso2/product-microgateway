@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.2.0-alpha2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,9 +29,10 @@
 
     <modules>
         <module>micro-gateway-interceptor</module>
+        <module>micro-gateway-jwt-transformer</module>
+        <module>micro-gateway-jwt-generator</module>
         <module>micro-gateway-core</module>
         <module>micro-gateway-cli</module>
         <module>micro-gateway-tools</module>
-        <module>micro-gateway-jwt-transformer</module>
     </modules>
 </project>

@@ -84,6 +84,7 @@ public const string DEFAULT_CIPHERS = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_EC
 + "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, " 
 + "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 public const string DEFAULT_SSL_VERIFY_CLIENT = "optional";
+public const string DEFAULT_MTSL_CONF_CERT_HEADER_NAME = "X-WSO2-CLIENT-CERTIFICATE";
 
 public const boolean DEFAULT_REQUEST_VALIDATION_ENABLED = false;
 public const boolean DEFAULT_RESPONSE_VALIDATION_ENABLED = false;
@@ -101,7 +102,7 @@ public const string DEFAULT_JMS_CONNECTION_USERNAME = "";
 public const string DEFAULT_JMS_CONNECTION_PASSWORD = "";
 public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endpoints";
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
-public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/throttle/data/v1";
+public const string DEFAULT_THROTTLE_KEY_TEMPLATE_URL = "https://localhost:9443/internal/data/v1";
 
 //global throttling - binary publisher related constants
 public const boolean DEFAULT_TM_BINARY_PUBLISHER_ENABLED = true;
@@ -171,7 +172,7 @@ public const string DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS = "ballerina";
 public const string DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS = "ballerina";
 public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
 public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
-public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl";
+public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl";
 public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
 
 public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;

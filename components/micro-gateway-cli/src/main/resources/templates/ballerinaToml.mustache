@@ -3,7 +3,7 @@ org-name= "wso2"
 version= "3.1.0"
 
 [dependencies]
-"wso2/gateway" = { path = "{{toolkitHome}}/lib/gateway-balo/gateway-2019r3-java8-3.1.0.balo"}
+"wso2/gateway" = { path = "{{toolkitHome}}/lib/gateway-balo/gateway-2020r1-java8-3.1.0.balo"}
 {{#each dependencies}}
 {{{.}}}
 {{/each}}
@@ -26,6 +26,10 @@ target = "java8"
     [[platform.libraries]]
         module = "jwtTransformer"
         path = "{{toolkitHome}}/lib/dependencies/mgw-jwt-transformer-{{mgwVersion}}.jar"
+
+    [[platform.libraries]]
+            module = "jwtGenerator"
+            path = "{{toolkitHome}}/lib/dependencies/mgw-jwt-generator-{{mgwVersion}}.jar"
 
      [[platform.libraries]]
         module = "gateway"

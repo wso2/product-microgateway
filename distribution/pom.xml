@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.2.0-alpha2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -131,7 +131,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
+                            <url>https://dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
                         </configuration>
@@ -176,14 +176,16 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
+                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
+                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer</includeArtifactIds>
                             <includeGroupIds>
                                 org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
                                 org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax
                             </includeGroupIds>
                             <includeArtifactIds>
                                 andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer,
-                                org.wso2.carbon.databridge.commons, org.wso2.carbon.databridge.commons.binary,
-                                disruptor
+                                mgw-jwt-generator, org.wso2.carbon.databridge.commons,
+                                org.wso2.carbon.databridge.commons.binary, disruptor
                             </includeArtifactIds>
                         </configuration>
                     </execution>

@@ -98,8 +98,9 @@
   certificateAlias = "wso2apim310"
   # Validate subscribed APIs
   validateSubscription = false
-  #support custom claim mapping
+  #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
+  # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scp"
     localClaim = "scope"
@@ -113,8 +114,9 @@
   certificateAlias = "alias"
   # Validate subscribed APIs
   validateSubscription = false
-  #support custom claim mapping
+  #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
+  # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scps"
     localClaim = "scope"
@@ -251,6 +253,28 @@
   ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
   # The type of client certificate verification. (e.g.: "require" or "optional")
   sslVerifyClient = "optional"
+  # Header name append by the load balancer including the encoded certificate of client after mtls handshake with client.
+  certificateHeaderName = "X-WSO2-CLIENT-CERTIFICATE"
+  # Is client certificate validation enable. This applies only if the certificate is present in the header. That is
+  # in load balancer fronted scenarios. If there is no load balancer in front of gateway, then if mutual ssl is enabled
+  # for the API, then irrespective of this config value, certificate will be validated.
+  isClientCertificateValidationEnabled = true
+    # [[mutualSSLConfig.api.certificates]]
+      # name = "API name given in the API Definition"
+      # version = "API version given in the API definition"
+      # aliasList = "list of aliases for a given API"
+    # Examples :
+    # API 1
+    [[mutualSSLConfig.api.certificates]]
+      name = "Swagger Petstore"
+      version = "1.0.5"
+      aliasList = ["ballerina", "wso2apim310"]
+    # API 2
+    [[mutualSSLConfig.api.certificates]]
+      name = "MyAPI"
+      version = "2.0.0"
+      aliasList = ["myAlias1", "myAlias2"]
+
 
 # Throttling configurations
 [throttlingConfig]
@@ -281,7 +305,7 @@
   throttleEndpointbase64Header = "admin:admin"
   #Configurations related to retrieve custom throttle policy related key templates from traffic manager or key manager.
   [throttlingConfig.dataRetriever]
-    serverUrl = "https://localhost:9443/throttle/data/v1"
+    serverUrl = "https://localhost:9443/internal/data/v1"
     username = "admin"
     password = "admin"
 
@@ -416,7 +440,7 @@
   # Token audience standard claim
   audience=["http://org.wso2.apimgt/gateway"]
   # JWT token generator implementation
-  generatorImpl="org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorImpl"
+  generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
   # JWT Generator cache configurations
   [jwtGeneratorConfig.jwtGeneratorCaching]
     # Enable jwt generator token caching
@@ -430,5 +454,5 @@
 
 # server configuration
 [server]
-  # timestamp skew in seconds which added when checking the token validity period
+  # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000

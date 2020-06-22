@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/java;
+import ballerina/java;
 import ballerina/http;
 
 # Compresses a directory.

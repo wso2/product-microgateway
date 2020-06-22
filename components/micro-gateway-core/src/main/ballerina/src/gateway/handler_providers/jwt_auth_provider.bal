@@ -75,10 +75,10 @@ public type JwtAuthProvider object {
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
-                    var cachedJwt = trap <jwt:CachedJwt>jwtCache.get(jwtToken);
+                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>jwtCache.get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
-                    if (cachedJwt is jwt:CachedJwt) {
+                    if (cachedJwt is jwt:InboundJwtCacheEntry) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
                         jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
                         jti = jwtPayloadFromCache["jti"];
@@ -111,10 +111,10 @@ public type JwtAuthProvider object {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims in the cache");
                             } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
-                                var result = doMappingContext(invocationContext, self.className, self.claims,
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims is not in the cache");
+                                var result = doMappingContext(invocationContext, self.className, claimsSet,
                                     self.classLoaded, jwtPayloadFromCache, self.jwtValidatorConfig, self.gatewayCache, authContext);
                                 if (result is auth:Error){
                                     return result;
@@ -131,10 +131,10 @@ public type JwtAuthProvider object {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
                             if (jwtTokenClaimCached is runtime:Principal) {
                                 invocationContext.principal =  jwtTokenClaimCached;
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims in the cache");
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims in the cache");
                             } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "Moddified claims is not in the cache");
-                                var result = doMappingContext(invocationContext, self.className, self.claims,
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "Modified claims is not in the cache");
+                                var result = doMappingContext(invocationContext, self.className, claimsSet,
                                     self.classLoaded, payload, self.jwtValidatorConfig, self.gatewayCache, authContext);
                                 if (result is auth:Error){
                                     return result;
@@ -190,7 +190,7 @@ public function doMappingContext(runtime:InvocationContext invocationContext, st
     string payloadAudience = jwtPayloadFromCache["aud"].toString();
     if( jwtValidatorConfig[ISSUER] ==  payloadIssuer &&
         jwtValidatorConfig[AUDIENCE] ==  payloadAudience) {
-        map<any>? customClaims = invocationContext["principal"]["claims"];
+        map<any>? customClaims = invocationContext[PRINCIPAL][ISSUER_CLAIMS];
         if (customClaims is map<any>) {
             if (claims is map<anydata>[] && claims.length() > 0) {
                 foreach map<anydata> claim in claims {
@@ -220,7 +220,7 @@ public function doMappingContext(runtime:InvocationContext invocationContext, st
                     return result;
                 }
             }
-            runtime:Principal? modifiedPrincipal = invocationContext["principal"];
+            runtime:Principal? modifiedPrincipal = invocationContext[PRINCIPAL];
             string jwtToken = authContext?.authToken.toString();
             if (modifiedPrincipal is runtime:Principal) {
                 gatewayCache.addClaimMappingCache(jwtToken, modifiedPrincipal);

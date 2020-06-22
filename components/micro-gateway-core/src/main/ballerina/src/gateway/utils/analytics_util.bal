@@ -179,7 +179,6 @@ function initializeAnalytics() {
     if (!configsRead) {
         getAnalyticsEnableConfig();
         if (isAnalyticsEnabled) {
-            initStreamPublisher();
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is enabled");
             future<()> uploadTask = start timerTask();            // file uploading task
             future<()> rotateTask = start rotatingTask();        // file rotating task
@@ -187,11 +186,6 @@ function initializeAnalytics() {
             printDebug(KEY_ANALYTICS_FILTER, "Analytics is disabled");
         }
     }
-}
-
-function initStreamPublisher() {
-    printDebug(KEY_UTILS, "Subscribing writing method to event stream");
-    eventStream.subscribe(writeEventToFile);
 }
 
 public function retrieveHostname(string key, string defaultHost) returns string {

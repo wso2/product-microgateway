@@ -68,4 +68,10 @@ public class Constants {
     public static final String JSON_SCHEMA = ".content.application/json.schema";
     public static final String VALIDATED_STATUS = "validated";
     public static final String RUNTIME_HOME_PATH = "mgw-runtime.home";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
+    public static final String RESOURCE_LOCATION = "resources/wso2/";
+    public static final String DOT = ".";
+    public static final String UNDER_SCORE = "_";
+    public static final String JSON_EXTENSION = ".json";
 }

@@ -21,7 +21,7 @@
     <parent>
         <artifactId>micro-gateway-parent</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.2.0-alpha2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -155,6 +155,14 @@
             <artifactId>org.wso2.carbon.databridge.receiver.binary</artifactId>
             <version>6.1.45</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>mgw-jwt-generator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>org.wso2.micro.gateway.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -216,6 +224,9 @@
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
+                        <jwt_generator_jar>
+                            ${basedir}/target/test-integration-${project.version}.jar
+                        </jwt_generator_jar>
                         <project.build.directory>${project.build.directory}</project.build.directory>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                         <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
@@ -387,6 +398,9 @@
                                 <jwt_transformer_jar>
                                     ${basedir}/../tests/target/test-integration-${project.version}.jar
                                 </jwt_transformer_jar>
+                                <jwt_generator_jar>
+                                    ${basedir}/../tests/target/test-integration-${project.version}.jar
+                                </jwt_generator_jar>
                                 <project.build.directory>${project.build.directory}</project.build.directory>
                                 <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                                 <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>

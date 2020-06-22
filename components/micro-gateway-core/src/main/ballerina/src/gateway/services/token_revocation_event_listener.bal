@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import wso2/jms;
+import ballerina/java.jms;
 
 string jmsConnectioninitialContextFactoryTokenRevocation = getConfigValue(REALTIME_MESSAGE_INSTANCE_ID, 
     JMS_CONNECTION_INITIAL_CONTEXT_FACTORY, DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
