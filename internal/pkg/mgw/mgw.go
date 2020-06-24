@@ -17,31 +17,29 @@
 package mgw
 
 import (
-	"context"
-	"flag"
-	"fmt"
-	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	"github.com/fsnotify/fsnotify"
+	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
+	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
+	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
+	listenerservice "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
+	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+
 	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
-	//myals "github.com/wso2/micro-gw/internal/pkg/logging"
 	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
-	cachev2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
-	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 	logger "github.com/wso2/micro-gw/internal/loggers"
 	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
 	"github.com/wso2/micro-gw/configs"
-	//"google.golang.org/appengine/log"
-	"net"
-	"os"
+	"github.com/fsnotify/fsnotify"
+	"google.golang.org/grpc"
 	"os/signal"
 	"sync/atomic"
-	//logger "github.com/wso2/micro-gw/internal/loggers"
-
-	"google.golang.org/grpc"
-
-	//accesslog "github.com/envoyproxy/go-control-plane/envoy/service/accesslog/v2"
-	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2"
+	"net"
+	"os"
+	"context"
+	"flag"
+	"fmt"
 )
 
 var (
@@ -58,7 +56,7 @@ var (
 
 	version int32
 
-	cache cachev2.SnapshotCache
+	cache cachev3.SnapshotCache
 
 )
 
@@ -78,17 +76,19 @@ func init() {
 	flag.StringVar(&mode, "ads", Ads, "Management server type (ads, xds, rest)")
 }
 
-// Hasher returns node ID as an ID
-type Hasher struct {
-}
 
-// ID function
-func (h Hasher) ID(node *core.Node) string {
+// IDHash uses ID field as the node hash.
+type IDHash struct{}
+
+// ID uses the node ID field
+func (IDHash) ID(node *core.Node) string {
 	if node == nil {
-		return "unknown"
+		return ""
 	}
 	return node.Id
 }
+
+var _ cachev3.NodeHash = IDHash{}
 
 
 const grpcMaxConcurrentStreams = 1000000
@@ -112,10 +112,10 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 
 	// register services
 	discovery.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
-	v2.RegisterEndpointDiscoveryServiceServer(grpcServer, server)
-	v2.RegisterClusterDiscoveryServiceServer(grpcServer, server)
-	v2.RegisterRouteDiscoveryServiceServer(grpcServer, server)
-	v2.RegisterListenerDiscoveryServiceServer(grpcServer, server)
+	endpointservice.RegisterEndpointDiscoveryServiceServer(grpcServer, server)
+	clusterservice.RegisterClusterDiscoveryServiceServer(grpcServer, server)
+	routeservice.RegisterRouteDiscoveryServiceServer(grpcServer, server)
+	listenerservice.RegisterListenerDiscoveryServiceServer(grpcServer, server)
 
 	logger.LoggerMgw.Info("port: ",port, " management server listening")
 	//log.Fatalf("", Serve(lis))
@@ -146,7 +146,7 @@ func updateEnvoy(location string) {
 
 	atomic.AddInt32(&version, 1)
 	logger.LoggerMgw.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
-	snap := cachev2.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
 	snap.Consistent()
 
 	err := cache.SetSnapshot(nodeId, snap)
@@ -186,7 +186,7 @@ func Run(conf *mgwconfig.Config) {
 
 	logger.LoggerMgw.Info("Starting control plane ....")
 
-	cache = cachev2.NewSnapshotCache(mode != Ads, Hasher{}, nil)
+	cache = cachev3.NewSnapshotCache(mode != Ads, IDHash{}, nil)
 
 	srv := xds.NewServer(ctx, cache, nil)
 
