@@ -17,12 +17,14 @@
 package envoyCodegen
 
 import (
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	envoyconfigfilterhttpextauthzv2 "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
-	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	ext_auth "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	router "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes"
+
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/golang/protobuf/ptypes"
 )
 
 /**
@@ -48,7 +50,33 @@ func getHttpFilters() []*hcm.HttpFilter {
  * @return hcm.HttpFilter  Http filter instance
  */
 func getRouterHttpFilter() hcm.HttpFilter {
-	return hcm.HttpFilter{Name: wellknown.Router}
+
+	routeFilterConf := router.Router{
+		DynamicStats:             nil,
+		StartChildSpan:           false,
+		UpstreamLog:              nil,
+		SuppressEnvoyHeaders:     false,
+		StrictCheckHeaders:       nil,
+		RespectExpectedRqTimeout: false,
+		XXX_NoUnkeyedLiteral:     struct{}{},
+		XXX_unrecognized:         nil,
+		XXX_sizecache:            0,
+	}
+
+	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
+	}
+
+	filter := hcm.HttpFilter{
+		Name:                 wellknown.Router,
+		ConfigType:           &hcm.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	}
+
+	return filter
 }
 
 /**
@@ -57,12 +85,12 @@ func getRouterHttpFilter() hcm.HttpFilter {
  * @return hcm.HttpFilter  Http filter instance
  */
 func getExtAauthzHttpFilter() hcm.HttpFilter {
-	extAuthzConfig := &envoyconfigfilterhttpextauthzv2.ExtAuthz{
-		WithRequestBody: &envoyconfigfilterhttpextauthzv2.BufferSettings{
+	extAuthzConfig := &ext_auth.ExtAuthz{
+		WithRequestBody: &ext_auth.BufferSettings{
 			MaxRequestBytes:     1024,
 			AllowPartialMessage: false,
 		},
-		Services: &envoyconfigfilterhttpextauthzv2.ExtAuthz_GrpcService{
+		Services: &ext_auth.ExtAuthz_GrpcService{
 			GrpcService: &core.GrpcService{
 				TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &core.GrpcService_EnvoyGrpc{

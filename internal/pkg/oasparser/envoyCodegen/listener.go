@@ -17,17 +17,17 @@
 package envoyCodegen
 
 import (
-	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	listenerv2 "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
-	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
-	envoy_config_filter_accesslog_v2 "github.com/envoyproxy/go-control-plane/envoy/config/filter/accesslog/v2"
-	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
+	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
+	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
+	access_log "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
+	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	"github.com/wso2/micro-gw/configs"
+
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/wso2/micro-gw/configs"
+	"github.com/golang/protobuf/ptypes"
 )
 
 /**
@@ -38,7 +38,7 @@ import (
  * @param vHostP  Virtual host
  * @return v2.Listener  V2 listener instance
  */
-func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
+func CreateListener(listenerName string, routeConfigName string, vHostP route.VirtualHost) listener.Listener {
 	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
@@ -55,12 +55,12 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
 	}
 	listenerFilters := createListenerFilters(routeConfigName, vHostP)
 
-	listener := v2.Listener{
+	listener := listener.Listener{
 		Name: listenerName,
 		Address: &core.Address{
 			Address: listenerAddress,
 		},
-		FilterChains: []*listenerv2.FilterChain{{
+		FilterChains: []*listener.FilterChain{{
 			Filters: listenerFilters},
 		},
 	}
@@ -74,8 +74,8 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
  * @param vHost  Virtual host
  * @return []*listenerv2.Filter  Listener filters as a array
  */
-func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
-	var filters []*listenerv2.Filter
+func createListenerFilters(routeConfigName string, vHost route.VirtualHost) []*listener.Filter {
+	var filters []*listener.Filter
 
 	//set connection manager filter for production
 	managerP := createConectionManagerFilter(vHost, routeConfigName)
@@ -84,9 +84,9 @@ func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
 	if err != nil {
 		panic(err)
 	}
-	connectionManagerFilterP := listenerv2.Filter{
+	connectionManagerFilterP := listener.Filter{
 		Name: wellknown.HTTPConnectionManager,
-		ConfigType: &listenerv2.Filter_TypedConfig{
+		ConfigType: &listener.Filter_TypedConfig{
 			TypedConfig: pbst,
 		},
 	}
@@ -103,7 +103,7 @@ func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
  * @param routeConfigName   Name of the route config
  * @return *hcm.HttpConnectionManager  Reference for a connection manager instance
  */
-func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
+func createConectionManagerFilter(vHost route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
 
 	httpFilters := getHttpFilters()
 	accessLogs := getAccessLogConfigs()
@@ -112,13 +112,13 @@ func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
 		CodecType:  hcm.HttpConnectionManager_AUTO,
 		StatPrefix: "ingress_http",
 		RouteSpecifier: &hcm.HttpConnectionManager_RouteConfig{
-			RouteConfig: &v2.RouteConfiguration{
+			RouteConfig: &route.RouteConfiguration{
 				Name:         routeConfigName,
-				VirtualHosts: []*v2route.VirtualHost{&vHost},
+				VirtualHosts: []*route.VirtualHost{&vHost},
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog: []*envoy_config_filter_accesslog_v2.AccessLog{&accessLogs},
+		AccessLog: []*access_log.AccessLog{&accessLogs},
 	}
 	return manager
 }
@@ -131,11 +131,11 @@ func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
  * @return v2route.VirtualHost  Virtual host instance
  * @return error  Error
  */
-func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.VirtualHost, error) {
+func CreateVirtualHost(vHost_Name string, routes []*route.Route) (route.VirtualHost, error) {
 
 	vHost_Domains := []string{"*"}
 
-	virtual_host := v2route.VirtualHost{
+	virtual_host := route.VirtualHost{
 		Name:    vHost_Name,
 		Domains: vHost_Domains,
 		Routes:  routes,
@@ -168,52 +168,40 @@ func createAddress(remoteHost string, port uint32) core.Address {
  *
  * @return envoy_config_filter_accesslog_v2.AccessLog  Access log config
  */
-func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
-	logFormat := ""
-
-	logConfig := &structpb.Struct{
-		Fields: map[string]*structpb.Value{
-			"path": {
-				Kind: &structpb.Value_StringValue{
-					StringValue: "/tmp/envoy.access.log",
-				},
-			},
-		},
-	}
+func getAccessLogConfigs() access_log.AccessLog {
+	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
+	logpath := "/tmp/envoy.access.log"   //default access log path
 
 	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
-		logFormat = logConf.AccessLogs.Format
-	}
-
-	if logFormat != "" {
-		logConfig = &structpb.Struct{
-			Fields: map[string]*structpb.Value{
-				"path": {
-					Kind: &structpb.Value_StringValue{
-						StringValue: "/tmp/envoy.access.log",
-					},
-				},
-				"format": {
-					Kind: &structpb.Value_StringValue{
-						StringValue: logConf.AccessLogs.Format,
-					},
-				},
-			},
+		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
+			Format:  logConf.AccessLogs.Format,
 		}
+		logpath = logConf.AccessLogs.LogFile
 	}
 
-	access_log := envoy_config_filter_accesslog_v2.AccessLog{
-		Name:                 "envoy.file_access_log",
-		ConfigType: &envoy_config_filter_accesslog_v2.AccessLog_Config{
-			Config: logConfig,
-		} ,
+	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
+		Path:   logpath,
+		AccessLogFormat: logFormat,
+	}
+
+	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+	}
+
+	access_logs := access_log.AccessLog{
+		Name:                 "envoy.access_loggers.file",
+		Filter:               nil,
+		ConfigType:           &access_log.AccessLog_TypedConfig{
+			TypedConfig: accessLogTypedConf,
+		},
 		XXX_NoUnkeyedLiteral: struct{}{},
 		XXX_unrecognized:     nil,
 		XXX_sizecache:        0,
 	}
 
-	return access_log
+	return access_logs
 }
