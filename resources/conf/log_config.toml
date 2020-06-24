@@ -1,5 +1,5 @@
 # The logging configuration file for control plane
-######### root Level #######
+######### root Level ########
 logfile = "resources/logs/controlPlane.log"
 logLevel = "INFO"
 
@@ -24,5 +24,3 @@ logLevel = "INFO"
 [accessLogs]
 logfile = "/tmp/envoy.access.log"
 format = "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% '%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n"
-
-
