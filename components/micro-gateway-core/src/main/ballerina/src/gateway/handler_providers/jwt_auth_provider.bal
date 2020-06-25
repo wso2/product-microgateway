@@ -24,6 +24,7 @@ import ballerina/stringutils;
 # + jwtValidatorConfig - JWT validator configurations
 # + inboundJwtAuthProvider - Reference to b7a inbound auth provider
 # + subscriptionValEnabled - Validate subscription
+# + consumerKeyClaim - The claim name in which the consumer key of the application present in the jwt.
 # + claims - JWT claim set
 # + className - Transformation class Name
 # + classLoaded - Class loaded or not
@@ -125,7 +126,7 @@ public type JwtAuthProvider object {
                             }
                          }
                         return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled,
-                                self.consumerKeyClaim, isGRPC);
+                                self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
                     (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
@@ -145,7 +146,7 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                         }
-                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, self.consumerKeyClaim, isGRPC);
+                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                 }
             }
@@ -158,11 +159,11 @@ public type JwtAuthProvider object {
 };
 
 public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled,
-                            string consumerKeyClaim, boolean isGRPC) returns @tainted (boolean | auth:Error) {
+                            string consumerKeyClaim, boolean isGRPC, APIGatewayCache gatewayCache) returns @tainted (boolean | auth:Error) {
     boolean subscriptionValidated = false;
     map<json>? customClaims = payload?.customClaims;
 
-    subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled, consumerKeyClaim);
+    subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled, consumerKeyClaim, gatewayCache);
     if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
         printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
         return true;

@@ -90,13 +90,6 @@
       clientId = ""
       clientSecret = ""
 
-[eventHub]
-  serviceUrl="https://localhost:9443"
-  internalDataContext="/internal/data/v1/"
-  username="admin"
-  password="admin"
-  listOfTenants = ["carbon.super"]
-
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[jwtTokenConfig]]
@@ -464,3 +457,12 @@
 [server]
   # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000
+
+[apim.eventHub]
+  enable = false
+  service_url = "https://localhost:9443"
+  internalDataContext="/internal/data/v1/"
+  username="admin"
+  password="admin"
+  eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+  listOfTenants = ["carbon.super"]

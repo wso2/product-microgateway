@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/io;
 
 # Data holder for Application details available in Gateway Pilot node. 
 # 
@@ -34,7 +33,9 @@ type ApplicationDataStore object {
         self.pilotPassword = password;
         self.serviceContext = context + "/applications";
         self.listOfTenants = listOfTenants;
-        self.fetchApplications();
+        if (apimEventHubEnabled) {
+            future<()> applicationsFetch = start self.fetchApplications();
+        }
     }
 
     # Retrieve a specific `Application` object from the Applicatio Data Store.
@@ -58,32 +59,32 @@ type ApplicationDataStore object {
             applicationMap = self.applications.get(tenantDomain);
             applicationMap[appKey] = app;
         }
-        self.applications[tenantDomain] = applicationMap;
+        lock {
+            //Writing event should be locked, due to worker threads are reading the map during request validations
+            self.applications[tenantDomain] = applicationMap;
+        }
     }
 
     function removeApplication(string tenantDomain, Application app) {
-        Application removedApp = self.applications.get(tenantDomain).remove(app.id.toString());
+        lock {
+            //Remove event should be locked, due to worker threads are reading the map during request validations
+            Application removedApp = self.applications.get(tenantDomain).remove(app.id.toString());
+        }
     }
 
     private function fetchApplications() {
-        io:println("application fetch is called");
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request appReq = new;
         appReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
         var tenantList = self.listOfTenants;
-        io:println("tenantList : " + tenantList.toString());
         if (tenantList is string[]) {
-            io:println("inside tenant list");
             foreach string tenant in tenantList {
-                io:println("tnenat : " + tenant);
                 appReq.setHeader(EVENT_HUB_TENANT_HEADER, tenant);
                 var response = gatewayPilotEndpoint->get(self.serviceContext, message = appReq);
-                io:println(response);
                 if (response is http:Response) {
                     map<Application> applicationMap = {};
                     var payload = response.getJsonPayload();
                     if (payload is json) {
-                        io:println(KEY_APPLICATION_STORE, "Application list of tenant : " + tenant + " is : " + payload.toJsonString());
                         printDebug(KEY_APPLICATION_STORE, "Application list of tenant : " + tenant + " is : " + payload.toJsonString());
                         json[] list = <json[]>payload.list;
                         printDebug(KEY_APPLICATION_STORE, "Received valid application details");
@@ -108,7 +109,6 @@ type ApplicationDataStore object {
                     printError(KEY_APPLICATION_STORE, "Failed to retrieve application data", response);
                 }
             }
-            io:println("Tenant application map : " + self.applications.toString());
         } else {
             printError(KEY_APPLICATION_STORE, "Error while reading tenant list map from config.", tenantList);
         }

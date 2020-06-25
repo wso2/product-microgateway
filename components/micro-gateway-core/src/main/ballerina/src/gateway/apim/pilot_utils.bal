@@ -14,11 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/runtime;
+APIGatewayCache gatewayCacheObject = new;
+
 function convertApplicationEventToApplicationDTO(json appEvent) returns Application {
     Application application = {
         id : <int>appEvent.applicationId,
         name: appEvent.applicationName.toString(),
-        tenantId : <int>appEvent.tenantId,
         tenantDomain : appEvent.tenantDomain.toString(),
         policyId : appEvent.applicationPolicy.toString(),
         tokenType : appEvent.tokenType.toString()
@@ -31,10 +33,93 @@ function convertSubscriptionEventToSubscriptionDTO(json subEvent) returns Subscr
         id : <int>subEvent.subscriptionId,
         apiId: <int>subEvent.apiId,
         appId: <int>subEvent.applicationId,
-        tenantId : <int>subEvent.tenantId,
         tenantDomain : subEvent.tenantDomain.toString(),
         policyId : subEvent.policyId.toString(),
         state : subEvent.subscriptionState.toString()
     };
     return subscription;
+}
+
+function convertKeyGenerationEventToKeyMapDTO(json keyEvent) returns KeyMap {
+    KeyMap keyMapping = {
+       appId :  <int>keyEvent.applicationId,
+       consumerKey : keyEvent.consumerKey.toString(),
+       keyType : keyEvent.keyType.toString(),
+       tenantDomain : keyEvent.tenantDomain.toString()
+    };
+    return keyMapping;
+}
+
+function convertApiEventToApiDTO(json apiEvent) returns Api {
+    Api api = {
+        id : <int>apiEvent.apiId,
+        provider: apiEvent.apiProvider.toString(),
+        name: apiEvent.apiName.toString(),
+        tenantDomain : apiEvent.tenantDomain.toString(),
+        apiVersion : apiEvent.apiVersion.toString(),
+        context : apiEvent.apiContext.toString()
+    };
+    return api;
+}
+
+function validateSubscriptionFromDataStores(string token, string tenantDomain, string consumerKey, string apiName, string apiVersion,
+                    boolean isValidateSubscription) returns ([AuthenticationContext, boolean]) {
+    boolean isAllowed = !isValidateSubscription;
+    var keyMap = pilotDataProvider.getKeyMapping(tenantDomain, consumerKey);
+    var api = pilotDataProvider.getApi(tenantDomain, apiName, apiVersion);
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string subscriptionKey = consumerKey + ":" + apiName + ":"  + apiVersion;
+    AuthenticationContext authenticationContext = {
+        apiKey: token,
+        authenticated: !isValidateSubscription
+    };
+    authenticationContext.consumerKey = consumerKey.toString();
+    //check from subscription cache
+    var authContext = gatewayCacheObject.retrieveFromSubcriptionCache(subscriptionKey);
+    if (authContext is AuthenticationContext) {
+        printDebug(JWT_UTIL, "Subcription key found from the cache : " + subscriptionKey);
+        authenticationContext = authContext;
+        invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+        isAllowed = true;
+    } else {
+        if (keyMap is KeyMap) {
+            authenticationContext.keyType = keyMap.keyType;
+            invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+            var app = pilotDataProvider.getApplication(tenantDomain, keyMap.appId);
+            if (app is Application) {
+                authenticationContext.applicationId = app.id.toString();
+                authenticationContext.applicationName = app.name;
+                authenticationContext.applicationTier = app.policyId;
+                authenticationContext.subscriber = app.owner;
+            } else {
+                printError(JWT_UTIL, "Application not found for consumer key : " + consumerKey + " and app Id : " + keyMap.appId.toString());
+            }
+
+            if (api is Api) {
+                var sub = pilotDataProvider.getSubscription(tenantDomain, keyMap.appId, api.id);
+
+                // if subscription in "UNBLOCKED" state is found in the pilot data, key is allowed
+                if (sub is Subscription && sub.state == "UNBLOCKED") {
+                    printDebug(JWT_UTIL, "Found a subscription for api: " + apiName + "__" + apiVersion);
+                    isAllowed = true;
+                    authenticationContext.authenticated = true;
+                    authenticationContext.apiPublisher = api.provider;
+                    authenticationContext.tier = sub.policyId;
+                    setSubsciberTenantDomain(authenticationContext);
+
+                    gatewayCacheObject.addToSubcriptionCache(subscriptionKey, authenticationContext);
+                } else {
+                    printError(JWT_UTIL,"Subscription not found for API : " + apiName + "__" + apiVersion +
+                    " for the application : " +  authenticationContext.applicationName);
+                }
+            } else {
+                printError(JWT_UTIL, "API not found for name : " + apiName + " and version : " + apiVersion);
+            }
+        } else {
+            printError(JWT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
+        }
+    }
+
+
+    return [authenticationContext,isAllowed];
 }

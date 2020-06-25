@@ -53,6 +53,7 @@ cache:Cache invalidTokenCache = new (genericCacheConfig);
 cache:Cache jwtCache = new (genericCacheConfig);
 cache:Cache introspectCache = new (genericCacheConfig);
 cache:Cache gatewayClaimsCache = new (genericCacheConfig);
+cache:Cache subscriptionCache = new (genericCacheConfig);
 
 cache:Cache jwtGeneratorCache = new (jwtGenerationCacheConfig);
 cache:Cache mutualSslCertificateCache = new (genericCacheConfig);
@@ -166,6 +167,23 @@ public type APIGatewayCache object {
         var isCertExist = mutualSslCertificateCache.get(cert);
         if (isCertExist is boolean) {
             return isCertExist;
+        } else {
+            return ();
+        }
+    }
+
+    public function addToSubcriptionCache(string subscriptionKey, AuthenticationContext authenticationContext) {
+        error? err = subscriptionCache.put(<@untainted>subscriptionKey, <@untainted>authenticationContext);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding subscription key " +  subscriptionKey + " to the subscription cache", err);
+        }
+        printDebug(KEY_GW_CACHE, "Added subscription information to the subscription cache. key: " + subscriptionKey);
+    }
+
+    public function retrieveFromSubcriptionCache(string subscriptionKey) returns (AuthenticationContext | ()){
+        var authenticationContext = subscriptionCache.get(subscriptionKey);
+        if (authenticationContext is AuthenticationContext) {
+            return authenticationContext;
         } else {
             return ();
         }

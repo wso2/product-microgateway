@@ -25,6 +25,7 @@ public function main() {
     {{/each}}
     addTokenServicesFilterAnnotation();
     initThrottlePolicies();
+    future<()> gatewayNotification = start gateway:initiateNotificationJmsListener();
     gateway:initThrottleDataPublisher();
     gateway:initGlobalThrottleDataPublisher();
     gateway:startObservabilityListener();

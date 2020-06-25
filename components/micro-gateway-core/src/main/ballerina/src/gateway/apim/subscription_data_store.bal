@@ -32,8 +32,9 @@ type SubscriptionDataStore object {
         self.pilotPassword = password;
         self.serviceContext = context + "/subscriptions";
         self.listOfTenants = listOfTenants;
-
-        self.fetchSubscriptions();
+        if (apimEventHubEnabled) {
+            future<()> susbcriptionsFetch = start self.fetchSubscriptions();
+        }
     }
 
     # Retrieve a specific `Subscription` object from the Subscription Data Store.
@@ -57,12 +58,16 @@ type SubscriptionDataStore object {
             subscriptionMap = self.subscriptions.get(tenantDomain);
             subscriptionMap[subKey] = sub;
         }
-        self.subscriptions[tenantDomain] = subscriptionMap;
+        lock {
+            self.subscriptions[tenantDomain] = subscriptionMap;
+        }
     }
 
     function removeSubscription(string tenantDomain, Subscription sub) {
         string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
-        Subscription removeSub = self.subscriptions.get(tenantDomain).remove(subKey.toString());
+        lock {
+            Subscription removeSub = self.subscriptions.get(tenantDomain).remove(subKey.toString());
+        }
     }
 
     private function fetchSubscriptions() {
@@ -77,11 +82,9 @@ type SubscriptionDataStore object {
                 if (response is http:Response) {
                     map<Subscription> subscriptionnMap = {};
                     var payload = response.getJsonPayload();
-
                     if (payload is json) {
                         json[] list = <json[]>payload.list;
-                        printDebug(KEY_SUBSCRIPTION_STORE, "Received valid subscription details");
-
+                        printDebug(KEY_SUBSCRIPTION_STORE, "Subscription list of tenant : " + tenant + " is : " + payload.toJsonString());
                         foreach json jsonSub in list {
                             Subscription sub = {
                                 id: <int>jsonSub.subscriptionId,

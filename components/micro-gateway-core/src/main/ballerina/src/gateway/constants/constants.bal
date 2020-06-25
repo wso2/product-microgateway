@@ -267,6 +267,8 @@ public const string BLOCKING_CONDITION_END_IP = "endingIp";
 public const string NOTIFICATION_EVENT_TYPE = "eventType";
 public const string NOTIFICATION_EVENT_TIMESTAMP = "timestamp";
 public const string NOTIFICATION_EVENT = "event";
+public const string API_CREATE_EVENT = "API_CREATE";
+public const string API_UPDATE_EVENT = "API_UPDATE";
 public const string APPLICATION_CREATE_EVENT = "APPLICATION_CREATE";
 public const string APPLICATION_UPDATE_EVENT = "APPLICATION_UPDATE";
 public const string APPLICATION_DELETE_EVENT = "APPLICATION_DELETE";
@@ -423,13 +425,14 @@ public const string KEY_SUBSCRIPTION_STORE = "SubscriptionDataStore";
 public const string KEY_API_STORE = "ApiDataStore";
 public const string KEY_KEYMAP_STORE = "KeyMappingDataStore";
 public const string KEY_APPLICATION_STORE = "ApplicationDataStore";
-public const string EVENT_HUB_INSTANCE_ID = "eventHub";
+public const string EVENT_HUB_INSTANCE_ID = "apim.eventHub";
 public const string EVENT_HUB_SERVER_URL = "serviceUrl";
 public const string EVENT_HUB_INT_CONTEXT = "internalDataContext";
 public const string EVENT_HUB_USERNAME = "admin";
 public const string EVENT_HUB_PASSWORD = "admin";
 public const string EVENT_HUB_TENANT_LIST = "listOfTenants";
 public const string EVENT_HUB_TENANT_HEADER = "xWSO2Tenant";
+public const string EVENT_HUB_LISTENER_ENDPOINTS = "eventListeningEndpoints";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";
