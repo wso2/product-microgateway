@@ -48,6 +48,7 @@ public type PilotDataProvider object {
         self.apiStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
         self.keyMapStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
         self.appStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
+
     }
 
     # Get Api details from `ApiDataStore`.
@@ -58,8 +59,15 @@ public type PilotDataProvider object {
     # + return - `Api` object if requested Api is found. If not `()`
     public function getApi(string tenantDomain, string name, string apiVersion) returns Api | () {
         string apiKey = name + ":" + apiVersion;
-
         return self.apiStore.getApi(tenantDomain, apiKey);
+    }
+
+    public function addApi(string tenantDomain,  Api api) {
+        self.apiStore.addApi(tenantDomain, api);
+    }
+
+    public function removeApi(string tenantDomain, Api api) {
+        self.apiStore.removeApi(tenantDomain, api);
     }
 
     # Get Key Mapping details from `KeyMappingDataStore`.
@@ -69,6 +77,14 @@ public type PilotDataProvider object {
     # + return - `KeyMap` object if requested Key Mapping is found. If not `()`
     public function getKeyMapping(string tenantDomain, string consumerKey) returns KeyMap | () {
         return self.keyMapStore.getMapping(tenantDomain, consumerKey);
+    }
+
+    public function addKeyMapping(string tenantDomain,  KeyMap keyMap) {
+        self.keyMapStore.addKeyMapping(tenantDomain, keyMap);
+    }
+
+    public function removeKeyMapping(string tenantDomain, KeyMap keyMap) {
+        self.keyMapStore.removeKeyMapping(tenantDomain, keyMap);
     }
 
     # Get Subscription details from `SubscriptionDataStore`.
@@ -93,7 +109,7 @@ public type PilotDataProvider object {
 
     # Get Application details from `ApplicationDataStore`.
     #
-    # # + tenantDomain - Tenant domain to which the application belongs
+    # + tenantDomain - Tenant domain to which the application belongs
     # + appId - Application Id of the application
     # + return - `Application` object if requested Application is found. If not `()`
     public function getApplication(string tenantDomain, int appId) returns Application | () {

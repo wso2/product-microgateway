@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/io;
 
 # Data holder for Key Mapping details available in Gateway Pilot node. KeyMapping object keeps
 # the mapping between an `Application` and a consumer key generated for an oauth application.
@@ -34,8 +33,9 @@ type KeyMappingDataStore object {
         self.pilotPassword = password;
         self.serviceContext = context + "/application-key-mappings";
         self.listOfTenants = listOfTenants;
-
-        self.fetchKeyMappings();
+        if (apimEventHubEnabled) {
+            future<()> keyMappingsFetch = start self.fetchKeyMappings();
+        }
     }
 
     # Retrieve a specific `KeyMap` object from the KeyMapping Data Store.
@@ -48,6 +48,29 @@ type KeyMappingDataStore object {
             return self.keyMaps.get(tenantDomain).get(consumerKey);
         }
         return ();
+    }
+
+    function addKeyMapping(string tenantDomain, KeyMap keyMap) {
+        map<KeyMap> keyMappingMap;
+        string mapKey = keyMap.consumerKey;
+        if (!self.keyMaps.hasKey(tenantDomain)) {
+            keyMappingMap = {};
+            keyMappingMap[mapKey] = keyMap;
+        } else {
+            keyMappingMap = self.keyMaps.get(tenantDomain);
+            keyMappingMap[mapKey] = keyMap;
+        }
+        lock {
+            //Writing event should be locked, due to worker threads are reading the map during request validations
+            self.keyMaps[tenantDomain] = keyMappingMap;
+        }
+    }
+
+    function removeKeyMapping(string tenantDomain, KeyMap keyMap) {
+        lock {
+            //Remove event should be locked, due to worker threads are reading the map during request validations
+            KeyMap removedKey = self.keyMaps.get(tenantDomain).remove(keyMap.consumerKey);
+        }
     }
 
     private function fetchKeyMappings() {
@@ -63,14 +86,16 @@ type KeyMappingDataStore object {
                     map<KeyMap> keyMap = {};
                     var payload = response.getJsonPayload();
                     if (payload is json) {
-                        io:println(KEY_APPLICATION_STORE, "key map list of tenant : " + tenant + " is : " + payload.toJsonString());
+                        printDebug(KEY_APPLICATION_STORE, "key map list of tenant : " + tenant + " is : " + payload.toJsonString());
                         json[] list = <json[]>payload.list;
                         printDebug(KEY_KEYMAP_STORE, "Received valid key mapping details");
                         foreach json jsonMap in list {
                             KeyMap mapping = {
                                 appId: <int>jsonMap.applicationId,
                                 consumerKey: jsonMap.consumerKey.toString(),
-                                keyType: jsonMap.keyType.toString()
+                                keyType: jsonMap.keyType.toString(),
+                                tenantDomain : tenant,
+                                keyManager : jsonMap.keyManager.toString()
                             };
                             keyMap[mapping.consumerKey] = mapping;
                         }

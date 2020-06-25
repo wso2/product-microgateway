@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/io;
 
 # Data holder for Api details available in Gateway Pilot node.
 # 
@@ -34,7 +33,9 @@ type ApiDataStore object {
         self.serviceContext = context + "/apis";
         self.listOfTenants = listOfTenants;
 
-        self.fetchApis();
+        if (apimEventHubEnabled) {
+            future<()> apisFetch = start self.fetchApis();
+        }
     }
 
     # Retrieve a specific `Api` object from the Api Data Store.
@@ -50,6 +51,30 @@ type ApiDataStore object {
 
     }
 
+    function addApi(string tenantDomain, Api api) {
+        map<Api> apiMap;
+        string apiKey = api.name + ":" + api.apiVersion;
+        if (!self.apis.hasKey(tenantDomain)) {
+            apiMap = {};
+            apiMap[apiKey] = api;
+        } else {
+            apiMap = self.apis.get(tenantDomain);
+            apiMap[apiKey] = api;
+        }
+        lock {
+            //Writing event should be locked, due to worker threads are reading the map during request validations
+            self.apis[tenantDomain] = apiMap;
+        }
+    }
+
+    function removeApi(string tenantDomain, Api api) {
+        string apiKey = api.name + ":" + api.apiVersion;
+        lock {
+            //Remove event should be locked, due to worker threads are reading the map during request validations
+            Api removedApi = self.apis.get(tenantDomain).remove(apiKey);
+        }
+    }
+
     private function fetchApis() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request apiReq = new;
@@ -62,12 +87,9 @@ type ApiDataStore object {
                 if (response is http:Response) {
                     map<Api> apiMap = {};
                     var payload = response.getJsonPayload();
-
                     if (payload is json) {
-                        io:println(KEY_APPLICATION_STORE, "API list of tenant : " + tenant + " is : " + payload.toJsonString());
+                        printDebug(KEY_API_STORE, "API list of tenant : " + tenant + " is : " + payload.toJsonString());
                         json[] list = <json[]>payload.list;
-                        printDebug(KEY_API_STORE, "Received valid api details");
-
                         foreach json jsonApi in list {
                             // TODO: substore: Map URL mapping attribute
                             Api api = {

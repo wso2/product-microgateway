@@ -20,7 +20,6 @@ public type Subscription record {|
     int appId = 1;
     string policyId = "";
     string state = "";
-    int tenantId = -1234;
     string tenantDomain = "carbon.super";
 |};
 
@@ -30,28 +29,18 @@ public type Application record {|
     string owner = "";
     string policyId = "";
     string tokenType = "";
-    int tenantId = -1234;
     string tenantDomain = "carbon.super";
     json[] groupIds?;
     json[] attributes?;
 |};
 
-public type ApplicationEvent record {|
-    int applicationId;
-    string applicationName = "";
-    string owner = "";
-    string applicationPolicy = "";
-    string tokenType = "";
-    int tenantId;
-    string tenantDomain;
-    json[] groupIds?;
-    json[] attributes?;
-|};
 
 public type KeyMap record {|
     int appId;
     string consumerKey = "";
     string keyType = "";
+    string tenantDomain = "carbon.super";
+    string keyManager = "Default";
 |};
 
 public type Api record {|
@@ -60,6 +49,7 @@ public type Api record {|
     string name = "";
     string apiVersion = "";
     string context = "";
+    string tenantDomain = "carbon.super";
     string policyId = "";
     any urlMaping?;
 |};

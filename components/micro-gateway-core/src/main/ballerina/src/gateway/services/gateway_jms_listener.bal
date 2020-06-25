@@ -20,17 +20,21 @@ import ballerina/lang.'array as arrays;
 import ballerina/lang.'string as str;
 import ballerina/stringutils;
 
+boolean apimEventHubEnabled = getConfigBooleanValue(EVENT_HUB_INSTANCE_ID, ENABLE, false);
+string notifyConnectionProviderUrl = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_LISTENER_ENDPOINTS,
+DEFAULT_JMS_CONNECTION_PROVIDER_URL);
+string notifyConnectionPassword = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_PASSWORD, DEFAULT_JMS_CONNECTION_PASSWORD);
+string notifyConnectionUsername = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_USERNAME, DEFAULT_JMS_CONNECTION_USERNAME);
 
 service gatewayNotificationService = service {
     resource function onMessage(jms:Message message) {
         if (message is jms:MapMessage) {
-            io:println("###### message recieved ");
             string? | error eventType = message.getString(NOTIFICATION_EVENT_TYPE);
             string? | error timestamp = message.getString(NOTIFICATION_EVENT_TIMESTAMP);
             string? | error event = message.getString(NOTIFICATION_EVENT);
 
             if (eventType is string && event is string) {
-                io:println("###### eventtype : " + eventType);
+                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType + " and event : " + event);
                 handleNotificationMessage(eventType, event);
             } else {
                 printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
@@ -49,9 +53,9 @@ public function startGatewayNotificationSubscriberService() returns @tainted jms
     // Initialize a JMS connection  with the provider.
     jms:Connection | error connection = trap jms:createConnection({
         initialContextFactory: jmsConnectionInitialContextFactory,
-        providerUrl: jmsConnectionProviderUrl,
-        username: jmsConnectionUsername,
-        password: jmsConnectionPassword
+        providerUrl: notifyConnectionProviderUrl,
+        username: notifyConnectionUsername,
+        password: notifyConnectionPassword
 
     });
     if (connection is error) {
@@ -89,12 +93,23 @@ public function startGatewayNotificationSubscriberService() returns @tainted jms
     }
 }
 
+public function initiateNotificationJmsListener() {
+    if (apimEventHubEnabled) {
+        jms:MessageConsumer | error gatewayNotificationSubscriber = trap startGatewayNotificationSubscriberService();
+        if (gatewayNotificationSubscriber is jms:MessageConsumer) {
+            printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "subscriber service for gateway notifications is started.");
+        } else {
+            printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error while starting subscriber service for gateway notofications.");
+        }
+    }
+}
+
 function handleNotificationMessage(string eventType, string encodedEvent ) {
     var decodedEvent = arrays:fromBase64(encodedEvent);
     if (decodedEvent is  byte[]) {
         var decodedString = str:fromBytes(decodedEvent);
         if (decodedString is string) {
-            printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS notification : " + decodedString);
+            printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS notification : " + decodedString);
             io:StringReader sr = new(decodedString, encoding = "UTF-8");
             json jsonEvent = checkpanic sr.readJson();
             printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS json value : " + jsonEvent.toJsonString());
@@ -107,6 +122,11 @@ function handleNotificationMessage(string eventType, string encodedEvent ) {
                 Application app = convertApplicationEventToApplicationDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS application to delete recieved : " + app.toString());
                 pilotDataProvider.removeApplication(<@untainted>app.tenantDomain, <@untainted>app);
+            } else if (stringutils:equalsIgnoreCase(API_CREATE_EVENT, eventType) ||
+                stringutils:equalsIgnoreCase(API_UPDATE_EVENT, eventType)) {
+                Api api = convertApiEventToApiDTO(jsonEvent);
+                printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS API to create recieved : " + api.toString());
+                pilotDataProvider.addApi(<@untainted>api.tenantDomain, <@untainted>api);
             } else if (stringutils:equalsIgnoreCase(SUBSCRIPTIONS_CREATE_EVENT, eventType) ||
                        stringutils:equalsIgnoreCase(SUBSCRIPTIONS_UPDATE_EVENT, eventType)) {
                 Subscription sub = convertSubscriptionEventToSubscriptionDTO(jsonEvent);
@@ -116,6 +136,10 @@ function handleNotificationMessage(string eventType, string encodedEvent ) {
                 Subscription sub = convertSubscriptionEventToSubscriptionDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS subscription to delete recieved : " + sub.toString());
                 pilotDataProvider.removeSubscription(<@untainted>sub.tenantDomain, <@untainted>sub);
+            } else if (stringutils:equalsIgnoreCase(APPLICATION_REGISTRATION_CREATE_EVENT, eventType)) {
+                KeyMap keyMap = convertKeyGenerationEventToKeyMapDTO(jsonEvent);
+                printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS key mapping event recived : " + keyMap.toString());
+                pilotDataProvider.addKeyMapping(<@untainted>keyMap.tenantDomain, <@untainted>keyMap);
             }
         } else {
             printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while decoding base 64 byte array to string", decodedString);
