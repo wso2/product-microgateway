@@ -29,8 +29,10 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
     //If application claim present in the jwt then its a self contained token. Can validate from the
     //claims present in the token
     if (customClaims is map<json> && customClaims.hasKey(APPLICATION)) {
-        subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
-        if(subscribedAPIList is json[]) {
+        if (customClaims.hasKey(SUBSCRIBED_APIS)) {
+            subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
+        }
+        if (subscribedAPIList is json[]) {
             return handleSubscribedAPIs(token, payload, subscribedAPIList, isValidationEnabled);
         } else if (isValidationEnabled){
             return false;
