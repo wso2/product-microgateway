@@ -58,6 +58,9 @@ public class GeneratorConstants {
     public static final String RESOURCE_LEVEL_PREFIX = "res_";
     public static final String APP_LEVEL_PREFIX = "app_";
     public static final String SUB_LEVEL_PREFIX = "sub_";
+    public static final String HYPHEN = "_hyphen_";
+    public static final String DOT = "_dot_";
+    public static final String SPACE = "_space_";
 
     /**
      * Enum defining the available types of throttle policies.
