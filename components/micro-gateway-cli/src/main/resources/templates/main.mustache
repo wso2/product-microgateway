@@ -4,6 +4,9 @@ public function main() {
     gateway:initNativeImpLog4jConfig();
     int totalResourceLength = 0;
     string projectName = "";
+
+    string qualifiedService = "";
+
     boolean isRequestValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
     gateway:REQUEST_VALIDATION_ENABLED, gateway:DEFAULT_REQUEST_VALIDATION_ENABLED);
     boolean isResponseValidationEnabled  = gateway:getConfigBooleanValue(gateway:VALIDATION_CONFIG_INSTANCE_ID,
@@ -14,6 +17,9 @@ public function main() {
     totalResourceLength = totalResourceLength +  {{cut qualifiedServiceName " "}}_service.length();
     gateway:populateAnnotationMaps("{{cut qualifiedServiceName " "}}", {{cut qualifiedServiceName " "}}, {{cut qualifiedServiceName " "}}_service);
     projectName = "{{projectName}}";
+    qualifiedService = "{{qualifiedServiceName}}";
+
+
     {{/each}}
     error? err = gateway:extractJAR(projectName);
     if (err is error) {
@@ -31,6 +37,43 @@ public function main() {
 
     {{>jwtRevocation}}
     startupExtension();
+    time:Time startedTime = time:currentTime();
+    io:println("Testing");
+    future<()> f1 = start dsData_Collector(startedTime);
 
     future<()> callhome = start gateway:invokeCallHome();
+}
+
+public function dsData_Collector(time:Time startedTime) {
+
+    int intervalInMillis = 60000;
+
+    task:Scheduler timer = new({
+        intervalInMillis: intervalInMillis,
+        initialDelayInMillis: 0
+    });
+
+    service service1 = service {
+        resource function onTrigger(time:Time startedTime) {
+            string url = gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, " ");
+            string path = gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PATH," ");
+
+            int counter = 0;
+            gateway:mainService(startedTime, projectName , url, qualifiedService);
+            runtime:sleep(1000);
+        }
+    };
+
+    var attachResult = timer.attach(service1, attachment = startedTime);
+    if (attachResult is error) {
+        io:println("Error attaching the service1.");
+        return;
+    }
+
+    var startResult = timer.start();
+    if (startResult is error) {
+        io:println("Starting the task is failed.");
+        return;
+    }
+    runtime:sleep(1000);
 }
