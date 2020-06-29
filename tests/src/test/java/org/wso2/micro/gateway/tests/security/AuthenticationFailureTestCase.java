@@ -62,11 +62,13 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
                         .getPath()));
         KeyValidationInfo info = new KeyValidationInfo();
         info.setStringResponse(response);
+        info.setTokenType(TestConstant.TOKEN_TYPE_INVALID_SUBSCRIPTION);
         invalidSubscriptionToken = pub.getAndRegisterAccessToken(info);
 
         String response1 = IOUtils.toString(new FileInputStream(
                 getClass().getClassLoader().getResource("keyManager/unauthorized.xml").getPath()));
         KeyValidationInfo info1 = new KeyValidationInfo();
+        info1.setTokenType(TestConstant.TOKEN_TYPE_INVALID_SCOPES);
         info1.setStringResponse(response1);
         invalidScopeToken = pub.getAndRegisterAccessToken(info1);
 
@@ -98,7 +100,7 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
     public void testWithInvalidScopes() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidScopeToken);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu_scope"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
         Assert.assertTrue(

@@ -55,6 +55,7 @@ public class MockHttpServer extends Thread {
     private String PubRestAPIBasePath = "/api/am/publisher/v1.1";
     private String AdminRestAPIBasePath = "/api/am/admin/v1.1";
     private String TMRestAPIBasePath = "/endpoints";
+    private String InternalDataContext = "/internal/data/v1";
     public final static String PROD_ENDPOINT_RESPONSE = "{\"type\": \"production\"}";
     public final static String SAND_ENDPOINT_RESPONSE = "{\"type\": \"sandbox\"}";
     public final static String PROD_ENDPOINT_NEW_RESPONSE = "{\"type\": \"new-production\"}";
@@ -337,6 +338,71 @@ public class MockHttpServer extends Thread {
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
                     exchange.close();
+                }
+            });
+            // Mock the introspection server.
+            httpServer.createContext("/oauth2/introspect", new HttpHandler() {
+                @Override
+                public void handle(HttpExchange httpExchange) throws IOException {
+                    String requestBody = IOUtils.toString(httpExchange.getRequestBody());
+                    String token = requestBody.split("token=")[1];
+                    byte[] response = MockAPIPublisher.getInstance().getIntrospectionResponse(token)
+                            .toString().getBytes();
+
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    httpExchange.getResponseBody().write(response);
+                    httpExchange.close();
+                }
+            });
+            // Mock the internal data endpoint (get Api)
+            httpServer.createContext(InternalDataContext + "/apis", new HttpHandler() {
+                @Override
+                public void handle(HttpExchange httpExchange) throws IOException {
+                    String apisResponse = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("api-get-response.json").getPath()));
+                    JSONObject apisResponseJSON = new JSONObject(apisResponse);
+                    byte[] response = apisResponseJSON.toString().getBytes();
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    httpExchange.getResponseBody().write(response);
+                    httpExchange.close();
+                }
+            });
+            // Mock the internal data endpoint (get application)
+            httpServer.createContext(InternalDataContext + "/applications", new HttpHandler() {
+                @Override
+                public void handle(HttpExchange httpExchange) throws IOException {
+                    String applicationsResponse = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("application-get-response.json").getPath()));
+                    JSONObject applicationsResponseJSON = new JSONObject(applicationsResponse);
+                    byte[] response = applicationsResponse.toString().getBytes();
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    httpExchange.getResponseBody().write(response);
+                    httpExchange.close();
+                }
+            });
+            // Mock the internal data endpoint (get subscription)
+            httpServer.createContext(InternalDataContext + "/subscriptions", new HttpHandler() {
+                @Override
+                public void handle(HttpExchange httpExchange) throws IOException {
+                    String subscriptionResponse = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("subscription-get-response.json").getPath()));
+                    JSONObject subscriptionResponseJSON = new JSONObject(subscriptionResponse);
+                    byte[] response = subscriptionResponseJSON.toString().getBytes();
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    httpExchange.getResponseBody().write(response);
+                    httpExchange.close();
+                }
+            });// Mock the internal data endpoint (get application key mappings)
+            httpServer.createContext(InternalDataContext + "/application-key-mappings", new HttpHandler() {
+                @Override
+                public void handle(HttpExchange httpExchange) throws IOException {
+                    String keyMappingResponse = IOUtils.toString(new FileInputStream(
+                            getClass().getClassLoader().getResource("key-mapping-response.json").getPath()));
+                    JSONObject keyMappingResponseJSON = new JSONObject(keyMappingResponse);
+                    byte[] response = keyMappingResponseJSON.toString().getBytes();
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                    httpExchange.getResponseBody().write(response);
+                    httpExchange.close();
                 }
             });
             httpServer.start();

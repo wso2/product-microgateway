@@ -1,0 +1,60 @@
+{
+  "count":5,
+  "list":[
+    {
+      "consumerKey": "ksBCR_Xqsp0ypRWtFBm9QWFgvCoa",
+      "keyType": "PRODUCTION",
+      "applicationId": 2,
+      "keyManager": "Default"
+    },
+    {
+      "applicationId":2,
+      "consumerKey":"O236v9XjxRm4unRAJfR_b6My0wIa",
+      "keyType":"SANDBOX",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":2,
+      "consumerKey":"O236v9XjxSm4unRAJfR_b6My0wIa",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":3,
+      "consumerKey":"APP_THROTTLING_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":4,
+      "consumerKey":"SUBSCRIPTION_THROTTLING_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":5,
+      "consumerKey":"5_MIN_SUB_THROTTLING_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":6,
+      "consumerKey":"5_MIN_APP_THROTTLING_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":7,
+      "consumerKey":"INVALID_APP_POLICY_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    },
+    {
+      "applicationId":8,
+      "consumerKey":"INVALID_SUB_POLICY_CK",
+      "keyType":"PRODUCTION",
+      "keyManager":"Default"
+    }
+  ],
+  "pagination":null
+}

@@ -1,0 +1,105 @@
+{
+  "PRODUCTION": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"ksBCR_Xqsp0ypRWtFBm9QWFgvCoa",
+    "username":"admin@carbon.super"
+  },
+  "SANDBOX": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"O236v9XjxRm4unRAJfR_b6My0wIa",
+    "username":"admin@carbon.super"
+  },
+  "INVALID_SCOPES": {
+    "nbf":9223372036854775807,
+    "scope":"some other scope",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"O236v9XjxSm4unRAJfR_b6My0wIa",
+    "username":"admin@carbon.super"
+  },
+  "INVALID_SUBSCRIPTION": {
+    "nbf":9223372036854775807,
+    "scope":"pizza:menu default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"O236v9XjxdddsunRAJfR_b6My0wIa",
+    "username":"admin@carbon.super"
+  },
+  "SUBSCRIPTION_THROTTLING": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"SUBSCRIPTION_THROTTLING_CK",
+    "username":"admin@carbon.super"
+  },
+  "APPLICATION_THROTTLING": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"APP_THROTTLING_CK",
+    "username":"admin@carbon.super"
+  },
+  "5_MIN_SUB_THROTTLING": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"5_MIN_SUB_THROTTLING_CK",
+    "username":"admin@carbon.super"
+  },
+  "5_MIN_APP_THROTTLING": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"5_MIN_APP_THROTTLING_CK",
+    "username":"admin@carbon.super"
+  },
+  "INVALID_APP_POLICY": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"INVALID_APP_POLICY_CK",
+    "username":"admin@carbon.super"
+  },
+  "INVALID_SUB_POLICY": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "client_id":"INVALID_SUB_POLICY_CK",
+    "username":"admin@carbon.super"
+  },
+  "inactive": {
+    "active": false
+  }
+}

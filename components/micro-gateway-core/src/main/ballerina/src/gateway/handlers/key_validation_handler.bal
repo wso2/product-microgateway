@@ -31,11 +31,13 @@ public type KeyValidationHandler object {
     public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     public oauth2:InboundOAuth2Provider introspectProvider;
     public boolean externalKM;
+    private boolean validateSubscriptions;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.introspectProvider = introspectProvider;
         self.externalKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, EXTERNAL, DEFAULT_EXTERNAL);
+        self.validateSubscriptions = getConfigBooleanValue(SECURITY_INSTANCE_ID, SECURITY_VALIDATE_SUBSCRIPTIONS, DEFAULT_VALIDATE_SUBSCRIPTIONS);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -69,43 +71,44 @@ public type KeyValidationHandler object {
         string headerValue = req.getHeader(authHeader);
         string credential = <@untainted>headerValue.substring(6, headerValue.length()).trim();
         string authHeaderName = getAuthorizationHeader(invocationContext);
+        APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
         boolean|auth:Error authenticationResult = false;
-        if (self.externalKM) {
-            authenticationResult = self.introspectProvider.authenticate(credential);
-            if (authenticationResult is auth:Error) {
-                return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
-            } else {
-                AuthenticationContext authenticationContext = {};
-                authenticationContext.authenticated = authenticationResult;
-                authenticationContext.keyType = PRODUCTION_KEY_TYPE;
-                runtime:Principal? principal = invocationContext?.principal;
-                if (principal is runtime:Principal) {
-                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
-                }
-                invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                return authenticationResult;
-            }
+        authenticationResult = self.introspectProvider.authenticate(credential);
+        if (authenticationResult is auth:Error) {
+            return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
         } else {
-            authenticationResult = self.oauth2KeyValidationProvider.authenticate(credential);
-            if (authenticationResult is boolean) {
-                if (authenticationResult) {
-                    AuthenticationContext authenticationContext = {};
-                    authenticationContext = <AuthenticationContext>invocationContext.attributes[
-                    AUTHENTICATION_CONTEXT];
-
-                    if (authenticationContext?.callerToken is string && authenticationContext?.callerToken != () 
-                            && authenticationContext?.callerToken != "") {
-                        printDebug(KEY_AUTHN_FILTER, "Caller token: " + <string>authenticationContext?.
-                        callerToken);
-                        req.setHeader(jwtheaderName, <string>authenticationContext?.callerToken);
-                    }
+            runtime:Principal? principal = invocationContext?.principal;
+            if (principal is runtime:Principal) {
+                AuthenticationContext authenticationContext = {};
+                authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                string apiName = "";
+                string apiVersion = "";
+                if (apiConfig is APIConfiguration) {
+                    apiName = apiConfig.name;
+                    apiVersion = apiConfig.apiVersion;
                 }
-                return authenticationResult;
-            } else {
-                return prepareAuthenticationError("Failed to authenticate with key validation auth handler.", authenticationResult);
+                map<any>? claims = principal?.claims;
+                any clientId = claims[CLIENT_ID];
+                boolean isAllowed = false;
+                if (clientId != () && clientId is string) {
+                   [authenticationContext, isAllowed] =
+                     validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
+                     self.validateSubscriptions);
+                   invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                   invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                   return isAllowed;    
+                } else if (clientId == () && self.externalKM) {
+                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                    return authenticationResult;
+                } else {
+                    setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+                    return false;
+                }
             }
         }
+        setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+        return false;
     }
 
 };

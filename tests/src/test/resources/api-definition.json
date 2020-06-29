@@ -103,6 +103,47 @@
         ]
       }
     },
+    "/menu_scope": {
+      "get": {
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "description": "Return a list of available menu items",
+        "responses": {
+          "200": {
+            "headers": {},
+            "description": "OK. List of APIs is returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MenuItem"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. Empty body because the client has already the latest\nversion of the requested resource."
+          },
+          "406": {
+            "description": "Not Acceptable. The requested media type is not supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "pizzashack_auth": ["pizza:menu"]
+          }
+        ]
+      }
+    },
     "/basic-menu": {
       "get": {
         "x-auth-type": "Application & Application User",
