@@ -287,6 +287,8 @@ fi
 LOG4J_CONFIGURATION_FILE="${GW_HOME}/conf/log4j2.properties"
 if [ -f "$LOG4J_CONFIGURATION_FILE" ]; then
   export JAVA_OPTS="$JAVA_OPTS -Dlog4j.configurationFile=${LOG4J_CONFIGURATION_FILE}"
+else
+  export JAVA_OPTS="$JAVA_OPTS -Dlog4j.configurationFactory=org.wso2.micro.gateway.core.logging.MgwLog4j2ConfigurationFactory"
 fi
 
 if [ ! "$CMD" = "stop" ]; then

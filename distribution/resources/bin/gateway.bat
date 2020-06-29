@@ -161,7 +161,7 @@ REM Start the gateway using internal ballerina distribution as the runtime
             EXIT /B %ERRORLEVEL%
         ) ELSE (
             REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReade' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append '%GW_HOME%\logs\microgateway.log'
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append '%GW_HOME%\logs\microgateway.log'
             EXIT /B %ERRORLEVEL%
         )
     )
@@ -254,6 +254,8 @@ REM add the system variable containing log4j properties file
     SET LOG4J_CONFIGURATION_FILE=%GW_HOME%\conf\log4j2.properties
     IF EXIST %LOG4J_CONFIGURATION_FILE% (
         SET JAVA_ARGS=%JAVA_ARGS% -Dlog4j.configurationFile=%LOG4J_CONFIGURATION_FILE%
+    ) ELSE (
+        SET JAVA_ARGS=%JAVA_ARGS% -Dlog4j.configurationFile=org.wso2.micro.gateway.core.logging.MgwLog4j2ConfigurationFactory
     )
     EXIT /B
 REM -----------------------------------------------------------------------------
