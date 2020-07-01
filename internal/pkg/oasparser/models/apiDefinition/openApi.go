@@ -21,13 +21,18 @@ package apiDefinition
 import (
 	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/config"
-	"log"
+	"github.com/wso2/micro-gw/configs"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/url"
 	"strconv"
 	"strings"
 )
 
+/**
+ * Set openApi3 data to mgwSwagger  Instance.
+ *
+ * @param swagger3  OpenApi3 unmarshalled data
+ */
 func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.swaggerVersion = swagger3.OpenAPI
 	if swagger3.Info != nil {
@@ -36,7 +41,7 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 		swagger.version = swagger3.Info.Version
 	}
 
-	swagger.vendorExtensible = converExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = SetResourcesOpenApi(swagger3)
 
 	if IsServerUrlIsAvailable(swagger3) {
@@ -47,6 +52,14 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	}
 }
 
+/**
+ * Set swagger3 resource path details to mgwSwagger  Instance.
+ *
+ * @param path  Resource path
+ * @param pathtype  Path type(Get, Post ... )
+ * @param operation  Operation type
+ * @return Resource  MgwSwagger resource instance
+ */
 func setOperationOpenApi(path string, pathtype string, operation *openapi3.Operation) Resource {
 	var resource Resource
 	if operation != nil {
@@ -59,11 +72,17 @@ func setOperationOpenApi(path string, pathtype string, operation *openapi3.Opera
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: converExtensibletoReadableFormat(operation.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(operation.ExtensionProps)}
 	}
 	return resource
 }
 
+/**
+ * Set swagger3 all resource to mgwSwagger resources.
+ *
+ * @param openApi  Swagger3 unmarshalled data
+ * @return []Resource  MgwSwagger resource array
+ */
 func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
 	if openApi.Paths != nil {
@@ -91,6 +110,12 @@ func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 	return resources
 }
 
+/**
+ * Retrieve host, basepath and port from the endpoint defintion from of the swaggers.
+ *
+ * @param rawUrl  RawUrl defintion
+ * @return Endpoint  Endpoint instance
+ */
 func getHostandBasepathandPort(rawUrl string) Endpoint {
     var (
     	basepath string
@@ -102,7 +127,7 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 	}
 	u, err := url.Parse(rawUrl)
 	if err != nil {
-		log.Fatal(err)
+		logger.LoggerOasparser.Fatal(err)
 	}
 
 	host = u.Hostname()
@@ -110,20 +135,26 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 	if u.Port() != "" {
 		u32, err := strconv.ParseUint(u.Port(), 10, 32)
 		if err != nil {
-			log.Println("Error passing port value to mgwSwagger", err)
+			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
 		}
 		port = uint32(u32)
 	} else {
-		//read default port from config
-		conf, errReadConfig := config.ReadConfigs()
+		//read default port from configs
+		conf, errReadConfig := configs.ReadConfigs()
 		if errReadConfig != nil {
-			log.Fatal("Error loading configuration. ", errReadConfig)
+			logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		}
 		port = conf.Envoy.ApiDefaultPort
 	}
 	return Endpoint{Host: host, Basepath: basepath, Port: port}
 }
 
+/**
+ * Check the availability od server url in openApi3
+ *
+ * @param swagger3  Swagger3 unmarshalled data
+ * @return bool  Bool value of availability
+ */
 func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 	if swagger3.Servers != nil {
 		if len(swagger3.Servers) > 0 && (swagger3.Servers[0].URL != "") {
@@ -136,17 +167,23 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 	}
 }
 
-func converExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
+/**
+ * Unmarshall the vendo extensible in open api3.
+ *
+ * @param vendorExtensible  VendorExtensible data of open api3
+ * @return map[string]interface{}  Map of the vendorExtensible
+ */
+func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
 	jsnRawExtensible := vendorExtensible.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		log.Println("Error unmarshelinn vendor extenstions: ",err)
+		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ",err)
 	}
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
 	if err != nil {
-		log.Println("error:", err)
+		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
 	}
 	return extensible
 }

@@ -14,24 +14,19 @@
  *  limitations under the License.
  *
  */
-package main
+package logging
 
-import (
-	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/cmd/microgateway"
-	_ "github.com/wso2/micro-gw/internal/pkg/logging"
-	"os"
+import "github.com/sirupsen/logrus"
+
+const (
+    //LOG_FILE_NAME = "resources/logs/microgateway.log"
+    DEFAULT_LOG_LEVEL = logrus.InfoLevel
+
+    //log levels
+	LEVEL_PANIC = "PANC"
+	LEVEL_FATAL = "FATL"
+	LEVEL_ERROR = "ERRO"
+	LEVEL_WARN  = "WARN"
+	LEVEL_INFO  = "INFO"
+	LEVEL_DEBUG = "DEBG"
 )
-
-
-func main() {
-
-	var file string
-	if len(os.Args) > 1 {
-		file = os.Args[1]
-		logger.Debug(file)
-	}
-
-	microgateway.StartMicroGateway(os.Args)
-
-}

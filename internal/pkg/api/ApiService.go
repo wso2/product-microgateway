@@ -18,18 +18,18 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 //This package contains the REST API for the control plane configurations
 
 type RESTService struct{}
 
-// TODO: Implement. Simply copy the swagger content to the location defined in the config or directly deploy the api.
+// TODO: Implement. Simply copy the swagger content to the location defined in the configs or directly deploy the api.
 // Deploy API in microgateway.
 func (rest *RESTService) ApiPOST(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Your API is added")
+	logger.LoggerApi.Info(w, "Your API is added")
 
 }
 

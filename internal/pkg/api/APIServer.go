@@ -18,15 +18,19 @@ package api
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/internal/pkg/confTypes"
-	"log"
+	"github.com/wso2/micro-gw/configs/confTypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/http"
 )
 
 type Server struct {
 }
 
+/**
+ * Start the api server.
+ *
+ * @param config   Control plane configs
+ */
 func Start(config *confTypes.Config) {
 	router := mux.NewRouter()
 
@@ -36,17 +40,17 @@ func Start(config *confTypes.Config) {
 	apiRouter.HandleFunc("/add", apiService.ApiPOST).Methods("POST")
 	// TODO: Immplement
 	//Configuration specific routes
-	//configRouter := router.PathPrefix("/config").Subrouter()
+	//configRouter := router.PathPrefix("/configs").Subrouter()
 	//
 	//authRouter := router.PathPrefix("/apikey").Subrouter()
 	//configService := new(ConfigService)
 	serverAddr := config.Server.IP + ":" + string(config.Server.Port)
-	//certFile := config.TLS.Alias
+	//certFile := configs.TLS.Alias
 
 	server := &http.Server{
 		Addr:    serverAddr,
 		Handler: router,
 	}
-	logrus.Info("Starting API Server at ", serverAddr)
-	log.Fatal(server.ListenAndServe())
+	logger.LoggerApi.Info("Starting API Server at ", serverAddr)
+	logger.LoggerApi.Fatal(server.ListenAndServe())
 }

@@ -23,14 +23,30 @@ import (
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/micro-gw/config"
+	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/wso2/micro-gw/configs"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"log"
 	"strings"
 	"time"
 )
 
+/**
+ * Create envoy routes along with clusters and endpoint instances.
+ * This create routes for all the swagger resources and link to clusters.
+ * Create clusters for api level production and sandbox endpoints.
+ * If a resource has resource level endpoint, it create another cluster and
+ * link it. If resources doesn't has resource level endpoints, those clusters are linked
+ * to the api level clusters.
+ *
+ * @param mgwSwagger  mgwSwagger instance
+ * @return []*v2route.Route  Production routes
+ * @return []*v2.Cluster  Production clusters
+ * @return []*core.Address  Production endpoints
+ * @return []*v2route.Route  Sandbox routes
+ * @return []*v2.Cluster  Sandbox clusters
+ * @return []*core.Address  Sandbox endpoints
+ */
 func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.Route, []*v2.Cluster, []*core.Address, []*v2route.Route, []*v2.Cluster, []*core.Address) {
 	var (
 		routesProd           []*v2route.Route
@@ -69,7 +85,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 		endpointsProd = append(endpointsProd, &apilevelAddressP)
 
 	} else {
-		log.Println("API level Producton endpoints are not defined")
+		logger .LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
 	for ind, resource := range mgwSwagger.GetResources() {
 
@@ -122,17 +138,24 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
 			routesProd = append(routesProd, &routeP)
 
 		} else {
-			log.Fatalf("Producton endpoints are not defined")
+			logger.LoggerOasparser.Fatalf("Producton endpoints are not defined")
 		}
 	}
 
 	return routesProd, clustersProd, endpointsProd, routesSand, clustersSand, endpointsSand
 }
 
+/**
+ * Create a cluster.
+ *
+ * @param address   Address which has host and port
+ * @return v2.Cluster  Cluster instance
+ */
 func createCluster(address core.Address, clusterName string) v2.Cluster {
-	conf, errReadConfig := config.ReadConfigs()
+	logger.LoggerOasparser.Debug("creating a cluster....")
+	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
-		log.Fatal("Error loading configuration. ", errReadConfig)
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
 	h := &address
@@ -163,7 +186,17 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 	return cluster
 }
 
+/**
+ * Create a route.
+ *
+ * @param xWso2Basepath   Xwso2 basepath
+ * @param endpoint  Endpoint
+ * @param resourcePath  Resource path
+ * @param clusterName  Name of the cluster
+ * @return v2route.Route  Route instance
+ */
 func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourcePath string, clusterName string) v2route.Route {
+	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		route v2route.Route
 		action *v2route.Route_Route
@@ -229,7 +262,14 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 	return route
 }
 
-//generates route paths for the api resources
+/**
+ * Generates route paths for the api resources.
+ *
+ * @param xWso2Basepath   Xwso2 basepath
+ * @param basePath  Default basepath
+ * @param resourcePath  Resource path
+ * @return string  new route path
+ */
 func GenerateRoutePaths(xWso2Basepath string, basePath string, resourcePath string) string {
 	newPath := ""
 	if xWso2Basepath != "" {
@@ -244,7 +284,14 @@ func GenerateRoutePaths(xWso2Basepath string, basePath string, resourcePath stri
 	return newPath
 }
 
-//generates regex for the resources which have path paramaters.
+/**
+ * Generates regex for the resources which have path paramaters.
+ * If path has path parameters ({id}), append a regex pattern (pathParaRegex).
+ * To avoid query parameter issues, add a regex pattern ( endRegex) for end of all routes.
+ *
+ * @param fullpath   resource full path
+ * @return string  new route path
+ */
 func GenerateRegex(fullpath string) string {
 	pathParaRegex := "([^/]+)"
 	endRegex := "(\\?([^/]+))?"

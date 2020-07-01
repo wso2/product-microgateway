@@ -22,17 +22,24 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
+/**
+ * Generate mgw swagger instance.
+ *
+ * @param location   Swagger file location
+ * @return []apiDefinition.MgwSwagger  Mgw swagger instances as a array
+ * @return error  Error
+ */
 func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 	var mgwSwaggers []apiDefinition.MgwSwagger
 
 	files, err := ioutil.ReadDir(location)
 	if err != nil {
-		log.Fatal("Error reading", location, "directory:", err)
+		logger.LoggerOasparser.Fatal("Error reading", location, "directory:", err)
 	}
 
 	for _, f := range files {
@@ -41,10 +48,10 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 
 		// if we os.Open returns an error then handle it
 		if err != nil {
-			log.Fatal("Error opening a api yaml file:", err)
+			logger.LoggerOasparser.Fatal("Error opening a api yaml file:", err)
 		}
 		//fmt.Println("Successfully Opened open api file",f.Name())
-		log.Println("Successfully Opened open api file", f.Name())
+		logger.LoggerOasparser.Info("Successfully Opened open api file", f.Name())
 
 		// defer the closing of our jsonFile so that we can parse it later on
 		defer openApif.Close()
@@ -59,6 +66,12 @@ func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
 	return mgwSwaggers, err
 }
 
+/**
+ * Get mgw swagger instance.
+ *
+ * @param apiContent   Api content as a byte array
+ * @return apiDefinition.MgwSwagger  Mgw swagger instance
+ */
 func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 	var mgwSwagger apiDefinition.MgwSwagger
 
@@ -75,7 +88,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 		err = json.Unmarshal(apiJsn, &ApiData2)
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			log.Println("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
 		} else {
 			mgwSwagger.SetInfoSwagger(ApiData2)
 		}
@@ -88,7 +101,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			log.Println("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
 		} else {
 			mgwSwagger.SetInfoOpenApi(*ApiData3)
 		}
@@ -98,7 +111,12 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 	return mgwSwagger
 }
 
-
+/**
+ * Check availability of endpoint.
+ *
+ * @param endpoints  Api endpoints array
+ * @return bool Availability as a bool value
+ */
 func IsEndpointsAvailable(endpoints []apiDefinition.Endpoint) bool {
 	if len(endpoints) > 0 {
 		return true

@@ -14,24 +14,34 @@
  *  limitations under the License.
  *
  */
-package main
+package confTypes
 
-import (
-	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/cmd/microgateway"
-	_ "github.com/wso2/micro-gw/internal/pkg/logging"
-	"os"
-)
+type pkg struct {
+	Name     string
+	LogLevel string
+}
 
+type accessLog struct {
+	LogFile string
+	Format string
+}
 
-func main() {
+// The log configuration struct.
+type LogConfig struct {
 
-	var file string
-	if len(os.Args) > 1 {
-		file = os.Args[1]
-		logger.Debug(file)
+	Logfile string
+	LogLevel  string
+	// log rotation parameters.
+	Rotation struct {
+		IP   string
+		Port string
+		MaxSize  int // megabytes
+		MaxBackups  int
+		MaxAge  int    //days
+		Compress  bool
 	}
 
-	microgateway.StartMicroGateway(os.Args)
+	Pkg        []pkg
+	AccessLogs accessLog
 
 }

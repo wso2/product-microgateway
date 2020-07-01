@@ -140,7 +140,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Basepath: "/api/v2",
 				Port:     8000,
 			},
-			message: "when port is not provided",  //here should find a way to readi config in tests
+			message: "when port is not provided",  //here should find a way to readi configs in tests
 		},
 		{
 			input: "petstore.io:8000/api/v2",

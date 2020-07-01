@@ -17,26 +17,29 @@
 package microgateway
 
 import (
-	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	logger "github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/configs"
 	"github.com/wso2/micro-gw/internal/pkg/mgw"
-	"log"
 )
 
 func initServer() error {
 	return nil
 }
 
+/**
+ * Start the control plane.
+ *
+ */
 func StartMicroGateway(args []string) {
 
-	logrus.Info("Starting Microgateway")
+	logger.Info("Starting Microgateway")
 	err := initServer()
 	if err != nil {
-		log.Fatal("Error starting the control plane", err)
+		logger.Fatal("Error starting the control plane", err)
 	}
-	conf, errReadConfig := config.ReadConfigs()
+	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
-		log.Fatal("Error loading configuration. ", errReadConfig)
+		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	mgw.Run(conf)
 }

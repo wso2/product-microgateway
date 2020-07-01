@@ -19,22 +19,32 @@ package oasparser
 //package envoy_config_generator
 
 import (
-	"fmt"
 	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"log"
 	"strings"
 )
 
+/**
+ * Get all production resources for envoy.
+ *
+ * @param location  Location of swagger files
+ * @return []types.Resource Production listeners
+ * @return []types.Resource Production clusters
+ * @return []types.Resource Production routes
+ * @return []types.Resource Production endpoints
+ */
 func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
+	logger.LoggerOasparser.Debug("debug check....................")
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Fatal("Error Generating mgwSwagger struct:", err)
+		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
+
 	}
 
 	var (
@@ -65,19 +75,28 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 		envoyNodeProd.SetEndpoints(endpointsP)
 
 	} else {
-		log.Println("No Api definitions found")
+		logger.LoggerOasparser.Error("No Api definitions found")
 	}
 
-	fmt.Println(len(routesP), "routes are generated successfully")
-	fmt.Println(len(clustersP), "clusters are generated successfully")
-	fmt.Println(len(endpointsP), "endpoints are generated successfully")
+	logger.LoggerOasparser.Info(len(routesP), " routes are generated successfully")
+	logger.LoggerOasparser.Info(len(clustersP), " clusters are generated successfully")
+	logger.LoggerOasparser.Info(len(endpointsP), " endpoints are generated successfully")
 	return envoyNodeProd.GetSources()
 }
 
+/**
+ * Get all sandbox resources for envoy.
+ *
+ * @param location  Location of swagger files
+ * @return []types.Resource sandbox listeners
+ * @return []types.Resource sandbox clusters
+ * @return []types.Resource sandbox routes
+ * @return []types.Resource sandbox endpoints
+ */
 func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
 	if err != nil {
-		log.Fatal("Error Generating mgwSwagger struct:", err)
+		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
 	}
 	//fmt.Println(mgwSwagger)
 	var (
@@ -110,7 +129,7 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 		envoyNodeSand.SetRoutes(routesS)
 		envoyNodeSand.SetEndpoints(endpointsS)
 	} else {
-		log.Println("No Api definitions found")
+		logger.LoggerOasparser.Error("No Api definitions found")
 	}
 
 	return envoyNodeSand.GetSources()

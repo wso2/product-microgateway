@@ -22,11 +22,17 @@ import (
 	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
-func GetHttpFilters() []*hcm.HttpFilter {
+/**
+ * Append all the http filters.
+ *
+ * @return []*hcm.HttpFilter  Http filter set as a array
+ */
+func getHttpFilters() []*hcm.HttpFilter {
 	//extAauth := GetExtAauthzHttpFilter()
-	router := GetRouterHttpFilter()
+	router := getRouterHttpFilter()
 
 	httpFilters := []*hcm.HttpFilter{
 		//&extAauth,
@@ -36,11 +42,21 @@ func GetHttpFilters() []*hcm.HttpFilter {
 	return httpFilters
 }
 
-func GetRouterHttpFilter() hcm.HttpFilter {
+/**
+ * Get router http filter.
+ *
+ * @return hcm.HttpFilter  Http filter instance
+ */
+func getRouterHttpFilter() hcm.HttpFilter {
 	return hcm.HttpFilter{Name: wellknown.Router}
 }
 
-func GetExtAauthzHttpFilter() hcm.HttpFilter {
+/**
+ * Get ExtAauthz http filter.
+ *
+ * @return hcm.HttpFilter  Http filter instance
+ */
+func getExtAauthzHttpFilter() hcm.HttpFilter {
 	extAuthzConfig := &envoyconfigfilterhttpextauthzv2.ExtAuthz{
 		WithRequestBody: &envoyconfigfilterhttpextauthzv2.BufferSettings{
 			MaxRequestBytes:     1024,
@@ -58,7 +74,7 @@ func GetExtAauthzHttpFilter() hcm.HttpFilter {
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
-		panic(err2)
+		logger.LoggerOasparser.Error(err2)
 	}
 	extAuthzFilter := hcm.HttpFilter{
 		Name: "envoy.filters.http.ext_authz",
