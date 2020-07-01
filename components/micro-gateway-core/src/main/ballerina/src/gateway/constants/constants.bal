@@ -317,6 +317,7 @@ public const string CONSUMER_KEY_CLAIM = "consumerKeyClaim";
 public const string ISSUER_CLAIMS = "claims";
 public const string PRINCIPAL = "principal";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
+public const string JWKS_URL = "jwksURL";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 
@@ -433,6 +434,7 @@ public const string EVENT_HUB_PASSWORD = "admin";
 public const string EVENT_HUB_TENANT_LIST = "listOfTenants";
 public const string EVENT_HUB_TENANT_HEADER = "xWSO2Tenant";
 public const string EVENT_HUB_LISTENER_ENDPOINTS = "eventListeningEndpoints";
+public const string ALL_TENANTS = "ALL";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";

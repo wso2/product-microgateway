@@ -66,8 +66,7 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
         string apiName = apiConfig.name;
         string apiVersion = apiConfig.apiVersion;
         string apiProvider = apiConfig.publisher;
-        string tenantDomain = getTenantFromBasePath(invocationContext.attributes[API_CONTEXT].toString()) ;
-        [authenticationContext, isAllowed] = validateSubscriptionFromDataStores(token, tenantDomain, consumerKey,
+        [authenticationContext, isAllowed] = validateSubscriptionFromDataStores(token, consumerKey,
                                                 apiName, apiVersion, isValidationEnabled);
     }
 

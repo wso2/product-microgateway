@@ -34,40 +34,37 @@ public type PilotDataProvider object {
     private string username;
     private string password;
     private string serviceContext;
-    private string[]|error listOfTenants;
     private http:Client gatewayPilotEndpoint;
 
     public function __init(http:Client gatewayPilotEndpoint) {
         self.username = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_USERNAME, DEFAULT_PILOT_USERNAME);
         self.password = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_PASSWORD, DEFAULT_PILOT_PASSWORD);
         self.serviceContext = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_INT_CONTEXT, DEFAULT_PILOT_INT_CONTEXT);
-        self.listOfTenants = string[].constructFrom(getConfigArrayValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_TENANT_LIST));
         self.gatewayPilotEndpoint = gatewayPilotEndpoint;
 
-        self.subStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
-        self.apiStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
-        self.keyMapStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
-        self.appStore = new(self.username, self.password, self.serviceContext, self.listOfTenants);
+        self.subStore = new(self.username, self.password, self.serviceContext);
+        self.apiStore = new(self.username, self.password, self.serviceContext);
+        self.keyMapStore = new(self.username, self.password, self.serviceContext);
+        self.appStore = new(self.username, self.password, self.serviceContext);
 
     }
 
     # Get Api details from `ApiDataStore`.
     #
-    # + tenantDomain - Tenant domain of API
     # + name - Api name
     # + apiVersion - Api version
     # + return - `Api` object if requested Api is found. If not `()`
-    public function getApi(string tenantDomain, string name, string apiVersion) returns Api | () {
+    public function getApi(string name, string apiVersion) returns Api | () {
         string apiKey = name + ":" + apiVersion;
-        return self.apiStore.getApi(tenantDomain, apiKey);
+        return self.apiStore.getApi(apiKey);
     }
 
-    public function addApi(string tenantDomain,  Api api) {
-        self.apiStore.addApi(tenantDomain, api);
+    public function addApi(Api api) {
+        self.apiStore.addApi(api);
     }
 
-    public function removeApi(string tenantDomain, Api api) {
-        self.apiStore.removeApi(tenantDomain, api);
+    public function removeApi(Api api) {
+        self.apiStore.removeApi(api);
     }
 
     # Get Key Mapping details from `KeyMappingDataStore`.
@@ -75,16 +72,16 @@ public type PilotDataProvider object {
     # + tenantDomain - Tenant domain to which the application belongs to.
     # + consumerKey - Consumer key of the application
     # + return - `KeyMap` object if requested Key Mapping is found. If not `()`
-    public function getKeyMapping(string tenantDomain, string consumerKey) returns KeyMap | () {
-        return self.keyMapStore.getMapping(tenantDomain, consumerKey);
+    public function getKeyMapping(string consumerKey) returns KeyMap | () {
+        return self.keyMapStore.getMapping(consumerKey);
     }
 
-    public function addKeyMapping(string tenantDomain,  KeyMap keyMap) {
-        self.keyMapStore.addKeyMapping(tenantDomain, keyMap);
+    public function addKeyMapping(KeyMap keyMap) {
+        self.keyMapStore.addKeyMapping(keyMap);
     }
 
-    public function removeKeyMapping(string tenantDomain, KeyMap keyMap) {
-        self.keyMapStore.removeKeyMapping(tenantDomain, keyMap);
+    public function removeKeyMapping(KeyMap keyMap) {
+        self.keyMapStore.removeKeyMapping(keyMap);
     }
 
     # Get Subscription details from `SubscriptionDataStore`.
@@ -93,18 +90,18 @@ public type PilotDataProvider object {
     # + appId - Application Id of the subscription
     # + apiId - Api Id of the subscription
     # + return - `Subscription` object if requested Subscription is found. If not `()`
-    public function getSubscription(string tenantDomain, int appId, int apiId) returns Subscription | () {
+    public function getSubscription(int appId, int apiId) returns Subscription | () {
         string subKey = appId.toString() + ":" + apiId.toString();
 
-        return self.subStore.getSubscription(tenantDomain, subKey);
+        return self.subStore.getSubscription(subKey);
     }
 
-    public function addSubscription(string tenantDomain,  Subscription sub) {
-        self.subStore.addSubscription(tenantDomain, sub);
+    public function addSubscription(Subscription sub) {
+        self.subStore.addSubscription(sub);
     }
 
-    public function removeSubscription(string tenantDomain, Subscription sub) {
-        self.subStore.removeSubscription(tenantDomain, sub);
+    public function removeSubscription(Subscription sub) {
+        self.subStore.removeSubscription(sub);
     }
 
     # Get Application details from `ApplicationDataStore`.
@@ -112,17 +109,17 @@ public type PilotDataProvider object {
     # + tenantDomain - Tenant domain to which the application belongs
     # + appId - Application Id of the application
     # + return - `Application` object if requested Application is found. If not `()`
-    public function getApplication(string tenantDomain, int appId) returns Application | () {
+    public function getApplication(int appId) returns Application | () {
         string appKey = appId.toString();
 
-        return self.appStore.getApplication(tenantDomain, appKey);
+        return self.appStore.getApplication(appKey);
     }
 
-    public function addApplication(string tenantDomain, Application app) {
-        self.appStore.addApplication(tenantDomain, app);
+    public function addApplication(Application app) {
+        self.appStore.addApplication(app);
     }
 
-    public function removeApplication(string tenantDomain, Application app) {
-        self.appStore.removeApplication(tenantDomain, app);
+    public function removeApplication(Application app) {
+        self.appStore.removeApplication(app);
     }
 };

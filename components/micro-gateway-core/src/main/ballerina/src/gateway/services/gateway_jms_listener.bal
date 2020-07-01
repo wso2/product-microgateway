@@ -117,29 +117,29 @@ function handleNotificationMessage(string eventType, string encodedEvent ) {
                 stringutils:equalsIgnoreCase(APPLICATION_UPDATE_EVENT, eventType)) {
                 Application app = convertApplicationEventToApplicationDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS application to create recieved : " + app.toString());
-                pilotDataProvider.addApplication(<@untainted>app.tenantDomain, <@untainted>app);
+                pilotDataProvider.addApplication(<@untainted>app);
             } else if (stringutils:equalsIgnoreCase(APPLICATION_DELETE_EVENT, eventType)) {
                 Application app = convertApplicationEventToApplicationDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS application to delete recieved : " + app.toString());
-                pilotDataProvider.removeApplication(<@untainted>app.tenantDomain, <@untainted>app);
+                pilotDataProvider.removeApplication(<@untainted>app);
             } else if (stringutils:equalsIgnoreCase(API_CREATE_EVENT, eventType) ||
                 stringutils:equalsIgnoreCase(API_UPDATE_EVENT, eventType)) {
                 Api api = convertApiEventToApiDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS API to create recieved : " + api.toString());
-                pilotDataProvider.addApi(<@untainted>api.tenantDomain, <@untainted>api);
+                pilotDataProvider.addApi(<@untainted>api);
             } else if (stringutils:equalsIgnoreCase(SUBSCRIPTIONS_CREATE_EVENT, eventType) ||
                        stringutils:equalsIgnoreCase(SUBSCRIPTIONS_UPDATE_EVENT, eventType)) {
                 Subscription sub = convertSubscriptionEventToSubscriptionDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS subscription to create recieved : " + sub.toString());
-                pilotDataProvider.addSubscription(<@untainted>sub.tenantDomain, <@untainted>sub);
+                pilotDataProvider.addSubscription(<@untainted>sub);
             } else if (stringutils:equalsIgnoreCase(SUBSCRIPTIONS_DELETE_EVENT, eventType)) {
                 Subscription sub = convertSubscriptionEventToSubscriptionDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS subscription to delete recieved : " + sub.toString());
-                pilotDataProvider.removeSubscription(<@untainted>sub.tenantDomain, <@untainted>sub);
+                pilotDataProvider.removeSubscription(<@untainted>sub);
             } else if (stringutils:equalsIgnoreCase(APPLICATION_REGISTRATION_CREATE_EVENT, eventType)) {
                 KeyMap keyMap = convertKeyGenerationEventToKeyMapDTO(jsonEvent);
                 printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "JMS key mapping event recived : " + keyMap.toString());
-                pilotDataProvider.addKeyMapping(<@untainted>keyMap.tenantDomain, <@untainted>keyMap);
+                pilotDataProvider.addKeyMapping(<@untainted>keyMap);
             }
         } else {
             printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while decoding base 64 byte array to string", decodedString);
