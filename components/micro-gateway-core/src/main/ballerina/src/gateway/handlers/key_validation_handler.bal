@@ -90,14 +90,14 @@ public type KeyValidationHandler object {
                 map<any>? claims = principal?.claims;
                 any clientId = claims[CLIENT_ID];
                 boolean isAllowed = false;
-                if (clientId != () && clientId is string) {
+                if (clientId != () && clientId is string && !self.externalKM) {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
                      self.validateSubscriptions);
                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    return isAllowed;    
-                } else if (clientId == () && self.externalKM) {
+                } else if (self.externalKM) {
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     return authenticationResult;
