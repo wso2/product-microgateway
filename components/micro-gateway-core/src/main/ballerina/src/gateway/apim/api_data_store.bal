@@ -20,18 +20,16 @@ import ballerina/http;
 # 
 # + apis - Map of `Api` objects
 type ApiDataStore object {
-    map<map<Api>> apis = {};
+    map<Api> apis = {};
 
     private string pilotUsername;
     private string pilotPassword;
     private string serviceContext;
-    private string[]|error listOfTenants;
 
-    public function __init(string username, string password, string context, string[]|error listOfTenants) {
+    public function __init(string username, string password, string context) {
         self.pilotUsername = username;
         self.pilotPassword = password;
         self.serviceContext = context + "/apis";
-        self.listOfTenants = listOfTenants;
 
         if (apimEventHubEnabled) {
             future<()> apisFetch = start self.fetchApis();
@@ -40,38 +38,29 @@ type ApiDataStore object {
 
     # Retrieve a specific `Api` object from the Api Data Store.
     #
-    # + tenantDomain - Tenan t domaain to which the API belongs to
     # + apiKey - api key in the format of `provider:name:version`
     # + return - `Api` object mapping with provided attributes. If no match was found `()` is returned.
-    function getApi(string tenantDomain, string apiKey) returns (Api | ()) {
-        if (self.apis.hasKey(tenantDomain) && self.apis.get(tenantDomain).hasKey(apiKey)) {
-            return self.apis.get(tenantDomain).get(apiKey);
+    function getApi( string apiKey) returns (Api | ()) {
+        if (self.apis.hasKey(apiKey)) {
+            return self.apis.get(apiKey);
         }
         return ();
 
     }
 
-    function addApi(string tenantDomain, Api api) {
-        map<Api> apiMap;
+    function addApi(Api api) {
         string apiKey = api.name + ":" + api.apiVersion;
-        if (!self.apis.hasKey(tenantDomain)) {
-            apiMap = {};
-            apiMap[apiKey] = api;
-        } else {
-            apiMap = self.apis.get(tenantDomain);
-            apiMap[apiKey] = api;
-        }
         lock {
             //Writing event should be locked, due to worker threads are reading the map during request validations
-            self.apis[tenantDomain] = apiMap;
+            self.apis[apiKey] = api;
         }
     }
 
-    function removeApi(string tenantDomain, Api api) {
+    function removeApi(Api api) {
         string apiKey = api.name + ":" + api.apiVersion;
         lock {
             //Remove event should be locked, due to worker threads are reading the map during request validations
-            Api removedApi = self.apis.get(tenantDomain).remove(apiKey);
+            Api removedApi = self.apis.remove(apiKey);
         }
     }
 
@@ -79,40 +68,32 @@ type ApiDataStore object {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request apiReq = new;
         apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
-        var tenantList = self.listOfTenants;
-        if (tenantList is string[]) {
-            foreach string tenant in tenantList {
-                apiReq.setHeader(EVENT_HUB_TENANT_HEADER, tenant);
-                var response = gatewayPilotEndpoint->get(self.serviceContext, message = apiReq);
-                if (response is http:Response) {
-                    map<Api> apiMap = {};
-                    var payload = response.getJsonPayload();
-                    if (payload is json) {
-                        printDebug(KEY_API_STORE, "API list of tenant : " + tenant + " is : " + payload.toJsonString());
-                        json[] list = <json[]>payload.list;
-                        foreach json jsonApi in list {
-                            // TODO: substore: Map URL mapping attribute
-                            Api api = {
-                                id: <int>jsonApi.apiId,
-                                provider: jsonApi.provider.toString(),
-                                name: jsonApi.name.toString(),
-                                apiVersion: jsonApi.'version.toString(),
-                                context: jsonApi.context.toString(),
-                                policyId: jsonApi.policy.toString()
-                            };
-                            string apiKey = api.name + ":" + api.apiVersion;
-                            apiMap[apiKey] = api;
-                        }
-                        self.apis[tenant] = apiMap;
-                    } else {
-                        printError(KEY_API_STORE, "Received invalid api data", payload);
-                    }
-                } else {
-                    printError(KEY_API_STORE, "Failed to retrieve api data", response);
+        var response = gatewayPilotEndpoint->get(self.serviceContext, message = apiReq);
+        if (response is http:Response) {
+            map<Api> apiMap = {};
+            var payload = response.getJsonPayload();
+            if (payload is json) {
+                printDebug(KEY_API_STORE, "API list is : " + payload.toJsonString());
+                json[] list = <json[]>payload.list;
+                foreach json jsonApi in list {
+                    // TODO: substore: Map URL mapping attribute
+                    Api api = {
+                        id: <int>jsonApi.apiId,
+                        provider: jsonApi.provider.toString(),
+                        name: jsonApi.name.toString(),
+                        apiVersion: jsonApi.'version.toString(),
+                        context: jsonApi.context.toString(),
+                        policyId: jsonApi.policy.toString()
+                    };
+                    string apiKey = api.name + ":" + api.apiVersion;
+                    self.apis[apiKey] = api;
                 }
+            } else {
+                printError(KEY_API_STORE, "Received invalid api data", payload);
             }
         } else {
-            printError(KEY_APPLICATION_STORE, "Error while reading tenant list map from config.", tenantList);
+            printError(KEY_API_STORE, "Failed to retrieve api data", response);
         }
     }
+
 };

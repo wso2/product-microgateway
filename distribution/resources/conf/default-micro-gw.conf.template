@@ -95,6 +95,8 @@
 [[jwtTokenConfig]]
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2apim310"
+  URL of the JWKs endpoint
+  jwksURL = ""
   # Validate subscribed APIs
   validateSubscription = false
   # The claim in which the consumer key of the application is coming

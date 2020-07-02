@@ -62,18 +62,20 @@ function convertApiEventToApiDTO(json apiEvent) returns Api {
     return api;
 }
 
-function validateSubscriptionFromDataStores(string token, string tenantDomain, string consumerKey, string apiName, string apiVersion,
+function validateSubscriptionFromDataStores(string token, string consumerKey, string apiName, string apiVersion,
                     boolean isValidateSubscription) returns ([AuthenticationContext, boolean]) {
     boolean isAllowed = !isValidateSubscription;
-    var keyMap = pilotDataProvider.getKeyMapping(tenantDomain, consumerKey);
-    var api = pilotDataProvider.getApi(tenantDomain, apiName, apiVersion);
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     string subscriptionKey = consumerKey + ":" + apiName + ":"  + apiVersion;
+    string apiTenantDomain = getTenantFromBasePath(invocationContext.attributes[API_CONTEXT].toString());
+    var keyMap = pilotDataProvider.getKeyMapping(consumerKey);
+    var api = pilotDataProvider.getApi(apiName, apiVersion);
     AuthenticationContext authenticationContext = {
         apiKey: token,
         authenticated: !isValidateSubscription
     };
     authenticationContext.consumerKey = consumerKey.toString();
+    invocationContext.attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
     //check from subscription cache
     var authContext = gatewayCacheObject.retrieveFromSubcriptionCache(subscriptionKey);
     if (authContext is AuthenticationContext) {
@@ -85,7 +87,7 @@ function validateSubscriptionFromDataStores(string token, string tenantDomain, s
         if (keyMap is KeyMap) {
             authenticationContext.keyType = keyMap.keyType;
             invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-            var app = pilotDataProvider.getApplication(tenantDomain, keyMap.appId);
+            var app = pilotDataProvider.getApplication(keyMap.appId);
             if (app is Application) {
                 authenticationContext.applicationId = app.id.toString();
                 authenticationContext.applicationName = app.name;
@@ -96,7 +98,7 @@ function validateSubscriptionFromDataStores(string token, string tenantDomain, s
             }
 
             if (api is Api) {
-                var sub = pilotDataProvider.getSubscription(tenantDomain, keyMap.appId, api.id);
+                var sub = pilotDataProvider.getSubscription(keyMap.appId, api.id);
 
                 // if subscription in "UNBLOCKED" state is found in the pilot data, key is allowed
                 if (sub is Subscription && sub.state == "UNBLOCKED") {
@@ -119,7 +121,6 @@ function validateSubscriptionFromDataStores(string token, string tenantDomain, s
             printError(JWT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
         }
     }
-
 
     return [authenticationContext,isAllowed];
 }
