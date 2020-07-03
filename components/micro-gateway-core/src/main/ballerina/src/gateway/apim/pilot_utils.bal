@@ -147,14 +147,17 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
             } else {
                 gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
                 printError(KEY_PILOT_UTIL, "API not found for name : " + apiName + " and version : " + apiVersion);
+                setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
             }
         } else {
             gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
             printError(KEY_PILOT_UTIL, "Application not found for consumer key : " + consumerKey + " and app Id : " + keyMap.appId.toString());
+            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
         }
     } else {
         gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
         printError(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
+        setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
     }
 
 

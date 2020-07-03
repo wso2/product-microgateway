@@ -30,13 +30,11 @@ public type KeyValidationHandler object {
 
     public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     public oauth2:InboundOAuth2Provider introspectProvider;
-    public boolean externalKM;
     private boolean validateSubscriptions;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.introspectProvider = introspectProvider;
-        self.externalKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, EXTERNAL, DEFAULT_EXTERNAL);
         self.validateSubscriptions = getConfigBooleanValue(SECURITY_INSTANCE_ID, SECURITY_VALIDATE_SUBSCRIPTIONS, DEFAULT_VALIDATE_SUBSCRIPTIONS);
     }
 
@@ -93,23 +91,22 @@ public type KeyValidationHandler object {
                 map<any>? claims = principal?.claims;
                 any clientId = claims[CLIENT_ID];
                 boolean isAllowed = false;
-                if (clientId != () && clientId is string && !self.externalKM) {
+                // If validateSubscription is true and clientID is present, do the subscription validation.
+                if (clientId != () && clientId is string && self.validateSubscriptions) {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
                      self.validateSubscriptions);
                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    return isAllowed;    
-                } else if (self.externalKM) {
+                } else { // Otherwise return the introspection response.
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     return authenticationResult;
-                } else {
-                    setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
-                    return false;
                 }
             }
         }
+        // Default return Invalid Credentials.
         setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
         return false;
     }
