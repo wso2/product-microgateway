@@ -396,10 +396,16 @@ public class MockHttpServer extends Thread {
             httpServer.createContext(InternalDataContext + "/application-key-mappings", new HttpHandler() {
                 @Override
                 public void handle(HttpExchange httpExchange) throws IOException {
+                    String consumerKey = "all";
                     String keyMappingResponse = IOUtils.toString(new FileInputStream(
                             getClass().getClassLoader().getResource("key-mapping-response.json").getPath()));
                     JSONObject keyMappingResponseJSON = new JSONObject(keyMappingResponse);
-                    byte[] response = keyMappingResponseJSON.toString().getBytes();
+                    String query = httpExchange.getRequestURI().getQuery();
+                    byte[] response;
+                    if (query != null && query.contains("consumerKey")) {
+                        consumerKey = query.split("=")[1];
+                    }
+                    response = keyMappingResponseJSON.get(consumerKey).toString().getBytes();
                     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     httpExchange.getResponseBody().write(response);
                     httpExchange.close();

@@ -82,6 +82,7 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
         var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
         if (contextFromCache is AuthenticationContext) {
             printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+            setErrorMessageToInvocationContext(SUBSCRIPTION_INACTIVE);
             return [contextFromCache,isAllowed];
         }
         keyMap = pilotDataProvider.loadKeyMappingFromService(<@untainted>consumerKey);
@@ -95,6 +96,7 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
             var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
             if (contextFromCache is AuthenticationContext) {
                 printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+                setErrorMessageToInvocationContext(SUBSCRIPTION_INACTIVE);
                 return [contextFromCache,isAllowed];
             }
             app = pilotDataProvider.loadAppplicationFromService(<@untainted>keyMap.appId);

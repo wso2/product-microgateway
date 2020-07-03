@@ -6,7 +6,7 @@
     "token_type":"Bearer",
     "exp":1593187742,
     "iat":1593184142,
-    "client_id":"ksBCR_Xqsp0ypRWtFBm9QWFgvCoa",
+    "client_id":"PRODUCTION_CK",
     "username":"admin@carbon.super"
   },
   "SANDBOX": {
@@ -16,7 +16,7 @@
     "token_type":"Bearer",
     "exp":1593187742,
     "iat":1593184142,
-    "client_id":"O236v9XjxRm4unRAJfR_b6My0wIa",
+    "client_id":"SANDBOX_CK",
     "username":"admin@carbon.super"
   },
   "INVALID_SCOPES": {
@@ -26,7 +26,7 @@
     "token_type":"Bearer",
     "exp":1593187742,
     "iat":1593184142,
-    "client_id":"O236v9XjxSm4unRAJfR_b6My0wIa",
+    "client_id":"INVALID_SCOPES_CK",
     "username":"admin@carbon.super"
   },
   "INVALID_SUBSCRIPTION": {
@@ -36,7 +36,7 @@
     "token_type":"Bearer",
     "exp":1593187742,
     "iat":1593184142,
-    "client_id":"O236v9XjxdddsunRAJfR_b6My0wIa",
+    "client_id":"INVALID_SUBSCRIPTION_CK",
     "username":"admin@carbon.super"
   },
   "SUBSCRIPTION_THROTTLING": {
