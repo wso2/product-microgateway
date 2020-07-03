@@ -62,6 +62,40 @@ type ApplicationDataStore object {
         }
     }
 
+    function loadAppplicationFromService(int appId) returns Application? {
+        string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
+        http:Request apiReq = new;
+        apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
+        string serviceContext = self.serviceContext + "?appId=" + appId.toString();
+        var response = gatewayPilotEndpoint->get(serviceContext, message = apiReq);
+        if (response is http:Response) {
+            var payload = response.getJsonPayload();
+            if (payload is json) {
+                printDebug(KEY_APPLICATION_STORE, "Application list for id : " + appId.toString() + " is : " + payload.toJsonString());
+                json[] list = <json[]>payload.list;
+                if (list.length() > 0 ) {
+                    Application app = {
+                        id: <int>list[0].id,
+                        owner: list[0].subName.toString(),
+                        name: list[0].name.toString(),
+                        policyId: list[0].policy.toString(),
+                        tokenType: list[0].tokenType.toString(),
+                        groupIds: <json[]>list[0].groupIds,
+                        attributes: <json[]>list[0].attributes
+                    };
+                    self.applications[appId.toString()] = <@untainted>app;
+                    printDebug(KEY_APPLICATION_STORE, "Returned application from service is : " + app.toString());
+                    return <@untainted>app;
+                }
+            } else {
+              printError(KEY_APPLICATION_STORE, "Received invalid application data for id : " + appId.toString(), payload);
+            }
+        } else {
+          printError(KEY_APPLICATION_STORE, "Failed to retrieve application data for id : " + appId.toString(), response);
+        }
+        return ();
+    }
+
     private function fetchApplications() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request appReq = new;

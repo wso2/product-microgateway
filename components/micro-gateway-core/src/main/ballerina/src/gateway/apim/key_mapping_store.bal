@@ -62,6 +62,37 @@ type KeyMappingDataStore object {
         }
     }
 
+    function loadKeyMappingFromService(string consumerKey) returns KeyMap? {
+        string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
+        http:Request apiReq = new;
+        apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
+        string serviceContext = self.serviceContext + "?consumerKey=" + consumerKey;
+        var response = gatewayPilotEndpoint->get(serviceContext, message = apiReq);
+        if (response is http:Response) {
+            var payload = response.getJsonPayload();
+            if (payload is json) {
+                printDebug(KEY_KEYMAP_STORE, "Key mapping  list for consumer key  : " + consumerKey + " is : " + payload.toJsonString());
+                json[] list = <json[]>payload.list;
+                if (list.length() > 0 ) {
+                    KeyMap mapping = {
+                        appId: <int>list[0].applicationId,
+                        consumerKey: list[0].consumerKey.toString(),
+                        keyType: list[0].keyType.toString(),
+                        keyManager : list[0].keyManager.toString()
+                    };
+                    self.keyMaps[consumerKey] = <@untainted>mapping;
+                    printDebug(KEY_KEYMAP_STORE, "Returned key mapping from service is : " + mapping.toString());
+                    return <@untainted>mapping;
+                }
+            } else {
+              printError(KEY_KEYMAP_STORE, "Received invalid key mapping for consumer key : " + consumerKey, payload);
+            }
+        } else {
+          printError(KEY_KEYMAP_STORE, "Failed to retrieve key mapping for consumer key : " + consumerKey, response);
+        }
+        return ();
+    }
+
     private function fetchKeyMappings() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request keyReq = new;

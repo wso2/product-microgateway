@@ -64,13 +64,48 @@ type ApiDataStore object {
         }
     }
 
+    function loadApiFromService(string apiContext, string apiVersion) returns Api? {
+        string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
+        http:Request apiReq = new;
+        apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
+        string serviceContext = self.serviceContext + "?context=" + apiContext + "&version=" + apiVersion;
+        var response = gatewayPilotEndpoint->get(serviceContext, message = apiReq);
+        if (response is http:Response) {
+            var payload = response.getJsonPayload();
+            if (payload is json) {
+                printDebug(KEY_API_STORE, "API list is : " + payload.toJsonString());
+                json[] list = <json[]>payload.list;
+                if (list.length() > 0 ) {
+                    Api api = {
+                        id: <int>list[0].apiId,
+                        provider: list[0].provider.toString(),
+                        name: list[0].name.toString(),
+                        apiVersion: list[0].'version.toString(),
+                        context: list[0].context.toString(),
+                        policyId: list[0].policy.toString()
+                    };
+                    string apiKey = api.name + ":" + api.apiVersion;
+                    self.apis[apiKey] = <@untainted>api;
+                    printDebug(KEY_API_STORE, "Returned API from service is : " + api.toString());
+                    return <@untainted>api;
+                }
+            } else {
+              printError(KEY_API_STORE, "Received invalid api data for context : " + apiContext
+                                        + " and version : " + apiVersion, payload);
+            }
+        } else {
+          printError(KEY_API_STORE, "Failed to retrieve api data for context : " + apiContext
+                                     + " and version : " + apiVersion, response);
+        }
+        return ();
+    }
+
     private function fetchApis() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request apiReq = new;
         apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
         var response = gatewayPilotEndpoint->get(self.serviceContext, message = apiReq);
         if (response is http:Response) {
-            map<Api> apiMap = {};
             var payload = response.getJsonPayload();
             if (payload is json) {
                 printDebug(KEY_API_STORE, "API list is : " + payload.toJsonString());

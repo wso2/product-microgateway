@@ -492,6 +492,7 @@ const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 const string API_KEY_UTIL = "APIKeyUtil";
 const string JWT_UTIL = "JWTUtil";
+const string KEY_PILOT_UTIL = "PilotUtil";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";

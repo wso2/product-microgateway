@@ -35,6 +35,7 @@ public type PilotDataProvider object {
     private string password;
     private string serviceContext;
     private http:Client gatewayPilotEndpoint;
+    private APIGatewayCache gatewayCache = new;
 
     public function __init(http:Client gatewayPilotEndpoint) {
         self.username = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_USERNAME, DEFAULT_PILOT_USERNAME);
@@ -67,9 +68,12 @@ public type PilotDataProvider object {
         self.apiStore.removeApi(api);
     }
 
+    public function loadApiFromService(string apiContext, string apiVersion) returns @tainted Api? {
+        return self.apiStore.loadApiFromService(apiContext, apiVersion);
+    }
+
     # Get Key Mapping details from `KeyMappingDataStore`.
     #
-    # + tenantDomain - Tenant domain to which the application belongs to.
     # + consumerKey - Consumer key of the application
     # + return - `KeyMap` object if requested Key Mapping is found. If not `()`
     public function getKeyMapping(string consumerKey) returns KeyMap | () {
@@ -84,9 +88,12 @@ public type PilotDataProvider object {
         self.keyMapStore.removeKeyMapping(keyMap);
     }
 
+    public function loadKeyMappingFromService(string consumerKey) returns @tainted KeyMap? {
+        return self.keyMapStore.loadKeyMappingFromService(consumerKey);
+    }
+
     # Get Subscription details from `SubscriptionDataStore`.
     #
-    # + tenantDomain - Tenant domain of the subscriber
     # + appId - Application Id of the subscription
     # + apiId - Api Id of the subscription
     # + return - `Subscription` object if requested Subscription is found. If not `()`
@@ -98,15 +105,22 @@ public type PilotDataProvider object {
 
     public function addSubscription(Subscription sub) {
         self.subStore.addSubscription(sub);
+        //currently we are removing all the entries from the cache since revers lookup for subscription key
+        //can be expensive
+        self.removeFromInvalidSubsriptionCache();
     }
 
     public function removeSubscription(Subscription sub) {
         self.subStore.removeSubscription(sub);
     }
 
+    public function loadSubscriptionFromService(int apiId, int appId) returns @tainted Subscription? {
+        self.removeFromInvalidSubsriptionCache();
+        return self.subStore.loadSubscriptionFromService(apiId, appId);
+    }
+
     # Get Application details from `ApplicationDataStore`.
     #
-    # + tenantDomain - Tenant domain to which the application belongs
     # + appId - Application Id of the application
     # + return - `Application` object if requested Application is found. If not `()`
     public function getApplication(int appId) returns Application | () {
@@ -121,5 +135,13 @@ public type PilotDataProvider object {
 
     public function removeApplication(Application app) {
         self.appStore.removeApplication(app);
+    }
+
+    public function loadAppplicationFromService(int appId) returns @tainted Application? {
+        return self.appStore.loadAppplicationFromService(appId);
+    }
+
+    function removeFromInvalidSubsriptionCache() {
+        self.gatewayCache.removeAllFromInvalidSubcriptionCache();
     }
 };
