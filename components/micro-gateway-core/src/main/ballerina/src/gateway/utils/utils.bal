@@ -338,8 +338,7 @@ public function sendErrorResponseFromInvocationContext(http:FilterContext contex
     //set WWW_AUTHENTICATE header to error response
     if (response.statusCode == 401) {
         string challengeString = getChallengeString(context);
-        response.setHeader(WWW_AUTHENTICATE, challengeString +
-        ", error=\"invalid token\" , error_description=\"The access token expired\"");
+        response.setHeader(WWW_AUTHENTICATE, challengeString + WWW_AUTHENTICATE_ERROR);
     }
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {

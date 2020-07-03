@@ -51,6 +51,7 @@ public const string KEY_VALIDATION_SERVICE_CONTEXT = "/services/APIKeyValidation
 public const string UTF_8 = "UTF-8";
 public const string INVALID_COOKIE = "Cookie is Invalid";
 public const string WWW_AUTHENTICATE = "WWW-Authenticate";
+public const string WWW_AUTHENTICATE_ERROR = ", error=\"invalid token\" , error_description=\"The access token expired\"";
 
 public const string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 public const string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
