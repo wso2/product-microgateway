@@ -43,6 +43,10 @@ public type MutualSSLHandler object {
             if (req.mutualSslHandshake[STATUS] == FAILED) {
                 printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: FAILED");
             }
+            //put challenge string to the invocation cotext if authentication fails
+            string challengeString = "Mutual SSL realm=\"WSO2 API Microgateway\"";
+            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+            invocationContext.attributes[CHALLENGE_STRING] = challengeString;
             // provided more generic error code to avoid security issues.
             setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS); 
             return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
