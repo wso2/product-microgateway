@@ -335,29 +335,9 @@ public function sendErrorResponseFromInvocationContext(http:FilterContext contex
     int errorCode = <int>invocationContext.attributes[ERROR_CODE];
     response.statusCode = <int>invocationContext.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
-
+    //set WWW_AUTHENTICATE header to error response
     if (response.statusCode == 401) {
-        string challengeString = invocationContext.attributes[CHALLENGE_STRING].toString();
-        string[] authProviders = [];
-        APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
-        if (apiConfig is APIConfiguration) {
-            authProviders = apiConfig.authProviders;
-            foreach var v in authProviders {
-                if (v == "oauth2") {
-                    if(challengeString == "") {
-                        challengeString = "OAuth2 realm=\"WSO2 API Microgateway\"";
-                    } else {
-                        challengeString += " OAuth2 realm=\"WSO2 API Microgateway\"";
-                    }
-                } else if (v == "basic") {
-                    if(challengeString == "") {
-                        challengeString = "Basic Auth realm=\"WSO2 API Microgateway\"";
-                    } else {
-                        challengeString += " Basic Auth realm=\"WSO2 API Microgateway\"";
-                    }
-                }
-            }
-        }
+        string challengeString = getChallengeString(context);
         response.setHeader(WWW_AUTHENTICATE, challengeString +
         ", error=\"invalid token\" , error_description=\"The access token expired\"");
     }
@@ -373,6 +353,32 @@ public function sendErrorResponseFromInvocationContext(http:FilterContext contex
     } else {
         attachGrpcErrorHeaders (response, errorMessage);
     }
+}
+
+public function getChallengeString(http:FilterContext context) returns string {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string challengeString = invocationContext.attributes[CHALLENGE_STRING].toString();
+    string[] authProviders = [];
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
+    if (apiConfig is APIConfiguration) {
+        authProviders = apiConfig.authProviders;
+        foreach var v in authProviders {
+            if (v == "oauth2") {
+                if(challengeString == "") {
+                    challengeString = "OAuth2 realm=\"WSO2 API Microgateway\"";
+                } else {
+                    challengeString += " OAuth2 realm=\"WSO2 API Microgateway\"";
+                }
+            } else if (v == "basic") {
+                if(challengeString == "") {
+                    challengeString = "Basic Auth realm=\"WSO2 API Microgateway\"";
+                } else {
+                    challengeString += " Basic Auth realm=\"WSO2 API Microgateway\"";
+                }
+            }
+        }
+    }
+    return challengeString;
 }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
