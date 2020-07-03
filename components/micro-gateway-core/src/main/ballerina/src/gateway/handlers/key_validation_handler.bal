@@ -76,6 +76,9 @@ public type KeyValidationHandler object {
         authenticationResult = self.introspectProvider.authenticate(credential);
         if (authenticationResult is auth:Error) {
             return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
+        } else if (!authenticationResult) {
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            return authenticationResult;
         } else {
             runtime:Principal? principal = invocationContext?.principal;
             if (principal is runtime:Principal) {
@@ -107,7 +110,7 @@ public type KeyValidationHandler object {
                 }
             }
         }
-        setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+        setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
         return false;
     }
 
