@@ -67,42 +67,69 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
     boolean isAllowed = !isValidateSubscription;
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     string subscriptionKey = consumerKey + ":" + apiName + ":"  + apiVersion;
-    string apiTenantDomain = getTenantFromBasePath(invocationContext.attributes[API_CONTEXT].toString());
+    string apiContext = invocationContext.attributes[API_CONTEXT].toString();
+    string apiTenantDomain = getTenantFromBasePath(apiContext);
     var keyMap = pilotDataProvider.getKeyMapping(consumerKey);
     var api = pilotDataProvider.getApi(apiName, apiVersion);
     AuthenticationContext authenticationContext = {
         apiKey: token,
         authenticated: !isValidateSubscription
     };
-    authenticationContext.consumerKey = consumerKey.toString();
+    authenticationContext.consumerKey = consumerKey;
     invocationContext.attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
-    //check from subscription cache
-    var authContext = gatewayCacheObject.retrieveFromSubcriptionCache(subscriptionKey);
-    if (authContext is AuthenticationContext) {
-        printDebug(JWT_UTIL, "Subcription key found from the cache : " + subscriptionKey);
-        authenticationContext = authContext;
+    if (keyMap is ()) {
+        printDebug(KEY_PILOT_UTIL, "Key mapping for consumer key : " + consumerKey + " is missing in the data store.");
+        var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
+        if (contextFromCache is AuthenticationContext) {
+            printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+            return [contextFromCache,isAllowed];
+        }
+        keyMap = pilotDataProvider.loadKeyMappingFromService(<@untainted>consumerKey);
+    }
+    if (keyMap is KeyMap) {
+        authenticationContext.keyType = keyMap.keyType;
         invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-        isAllowed = true;
-    } else {
-        if (keyMap is KeyMap) {
-            authenticationContext.keyType = keyMap.keyType;
-            invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-            var app = pilotDataProvider.getApplication(keyMap.appId);
-            if (app is Application) {
-                authenticationContext.applicationId = app.id.toString();
-                authenticationContext.applicationName = app.name;
-                authenticationContext.applicationTier = app.policyId;
-                authenticationContext.subscriber = app.owner;
-            } else {
-                printError(JWT_UTIL, "Application not found for consumer key : " + consumerKey + " and app Id : " + keyMap.appId.toString());
+        var app = pilotDataProvider.getApplication(keyMap.appId);
+        if (app is ()) {
+            printDebug(KEY_PILOT_UTIL, "Application with id : " + keyMap.appId.toString() + " is missing in the data store.");
+            var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
+            if (contextFromCache is AuthenticationContext) {
+                printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+                return [contextFromCache,isAllowed];
             }
+            app = pilotDataProvider.loadAppplicationFromService(<@untainted>keyMap.appId);
+        }
+        if (app is Application) {
+            authenticationContext.applicationId = app.id.toString();
+            authenticationContext.applicationName = app.name;
+            authenticationContext.applicationTier = app.policyId;
+            authenticationContext.subscriber = app.owner;
 
+            if (api is ()) {
+                printDebug(KEY_PILOT_UTIL, "API : " + apiName + ":" + apiVersion + " is missing in the data store.");
+                var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
+                if (contextFromCache is AuthenticationContext) {
+                    printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+                    return [contextFromCache,isAllowed];
+                }
+                api = pilotDataProvider.loadApiFromService(apiContext, apiVersion);
+            }
             if (api is Api) {
                 var sub = pilotDataProvider.getSubscription(keyMap.appId, api.id);
+                if (sub is ()) {
+                    printDebug(KEY_PILOT_UTIL, "Subscription for API : " + apiName + ":" + apiVersion
+                        + " for the application : " + app.name + " is missing in the data store.");
+                    var contextFromCache = gatewayCacheObject.retrieveFromInvalidSubcriptionCache(subscriptionKey);
+                    if (contextFromCache is AuthenticationContext) {
+                        printDebug(KEY_PILOT_UTIL, "Subscription key : " + subscriptionKey + " found in invalid subscription cache");
+                        return [contextFromCache,isAllowed];
+                    }
+                    sub = pilotDataProvider.loadSubscriptionFromService(api.id, <@untainted>keyMap.appId);
+                }
 
                 // if subscription in "UNBLOCKED" state is found in the pilot data, key is allowed
                 if (sub is Subscription && sub.state == "UNBLOCKED") {
-                    printDebug(JWT_UTIL, "Found a subscription for api: " + apiName + "__" + apiVersion);
+                    printDebug(KEY_PILOT_UTIL, "Found a subscription for api: " + apiName + "__" + apiVersion);
                     isAllowed = true;
                     authenticationContext.authenticated = true;
                     authenticationContext.apiPublisher = api.provider;
@@ -111,16 +138,22 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
 
                     gatewayCacheObject.addToSubcriptionCache(subscriptionKey, authenticationContext);
                 } else {
-                    printError(JWT_UTIL,"Subscription not found for API : " + apiName + "__" + apiVersion +
+                    printError(KEY_PILOT_UTIL,"Subscription not found for API : " + apiName + "__" + apiVersion +
                     " for the application : " +  authenticationContext.applicationName);
                 }
             } else {
-                printError(JWT_UTIL, "API not found for name : " + apiName + " and version : " + apiVersion);
+                gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
+                printError(KEY_PILOT_UTIL, "API not found for name : " + apiName + " and version : " + apiVersion);
             }
         } else {
-            printError(JWT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
+            gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
+            printError(KEY_PILOT_UTIL, "Application not found for consumer key : " + consumerKey + " and app Id : " + keyMap.appId.toString());
         }
+    } else {
+        gatewayCacheObject.addToInvalidSubcriptionCache(subscriptionKey, authenticationContext);
+        printError(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
     }
+
 
     return [authenticationContext,isAllowed];
 }

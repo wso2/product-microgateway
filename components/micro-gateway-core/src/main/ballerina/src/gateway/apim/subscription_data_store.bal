@@ -59,6 +59,42 @@ type SubscriptionDataStore object {
         }
     }
 
+    function loadSubscriptionFromService(int apiId, int appId) returns Subscription? {
+        string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
+        http:Request apiReq = new;
+        apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
+        string serviceContext = self.serviceContext + "?apiId=" + apiId.toString() + "&appId=" + appId.toString();
+        var response = gatewayPilotEndpoint->get(serviceContext, message = apiReq);
+        if (response is http:Response) {
+            var payload = response.getJsonPayload();
+            if (payload is json) {
+                printDebug(KEY_SUBSCRIPTION_STORE, "Subscription list for api Id : " + apiId.toString()
+                                    + " and application Id : " + appId.toString() + " is : " + payload.toJsonString());
+                json[] list = <json[]>payload.list;
+                if (list.length() > 0 ) {
+                    Subscription sub = {
+                        id: <int>list[0].subscriptionId,
+                        apiId: <int>list[0].apiId,
+                        appId: <int>list[0].appId,
+                        policyId: list[0].policyId.toString(),
+                        state: list[0].subscriptionState.toString()
+                    };
+                    string subKey = appId.toString() + ":" + apiId.toString();
+                    self.subscriptions[subKey] = <@untainted>sub;
+                    printDebug(KEY_SUBSCRIPTION_STORE, "Returned subscription from service is : " + sub.toString());
+                    return <@untainted>sub;
+                }
+            } else {
+              printError(KEY_SUBSCRIPTION_STORE, "Received invalid subscription data for api id : " + apiId.toString()
+                                        + " and app id : " + appId.toString(), payload);
+            }
+        } else {
+          printError(KEY_SUBSCRIPTION_STORE, "Failed to retrieve subscription data for api id : " + apiId.toString()
+                                     + " and app id : " + appId.toString(), response);
+        }
+        return ();
+    }
+
     private function fetchSubscriptions() {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request subReq = new;

@@ -52,7 +52,7 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
         authenticationContext.username = username;
     }
     string|string[]? audiencePayload = payload?.aud;
-    printDebug(JWT_UTIL,"Audiemce value retrieved : " + audiencePayload.toString());
+    printDebug(JWT_UTIL,"Audience value retrieved : " + audiencePayload.toString());
     string consumerKey = "";
     if (customClaims is map<json> && customClaims.hasKey(appKeyClaim)) {
         consumerKey = customClaims.get(appKeyClaim).toString();
