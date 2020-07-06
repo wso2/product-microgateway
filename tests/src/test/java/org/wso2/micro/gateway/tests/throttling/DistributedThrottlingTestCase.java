@@ -109,6 +109,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier(subscriptionPolicy.getPolicyName());
+        info.setTokenType(TestConstant.TOKEN_TYPE_SUBSCRIPTION_THROTTLING);
         token1 = pub.getAndRegisterAccessToken(info);
 
         KeyValidationInfo info2 = new KeyValidationInfo();
@@ -117,6 +118,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         info2.setAuthorized(true);
         info2.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info2.setSubscriptionTier("Unlimited");
+        info2.setTokenType(TestConstant.TOKEN_TYPE_APPLICATION_THROTTLING);
         token2 = pub.getAndRegisterAccessToken(info2);
 
         ApplicationDTO appWithNonExistPolicy = new ApplicationDTO();
