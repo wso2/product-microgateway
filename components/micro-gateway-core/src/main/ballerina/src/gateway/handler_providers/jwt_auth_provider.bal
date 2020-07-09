@@ -168,7 +168,11 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
         printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
         return true;
     } else {
-        setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        var errorcode = invocationContext.attributes[ERROR_CODE];
+        if (errorcode is ()) {
+            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+        }
         return prepareError("Subscriptions validation failed.");
     }
 }
