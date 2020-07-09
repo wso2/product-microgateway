@@ -51,6 +51,7 @@ if NOT EXIST %BALLERINA_HOME% SET BALLERINA_HOME="%MICROGW_HOME%\lib"
 
 SET PATH=%BALLERINA_HOME%\bin\;%PATH%
 SET JAVA_PATH=%MICROGW_HOME%\lib\jdk8u202-b08-jre
+SET HOME_CACHE=%MICROGW_HOME%\lib\gateway-balo
 
 REM Check JAVA availability
 if EXIST "%JAVA_HOME%" (
@@ -112,7 +113,7 @@ goto :end
                 if EXIST "%TARGET_DIR%\*.jar"  DEL /F "%TARGET_DIR%\*.jar"
 
                 REM Build project using ballerina
-                call ballerina build --experimental %project_name%
+                call ballerina build --experimental --home-cache="%HOME_CACHE%" %project_name%
 
                 if ERRORLEVEL 0 (
                     REM move all executable ballerina build outputs to MGW_PROJECT/target directory
