@@ -47,10 +47,7 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
         callerToken: token,
         authenticated: !isValidationEnabled
     };
-    string? username = payload?.sub;
-    if (username is string) {
-        authenticationContext.username = username;
-    }
+
     string|string[]? audiencePayload = payload?.aud;
     printDebug(JWT_UTIL,"Audience value retrieved : " + audiencePayload.toString());
     string consumerKey = "";
@@ -68,6 +65,10 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
         string apiProvider = apiConfig.publisher;
         [authenticationContext, isAllowed] = validateSubscriptionFromDataStores(token, consumerKey,
                                                 apiName, apiVersion, isValidationEnabled);
+        string? username = payload?.sub;
+        if (username is string) {
+            authenticationContext.username = username;
+        }
     }
 
     // TODO: substore: if possible print authenticationContext object as a json
