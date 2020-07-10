@@ -23,7 +23,6 @@ import ballerina/oauth2;
 #
 # + oauth2KeyValidationProvider - The reference to the key validation provider instance
 # + introspectProvider - The reference to the standard oauth2 introspect service provider
-# + externalKM - Is external key mananager is used or default wso2 key validation service is used.
 public type KeyValidationHandler object {
 
     *http:InboundAuthHandler;
@@ -96,10 +95,12 @@ public type KeyValidationHandler object {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
                      self.validateSubscriptions);
-                   invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                   invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    return isAllowed;    
                 } else { // Otherwise return the introspection response.
+                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     return authenticationResult;
