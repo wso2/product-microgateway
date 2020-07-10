@@ -103,21 +103,28 @@ public function getThrottleMetaData(ThrottleAnalyticsEventDTO dto) returns strin
     return dto.metaClientType;
 }
 
-public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto) returns string {
-    return dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
+public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto, string apimAnalyticsVertion) returns string {
+    string payload = dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
     dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
     dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
     gatewayType + OBJ + dto.throttledTime.toString() + OBJ + dto.hostname;
 
+    if (stringutils:equalsIgnoreCase("3.1.0", apimAnalyticsVertion)) {
+        payload = payload + OBJ + dto.properties;
+    } 
+    if (stringutils:equalsIgnoreCase("3.2.0", apimAnalyticsVertion)) {
+        payload = payload + OBJ + dto.properties + OBJ + dto.apiMethod + OBJ + dto.apiResourceTemplate;
+    }
+    return payload;
 }
 
-public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns EventDTO | error {
+public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto, string apimAnalyticsVertion) returns EventDTO | error {
     EventDTO eventDTO = {};
-    eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:3.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.throttle:" + apimAnalyticsVertion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getThrottleMetaData(dto);
     eventDTO.correlationData = "null";
-    eventDTO.payloadData = getThrottlePayloadData(dto);
+    eventDTO.payloadData = getThrottlePayloadData(dto, apimAnalyticsVertion);
     return eventDTO;
 }
 

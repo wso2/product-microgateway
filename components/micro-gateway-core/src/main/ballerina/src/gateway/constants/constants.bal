@@ -168,6 +168,7 @@ public const string FILE_UPLOAD_TASK = "taskUploadFiles";
 public const string INITIAL_DELAY = "initialDelayInMillis";
 public const string DESTINATION = "destination";
 public const string FILE_UPLOAD_ENABLE = "enable";
+public const string APIM_ANALYTICS_VERSION = "version";
 
 //gRPC analytics related constants
 public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";

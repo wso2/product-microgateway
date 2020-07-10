@@ -20,7 +20,7 @@ import ballerina/runtime;
 import ballerina/stringutils;
 
 
-public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
+public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO, string amAnalyticsVertion) returns string {
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO : " + requestResponseExecutionDTO.toString());
     string output =
     requestResponseExecutionDTO.applicationConsumerKey + OBJ +
@@ -52,6 +52,10 @@ public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDT
     requestResponseExecutionDTO.executionTime.otherLatency.toString() + OBJ +
     requestResponseExecutionDTO.gatewayType + OBJ +
     requestResponseExecutionDTO.label;
+
+    if (amAnalyticsVertion == "3.1.0" || amAnalyticsVertion == "3.2.0") {
+        output = output + OBJ + requestResponseExecutionDTO.properties;
+    }
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
     return output;
 }
@@ -61,15 +65,15 @@ public function getMetaDataForRequestResponseExecutionData(RequestResponseExecut
     return metaData.toString();
 }
 
-function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
+function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO, string amAnalyticsVertion) returns
 EventDTO | error
 {
     EventDTO eventDTO = {};
-    eventDTO.streamId = "org.wso2.apimgt.statistics.request:3.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.request:" + amAnalyticsVertion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getMetaDataForRequestResponseExecutionData(requestResponseExecutionDTO);
     eventDTO.correlationData = "null";
-    eventDTO.payloadData = getRequestReponseExecutionDataPayload(requestResponseExecutionDTO);
+    eventDTO.payloadData = getRequestReponseExecutionDataPayload(requestResponseExecutionDTO, amAnalyticsVertion);
     return eventDTO;
 }
 
@@ -149,25 +153,51 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.apiResourceTemplate = httpResourceConfig.path;
     }
     //request method
-    requestResponseExecutionDTO.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
-    int initTime = <int>context.attributes[REQUEST_TIME];
-    int timeRequestOut = <int>invocationContext.attributes[TS_REQUEST_OUT];
-    int timeResponseIn = <int>invocationContext.attributes[TS_RESPONSE_IN];
-    requestResponseExecutionDTO.serviceTime = timeRequestOut - initTime;
-    requestResponseExecutionDTO.backendTime = timeResponseIn - timeRequestOut;
-    requestResponseExecutionDTO.responseTime = timeResponseIn - initTime;
+    if (context.attributes[API_METHOD_PROPERTY] is string) {
+        requestResponseExecutionDTO.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
+    }
+    
+    if (context.attributes[REQUEST_TIME] is int && invocationContext.attributes[TS_RESPONSE_IN] is int && invocationContext.attributes[TS_REQUEST_OUT] is int) {
+        int initTime = <int>context.attributes[REQUEST_TIME];
+        int timeRequestOut = <int>invocationContext.attributes[TS_REQUEST_OUT];
+        int timeResponseIn = <int>invocationContext.attributes[TS_RESPONSE_IN];
+        requestResponseExecutionDTO.serviceTime = timeRequestOut - initTime;
+        requestResponseExecutionDTO.backendTime = timeResponseIn - timeRequestOut;
+        requestResponseExecutionDTO.responseTime = timeResponseIn - initTime;
+    }
+    
     //dummy values for protocol and destination for now
-    requestResponseExecutionDTO.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
-    requestResponseExecutionDTO.destination = <string>invocationContext.attributes[DESTINATION];
+    if (context.attributes[PROTOCOL_PROPERTY] is string) {
+        requestResponseExecutionDTO.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
+    }
+    if (invocationContext.attributes[DESTINATION] is string) {
+        requestResponseExecutionDTO.destination = <string>invocationContext.attributes[DESTINATION];
+    }
 
     //Set data which were set to context in the Request path
-    requestResponseExecutionDTO.applicationOwner = <string>context.attributes[APPLICATION_OWNER_PROPERTY];
-    requestResponseExecutionDTO.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
-    requestResponseExecutionDTO.apiTier = <string>context.attributes[API_TIER_PROPERTY];
-    requestResponseExecutionDTO.throttledOut = <boolean>context.attributes[CONTINUE_ON_TROTTLE_PROPERTY];
-    requestResponseExecutionDTO.userAgent = <string>context.attributes[USER_AGENT_PROPERTY];
-    requestResponseExecutionDTO.userIp = <string>context.attributes[USER_IP_PROPERTY];
-    requestResponseExecutionDTO.requestTimestamp = <int>context.attributes[REQUEST_TIME_PROPERTY];
+    if (context.attributes[APPLICATION_OWNER_PROPERTY] is string) {
+        requestResponseExecutionDTO.applicationOwner = <string>context.attributes[APPLICATION_OWNER_PROPERTY];
+    }
+    
+    if (context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY] is string) {
+        requestResponseExecutionDTO.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
+    }
+
+    if (context.attributes[API_TIER_PROPERTY] is string) {
+        requestResponseExecutionDTO.apiTier = <string>context.attributes[API_TIER_PROPERTY];
+    }
+    if (context.attributes[CONTINUE_ON_TROTTLE_PROPERTY] is boolean) {
+        requestResponseExecutionDTO.throttledOut = <boolean>context.attributes[CONTINUE_ON_TROTTLE_PROPERTY];
+    }
+    if (context.attributes[USER_AGENT_PROPERTY] is string) {
+        requestResponseExecutionDTO.userAgent = <string>context.attributes[USER_AGENT_PROPERTY];
+    }
+    if (context.attributes[USER_IP_PROPERTY] is string) {
+        requestResponseExecutionDTO.userIp = <string>context.attributes[USER_IP_PROPERTY];
+    }
+    if (context.attributes[REQUEST_TIME_PROPERTY] is int) {
+        requestResponseExecutionDTO.requestTimestamp = <int>context.attributes[REQUEST_TIME_PROPERTY];
+    }
     requestResponseExecutionDTO.gatewayType = GATEWAY_TYPE;
     requestResponseExecutionDTO.label = GATEWAY_TYPE;
 

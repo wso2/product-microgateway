@@ -21,19 +21,30 @@ public function getFaultMetaData(FaultDTO dto) returns string {
     return dto.metaClientType;
 }
 
-public function getFaultPayloadData(FaultDTO dto) returns string {
-    return dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
+public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) returns string {
+    printDebug(KEY_ANALYTICS_FILTER, "Generating fault data payload for " + amAnalyticsVersion);
+    string payloadData = dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
     dto.resourcePath + OBJ + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ + dto.userTenantDomain + OBJ +
     dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
-    dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ + dto.faultTime.toString();
+    dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ +
+    dto.faultTime.toString();
+
+    if (amAnalyticsVersion == "3.1.0") {
+        payloadData = payloadData + OBJ + dto.properties;
+    }
+    if (amAnalyticsVersion == "3.2.0") {
+        payloadData = payloadData + OBJ + dto.properties + OBJ + dto.apiResourceTemplate + OBJ +
+        dto.applicationOwner;
+    }
+    return payloadData;
 }
 
-public function getEventFromFaultData(FaultDTO dto) returns EventDTO | error {
+public function getEventFromFaultData(FaultDTO dto, string amAnalyticsVersion) returns EventDTO | error {
     EventDTO eventDTO = {};
-    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:3.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:" + amAnalyticsVersion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getFaultMetaData(dto);
     eventDTO.correlationData = "null";
-    eventDTO.payloadData = getFaultPayloadData(dto);
+    eventDTO.payloadData = getFaultPayloadData(dto, amAnalyticsVersion);
     return eventDTO;
 }
