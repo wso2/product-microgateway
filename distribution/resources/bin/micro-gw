@@ -152,6 +152,9 @@ fi
 # set BALLERINA_HOME
 BALLERINA_HOME="$MICROGW_HOME/lib/platform"
 
+# set local ballerina home cache location
+HOME_CACHE="$MICROGW_HOME/lib/gateway-balo"
+
 if [ ! -d "$BALLERINA_HOME" ]; then
     BALLERINA_HOME="$MICROGW_HOME/lib"
 fi
@@ -333,7 +336,7 @@ if [ "$IS_BUILD_COMMAND" = true ] && [ "$CMD_PRO_NAME_VAL" != "" ] && [ "$MICRO_
                 rm -f $MICRO_GW_LABEL_PROJECT_DIR/target/*.jar
             fi
             # build the ballerina source code for the label
-            ballerina build --experimental $CMD_PRO_NAME_VAL
+            ballerina build --experimental --home-cache="$HOME_CACHE" $CMD_PRO_NAME_VAL
             exit_code=$?
             TARGET_PATH=$MICRO_GW_LABEL_PROJECT_DIR/target/$CMD_PRO_NAME_VAL.jar
 
