@@ -17,10 +17,10 @@
 package envoy
 
 import (
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
-	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
-	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 )
@@ -32,23 +32,23 @@ type EnvoyNode struct {
 	endpoints []types.Resource
 }
 
-func (envoy *EnvoyNode) SetListener(listener *listener.Listener) {
+func (envoy *EnvoyNode) SetListener(listener *listenerv3.Listener) {
 	envoy.listeners = []types.Resource{listener}
 }
 
-func (envoy *EnvoyNode) SetClusters(clusters []*cluster.Cluster) {
+func (envoy *EnvoyNode) SetClusters(clusters []*clusterv3.Cluster) {
 	for _, clusterP := range clusters {
 		envoy.clusters = append(envoy.clusters, clusterP)
 	}
 }
 
-func (envoy *EnvoyNode) SetRoutes(routes []*route.Route) {
+func (envoy *EnvoyNode) SetRoutes(routes []*routev3.Route) {
 	for _, routes := range routes {
 		envoy.routes = append(envoy.routes, routes)
 	}
 }
 
-func (envoy *EnvoyNode) SetEndpoints(endpoints []*core.Address) {
+func (envoy *EnvoyNode) SetEndpoints(endpoints []*corev3.Address) {
 	for _, endpoint := range endpoints {
 		envoy.endpoints = append(envoy.endpoints, endpoint)
 	}

@@ -20,9 +20,9 @@ package oasparser
 
 import (
 
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
-	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
 	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
@@ -51,9 +51,9 @@ func GetProductionSources(location string) ([]types.Resource, []types.Resource, 
 	}
 
 	var (
-		routesP    []*route.Route
-		clustersP  []*cluster.Cluster
-		endpointsP []*core.Address
+		routesP    []*routev3.Route
+		clustersP  []*clusterv3.Cluster
+		endpointsP []*corev3.Address
 	)
 
 	for _, swagger := range mgwSwaggers {
@@ -103,9 +103,9 @@ func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []t
 	}
 	//fmt.Println(mgwSwagger)
 	var (
-		routesS    []*route.Route
-		clustersS  []*cluster.Cluster
-		endpointsS []*core.Address
+		routesS    []*routev3.Route
+		clustersS  []*clusterv3.Cluster
+		endpointsS []*corev3.Address
 	)
 
 	for _, swagger := range mgwSwaggers {

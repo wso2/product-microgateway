@@ -17,14 +17,14 @@
 package mgw
 
 import (
-	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
-	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
-	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
-	listenerservice "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
-	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	endpointservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
+	clusterservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
+	routeservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
+	listenerservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
+	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 
 	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
 	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
@@ -81,9 +81,9 @@ func init() {
 type IDHash struct{}
 
 // ID uses the node ID field
-func (IDHash) ID(node *core.Node) string {
+func (IDHash) ID(node *corev3.Node) string {
 	if node == nil {
-		return ""
+		return "unknown"
 	}
 	return node.Id
 }
@@ -100,7 +100,7 @@ const grpcMaxConcurrentStreams = 1000000
  * @param server   Xds server instance
  * @param port   Management server port
  */
-func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
+func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 	grpcServer := grpc.NewServer()
@@ -111,11 +111,11 @@ func RunManagementServer(ctx context.Context, server xds.Server, port uint) {
 	}
 
 	// register services
-	discovery.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
-	endpointservice.RegisterEndpointDiscoveryServiceServer(grpcServer, server)
-	clusterservice.RegisterClusterDiscoveryServiceServer(grpcServer, server)
-	routeservice.RegisterRouteDiscoveryServiceServer(grpcServer, server)
-	listenerservice.RegisterListenerDiscoveryServiceServer(grpcServer, server)
+	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
+	endpointservicev3.RegisterEndpointDiscoveryServiceServer(grpcServer, server)
+	clusterservicev3.RegisterClusterDiscoveryServiceServer(grpcServer, server)
+	routeservicev3.RegisterRouteDiscoveryServiceServer(grpcServer, server)
+	listenerservicev3.RegisterListenerDiscoveryServiceServer(grpcServer, server)
 
 	logger.LoggerMgw.Info("port: ",port, " management server listening")
 	//log.Fatalf("", Serve(lis))
@@ -188,7 +188,7 @@ func Run(conf *mgwconfig.Config) {
 
 	cache = cachev3.NewSnapshotCache(mode != Ads, IDHash{}, nil)
 
-	srv := xds.NewServer(ctx, cache, nil)
+	srv := xdsv3.NewServer(ctx, cache, nil)
 
 	//als := &myals.AccessLogService{}
 	//go RunAccessLogServer(ctx, als, alsPort)
