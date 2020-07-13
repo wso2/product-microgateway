@@ -1120,7 +1120,7 @@ public function buildBasicAuthHeader(string username, string password) returns s
     return BASIC_PREFIX_WITH_SPACE + headerValue;
 }
 
-# Compair the given two versions. The version should be in x.x.x format.
+# Get the supported analytics stream version for the configured value.
 #
 # + return - Returns the supported analytics version.
 # True if the version1 is greater than version2, false otherwise.
