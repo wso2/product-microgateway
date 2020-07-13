@@ -220,7 +220,8 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
             int index = 0;
             while (index < l) {
                 var subscription = subscribedAPIList[index];
-                if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+                if (subscription.name.toString() == apiName && 
+                (subscription.'version.toString() == apiVersion || subscription.'version.toString() == "*")) {
                     // API is found in the subscribed APIs
                     if (isDebugEnabled) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Found the API in subscribed APIs:" + subscription.name.toString()
@@ -230,7 +231,7 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
                         apiDetails["apiName"] = subscription.name.toString();
                     }
                     if (subscription.'version is json) {
-                        apiDetails["apiVersion"] = subscription.'version.toString();
+                        apiDetails["apiVersion"] = apiVersion;
                     }
                     if (subscription.context is json) {
                         apiDetails["apiContext"] = subscription.context.toString();
