@@ -109,11 +109,8 @@ public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto, string api
     dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
     gatewayType + OBJ + dto.throttledTime.toString() + OBJ + dto.hostname;
 
-    if (stringutils:equalsIgnoreCase("3.1.0", apimAnalyticsVertion)) {
-        payload = payload + OBJ + dto.properties;
-    } 
-    if (stringutils:equalsIgnoreCase("3.2.0", apimAnalyticsVertion)) {
-        payload = payload + OBJ + dto.properties + OBJ + dto.apiMethod + OBJ + dto.apiResourceTemplate;
+    if (apimAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION) {
+        payload = payload + OBJ + dto.apiMethod + OBJ + dto.apiResourceTemplate;
     }
     return payload;
 }

@@ -29,10 +29,7 @@ public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) ret
     dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ +
     dto.faultTime.toString();
 
-    if (amAnalyticsVersion == "3.1.0") {
-        payloadData = payloadData + OBJ + dto.properties;
-    }
-    if (amAnalyticsVersion == "3.2.0") {
+    if (amAnalyticsVersion !== DEFAULT_AM_ANALYTICS_VERSION) {
         payloadData = payloadData + OBJ + dto.properties + OBJ + dto.apiResourceTemplate + OBJ +
         dto.applicationOwner;
     }

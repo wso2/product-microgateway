@@ -53,7 +53,7 @@ public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDT
     requestResponseExecutionDTO.gatewayType + OBJ +
     requestResponseExecutionDTO.label;
 
-    if (amAnalyticsVertion == "3.1.0" || amAnalyticsVertion == "3.2.0") {
+    if (amAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION) {
         output = output + OBJ + requestResponseExecutionDTO.properties;
     }
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
