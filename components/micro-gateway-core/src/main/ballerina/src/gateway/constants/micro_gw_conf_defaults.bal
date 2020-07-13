@@ -37,8 +37,6 @@ public const string DEFAULT_KM_TOKEN_CONTEXT = "oauth2";
 public const int DEFAULT_TIMESTAMP_SKEW = 5000;
 public const boolean DEFAULT_EXTERNAL = false;
 
-public const string SECURITY_INSTANCE_ID = "security";
-public const string SECURITY_VALIDATE_SUBSCRIPTIONS = "validateSubscriptions";
 public const boolean DEFAULT_VALIDATE_SUBSCRIPTIONS = false;
 
 public const boolean DEFAULT_KM_CONF_SECURITY_BASIC_ENABLED = true;

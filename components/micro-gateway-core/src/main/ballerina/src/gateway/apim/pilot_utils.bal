@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/runtime;
-APIGatewayCache gatewayCacheObject = new;
 
 function convertApplicationEventToApplicationDTO(json appEvent) returns Application {
     Application application = {

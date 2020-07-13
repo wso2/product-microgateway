@@ -436,6 +436,10 @@ public const string EVENT_HUB_TENANT_HEADER = "xWSO2Tenant";
 public const string EVENT_HUB_LISTENER_ENDPOINTS = "eventListeningEndpoints";
 public const string ALL_TENANTS = "ALL";
 
+// security related configs
+public const string SECURITY_INSTANCE_ID = "security";
+public const string SECURITY_VALIDATE_SUBSCRIPTIONS = "validateSubscriptions";
+
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";
 public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
