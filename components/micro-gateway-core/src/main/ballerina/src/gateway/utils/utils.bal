@@ -1140,7 +1140,7 @@ public function getAnalyticsVertion() returns string {
     
     if (intVersion is int && intDefaultVersion is int) {
         if (intVersion > intDefaultVersion) {
-            return analyticsVersion;
+            return amAnalyticsVersion;
         }
     }
     // Return the default version.

@@ -104,13 +104,16 @@ public function getThrottleMetaData(ThrottleAnalyticsEventDTO dto) returns strin
 }
 
 public function getThrottlePayloadData(ThrottleAnalyticsEventDTO dto, string apimAnalyticsVertion) returns string {
+    string additionalProps = OBJ;
+    if (apimAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION) {
+        additionalProps = additionalProps + dto.apiResourceTemplate + OBJ + dto.apiMethod + OBJ;
+    }
     string payload = dto.userName + OBJ + dto.userTenantDomain + OBJ + dto.apiName + OBJ +
-    dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + OBJ +
+    dto.apiVersion + OBJ + dto.apiContext + OBJ + dto.apiCreator + OBJ + dto.apiCreatorTenantDomain + additionalProps +
     dto.applicationId + OBJ + dto.applicationName + OBJ + dto.subscriber + OBJ + dto.throttledOutReason + OBJ + dto.
     gatewayType + OBJ + dto.throttledTime.toString() + OBJ + dto.hostname;
-
     if (apimAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION) {
-        payload = payload + OBJ + dto.apiMethod + OBJ + dto.apiResourceTemplate;
+        payload = payload + OBJ + dto.properties;
     }
     return payload;
 }
