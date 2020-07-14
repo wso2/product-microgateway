@@ -122,7 +122,7 @@ public function validateAPIKey(string apiKeyToken) returns boolean {
         return false;
     }
     //get payload
-    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(apiKeyToken);
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayloadOfAPIKey(apiKeyToken);
     if (payload is jwt:JwtPayload) {
         json subscribedAPIList = [];
         //get allowed apis

@@ -805,7 +805,7 @@ public function initAuthHandlers() {
             },
             certificateAlias: getConfigValue(API_KEY_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_API_KEY_ALIAS)
         },
-        jwtCache: jwtCache
+        jwtCache: apiKeyCache
     };
     APIKeyProvider apiKeyProvider = new (apiKeyValidatorConfig);
     APIKeyHandler | APIKeyHandlerWrapper apiKeyHandler;
@@ -916,6 +916,9 @@ public function initAuthHandlers() {
 
 function readMultipleJWTIssuers(int timestampSkew) {
     map<anydata>[] | error jwtIssuers = map<anydata>[].constructFrom(config:getAsArray(JWT_INSTANCE_ID));
+    APIGatewayCache gatewayCacheObject = new;
+    boolean globalValidateSubscriptionConfig = getConfigBooleanValue(SECURITY_INSTANCE_ID,
+                                        SECURITY_VALIDATE_SUBSCRIPTIONS, DEFAULT_VALIDATE_SUBSCRIPTIONS);
     if (jwtIssuers is map<anydata>[] && jwtIssuers.length() > 0) {
         initiateJwtMap();
         printDebug(KEY_UTILS, "Found new multiple JWT issuer configs");
@@ -936,10 +939,11 @@ function readMultipleJWTIssuers(int timestampSkew) {
             var aud = jwtIssuer[AUDIENCE];
             var alias = jwtIssuer[CERTIFICATE_ALIAS];
             var jwksURL = jwtIssuer[JWKS_URL];
+            string issuer = getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER);
             jwt:JwtValidatorConfig jwtValidatorConfig = {
-                issuer: getDefaultStringValue(jwtIssuer[ISSUER], DEFAULT_JWT_ISSUER),
+                issuer: issuer,
                 clockSkewInSeconds: timestampSkew/1000,
-                jwtCache: jwtCache
+                jwtCache: gatewayCacheObject.getJWTCacheForProvider(issuer)
             };
             if (aud is string) {
                 jwtValidatorConfig.audience = aud;
@@ -974,7 +978,7 @@ function readMultipleJWTIssuers(int timestampSkew) {
             }
             JwtAuthProvider jwtAuthProvider
                 = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
-                    DEFAULT_VALIDATE_SUBSCRIPTION), consumerKeyClaim, claims, className, classLoaded);
+                    globalValidateSubscriptionConfig), consumerKeyClaim, claims, className, classLoaded);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -989,8 +993,9 @@ function readMultipleJWTIssuers(int timestampSkew) {
         //Support old config model
         printDebug(KEY_UTILS, "Find old jwt configurations or set default JWT configurations.");
         string aud = getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "");
+        string issuer = getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER);
         jwt:JwtValidatorConfig jwtValidatorConfig = {
-            issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, DEFAULT_JWT_ISSUER),
+            issuer: issuer,
             clockSkewInSeconds: 60,
             trustStoreConfig: {
                 trustStore: {
@@ -999,7 +1004,7 @@ function readMultipleJWTIssuers(int timestampSkew) {
                 },
                 certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, DEFAULT_CERTIFICATE_ALIAS)
             },
-            jwtCache: jwtCache
+            jwtCache: gatewayCacheObject.getJWTCacheForProvider(issuer)
         };
         if (aud.length() != 0) {
             jwtValidatorConfig.audience = aud;
@@ -1007,7 +1012,7 @@ function readMultipleJWTIssuers(int timestampSkew) {
         string consumerKeyClaim = getConfigValue(JWT_INSTANCE_ID, CONSUMER_KEY_CLAIM, DEFAULT_CONSUMER_KEY_CLAIM);
         JwtAuthProvider jwtAuthProvider
             = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
-                DEFAULT_VALIDATE_SUBSCRIPTION), consumerKeyClaim, [] , "", false);
+                globalValidateSubscriptionConfig), consumerKeyClaim, [] , "", false);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);

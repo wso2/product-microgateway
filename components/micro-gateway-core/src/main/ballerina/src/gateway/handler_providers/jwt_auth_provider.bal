@@ -59,6 +59,14 @@ public type JwtAuthProvider object {
     public function authenticate(string credential) returns @tainted (boolean | auth:Error) {
         //Start a span attaching to the system span.
         int | error | () spanIdAuth = startSpan(JWT_PROVIDER_AUTHENTICATE);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        var errorCodeSetFromPreviousHandler = invocationContext.attributes[ERROR_CODE];
+        if (errorCodeSetFromPreviousHandler is int && errorCodeSetFromPreviousHandler != 900901) {
+            //If a previous jwt auth provider(or issuer) has set any error code than the 900901(invalid token code),
+            // that means jwt validation has been successful for a previous jwt issuer, but scope or subscription
+            // validation has failed. Hence we do not need to continue rest of the jwt auth providers.
+            return false;
+        }
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         map<anydata>[] | error claimsSet = self.claims;
         //finishing span
@@ -70,15 +78,17 @@ public type JwtAuthProvider object {
             }
             boolean isBlacklisted = false;
             string? jti = "";
-            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
             runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
             if (authContext is runtime:AuthenticationContext) {
+                string? iss = self.jwtValidatorConfig?.issuer;
                 string? jwtToken = authContext?.authToken;
-                if (jwtToken is string) {
+                if (jwtToken is string && iss is string) {
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "jwt authenticated from the issuer : " + iss);
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
-                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>jwtCache.get(jwtToken);
+                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>self.gatewayCache.getJWTCacheForProvider(iss).get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
                     if (cachedJwt is jwt:InboundJwtCacheEntry) {
@@ -129,7 +139,7 @@ public type JwtAuthProvider object {
                                 self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
-                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken, iss);
                     if (payload is jwt:JwtPayload) {
                         if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
