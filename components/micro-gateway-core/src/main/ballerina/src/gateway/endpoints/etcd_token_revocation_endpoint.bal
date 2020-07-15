@@ -16,8 +16,7 @@
 
 import ballerina/http;
 
-http:Client etcdTokenRevocationEndpoint = new (
-getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, DEFAULT_PERSISTENT_MESSAGE_HOSTNAME), {
+http:Client etcdTokenRevocationEndpoint = new (revokedJwtServiceURL, {
     secureSocket: {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),

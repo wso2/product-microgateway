@@ -155,7 +155,8 @@ public const int DEFAULT_TM_AGENT_SECURE_MIN_IDLE_TIME_IN_POOL = 5000;
 
 public const boolean DEFAULT_TOKEN_REVOCATION_ENABLED = false;
 public const string DEFAULT_REALTIME_JMS_CONNECTION_TOPIC = "tokenRevocation";
-public const boolean DEFAULT_PERSISTENT_USE_DEFAULT = true;
+public const boolean DEFAULT_PERSISTENT_USE_DEFAULT = false;
+public const string DEFAULT_PERSISTENT_TYPE = "default";
 public const string DEFAULT_PERSISTENT_MESSAGE_HOSTNAME = "https://127.0.0.1:2379/v2/keys/jti/";
 public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";
