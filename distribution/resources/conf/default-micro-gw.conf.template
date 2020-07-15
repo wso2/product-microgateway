@@ -165,6 +165,8 @@
 
 # Analytics configurations
 [analytics]
+  # The configured API Manager analytics stream version
+  streamVersion = "3.2.0"
   # Configurations for file upload analytics
   [analytics.fileUpload]
     enable = false
@@ -468,3 +470,8 @@
   password="admin"
   eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
   listOfTenants = ["carbon.super"]
+
+# Token validation configuration
+[security]
+  # Enable/ Disable subscription validation for tokens.
+  validateSubscriptions = false

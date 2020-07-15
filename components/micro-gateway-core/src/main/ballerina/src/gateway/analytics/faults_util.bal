@@ -22,15 +22,30 @@ public function getFaultMetaData(FaultDTO dto) returns string {
 }
 
 public function getFaultPayloadData(FaultDTO dto) returns string {
+    printDebug(KEY_ANALYTICS_FILTER, "Generating fault data payload for " + amAnalyticsVersion);
+    string resourceTemplate = OBJ;
+    string applicationOwner = OBJ;
+    string properties = "";
+    // If am analytics version is 3.2.0, append api resource template and application owner
+    if (amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION) {
+        resourceTemplate = resourceTemplate + dto.apiResourceTemplate + OBJ;
+        applicationOwner = applicationOwner + dto.applicationOwner + OBJ;
+    }
+    // If analytics version is 3.1.0, append properties.
+    if (amAnalyticsVersion != DEFAULT_AM_ANALYTICS_VERSION_300) {
+            properties = OBJ + dto.properties;
+    }
+
     return dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
-    dto.resourcePath + OBJ + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ + dto.userTenantDomain + OBJ +
-    dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
-    dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ + dto.faultTime.toString();
+        dto.resourcePath + resourceTemplate + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ +
+        dto.userTenantDomain + OBJ + dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
+        dto.applicationName + applicationOwner + dto.protocol + OBJ + dto.errorCode.toString() + OBJ +
+        dto.errorMessage + OBJ + dto.faultTime.toString() + properties;
 }
 
 public function getEventFromFaultData(FaultDTO dto) returns EventDTO | error {
     EventDTO eventDTO = {};
-    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:3.0.0";
+    eventDTO.streamId = "org.wso2.apimgt.statistics.fault:" + amAnalyticsVersion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getFaultMetaData(dto);
     eventDTO.correlationData = "null";

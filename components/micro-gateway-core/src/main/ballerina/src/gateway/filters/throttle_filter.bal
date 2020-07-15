@@ -55,6 +55,7 @@ deployedPolicies) returns boolean {
     boolean isSecured = <boolean>invocationContext.attributes[IS_SECURED];
     context.attributes[ALLOWED_ON_QUOTA_REACHED] = false;
     context.attributes[IS_THROTTLE_OUT] = false;
+    context.attributes[API_METHOD_PROPERTY] = request.method;
 
     AuthenticationContext keyValidationResult = {};
     string? apiVersion = getVersion(context);

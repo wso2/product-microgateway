@@ -37,6 +37,9 @@ public type ThrottleAnalyticsEventDTO record {
     string gatewayType = "";
     int throttledTime = 0;
     string hostname = "";
+    string properties = "null"; // New 3.1.0
+    string apiMethod = ""; // New 3.2.0
+    string apiResourceTemplate = ""; // New 3.2.0
 };
 
 public type IntermediateStream record {

@@ -122,6 +122,7 @@ public const string USER_IP_PROPERTY = "userIp";
 public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
+public const string ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS";
 
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";
@@ -168,6 +169,7 @@ public const string FILE_UPLOAD_TASK = "taskUploadFiles";
 public const string INITIAL_DELAY = "initialDelayInMillis";
 public const string DESTINATION = "destination";
 public const string FILE_UPLOAD_ENABLE = "enable";
+public const string APIM_ANALYTICS_STREAM_VERSION = "streamVersion";
 
 //gRPC analytics related constants
 public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";

@@ -72,7 +72,10 @@ public const int DEFAULT_INITIAL_DELAY_IN_MILLIS = 5000;
 public const string DEFAULT_UPLOADING_EP = "https://localhost:9444/analytics/v1.0/usage/upload-file";
 public const int DEFAULT_ROTATING_PERIOD_IN_MILLIS =  600000;
 public const boolean DEFAULT_TASK_UPLOAD_FILES_ENABLED = true;
-//constants for gRPC analytics 
+public const string DEFAULT_AM_ANALYTICS_VERSION = "3.2.0";
+public const string DEFAULT_AM_ANALYTICS_VERSION_300 = "3.0.0";
+public const string DEFAULT_AM_ANALYTICS_VERSION_310 = "3.1.0";
+//constants for gRPC analytics
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
 
