@@ -88,12 +88,11 @@ public type JwtAuthProvider object {
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
-                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>self.gatewayCache.getJWTCacheForProvider(iss).get(jwtToken);
+                    var jwtPayloadFromCache = trap <jwt:JwtPayload>self.jwtValidatorConfig.jwtCache.get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
-                    if (cachedJwt is jwt:InboundJwtCacheEntry) {
+                    if (jwtPayloadFromCache is jwt:JwtPayload) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
-                        jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
                         jti = jwtPayloadFromCache["jti"];
                         if (jti is string) {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim found in the jwt");
@@ -135,7 +134,7 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                          }
-                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled,
+                        return validateSubscriptions(jwtToken, jwtPayloadFromCache, self.subscriptionValEnabled,
                                 self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");

@@ -145,10 +145,10 @@
   # Persistent revocation configurations
   [tokenRevocationConfig.persistent]
     enablePersistentStorageRetrieval = false
-    # Use etcd as the default persistent storage
-    useDefault = true
-    # The hostname of your persistent storage server (e.g.: <etcd-server-access-URL>/<service>/keys/jti/)
-    hostname = "https://127.0.0.1:2379/v2/keys/jti/"
+    # Use APIM as the default persistent storage. Other types are "etcd" and "custom"
+    type = "default"
+    # The endpoint url of your persistent storage server (e.g.: <etcd-server-access-URL>/<service>/keys/jti/)
+    endpointURL = "https://localhost:9443/internal/data/v1"
     # The username of your persistent storage server
     username = "root"
     # The password of your persistent storage server
