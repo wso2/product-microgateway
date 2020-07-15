@@ -151,7 +151,5 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
         printError(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
         setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
     }
-
-
     return [authenticationContext,isAllowed];
 }

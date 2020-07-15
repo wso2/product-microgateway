@@ -60,5 +60,9 @@
             <groupId>net.minidev</groupId>
             <artifactId>asm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-runtime</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- *  Class to implement standard claims and custom claims.
+ * Class to implement standard claims and custom claims.
  */
 public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
     private static final Logger logger = LogManager.getLogger(MGWJWTGeneratorImpl.class);
@@ -90,7 +90,7 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
             claims.put(dialect + "/apicontext", getApiDetails().get("apiContext"));
         }
         if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiVersion"))) {
-            claims.put(dialect + "/version", getApiDetails().get("apiContext"));
+            claims.put(dialect + "/version", getApiDetails().get("apiVersion"));
         }
         if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiTier"))) {
             claims.put(dialect + "/tier", getApiDetails().get("apiTier"));
@@ -105,12 +105,13 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
     }
 
     @Override
-    public Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo, ArrayList<String> restrictedClaims) {
+    public Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo,
+                                                    ArrayList<String> restrictedClaims) {
         Map<String, Object> claims = new HashMap<>();
-        for (String key: jwtInfo.keySet()) {
+        for (String key : jwtInfo.keySet()) {
             if (key.equals("customClaims")) {
                 Map<String, Object> customClaims = (Map<String, Object>) jwtInfo.get(key);
-                for (String subKey: customClaims.keySet()) {
+                for (String subKey : customClaims.keySet()) {
                     if (!restrictedClaims.contains(subKey)) {
                         claims.put(subKey, customClaims.get(subKey));
                     }

@@ -247,6 +247,10 @@ public function getConfigArrayValue(string instanceId, string property) returns 
     return config:getAsArray(instanceId + "." + property);
 }
 
+public function isConfigAvailable(string instanceId, string property) returns boolean {
+    return config:contains(instanceId + "." + property);
+}
+
 function getDefaultStringValue(anydata val, string defaultVal) returns string {
     if (val is string) {
         return <string>val;
@@ -967,6 +971,8 @@ function readMultipleJWTIssuers(int timestampSkew) {
                 jwtValidatorConfig.jwksConfig = jwksConfig;
             }
             string consumerKeyClaim = getDefaultStringValue(jwtIssuer[CONSUMER_KEY_CLAIM], DEFAULT_CONSUMER_KEY_CLAIM);
+            boolean remoteUserClaimRetrievalEnabled = getDefaultBooleanValue(jwtIssuer[REMOTE_USER_CLAIM_RETRIEVAL_ENABLED], 
+                                                                            DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED);
             boolean classLoaded = false;
             string className = "";
             if(jwtIssuer.hasKey(ISSUER_CLASSNAME)) {
@@ -979,7 +985,7 @@ function readMultipleJWTIssuers(int timestampSkew) {
             }
             JwtAuthProvider jwtAuthProvider
                 = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
-                    globalValidateSubscriptionConfig), consumerKeyClaim, claims, className, classLoaded);
+                    globalValidateSubscriptionConfig), consumerKeyClaim, claims, className, classLoaded, remoteUserClaimRetrievalEnabled);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
                 jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
@@ -1011,9 +1017,11 @@ function readMultipleJWTIssuers(int timestampSkew) {
             jwtValidatorConfig.audience = aud;
         }
         string consumerKeyClaim = getConfigValue(JWT_INSTANCE_ID, CONSUMER_KEY_CLAIM, DEFAULT_CONSUMER_KEY_CLAIM);
+        boolean remoteUserClaimRetrievalEnabled = getConfigBooleanValue(JWT_INSTANCE_ID, REMOTE_USER_CLAIM_RETRIEVAL_ENABLED, 
+                                                                    DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED);
         JwtAuthProvider jwtAuthProvider
             = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
-                globalValidateSubscriptionConfig), consumerKeyClaim, [] , "", false);
+                globalValidateSubscriptionConfig), consumerKeyClaim, [] , "", false, remoteUserClaimRetrievalEnabled);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
             jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);

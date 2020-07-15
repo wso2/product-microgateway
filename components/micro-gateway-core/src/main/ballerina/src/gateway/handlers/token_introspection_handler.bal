@@ -83,6 +83,7 @@ public type KeyValidationHandler object {
                 authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                 string apiName = "";
                 string apiVersion = "";
+
                 if (apiConfig is APIConfiguration) {
                     apiName = apiConfig.name;
                     apiVersion = apiConfig.apiVersion;
@@ -95,14 +96,37 @@ public type KeyValidationHandler object {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
                      self.validateSubscriptions);
-                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
-                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                   authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                   invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                   invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                   if (isAllowed) {
+                       map<string> apiDetails = createAPIDetailsMap(invocationContext);
+                       string cacheKey = credential + apiName + apiVersion;
+                       boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID, JWT_GENERATOR_ENABLED,
+                                                                    DEFAULT_JWT_GENERATOR_ENABLED);
+                       boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext,
+                                                                    cacheKey, enabledJWTGenerator, apiDetails);
+                       if (!tokenGenStatus) {
+                           printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                       }
+                   }
                    return isAllowed;    
                 } else { // Otherwise return the introspection response.
                     authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                    if (authenticationResult) {
+                        map<string> apiDetails = createAPIDetailsMap(invocationContext);
+                        string cacheKey = credential + apiName + apiVersion;
+                        boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                                             JWT_GENERATOR_ENABLED,
+                                                                             DEFAULT_JWT_GENERATOR_ENABLED);
+                        boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey,
+                                                        enabledJWTGenerator, apiDetails);
+                        if (!tokenGenStatus) {
+                            printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                        }
+                    }
                     return authenticationResult;
                 }
             }
@@ -111,5 +135,4 @@ public type KeyValidationHandler object {
         setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
         return false;
     }
-
 };

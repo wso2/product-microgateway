@@ -50,7 +50,6 @@ getConfigValue(FILE_UPLOAD_ANALYTICS, UPLOADING_EP, DEFAULT_UPLOADING_EP),
     }
 });
 
-
 public function getTokenEndpoint() returns http:Client {
     return tokenEndpoint;
 }

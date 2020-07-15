@@ -90,8 +90,7 @@ public type OAuth2KeyValidationProvider object {
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
 
                 // setting keytype to invocationContext
-                invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext
-                .keyType;
+                invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                 runtime:AuthenticationContext authContext = {scheme: AUTH_SCHEME_OAUTH2, authToken: credential};
 
                 printDebug(KEY_AUTHN_FILTER, "Set the auth context schema as : " + AUTH_SCHEME_OAUTH2);

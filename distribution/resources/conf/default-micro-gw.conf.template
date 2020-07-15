@@ -54,7 +54,11 @@
   tokenContext = "oauth2"
   # External Key Manager
   external = false
+  # Remote User Claim Retrieval Enabled
+  remoteUserClaimRetrievalEnabled = false
   # Basic security configurations
+  # Issuer
+  issuer = "https://localhost:9443/oauth2/token"
   [keymanager.security.basic]
     enabled = true
     username = "admin"
@@ -103,6 +107,8 @@
   consumerKeyClaim = "aud"
   #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
+  # Remote User Claim Retrieval Enabled
+  remoteUserClaimRetrievalEnabled = false
   # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scp"
@@ -119,6 +125,8 @@
   validateSubscription = false
   #class name of JWT claims value mapper transformer if you need claims mapping.
   claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
+  # Remote User Claim Retrieval Enabled
+  remoteUserClaimRetrievalEnabled = false
   # The key of remote claims and the local claims if you need claims mapping.
   [[jwtTokenConfig.claims]]
     remoteClaim = "scps"
@@ -446,6 +454,12 @@
   audience=["http://org.wso2.apimgt/gateway"]
   # JWT token generator implementation
   generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
+  [jwtGeneratorConfig.claimRetrieval]
+      //todo: add the sample implementation to retrieve claims from API Manager
+      # User claim retriever implementation
+      retrieverImpl="org.wso2.micro.gateway.jwt.generator.DefaultMGWClaimRetriever"
+      [jwtGeneratorConfig.claimRetrieval.configuration]
+          custom_config_key = "custom_config_property"
   # JWT Generator cache configurations
   [jwtGeneratorConfig.jwtGeneratorCaching]
     # Enable jwt generator token caching
@@ -470,6 +484,11 @@
   password="admin"
   eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
   listOfTenants = ["carbon.super"]
+
+# API Manager default credentials
+[apim.credentials]
+username = "admin"
+password = "admin"
 
 # Token validation configuration
 [security]
